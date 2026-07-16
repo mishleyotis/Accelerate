@@ -1,0 +1,168 @@
+[project]
+name = "dma-insights-backend"
+version = "0.1.0"
+description = "DMA Insights backend — FastAPI + SQLAlchemy 2.0 + Pydantic v2"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.115.0",
+  "uvicorn[standard]==0.30.6",
+  "sqlalchemy[asyncio]==2.0.35",
+  "asyncpg==0.29.0",
+  "psycopg[binary]==3.2.3",
+  "alembic==1.13.3",
+  "pgvector==0.3.6",
+  "pydantic[email]==2.9.2",
+  "pydantic-settings==2.5.2",
+  "redis[hiredis]==5.1.1",
+  "httpx==0.27.2",
+  "google-auth==2.35.0",
+  "google-cloud-aiplatform==1.70.0",
+  "google-api-python-client==2.149.0",
+  "google-cloud-secret-manager==2.21.0",
+  "google-cloud-storage==2.18.2",
+  "google-cloud-pubsub==2.26.0",
+  "openpyxl==3.1.5",
+  "python-docx==1.1.2",
+  "beautifulsoup4==4.12.3",
+  "lxml==5.3.0",
+  "rapidfuzz==3.10.0",
+  "structlog==24.4.0",
+  "tenacity==9.0.0",
+  "python-multipart==0.0.12",
+  "PyJWT[crypto]==2.9.0",
+  "cryptography==43.0.1",
+  # B-6 prospecting scorecard HTML export (PDF via the optional `export`
+  # extra). Already present transitively; pinned explicitly as it is now a
+  # direct import in app/services/scorecard_export.py.
+  "jinja2==3.1.6",
+  # raw_artifacts store (migration 049): zstd-compressed originals persisted
+  # in the DB. app/services/raw_artifact_store.py imports it at module level
+  # — the 2026-07-04 CI live-PG stage caught it absent from the image.
+  "zstandard==0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  # numpy is a direct import in tests/test_grounding_v4.py (np.array embedding
+  # fixtures). It rides into both images transitively via the nlp extra
+  # scikit-learn and scipy, but is declared here so the cloudbuild test-import
+  # coverage guard sees an explicit dev declaration. Pinned to the numpy 1.x
+  # line that pairs with scipy 1.13.1 and scikit-learn 1.5.2. Kept as the first
+  # dev entry: the guard parses this list with a regex that stops at the first
+  # closing bracket, so nothing bracket-bearing may precede it.
+  "numpy==1.26.4",
+  "pytest==8.3.3",
+  "pytest-asyncio==0.24.0",
+  "pytest-cov==5.0.0",
+  "ruff==0.6.9",
+  "mypy==1.11.2",
+  "types-redis==4.6.0.20240903",
+  "httpx==0.27.2",
+  "freezegun==1.5.1",
+  "factory-boy==3.3.1",
+  # Used by tests/test_docker_and_cloudbuild_contracts.py to parse
+  # cloudbuild.yaml. Add to cloudbuild.yaml's pip install line too.
+  "PyYAML==6.0.2",
+  # Used by live-PG tests (test_seed_ci.py, test_live_db_integration.py,
+  # test_persona_e2e.py) for sync DB connections. Production runtime
+  # uses psycopg3 via `psycopg[binary]`; tests use psycopg2 for the
+  # legacy sync API. Both are required at test time.
+  "psycopg2-binary==2.9.9",
+]
+# 2026-05-28 audit fix: OCR deep-extract fallback is a runtime
+# dependency in BOTH the backend image (historical_backfill uses it)
+# AND the worker image (drive_crawler retries use it). The Dockerfiles
+# pip-install these directly today; declaring them here as an optional
+# extra lets `pip install .[ocr]` reproduce the prod runtime locally,
+# and makes the contract visible to dependency-scanners. System
+# binaries (tesseract-ocr, poppler-utils) remain installed via apt in
+# the Dockerfiles.
+ocr = [
+  "pytesseract==0.3.13",
+  "pdf2image==1.17.0",
+  "Pillow==10.4.0",
+]
+# Shared NLP platform (app/services/nlp/): spaCy tier for segmentation/
+# NER/dep-parse plus scikit-learn for the lemma-TF-IDF similarity linker.
+# The en_core_web_sm model wheel is NOT on PyPI — the backend image
+# installs it at build time from the pinned HF artifact (Dockerfile:
+# `pip install <en_core_web_sm-3.7.1 wheel URL>` or
+# `python -m spacy download en_core_web_sm`), baking the model layer.
+# Core installs skip this extra entirely: the toolkit degrades to its
+# regex tier when spaCy/model are absent (never raises — see
+# app/services/nlp/__init__.py NLP_DEGRADED contract).
+nlp = [
+  "spacy==3.7.5",
+  "scikit-learn==1.5.2",
+  "scipy==1.13.1",
+  # Gold-standard semantic tier (app/services/nlp/semantic.py): MiniLM
+  # sentence embeddings so evidence↔capability alignment is SEMANTIC, not
+  # merely lexical — TF-IDF mis-ranks word-overlap decoys (a privacy notice
+  # out-ranks the real underwriting evidence on the shared word "member").
+  # torch is the CPU wheel (see the Dockerfiles' --index-url pytorch/cpu);
+  # the all-MiniLM-L6-v2 weights are baked into the image (offline at run).
+  # Absent → semantic.py transparently degrades to the TF-IDF tier.
+  "sentence-transformers==3.0.1",
+]
+# B-6 prospecting scorecard PDF export. HTML export needs only jinja2
+# (a core dep); PDF rendering uses WeasyPrint, which also needs system
+# libs (libcairo2, libpango-1.0-0) installed via apt in the image that
+# serves PDF. The endpoint returns 501 when this extra is absent rather
+# than fabricating a file, so core installs are unaffected.
+export = [
+  "weasyprint==62.3",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# Pin the fixture loop scope so the suite doesn't change semantics on
+# pytest-asyncio upgrades. Build log d4e8a921 flagged the deprecation
+# warning that future versions will switch the default; pinning to
+# "function" matches the current implicit behaviour and is the safest
+# choice for async DB/session tests.
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+# Silence warnings we have no control over — the underlying behaviour
+# is correct.
+# - asyncpg's Connection._cancel coroutine is teardown noise from
+#   pytest-asyncio's event-loop close; the cancel completes correctly
+#   under the hood. Filter it instead of papering over with await.
+# - DeprecationWarning from third-party libs (httpx, google SDK) when
+#   they keep shipping old patterns we don't control.
+filterwarnings = [
+    "ignore:coroutine 'Connection._cancel' was never awaited:RuntimeWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# Fixture corpus (`tests/fixtures/dma_packages_*/`) is data shipped
+# verbatim from real DMA bot output -- governance audit scripts,
+# peer-score generators, etc. They are test DATA, not test code; linting
+# them spuriously flags issues in third-party shape (Batch 10 simulate
+# Stage 11 surfaced this).
+extend-exclude = [
+  "tests/fixtures/dma_packages_batches/**/*.py",
+  "tests/fixtures/dma_packages_sanitized/**/*.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP", "C4", "SIM", "TID", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+# `app` (this backend) and `workers` (the sibling package at ../workers) are
+# BOTH first-party in this monorepo app. Without pinning this, ruff AUTO-detects
+# first-party membership and the result DIFFERED across environments: CI's fresh
+# container classified `workers` as third-party (and flagged the crawler tests'
+# import order) while a warm local tree classified it first-party (and flagged
+# the worker tests instead). That non-determinism let `ruff check` pass locally
+# yet fail the deploy's backend-tests step. Pinning known-first-party makes I001
+# import-sorting deterministic everywhere.
+known-first-party = ["app", "workers"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]

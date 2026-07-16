@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: dma-insights-postgres
+    environment:
+      POSTGRES_DB: dma_insights
+      POSTGRES_USER: dma_insights
+      POSTGRES_PASSWORD: dma_insights_local
+    ports:
+      - "5433:5432"
+    volumes:
+      - dma_insights_pg:/var/lib/postgresql/data
+      - ./backend/scripts/init-extensions.sql:/docker-entrypoint-initdb.d/00-extensions.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dma_insights -d dma_insights"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: dma-insights-redis
+    ports:
+      - "6380:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - dma_insights_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  dma_insights_pg:
+  dma_insights_redis:

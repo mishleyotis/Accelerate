@@ -1,0 +1,29 @@
+{
+  "name": "report_section",
+  "version": "v1",
+  "sklearn_version": "1.5.2",
+  "classes": [
+    "benchmark_comparison",
+    "data_gaps",
+    "evidence_registry",
+    "executive_summary_scqa",
+    "gap_prioritization",
+    "issue_register",
+    "pillar_deep_dive_p1",
+    "pillar_deep_dive_p2",
+    "pillar_deep_dive_p3",
+    "pillar_deep_dive_p4",
+    "recommendations",
+    "roadmap",
+    "trend_analysis"
+  ],
+  "n_train": 433,
+  "train_data_sha256": "195b28ebc58987c38ec3b41661db03866445873015353433189db0bb13381ba2",
+  "artifact_sha256": "875229da5db81473586e37ff0901d0bc49737570f8314dedff1e76fd2598a509",
+  "cv": {
+    "acc": 0.9885,
+    "macro_f1": 0.9946
+  },
+  "feature": "word(1,2)+char_wb(3,5) TF-IDF",
+  "provenance_note": "retrained artifact (formerly stamped v2) living in the v1 slot; slot contract: file name == meta.version == caller version"
+}

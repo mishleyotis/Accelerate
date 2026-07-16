@@ -1,0 +1,141 @@
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║  ERROR HISTORY — keep this list in sync with new failure modes.      ║
+# ╠══════════════════════════════════════════════════════════════════════╣
+# ║  N1  'Admin fixes appear not applied' after redeploy                 ║
+# ║      → no Cache-Control headers; browser + Cloud Run edge served     ║
+# ║        the prior revision's .jsx files for hours after redeploy      ║
+# ║      FIX: location ~ \.(html|jsx|js|json|css|map)$ blocks below      ║
+# ║           send 'no-cache, no-store, must-revalidate'                 ║
+# ║                                                                      ║
+# ║  N2  /api/* requests timed out after 30s on slow operations          ║
+# ║      → proxy_read_timeout default was 60s but cloudbuild can't get   ║
+# ║        more headroom for synthesis calls                             ║
+# ║      FIX: proxy_read_timeout 120s + proxy_send_timeout 120s          ║
+# ║                                                                      ║
+# ║  N3  /api/* DNS resolution failed when backend Cloud Run had IPv6    ║
+# ║      → 'no resolver defined to resolve …'                            ║
+# ║      FIX: resolver 8.8.8.8 8.8.4.4 ipv6=off (line below)             ║
+# ║                                                                      ║
+# ║  N3b nginx exited at startup with                                    ║
+# ║      'host not found in upstream "stub-backend"' — the frontend-     ║
+# ║      image-smoke step uses a stub backend hostname that does NOT     ║
+# ║      resolve, but nginx still parses proxy_pass at config-load and   ║
+# ║      dies. Same class of crash hits prod whenever the backend Cloud  ║
+# ║      Run service hostname briefly fails DNS during a rollout.        ║
+# ║      FIX: assign the upstream URL to a variable so proxy_pass uses   ║
+# ║           the runtime resolver (8.8.8.8) instead of the startup      ║
+# ║           parser. With a variable in proxy_pass, nginx never tries   ║
+# ║           to resolve the upstream until a /api/* request arrives.    ║
+# ║                                                                      ║
+# ║  N4  Pages broke with 'server directive not allowed here'            ║
+# ║      → operator-edited config copy-pasted without events{}/http{}    ║
+# ║      FIX: this is loaded as a template into nginx's http{} block;    ║
+# ║           never edit /etc/nginx/conf.d/default.conf directly         ║
+# ║                                                                      ║
+# ║  N5  Stale /index.html cached at CDN edge after content-only change  ║
+# ║      → Cloud Run's edge cache holds /index.html for ~5min            ║
+# ║      FIX: Dockerfile stamps ?v=<sha> on every script URL at build    ║
+# ║           time → URL differs per revision → cache must refetch       ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # ERROR HISTORY N6: 413 Request Entity Too Large on catalogue +
+    # manual payload uploads. Default nginx client_max_body_size is 1 MB;
+    # AlmaBank scoring workbook is ~3 MB; full DMA package zips reach
+    # ~80 MB. Raise to 100 MB to cover every documented upload surface.
+    # Cloud Run's internal limit is 32 MB for HTTP/1.1 but 100 MB for
+    # HTTP/2 (which Cloud Run prefers) — nginx must not be the bottleneck.
+    client_max_body_size 100m;
+    client_body_timeout  120s;
+    client_header_timeout 60s;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+    location = /healthz {
+        return 200 "ok\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Proxy /api/* to the backend Cloud Run service.
+    location /api/ {
+        resolver 8.8.8.8 8.8.4.4 ipv6=off valid=300s;
+        resolver_timeout 5s;
+        # ERROR HISTORY N3b: nginx exits at startup with
+        # 'host not found in upstream "<host>"' when the literal hostname
+        # baked into proxy_pass can't be resolved at config-load time.
+        # Assigning the upstream URL to a variable forces nginx to use the
+        # runtime resolver above instead — DNS resolution is deferred
+        # until the first /api/* request arrives. Behavior for the
+        # request itself is identical to the static form (full request
+        # URI is forwarded), so prod /api/foo → backend/api/foo still
+        # works exactly the same.
+        set $upstream_backend "${BACKEND_URL}";
+        proxy_pass $upstream_backend;
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_pass_request_headers on;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_connect_timeout 10s;
+    }
+
+    # Long-cache truly immutable assets (fonts, vendored libs, images).
+    # These rarely change between revisions.
+    location ~* ^/(fonts|vendor|brand|assets)/ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable" always;
+        try_files $uri =404;
+    }
+
+    # Build-SHA stamp — the deploy parity gate curls /__build.txt and
+    # refuses to promote a revision whose stamp != the deployed git SHA.
+    # MUST be an exact-match, never-cache location that 404s when ABSENT:
+    # without this, /__build.txt fell through to the SPA `try_files …
+    # /index.html` below, so a stale/missing stamp returned 200 + the HTML
+    # shell and the gate could not tell stale from fresh (2026-06-13). The
+    # vite buildShaPlugin writes dist/__build.txt; see vite.config.ts.
+    location = /__build.txt {
+        default_type text/plain;
+        add_header Cache-Control "no-store" always;
+        try_files $uri =404;
+    }
+
+    # NEVER cache source files that change with every git commit.
+    # standalone-src/ ships .jsx + .js by name (NOT content-hashed).
+    # Without these headers the browser + Cloud Run edge cache the
+    # prior revision's pages-alerts-prospecting-admin.jsx for hours
+    # after a redeploy — admin fixes appear to be "not applied" until
+    # the operator manually hard-refreshes. Force revalidation per
+    # request so a `terraform apply` is immediately visible.
+    #
+    # State branches per request:
+    #   first_visit_after_deploy → 200 fresh file (cold cache)
+    #   subsequent_unchanged     → 304 Not Modified (ETag match)
+    #   subsequent_changed       → 200 fresh file (new revision)
+    #   stale_cache_attempt      → blocked by no-store; goes 200/304
+    location ~* \.(html|jsx|js|json|css|map)$ {
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        add_header Expires "0" always;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Fallback (hash-routed SPA paths) — falls through to index.html
+    # which itself carries the no-cache headers above.
+    location / {
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        try_files $uri $uri/ /index.html;
+    }
+}

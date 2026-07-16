@@ -1,0 +1,32 @@
+{
+  "name": "subvertical",
+  "version": "v1",
+  "sklearn_version": "1.5.2",
+  "classes": [
+    "AM",
+    "CIB",
+    "CL",
+    "CU",
+    "FC",
+    "IB",
+    "IC",
+    "NON_FI",
+    "RB",
+    "RIA"
+  ],
+  "n_train": 113,
+  "train_data_sha256": "6ef4b629580bf0fac8ccabe84ef8867f4f49e9478cc5929c9405276d2b30ce3c",
+  "artifact_sha256": "8271f30c879503133cbc0cf72766424115757a047fab7166dd9d85d6c8d446c6",
+  "heldout_no_stated": {
+    "n": 33,
+    "regex_acc": 0.7273,
+    "model_acc": 0.8182,
+    "model_macro_f1": 0.8148
+  },
+  "feature": "word(1,2)+char_wb(3,5) TF-IDF + domain cues + regex vote; SVn stripped; clf=logreg C=0.5",
+  "cv3_all": {
+    "acc": 0.885,
+    "macro_f1": 0.59
+  },
+  "provenance_note": "retrained artifact (formerly stamped v2) living in the v1 slot; slot contract: file name == meta.version == caller version"
+}

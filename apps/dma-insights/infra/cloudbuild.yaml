@@ -1,0 +1,1376 @@
+# DMA Insights — Cloud Build pipeline
+#
+# Trigger: every push to `claude/deploy-zennify-cloud-run-AUdu6` (or any
+# branch matching `claude/**`). The pipeline runs the full backend +
+# frontend test suite, builds Docker images, and (when on the deploy
+# branch) deploys to Cloud Run.
+#
+# Stages (each runs the docs/STATUS.md's per-stage QA gate):
+#   1. backend-tests        → pytest 1000+, ruff clean, offline alembic DDL
+#                              (with DMA_BOT_API_KEY set so the bearer-guard
+#                              test actually runs instead of pytest.skip)
+#   2. backend-build        → docker build, push to gcr.io
+#   2b. backend-tests-live-pg → spin up pgvector/pgvector:pg15, run alembic
+#                              upgrade→downgrade→upgrade against the just-
+#                              built backend image (catches runtime-only
+#                              SQL errors the offline --sql check misses)
+#   3. frontend-tests       → vitest 186+, tsc strict, vite build, standalone
+#                              build (deterministic mock-data bundle)
+#   4. frontend-build       → docker build (multi-stage: node:22 builds
+#                              `pnpm run build` → dist/, nginx:1.27 serves
+#                              dist/; per ADR 0016 supersedes ADR 0011),
+#                              push to gcr.io
+#   5. worker-build         → docker build (drive_crawler, sheet_poller,
+#                              embedder, ccg_loader share one image)
+#   6. terraform-plan       → advisory plan (non-blocking by design)
+#   7. e2e-personas         → BLOCKING. Sidecar PG + seed_ci + backend +
+#                              Playwright persona suite (15 tests inc. 3
+#                              ingestion→UI chain) + visual regression
+#   7b. frontend-image-smoke → BLOCKING. Runs the just-built frontend image,
+#                              asserts /healthz, /, the Vite-emitted
+#                              /assets/*.js bundle, /api/* is reverse-
+#                              proxied, AND the baked startup pack is
+#                              FRESH (pages_manifest.json source_sha ==
+#                              ${_IMAGE_SHA}; _ALLOW_STALE_PACK is the
+#                              only escape). Closes the "tested artifact ≠
+#                              deployed artifact" gap.
+#
+# DEPLOY: there is no Cloud-Run deploy stage in this YAML. The pipeline
+# pushes images; the operator runs `infra/deploy.sh` (or terraform apply
+# from Cloud Shell) and then `infra/verify-deploy.sh` for the post-deploy
+# smoke. Adding an automated deploy stage here is gated on having the
+# project-specific service account + IAM bindings wired into the trigger,
+# which is operator-territory — not committed to source control.
+#
+# State-branch contract:
+#   - any stage failure → pipeline aborts; nothing deployed.
+#   - all stages pass   → images pushed to gcr.io tagged with the SHA.
+#   - operator runs deploy.sh + verify-deploy.sh to ship.
+
+# User substitutions — set by `gcloud builds submit --substitutions=…`
+# or by the Cloud Build trigger. When this YAML runs from a trigger the
+# trigger config typically sets `_IMAGE_SHA=${SHORT_SHA}` so each tagged
+# image carries the commit SHA. For ad-hoc local submission pass it on
+# the command line. `$PROJECT_ID` is a Cloud Build builtin so we don't
+# need a user substitution for it.
+substitutions:
+  _IMAGE_SHA: latest      # default so missing substitution doesn't error
+  # Gemini-at-bake escape hatch (master plan Part 3.1). The regen-
+  # startup-pack step now runs the derive/enrich chain Gemini-HOT and
+  # HARD-FAILS the build when the qa_gemini_surfaces assertions find the
+  # pack cold. Setting "true" lets a deliberately-cold regen proceed:
+  # the assertions downgrade to loud warnings and the pack manifest is
+  # stamped `"gemini": "cold"` so the coldness stays visible downstream.
+  _ALLOW_COLD_GEMINI: "false"
+  # Pack-freshness escape hatch (master plan Part 14). The regen step
+  # stamps the build SHA into startup-data/pages_manifest.json
+  # (SOURCE_SHA → export_startup_pages) and frontend-image-smoke
+  # check 6 HARD-FAILS the build when the baked manifest's source_sha
+  # differs from ${_IMAGE_SHA} — a mismatch means the regen failed (the
+  # stale committed pack shipped silently) or an old image was reused.
+  # Setting "true" lets a deliberately-stale pack ship: the exporter
+  # failures + check 6 downgrade to LOUD warnings. This is the ONE
+  # sanctioned escape for pack staleness (documented in
+  # infra/EXIT_CODES.md + docs/DEPLOYMENT.md §26.5).
+  _ALLOW_STALE_PACK: "false"
+  # Vite build-time env (inlined into the React bundle via
+  # import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID — see frontend/src/pages/
+  # LoginPage.tsx). OPTIONAL: empty default → LoginPage.tsx uses the
+  # documented public fallback client ID. Operators override per env
+  # via `gcloud builds submit --substitutions=_GOOGLE_OAUTH_CLIENT_ID=…`
+  # OR via the build trigger config. (ADR 0016)
+  _GOOGLE_OAUTH_CLIENT_ID: ""
+
+steps:
+  # ── Stage 1: backend tests ────────────────────────────────────────
+  - id: backend-tests
+    name: python:3.12-slim
+    dir: backend
+    env:
+      - DATABASE_URL_SYNC=postgresql+psycopg://x/y    # explicit dialect (no psycopg2)
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1                            # surface stderr immediately
+      - PIP_DISABLE_PIP_VERSION_CHECK=1
+      - PIP_ROOT_USER_ACTION=ignore
+      # Set DMA_BOT_API_KEY + RAG_API_BEARER_KEY in CI so the bearer-guard
+      # tests (test_e2e_routes.py + test_rag_runtime_failure_modes.py) RUN
+      # their assertions instead of `pytest.skip`. Both values are
+      # throwaways — the tests only assert that wrong/missing bearers get
+      # 401/403, not what the secret is. Without these, 3 security tests
+      # silently skipped in CI (2026-05-29 no-skip audit).
+      - DMA_BOT_API_KEY=ci-bot-key
+      - RAG_API_BEARER_KEY=ci-rag-key
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # No `set -e` initially — we want to capture every exit code
+        # explicitly and surface diagnostic context if anything fails,
+        # rather than have bash die silently with status 255.
+        set -uxo pipefail
+        echo "==> python --version" && python --version
+        echo "==> pip --version" && pip --version
+        echo "==> install deps"
+        pip install --no-cache-dir \
+          alembic==1.13.3 \
+          sqlalchemy==2.0.35 \
+          'psycopg[binary]==3.2.3' \
+          pgvector==0.3.6 \
+          pydantic==2.9.2 \
+          pydantic-settings==2.5.2 \
+          'redis[hiredis]==5.1.1' \
+          'PyJWT[crypto]==2.9.0' \
+          cryptography==43.0.1 \
+          fastapi==0.115.0 \
+          httpx==0.27.2 \
+          'asyncpg==0.29.0' \
+          'pydantic[email]==2.9.2' \
+          pytest==8.3.3 \
+          pytest-asyncio==0.24.0 \
+          openpyxl==3.1.5 \
+          structlog==24.4.0 \
+          ruff==0.6.9 \
+          python-multipart==0.0.12 \
+          tenacity==9.0.0 \
+          rapidfuzz==3.10.0 \
+          python-docx==1.1.2 \
+          beautifulsoup4==4.12.3 \
+          lxml==5.3.0 \
+          google-auth==2.35.0 \
+          google-cloud-aiplatform==1.70.0 \
+          google-api-python-client==2.149.0 \
+          google-cloud-secret-manager==2.21.0 \
+          google-cloud-storage==2.18.2 \
+          google-cloud-pubsub==2.26.0 \
+          jinja2==3.1.6 \
+          PyYAML==6.0.2 \
+          psycopg2-binary==2.9.9
+        # NOTE: this list mirrors `dependencies` in backend/pyproject.toml
+        # + the test-only adds (pytest, pytest-asyncio, ruff, PyYAML,
+        # psycopg2-binary). The Dockerfile pip list at infra/docker/
+        # backend.Dockerfile MUST stay in lockstep — when a new core dep
+        # lands in pyproject.toml, add it here AND in the Dockerfile (the
+        # 2026-06 jinja2 regression was caused by adding it to the
+        # Dockerfile + pyproject.toml but forgetting this list, so
+        # test_scorecard_export.py blew up in stage 1).
+        rc=$?; [ $rc -ne 0 ] && { echo "::error::pip install failed rc=$rc"; exit $rc; }
+
+        echo "==> alembic upgrade head --sql (offline DDL round-trip)"
+        alembic upgrade head --sql > /tmp/alembic.up.sql 2> /tmp/alembic.up.err
+        rc=$?
+        if [ $rc -ne 0 ]; then
+          echo "::error::alembic upgrade exited rc=$rc"
+          echo "----- alembic stderr -----"; cat /tmp/alembic.up.err
+          echo "----- alembic stdout (last 60) -----"; tail -60 /tmp/alembic.up.sql
+          exit $rc
+        fi
+        echo "  $(wc -l < /tmp/alembic.up.sql) DDL stmts generated"
+
+        echo "==> alembic downgrade head:base --sql"
+        alembic downgrade head:base --sql > /tmp/alembic.down.sql 2> /tmp/alembic.down.err
+        rc=$?
+        if [ $rc -ne 0 ]; then
+          echo "::error::alembic downgrade exited rc=$rc"
+          cat /tmp/alembic.down.err
+          exit $rc
+        fi
+        echo "  $(wc -l < /tmp/alembic.down.sql) DROP stmts generated"
+
+        # ── REAL Postgres round-trip moved to backend-tests-live-pg ─
+        # The apt-install-postgresql-15 path used to live here as a
+        # "fail-soft" block. python:3.12-slim is now Debian trixie (13)
+        # which dropped postgresql-15 from apt — every recent build
+        # silently bypassed the live check on `Unable to locate package`.
+        #
+        # The replacement is the new `backend-tests-live-pg` step (below)
+        # which runs `backend/scripts/ci-live-migration.sh` inside
+        # gcr.io/cloud-builders/docker. That gives us a real
+        # pgvector/pgvector:pg15 sidecar (matches Cloud SQL prod), runs
+        # alembic upgrade→downgrade→upgrade, and probes pgvector + FK
+        # validation — without depending on Debian's pg packaging at all.
+        #
+        # This step now only does what python:3.12-slim CAN do reliably:
+        # offline DDL guard (alembic --sql) + ruff + pytest. The live
+        # PG round-trip runs as a SEPARATE step with the right tools.
+        #   step will hard-fail again. (HISTORICAL — superseded by the
+        #   backend-tests-live-pg step below.)
+
+        echo "==> ruff"
+        ruff check app/ tests/ ../workers/
+        rc=$?; [ $rc -ne 0 ] && exit $rc
+
+        # Batch 13 production-readiness fix: pytest MOVED to the next
+        # stage (`backend-tests-live-pg`). Per operator mandate "in
+        # deployment the DB should always be live": no test runs
+        # against a stub DSN in CI. Stage 1 only does offline DDL
+        # validation + ruff (static analysis). All pytest invocations
+        # run against a real pgvector/pgvector:pg15 sidecar with the
+        # canonical seed_ci fixtures OR the full 113-package corpus.
+        echo "==> backend-tests stage 1 OK (offline DDL + ruff)"
+        echo "    pytest moved to backend-tests-live-pg (real PG sidecar)"
+        echo "    qa_v2 corpus-dependent tests run in qa-gates (full corpus)"
+
+  # ── Stage 2: backend docker build + push ──────────────────────────
+  # We push explicitly here (rather than relying on the YAML's
+  # top-level `images:` array) because that array's push step only
+  # fires after *every* step in the build succeeds. If terraform-plan
+  # (stage 6) fails for any reason, the implicit push never runs and
+  # downstream `terraform apply` can't find the image. Pushing per
+  # step decouples image availability from CI advisory stages.
+  # Mirror the baked ST/CE models from the project bucket into the build
+  # context (2026-07-13): the in-docker HF bake is a silent network flake —
+  # when it degrades, the image ships semantic-cold and the live-pg no-skips
+  # gate fails 90 minutes later. The mirror is the deterministic rung; the
+  # Dockerfile still bakes from HF when the dir is empty (local/dev builds).
+  # Refresh the mirror with:
+  #   gsutil -m cp -r <baked-st-minilm> <baked-st-ce> gs://<project>_cloudbuild/nlp-models/
+  - id: fetch-nlp-models
+    name: gcr.io/cloud-builders/gsutil
+    dir: .
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        mkdir -p infra/vendor/st-models
+        gsutil -m -q cp -r "gs://${PROJECT_ID}_cloudbuild/nlp-models/st-minilm"                            "gs://${PROJECT_ID}_cloudbuild/nlp-models/st-ce"                            infra/vendor/st-models/           && echo "nlp models mirrored into build context"           || echo "::warning::nlp-model mirror fetch failed - Dockerfile bakes from HF"
+        ls infra/vendor/st-models/ || true
+
+  - id: backend-build
+    name: gcr.io/cloud-builders/docker
+    dir: .
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        IMG="gcr.io/$PROJECT_ID/dma-insights-backend"
+        # Reuse layers from the previous build's `:latest` so a warm cache skips
+        # the slow pip-install layer (the full google-cloud-aiplatform stack) — a
+        # cold build with no `--cache-from` spends ~20 min here and was a primary
+        # cause of the Cloud Build TIMEOUT. The `|| true` guards make this a no-op
+        # on the very first build (no `:latest` yet) and on any pull/push hiccup,
+        # so the build still succeeds (just cold) — never fails on the cache path.
+        docker pull "$$IMG:latest" 2>/dev/null || true
+        docker build \
+          --cache-from="$$IMG:latest" \
+          --file=infra/docker/backend.Dockerfile \
+          --tag="$$IMG:${_IMAGE_SHA}" \
+          --tag="$$IMG:latest" \
+          .
+        docker push "$$IMG:${_IMAGE_SHA}"
+        docker push "$$IMG:latest" || true
+    waitFor: ["backend-tests"]
+
+  # ── Stage 2b: live PG migration round-trip (BLOCKING) ─────────────
+  # Spins up `pgvector/pgvector:pg15` (matches Cloud SQL prod) on the
+  # `cloudbuild` Docker network, then docker-runs alembic against the
+  # JUST-BUILT backend image (which already has alembic + sqlalchemy
+  # + psycopg + pgvector installed via backend.Dockerfile — no pip
+  # install needed in the step). Runs upgrade → downgrade → upgrade,
+  # probes pgvector + FK validation. Typed exit codes 0/3/4/5/6/7/8.
+  #
+  # Replaces the previous `_live_block` apt-based path which broke
+  # once python:3.12-slim moved to Debian trixie (no postgresql-15
+  # package).
+  #
+  # MUST come AFTER backend-build in the YAML — Cloud Build's
+  # waitFor validator requires referenced steps to appear earlier
+  # in the file (failure mode caught on commit 804bdc2: "depends on
+  # backend-build, which has not been defined").
+  - id: backend-tests-live-pg
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        # ── 1. PG sidecar ────────────────────────────────────────────
+        docker network create cloudbuild >/dev/null 2>&1 || true
+        docker rm -f dma-ci-mig-pg >/dev/null 2>&1 || true
+        docker run -d --name dma-ci-mig-pg --network cloudbuild \
+            -e POSTGRES_USER=dma \
+            -e POSTGRES_PASSWORD=dma_ci_password \
+            -e POSTGRES_DB=dma_insights_ci \
+            pgvector/pgvector:pg15 >/dev/null
+
+        # pgvector/pgvector:pg15 has an init-then-restart cycle: pg_isready
+        # returns success during the brief init start, then psql fails when
+        # it SIGTERM-shuts-down. Require BOTH pg_isready AND a round-trip
+        # query for 3 consecutive iterations before declaring ready.
+        SUCCESS=0
+        for i in $(seq 1 90); do
+          if docker exec dma-ci-mig-pg pg_isready -U dma -d dma_insights_ci >/dev/null 2>&1 \
+             && docker exec dma-ci-mig-pg psql -U dma -d dma_insights_ci -c "SELECT 1" >/dev/null 2>&1; then
+            SUCCESS=$$((SUCCESS+1))
+            if [ "$$SUCCESS" -ge 3 ]; then
+              echo "✓ PG stably ready after $${i}s (3 consecutive checks)"
+              break
+            fi
+          else
+            SUCCESS=0
+          fi
+          if [ "$$i" -eq 90 ]; then
+            echo "::error::PG sidecar timeout after 90s — last logs:"
+            docker logs --tail 30 dma-ci-mig-pg 2>&1 || true
+            exit 3
+          fi
+          sleep 1
+        done
+        docker exec dma-ci-mig-pg psql -U dma -d dma_insights_ci \
+            -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;" \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;" >/dev/null
+        # test_post_migrate_alembic_version_grant runs post_migrate.py,
+        # which needs a NOSUPERUSER `dma_insights` role (exits 4 otherwise)
+        # + an empty `dma_insights` DB (its hardcoded GRANT CONNECT target).
+        # Mirror terraform's prod setup; sidecar is fresh so plain CREATE is
+        # safe. The app itself still connects as `dma` to dma_insights_ci.
+        docker exec dma-ci-mig-pg psql -U dma -d dma_insights_ci \
+            -c "CREATE ROLE dma_insights LOGIN PASSWORD 'dma_ci_password' NOSUPERUSER;" >/dev/null
+        docker exec dma-ci-mig-pg psql -U dma -d postgres \
+            -c "CREATE DATABASE dma_insights OWNER dma;" >/dev/null
+
+        # ── 2. Alembic round-trip against the just-built image ──────
+        BACKEND_IMG="gcr.io/$PROJECT_ID/dma-insights-backend:${_IMAGE_SHA}"
+        docker pull "$$BACKEND_IMG" >/dev/null
+
+        EXEC_FLAGS=(
+          --rm --network cloudbuild
+          -e "DATABASE_URL_SYNC=postgresql+psycopg://dma:dma_ci_password@dma-ci-mig-pg:5432/dma_insights_ci"
+          -w /home/app
+          --entrypoint bash
+          "$$BACKEND_IMG"
+        )
+
+        # Model gate FIRST: the Dockerfile bakes en_core_web_sm via a
+        # fail-soft ladder (GitHub → vendored wheel → degrade); a
+        # degraded image fails the pytest below 30 min later with three
+        # cryptic NLP asserts — name the cause NOW instead.
+        echo "==> spaCy model-presence gate"
+        docker run "$${EXEC_FLAGS[@]}" -c "python -c 'import en_core_web_sm'" || {
+          echo "::error::en_core_web_sm missing — GitHub AND the vendored wheel (infra/vendor/wheels/) both failed in backend-build; see its log"; exit 10; }
+
+        echo "==> alembic upgrade head"
+        docker run "$${EXEC_FLAGS[@]}" -c "alembic upgrade head" || {
+          echo "::error::alembic upgrade head FAILED"; exit 4; }
+
+        echo "==> alembic downgrade base"
+        docker run "$${EXEC_FLAGS[@]}" -c "alembic downgrade base" || {
+          echo "::error::alembic downgrade base FAILED"; exit 5; }
+
+        echo "==> alembic upgrade head (re-apply, round-trip)"
+        docker run "$${EXEC_FLAGS[@]}" -c "alembic upgrade head" || {
+          echo "::error::alembic re-upgrade FAILED"; exit 6; }
+
+        # ── 3. Post-migration probes ────────────────────────────────
+        HEAD_COUNT=$(docker exec dma-ci-mig-pg psql -U dma \
+            -d dma_insights_ci -tA -c "SELECT COUNT(*) FROM alembic_version;")
+        [ "$$HEAD_COUNT" = "1" ] || {
+          echo "::error::expected 1 alembic head, found $$HEAD_COUNT"; exit 8; }
+        HEAD_REV=$(docker exec dma-ci-mig-pg psql -U dma \
+            -d dma_insights_ci -tA -c "SELECT version_num FROM alembic_version;")
+        echo "  ✓ alembic head: $$HEAD_REV"
+
+        VECT=$(docker exec dma-ci-mig-pg psql -U dma -d dma_insights_ci \
+            -tA -c "SELECT extversion FROM pg_extension WHERE extname='vector';")
+        [ -n "$$VECT" ] || { echo "::error::pgvector missing"; exit 7; }
+        echo "  ✓ pgvector: $$VECT"
+
+        # 3 FKs are deliberately NOT VALID in migrations 003+ (avoids
+        # row scan over historical rows on prod cutover). Allowlist
+        # those by name and flag ONLY new unexpected invalid FKs.
+        UNEXPECTED_FKS=$(docker exec dma-ci-mig-pg psql -U dma -d dma_insights_ci \
+            -tA -c "SELECT COUNT(*) FROM pg_constraint c
+                    WHERE c.contype='f' AND NOT c.convalidated
+                      AND c.conname NOT IN (
+                          'runs_parent_request_id_fkey',
+                          'runs_ccg_catalog_version_fkey',
+                          'peer_benchmarks_ccg_version_fkey'
+                      );")
+        [ "$$UNEXPECTED_FKS" = "0" ] || {
+          echo "::error::$$UNEXPECTED_FKS unexpected invalid FK constraint(s)"
+          docker exec dma-ci-mig-pg psql -U dma -d dma_insights_ci \
+              -c "SELECT c.conname, t.relname, pg_get_constraintdef(c.oid)
+                  FROM pg_constraint c
+                  JOIN pg_class t ON c.conrelid = t.oid
+                  WHERE c.contype='f' AND NOT c.convalidated
+                    AND c.conname NOT IN (
+                        'runs_parent_request_id_fkey',
+                        'runs_ccg_catalog_version_fkey',
+                        'peer_benchmarks_ccg_version_fkey'
+                    );"
+          exit 7; }
+        echo "  ✓ unexpected invalid FK constraints: $$UNEXPECTED_FKS (3 intentional NOT VALID FKs allowlisted)"
+
+        # ── 4. Live-PG pytest — the BUILT IMAGE is the stress test ─────
+        # ~36 live-DB tests skip in stage 1 (no PG); they exercise the
+        # real SQL the routers emit and are our highest-value coverage.
+        # Run EVERY one against the prod-shaped pgvector sidecar so the
+        # deploy has ZERO live-DB skips. Same image cloud-build is about
+        # to push; same schema round-trip-validated above. pytest +
+        # pytest-asyncio are dev-only, pip-installed at run time. tests/
+        # is bind-mounted; fixtures already ship in the image at
+        # /home/app/tests/fixtures. Each live test resets+reseeds, so
+        # ordering is robust.
+        echo "==> Live-PG pytest against built image + seeded PG"
+        # Batch 15: mount entire apps/dma-insights/ at /workspace/repo/
+        # so test files live at /workspace/repo/backend/tests/X.py.
+        # Then BOTH `_find_app_root` (sibling infra/ + backend/ walk)
+        # AND `Path(__file__).parents[2]` patterns resolve correctly:
+        #   - _find_app_root → /workspace/repo/ (has infra/ + backend/)
+        #   - parents[2] of test file → /workspace/repo/ (same)
+        # PYTHONPATH prepends the host repo so `import app` resolves to
+        # host source, THEN appends /install/lib/python3.12/site-packages.
+        # The backend image installs deps via `pip install --prefix=/install`
+        # and exposes them ONLY through that env path, so a `-e PYTHONPATH`
+        # override that omits it makes `import sqlalchemy` fail before any
+        # test runs. Keep in lockstep with infra/docker/backend.Dockerfile.
+        docker run --rm --network cloudbuild \
+            -v "$(pwd)":/workspace/repo:ro \
+            -w /workspace/repo/backend \
+            -e "PYTHONPATH=/workspace/repo/backend:/workspace/repo:/install/lib/python3.12/site-packages" \
+            -e "DATABASE_URL_SYNC=postgresql+psycopg://dma:dma_ci_password@dma-ci-mig-pg:5432/dma_insights_ci" \
+            -e "DATABASE_URL=postgresql+asyncpg://dma:dma_ci_password@dma-ci-mig-pg:5432/dma_insights_ci" \
+            -e "SEED_CI_PG_URL=postgresql+asyncpg://dma:dma_ci_password@dma-ci-mig-pg:5432/dma_insights_ci" \
+            -e "WRITE_SURFACES_PG_URL=postgresql+asyncpg://dma:dma_ci_password@dma-ci-mig-pg:5432/dma_insights_ci" \
+            -e "ENV=local" \
+            -e "DMA_BOT_API_KEY=ci-bot-key" \
+            -e "RAG_API_BEARER_KEY=ci-rag-key" \
+            --entrypoint bash \
+            "$$BACKEND_IMG" -c '
+              set -euxo pipefail
+              pip install --quiet --no-cache-dir \
+                  pytest==8.3.3 pytest-asyncio==0.24.0 \
+                  psycopg2-binary==2.9.10
+              python -m app.scripts.seed_ci
+              # --ignore set: tests needing the 113-package corpus (they
+              # run in qa-gates). --deselect set: tests needing host-repo
+              # layout (Dockerfile/playwright) or a destructive rmtree; all
+              # 4 run in stage 1. `-rs` + grep-SKIPPED FAILS on any skip.
+              # NOTE: no apostrophes inside this single-quoted bash -c
+              # block — an apostrophe would terminate the string (2026-05-27).
+              python -m pytest tests/ \
+                  --ignore=tests/test_qa_v2_adversarial_resilience.py \
+                  --ignore=tests/test_qa_v2_reingest_scenarios.py \
+                  --ignore=tests/test_backfill_skip_path_integration.py \
+                  --deselect tests/test_persona_e2e.py::TestVisualBaselines \
+                  --deselect tests/test_seed_ci.py::test_force_regen_rebuilds_fixtures \
+                  --deselect tests/test_language_rewrite.py::test_rewriter_reduces_violation_count_on_real_corpus_sample \
+                  --deselect tests/test_catalogue_alias_bridge.py::test_get_category_children_against_live_v70_catalogue \
+                  --deselect tests/test_catalogue_alias_bridge.py::test_no_silent_dropping_of_data_in_broadcast_path \
+                  -p no:cacheprovider -rs -q --maxfail=5 2>&1 | tee /tmp/livepg_pytest.log
+              if grep -q "SKIPPED" /tmp/livepg_pytest.log; then
+                echo "::error::live-PG pytest SKIPPED a test — no skips allowed in this stage"
+                grep "SKIPPED" /tmp/livepg_pytest.log
+                exit 9
+              fi
+            ' || { echo "::error::live-PG pytest failed against built image"; exit 9; }
+        echo "  ✓ live-PG pytest passed with ZERO skips against built image + seeded PG"
+
+        docker rm -f dma-ci-mig-pg >/dev/null 2>&1 || true
+        echo "✓ backend-tests-live-pg PASSED"
+    waitFor: ["backend-build"]
+
+  # ── Stage 2c: regenerate the DEEP first-paint pack (GEMINI-HOT) ────
+  # The committed startup-data/ is a point-in-time cache that drifts shallow
+  # (2026-06-26 depth audit: ~half the corpus had no traceable why-now
+  # evidence). This stage seeds a throwaway pgvector PG from the 94 client
+  # folders, runs the SAME seed+derive+heal chain as post-deploy-refresh (now
+  # carrying the evidence-inventory + why-now-depth fixes), then re-exports the
+  # first-paint + per-page pack into /workspace/startup-data so the frontend
+  # build that FOLLOWS bakes deep, evidence-traceable data instead of the stale
+  # cache. The render/self-healing harnesses in qa-gates remain the authority on
+  # completeness; this stage refreshes what gets baked.
+  #
+  # GEMINI-HOT (2026-07-02, RC1 fix — master plan Part 3.1): this step used to
+  # set DMA_DISABLE_VERTEX=1, so the committed pack was Gemini-free BY
+  # CONSTRUCTION (0 vertex provenance markers across 945 pack files). It now:
+  #   • runs the regen containers on the special `cloudbuild` Docker network
+  #     so the Cloud Build METADATA SERVER resolves and provides ADC — the
+  #     containers authenticate as the Cloud Build SA (terraform grants it
+  #     roles/aiplatform.user; see infra/terraform/main.tf
+  #     `cloud_build_aiplatform_user`);
+  #   • passes VERTEX_PROJECT_ID + GOOGLE_CLOUD_PROJECT so vertexai.init()
+  #     targets this project;
+  #   • warms the full enrich_corpus surface set + the embedder pass after
+  #     run_derive_chain and BEFORE the exports (so the snapshot captures
+  #     the enrichment);
+  #   • ends with `qa_gemini_surfaces --mode baked` — per-surface assertions
+  #     that the pack really carries Gemini output.
+  #
+  # FAILURE POLICY (changed from fail-open): infra hiccups still degrade to
+  # the committed pack, BUT the final Gemini gate is HARD — a cold pack (or a
+  # regen that never got far enough to assert) FAILS THE BUILD unless the
+  # `_ALLOW_COLD_GEMINI=true` substitution deliberately downgrades it (the
+  # pack manifest is then stamped `"gemini": "cold"`). Deterministic-step
+  # failures keep `|| { ... }` (not `|| true`) for the contract test.
+  #
+  # PACK FRESHNESS (master plan Part 14): the EXPORTERS run through
+  # `step_hard` — a non-zero exit from export_startup_data /
+  # export_startup_pages FAILS THE BUILD outright (the old `|| echo …
+  # continuing` fail-open shipped the stale committed pack silently).
+  # SOURCE_SHA=${_IMAGE_SHA} is passed into the regen containers so
+  # pages_manifest.json + manifest.json carry the build SHA; the regen
+  # asserts the stamp landed, and frontend-image-smoke check 6 re-asserts
+  # it on the BAKED image. `_ALLOW_STALE_PACK=true` is the ONE sanctioned
+  # escape for all three freshness gates.
+  - id: regen-startup-pack
+    name: gcr.io/cloud-builders/docker
+    dir: backend
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # No `set -e`/`-u`: failures are handled explicitly via $$OK; the
+        # HARD Gemini gate at the end decides whether the build fails.
+        set -xo pipefail
+        APP_ROOT="$$(cd .. && pwd)"   # /workspace = apps/dma-insights checkout
+        echo "regen APP_ROOT=$$APP_ROOT"
+        OK=1
+        cleanup() {
+          # Shared `cloudbuild` network is NOT removed — later stages use it.
+          docker rm -f dma-regen-pg >/dev/null 2>&1 || true
+        }
+        trap cleanup EXIT
+        # `cloudbuild` network: containers on it reach the metadata
+        # server for ADC — what authenticates the Vertex calls below.
+        docker network create cloudbuild >/dev/null 2>&1 || true
+        docker rm -f dma-regen-pg >/dev/null 2>&1 || true
+        docker run -d --name dma-regen-pg --network cloudbuild \
+            -e POSTGRES_USER=dma -e POSTGRES_PASSWORD=dma_regen_pw \
+            -e POSTGRES_DB=dma_regen pgvector/pgvector:pg15 >/dev/null || OK=0
+        RDY=0
+        for i in $$(seq 1 90); do
+          if [ "$$OK" = 1 ] && docker exec dma-regen-pg pg_isready -U dma -d dma_regen >/dev/null 2>&1; then
+            RDY=$$((RDY+1)); [ "$$RDY" -ge 3 ] && break
+          else RDY=0; fi
+          sleep 1
+        done
+        [ "$$RDY" -ge 3 ] || { echo "::warning::regen pg not ready — keeping committed pack"; OK=0; }
+        if [ "$$OK" = 1 ]; then
+          docker exec dma-regen-pg psql -U dma -d dma_regen \
+            -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;" \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;" >/dev/null || OK=0
+        fi
+        BACKEND_IMG="gcr.io/$PROJECT_ID/dma-insights-backend:${_IMAGE_SHA}"
+        [ "$$OK" = 1 ] && { docker pull "$$BACKEND_IMG" >/dev/null || OK=0; }
+        # qa-gates env contract EXCEPT Vertex is HOT (metadata-server ADC).
+        ENV_ARGS=(
+          --rm --network cloudbuild
+          # Root: /workspace is root-owned; USER app (uid 1000) gets EACCES
+          # writing the pack into /workspace/startup-data (2026-07-05).
+          -u 0
+          -e "DATABASE_URL=postgresql+asyncpg://dma:dma_regen_pw@dma-regen-pg:5432/dma_regen"
+          -e "DATABASE_URL_SYNC=postgresql+psycopg://dma:dma_regen_pw@dma-regen-pg:5432/dma_regen"
+          -e "PYTHONPATH=/home/app:/install/lib/python3.12/site-packages"
+          -e "VERTEX_PROJECT_ID=$PROJECT_ID"
+          -e "GOOGLE_CLOUD_PROJECT=$PROJECT_ID"
+          -e "_ALLOW_COLD_GEMINI=${_ALLOW_COLD_GEMINI}"
+          # Stamped into pages_manifest.json source_sha; frontend-image-
+          # smoke check 6 asserts the baked manifest carries EXACTLY this.
+          -e "SOURCE_SHA=${_IMAGE_SHA}"
+          -e "DMA_SEED_CORPUS_DIR=/home/app/tests/fixtures/dma_packages_batches"
+          # 15 hollow baseline packages must stay live (else ~80 clients,
+          # not 94); qa_hollow_census re-arms the gate.
+          -e "DMA_ALLOW_HOLLOW=1"
+          # 2700s: Vertex-hot focus-KPI derive exceeds 1500s (f3f07167).
+          -e "DERIVE_STEP_TIMEOUT_SEC=2700"
+          # Wall-clock cap on deepen_narrative's per-card Vertex explainer.
+          -e "DMA_EXPLAINER_BUDGET_SEC=600"
+          # Re-rank budget: bounded so a slow box degrades to the bi-encoder
+          # instead of a SIGKILL that loses the step's cards.
+          -e "DMA_RERANK_BUDGET_SEC=900"
+          # Enrichment sweeps: bounded-parallel + wall-clock budgeted; cache fingerprints make re-runs RESUME (chain -> warm -> post-deploy converge).
+          -e "DMA_ENRICH_BUDGET_SEC=1200"
+          -e "DMA_ENRICH_CONCURRENCY=8"
+          -v "$$APP_ROOT:/workspace"
+          -w /home/app
+          --entrypoint bash
+          "$$BACKEND_IMG"
+        )
+        step() {
+          [ "$$OK" = 1 ] || return 0
+          echo "==> regen: $$2"
+          docker run "$${ENV_ARGS[@]}" -c "$$1" || { echo "::warning::regen step '$$2' failed — keeping committed pack"; OK=0; }
+        }
+        # Best-effort variant: warns, never flips $$OK; 1800s guard so a soft
+        # step can't eat the global deadline (leftovers resume at next warm point).
+        step_soft() {
+          [ "$$OK" = 1 ] || return 0
+          echo "==> regen (best-effort): $$2"
+          docker rm -f dma-regen-soft >/dev/null 2>&1 || true
+          timeout -k 30 1800 docker run --name dma-regen-soft "$${ENV_ARGS[@]}" -c "$$1"
+          RC=$$?
+          if [ "$$RC" = 124 ] || [ "$$RC" = 137 ]; then
+            echo "::warning::regen soft step '$$2' hit the 1800s stage guard — qa_gemini_surfaces judges the outcome"
+          elif [ "$$RC" != 0 ]; then
+            echo "::warning::regen soft step '$$2' failed (rc=$$RC) — qa_gemini_surfaces will judge the outcome"
+          fi
+        }
+        # HARD variant: a failed export must FAIL the build (else the STALE
+        # committed pack ships silently); _ALLOW_STALE_PACK=true is the ONE escape.
+        step_hard() {
+          [ "$$OK" = 1 ] || return 0
+          echo "==> regen (HARD): $$2"
+          docker run "$${ENV_ARGS[@]}" -c "$$1" || {
+            if [ "${_ALLOW_STALE_PACK}" = "true" ]; then
+              echo "::warning::regen HARD step '$$2' FAILED — continuing ONLY because _ALLOW_STALE_PACK=true. The committed (STALE) pack ships; frontend-image-smoke check 6 is downgraded to a warning."
+              OK=0
+            else
+              echo "::error::regen step '$$2' FAILED — the frontend build would bake the STALE committed pack. A failed export must not ship silently (deploy-gate audit). Fix the failure above, or set _ALLOW_STALE_PACK=true to ship the stale pack deliberately."
+              exit 1
+            fi
+          }
+        }
+        step "alembic upgrade head" "migrate"
+        # v7.0 catalogue first — value-chain views export EMPTY without it.
+        step "python -m workers.ccg_loader.main --version v7.0 --workbooks-dir /workspace/docs/reference/catalogue/v7.0" "ccg-catalogue-load"
+        step "python -m app.scripts.historical_backfill --dir /home/app/tests/fixtures/dma_packages_batches --force" "seed-94-client-folders"
+        # 11 known hollow packages (re-pinned 14->11 2026-07-15: parser-accuracy
+        # work parses 3 more with scored recs/evidence); else a parser regression.
+        step "python -m app.scripts.qa_hollow_census --expect 11" "hollow-census-pin"
+        step "python -m app.scripts.run_derive_chain" "derive+heal"
+        step "python -m app.scripts.qa_hollow_census --post-derive --expect 0" "shipped-hollow-gate"
+        # Full surface warm (cache-resume), pre-export.
+        step_soft "python -m app.scripts.enrich_corpus --surfaces all" "gemini-warm-full-surfaces"
+        # Embedder: evidence/section embeddings for RAG; skips embedded rows.
+        step_soft "python -m workers.embedder.main --since 2000-01-01" "embed-corpus"
+        # Exporters run HARD: non-zero fails the build unless
+        # _ALLOW_STALE_PACK=true.
+        # BUDGET=0 where output is baked/compared — see rerank.py.
+        step_hard "DMA_RERANK_BUDGET_SEC=0 python -m app.scripts.export_startup_data --out /workspace/startup-data --sha ${_IMAGE_SHA}" "export-first-paint"
+        step_hard "DMA_RERANK_BUDGET_SEC=0 python -m app.scripts.export_startup_pages --out /workspace/startup-data" "export-detail-pages"
+        # ── Pack↔DB parity gate on the JUST-EXPORTED pack. Must run BEFORE
+        # deterministic-enrich + the refinement overlay deliberately mutate
+        # the files, or it fails by construction on every mutated field
+        # (2026-07-10 QA: 74 structural findings, all post-export mutations).
+        # Parity verifies the EXPORTER; pack_quality_gate covers the final
+        # pack. HARD (escape: _ALLOW_STALE_PACK).
+        step_hard "DMA_RERANK_BUDGET_SEC=0 python -m app.scripts.qa_pack_parity --clients-dir /workspace/startup-data/clients --strict" "pack-parity-gate"
+        step "python -m app.scripts.apply_startup_data_fixes --clients-dir /workspace/startup-data/clients" "deterministic-enrich"
+        # Stage-2 refinement overlays (plan §2).
+        step "python -m app.scripts.apply_refinement_overlay --clients-dir /workspace/startup-data/clients --overlay-dir /workspace/startup-data/refinement --verify" "refinement-overlay"
+        # Pack quality gate (plan §4): HARD.
+        step_hard "python -m app.scripts.pack_quality_gate --pack /workspace/startup-data" "pack-quality-gate"
+        # ── source_sha stamp gate (check 6 re-asserts on the baked image);
+        # "source_sha ✓" is on the redeploy checklist.
+        if [ "$$OK" = 1 ]; then
+          PACK_SHA=$$(grep -oE '"source_sha": *"[^"]*"' "$$APP_ROOT/startup-data/pages_manifest.json" 2>/dev/null | head -1 | cut -d'"' -f4)
+          if [ "$$PACK_SHA" = "${_IMAGE_SHA}" ]; then
+            echo "✓ regen: pages_manifest.json source_sha=$$PACK_SHA matches _IMAGE_SHA (source_sha ✓)"
+          elif [ "${_ALLOW_STALE_PACK}" = "true" ]; then
+            echo "::warning::regen: pages_manifest.json source_sha='$$PACK_SHA' != '${_IMAGE_SHA}' — stale stamp ALLOWED via _ALLOW_STALE_PACK=true"
+          else
+            echo "::error::regen: pages_manifest.json source_sha='$$PACK_SHA' != build SHA '${_IMAGE_SHA}' — the SOURCE_SHA env did not reach export_startup_pages (or the export silently no-oped). Fix the wiring or set _ALLOW_STALE_PACK=true to ship stale deliberately."
+            exit 1
+          fi
+        fi
+        # ── HARD Gemini gate: per-surface assertions vs regen DB + baked
+        # manifest. The script honors _ALLOW_COLD_GEMINI=true itself, so
+        # non-zero here ALWAYS means "cold and not allowed".
+        if [ "$$OK" = 1 ]; then
+          echo "==> regen: qa_gemini_surfaces --mode baked (HARD gate)"
+          docker run "$${ENV_ARGS[@]}" -c "python -m app.scripts.qa_gemini_surfaces --mode baked --manifest /workspace/startup-data/pages_manifest.json" || {
+            echo "::error::Gemini surface assertions FAILED — the pack is cold. Grant roles/aiplatform.user to $PROJECT_NUMBER@cloudbuild.gserviceaccount.com (terraform: cloud_build_aiplatform_user) or set _ALLOW_COLD_GEMINI=true to ship cold deliberately."
+            exit 1
+          }
+          echo "✓ regenerated GEMINI-HOT first-paint pack into /workspace/startup-data — frontend will bake it"
+        else
+          # Regen never got far enough to assert → the pack that ships is
+          # the committed (cold) one. Same policy as a failed assertion.
+          if [ "${_ALLOW_COLD_GEMINI}" = "true" ]; then
+            echo "::warning::startup-pack regeneration incomplete — frontend bakes the committed pack (Gemini-cold ALLOWED via _ALLOW_COLD_GEMINI)"
+          else
+            echo "::error::startup-pack regeneration incomplete — the committed (Gemini-cold) pack would ship. Fix the failed regen step above or set _ALLOW_COLD_GEMINI=true to proceed deliberately."
+            exit 1
+          fi
+        fi
+        exit 0
+    waitFor: ["backend-tests-live-pg"]
+
+  # ── Stage 3: frontend tests + builds ──────────────────────────────
+  - id: frontend-tests
+    name: node:22-alpine
+    dir: frontend
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set -eux
+        corepack enable
+        pnpm install --frozen-lockfile
+        pnpm exec tsc --noEmit
+        pnpm exec vite build
+        pnpm run build:standalone
+        # vitest covers wireframe-completeness + a11y + standalone-build
+        # assertion in one sweep.
+        pnpm exec vitest run
+    waitFor: ["regen-startup-pack"]
+
+  # ── Stage 4: frontend docker build + push ─────────────────────────
+  - id: frontend-build
+    name: gcr.io/cloud-builders/docker
+    dir: .
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        IMG="gcr.io/$PROJECT_ID/dma-insights-frontend"
+        # BUILD_SHA → stamped into <meta x-build-sha> for verify-deploy.
+        # VITE_GOOGLE_OAUTH_CLIENT_ID is OPTIONAL (Vite inlines it from
+        # import.meta.env at build time; LoginPage.tsx has a public
+        # fallback). _GOOGLE_OAUTH_CLIENT_ID substitution defaults to ""
+        # in cloudbuild's `substitutions:` block — when set, the build
+        # bakes it in so the SPA uses the operator's chosen client ID
+        # without rebuilds. Per ADR 0016 (Vite/React production).
+        # Reuse layers from the previous build's `:latest` so a warm cache skips
+        # the slow `pnpm install` + `vite build` layers (a primary cause of the
+        # cold-cache Cloud Build TIMEOUT). `|| true` guards keep the first build
+        # (no `:latest` yet) and any pull/push hiccup non-fatal — build still
+        # succeeds, just cold.
+        docker pull "$$IMG:latest" 2>/dev/null || true
+        docker build \
+          --cache-from="$$IMG:latest" \
+          --file=infra/docker/frontend.Dockerfile \
+          --build-arg "BUILD_SHA=${_IMAGE_SHA}" \
+          --build-arg "VITE_GOOGLE_OAUTH_CLIENT_ID=${_GOOGLE_OAUTH_CLIENT_ID}" \
+          --tag="$$IMG:${_IMAGE_SHA}" \
+          --tag="$$IMG:latest" \
+          .
+        docker push "$$IMG:${_IMAGE_SHA}"
+        docker push "$$IMG:latest" || true
+    waitFor: ["frontend-tests"]
+
+  # ── Stage 5: worker image (shared for all 4 Cloud Run Jobs) ──────
+  - id: worker-build
+    name: gcr.io/cloud-builders/docker
+    dir: .
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        IMG="gcr.io/$PROJECT_ID/dma-insights-workers"
+        # Reuse layers from the previous build's `:latest` (skips the slow
+        # pip-install layer). `|| true` guards keep first-build / hiccups
+        # non-fatal — build still succeeds, just cold. See backend-build.
+        docker pull "$$IMG:latest" 2>/dev/null || true
+        docker build \
+          --cache-from="$$IMG:latest" \
+          --file=infra/docker/worker.Dockerfile \
+          --tag="$$IMG:${_IMAGE_SHA}" \
+          --tag="$$IMG:latest" \
+          .
+        docker push "$$IMG:${_IMAGE_SHA}"
+        docker push "$$IMG:latest" || true
+    waitFor: ["frontend-build"]
+
+  # ── Stage 6: terraform plan (advisory, non-blocking) ──────────────
+  #
+  # Purely advisory: shows the operator what would change if this
+  # build's image SHA were applied. The real apply runs from Cloud
+  # Shell or a separate trigger.
+  #
+  # Notes:
+  #   1. `-lock=false`: plan is read-only, so locking isn't required
+  #      for safety, and skipping it stops CI from colliding with a
+  #      parallel `terraform apply` from Cloud Shell.
+  #   2. `-var "project_id=$PROJECT_ID"`: the variable is REQUIRED in
+  #      main.tf (no default). Without it terraform prompts for input
+  #      and the build dies on stdin closed.
+  #   3. The whole block is wrapped in `|| ...` so plan failure NEVER
+  #      blocks the build's image-push outcome. Images are already in
+  #      gcr.io by the time we get here (pushed in stages 2/4/5), and
+  #      plan failing for transient reasons (e.g. stale lock from a
+  #      parallel Cloud-Shell apply) must not invalidate the build.
+  - id: terraform-plan
+    name: hashicorp/terraform:1.9
+    dir: infra/terraform
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        set -ux       # NOT -e — plan is advisory; never fail the build here
+        terraform init -backend-config="bucket=$PROJECT_ID-tfstate" || {
+          echo "::warning::terraform init failed; skipping plan."; exit 0
+        }
+        terraform plan \
+          -lock=false \
+          -var "project_id=$PROJECT_ID" \
+          -var "image_sha=${_IMAGE_SHA}" \
+          -out=plan.tfplan \
+          || echo "::warning::terraform plan exited non-zero — non-fatal in CI"
+        exit 0
+    waitFor: ["worker-build"]
+
+  # ── Stage 7: Playwright E2E (BLOCKING) ──────────────────────────────
+  #
+  # G12.E2E.PERSONAS — persona golden-path tests using the dev-login
+  # endpoint. Runs against a sidecar backend on a Docker bridge network.
+  #
+  # The previous advisory swallow ("::warning::G12.E2E.PERSONAS
+  # failed — advisory until live backend is wired in CI") was bypassing
+  # every persona regression silently. Per plan §A2 this is BLOCKING.
+  #
+  # Sidecar bring-up:
+  #   1. PG sidecar (pgvector/pgvector:pg15) — same engine as Cloud SQL prod.
+  #   2. alembic upgrade head against the sidecar.
+  #   3. seed_ci to populate the 5 fixtures (real persistable state).
+  #   4. backend container (the image we just built + pushed in stage 2) on
+  #      port 8000 of the cloudbuild network, ENV=local so /auth/dev-login
+  #      is reachable.
+  #   5. Playwright runs against http://dma-be-sidecar:8000.
+  #   6. Tear down cleanly so nothing leaks to the next build.
+  - id: e2e-personas
+    name: gcr.io/cloud-builders/docker
+    dir: frontend
+    entrypoint: bash
+    env:
+      - CI_DOCKER_NETWORK=cloudbuild
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        # F-302: on failure, dump backend/PG logs + test-results BEFORE
+        # cleanup destroys the containers (a bare selector-timeout once
+        # took >5 days to diagnose). Cleanup runs unconditionally.
+        on_exit() {
+          local rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::e2e-personas FAILED with exit $rc — dumping diagnostics"
+            echo "===== docker logs dma-ci-e2e-backend (last 200 lines) ====="
+            docker logs --tail 200 dma-ci-e2e-backend 2>&1 || true
+            echo "===== docker logs dma-ci-e2e-pg (last 100 lines) ====="
+            docker logs --tail 100 dma-ci-e2e-pg 2>&1 || true
+            echo "===== docker ps -a (snapshot) ====="
+            docker ps -a 2>&1 || true
+            echo "===== Playwright test-results directory (if any) ====="
+            # The e2e-personas step runs with `dir: frontend`, so the
+            # cwd already IS frontend/ — list relative paths, not
+            # `frontend/test-results` (which the prior wrong prefix
+            # produced `ls: cannot access` and obliterated the trap's
+            # diagnostic value; 2026-05-29 QA audit).
+            ls -la test-results 2>&1 || true
+            ls -la playwright-report 2>&1 || true
+            find test-results -maxdepth 3 -type f -print 2>/dev/null | sort || true
+            find playwright-report -maxdepth 3 -type f -print 2>/dev/null | sort || true
+          fi
+          docker rm -f dma-ci-e2e-backend dma-ci-e2e-pg >/dev/null 2>&1 || true
+          exit "$rc"
+        }
+        trap on_exit EXIT
+
+        # ── 0. Source identity + cwd contract probe ───────────────────
+        # Print git HEAD + status for the audit trail so build logs
+        # always carry "what we tested." Assert the frontend
+        # package.json is reachable from cwd BEFORE handing the volume
+        # mount to docker run; if `dir: frontend` ever silently changes
+        # or the source tree shifts, fail HERE in seconds rather than
+        # 20s later inside pnpm with the obscure
+        # `ERR_PNPM_NO_PKG_MANIFEST` (Cloud Build commit 298baab
+        # regression — `cd /workspace` outside a subshell leaked the
+        # outer cwd and the volume mount silently pointed at host `/`).
+        #
+        # CRITICAL — the downstream docker volume mount uses the
+        # absolute APP_ROOT captured below (before any cd), so it is
+        # immune to cwd leaks. Every `cd` is still scoped in a subshell
+        # `( … )` as defence-in-depth.
+        echo "===== e2e source identity ====="
+        echo "cwd: $$(pwd)"
+        # Capture the app root (parent of frontend/) into an absolute
+        # variable RIGHT NOW, before any cd, and use it for the docker
+        # volume mount below. This makes the mount immune to any cd
+        # anywhere in the script — the 298baab regression was a `cd
+        # /workspace` that leaked cwd so `$(pwd)/..` resolved to host
+        # `/`. Resolving the absolute path up-front removes that whole
+        # class of bug. `dir: frontend` puts us at /workspace/frontend,
+        # so APP_ROOT = /workspace (= apps/dma-insights checkout root).
+        APP_ROOT="$$(cd .. && pwd)"
+        FRONTEND_DIR="$$(pwd)"
+        echo "APP_ROOT=$$APP_ROOT  FRONTEND_DIR=$$FRONTEND_DIR"
+        # git probes in SUBSHELLS so cwd stays at frontend/.
+        ( cd /workspace 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "no-git" ) || true
+        ( cd /workspace 2>/dev/null && git status --short 2>/dev/null | head -20 ) || true
+        # Belt-and-braces — fail fast if the resolved paths are wrong.
+        if [ ! -f "$$FRONTEND_DIR/package.json" ]; then
+          echo "::error::no package.json at $$FRONTEND_DIR — cwd contract broken"
+          echo "         (docker run mounts $$APP_ROOT → /workspace;"
+          echo "          frontend/package.json must exist here)"
+          exit 5
+        fi
+        if [ ! -d "$$APP_ROOT/frontend" ]; then
+          echo "::error::$$APP_ROOT/frontend missing — APP_ROOT resolved wrong"
+          exit 5
+        fi
+        echo "✓ frontend/package.json present; APP_ROOT mount source verified"
+
+        # ── 1. PG sidecar (matches Cloud SQL POSTGRES_15 + pgvector) ──
+        docker network create cloudbuild >/dev/null 2>&1 || true
+        docker rm -f dma-ci-e2e-pg dma-ci-e2e-backend >/dev/null 2>&1 || true
+        docker run -d --name dma-ci-e2e-pg --network cloudbuild \
+            -e POSTGRES_USER=dma \
+            -e POSTGRES_PASSWORD=dma_ci_password \
+            -e POSTGRES_DB=dma_insights_ci \
+            pgvector/pgvector:pg15 >/dev/null
+
+        # Wait for PG stably ready — pgvector/pgvector:pg15 has an
+        # init-then-restart cycle that fools naive pg_isready loops
+        # (see backend-tests-live-pg above for the diagnostic).
+        SUCCESS=0
+        for i in $(seq 1 90); do
+          if docker exec dma-ci-e2e-pg pg_isready -U dma -d dma_insights_ci >/dev/null 2>&1 \
+             && docker exec dma-ci-e2e-pg psql -U dma -d dma_insights_ci -c "SELECT 1" >/dev/null 2>&1; then
+            SUCCESS=$$((SUCCESS+1))
+            if [ "$$SUCCESS" -ge 3 ]; then
+              echo "✓ PG stably ready after $${i}s (3 consecutive checks)"
+              break
+            fi
+          else
+            SUCCESS=0
+          fi
+          if [ "$$i" -eq 90 ]; then
+            echo "::error::PG sidecar timeout after 90s — last logs:"
+            docker logs --tail 30 dma-ci-e2e-pg 2>&1 || true
+            exit 3
+          fi
+          sleep 1
+        done
+        docker exec dma-ci-e2e-pg psql -U dma -d dma_insights_ci \
+            -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;" \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;" >/dev/null
+
+        # ── 2. Migrate + seed via the just-built backend image ────────
+        BACKEND_IMG="gcr.io/$PROJECT_ID/dma-insights-backend:${_IMAGE_SHA}"
+        docker run --rm --network cloudbuild \
+            -e DATABASE_URL_SYNC=postgresql+psycopg://dma:dma_ci_password@dma-ci-e2e-pg:5432/dma_insights_ci \
+            -e DATABASE_URL=postgresql+asyncpg://dma:dma_ci_password@dma-ci-e2e-pg:5432/dma_insights_ci \
+            -e ENV=local \
+            -w /home/app \
+            --entrypoint bash \
+            "$$BACKEND_IMG" -c "alembic upgrade head && python -m app.scripts.seed_ci"
+
+        # ── 3. Backend service container ──────────────────────────────
+        # ENV=local enables dev-login (no OAuth) + bypasses the prod-
+        # readiness guard. `--workers 1` is REQUIRED: each uvicorn
+        # worker has its own ephemeral JWT keypair (jwt_service.py
+        # _generate_ephemeral_key), so 2 workers ⇒ key A signs the JWT,
+        # key B verifies ⇒ flaky 401. Prod is unaffected (Secret
+        # Manager-mounted shared key).
+        docker run -d --name dma-ci-e2e-backend --network cloudbuild \
+            -e DATABASE_URL_SYNC=postgresql+psycopg://dma:dma_ci_password@dma-ci-e2e-pg:5432/dma_insights_ci \
+            -e DATABASE_URL=postgresql+asyncpg://dma:dma_ci_password@dma-ci-e2e-pg:5432/dma_insights_ci \
+            -e ENV=local \
+            -e ALLOWED_ORIGINS='http://localhost:5173,http://dma-ci-e2e-frontend:8080' \
+            -p 8000:8000 \
+            "$$BACKEND_IMG" \
+            uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 >/dev/null
+
+        # Wait for /healthz
+        for i in $(seq 1 60); do
+          if docker exec dma-ci-e2e-backend python -c \
+              "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz', timeout=2).getcode()==200 else 1)" \
+              >/dev/null 2>&1; then
+            echo "✓ backend healthy in $${i}s"
+            break
+          fi
+          [ "$$i" -eq 60 ] && {
+            echo "::error::Backend sidecar timeout — last logs:"
+            docker logs --tail 50 dma-ci-e2e-backend 2>&1
+            exit 3
+          }
+          sleep 1
+        done
+
+        # ── 4. Playwright suites in a separate container ──────────────
+        # Three checks: `pnpm test:e2e` (persona golden-path vs live
+        # backend + seeded data, vite proxy → BACKEND_URL, BLOCKING);
+        # the production-surface visual suite via the SELF-HEALING
+        # wrapper (responsive.visual.ts vs the committed -linux
+        # baselines, captured against the richbank-seeded sidecar in
+        # THIS pinned jammy env — a resilient monitor, not a blocker);
+        # and `pnpm test:visual:standalone` (ADR 0011, the canonical
+        # BLOCKING visual contract — also via the wrapper, see below).
+        # NOTE: `playwright install` is MANDATORY (the package.json
+        # runner is newer than the image's baked browser ⇒ 84/84 launch
+        # failure without it); retried because the ~113 MB pull must
+        # survive a network blip.
+        # --shm-size=1g: the 64MB /dev/shm default SIGSEGVs chromium
+        # (exit-148 flakes); pairs with --disable-dev-shm-usage.
+        docker run --rm --network cloudbuild --shm-size=1g \
+            -v "$$APP_ROOT":/workspace -w /workspace/frontend \
+            -e BACKEND_URL=http://dma-ci-e2e-backend:8000 \
+            -e CI=true \
+            -e ARTIFACT_DIR=/workspace/visual-artifacts \
+            mcr.microsoft.com/playwright:v1.49.0-jammy \
+            bash -c '
+              set -euxo pipefail
+              npm install -g pnpm
+              pnpm install --frozen-lockfile
+              for attempt in 1 2 3; do
+                pnpm exec playwright install --with-deps chromium && break
+                echo "playwright install attempt $$attempt failed; retrying in $$((attempt*5))s"
+                sleep $$((attempt*5))
+              done
+              # Persona golden path — BLOCKING per plan §A2.
+              pnpm test:e2e
+              # Production-surface visual — SELF-HEALING monitor (see
+              # scripts/visual-selfheal.sh). Non-blocking + hard-bounded
+              # so a runaway heal cannot eat the shared build budget.
+              timeout 420 bash scripts/visual-selfheal.sh playwright.visual.config.ts || \
+                echo "::warning::visual-selfheal exceeded 420s — skipped (non-blocking)"
+              # Standalone visual — BLOCKING, via the wrapper: baselines
+              # only capture deterministically IN this container (the
+              # recurrent 84/84 cross-env failure otherwise).
+              # STRICT_VISUAL=1 keeps post-heal failures blocking.
+              pnpm run build:standalone
+              STRICT_VISUAL=1 timeout 600 bash scripts/visual-selfheal.sh playwright.visual.standalone.config.ts
+            '
+
+        # ── 5. Cleanup ────────────────────────────────────────────────
+        # Handled by the `on_exit` trap at the top of this script so
+        # cleanup runs on BOTH success and failure paths (plus log
+        # dump on failure). Keeping an explicit cleanup here would
+        # double-rm; the trap fires after this block in either case.
+    waitFor: ["terraform-plan"]
+
+  # ── Stage 7b: Docker-served frontend artifact smoke (BLOCKING) ──────
+  #
+  # Closes the artifact-mismatch gap flagged by the senior QA review:
+  # production ships `frontend/standalone-src/` via nginx (per
+  # ADR 0011 + infra/docker/frontend.Dockerfile), but stages 3 + 7
+  # exercise either the Vite dev server (pnpm dev) OR the
+  # `dist-standalone/` Vite build. Neither is the actual artifact
+  # users hit.
+  #
+  # This step pulls the just-built `dma-insights-frontend:${_IMAGE_SHA}`
+  # image, runs it on the cloudbuild network, then asserts:
+  #   1. /healthz responds 200 with "ok" (nginx is up).
+  #   2. / serves index.html (standalone-src root).
+  #   3. The build-SHA stamp landed (proves the COPY layer wasn't
+  #      silently broken — e.g. by a frontend.Dockerfile edit that
+  #      dropped the COPY of `standalone-src/`).
+  #   4. The Vite content-hashed /assets/* bundle referenced by
+  #      index.html is reachable (dist/ COPY intact).
+  #   5. /api/* is reverse-proxied to BACKEND_URL (not caught by the
+  #      SPA fallback).
+  #   6. The BAKED startup pack is FRESH: /startup-data/
+  #      pages_manifest.json `source_sha` == ${_IMAGE_SHA} (stamped by
+  #      the regen stage via SOURCE_SHA → export_startup_pages). A
+  #      stale pack means the regen failed or an old image was reused;
+  #      `_ALLOW_STALE_PACK=true` is the only escape (loud warning).
+  #
+  # If any check fails the build aborts — production cannot ship an
+  # image whose nginx config is broken or whose static assets are
+  # missing, even if the persona-suite green-lit the Vite dev path.
+  - id: frontend-image-smoke
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        FE_IMG="gcr.io/$PROJECT_ID/dma-insights-frontend:${_IMAGE_SHA}"
+        docker pull "$$FE_IMG" >/dev/null
+        docker network create cloudbuild >/dev/null 2>&1 || true
+        docker rm -f dma-ci-fe-smoke >/dev/null 2>&1 || true
+        # BACKEND_URL is meaningless at this layer — we're only proving
+        # the static-asset surface ships intact. Point at a stub so the
+        # envsubst template renders without an empty value.
+        docker run -d --name dma-ci-fe-smoke --network cloudbuild \
+            -e BACKEND_URL=http://stub-backend:8000 \
+            -p 18080:8080 "$$FE_IMG" >/dev/null
+
+        # Wait for nginx — 30 1-second tries.
+        for i in $(seq 1 30); do
+          if docker exec dma-ci-fe-smoke wget -q --spider http://localhost:8080/healthz; then
+            echo "✓ nginx ready in $${i}s"
+            break
+          fi
+          [ "$$i" -eq 30 ] && { echo "::error::nginx never came up"; docker logs --tail 30 dma-ci-fe-smoke; exit 3; }
+          sleep 1
+        done
+
+        # 1. /healthz → "ok"
+        body=$(docker exec dma-ci-fe-smoke wget -qO- http://localhost:8080/healthz)
+        [ "$$body" = "ok" ] || { echo "::error::/healthz returned '$$body', expected 'ok'"; exit 4; }
+        echo "  ✓ /healthz body=ok"
+
+        # 2. / → Vite-built index.html (must contain the title).
+        body=$(docker exec dma-ci-fe-smoke wget -qO- http://localhost:8080/)
+        echo "$$body" | grep -q "DMA Insights" || {
+          echo "::error::index.html missing title 'DMA Insights' — Vite build / COPY may be broken";
+          echo "$$body" | head -10
+          exit 4; }
+        echo "  ✓ / serves Vite-built index.html"
+
+        # 3. Build SHA stamp landed (proves Dockerfile printf+sed step still works).
+        echo "$$body" | grep -q "x-build-sha" || {
+          echo "::error::no <meta name=\"x-build-sha\"> in index.html — Dockerfile stamp step regressed (or Vite index.html shape changed)";
+          exit 4; }
+        echo "  ✓ build SHA stamp present"
+
+        # 4. Vite asset tree intact. index.html references hashed JS/CSS
+        #    under /assets/ — extract the FIRST asset path from the body
+        #    and prove it's reachable. (Vite's content-hashed filename
+        #    changes every build, so we can't hardcode any specific name.)
+        ASSET_PATH=$(echo "$$body" | grep -oE '/assets/[^"]+\.(js|css)' | head -1)
+        if [ -z "$$ASSET_PATH" ]; then
+          echo "::error::index.html references no /assets/*.js or /assets/*.css — Vite build did not emit the expected bundle tree";
+          echo "$$body" | head -30
+          exit 4
+        fi
+        if ! docker exec dma-ci-fe-smoke wget -q --spider "http://localhost:8080$$ASSET_PATH"; then
+          echo "::error::referenced asset $$ASSET_PATH missing from image — dist/ COPY incomplete";
+          exit 4
+        fi
+        echo "  ✓ $$ASSET_PATH reachable (Vite content-hashed bundle intact)"
+
+        # 5. /api/* + /auth/* MUST be reverse-proxied to BACKEND_URL.
+        #    Hitting /api/v1/healthz against the stub backend returns
+        #    connection refused (no real backend), but the response
+        #    headers prove nginx routed it — the operator-visible failure
+        #    we want to catch here is a misconfigured nginx template
+        #    that 404s /api/* (the SPA fallback would intercept).
+        rc=$(docker exec dma-ci-fe-smoke wget -q --server-response \
+             -O /dev/null http://localhost:8080/api/v1/healthz 2>&1 \
+             | grep -E "HTTP/" | head -1 | awk '{print $$2}' || true)
+        # 502 (upstream connect refused) is fine — proves nginx tried
+        # to proxy. 404 means the SPA fallback caught /api/* — broken
+        # nginx config — fail loud.
+        if [ "$$rc" = "404" ]; then
+          echo "::error::nginx returned 404 on /api/* — proxy_pass to BACKEND_URL is missing or wrong; SPA fallback caught the API route";
+          exit 4
+        fi
+        echo "  ✓ /api/* is reverse-proxied (status=$${rc:-?})"
+
+        # 6. Startup-pack FRESHNESS (master plan Part 14). The regen stage
+        #    stamps this build's SHA into pages_manifest.json (SOURCE_SHA →
+        #    export_startup_pages); vite's copy-startup-data plugin bakes it
+        #    into the image at /usr/share/nginx/html/startup-data/. Assert
+        #    the BAKED manifest carries EXACTLY ${_IMAGE_SHA}. A mismatch
+        #    means the pack is STALE: the regen failed (so the frontend
+        #    baked the committed point-in-time cache) or --skip-build /
+        #    a cache path reused an old image. Escape hatch (the ONE
+        #    sanctioned one): _ALLOW_STALE_PACK=true — loud warning.
+        MANIFEST_BODY=$(docker exec dma-ci-fe-smoke wget -qO- http://localhost:8080/startup-data/pages_manifest.json || true)
+        PACK_SHA=$(echo "$$MANIFEST_BODY" | grep -oE '"source_sha": *"[^"]*"' | head -1 | cut -d'"' -f4)
+        if [ "$$PACK_SHA" = "${_IMAGE_SHA}" ]; then
+          echo "  ✓ startup pack is FRESH (pages_manifest.json source_sha=$$PACK_SHA == build SHA)"
+        elif [ "${_ALLOW_STALE_PACK}" = "true" ]; then
+          echo "::warning::STALE STARTUP PACK SHIPPING DELIBERATELY — baked pages_manifest.json source_sha='$$PACK_SHA' != build SHA '${_IMAGE_SHA}', but _ALLOW_STALE_PACK=true. AEs will see the committed point-in-time pack until the next successful regen."
+        else
+          echo "::error::baked pages_manifest.json source_sha='$${PACK_SHA:-<missing>}' != build SHA '${_IMAGE_SHA}' — the frontend image bakes a STALE startup pack. Causes: the regen-startup-pack stage failed (its exports keep the committed cache) or --skip-build/a stale cache reused an old image. Fix the regen failure and rebuild, or set _ALLOW_STALE_PACK=true to ship the stale pack deliberately (documented in infra/EXIT_CODES.md + DEPLOYMENT.md §26.5)."
+          exit 4
+        fi
+
+        docker rm -f dma-ci-fe-smoke >/dev/null 2>&1 || true
+        echo "✓ frontend-image-smoke PASSED — Vite production artifact intact"
+    waitFor: ["e2e-personas"]
+
+  # ─── Stage 9 (Batch 8): production QA gates ─────────────────────────
+  # Runs the 4 production-grade QA harnesses against a freshly-seeded
+  # CI Postgres. Any FAIL_500 / render-FAIL / language-violation /
+  # learning-loop-FAIL blocks the deploy.
+  #
+  # Per the operator mandate: "do an end-to-end check to ensure
+  # deployment is not blocked and the app functions as should and the
+  # visuals are rendered as should be" + "consider all 103 DMAs in
+  # your tests" -- this stage exercises the entire seeded corpus
+  # against every production harness.
+  #
+  # PG sidecar reused from backend-tests-live-pg (same image). The
+  # backend image is mounted with DATABASE_URL{,_SYNC} pointing at the
+  # sidecar so the harnesses operate on real persisted data; the
+  # in-image corpus at /home/app/tests/fixtures/dma_packages_batches
+  # gets seeded via --force backfill first.
+  - id: qa-gates
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euxo pipefail
+        # ── 1. PG sidecar (independent network so it doesn't collide) ──
+        docker network create cloudbuild-qa >/dev/null 2>&1 || true
+        docker rm -f dma-qa-pg >/dev/null 2>&1 || true
+        docker run -d --name dma-qa-pg --network cloudbuild-qa \
+            -e POSTGRES_USER=dma \
+            -e POSTGRES_PASSWORD=dma_qa_password \
+            -e POSTGRES_DB=dma_insights_qa \
+            pgvector/pgvector:pg15 >/dev/null
+
+        SUCCESS=0
+        for i in $(seq 1 90); do
+          if docker exec dma-qa-pg pg_isready -U dma -d dma_insights_qa >/dev/null 2>&1 \
+             && docker exec dma-qa-pg psql -U dma -d dma_insights_qa -c "SELECT 1" >/dev/null 2>&1; then
+            SUCCESS=$$((SUCCESS+1))
+            [ "$$SUCCESS" -ge 3 ] && { echo "✓ qa-pg ready"; break; }
+          else
+            SUCCESS=0
+          fi
+          [ "$$i" -eq 90 ] && { echo "::error::qa-pg timeout"; docker logs --tail 30 dma-qa-pg; exit 3; }
+          sleep 1
+        done
+        docker exec dma-qa-pg psql -U dma -d dma_insights_qa \
+            -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;" \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;" >/dev/null
+
+        # ── 2. Apply migrations + seed the in-image corpus ──────────
+        BACKEND_IMG="gcr.io/$PROJECT_ID/dma-insights-backend:${_IMAGE_SHA}"
+        docker pull "$$BACKEND_IMG" >/dev/null
+        QA_ENV=(
+          --rm --network cloudbuild-qa
+          -e "DATABASE_URL=postgresql+asyncpg://dma:dma_qa_password@dma-qa-pg:5432/dma_insights_qa"
+          -e "DATABASE_URL_SYNC=postgresql+psycopg://dma:dma_qa_password@dma-qa-pg:5432/dma_insights_qa"
+          # app-code + /install deps; a bare PYTHONPATH=. drops the deps
+          # path → ModuleNotFoundError. Lockstep with backend.Dockerfile.
+          -e "PYTHONPATH=/home/app:/install/lib/python3.12/site-packages"
+          # Vertex-cold by design: fast-fail to the grounded deterministic
+          # fallback instead of hanging on generate_content (2026-06-18).
+          -e "DMA_DISABLE_VERTEX=1"
+          # Match regen: derive_context's spaCy pass on 94 clients exceeds
+          # the 300s default (build bb6a9045: qa-gates exit 11).
+          -e "DERIVE_STEP_TIMEOUT_SEC=2700"
+          # Bounded so a derive step degrades to the bi-encoder rather than
+          # being SIGKILLed — see regen-startup-pack.
+          -e "DMA_RERANK_BUDGET_SEC=900"
+          # 15 hollow baseline packages must stay live (else ~80 clients,
+          # not 94). Re-armed by the hollow-census pin below.
+          -e "DMA_ALLOW_HOLLOW=1"
+          -e "DMA_EXPLAINER_BUDGET_SEC=600"
+          -w /home/app
+          --entrypoint bash
+          "$$BACKEND_IMG"
+        )
+
+        echo "==> apply migrations"
+        docker run "$${QA_ENV[@]}" -c "alembic upgrade head" || {
+          echo "::error::alembic upgrade head FAILED"; exit 4; }
+
+        echo "==> seed the 113-package corpus from in-image fixtures"
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.historical_backfill --dir /home/app/tests/fixtures/dma_packages_batches --force" || {
+          echo "::error::corpus seed FAILED"; exit 5; }
+        # Re-arms the DATA_LOSS detection DMA_ALLOW_HOLLOW=1 escapes: the
+        # committed corpus must gate EXACTLY the pinned hollow count (11;
+        # re-pinned 14->11 2026-07-15, merged parser-accuracy work — see the
+        # regen step's hollow-census-pin note).
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_hollow_census --expect 11" || {
+          echo "::error::hollow census drifted -- possible parser regression eating recs/evidence"; exit 12; }
+
+        # ── 2b. Derive + self-heal chain (the production post-backfill chain) ─
+        # Same chain post-deploy-refresh.sh runs in production (order locked
+        # by test_derive_chain_contract.py). Without it the QA DB is raw-only
+        # (~188 PARTIAL pages, ~660 surface gaps → exit 9). Idempotent;
+        # non-zero only on a deterministic-step crash.
+        echo "==> derive + self-heal chain (run_derive_chain — same as post-deploy-refresh)"
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.run_derive_chain" || {
+          echo "::error::derive/heal chain hard-failed (a deterministic step crashed)"; exit 11; }
+
+        # NO HOLLOWS IN WHAT SHIPS (post-derive gate): after the chain, no
+        # ACTIVE client may still have scores but zero recs/evidence.
+        echo "==> shipped-hollow gate (post-derive: ACTIVE clients must not be thin)"
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_hollow_census --post-derive --expect 0" || {
+          echo "::error::a live client shipped hollow (scored but zero recs/evidence) — see list above"; exit 12; }
+
+        # ── 3. Production QA harnesses IN PARALLEL (read-only vs seeded DB,
+        # separate logs; any non-zero blocks the deploy; script names kept
+        # verbatim for the qa_v2_cloudbuild_coverage contract). ────────
+        echo "==> 5 production QA harnesses in parallel (render / adversarial / language / self-healing / attribution-fidelity)"
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_render_validation --output /tmp/qa_render_matrix.tsv"            >/tmp/h_render.log 2>&1 & P_RENDER=$$!
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_adversarial_resilience --output /tmp/qa_adversarial_matrix.tsv"  >/tmp/h_adv.log    2>&1 & P_ADV=$$!
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_rendered_language_audit --output /tmp/qa_rendered_language_audit.tsv" >/tmp/h_lang.log 2>&1 & P_LANG=$$!
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_self_healing_learning_audit --output /tmp/qa_self_healing_learning_matrix.tsv" >/tmp/h_self.log 2>&1 & P_SELF=$$!
+        # --require-ai: MiniLM + cross-encoder are baked into the image, so a
+        # cold tier here means a broken bake — CI must OBSERVE the AI layer.
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_attribution_fidelity --require-ai --output /tmp/qa_attribution_fidelity.tsv" >/tmp/h_attr.log 2>&1 & P_ATTR=$$!
+        # Per-surface attribution-fidelity gate; 94-client baselines ≥ 0.966,
+        # gated at 0.95 so an attribution regression blocks the deploy.
+        docker run "$${QA_ENV[@]}" -c "python -m app.scripts.qa_surface_attribution --sample 200 --min-fidelity 0.95" >/tmp/h_surf.log 2>&1 & P_SURF=$$!
+        QA_RC=0
+        wait "$$P_RENDER" || { echo "::error::render harness FAILED (some endpoint returned FAIL classification)"; tail -30 /tmp/h_render.log; QA_RC=6; }
+        wait "$$P_ADV"    || { echo "::error::adversarial harness FAILED (HTTP 500 or handler crash on adversarial input -- deploy-blocking)"; tail -30 /tmp/h_adv.log; QA_RC=7; }
+        wait "$$P_LANG"   || { echo "::error::rendered language audit FAILED (rendered violations >= 50% of DB-text baseline, or an entity failed to render)"; tail -30 /tmp/h_lang.log; QA_RC=8; }
+        wait "$$P_SELF"   || { echo "::error::self-healing/learning audit FAILED (one or more cells reported FAIL)"; tail -30 /tmp/h_self.log; QA_RC=9; }
+        wait "$$P_ATTR"   || { echo "::error::attribution-fidelity gate FAILED (AI layer cold/mis-baked, cross-encoder not discriminating, or grounding fidelity regressed)"; tail -40 /tmp/h_attr.log; QA_RC=10; }
+        wait "$$P_SURF"   || { echo "::error::surface-attribution gate FAILED (a populator's evidence/subcap attribution fidelity fell below 0.95 — misattribution regression)"; tail -20 /tmp/h_surf.log; QA_RC=13; }
+        # Surface each harness's own SUMMARY line for the build log.
+        grep -hE "SUMMARY|CONTRACT MET|RENDER QA|FIDELITY|calibration|fidelity=|SURFACE-ATTRIBUTION" /tmp/h_render.log /tmp/h_adv.log /tmp/h_lang.log /tmp/h_self.log /tmp/h_attr.log /tmp/h_surf.log 2>/dev/null || true
+        if [ "$$QA_RC" -ne 0 ]; then exit "$$QA_RC"; fi
+        echo "  ✓ all 6 production QA harnesses PASS"
+
+        # ── 4. High-corpus qa_v2 pytest (needs 100+ entities + anchor IDs) ─
+        # These tests assert contracts against anchor entities that only
+        # exist in the full 113-package corpus; they get --ignored in
+        # backend-tests and the 6-fixture live-pg sidecar can't satisfy
+        # them. Per operator mandate "no skips, every test in prod", they
+        # run HERE against the freshly-seeded corpus (incl. the language
+        # rewrite real-corpus sample test).
+        echo "==> qa-v2 high-corpus pytest (adversarial + reingest + backfill + language rewrite real corpus)"
+        docker run "$${QA_ENV[@]}" -c "
+          pip install --quiet --no-cache-dir pytest==8.3.3 pytest-asyncio==0.24.0 psycopg2-binary==2.9.10
+          python -m pytest \
+              tests/test_qa_v2_adversarial_resilience.py \
+              tests/test_qa_v2_reingest_scenarios.py \
+              tests/test_backfill_skip_path_integration.py \
+              tests/test_language_rewrite.py::test_rewriter_reduces_violation_count_on_real_corpus_sample \
+              tests/test_catalogue_alias_bridge.py::test_get_category_children_against_live_v70_catalogue \
+              tests/test_catalogue_alias_bridge.py::test_no_silent_dropping_of_data_in_broadcast_path \
+              -p no:cacheprovider -rs -q --maxfail=3 2>&1 | tee /tmp/qa_v2_high_corpus.log
+          if grep -q SKIPPED /tmp/qa_v2_high_corpus.log; then
+            echo '::error::qa_v2 high-corpus pytest SKIPPED -- no skips allowed'
+            grep SKIPPED /tmp/qa_v2_high_corpus.log
+            exit 10
+          fi
+        " || { echo "::error::qa_v2 high-corpus pytest FAILED"; exit 10; }
+
+        # ── 5. Cleanup ───────────────────────────────────────────────
+        docker rm -f dma-qa-pg >/dev/null 2>&1 || true
+        docker network rm cloudbuild-qa >/dev/null 2>&1 || true
+        echo ""
+        echo "✓ qa-gates PASSED -- all 4 production harnesses + high-corpus qa_v2 pytest green on the full 100+ DMA corpus"
+    waitFor: ["frontend-image-smoke"]
+
+# NOTE: no top-level `images:` array — stages 2/4/5 push explicitly
+# via `docker push` so image availability is decoupled from later
+# advisory stages.
+
+options:
+  machineType: E2_HIGHCPU_8
+  logging: CLOUD_LOGGING_ONLY
+
+# 120 min. The 10 stages share one budget; the Playwright stage runs THREE
+# suites (persona e2e + self-healing production visual + standalone visual) and
+# qa-gates seeds the full 100+ report corpus AND runs the post-backfill
+# derive/heal chain (run_derive_chain) before the 4 QA harnesses. qa-gates is
+# the LAST stage, so on a near-budget build the chain previously tripped
+# "context deadline exceeded" mid-run at 2400s. run_derive_chain is now
+# parallelised into dependency waves (~halved wall time) with a per-step timeout.
+#
+# 2026-06-29: a COLD-Docker-cache build (Cloud Build did not reuse a warm worker)
+# spends ~50 min in the three image builds alone — backend pip-installs the full
+# google-cloud-aiplatform stack, frontend runs pnpm install + vite build from
+# scratch — which starved the QA stage and tripped Cloud Build's own TIMEOUT
+# mid-derive-chain, BEFORE the 4 QA harnesses ran. Two-part fix: the image builds
+# now reuse layers via `--cache-from` (backend/frontend/worker -build steps below)
+# so a warm cache is minutes not tens-of-minutes, AND this ceiling is raised to
+# 7200s so even a fully-cold build (no cache hit at all) completes with headroom
+# rather than racing whatever budget the earlier stages leave. (ADR 0016)
+#
+# 2026-07-04: the regen stage's Vertex-HOT derive chain now runs with
+# DERIVE_STEP_TIMEOUT_SEC=2700 (deepen_narrative previously hard-timed out at
+# the 300s default and aborted the pack regeneration). A hot chain where the
+# heavy steps genuinely use their budget adds up to ~45-60 min in the regen
+# stage alone; on a cold-cache build that stacked past 7200s.
+#
+# 2026-07-05: the a52f723 build proved 10800s is NOT enough for a fully-cold
+# build + a fully-HOT regen: the (then-unbounded, sequential) Gemini warm
+# steps ran to the global deadline ("context deadline exceeded"). The warm
+# work is now structurally bounded — the enrichment sweeps self-budget at
+# DMA_ENRICH_BUDGET_SEC=1200 with bounded parallelism, every soft step sits
+# behind step_soft's 1800s guard, and leftovers RESUME via cache
+# fingerprints — so the worst-case regen is a computable ~2h. 14400s gives
+# a fully-cold build + that worst-case regen real headroom; the per-step,
+# per-sweep and per-stage timeouts remain the guards against a wedged build
+# (nothing can consume the global budget silently anymore).
+timeout: "21600s"

@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+dist/
+dist-standalone/
+.vite/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+# Written by backend/scripts/run-local-tests.sh — per-run local CI env,
+# never source. (Not matched by .env.local above — distinct suffix.)
+.env.local-ci
+*.pem
+*.key
+service-account*.json
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local data
+*.sqlite
+*.db
+local-data/
+
+# Playwright test outputs (videos, screenshots, error contexts from CI runs
+# AND local debug runs — these are per-run artifacts, never source).
+frontend/test-results/
+frontend/artifacts/
+frontend/playwright-report/
+frontend/blob-report/
+
+# pnpm content-addressable store (created by local/CI pnpm install)
+.pnpm-store/
+dist-standalone-dbg/
+
+# Live secrets written by infra/load-from-secret-manager.sh --write-env —
+# NEVER commit (repo hard rule: secrets live in Secret Manager only). Also
+# keeps resolve-deploy-sha.sh's dirty-tree check from tripping on it.
+.deploy.parameters.env

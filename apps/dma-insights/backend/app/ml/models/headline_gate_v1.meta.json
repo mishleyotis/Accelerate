@@ -1,0 +1,40 @@
+{
+  "name": "headline_gate",
+  "version": "v1",
+  "sklearn_version": "1.5.2",
+  "classes": [
+    "reject",
+    "gold"
+  ],
+  "n_train": 450,
+  "n_natural": 420,
+  "train_data_sha256": "53e1599bf0ae5442752d9ca8293925237bfbf7ae00bf116659f934567b50bdb7",
+  "artifact_sha256": "50fbc3faa6768b0491ab36375e85b97b39b271b4c6e21e314b23b9dc7c5cebf9",
+  "cv": {
+    "gold_reject": {
+      "p": 0.9068,
+      "r": 0.8976,
+      "f1": 0.902,
+      "n": 420,
+      "n_pos": 113,
+      "C": 8.0
+    },
+    "vendor_first": {
+      "p": 0.8873,
+      "r": 0.8713,
+      "f1": 0.8788,
+      "n": 420,
+      "n_pos": 112,
+      "C": 4.0
+    },
+    "threat_tone": {
+      "p": 0.4655,
+      "r": 0.4988,
+      "f1": 0.4816,
+      "n": 450,
+      "n_pos": 31,
+      "C": 4.0
+    }
+  },
+  "feature": "word(1,2)+char_wb(3,5) TF-IDF; GroupKFold by entity"
+}

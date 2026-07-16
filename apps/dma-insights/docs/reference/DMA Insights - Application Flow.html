@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)file:///Users/Mishley/Downloads/DMA_Visualizer_App_Flow_v3.0.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DMA Visualizer — Application flow v3.0</title>
+<link href="./DMA Insights - Application Flow_files/css2" rel="stylesheet">
+<style>
+/* ── ZENNIFY OFFICIAL DESIGN TOKENS (from zennify-design-system v2.4.15) ── */
+:root{
+  /* Brand greens — primary family */
+  --z-navy:    #001E48;
+  --z-dark:    #1C4A4D; /* body text on light, dark backgrounds */
+  --z-dark2:   #185F60; /* sidebar bg, dark card fills */
+  --z-teal:    #27BBAF; /* primary accent, headlines, stat numbers */
+  --z-mid:     #139F94; /* icon fills, secondary accent */
+  --z-lt-teal: #62D7B8; /* DMA Building level, highlights */
+  --z-mint:    #79E2BF; /* highlights on dark slides */
+  --z-mint-lt: #B0EDD3; /* text on dark slides */
+  --z-ice:     #E8F7F6; /* card tint, subtle section backgrounds */
+
+  /* Blues & purples — secondary family */
+  --z-lav:    #F2F4F9; /* primary card fill */
+  --z-blue:   #3D81F6; /* Phase 1 indicator, benchmark medians */
+  --z-purple: #8094C0; /* eyebrow text, muted accent — "Zennify gray" */
+  --z-dpur:   #735BA1; /* Phase 0 indicator, deep accent */
+  --z-below:  #C25008; /* below benchmark, auth failure, error indicator */
+
+  /* Oranges — accent family */
+  --z-org:    #FE9732; /* emphasis orange, friction flags */
+  --z-org-lt: #FFCB99; /* DMA Activating (M1-M2), stat card bg */
+
+  /* Grays */
+  --z-bg:     #F5F5F5; /* page background */
+  --z-lav2:   #F2F4F9; /* card fill (lavender) */
+  --z-sep:    #E5E7EB; /* separators */
+  --z-body:   #4A5568; /* body text (alternative) */
+  --z-muted:  #6B7280; /* footnotes, captions */
+  --z-white:  #FFFFFF;
+
+  /* DMA maturity palette — from color_system.md §DMA-Specific Colors */
+  --m-act:  #FFCB99; --m-act-t:  #7C3C00; /* Activating M1-M2 */
+  --m-bld:  #62D7B8; --m-bld-t:  #0D4F3C; /* Building M2-M3 */
+  --m-cmp:  #27BBAF; --m-cmp-t:  #FFFFFF; /* Competing M3-M4 */
+  --m-dif:  #139F94; --m-dif-t:  #FFFFFF; /* Differentiating M4-M5 */
+
+  /* Phase badges */
+  --ph0: #735BA1; --ph0-lt: #EDE9FE; --ph0-bd: #C4B5FD;
+  --ph1: #3D81F6; --ph1-lt: #EFF6FF; --ph1-bd: #BFDBFE;
+
+  --r:8px; --rl:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;background:var(--z-bg);color:var(--z-dark);}
+.shell{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sb{width:256px;flex-shrink:0;background:var(--z-dark2);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-brand{font-size:11px;font-weight:600;color:var(--z-teal);letter-spacing:.12em;text-transform:uppercase;}
+.sb-title{font-size:11px;color:rgba(255,255,255,.32);margin-top:3px;}
+.sb-ver{font-size:10px;color:rgba(255,255,255,.18);margin-top:2px;font-family:'DM Mono',monospace;}
+.sb-grp{padding:10px 8px 2px;}
+.sb-gl{font-size:9px;font-weight:600;color:rgba(255,255,255,.22);letter-spacing:.14em;text-transform:uppercase;padding:0 8px;margin-bottom:3px;}
+.sb-a{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--r);cursor:pointer;color:rgba(255,255,255,.45);font-size:11.5px;transition:all .12s;border:none;background:none;width:100%;text-align:left;}
+.sb-a:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.82);}
+.sb-a.on{background:rgba(39,187,175,.16);color:var(--z-teal);}
+.sb-a.ph0{color:rgba(196,181,253,.55);}
+.sb-a.ph0.on{background:rgba(115,91,161,.18);color:#c4b5fd;}
+.sb-a.ph1{color:rgba(191,219,254,.55);}
+.sb-a.ph1.on{background:rgba(61,129,246,.16);color:#bfdbfe;}
+.sb-n{font-size:9px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 5px;min-width:22px;text-align:center;flex-shrink:0;}
+.sb-a.on .sb-n{background:rgba(39,187,175,.25);color:var(--z-teal);}
+.sb-a.ph0.on .sb-n{background:rgba(115,91,161,.3);color:#c4b5fd;}
+.sb-a.ph1.on .sb-n{background:rgba(61,129,246,.25);color:#bfdbfe;}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.18);}
+
+/* ── MAIN ── */
+.main{flex:1;min-width:0;}
+.topbar{background:var(--z-white);border-bottom:1px solid var(--z-sep);padding:13px 36px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+.tb-t{font-size:15px;font-weight:600;color:var(--z-dark);}
+.tb-s{font-size:11px;color:var(--z-muted);}
+.content{padding:36px;max-width:980px;}
+.section{display:none;}
+.section.on{display:block;}
+
+/* ── TYPOGRAPHY ── */
+/* Sentence case on all headings (Zennify rule C21) */
+.eyebrow{font-size:11px;font-weight:400;color:var(--z-purple);letter-spacing:.10em;text-transform:uppercase;margin-bottom:10px;}
+.eyebrow.ph0{color:var(--ph0);}
+.eyebrow.ph1{color:var(--ph1);}
+.eyebrow.auth{color:var(--z-below);}
+.eyebrow.ai{color:var(--z-dpur);}
+h1{font-size:26px;font-weight:600;color:var(--z-dark);letter-spacing:-.018em;line-height:1.22;margin-bottom:6px;}
+h2{font-size:17px;font-weight:600;color:var(--z-dark);margin:32px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--z-ice);}
+h2.ph0{border-color:var(--ph0-bd);}
+h2.ph1{border-color:var(--ph1-bd);}
+h2.auth{border-color:rgba(194,80,8,.3);}
+h2.ai{border-color:var(--ph0-bd);}
+h3{font-size:14px;font-weight:600;color:var(--z-dark);margin:20px 0 8px;}
+h4{font-size:13px;font-weight:500;color:#2D5B5E;margin:14px 0 6px;}
+p{color:var(--z-body);line-height:1.78;margin-bottom:10px;}
+.lead{font-size:15px;font-weight:300;color:var(--z-body);line-height:1.85;margin-bottom:22px;max-width:840px;}
+code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--z-lav);padding:2px 5px;border-radius:4px;color:var(--z-dark2);}
+strong{font-weight:600;color:var(--z-dark);}
+hr{border:none;border-top:1px solid var(--z-sep);margin:24px 0;}
+
+/* ── BADGES ── */
+.b{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;}
+.bt{background:var(--z-ice);color:var(--z-dark2);}
+.bteal{background:var(--z-ice);color:var(--z-dark2);}
+.bauth{background:rgba(194,80,8,.12);color:var(--z-below);}
+.bai{background:var(--ph0-lt);color:var(--ph0);}
+.bph0{background:var(--ph0-lt);color:var(--ph0);}
+.bph1{background:var(--ph1-lt);color:var(--ph1);}
+.borg{background:rgba(254,151,50,.14);color:#7C3500;}
+.bsuc{background:var(--z-ice);color:var(--z-dark2);}
+.b-drive{background:var(--ph1-lt);color:var(--ph1);}
+.b-pending{background:rgba(254,151,50,.12);color:#7C3500;}
+.b-review{background:var(--ph0-lt);color:var(--ph0);}
+
+/* ── MARKERS (replacing v2 emoji — Zennify-styled labels only) ── */
+.marker{display:inline-flex;align-items:center;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;margin:0 2px;}
+.m-db   {background:var(--z-ice);color:var(--z-dark2);}    /* database write */
+.m-auth {background:rgba(194,80,8,.12);color:var(--z-below);}  /* auth gate */
+.m-url  {background:var(--ph0-lt);color:var(--ph0);}       /* URL change */
+.m-sse  {background:var(--ph1-lt);color:var(--ph1);}       /* SSE realtime */
+.m-ai   {background:var(--ph0-lt);color:var(--ph0);}       /* Gemini/AI */
+.m-drive{background:var(--ph1-lt);color:var(--ph1);}       /* Google Drive */
+.m-ux   {background:rgba(254,151,50,.14);color:#7C3500;}   /* friction point */
+.m-ph0  {background:var(--ph0-lt);color:var(--ph0);}       /* Phase 0 event */
+.m-ph1  {background:var(--ph1-lt);color:var(--ph1);}       /* Phase 1 event */
+
+/* ── CALLOUTS ── */
+.co{border-radius:var(--r);padding:14px 17px;margin:12px 0;}
+.co p{margin:0;font-size:13px;line-height:1.72;}
+.co-teal{background:var(--z-ice);border-left:3px solid var(--z-teal);}
+.co-teal p{color:var(--z-dark2);}
+.co-ai{background:var(--ph0-lt);border-left:3px solid var(--z-dpur);}
+.co-ai .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--z-dpur);margin-bottom:5px;}
+.co-ai p{color:#3B0764;}
+.co-auth{background:rgba(194,80,8,.08);border-left:3px solid var(--z-below);}
+.co-auth .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--z-below);margin-bottom:5px;}
+.co-auth p{color:#7C2D00;}
+.co-ux{background:rgba(254,151,50,.10);border-left:3px solid var(--z-org);}
+.co-ux .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7C3500;margin-bottom:5px;}
+.co-ux p{color:#7C3500;}
+.co-plain{background:var(--z-lav);border-left:3px solid var(--z-purple);}
+.co-plain p{color:var(--z-dark);}
+.co-dark{background:var(--z-dark);padding:16px 20px;border-radius:var(--rl);}
+.co-dark .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--z-mint);margin-bottom:6px;}
+.co-dark p{color:rgba(255,255,255,.78);}
+.co-ph0{background:var(--ph0-lt);border-left:3px solid var(--z-dpur);}
+.co-ph0 .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ph0);margin-bottom:5px;}
+.co-ph0 p{color:#3B0764;}
+.co-ph1{background:var(--ph1-lt);border-left:3px solid var(--ph1);}
+.co-ph1 .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ph1);margin-bottom:5px;}
+.co-ph1 p{color:#1E3A8A;}
+.co-suc{background:var(--z-ice);border-left:3px solid var(--z-mid);}
+.co-suc .col{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--z-mid);margin-bottom:5px;}
+.co-suc p{color:var(--z-dark2);}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0;}
+.tbl th{background:var(--z-dark);color:rgba(255,255,255,.85);padding:8px 12px;text-align:left;font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.tbl th:first-child{border-radius:6px 0 0 6px;}
+.tbl th:last-child{border-radius:0 6px 6px 0;}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--z-lav);vertical-align:top;color:var(--z-body);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#FAFBFD;}
+.tbl-ph0 th{background:var(--z-dpur);}
+.tbl-ph1 th{background:var(--ph1);}
+.tbl-auth th{background:var(--z-below);}
+.tbl-ai th{background:var(--z-dpur);}
+.tbl-teal th{background:var(--z-dark2);}
+.tk{color:var(--z-dark2);font-weight:600;font-family:'DM Mono',monospace;font-size:12px;}
+
+/* ── CODE BLOCKS ── */
+.code{background:var(--z-dark);border-radius:var(--r);padding:16px 18px;font-family:'DM Mono',monospace;font-size:11.5px;color:#e2e8f0;overflow-x:auto;margin:12px 0;line-height:1.8;}
+.kw{color:#60a5fa;}.str{color:#6ee7b7;}.cmt{color:#475569;}.key{color:#f0abfc;}.num{color:#fbbf24;}.fn{color:var(--z-mint);}
+
+/* ── FLOW STEPS ── */
+.flow{margin:16px 0;}
+.fstep{display:flex;gap:13px;margin-bottom:2px;}
+.fspine{display:flex;flex-direction:column;align-items:center;}
+.fdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.fd-t{background:var(--z-teal);color:#fff;}
+.fd-auth{background:var(--z-below);color:#fff;}
+.fd-ai{background:var(--z-dpur);color:#fff;}
+.fd-org{background:var(--z-org);color:#fff;}
+.fd-mid{background:var(--z-mid);color:#fff;}
+.fd-ph0{background:var(--z-dpur);color:#fff;}
+.fd-ph1{background:var(--ph1);color:#fff;}
+.fd-dark{background:var(--z-dark);color:#fff;}
+.fline{flex:1;width:2px;min-height:12px;}
+.fl-t{background:var(--z-ice);}
+.fl-auth{background:rgba(194,80,8,.15);}
+.fl-ai{background:var(--ph0-lt);}
+.fl-org{background:rgba(254,151,50,.15);}
+.fl-mid{background:var(--z-ice);}
+.fl-ph0{background:var(--ph0-lt);}
+.fl-ph1{background:var(--ph1-lt);}
+.fl-dark{background:var(--z-lav);}
+.fbody{flex:1;padding-bottom:16px;}
+.ftitle{font-size:13px;font-weight:600;color:var(--z-dark);margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.fdesc{font-size:12.5px;color:var(--z-muted);line-height:1.72;}
+.fsub{font-size:12px;color:var(--z-body);line-height:1.72;margin-top:5px;background:var(--z-lav);border-radius:6px;padding:8px 12px;}
+
+/* ── CARDS ── */
+.card{background:var(--z-white);border:1px solid var(--z-sep);border-radius:var(--rl);padding:16px 18px;margin-bottom:12px;}
+.card-ai{background:var(--ph0-lt);border:1px solid var(--ph0-bd);}
+.card-ph0{background:var(--ph0-lt);border:1px solid var(--ph0-bd);}
+.card-ph1{background:var(--ph1-lt);border:1px solid var(--ph1-bd);}
+.card-auth{background:rgba(194,80,8,.06);border:1px solid rgba(194,80,8,.2);}
+.card-suc{background:var(--z-ice);border:1px solid rgba(39,187,175,.3);}
+.card-org{background:rgba(254,151,50,.08);border:1px solid rgba(254,151,50,.3);}
+.card-t{font-size:14px;font-weight:600;color:var(--z-dark);}
+.card-b{font-size:12.5px;color:var(--z-body);margin-top:6px;line-height:1.7;}
+
+/* ── STATUS BADGES ── */
+.state{display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
+.s-gray{background:var(--z-lav);color:var(--z-dark);}
+.s-org{background:rgba(254,151,50,.12);color:#7C3500;}
+.s-blue{background:var(--ph1-lt);color:var(--ph1);}
+.s-teal{background:var(--z-ice);color:var(--z-dark2);}
+.s-suc{background:var(--z-ice);color:var(--z-mid);}
+.s-below{background:rgba(194,80,8,.12);color:var(--z-below);}
+.s-ph0{background:var(--ph0-lt);color:var(--ph0);}
+.s-ph1{background:var(--ph1-lt);color:var(--ph1);}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+
+/* ── HEATMAP (Zennify DMA maturity palette) ── */
+.hm-wrap{border:1px solid var(--z-sep);border-radius:var(--rl);overflow:hidden;margin:10px 0;}
+.hm-toolbar{background:var(--z-lav);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--z-muted);border-bottom:1px solid var(--z-sep);}
+.hm-grid{padding:12px;display:grid;grid-template-columns:90px repeat(8,1fr);gap:3px;}
+.hm-cell{height:24px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;transition:transform .1s;}
+.hm-cell:hover{transform:scale(1.1);z-index:1;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.hm-row-lbl{font-size:10px;color:var(--z-muted);text-align:right;padding-right:8px;display:flex;align-items:center;justify-content:flex-end;}
+.hm-col-hdr{font-size:9px;color:var(--z-muted);text-align:center;padding:0 2px;display:flex;align-items:flex-end;justify-content:center;height:24px;}
+/* Maturity colours — DMA-specific (not generic red/green) */
+.c-act{background:var(--m-act);color:var(--m-act-t);}  /* Activating M1-2 #FFCB99 */
+.c-bld{background:var(--m-bld);color:var(--m-bld-t);}  /* Building M2-3 #62D7B8 */
+.c-cmp{background:var(--m-cmp);color:var(--m-cmp-t);}  /* Competing M3-4 #27BBAF */
+.c-dif{background:var(--m-dif);color:var(--m-dif-t);}  /* Differentiating M4-5 #139F94 */
+/* Thin evidence: ORANGE dashed (not red — per PRD v3 §07) */
+.c-thin{background:var(--m-act);outline:2px dashed var(--z-org);outline-offset:1px;}
+
+/* ── PROGRESS BAR ── */
+.prog{background:var(--z-lav);border-radius:var(--r);padding:12px 14px;margin:8px 0;}
+.prog-label{font-size:11px;font-weight:600;color:var(--z-dark);margin-bottom:7px;display:flex;justify-content:space-between;}
+.prog-bar{height:6px;background:var(--z-sep);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s ease;background:var(--z-teal);}
+.prog-steps{display:flex;gap:4px;margin-top:8px;}
+.ps{font-size:9px;padding:3px 7px;border-radius:4px;flex:1;text-align:center;}
+.ps-done{background:var(--z-teal);color:#fff;}
+.ps-active{background:var(--z-org);color:#fff;}
+.ps-pending{background:var(--z-sep);color:var(--z-muted);}
+
+/* ── STATS ── */
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+.stat{background:var(--z-lav);border-radius:var(--rl);padding:13px 15px;text-align:center;flex:1;min-width:110px;}
+.stat-n{font-size:24px;font-weight:600;color:var(--z-teal);line-height:1;}
+.stat-l{font-size:11px;font-weight:500;color:var(--z-dark);margin-top:3px;}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;padding:10px 14px;background:var(--z-lav);border-radius:var(--r);}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--z-body);}
+
+/* ── MATURITY LEGEND ── */
+.m-legend{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.m-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.m-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── ANNOTATION DEMO ── */
+.ann{background:rgba(254,151,50,.08);border:1px solid rgba(254,151,50,.3);border-radius:var(--r);padding:10px 13px;margin:8px 0;}
+.ann-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.ann-author{font-size:11px;font-weight:600;color:#7C3500;}
+.ann-text{font-size:12.5px;color:#7C3500;line-height:1.65;}
+.ann-tag{display:inline-flex;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;margin-top:5px;}
+.at-a{background:var(--z-ice);color:var(--z-mid);}
+.at-p{background:rgba(254,151,50,.12);color:#7C3500;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:40px 30px;}
+.empty-icon{width:48px;height:48px;background:var(--z-ice);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:22px;}
+.empty-title{font-size:16px;font-weight:600;color:var(--z-dark);margin-bottom:6px;}
+.empty-desc{font-size:13px;color:var(--z-muted);max-width:420px;margin:0 auto;}
+.empty-cta{margin-top:18px;}
+
+/* ── WIREFRAME SHELL ── */
+.wf{background:var(--z-dark);border-radius:var(--rl);padding:2px;margin:14px 0;}
+.wf-bar{background:var(--z-dark2);border-radius:10px 10px 0 0;padding:8px 14px;display:flex;align-items:center;gap:8px;}
+.wf-dot{width:10px;height:10px;border-radius:50%;}
+.wf-r{background:#FF5F57;}.wf-y{background:#FEBC2E;}.wf-g{background:#28C840;}
+.wf-title{font-size:11px;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace;margin-left:auto;}
+.wf-body{background:var(--z-bg);border-radius:0 0 10px 10px;padding:14px;}
+.wf-nav{background:var(--z-dark);border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;gap:8px;align-items:center;}
+.wf-tab{font-size:10px;color:rgba(255,255,255,.45);padding:4px 8px;border-radius:4px;}
+.wf-tab.a{background:rgba(39,187,175,.2);color:var(--z-teal);}
+.wf-content{display:grid;grid-template-columns:1fr 290px;gap:10px;}
+.wf-main{background:var(--z-white);border:1px solid var(--z-sep);border-radius:8px;padding:12px;min-height:180px;}
+.wf-panel{background:var(--ph0-lt);border:1px solid var(--ph0-bd);border-radius:8px;padding:12px;min-height:180px;}
+.wf-panel-hdr{font-size:9px;font-weight:700;color:var(--ph0);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.wf-block{background:var(--z-lav);border-radius:6px;padding:8px 10px;margin:4px 0;}
+.wf-h{font-size:11px;font-weight:600;color:var(--z-dark);}
+.wf-p{font-size:10px;color:var(--z-muted);margin-top:2px;}
+
+/* ── PERSISTENT MAP ── */
+.pm-row{display:grid;grid-template-columns:160px 100px 130px 1fr;gap:10px;padding:9px 12px;border-bottom:1px solid var(--z-lav);font-size:12px;align-items:start;}
+.pm-row:last-child{border-bottom:none;}
+.pm-head{background:var(--z-dark);}
+.pm-head .pm-cell{color:rgba(255,255,255,.8);font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:8px 12px;}
+.pm-cell{color:var(--z-body);}
+.pm-cell.item{font-weight:600;color:var(--z-dark);}
+.pm-cell.store{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-dpur);}
+.pm-cell.ttl{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-mid);}
+
+/* ── PHASE BANNER ── */
+.phase-banner{border-radius:var(--r);padding:10px 16px;margin:12px 0;display:flex;align-items:center;gap:10px;font-size:12px;}
+.pb-ph0{background:var(--ph0-lt);border:1px solid var(--ph0-bd);}
+.pb-ph0 .pb-badge{background:var(--z-dpur);color:#fff;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.pb-ph0 .pb-text{color:#3B0764;}
+.pb-ph1{background:var(--ph1-lt);border:1px solid var(--ph1-bd);}
+.pb-ph1 .pb-badge{background:var(--ph1);color:#fff;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.pb-ph1 .pb-text{color:#1E3A8A;}
+
+/* ── NAV TABS ── */
+.nav-tabs{display:flex;padding:0 16px;background:var(--z-dark);}
+.nt{padding:10px 14px;font-size:11.5px;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:5px;}
+.nt.on{color:var(--z-teal);border-bottom-color:var(--z-teal);}
+.nt-count{font-size:9px;background:rgba(254,151,50,.4);color:#fff;border-radius:10px;padding:1px 5px;}
+
+/* ── IMPORT AUDIT ── */
+.audit-row{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid var(--z-lav);font-size:12px;}
+.audit-row:last-child{border-bottom:none;}
+.audit-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;flex-shrink:0;font-family:'DM Mono',monospace;}
+.as-excl{background:rgba(194,80,8,.12);color:var(--z-below);}
+.as-rev{background:var(--ph0-lt);color:var(--ph0);}
+.as-ok{background:var(--z-ice);color:var(--z-mid);}
+.audit-file{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-dark);font-weight:500;}
+.audit-reason{color:var(--z-muted);margin-top:2px;}
+
+@media(max-width:768px){.sb{display:none;}.g2,.g3{grid-template-columns:1fr;}.wf-content{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-brand">Zennify</div>
+    <div class="sb-title">DMA Visualizer · Application flow</div>
+    <div class="sb-ver">v3.0 · PRD v3 · TRD v4 · Design system v2.4.15</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Foundation</div>
+    <button class="sb-a on" onclick="go(&#39;s00&#39;)"><span class="sb-n">00</span>Overview &amp; principles</button>
+    <button class="sb-a" onclick="go(&#39;s01&#39;)"><span class="sb-n">01</span>Authentication &amp; session</button>
+    <button class="sb-a" onclick="go(&#39;s02&#39;)"><span class="sb-n">02</span>Global navigation</button>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Global pages</div>
+    <button class="sb-a" onclick="go(&#39;s03&#39;)"><span class="sb-n">03</span>Dashboard home /</button>
+    <button class="sb-a" onclick="go(&#39;s04&#39;)"><span class="sb-n">04</span>Entity directory</button>
+    <button class="sb-a" onclick="go(&#39;s05&#39;)"><span class="sb-n">05</span>In-progress run</button>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Per-client pages</div>
+    <button class="sb-a" onclick="go(&#39;s06&#39;)"><span class="sb-n">06</span>Client shell &amp; tabs</button>
+    <button class="sb-a" onclick="go(&#39;s07&#39;)"><span class="sb-n">D1</span>Entity intelligence hub</button>
+    <button class="sb-a" onclick="go(&#39;s08&#39;)"><span class="sb-n">D2</span>Insight card surface</button>
+    <button class="sb-a" onclick="go(&#39;s09&#39;)"><span class="sb-n">D3</span>Maturity heatmap</button>
+    <button class="sb-a" onclick="go(&#39;s10&#39;)"><span class="sb-n">D4</span>Platform matrix</button>
+    <button class="sb-a" onclick="go(&#39;s11&#39;)"><span class="sb-n">D5</span>Context &amp; timeline</button>
+    <button class="sb-a" onclick="go(&#39;s12&#39;)"><span class="sb-n">D6</span>Assessment health</button>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Key interactions</div>
+    <button class="sb-a" onclick="go(&#39;s13&#39;)"><span class="sb-n">13</span>Evidence drilldowns</button>
+    <button class="sb-a ai" onclick="go(&#39;s14&#39;)"><span class="sb-n">14</span>Intelligence Panel</button>
+    <button class="sb-a" onclick="go(&#39;s15&#39;)"><span class="sb-n">15</span>Audience mode toggle</button>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Workflows</div>
+    <button class="sb-a" onclick="go(&#39;s16&#39;)"><span class="sb-n">16</span>Alert management</button>
+    <button class="sb-a" onclick="go(&#39;s17&#39;)"><span class="sb-n">17</span>Prospecting &amp; export</button>
+    <button class="sb-a" onclick="go(&#39;s18&#39;)"><span class="sb-n">18</span>Version diff &amp; reruns</button>
+    <button class="sb-a" onclick="go(&#39;s19&#39;)"><span class="sb-n">19</span>Annotations lifecycle</button>
+    <button class="sb-a" onclick="go(&#39;s20&#39;)"><span class="sb-n">20</span>Feedback loop</button>
+    <button class="sb-a" onclick="go(&#39;s21&#39;)"><span class="sb-n">21</span>Admin workflows</button>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Phase 0 — Drive ingest</div>
+    <button class="sb-a ph0" onclick="go(&#39;s22&#39;)"><span class="sb-n">22</span>Drive crawl flow</button>
+    <button class="sb-a ph0" onclick="go(&#39;s23&#39;)"><span class="sb-n">23</span>Import audit workflow</button>
+    <button class="sb-a ph0" onclick="go(&#39;s24&#39;)"><span class="sb-n">24</span>Entity pending review</button>
+    <button class="sb-a ph0" onclick="go(&#39;s25&#39;)"><span class="sb-n">25</span>Phase 0 → Phase 1 transition</button>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-gl">Reference</div>
+    <button class="sb-a" onclick="go(&#39;s26&#39;)"><span class="sb-n">26</span>Persistent storage map</button>
+    <button class="sb-a" onclick="go(&#39;s27&#39;)"><span class="sb-n">27</span>Error &amp; empty states</button>
+    <button class="sb-a" onclick="go(&#39;s28&#39;)"><span class="sb-n">28</span>Mobile experience</button>
+  </div>
+  <div class="sb-foot">© 2026 Zennify · Confidential</div>
+</nav>
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-t" id="tb-t">00 — Overview &amp; design principles</div>
+      <div class="tb-s">DMA Visualizer · App flow v3.0 · PRD v3 · TRD v4 · Design system v2.4.15</div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <span class="b bt">App flow v3.0</span>
+      <span class="b bph0">Phase 0</span>
+      <span class="b bph1">Phase 1</span>
+    </div>
+  </div>
+  <div class="content">
+<!-- S00 OVERVIEW -->
+<div id="s00" class="section on">
+<div class="eyebrow">Application flow v3.0 · DMA Visualizer</div>
+<h1>Overview &amp; design principles</h1>
+<p class="lead">This document maps every user journey, authentication gate, friction point, persistent storage event, and state transition in the DMA Visualizer. v3.0 adds full Phase 0 (Drive-based bootstrapping) flows and aligns all visual language with the Zennify design system v2.4.15.</p>
+
+<div class="legend">
+  <div class="legend-item"><span class="marker m-db">DB</span>Database write</div>
+  <div class="legend-item"><span class="marker m-auth">AUTH</span>Auth gate required</div>
+  <div class="legend-item"><span class="marker m-url">URL</span>Browser URL changes</div>
+  <div class="legend-item"><span class="marker m-sse">SSE</span>Real-time push event</div>
+  <div class="legend-item"><span class="marker m-ai">AI</span>Gemini/Vertex AI call</div>
+  <div class="legend-item"><span class="marker m-drive">DRIVE</span>Google Drive read/write</div>
+  <div class="legend-item"><span class="marker m-ux">UX</span>Friction point — handle carefully</div>
+  <div class="legend-item"><span class="marker m-ph0">PH0</span>Phase 0 only</div>
+  <div class="legend-item"><span class="marker m-ph1">PH1</span>Phase 1 only</div>
+</div>
+
+<h2>Phase architecture — two operating modes</h2>
+<div class="g2">
+  <div class="card card-ph0">
+    <div class="card-t" style="color:var(--z-dpur);">Phase 0 — Drive bootstrap</div>
+    <div class="card-b">The app bootstraps from completed DMA artifacts already in Google Drive. No changes to the DMA project required. The app discovers, classifies, parses, and deduplicates files autonomously. Entities sourced from Drive are tagged <code>data_source: DRIVE_PARSE</code>. Phase 0 is never removed — it becomes the permanent "manual import" path.</div>
+  </div>
+  <div class="card card-ph1">
+    <div class="card-t" style="color:var(--ph1);">Phase 1 — Claude Project API</div>
+    <div class="card-b">The DMA project posts <code>app_payload_v1.json</code> directly to the app's ingest endpoint after each completed run. No Drive polling. No content parsing. Schema-validated JSON ingested directly. Entities updated via Phase 1 are tagged <code>data_source: PROJECT_API</code>. Phase 0 entities coexist and are not displaced.</div>
+  </div>
+</div>
+
+<h2>Three user roles</h2>
+<table class="tbl">
+  <thead><tr><th>Role</th><th>Primary users</th><th>Key capabilities</th><th>Key restrictions</th></tr></thead>
+  <tbody>
+    <tr><td><span class="b bt">ANALYST</span></td><td>Mishley (DMA Analyst)</td><td>Full data access. Manages thin-evidence alerts, version diffs, feedback loop, waive decisions, Phase 0 import audit.</td><td>None — sees everything including rationale, ERS scores, D6 Assessment health.</td></tr>
+    <tr><td><span class="b bph1">AE</span></td><td>AEs, Sales Directors, Delivery Leads</td><td>Entity intelligence hub, platform matrix, insight cards, scorecard export.</td><td>Rationale text, ERS scores, REC root cause, alert counts, D6 tab all hidden. Cannot waive alerts. Cannot trigger Pro Gemini calls.</td></tr>
+    <tr><td><span class="b borg">ADMIN</span></td><td>Engineering team</td><td>All ANALYST capabilities plus user management, API key rotation, Vertex AI budget, Drive re-scans, catalog import, import audit resolution.</td><td>None — full access.</td></tr>
+  </tbody>
+</table>
+
+<h2>10 core UX principles</h2>
+<div class="g2">
+  <div class="card"><div class="card-t">1 — Deep links always work</div><div class="card-b">Every meaningful state lives in the URL. <code>/clients/abc/heatmap?subcap=P2C3.2.4&amp;hm=value_chain</code> restores that exact state including the open evidence drawer.</div></div>
+  <div class="card"><div class="card-t">2 — Partial data is always better than none</div><div class="card-b">Phase 0 Drive-parsed entities show immediately even with NULL fields. In-progress Phase 1 runs surface available data after each batch. The app never waits for a complete payload to display something useful.</div></div>
+  <div class="card"><div class="card-t">3 — Intelligence Panel never blocks</div><div class="card-b">The Gemini panel is strictly additive. All 6 dashboard clusters are fully functional without it. Gemini failure shows a soft advisory — not an error page.</div></div>
+  <div class="card"><div class="card-t">4 — Customer View is explicit and reversible</div><div class="card-b">An amber persistent banner appears whenever Customer View is active. Toggling is one click. The toggle is always visible in the top-right of client pages.</div></div>
+  <div class="card"><div class="card-t">5 — No dead ends</div><div class="card-b">Every error state has a recovery action. Every empty state explains why it is empty and what the next step is. The app never shows a blank screen without context.</div></div>
+  <div class="card"><div class="card-t">6 — Role-based UX, not just access</div><div class="card-b">The information hierarchy adapts to role. ANALYST sees alert count badges prominently. AE sees the Opportunity Surface Score and "Why now" signals first. Same data, different prioritisation.</div></div>
+  <div class="card"><div class="card-t">7 — Staleness is always visible</div><div class="card-b">Freshness indicators (green/amber/red) appear on every entity card and in the client top bar. Phase 0 entities show their <code>data_source: DRIVE_PARSE</code> badge so AEs know when data came from a parsed document vs a live API run.</div></div>
+  <div class="card"><div class="card-t">8 — One click to the evidence</div><div class="card-b">Every scored claim, recommendation, and insight card surfaces its evidence in one click. The evidence drawer slides in without navigating away.</div></div>
+  <div class="card"><div class="card-t">9 — Run comparison is non-destructive</div><div class="card-b">Viewing a superseded run never changes the active run view. An amber banner labels the non-active state. The diff includes Drive-parse vs Phase 1 structured comparisons.</div></div>
+  <div class="card"><div class="card-t">10 — The app works when Gemini is down</div><div class="card-b">The Intelligence Panel is optional. Gemini unavailability shows a soft "Analysis temporarily unavailable" advisory in the panel. No functionality outside the panel is affected.</div></div>
+</div>
+
+<div class="stat-row">
+  <div class="stat"><div class="stat-n">28</div><div class="stat-l">Flow sections</div></div>
+  <div class="stat"><div class="stat-n">6</div><div class="stat-l">Dashboard clusters</div></div>
+  <div class="stat"><div class="stat-n">3</div><div class="stat-l">User roles</div></div>
+  <div class="stat"><div class="stat-n">5</div><div class="stat-l">Evidence drilldown paths</div></div>
+  <div class="stat"><div class="stat-n">8</div><div class="stat-l">Gemini surfaces</div></div>
+  <div class="stat"><div class="stat-n">2</div><div class="stat-l">Operating phases</div></div>
+</div>
+</div>
+
+<!-- S01 AUTH -->
+<div id="s01" class="section">
+<div class="eyebrow auth">Section 01 · Authentication</div>
+<h1>Authentication &amp; session management</h1>
+<p class="lead">Every route is auth-gated except <code>/login</code>. All users must be @zennify.com Google accounts. The ingest endpoint uses a separate static Bearer key — not user JWT. Deep links are preserved through the login redirect.</p>
+
+<div class="co co-auth"><div class="col">AUTH gate</div><p>Any unauthenticated request to any route is redirected to <code>/login?callbackUrl=...original-url...</code>. After successful login the user returns exactly to where they were, including open drawers and URL params.</p></div>
+
+<h2 class="auth">First visit — complete login flow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">1</div><div class="fline fl-auth"></div></div><div class="fbody">
+    <div class="ftitle">User navigates to the app URL <span class="marker m-auth">AUTH</span></div>
+    <div class="fdesc">NextAuth.js middleware runs on every request. No valid session → immediate redirect to <code>/login?callbackUrl=%2F</code>. The login page is the only route accessible without authentication.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">2</div><div class="fline fl-auth"></div></div><div class="fbody">
+    <div class="ftitle">Login page — "Sign in with Google" only</div>
+    <div class="fdesc">Zennify logo, one button: "Sign in with Google." No username/password form. Message: "Access restricted to @zennify.com accounts." No other login method exists.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">3</div><div class="fline fl-auth"></div></div><div class="fbody">
+    <div class="ftitle">Google OAuth redirect with <code>hd=zennify.com</code> restriction <span class="marker m-ux">UX</span></div>
+    <div class="fdesc">Redirected to <code>accounts.google.com/...hd=zennify.com</code>. The Google account picker appears. <strong>Friction:</strong> users with personal Gmail accounts selected in Chrome may accidentally pick the wrong account. <strong>Resolution:</strong> non-zennify selection returns to <code>/login?error=OAuthAccountNotLinked</code> with: "Only @zennify.com accounts are permitted. Please select your Zennify account." Retry button restarts the flow cleanly.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">4</div><div class="fline fl-auth"></div></div><div class="fbody">
+    <div class="ftitle">Google confirms → NextAuth receives the callback</div>
+    <div class="fdesc">Google redirects to <code>/api/auth/callback/google?code=...&amp;state=...</code>. NextAuth exchanges the code for tokens server-side. Verifies id_token signature using Google's JWKS endpoint.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">5</div><div class="fline fl-auth"></div></div><div class="fbody">
+    <div class="ftitle">Domain validation + user record upsert <span class="marker m-db">DB</span></div>
+    <div class="fdesc">Confirms email ends in @zennify.com. Upserts user record: existing <code>google_sub</code> → return with existing role. New → create with default role <strong>AE</strong>. Roles are never changed automatically — only by ADMIN action. New user sees: "Your account has been created with the AE role. Contact an admin to request Analyst or Admin access."</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">6</div><div class="fline fl-auth"></div></div><div class="fbody">
+    <div class="ftitle">RS256 JWT issued → HttpOnly session cookie set <span class="marker m-db">Cookie</span></div>
+    <div class="fdesc">NextAuth generates app-scoped JWT: user UUID, email, name, role, iat, exp (+1 hour). RS256 private key from Secret Manager. Stored as HttpOnly Secure SameSite=Strict cookie named <code>dma-session</code>. Unreadable by JavaScript.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-auth">7</div></div><div class="fbody">
+    <div class="ftitle">Redirect to original URL <span class="marker m-url">URL</span></div>
+    <div class="fdesc">User redirected to <code>callbackUrl</code> from step 1 — or <code>/</code> if no callback. All subsequent navigation works without re-authenticating.</div>
+  </div></div>
+</div>
+
+<h2 class="auth">Session lifecycle</h2>
+<table class="tbl tbl-auth">
+  <thead><tr><th>Event</th><th>What happens</th><th>User experience</th></tr></thead>
+  <tbody>
+    <tr><td>Normal API call</td><td>JWT sent in cookie automatically. FastAPI middleware validates RS256 signature and expiry. Extracts user ID and role.</td><td>Transparent.</td></tr>
+    <tr><td>JWT nearing expiry (within 5 min)</td><td>NextAuth.js client hook silently calls <code>/api/auth/session</code>. New JWT issued, cookie updated.</td><td>Transparent — no page interruption.</td></tr>
+    <tr><td>JWT expired, silent refresh fails</td><td>Next API call returns 401. App catches 401 globally. Clears session cookie.</td><td>Full-page overlay: "Your session has expired. Please sign in again." Single "Sign in" button. Current URL preserved as callbackUrl.</td></tr>
+    <tr><td>New tab</td><td>HttpOnly cookie present. NextAuth detects existing session on load.</td><td>Seamless — taken directly to last page.</td></tr>
+    <tr><td>Log out</td><td>POST to <code>/api/auth/signout</code>. Cookie cleared.</td><td>Taken to login page. "You have been signed out."</td></tr>
+  </tbody>
+</table>
+
+<h2 class="auth">Role gate enforcement — two-layer model</h2>
+<div class="co co-plain"><p><strong>Both layers must agree.</strong> The FastAPI backend strips or rejects requests based on the JWT role claim. The Next.js frontend hides UI elements based on session role. A user cannot access restricted data by manipulating the frontend — the backend enforces the same rules independently.</p></div>
+<table class="tbl">
+  <thead><tr><th>Route or action</th><th>Minimum role</th><th>Behaviour if insufficient</th></tr></thead>
+  <tbody>
+    <tr><td><code>/admin/*</code></td><td>ADMIN</td><td>Frontend redirects to <code>/</code> with toast: "You do not have admin access."</td></tr>
+    <tr><td>D6 Assessment health tab</td><td>ANALYST</td><td>Tab not rendered for AE role. Direct URL access → redirected to <code>/clients/:id/overview</code>.</td></tr>
+    <tr><td>Waive a thin-evidence alert</td><td>ANALYST</td><td>Waive button not rendered for AE. Direct API call returns 403.</td></tr>
+    <tr><td>Pro model Gemini surface</td><td>Any (AE: cache-only)</td><td>AE sees cached response if available. If no cache: "This analysis requires analyst access." Not an error — informational state.</td></tr>
+    <tr><td>View subcap rationale text</td><td>ANALYST</td><td>Field stripped from API response for AE. Frontend shows lock icon: "Internal data — not available in your role."</td></tr>
+    <tr><td><code>/admin/import/audit</code></td><td>ADMIN</td><td>Page not accessible for ANALYST or AE. Redirect to <code>/admin</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S02 GLOBAL NAV -->
+<div id="s02" class="section">
+<div class="eyebrow">Section 02</div>
+<h1>Global navigation</h1>
+<p class="lead">A persistent left sidebar provides global navigation. The top bar provides per-page context and client-level controls. Every global navigation element is visible to all roles — the Alerts item is ANALYST-only but still appears as a visual presence (greyed out, not hidden) to prevent confusion about where alerts live.</p>
+
+<h2>Sidebar items and badge logic</h2>
+<table class="tbl">
+  <thead><tr><th>Nav item</th><th>Shown to</th><th>Badge</th><th>Click action</th></tr></thead>
+  <tbody>
+    <tr><td>Dashboard</td><td>All</td><td>None</td><td>Navigate to <code>/</code></td></tr>
+    <tr><td>Clients</td><td>All</td><td>Teal pulse dot when any run is in-progress</td><td>Navigate to <code>/clients</code></td></tr>
+    <tr><td>Alerts</td><td>ANALYST, ADMIN (visible to AE but greyed)</td><td>Orange count badge when OPEN alerts exist. Disappears at 0.</td><td>Navigate to <code>/alerts</code></td></tr>
+    <tr><td>Prospecting</td><td>All</td><td>None</td><td>Navigate to <code>/prospecting</code></td></tr>
+    <tr><td>Admin</td><td>ADMIN only</td><td>Orange dot if ingest API key expiring or import job failed</td><td>Navigate to <code>/admin</code></td></tr>
+    <tr><td>User avatar + role badge</td><td>All</td><td>Role badge (AE/ANALYST/ADMIN)</td><td>Dropdown: Profile, Sign out</td></tr>
+  </tbody>
+</table>
+
+<h2>Top bar — context-sensitive on client pages</h2>
+<table class="tbl">
+  <thead><tr><th>Element</th><th>Where shown</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Entity name</td><td><code>/clients/:id/*</code></td><td>Full institution name. Click → <code>/clients/:id/overview</code></td></tr>
+    <tr><td>Data source badge</td><td><code>/clients/:id/*</code></td><td><span class="b bph1">PROJECT API</span> or <span class="b bph0">DRIVE PARSE</span> — shows provenance of the active run.</td></tr>
+    <tr><td>Run status badge</td><td><code>/clients/:id/*</code></td><td>Pulsing dot when in-progress. Static when ACTIVE.</td></tr>
+    <tr><td>Run selector dropdown</td><td><code>/clients/:id/*</code></td><td>All runs for this entity, newest first. Format: "Jun 1 2026 · 2.8 · ACTIVE · PROJECT API". Selecting a run updates all 6 tabs simultaneously. <span class="marker m-url">URL</span> updates with <code>?run=DMA-ASM-...</code></td></tr>
+    <tr><td>Internal / Customer toggle</td><td><code>/clients/:id/*</code></td><td>Default: Internal. Amber banner when Customer mode active. Persists in session URL param <code>?view=customer</code>.</td></tr>
+    <tr><td>Assessment freshness</td><td><code>/clients/:id/*</code></td><td>Green dot &lt;6 months · Orange dot 6–12 months · Red dot &gt;12 months or open alerts</td></tr>
+  </tbody>
+</table>
+
+<h2>Keyboard and accessibility</h2>
+<ul style="padding-left:18px;margin:8px 0;font-size:13px;color:var(--z-body);">
+  <li style="padding:3px 0;"><strong>Tab / Shift+Tab:</strong> Navigate interactive elements. Focus ring: 2px teal (#27BBAF).</li>
+  <li style="padding:3px 0;"><strong>Escape:</strong> Closes any open drawer (Evidence, Intelligence Panel, card modal). Returns focus to trigger element.</li>
+  <li style="padding:3px 0;"><strong>⌘K / Ctrl+K:</strong> Global command palette. Type entity name → navigate directly.</li>
+  <li style="padding:3px 0;"><strong>Arrow keys on heatmap:</strong> Navigate subcap cells when heatmap has focus.</li>
+</ul>
+</div>
+
+<!-- S03 DASHBOARD HOME -->
+<div id="s03" class="section">
+<div class="eyebrow">Section 03 · Route: /</div>
+<h1>Dashboard home</h1>
+<p class="lead">The first page after login. A command centre for the team showing system-wide activity: active in-progress runs, recent completions, open alerts, stale assessments. Content adapts to the logged-in role.</p>
+
+<div class="co co-plain"><p><strong>Role-differentiated home experience.</strong> ANALYST sees alert count and stale entity queue prominently. AE sees recent completions and a prominent search bar. ADMIN sees all of the above plus a system health strip (last Drive crawl time, Vertex AI budget used this month, last import job status).</p></div>
+
+<h2>Page sections</h2>
+<div class="g2">
+  <div class="card"><div class="card-t">Active runs strip (SSE-powered) <span class="marker m-sse">SSE</span></div><div class="card-b">All runs with status ≠ ACTIVE or SUPERSEDED. Each card: entity name, current batch, progress bar (batches 1–6), last updated. Updates in real time. If no runs in progress, strip is hidden. Clicking navigates to <code>/clients/:id/overview</code>.</div></div>
+  <div class="card"><div class="card-t">Needs attention (ANALYST/ADMIN) <span class="marker m-auth">AUTH</span></div><div class="card-b">Two sub-sections: (1) OPEN thin-evidence alerts — count + "View all" → /alerts. (2) Stale entities — &gt;6 months since last run, sorted by staleness. Each shows entity name + run date + "Request rerun" action.</div></div>
+  <div class="card"><div class="card-t">Recent completions</div><div class="card-b">Last 10 ACTIVE runs. Each card: entity name, subvertical badge, overall score, run date, data source badge (DRIVE PARSE or PROJECT API). Click → <code>/clients/:id/overview</code>.</div></div>
+  <div class="card"><div class="card-t">Quick search</div><div class="card-b">Debounced search field. Results appear as a dropdown (up to 8 matches with score rings). Enter or click → <code>/clients/:id/overview</code>.</div></div>
+</div>
+
+<h2>In-progress run card (batch progress)</h2>
+<div class="prog">
+  <div class="prog-label"><span>Farm Credit East — scoring in progress</span><span style="color:var(--z-teal);">Batch 4 of 6</span></div>
+  <div class="prog-bar"><div class="prog-fill" style="width:66%"></div></div>
+  <div class="prog-steps">
+    <div class="ps ps-done">1 Setup</div><div class="ps ps-done">2 Evidence</div><div class="ps ps-done">3 Peers</div>
+    <div class="ps ps-active">4 Scoring</div><div class="ps ps-pending">5 Analysis</div><div class="ps ps-pending">6 Final</div>
+  </div>
+</div>
+
+<h2>Empty state — first use</h2>
+<div class="card">
+  <div class="empty">
+    <div class="empty-icon" style="font-size:18px;color:var(--z-mid);">DRV</div>
+    <div class="empty-title">No assessments yet</div>
+    <div class="empty-desc">DMA Visualizer is ready. Assessments appear here as the DMA project completes runs. To bootstrap from existing Drive artifacts, use the admin import tool.</div>
+    <div class="empty-cta"><button style="background:var(--z-teal);color:#fff;padding:8px 18px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Import from Drive</button></div>
+  </div>
+</div>
+</div>
+
+<!-- S04 ENTITY DIRECTORY -->
+<div id="s04" class="section">
+<div class="eyebrow">Section 04 · Route: /clients</div>
+<h1>Entity directory</h1>
+<p class="lead">Primary browse interface for all assessed institutions. Every entity with at least one ingested record (Phase 0 Drive-parsed or Phase 1 API) appears here. Data source badge distinguishes provenance. In-progress runs show a live progress state instead of a score.</p>
+
+<h2>Entity card anatomy</h2>
+<table class="tbl">
+  <thead><tr><th>Element</th><th>Data source</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Institution name</td><td><code>entities.name</code></td><td>Click → <code>/clients/:id/overview</code></td></tr>
+    <tr><td>Subvertical badge · Domain</td><td><code>entities.subvertical · domain</code></td><td>Static labels</td></tr>
+    <tr><td>Data source badge <em>(new in v3)</em></td><td><code>assessment_runs.data_source</code></td><td><span class="b bph1">PROJECT API</span> for Phase 1 runs. <span class="b bph0">DRIVE PARSE</span> for Phase 0 runs. Teal "ACTIVE" badge shown for in-progress runs.</td></tr>
+    <tr><td>Assessment date</td><td><code>assessment_runs.run_date</code></td><td>Orange if 6–12 months, red indicator if &gt;12 months</td></tr>
+    <tr><td>Overall score ring</td><td><code>entities.overall_score</code></td><td>M1–M5 colour. Hidden for in-progress runs (shows progress bar instead).</td></tr>
+    <tr><td>Pillar bar strip</td><td><code>pillar_scores</code></td><td>4 tiny bars using DMA maturity colours. Click a bar → Heatmap tab for that pillar.</td></tr>
+    <tr><td>Freshness indicator</td><td>Computed: run_date vs today</td><td>Teal dot &lt;6 months · Orange dot 6–12 months · Below-benchmark indicator &gt;12 months</td></tr>
+    <tr><td>Alert count (ANALYST) <span class="marker m-auth">AUTH</span></td><td><code>thin_evidence_alerts</code> WHERE OPEN</td><td>Orange badge with count. Click → <code>/alerts?entity=:id</code></td></tr>
+    <tr><td>PENDING_REVIEW badge <em>(Phase 0)</em> <span class="marker m-ph0">PH0</span></td><td><code>entities.review_status</code></td><td>Shown when entity was inferred from Drive with confidence &lt;0.7 and awaits admin confirmation. See §24.</td></tr>
+  </tbody>
+</table>
+
+<h2>Search and filter flow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">1</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">User types in the search box</div><div class="fdesc">Debounced 300ms. GET <code>/api/v1/entities?search=...</code> to read replica. Results replace entity grid inline. URL updates with <code>?q=sound</code>. <span class="marker m-url">URL</span></div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">2</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">User applies filters</div><div class="fdesc">Each filter change triggers a new API call. Multiple filters are ANDed. URL updates with all active filters. "Clear all filters" always visible when any filter is active. New in v3: filter by <strong>data source</strong> (DRIVE_PARSE / PROJECT_API) and by <strong>review status</strong> (PENDING_REVIEW).</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">3</div></div><div class="fbody"><div class="ftitle">No results state <span class="marker m-ux">UX</span></div><div class="fdesc">Grid replaced by: "No clients match your search." Two recovery actions always visible: "Clear all filters" and "Clear search." Never a blank table.</div></div></div>
+</div>
+</div>
+
+<!-- S05 IN-PROGRESS RUN -->
+<div id="s05" class="section">
+<div class="eyebrow">Section 05 · Phase 1 only</div>
+<h1>In-progress run experience</h1>
+<p class="lead">When Claude posts batch payloads incrementally, the app surfaces available data progressively — never showing a spinner for hours. Each batch unlocks a new dashboard layer.</p>
+
+<div class="phase-banner pb-ph1"><span class="pb-badge">PH1</span><span class="pb-text">Batch-by-batch progression applies only to Phase 1 (Claude Project API) runs. Phase 0 Drive-parsed entities are imported as a single complete record — they go directly to ACTIVE status.</span></div>
+
+<h2>What's available after each batch</h2>
+<table class="tbl tbl-ph1">
+  <thead><tr><th>After batch</th><th>Run status</th><th>Available in app</th><th>Still locked</th></tr></thead>
+  <tbody>
+    <tr><td class="tk">Batch 1 — Entity + peers</td><td><span class="state s-org">RESEARCH_IN_PROGRESS</span></td><td>Entity card in directory. D1 entity snapshot. Peers tab with locked peer list.</td><td>Heatmap, insight cards, platform matrix, context tab, all Gemini surfaces.</td></tr>
+    <tr><td class="tk">Batch 2 — Evidence</td><td><span class="state s-org">EVIDENCE_COLLECTING</span></td><td>Evidence browser. First thin-evidence alerts generated. D6 alert list begins populating.</td><td>Heatmap (no scores yet). Insight cards.</td></tr>
+    <tr><td class="tk">Batch 3 — Peer scores</td><td><span class="state s-blue">SCORING_IN_PROGRESS</span></td><td>Peers tab fully populated with peer scores and benchmarks.</td><td>Heatmap cells (no subcap scores yet).</td></tr>
+    <tr><td class="tk">Batch 4 — Subcap scores</td><td><span class="state s-blue">SCORING_IN_PROGRESS</span></td><td><strong>Heatmap goes live.</strong> All cells populated. Evidence drawer works. Thin-evidence alerts finalised. Platform fit scores computed. Intelligence cache warming begins.</td><td>Insight cards. Transformation roadmap.</td></tr>
+    <tr><td class="tk">Batch 5 — Analysis</td><td><span class="state s-ph0">ANALYSIS_IN_PROGRESS</span></td><td>Insight Card surface live. Platform matrix live. D1 Entity hub fully populated. Why-now signals computed. 5 pre-warmed Gemini surfaces available.</td><td>Context &amp; Timeline tab. QA gate status.</td></tr>
+    <tr><td class="tk">Batch 6 — Final payload</td><td><span class="state s-suc">ACTIVE</span></td><td>All 6 dashboard clusters fully populated. D5 Context live. D6 QA gates live. Feedback files written to Drive. SSE broadcast to connected browsers.</td><td>Nothing — all features available.</td></tr>
+  </tbody>
+</table>
+
+<h2>Per-tab locked-state banners</h2>
+<table class="tbl">
+  <thead><tr><th>Tab</th><th>Banner while locked</th><th>Clears after</th></tr></thead>
+  <tbody>
+    <tr><td>D1 Overview</td><td>"Assessment in progress — Batch 1/6 complete. Pillar scores appear after Batch 5." With live progress bar.</td><td>Batch 5</td></tr>
+    <tr><td>D2 Insights</td><td>"Insight cards are generated during the analysis phase. Available after Batch 5."</td><td>Batch 5</td></tr>
+    <tr><td>D3 Heatmap</td><td>"Subcapability scoring is in progress — Batch 4 will unlock the heatmap." Animated cells-filling illustration.</td><td>Batch 4</td></tr>
+    <tr><td>D4 Platform</td><td>"Platform analysis is generated after scoring completes. Available after Batch 5."</td><td>Batch 5</td></tr>
+    <tr><td>D5 Context</td><td>"Context &amp; Timeline is included in the final batch. Available after Batch 6."</td><td>Batch 6</td></tr>
+    <tr><td>D6 Health</td><td>"Thin-evidence alerts are generating now. QA gates available after Batch 6."</td><td>Batch 4 (partial), Batch 6 (full)</td></tr>
+  </tbody>
+</table>
+
+<h2>SSE live update flow <span class="marker m-sse">SSE</span></h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">1</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Browser subscribes on opening a client page</div><div class="fdesc">Frontend opens <code>/api/v1/sse/clients/:entity_id</code>. Persistent SSE stream. Closes when user navigates away.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">2</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Claude posts batch → DB write → Redis publish</div><div class="fdesc">Successful ingest publishes to Redis channel <code>ingest:{entity_id}</code>. SSE handler reads from Redis and pushes to all connected browsers.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">3</div></div><div class="fbody"><div class="ftitle">Browser receives SSE → React Query stale → UI updates without reload</div><div class="fdesc">Event: <code>{"event":"batch_complete","batch":4,"status":"SCORING_IN_PROGRESS","heatmap_ready":true}</code>. React Query marks heatmap query stale and refetches. Locked banner on D3 replaces with live heatmap. Toast: "Batch 4 complete — heatmap is now live."</div></div></div>
+</div>
+</div>
+<!-- S06 CLIENT SHELL -->
+<div id="s06" class="section">
+<div class="eyebrow">Section 06 · Route: /clients/:id/*</div>
+<h1>Client shell &amp; tab navigation</h1>
+<p class="lead">The client shell is the container shared by all 6 dashboard cluster tabs. Tab state lives in the URL. Switching tabs never reloads the page. The Intelligence Panel is always present as a right-side drawer.</p>
+
+<h2>Tab mapping — PRD v3 §04</h2>
+<table class="tbl">
+  <thead><tr><th>Tab</th><th>Route</th><th>Dashboard cluster</th><th>Persona priority</th></tr></thead>
+  <tbody>
+    <tr><td>Overview</td><td><code>/clients/:id/overview</code></td><td>D1 — Entity intelligence hub</td><td>AE · Delivery Lead</td></tr>
+    <tr><td>Insights</td><td><code>/clients/:id/insights</code></td><td>D2 — Insight card surface</td><td>Delivery Lead · AE</td></tr>
+    <tr><td>Heatmap</td><td><code>/clients/:id/heatmap</code></td><td>D3 — Maturity heatmap</td><td>Delivery Lead · Analyst</td></tr>
+    <tr><td>Platform</td><td><code>/clients/:id/platform</code></td><td>D4 — Platform opportunity matrix</td><td>AE · Delivery Lead</td></tr>
+    <tr><td>Context</td><td><code>/clients/:id/context</code></td><td>D5 — Context &amp; timeline (internal only)</td><td>Delivery Lead · AE</td></tr>
+    <tr><td>Health <span class="marker m-auth">AUTH</span></td><td><code>/clients/:id/health</code></td><td>D6 — Assessment health (ANALYST/ADMIN only)</td><td>Analyst</td></tr>
+  </tbody>
+</table>
+
+<div class="wf">
+  <div class="wf-bar"><div class="wf-dot wf-r"></div><div class="wf-dot wf-y"></div><div class="wf-dot wf-g"></div><span class="wf-title">/clients/fce-001/insights — Farm Credit East</span></div>
+  <div class="wf-body" style="padding:0;">
+    <div style="background:var(--z-dark);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:600;color:#fff;">Farm Credit East</span>
+        <span class="state s-suc" style="font-size:10px;">ACTIVE</span>
+        <span class="b bph1" style="font-size:10px;">PROJECT API</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10px;color:rgba(255,255,255,.4);">Internal</span>
+        <div style="background:rgba(255,255,255,.1);border-radius:4px;padding:3px 8px;font-size:11px;color:rgba(255,255,255,.6);">Customer</div>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <div class="nt">Overview</div><div class="nt on">Insights</div><div class="nt">Heatmap</div>
+      <div class="nt">Platform</div><div class="nt">Context</div><div class="nt">Health <span class="nt-count">8</span></div>
+    </div>
+    <div class="wf-content" style="padding:12px;gap:10px;">
+      <div class="wf-main">
+        <div style="font-size:13px;font-weight:600;color:var(--z-dark);margin-bottom:10px;">Insight cards — 14 total</div>
+        <div class="wf-block" style="border-left:3px solid var(--z-below);">
+          <div style="display:flex;justify-content:space-between;"><span class="wf-h">IC-003 — Data architecture fragmentation</span><span style="font-size:9px;color:var(--z-below);font-weight:700;">CRITICAL</span></div>
+          <div class="wf-p">P4 · Data Cloud · Databricks — Click to expand</div>
+        </div>
+        <div class="wf-block" style="border-left:3px solid var(--z-org);">
+          <div style="display:flex;justify-content:space-between;"><span class="wf-h">IC-007 — Digital channel investment signals</span><span style="font-size:9px;color:var(--z-org);font-weight:700;">OPPORTUNITY</span></div>
+          <div class="wf-p">P2 · Marketing Cloud — Click to expand</div>
+        </div>
+      </div>
+      <div class="wf-panel">
+        <div class="wf-panel-hdr">Intelligence Panel</div>
+        <div style="font-size:11px;color:#3B0764;line-height:1.65;">Platform story for Salesforce — streaming…</div>
+        <div style="height:3px;background:var(--ph0-bd);border-radius:2px;margin-top:8px;overflow:hidden;"><div style="width:60%;height:100%;background:var(--z-dpur);border-radius:2px;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>URL state — what gets captured</h2>
+<div class="co co-suc"><div class="col">Persistent URL state</div><p>All meaningful sub-states are URL params: <code>?run=DMA-ASM-...</code> · <code>?subcap=P2C3.2.4</code> · <code>?evidence=E-047</code> · <code>?hm=value_chain</code> · <code>?view=customer</code> · <code>?zoom=subcap&amp;pillar=P2&amp;cat=P2C3</code> · <code>?compare=...&amp;base=...</code>. Sharing the URL restores the exact state including open drawers.</p></div>
+</div>
+
+<!-- S07 D1 -->
+<div id="s07" class="section">
+<div class="eyebrow">Section 07 · Dashboard 1 · /clients/:id/overview</div>
+<h1>D1 — Entity intelligence hub</h1>
+<p class="lead">Default landing tab. Designed for the AE with 3 minutes before a client call. Every element answers a question an AE would actually ask.</p>
+
+<h2>Page scroll sequence — top to bottom</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-dark">1</div><div class="fline fl-dark"></div></div><div class="fbody">
+    <div class="ftitle">Entity snapshot (always above the fold)</div>
+    <div class="fdesc">Legal name, subvertical, size tier, primary financial metric, HQ, footprint, assessment date + freshness indicator, evidence mode badge. <span class="marker m-ph0">PH0</span> Phase 0 entities show <span class="b bph0">DRIVE PARSE</span> data source badge with tooltip: "Parsed from Drive artifact on [date]. Data completeness may vary from a Phase 1 structured run."</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-dark">2</div><div class="fline fl-dark"></div></div><div class="fbody">
+    <div class="ftitle">Overall score ring + pillar bar chart <span class="marker m-ai">AI</span></div>
+    <div class="fdesc">Large maturity ring using DMA palette. Four horizontal pillar bars with score, peer median dot, and delta. Clicking a pillar bar navigates to <code>/clients/:id/heatmap?pillar=P2</code>. Intelligence Panel auto-loads <strong>why_now</strong> surface (pre-cached, instant).</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-dark">3</div><div class="fline fl-dark"></div></div><div class="fbody">
+    <div class="ftitle">"Why now" signal strip</div>
+    <div class="fdesc">2–4 trigger events from the Digital Evolution Timeline and Issue Register. Tags: MIGRATION · ACQUISITION · REGULATORY · LEADERSHIP. Filtered for &lt;24 months and commercial relevance (P2/P4 affected). 1-sentence conversation starters. Template-fill, not generative AI. Clicking a signal navigates to <code>/clients/:id/context</code> with that event highlighted.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-dark">4</div><div class="fline fl-dark"></div></div><div class="fbody">
+    <div class="ftitle">SCQA executive narrative (collapsible) <span class="marker m-ux">UX</span></div>
+    <div class="fdesc">Collapsed: 2-sentence summary. Expanded: full SCQA narrative with clickable E-ID chips. Verbatim from Assessment Report §1 — never AI-generated. <strong>Friction:</strong> long SCQA narratives (&gt;500 words) overwhelm AEs. Mitigated by collapsed-by-default with "Read full analysis ↓" expand link.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-dark">5</div><div class="fline fl-dark"></div></div><div class="fbody">
+    <div class="ftitle">Opportunity Surface Score — per platform</div>
+    <div class="fdesc">Five platform cards (SF · DB · TBL · TW · nCino): composite score 0–100, gap count, confirmed-absent tech count, top 3 subcap opportunities. Sortable by fit score. Click a card → <code>/clients/:id/platform?platform=SF</code>. Score formula: Σ(priority_score × gap_size) for subcaps where score &lt; 3.0, status ABSENT, confidence ≠ LOW.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-dark">6</div></div><div class="fbody">
+    <div class="ftitle">Top findings strip</div>
+    <div class="fdesc">5–7 findings from Assessment Report §1.2. Each: title, 1-sentence observation, maturity implication, platform badge. Click → expands inline with linked evidence E-ID chips. Clicking an E-ID opens the evidence drawer.</div>
+  </div></div>
+</div>
+</div>
+
+<!-- S08 D2 -->
+<div id="s08" class="section">
+<div class="eyebrow">Section 08 · Dashboard 2 · /clients/:id/insights</div>
+<h1>D2 — Insight card surface</h1>
+<p class="lead">The analytical core of the DMA. Insight cards bridge raw evidence to commercial implication via the WHAT/WHY/SO WHAT structure from PRD v3 §06. This tab is for the Delivery Lead and Analyst who need depth.</p>
+
+<h2>Heatmap preview with correct DMA maturity palette</h2>
+<div class="m-legend">
+  <div class="m-pill" style="background:var(--m-act);"><div class="m-dot" style="background:var(--m-act-t);"></div><span style="color:var(--m-act-t);font-weight:600;font-size:11px;">Activating · M1–M2</span></div>
+  <div class="m-pill" style="background:var(--m-bld);"><div class="m-dot" style="background:var(--m-bld-t);"></div><span style="color:var(--m-bld-t);font-weight:600;font-size:11px;">Building · M2–M3</span></div>
+  <div class="m-pill" style="background:var(--m-cmp);"><div class="m-dot" style="background:var(--m-cmp-t);"></div><span style="color:var(--m-cmp-t);font-weight:600;font-size:11px;">Competing · M3–M4</span></div>
+  <div class="m-pill" style="background:var(--m-dif);"><div class="m-dot" style="background:var(--m-dif-t);"></div><span style="color:var(--m-dif-t);font-weight:600;font-size:11px;">Differentiating · M4–M5</span></div>
+  <div class="m-pill" style="background:var(--m-act);outline:2px dashed var(--z-org);outline-offset:2px;"><span style="color:var(--m-act-t);font-size:11px;">Thin evidence — orange dashed outline</span></div>
+</div>
+<div class="co co-ux"><div class="col">Design note</div><p>The thin-evidence indicator uses an <strong>orange dashed outline</strong> (#FE9732), not red. Red is reserved for below-benchmark indicators (#C25008). This distinction matters: thin evidence is a data quality signal, not an error state. Per PRD v3 §07 and design system color_system.md §DMA-Specific.</p></div>
+
+<h2>Insight card grid interaction</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">1</div><div class="fline fl-t"></div></div><div class="fbody">
+    <div class="ftitle">Card grid loads — sorted by flag severity</div>
+    <div class="fdesc">CRITICAL first, then OPPORTUNITY, then MONITOR. Filterable by pillar, confidence (HIGH/MEDIUM/LOW), flag, and platform. 2-column masonry grid on desktop, 1-column on mobile.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">2</div><div class="fline fl-t"></div></div><div class="fbody">
+    <div class="ftitle">User clicks "View full card + evidence" <span class="marker m-url">URL</span></div>
+    <div class="fdesc">Full-screen modal slides up from bottom. URL updates to <code>?card=IC-003</code>. Modal shows WHAT / WHY / SO WHAT full text with E-ID chips (clickable). AFFECTS row shows linked subcap ID chips.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">3</div><div class="fline fl-t"></div></div><div class="fbody">
+    <div class="ftitle">E-ID chip click → evidence drawer (layered) <span class="marker m-ux">UX</span></div>
+    <div class="fdesc">Evidence Drawer slides in from the right inside the modal overlay. Modal dims slightly but remains visible. Drawer is independently closable. <strong>Layered drawer pattern:</strong> closing the drawer returns to the card modal (still open), not the card grid.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">4</div><div class="fline fl-t"></div></div><div class="fbody">
+    <div class="ftitle">Subcap ID chip in AFFECTS → heatmap tab</div>
+    <div class="fdesc">Modal closes. Navigates to <code>/clients/:id/heatmap?subcap=P2C3.2.4</code>. Heatmap opens zoomed to that cell with evidence drawer pre-opened. Browser back returns to Insights tab with card modal still open (URL preserved).</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">5</div></div><div class="fbody">
+    <div class="ftitle">Adding an annotation <span class="marker m-db">DB</span></div>
+    <div class="fdesc">"Add note" at bottom of card modal. Optional status tag (ACTIONED / PENDING) and Salesforce opportunity ID. POST to <code>/api/v1/entities/:entity_id/annotations</code> with ic_id. Written to <code>analyst_annotations</code> — entity-scoped, not run-scoped. Survives reruns and Phase 0 → Phase 1 transitions.</div>
+  </div></div>
+</div>
+
+<h2>Technology landscape grid (D2 sub-view)</h2>
+<table class="tbl">
+  <thead><tr><th>Quadrant</th><th>Evidence tier</th><th>Link action</th></tr></thead>
+  <tbody>
+    <tr><td><span class="b bsuc">Confirmed</span></td><td>T1–T3</td><td>Evidence drawer showing T1–T3 items</td></tr>
+    <tr><td><span class="b borg">Claimed</span></td><td>T4–T5</td><td>Evidence drawer with warning: "Unconfirmed — based on marketing claims only"</td></tr>
+    <tr><td><span class="b bph0">Job signals</span></td><td>T7–T8 proxy</td><td>Evidence drawer showing proxy evidence items</td></tr>
+    <tr><td><span class="b bauth">Gaps</span></td><td>Absent (ABSENT status)</td><td>Navigates to <code>/clients/:id/platform</code> filtered to that platform group</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S09 D3 HEATMAP -->
+<div id="s09" class="section">
+<div class="eyebrow">Section 09 · Dashboard 3 · /clients/:id/heatmap</div>
+<h1>D3 — Maturity heatmap</h1>
+<p class="lead">Primary data-dense visualisation. Four zoom levels. Two view modes. Peer overlay. Issue overlay. DMA-specific maturity colour palette throughout — no generic red/green/yellow colours.</p>
+
+<h2>Heatmap preview — subcapability level (DMA palette)</h2>
+<div class="hm-wrap">
+  <div class="hm-toolbar">
+    <span style="font-weight:600;color:var(--z-dark);">P2 Customer experience</span>
+    <span style="margin-left:8px;">→ P2C3: Customer journey</span>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <span style="font-size:10px;color:var(--z-muted);">Peer overlay: ON</span>
+      <span class="b bt" style="font-size:10px;">8 subcaps</span>
+      <span style="background:rgba(254,151,50,.15);color:#7C3500;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;">1 thin</span>
+    </div>
+  </div>
+  <div class="hm-grid">
+    <div></div>
+    <div class="hm-col-hdr">CJ.1.1</div><div class="hm-col-hdr">CJ.1.2</div><div class="hm-col-hdr">CJ.2.1</div><div class="hm-col-hdr">CJ.2.4</div><div class="hm-col-hdr">CJ.3.1</div><div class="hm-col-hdr">CJ.4.2</div><div class="hm-col-hdr">CJ.4.3</div><div class="hm-col-hdr">CJ.5.1</div>
+    <div class="hm-row-lbl">This entity</div>
+    <div class="hm-cell c-bld">2.5</div><div class="hm-cell c-cmp">3.0</div><div class="hm-cell c-thin">2.0</div><div class="hm-cell c-act">2.0</div><div class="hm-cell c-dif">4.0</div><div class="hm-cell c-act">1.5</div><div class="hm-cell c-bld">2.5</div><div class="hm-cell c-cmp">3.0</div>
+    <div class="hm-row-lbl">Peer median</div>
+    <div class="hm-cell c-cmp" style="opacity:.55;"></div><div class="hm-cell c-cmp" style="opacity:.55;"></div><div class="hm-cell c-bld" style="opacity:.55;"></div><div class="hm-cell c-cmp" style="opacity:.55;"></div><div class="hm-cell c-cmp" style="opacity:.55;"></div><div class="hm-cell c-bld" style="opacity:.55;"></div><div class="hm-cell c-cmp" style="opacity:.55;"></div><div class="hm-cell c-cmp" style="opacity:.55;"></div>
+  </div>
+  <div style="padding:8px 12px;font-size:10px;color:var(--z-muted);background:var(--z-lav);display:flex;gap:14px;flex-wrap:wrap;">
+    <span>Orange dashed outline = thin evidence (&lt;3 items)</span>
+    <span>Hover = tooltip: score, evidence count, platform</span>
+    <span>Lock icon = score capped by issue register</span>
+    <span>Click cell = evidence drawer + Gemini subcap narrative</span>
+  </div>
+</div>
+
+<h2>Zoom navigation flows</h2>
+<table class="tbl">
+  <thead><tr><th>Level</th><th>Cells</th><th>Cell shows</th><th>Click action</th><th>URL param</th></tr></thead>
+  <tbody>
+    <tr><td class="tk">Pillar</td><td>4</td><td>Score + peer gap indicator</td><td>Zooms to category level</td><td><code>?zoom=pillar</code></td></tr>
+    <tr><td class="tk">Category</td><td>17</td><td>Score + weight + peer median dot</td><td>Zooms to capability level</td><td><code>?zoom=category&amp;pillar=P2</code></td></tr>
+    <tr><td class="tk">SubCap</td><td>~708</td><td>Score + thin flag + platform chip</td><td>Opens evidence drawer + loads Gemini subcap_narrative</td><td><code>?zoom=subcap&amp;pillar=P2&amp;cat=P2C3&amp;subcap=P2C3.2.4</code></td></tr>
+  </tbody>
+</table>
+
+<h2>Mode toggles and their URL params</h2>
+<table class="tbl">
+  <thead><tr><th>Toggle</th><th>Effect</th><th>URL param</th></tr></thead>
+  <tbody>
+    <tr><td>Standard ↔ Value chain</td><td>Row axis switches from pillar taxonomy to V7 21_VC_Mapping business value chain groupings (Digital Account Opening, Loan Origination, etc.). Same 708 cells, reorganised by business process.</td><td><code>?hm=value_chain</code> / <code>?hm=standard</code></td></tr>
+    <tr><td>Peer overlay ON/OFF</td><td>Second row per capability shows peer median score. Gap cells (&gt;0.5 below peer) get an orange below-benchmark marker; (&gt;1.0 below) get a stronger indicator. Peer names shown in tooltip.</td><td><code>?peer=true</code></td></tr>
+    <tr><td>Issue overlay ON/OFF</td><td>Score-capped cells show a lock icon. Hovering the lock reveals: issue ID, severity, cap value, resolution status. Visualises the link between issue register and scores.</td><td><code>?issues=true</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S10 D4 -->
+<div id="s10" class="section">
+<div class="eyebrow">Section 10 · Dashboard 4 · /clients/:id/platform</div>
+<h1>D4 — Platform opportunity matrix</h1>
+<p class="lead">The commercial layer. Answers "which platform conversation should I lead with this institution?" Platform Fit Score cards are the primary entry point. Platform Readiness Index prevents recommending platforms an institution is not ready to absorb.</p>
+
+<h2>Platform fit score cards — layout</h2>
+<p style="font-size:12.5px;color:var(--z-muted);margin-bottom:12px;">Five platforms per PRD v3 §08: <strong>Salesforce (SF)</strong> — Agentforce · Data Cloud · FSC · CRMA · Marketing · Platform &nbsp;|&nbsp; <strong>Databricks (DB)</strong> — Mosaic AI · Agent Bricks · Lakeflow &nbsp;|&nbsp; <strong>Tableau (TBL)</strong> — Embedded · Next · Pulse &nbsp;|&nbsp; <strong>Twilio (TW)</strong> — Engage · Conversations &nbsp;|&nbsp; <strong>nCino</strong> — Workflow Engine · Document Manager</p>
+<div class="g2">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <div><div class="card-t">Salesforce</div><div style="font-size:11px;color:var(--z-muted);">Agentforce · Data Cloud · FSC · CRMA · Marketing</div></div>
+      <div style="font-size:28px;font-weight:600;color:var(--z-teal);">72</div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+      <span style="font-size:11px;background:var(--z-ice);color:var(--z-dark2);padding:2px 8px;border-radius:4px;">34 gaps</span>
+      <span style="font-size:11px;background:var(--z-ice);color:var(--z-mid);padding:2px 8px;border-radius:4px;">5 confirmed absent</span>
+    </div>
+    <div class="card-b">Top gaps: Customer Journey Analytics (2.0) · Data Platform (1.5) · Agent-assisted service (1.5)</div>
+    <button style="margin-top:8px;padding:6px 14px;background:var(--z-teal);color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;width:100%;">Explore Salesforce opportunity →</button>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <div><div class="card-t">Databricks</div><div style="font-size:11px;color:var(--z-muted);">Mosaic AI · Agent Bricks · Lakeflow</div></div>
+      <div style="font-size:28px;font-weight:600;color:var(--z-teal);">41</div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <span style="font-size:11px;background:var(--ph0-lt);color:var(--ph0);padding:2px 8px;border-radius:4px;">Readiness: partial</span>
+    </div>
+    <div class="card-b">Top gaps: Advanced analytics (2.0) · Real-time decisioning (1.5) · Data quality governance (2.0)</div>
+  </div>
+</div>
+
+<h2>Platform readiness index — prerequisite check (PRD v3 §08)</h2>
+<div class="card">
+  <div class="card-t">Salesforce Agentforce — readiness check</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">
+    <div style="background:var(--z-ice);border-radius:6px;padding:9px;border:1px solid rgba(39,187,175,.3);">
+      <div style="font-size:10px;font-weight:700;color:var(--z-mid);text-transform:uppercase;margin-bottom:3px;">MET</div>
+      <div style="font-size:12px;color:var(--z-dark);">Digital strategy</div>
+      <div style="font-size:11px;color:var(--z-muted);">P1C1 ≥ 2.0 · Current: 2.8</div>
+    </div>
+    <div style="background:rgba(254,151,50,.08);border-radius:6px;padding:9px;border:1px solid rgba(254,151,50,.3);">
+      <div style="font-size:10px;font-weight:700;color:#7C3500;text-transform:uppercase;margin-bottom:3px;">PARTIAL</div>
+      <div style="font-size:12px;color:var(--z-dark);">Digital service model</div>
+      <div style="font-size:11px;color:var(--z-muted);">P2C2 ≥ 2.0 · Current: 1.8</div>
+    </div>
+    <div style="background:var(--z-ice);border-radius:6px;padding:9px;border:1px solid rgba(39,187,175,.3);">
+      <div style="font-size:10px;font-weight:700;color:var(--z-mid);text-transform:uppercase;margin-bottom:3px;">MET</div>
+      <div style="font-size:12px;color:var(--z-dark);">Data foundation</div>
+      <div style="font-size:11px;color:var(--z-muted);">P4C1 ≥ 2.0 · Current: 2.2</div>
+    </div>
+  </div>
+  <div style="margin-top:8px;padding:8px 10px;background:rgba(254,151,50,.08);border-radius:6px;font-size:12px;color:#7C3500;"><strong>Advisory:</strong> P2C2 (Digital service model) is at 1.8 — below the 2.0 minimum for Agentforce. Lead with Salesforce FSC as the foundation prerequisite conversation — prerequisites for Agentforce are P4C1.x ≥ 2.0 · P2C2.x ≥ 2.0 · P1C1.x ≥ 2.0 (per PRD v3 §08) before introducing Agentforce.</div>
+</div>
+
+<h2>Conversation starter generator</h2>
+<div class="co co-plain"><p>For a selected platform, generates 3–5 concise evidence-backed talking points. <strong>Template-fill, not AI-generated</strong> — assembled from stored assessment fields (score, peer median, top evidence excerpt, peer name). Format: "[Entity]'s P4 score of 2.1 in Data Platform is 0.7 below the [Subvertical] peer median. [Named peer] deployed [Platform] in [Quarter] after a similar finding [E-047]. Evidence confirms the root constraint is..." Each talking point has a "Copy" button.</p></div>
+</div>
+
+<!-- S11 D5 -->
+<div id="s11" class="section">
+<div class="eyebrow">Section 11 · Dashboard 5 · /clients/:id/context</div>
+<h1>D5 — Context &amp; timeline</h1>
+<p class="lead">The historical intelligence layer. All content is <code>internal_only: true</code> by default. The entire tab is hidden in Customer View — it does not appear in the tab bar.</p>
+
+<div class="co co-auth"><div class="col">Internal only</div><p>D5 is hidden entirely when audience mode is set to Customer View. Direct URL access to <code>/clients/:id/context?view=customer</code> redirects to <code>/clients/:id/overview</code>.</p></div>
+
+<h2>D5 sub-sections and their interactions</h2>
+<table class="tbl">
+  <thead><tr><th>Panel</th><th>Data from PRD v3</th><th>Interaction</th></tr></thead>
+  <tbody>
+    <tr><td>Digital evolution timeline</td><td>Client Profile §3 — date, initiative, E-ID, capability impact, maturity signal. Nodes: teal = positive, below-benchmark = negative, neutral = muted.</td><td>Hover = full event tooltip. Click = detail panel expands + Intelligence Panel loads why_now contextual variant. "Why now" signals in D1 are drawn from this timeline.</td></tr>
+    <tr><td>Issue register Gantt</td><td>Assessment Report §4 — issue ID, type, date range, severity, cap value. Bar colour: below-benchmark = CRITICAL, orange = MATERIAL, muted = MINOR.</td><td>Hover = tooltip. Click = expands with issue details + "View capped cells in heatmap" link.</td></tr>
+    <tr><td>Financial trajectory</td><td>Client Profile §3.2 — 5-year metrics, CAGR, trend classification (ACCELERATING/STABLE/DECLINING).</td><td>Hover = year metric. Trend badge links to supporting evidence items.</td></tr>
+    <tr><td>Regulatory standing</td><td>Client Profile §3.3 — regulator, license status, enforcement actions.</td><td>Enforcement entries link to evidence. "Confirmed clean" shown for negative search results with confirming evidence.</td></tr>
+    <tr><td>Sentiment overview</td><td>Client Profile §3.4 — Glassdoor, app store ratings, complaint trends.</td><td>Clicking a metric opens source evidence items. Low sentiment caps P2 scoring — caps are visible in the heatmap issue overlay.</td></tr>
+    <tr><td>Acquisition history</td><td>Client Profile §4.4 — M&amp;A events with integration implications.</td><td>Each acquisition links to its timeline event and to any capabilities impacted by technology fragmentation.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S12 D6 -->
+<div id="s12" class="section">
+<div class="eyebrow">Section 12 · Dashboard 6 · /clients/:id/health</div>
+<h1>D6 — Assessment health</h1>
+<p class="lead">The Analyst's primary workspace. Entirely hidden from AE role. Contains all quality signals: thin evidence alerts, version diff, safeguard gates, evidence age tracking, and the cross-entity pattern finder.</p>
+
+<div class="co co-auth"><div class="col">ANALYST / ADMIN only</div><p>D6 tab is not rendered for AE role. AE accessing <code>/clients/:id/health</code> directly → redirected to <code>/clients/:id/overview</code> with toast: "This section requires Analyst access."</p></div>
+
+<h2>Thin-evidence alert workflow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">1</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">Alert list loads — ranked by severity</div><div class="fdesc">HIGH first (proxy not attempted, evidence_count = 0), then MEDIUM (proxy attempted, count 1–2). Each row: subcap ID + name, evidence count (N/3), tier distribution bar, proxy_searched status, recommended action badge (PROXY_ESCALATION / TIER_UPGRADE / FORCE_RERUN).</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">2</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">Analyst marks alert IN_REVIEW <span class="marker m-db">DB</span></div><div class="fdesc">Status toggle OPEN → IN_REVIEW. Alert stays in list and remains in <code>thin_evidence_feedback.json</code> for next rerun.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">3</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">Analyst waives an alert (exceptional) <span class="marker m-db">DB</span> <span class="marker m-drive">DRIVE</span></div><div class="fdesc">Waive dialog requires rationale text (min 50 chars). On confirm: DB updated, <code>thin_evidence_feedback.json</code> regenerated excluding the waived subcap, written to Drive. Toast: "Alert waived and feedback file updated."</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">4</div></div><div class="fbody"><div class="ftitle">Alert auto-resolves after a rerun <span class="marker m-sse">SSE</span></div><div class="fdesc">New Batch 4 ingest: subcaps with evidence_count ≥ 3 that were previously OPEN → RESOLVED_BY_RERUN. D6 alert list updates via SSE. Toast: "[N] alerts resolved by the new run."</div></div></div>
+</div>
+
+<h2>Version diff — state management</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">1</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Analyst opens D6 with 2+ runs</div><div class="fdesc">Version Diff section shows two run selectors. Default: ACTIVE run vs most recent SUPERSEDED run. <strong>Note:</strong> Comparing a Phase 0 DRIVE_PARSE run to a Phase 1 PROJECT_API run is a valid and useful comparison — it shows what the structured API run added over the parsed document version.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">2</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Analyst selects two runs <span class="marker m-url">URL</span></div><div class="fdesc">URL updates: <code>?compare=DMA-ASM-...&amp;base=DMA-ASM-...</code>. Subcap diff table loads.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">3</div></div><div class="fbody"><div class="ftitle">Diff table rendering</div><div class="fdesc">Each subcap: ID, score in run A, score in run B, delta (teal ▲+0.5, below-benchmark ▼−0.5, — unchanged), evidence count in both runs. Score regressions &gt;1.0 flagged with below-benchmark indicator. New alerts (orange badge), resolved alerts (teal badge). Export as CSV → named <code>diff_{entity}_{runA}_vs_{runB}.csv</code>.</div></div></div>
+</div>
+</div>
+<!-- S13 EVIDENCE DRILLDOWNS -->
+<div id="s13" class="section">
+<div class="eyebrow">Section 13 · Key interaction</div>
+<h1>Evidence drilldowns — 5 trigger paths</h1>
+<p class="lead">The evidence drawer is the single most important interaction in the app. It provides the proof behind every claim, score, and recommendation. Five distinct trigger paths all open the same drawer but pre-load different content and return to different places on close.</p>
+
+<div class="co co-teal"><p><strong>Design rule:</strong> The evidence drawer never navigates away. It always slides in from the right (320px). Closing it (Escape or ×) returns the user to exactly where they were. URL includes <code>&amp;evidence=E-047</code> so the drawer state is deep-linkable.</p></div>
+
+<h2>The 5 trigger paths</h2>
+<table class="tbl">
+  <thead><tr><th>#</th><th>Source element</th><th>Target</th><th>What the drawer reveals</th></tr></thead>
+  <tbody>
+    <tr><td class="tk">1</td><td>Click any subcap cell in the heatmap</td><td>Evidence drawer for that subcap</td><td>All evidence items, full rationale (ANALYST only), confidence, evidence ceiling, caps applied</td></tr>
+    <tr><td class="tk">2</td><td>E-ID chip on any insight card, narrative, or recommendation</td><td>Evidence drawer for that specific item</td><td>Tier, ERS score (ANALYST), claim type, excerpt, source URL, all subcaps this evidence supports</td></tr>
+    <tr><td class="tk">3</td><td>REC-XX root cause E-IDs on a recommendation card</td><td>Evidence drawer</td><td>Evidence grounding the recommendation. "Filter heatmap to this recommendation's subcaps" link also shown.</td></tr>
+    <tr><td class="tk">4</td><td>Issue record in the issue register Gantt (D5)</td><td>Heatmap with issue overlay active + affected cells highlighted</td><td>Lock icon on capped cells reveals: issue ID, severity, cap value, resolution status</td></tr>
+    <tr><td class="tk">5</td><td>Technology landscape gap entry (D2)</td><td>Platform tab filtered to that platform group</td><td>No drawer — gaps have no evidence to show. Navigates to the commercial opportunity view instead.</td></tr>
+  </tbody>
+</table>
+
+<h2>Evidence drawer states</h2>
+<table class="tbl">
+  <thead><tr><th>State</th><th>UX treatment</th></tr></thead>
+  <tbody>
+    <tr><td>Loading</td><td>Skeleton loading state: animated ice-coloured bars in the shape of evidence cards. Typically &lt;200ms from read replica.</td></tr>
+    <tr><td>Evidence items present</td><td>Each item: E-ID chip, source name (clickable → new tab), tier badge, ERS score (ANALYST only), claim type chip (FACT/INFERENCE/HYPOTHESIS/CEILING_ESTIMATE), recency tag, excerpt.</td></tr>
+    <tr><td>No evidence (empty)</td><td>"No evidence found for this subcapability." If ANALYST: shows thin-evidence alert badge for this subcap.</td></tr>
+    <tr><td>Rationale field</td><td>ANALYST: full rationale text. AE: lock icon + "Internal data — not available in your role."</td></tr>
+    <tr><td>Close</td><td>Escape or × button. Drawer slides out. URL removes <code>&amp;evidence=</code> param. Focus returns to trigger element (accessibility).</td></tr>
+    <tr><td>Layered (inside card modal)</td><td>Drawer opens inside the modal context. Closing the drawer returns to the card modal, not the grid. See §08.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S14 INTELLIGENCE PANEL -->
+<div id="s14" class="section">
+<div class="eyebrow ai">Section 14 · Intelligence Panel</div>
+<h1>Intelligence Panel — Gemini surfaces</h1>
+<p class="lead">A 360px persistent right-side drawer that streams Gemini analysis. Strictly additive: all 6 dashboard clusters are fully functional without it. When Gemini is unavailable, the panel shows a soft advisory — not an error page.</p>
+
+<h2>Panel states</h2>
+<table class="tbl tbl-ai">
+  <thead><tr><th>State</th><th>Visual treatment</th><th>User actions</th></tr></thead>
+  <tbody>
+    <tr><td>Pre-cached (instant)</td><td>Content appears immediately. Small "Cached" label in panel footer with timestamp.</td><td>Read, copy, collapse.</td></tr>
+    <tr><td>Streaming</td><td>Content appears word-by-word. A teal animated cursor at the end of streamed text. Faint teal shimmer on panel border.</td><td>Read as it streams. Collapse (stream continues; shows instantly on re-expand).</td></tr>
+    <tr><td>Hallucination flag detected</td><td>Flagged segment has an orange highlight background + advisory icon. Footer: "[N] unvalidated agent references detected."</td><td>Click warning to see which agent ID was not found in the 470-agent catalog. Copy non-flagged portion.</td></tr>
+    <tr><td>Gemini unavailable</td><td>Soft muted message: "Analysis temporarily unavailable." Retry button. Grey styling — not an error colour. Main dashboard content unaffected.</td><td>Retry after 30 seconds. If still unavailable: "Check back later."</td></tr>
+    <tr><td>AE on Pro-only surface</td><td>"This analysis requires a deeper model. An Analyst can generate it — you'll see the result next time you open this page." If cached response exists: shown immediately without this message.</td><td>Informational — no direct action.</td></tr>
+    <tr><td>Collapsed</td><td>40px strip on right edge. Small AI label and current surface name. Hover = tooltip.</td><td>Click or drag to re-expand.</td></tr>
+  </tbody>
+</table>
+
+<h2>Auto-routing — which surface loads on which action</h2>
+<table class="tbl tbl-ai">
+  <thead><tr><th>User action / active view</th><th>Surface loaded</th><th>Model · Cache strategy</th></tr></thead>
+  <tbody>
+    <tr><td>Opens any client page (first load)</td><td>why_now</td><td>Flash · Pre-cached at ingest — always instant</td></tr>
+    <tr><td>D1 Overview tab active</td><td>why_now</td><td>Flash · Pre-cached</td></tr>
+    <tr><td>D2 Insights tab active</td><td>platform_story (highest-fit platform)</td><td>Flash · Pre-cached if in bootstrap 5</td></tr>
+    <tr><td>D3 Heatmap — subcap cell clicked</td><td>subcap_narrative (for that subcap)</td><td>Flash · Cached per cell; fresh call &lt;800ms first token</td></tr>
+    <tr><td>D4 Platform tab active</td><td>offering_recommendation</td><td>Flash · Pre-cached at ingest</td></tr>
+    <tr><td>D4 — specific platform card clicked</td><td>platform_story for that platform</td><td>Flash · Cached per platform</td></tr>
+    <tr><td>D5 Context tab active</td><td>why_now (timeline-contextual variant)</td><td>Flash · Generated on first D5 open; cached 4h</td></tr>
+    <tr><td>Peers tab active</td><td>peer_positioning</td><td>Flash · Pre-cached if in bootstrap 5</td></tr>
+    <tr><td>"Meeting Prep" button clicked</td><td>meeting_prep</td><td>Pro · Manual trigger; rate limited 20/day/user; 4h cache</td></tr>
+    <tr><td>"Cross-Pillar Synthesis" clicked</td><td>cross_pillar_synthesis</td><td>Pro · Manual trigger; rate limited; 4h cache</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S15 AUDIENCE MODE -->
+<div id="s15" class="section">
+<div class="eyebrow">Section 15 · Key interaction</div>
+<h1>Audience mode toggle — Internal ↔ Customer View</h1>
+<p class="lead">Every client page has an Internal/Customer toggle in the top-right. Internal is the default. Customer View hides fields that should not be screen-shared with clients.</p>
+
+<h2>Toggle interaction flow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">1</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">User clicks "Customer View"</div><div class="fdesc">An <strong>amber persistent banner</strong> appears at the top of the content area: "Customer View active — internal data is hidden. Toggle back to see full details." This banner cannot be dismissed — it must always be visible so the user is never confused about which mode they are in during a screen share.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">2</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Content changes without page reload <span class="marker m-ux">UX</span></div><div class="fdesc">React Query refetches with <code>view=customer</code> param. Backend returns stripped responses for AE-mode requests. Hidden: evidence excerpts, ERS scores, rationale, issue severities, event timelines, alert counts, financial trajectory, sentiment data, acquisition history, and entire D6 tab. <strong>Friction:</strong> field disappearances use CSS fade transitions (150ms) — no layout reflow from hiding sections that would shift the page content.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">3</div></div><div class="fbody"><div class="ftitle">URL updates <span class="marker m-url">URL</span></div><div class="fdesc">Adds <code>?view=customer</code>. Sharing the URL preserves the Customer View. Closing the browser and returning resets to Internal (safety default). URL param only persists for the session.</div></div></div>
+</div>
+
+<h2>What changes per tab in Customer View</h2>
+<table class="tbl">
+  <thead><tr><th>Tab</th><th>Hidden in Customer View</th></tr></thead>
+  <tbody>
+    <tr><td>D1 Overview</td><td>E-ID chips stripped to plain text. Evidence mode badge hidden. Assessment ID hidden.</td></tr>
+    <tr><td>D2 Insights</td><td>"Claimed" and "Job signals" tech landscape quadrants hidden. Leadership email addresses hidden. E-ID chips on insight cards hidden.</td></tr>
+    <tr><td>D3 Heatmap</td><td>ERS scores, rationale, claim type chips hidden from evidence drawer. Thin-evidence orange outlines still shown (real data quality signal). Evidence count badge hidden.</td></tr>
+    <tr><td>D4 Platform</td><td>Recommendation root cause paragraphs hidden. Platform readiness advisory notes hidden. Expected outcomes shown (no investment amounts ever shown).</td></tr>
+    <tr><td>D5 Context</td><td>Entire tab hidden. Not in tab bar. Direct URL access → redirected to /overview.</td></tr>
+    <tr><td>D6 Health</td><td>Entire tab hidden.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S16 ALERTS -->
+<div id="s16" class="section">
+<div class="eyebrow">Section 16 · Route: /alerts</div>
+<h1>Alert management</h1>
+<p class="lead">Global thin-evidence alert dashboard. Mishley's primary evidence quality workspace. ANALYST and ADMIN only. Orange count badge in the sidebar links here. SSE-updated in real time when new ingests generate or resolve alerts.</p>
+
+<h2>Alert workflow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">1</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">New batch posted → alerts generated <span class="marker m-sse">SSE</span></div><div class="fdesc">After ingest, background task computes thin evidence. New alerts written to DB. SSE publishes to the /alerts page if open. Sidebar badge count updates in real time. Banner: "[N] new alerts added — [Entity] Batch [N]."</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">2</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">Analyst reviews HIGH severity first</div><div class="fdesc">Click alert row → expands inline: full evidence item list (tier + excerpt), proxy_searched status, recommended action. "View in heatmap" opens <code>/clients/:id/heatmap?subcap=...</code> in a new tab (Analyst keeps place in /alerts).</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">3</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">Mark IN_REVIEW <span class="marker m-db">DB</span></div><div class="fdesc">Status toggle OPEN → IN_REVIEW. Alert stays in list. Included in <code>thin_evidence_feedback.json</code> for next rerun.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">4</div><div class="fline fl-org"></div></div><div class="fbody"><div class="ftitle">Waive with rationale <span class="marker m-db">DB</span> <span class="marker m-drive">DRIVE</span></div><div class="fdesc">Dialog requires rationale (min 50 chars). On confirm: DB updated, Drive feedback JSON regenerated excluding waived subcap. Waived alerts move to a separate "Waived" section, permanently excluded from the feedback loop but logged in the audit trail.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-org">5</div></div><div class="fbody"><div class="ftitle">Auto-resolved by a rerun</div><div class="fdesc">When a new run posts Batch 4 with evidence_count ≥ 3 for a previously OPEN subcap → RESOLVED_BY_RERUN. D6 and /alerts update via SSE. Teal toast: "[N] alerts resolved by the new run."</div></div></div>
+</div>
+
+<h2>Patterns tab (global view)</h2>
+<div class="co co-teal"><p>The /alerts page has a "Patterns" tab (ANALYST only). A meta-heatmap: subcap IDs vs entities, coloured by whether each entity has an open alert for that subcap. Subcaps where ≥60% of entities in a subvertical have alerts are highlighted — systematic evidence gaps suggesting the proxy search methodology needs updating for that subcap type, not individual entity issues.</p></div>
+</div>
+
+<!-- S17 PROSPECTING -->
+<div id="s17" class="section">
+<div class="eyebrow">Section 17 · Route: /prospecting</div>
+<h1>Prospecting &amp; scorecard export</h1>
+<p class="lead">Lightweight self-service tool for AEs. Search for an entity → get a 1-page customer-safe summary → export as PDF or HTML. No analyst involvement. Designed for 50+ entities per week.</p>
+
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">1</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">AE navigates to /prospecting</div><div class="fdesc">Prominent search box. Recent searches list (last 10 entities, stored in browser localStorage — cleared on logout).</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">2</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">AE types entity name <span class="marker m-url">URL</span></div><div class="fdesc">Debounced search against entity name and domain. Results appear as dropdown with name, subvertical, score, and data source badge. <strong>Not found:</strong> "No assessment found for [name]. Contact the DMA team to request an assessment." Mailto link pre-fills the email with entity name.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">3</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Scorecard preview loads — always Customer View</div><div class="fdesc">URL: <code>/prospecting?entity=abc123</code>. Shows: entity snapshot, overall maturity ring, 4-pillar bar chart, top 3 platform opportunities, technology gap highlights. Internal/Customer toggle is not available on this page — it is permanently Customer View.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">4</div><div class="fline fl-t"></div></div><div class="fbody"><div class="ftitle">Export as PDF <span class="marker m-ux">UX</span></div><div class="fdesc">POST <code>/api/v1/runs/:run_id/export/pdf</code>. Returns 202 with job_id. Button → loading spinner: "Generating PDF… Usually takes 5–10 seconds." When complete: "Download PDF" button opens a signed GCS URL (valid 24 hours). <strong>Friction:</strong> 3–8 second wait must be clearly communicated — spinner with estimated time prevents users from thinking it has frozen.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">5</div></div><div class="fbody"><div class="ftitle">Download HTML (instant)</div><div class="fdesc">Client-side blob download. No server call. Instant. File named <code>scorecard_{entity}_{date}.html</code>. Preferred for high-volume use.</div></div></div>
+</div>
+</div>
+
+<!-- S18 VERSION DIFF -->
+<div id="s18" class="section">
+<div class="eyebrow">Section 18 · Route: /clients/:id/runs</div>
+<h1>Version history &amp; run comparison</h1>
+<p class="lead">Every run is immutably stored. Any two runs for the same entity can be compared. This includes comparing a Phase 0 DRIVE_PARSE run to a Phase 1 PROJECT_API run — a particularly useful diff showing what structured data adds over parsed documents.</p>
+
+<h2>Viewing a superseded run</h2>
+<div class="co co-ux"><div class="col">Friction point</div><p>When a user selects a superseded run from the run selector dropdown, all 6 dashboard tabs update to show that older run's data. An <strong>amber banner</strong> must appear: "Viewing: [date] run (SUPERSEDED). The ACTIVE run is from [date]. Return to active →" This banner is persistent while a superseded run is selected and cannot be dismissed — it prevents decisions based on stale data.</p></div>
+
+<h2>Run history table columns</h2>
+<table class="tbl">
+  <thead><tr><th>Column</th><th>Content</th></tr></thead>
+  <tbody>
+    <tr><td>Run date</td><td>Formatted as "Jun 1, 2026"</td></tr>
+    <tr><td>Status</td><td>ACTIVE or SUPERSEDED</td></tr>
+    <tr><td>Data source</td><td><span class="b bph1">PROJECT API</span> or <span class="b bph0">DRIVE PARSE</span></td></tr>
+    <tr><td>Overall score</td><td>Score ring in DMA maturity palette</td></tr>
+    <tr><td>Evidence mode</td><td>PUBLIC / INTERNAL / HYBRID badge</td></tr>
+    <tr><td>Subcap count</td><td>Total subcap rows (708 for Phase 1; variable for Phase 0 parsed)</td></tr>
+    <tr><td>Open alerts at ingest</td><td>Count of OPEN alerts generated for this run</td></tr>
+    <tr><td>Actions</td><td>"View" (opens that run) · "Compare to active" (opens D6 diff)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S19 ANNOTATIONS -->
+<div id="s19" class="section">
+<div class="eyebrow">Section 19 · Workflow</div>
+<h1>Annotations lifecycle</h1>
+<p class="lead">Analyst annotations are entity-scoped notes on insight cards. They close the loop between assessment findings and engagement outcomes. All roles can create annotations. They survive Phase 0 → Phase 1 transitions because they are entity-scoped, not run-scoped.</p>
+
+<div class="g2">
+  <div class="card"><div class="card-t">Creating an annotation <span class="marker m-db">DB</span></div><div class="card-b">User clicks "Add note" in the insight card modal. Text field, optional status tag (ACTIONED / PENDING), optional Salesforce opportunity ID. POST to <code>/api/v1/entities/:entity_id/annotations</code> with ic_id. Written to <code>analyst_annotations</code> (append-only). Toast: "Note saved."</div></div>
+  <div class="card"><div class="card-t">Persistence across runs and phases</div><div class="card-b">Stored with entity_id + ic_id. Survives reruns (entity-scoped). Also survives the Phase 0 → Phase 1 transition — when a Phase 1 run supersedes the Phase 0 record, all annotations carry forward automatically to the new run's insight cards.</div></div>
+  <div class="card"><div class="card-t">CONFIRMED auto-tagging</div><div class="card-b">When an annotation is tagged ACTIONED and a subsequent rerun shows the subcap score improved to ≥ 3.0, the annotation is automatically tagged CONFIRMED. This closes the loop: "We actioned this → evidence shows improvement."</div></div>
+  <div class="card"><div class="card-t">Version history</div><div class="card-b">Every edit creates a new annotation record (append-only log). Current annotation = most recent. Prior versions accessible via "Annotation history" toggle on the card modal.</div></div>
+</div>
+
+<div class="ann">
+  <div class="ann-top"><span class="ann-author">M. Otiende (Analyst)</span><span style="font-size:10px;color:#7C3500;">Jun 2, 2026 · 9:32 AM</span></div>
+  <div class="ann-text">Discussed IC-003 with the Delivery Lead before the Farm Credit call. The data fragmentation point resonated strongly — the CIO mentioned they've been evaluating Data Cloud for 6 months but haven't committed. Connected to SF opportunity SF-2847.</div>
+  <div><span class="ann-tag at-a">ACTIONED</span></div>
+</div>
+</div>
+
+<!-- S20 FEEDBACK LOOP -->
+<div id="s20" class="section">
+<div class="eyebrow">Section 20 · Workflow</div>
+<h1>Feedback loop — app to DMA project</h1>
+<p class="lead">After every Phase 1 ingest, the app generates up to 5 structured feedback JSON files and writes them to the entity's Drive folder. The DMA project reads these at Batch 1 pre-flight for the next run.</p>
+
+<div class="phase-banner pb-ph1"><span class="pb-badge">PH1 only</span><span class="pb-text">The feedback loop only applies to Phase 1 (API-ingest) runs. Phase 0 Drive-parsed entities do not generate feedback files — there is no running DMA project instance to receive them.</span></div>
+
+<h2>Feedback files generated per ingest</h2>
+<table class="tbl">
+  <thead><tr><th>File</th><th>Trigger condition</th><th>DMA project reads at</th></tr></thead>
+  <tbody>
+    <tr><td class="tk">thin_evidence_feedback.json</td><td>Always — generated after every ingest. Lists subcaps with evidence_count &lt; 3.</td><td>Batch 1 pre-flight → thin_subcaps added to mandatory proxy queue</td></tr>
+    <tr><td class="tk">evidence_freshness_alert.json</td><td>&gt;40% of subcaps have evidence &gt;18 months old.</td><td>Batch 1 pre-flight → stale_subcaps → exclude prior URLs, treat as new search</td></tr>
+    <tr><td class="tk">calibration_flag.json</td><td>Entity score &gt;1.5 above peer median in any category.</td><td>Phase 2 (peer scoring) → calibration_flags → peer score double-check</td></tr>
+    <tr><td class="tk">regression_flag.json</td><td>Subcap score drops &gt;1.0 from prior run with no evidence count change.</td><td>Phase 4 (scoring) → regression_subcaps → explicit rationale requirement (≥300 chars)</td></tr>
+    <tr><td class="tk">evidence_reuse_alert.json</td><td>&gt;80% of evidence URLs duplicated from prior run.</td><td>Batch 2 (research) → reuse_urls excluded from search results</td></tr>
+  </tbody>
+</table>
+
+<h2>End-to-end feedback loop flow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph1">1</div><div class="fline fl-ph1"></div></div><div class="fbody"><div class="ftitle">Claude posts Batch 6 (final) → 5 async background tasks start <span class="marker m-db">DB</span></div><div class="fdesc">POST /api/v1/ingest/assessment with partial=false. All data written to DB. Task queue starts <code>write_feedback_to_drive</code>.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph1">2</div><div class="fline fl-ph1"></div></div><div class="fbody"><div class="ftitle">Feedback files generated and written to Drive <span class="marker m-drive">DRIVE</span></div><div class="fdesc">For each triggered condition, the corresponding JSON is generated and written to <code>drive://DMA Assets/{entity_name}/{run_id}/</code>. D6 Health tab shows a "Feedback files" section listing what was written.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph1">3</div><div class="fline fl-ph1"></div></div><div class="fbody"><div class="ftitle">Alert actions regenerate feedback files immediately</div><div class="fdesc">When Mishley waives an alert or marks one RESOLVED, the feedback JSON is regenerated immediately excluding that subcap and written to Drive again. The DMA project always reads the most current version.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph1">4</div></div><div class="fbody"><div class="ftitle">DMA project next run reads feedback at Batch 1 pre-flight</div><div class="fdesc">Reads all feedback files from entity Drive folder. Thin subcaps → mandatory proxy queue. Stale subcaps → refresh queue. Regression subcaps → rationale required. Rerun posts Batch 4 → thin alerts auto-resolve. Feedback loop completes.</div></div></div>
+</div>
+</div>
+
+<!-- S21 ADMIN WORKFLOWS -->
+<div id="s21" class="section">
+<div class="eyebrow">Section 21 · Route: /admin/*</div>
+<h1>Admin workflows</h1>
+<p class="lead">Admin-only pages. Three sub-sections: Import (Phase 0 Drive + Phase 1 manual), Settings (users, API key, budget), and Import Audit (review of EXCLUDED and REVIEW files from Drive crawl). All admin actions are logged to the audit trail.</p>
+
+<h2>/admin/import — ingest and catalog management</h2>
+<table class="tbl">
+  <thead><tr><th>Action</th><th>Phase</th><th>Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Upload app_payload_v1.json</td><td>PH1</td><td>File picker. Validated by Pydantic model. Success: ingested as normal batch. Failure: field-level errors shown inline with JSON line numbers.</td></tr>
+    <tr><td>Trigger Drive re-scan (DELTA)</td><td>PH0</td><td>"Scan for new DMA artifacts." Shows last crawl time. Triggers Cloud Run Job. Live log stream: "Scanning... 47 files checked, 3 new entities found." Takes 2–5 minutes.</td></tr>
+    <tr><td>Trigger Drive re-scan (FULL)</td><td>PH0</td><td>"Full re-scan" with confirmation: "This will re-process all files and may take 30+ minutes. Continue?" Sends email notification when complete.</td></tr>
+    <tr><td>Import V7 catalog update</td><td>Both</td><td>Four XLSX file pickers (one per pillar). Version label field. Validates expected sheet names. Creates a new catalog_version record. Existing runs retain reference to their original version.</td></tr>
+    <tr><td>View import jobs</td><td>Both</td><td>Table of past import jobs: type, date, status, stats (files processed, entities created/updated, errors). Click a job → full log. FAILED jobs → "Retry" button.</td></tr>
+  </tbody>
+</table>
+
+<h2>/admin/settings</h2>
+<table class="tbl">
+  <thead><tr><th>Setting</th><th>UI</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr><td>User role management</td><td>Table of all users with role dropdowns.</td><td>Role change takes effect on the user's next API call (JWT refresh required).</td></tr>
+    <tr><td>Ingest API key rotation</td><td>"Rotate key" with confirmation: "The existing key will be immediately invalidated. Claude DMA Project scripts will need to be updated."</td><td>New key generated from Secret Manager. Old key invalidated. Displayed once — admin must copy it. Audit log entry created.</td></tr>
+    <tr><td>Vertex AI budget monitor</td><td>Current month spend vs $400 budget. Bar chart by day. Flash vs Pro breakdown.</td><td>Read-only. If spend &gt;95%: "Auto-downgrade active — Pro surfaces are using Flash model."</td></tr>
+  </tbody>
+</table>
+</div>
+<!-- S22 PHASE 0 DRIVE CRAWL -->
+<div id="s22" class="section">
+<div class="eyebrow ph0">Section 22 · Phase 0</div>
+<h1>Phase 0 — Drive crawl &amp; import flow</h1>
+<p class="lead">The app bootstraps from existing DMA artifacts in Google Drive without requiring any changes to the DMA project. This section maps the complete 10-step import pipeline — from crawl trigger to database record — including entity inference, test case removal, and deduplication as specified in PRD v3 §09–§15.</p>
+
+<div class="phase-banner pb-ph0"><span class="pb-badge">PH0</span><span class="pb-text">Target Drive folder: <code>1uvt3kh8vPIygFwUNfKQSol0m5OYj2O0P</code> (DMA Assets). Flat structure with mixed naming conventions. Entity inference required for every file.</span></div>
+
+<h2>10-step import pipeline (PRD v3 §15)</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">1</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Crawl trigger <span class="marker m-ph0">PH0</span></div>
+    <div class="fdesc">Scheduled every 6 hours (delta mode: <code>modifiedTime &gt; last_crawl_at</code>), or manual trigger via <code>POST /api/v1/admin/import/trigger</code> from the admin UI. Full rescan flag <code>full_rescan: true</code> re-processes all files regardless of modifiedTime.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">2</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Metadata collection → candidate pool <span class="marker m-drive">DRIVE</span></div>
+    <div class="fdesc">Recursive folder traversal (max depth 6). Collect: Drive file ID, MIME type, name, modifiedTime, createdTime, owner email, parent folder ID. Metadata only — no content fetch at this stage. Paginate via pageToken (100 files per call). MIME filter applied: retain Google Docs, Sheets, Slides, DOCX, XLSX, PPTX, JSON, ZIP.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">3</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Artifact classification — folder path → filename → header scan</div>
+    <div class="fdesc">Each candidate classified in order: (1) folder path signal, (2) filename pattern matching against artifact registry (§11), (3) header scan of first 500 characters. Unclassified → UNRESOLVED queue for admin review.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">4</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Test case removal — 6 detection rules (PRD v3 §13) <span class="marker m-ph0">PH0</span></div>
+    <div class="fdesc">Rules applied in priority order. A single EXCLUDE decision terminates processing for that file. All excluded files logged to <code>import_audit</code> table.
+    <table style="font-size:11px;margin-top:8px;border-collapse:collapse;width:100%;">
+      <tbody><tr style="background:var(--z-dark);"><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;font-size:9.5px;">Rule</td><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;font-size:9.5px;">Detection</td><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;font-size:9.5px;">Action</td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">R01</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Filename contains: test, demo, sandbox, template, sample, copy of</td><td style="padding:4px 8px;"><span class="audit-status as-excl">EXCLUDE</span></td></tr>
+      <tr><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">R02</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">No Assessment ID AND entity cannot be resolved with confidence ≥ 0.7</td><td style="padding:4px 8px;"><span class="audit-status as-excl">EXCLUDE</span></td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">R03</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Resolved entity is non-FSI (PropTech, EdTech, Healthcare, Nonprofit outside FSI)</td><td style="padding:4px 8px;"><span class="audit-status as-excl">EXCLUDE</span></td></tr>
+      <tr><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">R04</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">≥3 unfilled template tokens: <code>{{entity_name}}</code>, <code>[INSTRUCTION:</code>, <code>{{...}}</code></td><td style="padding:4px 8px;"><span class="audit-status as-excl">EXCLUDE</span></td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">R05</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">File owner email outside @zennify.com and dma@zennify.com</td><td style="padding:4px 8px;"><span class="audit-status as-rev">REVIEW</span></td></tr>
+      <tr><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">R06</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Document contains "Framework v4", "Framework v5.0", "Framework v5.1" — schema incompatible with v5.5</td><td style="padding:4px 8px;"><span class="audit-status as-rev">REVIEW</span></td></tr>
+    </tbody></table></div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">5</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Entity inference — 4-signal cascade (PRD v3 §12)</div>
+    <div class="fdesc">Applied to every candidate. Confidence &lt; 0.7 → UNRESOLVED (flagged for admin review — not automatically imported). New entities (no existing DB match) → created as PENDING_REVIEW (see §24).<br>
+    <table style="font-size:11px;margin-top:8px;border-collapse:collapse;width:100%;">
+      <tbody><tr style="background:var(--z-dark);"><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;">Signal</td><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;">Confidence</td><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;">Method</td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-weight:600;font-size:11px;">Assessment ID extraction</td><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;color:var(--z-mid);">1.0</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Pattern: <code>DMA-(?:ASM|RES)-([A-Z0-9]+)-(\d{8})-(\d{4})</code> in filename + first 2,000 chars</td></tr>
+      <tr><td style="padding:4px 8px;font-weight:600;font-size:11px;">Entity name from document header</td><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;color:var(--z-mid);">0.9</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">First 500 chars. Name follows "CLIENT PROFILE" or "DIGITAL MATURITY ASSESSMENT". Fuzzy-matched (Levenshtein ≤ 3).</td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-weight:600;font-size:11px;">Filename token extraction</td><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;color:var(--z-mid);">0.75</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Split on _ - spaces. Strip DMA prefixes/suffixes. Match remaining tokens against entity table.</td></tr>
+      <tr><td style="padding:4px 8px;font-weight:600;font-size:11px;">Parent folder name</td><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;color:var(--z-mid);">0.65</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Folder name (e.g. "Farm Credit East") matched against entity table.</td></tr>
+    </tbody></table></div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">6</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Deduplication — 4 winner selection rules (PRD v3 §14)</div>
+    <div class="fdesc">For each entity × artifact type pair, exactly one winner is selected. Others logged as SUPERSEDED.
+    <table style="font-size:11px;margin-top:8px;border-collapse:collapse;width:100%;">
+      <tbody><tr style="background:var(--z-dark);"><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;">Rule</td><td style="padding:4px 8px;color:rgba(255,255,255,.8);font-weight:600;">Winner condition</td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">1</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">FINAL suffix wins — <code>_FINAL</code> in filename beats all non-FINAL versions regardless of date</td></tr>
+      <tr><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">2</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Assessment ID date wins — highest YYYYMMDD wins; equal dates: higher sequence number</td></tr>
+      <tr style="background:var(--z-lav);"><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">3</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">Latest Drive modifiedTime wins — fallback when rules 1–2 do not resolve</td></tr>
+      <tr><td style="padding:4px 8px;font-family:&#39;DM Mono&#39;,monospace;font-size:10px;">4</td><td style="padding:4px 8px;font-size:11px;color:var(--z-body);">dma@zennify.com owner beats named-user owner — engine-generated wins over manually uploaded</td></tr>
+    </tbody></table></div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">7</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Deep content fetch and parse <span class="marker m-drive">DRIVE</span></div>
+    <div class="fdesc">Winners fetched from Drive API (5 concurrent). Parsed per artifact type using section header anchors (DOCX reports) or header-row detection (XLSX workbooks). Structured data written to <code>parsed_artifact</code> staging table.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">8</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Synthetic payload assembly</div>
+    <div class="fdesc">All parsed fields from all artifact types for one entity merged using source priority hierarchy (Assessment Report scores beat Research Report scores for subcap data). Fields parsed from XLSX workbook take precedence for subcap data. Fields not present in any parsed artifact remain NULL.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">9</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Entity PENDING_REVIEW check <span class="marker m-db">DB</span></div>
+    <div class="fdesc">If the entity was newly created during inference (no prior DB match): status → PENDING_REVIEW. Not shown in entity directory until ADMIN confirms (see §24). Existing entities proceed directly to storage.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">10</div></div><div class="fbody">
+    <div class="ftitle">Storage + run record creation <span class="marker m-db">DB</span></div>
+    <div class="fdesc">All fields written to DB as a new run record with <code>data_source: DRIVE_PARSE</code>. Run status → ACTIVE (Drive-parsed entities go directly to ACTIVE — no batch stages). Entity directory shows the new entity (if ADMIN-confirmed) with the DRIVE PARSE badge.</div>
+  </div></div>
+</div>
+</div>
+
+<!-- S23 IMPORT AUDIT -->
+<div id="s23" class="section">
+<div class="eyebrow ph0">Section 23 · Phase 0 · Route: /admin/import/audit</div>
+<h1>Phase 0 — Import audit workflow</h1>
+<p class="lead">Every Drive file that was EXCLUDED or flagged for REVIEW during the crawl is logged to the <code>import_audit</code> table. Admins review these files here. REVIEW files can be resolved (imported or permanently excluded). EXCLUDED files are informational — logged for audit but not actionable.</p>
+
+<div class="co co-ph0"><div class="col">ADMIN only</div><p>The <code>/admin/import/audit</code> route is ADMIN only. ANALYST cannot access it. The audit table is never shown in the main entity directory — only here.</p></div>
+
+<h2>Import audit page layout</h2>
+<table class="tbl tbl-ph0">
+  <thead><tr><th>Section</th><th>Content</th><th>Default state</th></tr></thead>
+  <tbody>
+    <tr><td>Summary strip</td><td>Total EXCLUDED, total REVIEW, last crawl date, total candidates processed.</td><td>Always visible above the table.</td></tr>
+    <tr><td>Filter bar</td><td>Status (ALL / REVIEW / EXCLUDED), rule triggered (R01–R06), crawl date range.</td><td>Shows all REVIEW items by default (these need action).</td></tr>
+    <tr><td>Audit table</td><td>Drive file ID · Filename · Rules triggered · Status · Timestamp · Actions (REVIEW items only).</td><td>Sorted by most recent crawl, REVIEW items first.</td></tr>
+  </tbody>
+</table>
+
+<h2>Sample import audit entries</h2>
+<div class="card" style="padding:0;overflow:hidden;">
+  <div style="background:var(--z-dark);padding:8px 14px;display:flex;gap:12px;">
+    <div style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;flex:0 0 70px;">Status</div>
+    <div style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;flex:1;">Filename</div>
+    <div style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;flex:0 0 120px;">Rules triggered</div>
+  </div>
+  <div class="audit-row">
+    <div class="audit-status as-excl">EXCLUDED</div>
+    <div style="flex:1;"><div class="audit-file">Nyumba Zetu Final Research Report.gdoc</div><div class="audit-reason">No Assessment ID. Resolved entity is PropTech (Nairobi) — non-FSI. Rules R02, R03.</div></div>
+    <div style="flex:0 0 120px;font-size:11px;color:var(--z-muted);">R02 · R03</div>
+  </div>
+  <div class="audit-row">
+    <div class="audit-status as-rev">REVIEW</div>
+    <div style="flex:1;"><div class="audit-file">DMA_Assessment_Report_ClientX.gdoc</div><div class="audit-reason">File owner: john.smith@client.com (outside zennify.com). Rule R05. May be a client-provided document shared to Drive.</div></div>
+    <div style="flex:0 0 120px;font-size:11px;color:var(--z-muted);">R05</div>
+  </div>
+  <div class="audit-row">
+    <div class="audit-status as-rev">REVIEW</div>
+    <div style="flex:1;"><div class="audit-file">Legacy_Assessment_STCU_Framework_v5.0.gdoc</div><div class="audit-reason">Contains "Framework v5.0" — schema incompatible with v5.5. Rule R06. May be importable with legacy parsing confirmation.</div></div>
+    <div style="flex:0 0 120px;font-size:11px;color:var(--z-muted);">R06</div>
+  </div>
+</div>
+
+<h2>Resolving a REVIEW file</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">1</div><div class="fline fl-ph0"></div></div><div class="fbody"><div class="ftitle">Admin opens a REVIEW file's detail view</div><div class="fdesc">Click the row → panel expands with: full file metadata (owner, modifiedTime, size), rules triggered with explanations, a preview of the first 500 characters of the document content, and the inferred entity (if any).</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">2</div><div class="fline fl-ph0"></div></div><div class="fbody"><div class="ftitle">Admin chooses an action</div><div class="fdesc">Two options: <strong>"Import anyway"</strong> — bypasses the REVIEW flag, adds the file to the import pipeline immediately. Requires Admin to confirm: "I confirm this is a valid DMA artifact for [entity]." Or <strong>"Permanently exclude"</strong> — marks the file as EXCLUDED, preventing it from appearing in future crawl results.</div></div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">3</div></div><div class="fbody"><div class="ftitle">Resolution recorded <span class="marker m-db">DB</span></div><div class="fdesc">POST to <code>/api/v1/admin/import/audit/:id/resolve</code> with action (IMPORT / PERMANENTLY_EXCLUDE) and optional note. Audit record updated with: resolved_by, resolved_at, resolution_action, resolution_note. If IMPORT: file joins the normal pipeline at step 7 (content fetch).</div></div></div>
+</div>
+</div>
+
+<!-- S24 PENDING REVIEW -->
+<div id="s24" class="section">
+<div class="eyebrow ph0">Section 24 · Phase 0</div>
+<h1>Phase 0 — Entity PENDING_REVIEW</h1>
+<p class="lead">When Drive inference creates a new entity that was not previously in the database, it starts with status PENDING_REVIEW. It is not shown in the entity directory until an ADMIN confirms the entity is a valid FSI institution. This prevents accidental import of misclassified non-clients.</p>
+
+<div class="co co-ph0"><div class="col">Why this exists</div><p>Drive entity inference uses a confidence cascade. Files with confidence ≥ 0.7 are auto-matched. Files that create new entities are automatically flagged PENDING_REVIEW because the inference has not been confirmed by a human. An ADMIN must review the evidence before the entity appears in the directory.</p></div>
+
+<h2>PENDING_REVIEW entity lifecycle</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">1</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Drive crawl creates a new entity from inference</div>
+    <div class="fdesc">An entity is inferred from a Drive file with confidence between 0.7 and 0.89 (Assessment ID found, or name extraction confirmed, but entity is new to the DB). Entity record created with <code>review_status: PENDING_REVIEW</code>. The entity's data is fully ingested into the DB — only its visibility is gated.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">2</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Admin notified <span class="marker m-sse">SSE</span></div>
+    <div class="fdesc">Admin's sidebar shows a badge on the Admin nav item: "[N] entities pending review." The /admin page has a PENDING_REVIEW section with one card per entity: inferred name, inferred subvertical, confidence score, which rule produced the inference, and a link to the source Drive file.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">3</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Admin reviews inference evidence</div>
+    <div class="fdesc">Each PENDING_REVIEW card shows: the matching evidence (Assessment ID found, entity name extracted from header, filename tokens matched). Admin can view the first 2,000 characters of the source document inline. Confidence score and which cascade signal produced the match is shown with explanation.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">4</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Admin confirms or rejects <span class="marker m-db">DB</span></div>
+    <div class="fdesc"><strong>Confirm:</strong> Optional name correction, subvertical selection, and domain entry. Entity <code>review_status</code> → CONFIRMED. Entity immediately appears in the entity directory with the DRIVE PARSE badge. <br><strong>Reject:</strong> Entity is marked EXCLUDED and will not appear again unless manually re-imported. Source file is logged in the import_audit table as R02 (non-resolvable).</div>
+  </div></div>
+</div>
+
+<h2>PENDING_REVIEW visibility rules</h2>
+<table class="tbl tbl-ph0">
+  <thead><tr><th>Where</th><th>PENDING_REVIEW entity visible?</th></tr></thead>
+  <tbody>
+    <tr><td>Entity directory (/clients)</td><td>Not visible. Excluded from all search and filter results.</td></tr>
+    <tr><td>Admin PENDING_REVIEW section</td><td>Visible. Full entity record and inference evidence shown.</td></tr>
+    <tr><td>Alert dashboard (/alerts)</td><td>Not visible. Alerts generated during parsing are suppressed until the entity is confirmed.</td></tr>
+    <tr><td>Direct URL access (/clients/:id/*)</td><td>Returns 404 "Entity not found or pending review" — same as non-existent entity. Admin sees additional message: "This entity is pending review. Confirm in admin to make it visible."</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- S25 PHASE TRANSITION -->
+<div id="s25" class="section">
+<div class="eyebrow ph0">Section 25 · Phase 0 → Phase 1</div>
+<h1>Phase 0 → Phase 1 transition</h1>
+<p class="lead">When a Phase 0 entity is subsequently run through the DMA project with Phase 1 enabled, the new Phase 1 run supersedes the Drive-parsed record. Phase 0 data is never deleted — it is retained as SUPERSEDED and is a valid diff baseline. Per PRD v3 §18.</p>
+
+<h2>Transition conditions</h2>
+<table class="tbl">
+  <thead><tr><th>Condition</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>DMA project has <code>scripts/post_to_app.py</code> installed and validated in a sandbox run</td><td>Checked during Phase 1 activation</td></tr>
+    <tr><td>Ingest endpoint is live and returns 201 for a test payload</td><td>Verified by Admin before enabling Phase 1 for a entity</td></tr>
+    <tr><td>API key provisioned and stored in the DMA project's environment variables</td><td>Admin action via /admin/settings</td></tr>
+    <tr><td>End-to-end test: DMA run → POST to app → DB record → UI visible</td><td>Required before marking Phase 1 as production-ready</td></tr>
+  </tbody>
+</table>
+
+<h2>Per-entity transition flow</h2>
+<div class="flow">
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph0">→</div><div class="fline fl-ph0"></div></div><div class="fbody">
+    <div class="ftitle">Before Phase 1: entity exists as DRIVE_PARSE <span class="marker m-ph0">PH0</span></div>
+    <div class="fdesc">Entity in directory with <span class="b bph0">DRIVE PARSE</span> badge. All fields from parsed documents. Possible NULL fields where parsing was incomplete. Analyst annotations already exist (if any were created).</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-ph1">→</div><div class="fline fl-ph1"></div></div><div class="fbody">
+    <div class="ftitle">First Phase 1 run posts → transition <span class="marker m-ph1">PH1</span> <span class="marker m-db">DB</span></div>
+    <div class="fdesc">DMA project posts payload. New run_id created. Prior DRIVE_PARSE run → SUPERSEDED. Entity flag → <code>data_source: PROJECT_API</code>. NULL fields filled. Subcap count → canonical 708 rows. Entity directory now shows <span class="b bph1">PROJECT API</span> badge.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">→</div><div class="fline fl-t"></div></div><div class="fbody">
+    <div class="ftitle">Annotations carry forward automatically</div>
+    <div class="fdesc">All analyst annotations are entity-scoped. They automatically appear on the new Phase 1 run's insight cards. No manual migration needed.</div>
+  </div></div>
+  <div class="fstep"><div class="fspine"><div class="fdot fd-t">→</div></div><div class="fbody">
+    <div class="ftitle">Phase 0 record retained — valid diff baseline</div>
+    <div class="fdesc">The DRIVE_PARSE run is retained as SUPERSEDED in the run history. It is a valid comparison target in the D6 version diff view. The diff label shows: "Drive parse (Phase 0) vs Phase 1 structured" — helping the Analyst see what completeness the structured API run added over the parsed document version.</div>
+  </div></div>
+</div>
+
+<h2>Entities the project never re-runs</h2>
+<div class="co co-plain"><p>Phase 0 entities the DMA project never re-runs remain as <code>data_source: DRIVE_PARSE</code> indefinitely. They are fully usable but carry the DRIVE PARSE badge as a permanent indicator of their provenance. Their assessment freshness indicator will eventually turn orange and then red as time passes — the standard mechanism for flagging stale assessments applies equally to Phase 0 entities.</p></div>
+</div>
+
+<!-- S26 STORAGE MAP -->
+<div id="s26" class="section">
+<div class="eyebrow">Section 26 · Reference</div>
+<h1>Persistent storage map</h1>
+<p class="lead">Complete inventory of every piece of state that persists, where it lives, how long it lasts, and what creates or destroys it. Updated for v3 to include Phase 0-specific entries.</p>
+
+<h2>Assessment data (immutable after ACTIVE)</h2>
+<div class="pm-row pm-head"><div class="pm-cell">What is stored</div><div class="pm-cell">Layer</div><div class="pm-cell">Lifetime</div><div class="pm-cell">Created / Modified by</div></div>
+<div class="pm-row"><div class="pm-cell item">Entity record</div><div class="pm-cell store">PostgreSQL · entities</div><div class="pm-cell ttl">Permanent</div><div class="pm-cell">Created: first ingest (PH0 or PH1). Updated: latest_run_id, overall_score, data_source on each new ACTIVE run. review_status updated by ADMIN action.</div></div>
+<div class="pm-row"><div class="pm-cell item">Assessment run (PH0)</div><div class="pm-cell store">PostgreSQL · assessment_runs</div><div class="pm-cell ttl">Permanent (immutable)</div><div class="pm-cell">Created: Drive crawl import pipeline step 10. data_source = DRIVE_PARSE. Status → ACTIVE immediately. SUPERSEDED when Phase 1 run is ingested for same entity.</div></div>
+<div class="pm-row"><div class="pm-cell item">Assessment run (PH1)</div><div class="pm-cell store">PostgreSQL · assessment_runs</div><div class="pm-cell ttl">Permanent (immutable after ACTIVE)</div><div class="pm-cell">Created: ingest API batch 1 POST. Status progresses through batch stages to ACTIVE on batch 6. SUPERSEDED on next run.</div></div>
+<div class="pm-row"><div class="pm-cell item">Subcap scores</div><div class="pm-cell store">PostgreSQL · subcap_scores</div><div class="pm-cell ttl">Permanent (immutable)</div><div class="pm-cell">PH1: batch 4 POST. PH0: during parse pipeline. Never modified — score changes require a new run.</div></div>
+<div class="pm-row"><div class="pm-cell item">Evidence items</div><div class="pm-cell store">PostgreSQL · evidence_items</div><div class="pm-cell ttl">Permanent</div><div class="pm-cell">PH1: batch 2 POST. PH0: during parse. Run-scoped IDs (E-001 in Run A ≠ E-001 in Run B).</div></div>
+<div class="pm-row"><div class="pm-cell item">Insight cards</div><div class="pm-cell store">PostgreSQL · insight_cards</div><div class="pm-cell ttl">Permanent</div><div class="pm-cell">PH1: batch 5 POST. PH0: parsed from Client Profile §4.1. Marked REVISED when rerun produces updated IC-ID.</div></div>
+<div class="pm-row"><div class="pm-cell item">Import audit records (PH0)</div><div class="pm-cell store">PostgreSQL · import_audit</div><div class="pm-cell ttl">Permanent</div><div class="pm-cell">Created by Drive crawl for every EXCLUDED or REVIEW file. Updated by ADMIN resolution action.</div></div>
+<div class="pm-row"><div class="pm-cell item">Raw DMA artifacts</div><div class="pm-cell store">Google Cloud Storage</div><div class="pm-cell ttl">Permanent (backup)</div><div class="pm-cell">Copied from Drive after successful parse. Backup — not used for serving.</div></div>
+
+<h2>Mutable quality state</h2>
+<div class="pm-row pm-head"><div class="pm-cell">What is stored</div><div class="pm-cell">Layer</div><div class="pm-cell">Lifetime</div><div class="pm-cell">Created / Modified by</div></div>
+<div class="pm-row"><div class="pm-cell item">Thin evidence alerts</div><div class="pm-cell store">PostgreSQL · thin_evidence_alerts</div><div class="pm-cell ttl">Permanent (status changes)</div><div class="pm-cell">Auto-created on ingest. OPEN → IN_REVIEW → RESOLVED/WAIVED. Auto-resolved by rerun with sufficient evidence.</div></div>
+<div class="pm-row"><div class="pm-cell item">Analyst annotations</div><div class="pm-cell store">PostgreSQL · analyst_annotations</div><div class="pm-cell ttl">Permanent (append-only)</div><div class="pm-cell">Created by any user. Entity-scoped. Survive Phase 0 → Phase 1 transitions and reruns.</div></div>
+
+<h2>Intelligence cache</h2>
+<div class="pm-row pm-head"><div class="pm-cell">What is stored</div><div class="pm-cell">Layer</div><div class="pm-cell">Lifetime</div><div class="pm-cell">Created / Destroyed by</div></div>
+<div class="pm-row"><div class="pm-cell item">Gemini responses (hot)</div><div class="pm-cell store">Redis</div><div class="pm-cell ttl">4 hours TTL</div><div class="pm-cell">Created: Gemini call or ingest bootstrap. Destroyed: TTL expiry or admin cache clear.</div></div>
+<div class="pm-row"><div class="pm-cell item">Gemini responses (audit)</div><div class="pm-cell store">PostgreSQL · intelligence_cache</div><div class="pm-cell ttl">90 days (hallucination flags: permanent)</div><div class="pm-cell">Append-only. Never modified. Purged at 90 days unless hallucination_flags is non-empty.</div></div>
+<div class="pm-row"><div class="pm-cell item">Feedback files (PH1)</div><div class="pm-cell store">Google Drive</div><div class="pm-cell ttl">Permanent (overwritten on each ingest)</div><div class="pm-cell">Written after every Phase 1 ingest and after alert waive/resolve actions. DMA project reads at Batch 1.</div></div>
+
+<h2>Session and URL state</h2>
+<div class="pm-row pm-head"><div class="pm-cell">What is stored</div><div class="pm-cell">Layer</div><div class="pm-cell">Lifetime</div><div class="pm-cell">Notes</div></div>
+<div class="pm-row"><div class="pm-cell item">RS256 JWT (session)</div><div class="pm-cell store">HttpOnly cookie</div><div class="pm-cell ttl">1 hour · auto-refreshed</div><div class="pm-cell">Created: Google OAuth callback. Destroyed: logout or refresh failure.</div></div>
+<div class="pm-row"><div class="pm-cell item">Recent prospecting searches</div><div class="pm-cell store">Browser localStorage</div><div class="pm-cell ttl">Session (clears on logout)</div><div class="pm-cell">Max 10 entries (FIFO). Last 10 entities the user searched in /prospecting.</div></div>
+<div class="pm-row"><div class="pm-cell item">URL state params</div><div class="pm-cell store">Browser URL only</div><div class="pm-cell ttl">Session (in URL)</div><div class="pm-cell">?run= · ?subcap= · ?evidence= · ?hm= · ?view= · ?zoom= · ?pillar= · ?cat= · ?compare= · ?q= · etc.</div></div>
+</div>
+
+<!-- S27 ERROR & EMPTY STATES -->
+<div id="s27" class="section">
+<div class="eyebrow">Section 27 · Reference</div>
+<h1>Error &amp; empty states</h1>
+<p class="lead">Every flow handles missing data, failed requests, and unexpected states. Each error has a clear explanation and a specific recovery action.</p>
+
+<h2>Global error states</h2>
+<table class="tbl">
+  <thead><tr><th>Error</th><th>Treatment</th><th>Recovery</th></tr></thead>
+  <tbody>
+    <tr><td>Non-zennify.com account</td><td>Inline message on /login: "Only @zennify.com Google accounts are permitted."</td><td>"Try again" button restarts the OAuth flow.</td></tr>
+    <tr><td>JWT expired</td><td>Non-dismissable full-page overlay: "Your session has expired. Please sign in again."</td><td>"Sign in" → /login with callbackUrl to current page.</td></tr>
+    <tr><td>403 Forbidden</td><td>Toast: "You don't have access to this feature. Contact an admin if you need it." Auto-dismisses after 5s.</td><td>None — informational.</td></tr>
+    <tr><td>Network offline</td><td>Orange top-of-page banner: "You appear to be offline."</td><td>Auto-dismisses on reconnect. "Reload" button if content failed to load.</td></tr>
+    <tr><td>500 Server Error</td><td>Component-level error state (not page crash). Toast: "Something went wrong. Our team has been notified." Sentry captures with request_id.</td><td>Retry button in the component. If persistent: "Contact engineering@zennify.com [request_id]."</td></tr>
+    <tr><td>Drive crawl failure (PH0)</td><td>Import job status → FAILED. Admin notified via /admin badge. Error logged to import_jobs table with exception detail.</td><td>"Retry" button on the import job row in /admin/import.</td></tr>
+  </tbody>
+</table>
+
+<h2>Per-page empty states</h2>
+<table class="tbl">
+  <thead><tr><th>Page/context</th><th>Empty condition</th><th>What to show</th></tr></thead>
+  <tbody>
+    <tr><td>/ Dashboard</td><td>No entities in DB</td><td>Onboarding card: "Welcome to DMA Visualizer! No assessments yet. Get started by importing from Drive or completing a DMA run." Two action buttons: Import from Drive, View documentation.</td></tr>
+    <tr><td>/clients directory</td><td>Search returns 0 results</td><td>"No clients match your search." Clear filters + clear search buttons. Never a blank table.</td></tr>
+    <tr><td>D3 Heatmap — no scores</td><td>Run is in Batch 1–3</td><td>Greyed-out heatmap grid (preview of structure) with progress bar and "Subcap scoring will begin in Batch 4" message.</td></tr>
+    <tr><td>D6 alerts — 0 open</td><td>All alerts resolved or none generated</td><td>Teal positive state: "No open alerts for this entity. Evidence coverage meets the minimum threshold across all subcaps."</td></tr>
+    <tr><td>Evidence drawer — 0 evidence</td><td>Subcap has no evidence items</td><td>"No evidence found for this subcapability." ANALYST: thin-evidence alert badge shown.</td></tr>
+    <tr><td>Intelligence Panel — no cache</td><td>Bootstrap didn't run yet</td><td>"Generating analysis…" with teal pulse animation. &lt;800ms for Flash first token. Never an empty panel.</td></tr>
+    <tr><td>/prospecting — not found</td><td>Search term doesn't match any entity</td><td>"No DMA assessment found for '[name]'. Request an assessment by emailing dma@zennify.com with the company name." Mailto link pre-fills.</td></tr>
+    <tr><td>Admin PENDING_REVIEW — none</td><td>All new entities from Drive crawl are confirmed or rejected</td><td>Teal positive state: "No entities pending review. All Drive-imported entities have been confirmed."</td></tr>
+  </tbody>
+</table>
+
+<h2>Intelligence Panel soft failure design</h2>
+<div class="co co-ai"><div class="col">AI failures must be soft</div><p>Intelligence Panel failures use neutral grey styling — never orange or below-benchmark red. The panel is additive; its failure must never alarm the user or suggest the main dashboard is broken. "Analysis temporarily unavailable" with a retry option is the correct pattern. All 6 dashboard clusters remain fully functional regardless of panel state.</p></div>
+</div>
+
+<!-- S28 MOBILE -->
+<div id="s28" class="section">
+<div class="eyebrow">Section 28 · Reference</div>
+<h1>Mobile experience</h1>
+<p class="lead">The app is primarily a desktop tool. AEs frequently need quick access on mobile (before a call, between meetings). The mobile experience is optimised for read-only consumption of D1, D2, and the scorecard export.</p>
+
+<h2>Layout changes on mobile (&lt;768px)</h2>
+<table class="tbl">
+  <thead><tr><th>Element</th><th>Desktop</th><th>Mobile</th></tr></thead>
+  <tbody>
+    <tr><td>Left sidebar</td><td>256px persistent</td><td>Hidden. Hamburger icon (☰) in top bar. Tap → overlay drawer from left.</td></tr>
+    <tr><td>Intelligence Panel</td><td>360px right drawer</td><td>Hidden by default. Floating "AI" button in bottom-right. Tap → full-screen overlay.</td></tr>
+    <tr><td>Heatmap (D3)</td><td>Full 708-cell subcap grid</td><td>Defaults to Category zoom (17 cells). Subcap zoom accessible with horizontal scroll. "Full heatmap" button → full-screen landscape.</td></tr>
+    <tr><td>Evidence drawer</td><td>320px right panel</td><td>Full-screen bottom sheet. Slides up from bottom edge.</td></tr>
+    <tr><td>Client tab bar (6 tabs)</td><td>Horizontal row</td><td>Horizontal scroll tab bar. 3–4 visible without scrolling.</td></tr>
+    <tr><td>Card grids (2-column)</td><td>2 columns</td><td>1 column — all grids stack vertically.</td></tr>
+    <tr><td>Phase 0 admin audit table</td><td>4-column layout</td><td>2-column layout. Rule column hidden; shown in expanded row.</td></tr>
+  </tbody>
+</table>
+
+<h2>Mobile-optimised flows</h2>
+<div class="g2">
+  <div class="card card-suc"><div class="card-t" style="color:var(--z-mid);">Works well on mobile</div><div class="card-b">Entity directory browse and search · D1 Entity intelligence hub (entity snapshot + Why now signals + pillar bars) · Insight card grid (D2) browsing · /prospecting scorecard export · Alert status management (IN_REVIEW, WAIVE) · Intelligence Panel in full-screen mode · Run history list</div></div>
+  <div class="card card-org"><div class="card-t" style="color:#7C3500;">Reduced functionality on mobile</div><div class="card-b">D3 Heatmap at subcap level (scroll-intensive) · D4 Platform matrix (table-heavy) · Evidence drawer with many items · Version diff view (wide table) · Phase 0 import audit table · Cross-entity pattern finder</div></div>
+</div>
+
+<h2>Touch interactions</h2>
+<ul style="padding-left:18px;margin:8px 0;font-size:13px;color:var(--z-body);">
+  <li style="padding:3px 0;"><strong>Heatmap cell — tap:</strong> Opens evidence drawer (same as desktop click).</li>
+  <li style="padding:3px 0;"><strong>Heatmap cell — long press:</strong> Shows tooltip with subcap details (equivalent to desktop hover).</li>
+  <li style="padding:3px 0;"><strong>Evidence drawer / bottom sheet — swipe right:</strong> Dismisses the drawer.</li>
+  <li style="padding:3px 0;"><strong>Client tabs — horizontal swipe:</strong> Navigates between the 6 tabs.</li>
+  <li style="padding:3px 0;"><strong>Insight card — tap anywhere:</strong> Opens full card modal.</li>
+</ul>
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+<script>
+const TITLES={
+  s00:'00 — Overview & design principles',s01:'01 — Authentication & session',
+  s02:'02 — Global navigation',s03:'03 — Dashboard home (/)',
+  s04:'04 — Entity directory (/clients)',s05:'05 — In-progress run',
+  s06:'06 — Client shell & tab navigation',s07:'D1 — Entity intelligence hub',
+  s08:'D2 — Insight card surface',s09:'D3 — Maturity heatmap',
+  s10:'D4 — Platform opportunity matrix',s11:'D5 — Context & timeline',
+  s12:'D6 — Assessment health',s13:'13 — Evidence drilldowns',
+  s14:'14 — Intelligence Panel',s15:'15 — Audience mode toggle',
+  s16:'16 — Alert management',s17:'17 — Prospecting & export',
+  s18:'18 — Version diff & reruns',s19:'19 — Annotations lifecycle',
+  s20:'20 — Feedback loop',s21:'21 — Admin workflows',
+  s22:'22 — Phase 0: Drive crawl',s23:'23 — Phase 0: Import audit',
+  s24:'24 — Phase 0: Entity pending review',s25:'25 — Phase 0 → Phase 1 transition',
+  s26:'26 — Persistent storage map',s27:'27 — Error & empty states',
+  s28:'28 — Mobile experience',
+};
+function go(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.sb-a').forEach(l=>l.classList.remove('on'));
+  const sec=document.getElementById(id);
+  if(sec){sec.classList.add('on');}
+  document.querySelectorAll('.sb-a').forEach(l=>{
+    if((l.getAttribute('onclick')||'').includes("'"+id+"'"))l.classList.add('on');
+  });
+  document.getElementById('tb-t').textContent=TITLES[id]||id;
+  window.scrollTo(0,0);
+}
+</script>
+
+
+</body></html>

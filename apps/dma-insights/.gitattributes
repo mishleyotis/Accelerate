@@ -1,0 +1,8 @@
+# DMA package fixtures are committed binaries (xlsx/docx/pdf are zips).
+# Mark binary + -diff so git never attempts EOL normalization or a
+# textual 3-way merge (2026-06-10: a stray openpyxl re-save once churned
+# two scoring workbooks into a commit and blocked operator `git pull`).
+backend/tests/fixtures/** binary
+*.xlsx binary -diff
+*.docx binary -diff
+*.pdf  binary -diff

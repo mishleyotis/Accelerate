@@ -1,0 +1,10 @@
+# Redis persistence snapshot — Redis writes this whenever it's started
+# with the default `save` config and `dir .` (where . happens to be the
+# backend dir during a local visual-test run). It's a runtime artifact,
+# not source.
+dump.rdb
+
+# Local-dev artefacts that should never land in the repo
+*.log
+.env.local
+.coverage

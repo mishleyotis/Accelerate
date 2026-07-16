@@ -1,0 +1,22 @@
+# Terraform local state — never commit.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.lock.info
+
+# Plan output — generated per-run.
+plan.tfplan
+*.tfplan
+
+# Local override files — operator-specific.
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Crash logs.
+crash.log
+crash.*.log
+
+# DO commit the provider lock — pins versions across machines.
+# !.terraform.lock.hcl  (implicit — not in any pattern above)

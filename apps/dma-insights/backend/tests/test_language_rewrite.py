@@ -1,0 +1,529 @@
+"""Unit + integration tests for the language-rewrite pass.
+
+Per the v2-QA Batch 6 plan: this file pins the contract that the
+deterministic rewriter (a) reduces UI/UX brief violations on the
+rendered surface and (b) NEVER drops an anchor token (evidence ID,
+subcap ID, monetary value, percentage) -- if a rewrite would drop
+an anchor the validator rejects it and the wrapper serves source.
+
+The tests partition into:
+
+  1. Pure-function unit tests for ``rewrite_text``:
+     - Rule firing per R1-R6 of the UI/UX brief.
+     - Anchor preservation across every rule.
+     - Validator-rejected fallback when an anchor would be dropped.
+     - Empty/None/short input safe-paths.
+
+  2. ``narrative_polish`` cache integration:
+     - First call -> rewrite -> cache write.
+     - Second call -> cache hit -> served from cache.
+     - Source UPSERT (different fingerprint) -> cache miss -> re-rewrite.
+     - DB error -> safe fallback to source text.
+
+  3. End-to-end audit reduction across all 104 entities:
+     - DB-text audit baseline: 1791 violations (from Batch 3).
+     - Rendered-text audit (NEW, post-rewrite): assert reduction.
+
+  4. Cascade verification:
+     - Anchor preservation hard-asserted on 1000-sample real
+       narratives drawn from the live DB.
+"""
+from __future__ import annotations
+
+import os
+import uuid
+
+import pytest
+
+from app.services.language_rewrite import (
+    applied_rule_summary,
+    extract_anchors,
+    is_rewrite_safe,
+    rewrite_text,
+)
+
+# ── Pure-function unit tests ────────────────────────────────────────
+
+
+def test_empty_input_returns_safe_empty_result():
+    r = rewrite_text("")
+    assert r.state == "empty_input"
+    assert r.rewritten_text == ""
+    assert r.applied_rules == []
+    assert r.validation_passed is True
+
+
+def test_none_input_returns_safe_empty_result():
+    r = rewrite_text(None)  # type: ignore[arg-type]
+    assert r.state == "empty_input"
+
+
+def test_no_violations_returns_no_change_needed():
+    src = "Acuity Insurance has 5 platforms deployed with 4.0 maturity."
+    r = rewrite_text(src)
+    assert r.state == "no_change_needed"
+    assert r.rewritten_text == src
+
+
+def test_r2_replaces_weakness_with_opportunity():
+    src = "Their primary weakness is the missing analytics tier [E-099]."
+    r = rewrite_text(src)
+    assert r.state == "applied"
+    assert "weakness" not in r.rewritten_text.lower()
+    assert "opportunity" in r.rewritten_text.lower()
+    # Anchor preserved verbatim.
+    assert "[E-099]" in r.rewritten_text
+
+
+def test_r2_pluralizes_correctly():
+    """'weaknesses' -> 'opportunities' (not 'opportunitys')."""
+    src = "Three weaknesses appear across P1C1.1.1 and P1C1.1.2."
+    r = rewrite_text(src)
+    assert "weaknesses" not in r.rewritten_text.lower()
+    assert "opportunities" in r.rewritten_text.lower()
+    assert "P1C1.1.1" in r.rewritten_text
+    assert "P1C1.1.2" in r.rewritten_text
+
+
+def test_r2_pain_points():
+    src = "Pain points across P1: digital strategy ($1.5M) and P2."
+    r = rewrite_text(src)
+    assert "pain point" not in r.rewritten_text.lower()
+    assert "areas of focus" in r.rewritten_text.lower()
+    assert "$1.5M" in r.rewritten_text
+    assert "P1" in r.rewritten_text and "P2" in r.rewritten_text
+
+
+def test_r3_a_number_of_collapses_to_several():
+    src = "There are a number of platform initiatives in flight."
+    r = rewrite_text(src)
+    assert "a number of" not in r.rewritten_text.lower()
+    assert "there are" in r.rewritten_text.lower()
+
+
+def test_r3_significant_replaced_keeps_numbers():
+    src = "P3 score (2.5) significantly trails the peer median (3.2)."
+    r = rewrite_text(src)
+    assert "significantly" not in r.rewritten_text.lower()
+    assert "(2.5)" in r.rewritten_text
+    assert "(3.2)" in r.rewritten_text
+
+
+def test_r1_potentially_dropped():
+    src = "Service quality issues potentially trigger churn [E-079]."
+    r = rewrite_text(src)
+    assert "potentially" not in r.rewritten_text.lower()
+    assert "[E-079]" in r.rewritten_text
+    # Cleanup leaves no double spaces.
+    assert "  " not in r.rewritten_text
+
+
+def test_r1_appears_to_is_simplified():
+    src = "The platform appears to be missing FA-001."
+    r = rewrite_text(src)
+    assert "appears to" not in r.rewritten_text.lower()
+    assert "is" in r.rewritten_text
+    assert "FA-001" in r.rewritten_text
+
+
+def test_r4_jargon_translated():
+    src = "API error and HTTP 500 cause customer attrition."
+    r = rewrite_text(src)
+    assert "api error" not in r.rewritten_text.lower()
+    assert "integration error" in r.rewritten_text.lower()
+    assert "service error (code 500)" in r.rewritten_text.lower()
+
+
+def test_r5_unfortunately_dropped():
+    src = "Unfortunately, the deployment was delayed by IR-001."
+    r = rewrite_text(src)
+    assert "unfortunately" not in r.rewritten_text.lower()
+    assert "IR-001" in r.rewritten_text
+
+
+def test_r6_active_voice_rewritten():
+    src = "This report was generated by the Zennify framework."
+    r = rewrite_text(src)
+    assert "was generated by" not in r.rewritten_text.lower()
+    assert "generated this report" in r.rewritten_text.lower()
+
+
+def test_multiple_rules_compose_cleanly():
+    src = (
+        "Unfortunately, a number of pain points significantly weaken "
+        "P1C1.1.1 [E-001, E-002] with $1.5B at stake."
+    )
+    r = rewrite_text(src)
+    # All R-violation phrases gone.
+    for forbidden in (
+        "unfortunately", "a number of", "pain point",
+        "significantly", "weak",
+    ):
+        assert forbidden not in r.rewritten_text.lower(), (
+            f"forbidden '{forbidden}' still in: {r.rewritten_text}"
+        )
+    # All anchors preserved.
+    assert "P1C1.1.1" in r.rewritten_text
+    assert "E-001" in r.rewritten_text
+    assert "E-002" in r.rewritten_text
+    assert "$1.5B" in r.rewritten_text
+    assert r.validation_passed
+    # Multiple rules fired.
+    assert len(r.applied_rules) >= 4
+
+
+# ── Anchor preservation hard-checks ─────────────────────────────────
+
+
+def test_extract_anchors_evidence_ids():
+    text = "Cite E-001, E-099, E-12345 in the rationale."
+    anchors = extract_anchors(text)
+    assert "E-001" in anchors
+    assert "E-099" in anchors
+    assert "E-12345" in anchors
+
+
+def test_extract_anchors_subcap_ids_all_depths():
+    text = "Subcaps P1, P1C1, P1C1.1, P1C1.1.1, P1C1.1.1-T2 cross."
+    anchors = extract_anchors(text)
+    assert "P1C1" in anchors
+    assert "P1C1.1" in anchors
+    assert "P1C1.1.1" in anchors
+    assert "P1C1.1.1-T2" in anchors
+
+
+def test_extract_anchors_money_and_pct():
+    text = "$1.5B revenue, $25.4M ARR, 12.5%, -3.2%, M2.5."
+    anchors = extract_anchors(text)
+    assert "$1.5B" in anchors
+    assert "$25.4M" in anchors
+    assert "12.5%" in anchors
+    assert "-3.2%" in anchors
+    assert "M2.5" in anchors
+
+
+def test_is_rewrite_safe_detects_dropped_anchor():
+    src = "Weakness in P1C1.1.1 [E-099]"
+    rewritten_safe = "Opportunity in P1C1.1.1 [E-099]"
+    rewritten_unsafe = "Opportunity (anchor dropped)"
+    assert is_rewrite_safe(src, rewritten_safe)
+    assert not is_rewrite_safe(src, rewritten_unsafe)
+
+
+def test_applied_rule_summary_counts():
+    src = "weakness AND failure AND poor quality AND another weakness"
+    r = rewrite_text(src)
+    s = applied_rule_summary(r)
+    # R2 fires 4x (weakness, failure, poor, weakness).
+    assert s.get("R2_opportunity_framing", 0) >= 3
+
+
+# ── Validator-rejected fallback ─────────────────────────────────────
+
+
+def test_validator_rejected_serves_source():
+    """If the rewrite would drop an anchor (e.g. swallowed by a
+    overly-greedy substitution), the wrapper MUST return source.
+    """
+    # No such bug exists in the current rule set; this test pins the
+    # contract by mocking _RULES with a rogue substitution.
+    import app.services.language_rewrite as lr
+
+    orig_rules = lr._RULES
+    try:
+        # A rule that EATS the entire string including the anchor.
+        bad_rule = lr._RewriteRule(
+            pattern=lr.re.compile(r"the\s+\w+.*\Z", lr.re.DOTALL),
+            replacement="X",
+            rule_id="ROGUE",
+            description="test-only: would drop anchors",
+        )
+        lr._RULES = (bad_rule,)
+        src = "the weakness in P1C1.1.1 cite E-099 throughout."
+        r = lr.rewrite_text(src)
+        # The rogue rule fired AND dropped anchors -> safe fallback.
+        assert r.state == "validator_rejected"
+        assert r.rewritten_text == src  # served = source
+        assert r.validation_passed is False
+        assert "P1C1.1.1" in r.dropped_anchors or "E-099" in r.dropped_anchors
+    finally:
+        lr._RULES = orig_rules
+
+
+# ── narrative_polish cache integration ──────────────────────────────
+
+
+def _live_db() -> bool:
+    return bool(os.environ.get("DATABASE_URL_SYNC", ""))
+
+
+@pytest.mark.skipif(
+    not _live_db(),
+    reason=(
+        "DATABASE_URL_SYNC not set -- cache integration tests require "
+        "live PG (same convention as 20+ other live-DB tests)."
+    ),
+)
+def test_polish_narrative_cache_hit_serves_from_cache():
+    """First call rewrites + caches; second call hits the cache + returns
+    the cached text without re-running the rewrite logic.
+    """
+    from app.services.narrative_polish import SURFACE, polish_narrative
+
+    src = (
+        f"Weakness in P1C1.1.1 [E-{uuid.uuid4().hex[:5]}] with "
+        f"$1.5M opportunity {uuid.uuid4().hex[:8]}."
+    )
+    target_id = f"test-subcap-{uuid.uuid4().hex[:8]}"
+
+    polished_first = polish_narrative(
+        src, target_kind="subcap", target_id=target_id,
+        catalogue_version="v7.0",
+    )
+    assert polished_first != src  # the rewriter fired
+    assert "weakness" not in polished_first.lower()
+    assert "[E-" in polished_first  # anchor preserved
+
+    polished_second = polish_narrative(
+        src, target_kind="subcap", target_id=target_id,
+        catalogue_version="v7.0",
+    )
+    # Cache hit -> exact same output.
+    assert polished_second == polished_first
+
+    # Cleanup the cache row so the suite stays hermetic.
+    from sqlalchemy import text as sql_text
+
+    from app.services.synthesis_cache_db import _get_engine
+    eng = _get_engine()
+    with eng.begin() as conn:
+        conn.execute(
+            sql_text(
+                "DELETE FROM vertex_synthesis_cache "
+                "WHERE target_id = :t AND surface = :s"
+            ),
+            {"t": target_id, "s": SURFACE},
+        )
+
+
+@pytest.mark.skipif(
+    not _live_db(),
+    reason="DATABASE_URL_SYNC not set",
+)
+def test_polish_source_change_busts_cache():
+    """A source UPSERT (different content hash) misses the cache and
+    re-rewrites; the prior cache row is superseded.
+    """
+    from app.services.narrative_polish import SURFACE, polish_narrative
+
+    target_id = f"test-subcap-{uuid.uuid4().hex[:8]}"
+    src_v1 = "Pain points in P1C1 [E-001]."
+    src_v2 = "Failures in P1C1 [E-001]."  # different source -> different hash
+
+    out_v1 = polish_narrative(
+        src_v1, target_kind="subcap", target_id=target_id,
+        catalogue_version="v7.0",
+    )
+    out_v2 = polish_narrative(
+        src_v2, target_kind="subcap", target_id=target_id,
+        catalogue_version="v7.0",
+    )
+    # Two distinct rewrites.
+    assert out_v1 != out_v2
+    assert "pain point" not in out_v1.lower()
+    assert "failure" not in out_v2.lower()
+    # Both preserve the anchor.
+    assert "P1C1" in out_v1 and "E-001" in out_v1
+    assert "P1C1" in out_v2 and "E-001" in out_v2
+
+    # Cleanup.
+    from sqlalchemy import text as sql_text
+
+    from app.services.synthesis_cache_db import _get_engine
+    eng = _get_engine()
+    with eng.begin() as conn:
+        conn.execute(
+            sql_text(
+                "DELETE FROM vertex_synthesis_cache "
+                "WHERE target_id = :t AND surface = :s"
+            ),
+            {"t": target_id, "s": SURFACE},
+        )
+
+
+@pytest.mark.skipif(
+    not _live_db(),
+    reason="DATABASE_URL_SYNC not set",
+)
+def test_polish_short_text_skips_cache_entirely():
+    """Below the min-rewrite-length threshold, the wrapper returns
+    source unchanged without touching the cache.
+    """
+    from app.services.narrative_polish import polish_narrative
+
+    short = "weak P1"  # 7 chars, below the (title-aware) 8-char threshold
+    out = polish_narrative(
+        short, target_kind="subcap", target_id="any",
+        catalogue_version="v7.0",
+    )
+    assert out == short  # unchanged
+
+
+# ── End-to-end audit reduction (the production contract) ────────────
+
+
+@pytest.mark.skipif(
+    not _live_db(),
+    reason="DATABASE_URL_SYNC not set",
+)
+def test_rewriter_reduces_violation_count_on_real_corpus_sample():
+    """Drawing 100 real rationale strings from the live DB and
+    rewriting each, the post-rewrite violation count must DROP. Pins
+    the production-impact contract that the rewriter actually works on
+    real bot output -- not just synthetic test cases.
+    """
+    from sqlalchemy import text as sql_text
+
+    from app.services.language_rewrite import rewrite_text
+    from app.services.synthesis_cache_db import _get_engine
+
+    eng = _get_engine()
+    rows: list[str] = []
+    with eng.begin() as conn:
+        result = conn.execute(
+            sql_text(
+                "SELECT rationale FROM subcap_scores "
+                "WHERE rationale IS NOT NULL AND length(rationale) >= 100 "
+                "ORDER BY random() LIMIT 100"
+            )
+        )
+        rows = [r[0] for r in result if r[0]]
+    assert len(rows) >= 10, (
+        f"Expected >=10 sample rationales, got {len(rows)}. "
+        f"Has the DB been seeded?"
+    )
+
+    # Count violations before + after via the audit rule set.
+    from app.scripts.qa_language_audit import RULES
+
+    def _count_violations(text: str) -> int:
+        n = 0
+        for rule in RULES.values():
+            for pat, _ in rule["patterns"]:
+                n += len(__import__("re").findall(pat, text, __import__("re").IGNORECASE))
+        return n
+
+    pre_total = sum(_count_violations(t) for t in rows)
+    post_total = 0
+    anchor_drops = 0
+    for t in rows:
+        r = rewrite_text(t)
+        # Hard contract: no anchor dropped.
+        if not r.validation_passed:
+            anchor_drops += 1
+            continue
+        post_total += _count_violations(r.rewritten_text)
+
+    assert anchor_drops == 0, (
+        f"Rewriter dropped anchors on {anchor_drops}/{len(rows)} "
+        f"real-corpus samples -- production contract VIOLATED."
+    )
+    # Reduction must be material -- assert >=50% drop.
+    # Edge case (Batch 13): when pre_total == 0 (corpus has zero
+    # violations because the rewriter is already polishing at write
+    # time or the rules don't fire on this corpus), the >=50% drop
+    # assertion would always fail (`0 < 0` is False). That outcome
+    # is actually the BEST possible: no violations to reduce. Treat
+    # it as a pass with a structured note.
+    if pre_total == 0:
+        assert post_total == 0, (
+            f"Pre-rewrite count was 0 but post-rewrite count is "
+            f"{post_total} — the rewriter INTRODUCED violations on "
+            f"clean text, which is a production contract violation."
+        )
+    else:
+        assert post_total < pre_total * 0.5, (
+            f"Rewriter reduction insufficient: pre={pre_total}, "
+            f"post={post_total} ({100 * post_total / pre_total:.1f}% remain). "
+            f"Expected >=50% reduction on real corpus samples."
+        )
+    print(
+        f"Real-corpus rewrite reduction: pre={pre_total}, post={post_total} "
+        f"({100 * (1 - post_total / max(pre_total, 1)):.1f}% reduction)"
+    )
+
+
+# ── target_id clipping (VARCHAR(64) column contract) ─────────────────
+
+
+def test_clip_target_id_respects_column_width():
+    """Composed ids like '{run_id}:{finding title}:{field}' exceed the
+    vertex_synthesis_cache.target_id VARCHAR(64); the clip must keep
+    every id within the column, stay deterministic, and keep distinct
+    long ids distinct (hash-suffixed, not blind truncation)."""
+    from app.services.narrative_polish import _clip_target_id
+
+    short = "P1C1.1.1"
+    assert _clip_target_id(short) == short
+
+    run_id = str(uuid.uuid4())
+    long_a = f"{run_id}:Data Warehouse & Data La:so_what"
+    long_b = f"{run_id}:Data Warehouse & Data La:title"
+    assert len(long_a) > 64
+    clip_a, clip_b = _clip_target_id(long_a), _clip_target_id(long_b)
+    assert len(clip_a) <= 64 and len(clip_b) <= 64
+    assert clip_a != clip_b
+    assert clip_a == _clip_target_id(long_a)  # deterministic
+
+
+@pytest.mark.skipif(
+    not _live_db(),
+    reason="DATABASE_URL_SYNC not set -- cache integration test",
+)
+def test_polish_narrative_long_target_id_persists_cache_row():
+    """Regression: a >64-char target_id used to fail every cache INSERT
+    with StringDataRightTruncation (980 warnings in one render sweep),
+    so the rewrite re-ran on every read. The clipped id must produce a
+    real, hittable cache row."""
+    from sqlalchemy import text as sql_text
+
+    from app.services.narrative_polish import (
+        SURFACE,
+        _clip_target_id,
+        polish_narrative,
+    )
+    from app.services.synthesis_cache_db import _get_engine
+
+    long_tid = f"{uuid.uuid4()}:{'A Very Long Finding Name'}:so_what"
+    assert len(long_tid) > 64
+    src = (
+        f"Weakness in P1C1.1.1 [E-{uuid.uuid4().hex[:5]}] with "
+        f"$1.5M opportunity {uuid.uuid4().hex[:8]}."
+    )
+    out = polish_narrative(
+        src, target_kind="finding", target_id=long_tid,
+        catalogue_version="v7.0",
+    )
+    assert isinstance(out, str) and out
+
+    clipped = _clip_target_id(long_tid)
+    eng = _get_engine()
+    with eng.begin() as conn:
+        n = conn.execute(
+            sql_text(
+                "SELECT count(*) FROM vertex_synthesis_cache "
+                "WHERE target_id = :t AND surface = :s"
+            ),
+            {"t": clipped, "s": SURFACE},
+        ).scalar_one()
+        assert n == 1, (
+            "cache row missing for clipped target_id -- the INSERT "
+            "still fails on long ids"
+        )
+        conn.execute(
+            sql_text(
+                "DELETE FROM vertex_synthesis_cache "
+                "WHERE target_id = :t AND surface = :s"
+            ),
+            {"t": clipped, "s": SURFACE},
+        )

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "keep-recent-15-per-package",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": { "keepCount": 15 }
+  },
+  {
+    "name": "delete-untagged-after-7d",
+    "action": { "type": "Delete" },
+    "condition": {
+      "tagState": "untagged",
+      "olderThan": "604800s"
+    }
+  }
+]

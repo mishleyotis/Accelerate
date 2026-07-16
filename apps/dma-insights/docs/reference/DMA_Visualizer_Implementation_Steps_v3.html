@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMA Visualizer — Implementation Steps v3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#F8FAFC;color:#1E293B;line-height:1.6;font-size:14px}
+:root{
+  --teal:#27BBAF;--dpur:#735BA1;--blue:#3D81F6;--below:#C25008;--org:#FE9732;--above:#059669;
+  --dark:#1C4A4D;--dark2:#185F60;--lav:#F2F4F9;--ice:#E8F7F6;--sep:#E5E7EB;--muted:#6B7280;
+  --body:#4A5568;--white:#FFFFFF;--bg:#F8FAFC;
+  --r:8px;--r-lg:12px;
+}
+a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+code{font-family:'JetBrains Mono','Fira Code',monospace;font-size:12px;background:var(--lav);color:var(--dpur);padding:1px 6px;border-radius:4px}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:260px;flex-shrink:0;background:var(--dark);position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 0}
+.sidebar a{display:block;padding:5px 20px;color:rgba(255,255,255,.5);font-size:11.5px;transition:.15s;border-left:2px solid transparent}
+.sidebar a:hover{color:#fff;text-decoration:none;background:rgba(255,255,255,.06)}
+.sidebar-logo{padding:16px 20px 20px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:12px}
+.sidebar-logo-mark{width:28px;height:28px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.sidebar-logo-text{font-size:13px;font-weight:600;color:#fff}
+.sidebar-logo-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.sidebar-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.25);padding:12px 20px 4px}
+.content{flex:1;max-width:1140px;padding:40px 48px}
+h1.page-title{font-size:28px;font-weight:700;color:var(--dark);margin-bottom:6px}
+h1.page-title span{color:var(--teal)}
+.page-subtitle{font-size:15px;color:var(--muted);margin-bottom:32px;max-width:720px;line-height:1.7}
+h2{font-size:18px;font-weight:700;color:var(--dark);margin:40px 0 16px;padding-top:24px;border-top:1px solid var(--sep);display:flex;align-items:center;gap:10px}
+h2:first-of-type{border-top:none;padding-top:0;margin-top:0}
+h2 .sec-num{background:var(--teal);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0}
+h3.subsec{font-size:14px;font-weight:700;color:var(--dark);margin:4px 0 8px}
+h4.h4{font-size:13px;font-weight:600;color:var(--dark);margin:14px 0 6px}
+p.lead{font-size:13.5px;color:var(--body);line-height:1.7;margin-bottom:10px;max-width:760px}
+p.note{font-size:12px;color:var(--muted);font-style:italic;margin:4px 0 12px}
+.table-card{background:#fff;border:1px solid var(--sep);border-radius:var(--r-lg);padding:20px 24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.table-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.table-name{font-size:14px;font-weight:700;color:var(--dark);font-family:'JetBrains Mono',monospace}
+.table-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:var(--teal);color:#fff}
+.field-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.field-table th{background:var(--lav);padding:6px 10px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);border-bottom:1px solid var(--sep)}
+.field-table td{padding:7px 10px;border-bottom:1px solid #f0f0f0;color:var(--body);vertical-align:top}
+.field-table tr:last-child td{border-bottom:none}
+.field-table tr:hover td{background:var(--ice)}
+.ver-badge{background:var(--dark);color:#fff;padding:10px 20px;border-radius:var(--r);font-size:12px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center}
+.ver-badge span{color:var(--teal);font-weight:600}
+.stats-row{display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap}
+.stat-card{background:#fff;border:1px solid var(--sep);border-radius:var(--r);padding:14px 20px;min-width:140px}
+.stat-card .val{font-size:24px;font-weight:700;color:var(--teal)}
+.stat-card .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+@media(max-width:900px){.sidebar{display:none}.content{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark" style="padding:0;overflow:hidden;">
+<svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+<rect width="28" height="28" rx="6" fill="#27BBAF"/>
+<path d="M7.5 8.5h13l-8 11h8" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg></div>
+    <div>
+      <div class="sidebar-logo-text">Zennify DMA</div>
+      <div class="sidebar-logo-sub">Implementation Steps v3.0</div>
+    </div>
+  </div>
+  <div class="sidebar-section">Phases</div>
+  <a href="#scaffold" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">S Project Scaffolding</a><a href="#step-S.1">S.1 Repo & CLAUDE.md</a><a href="#step-S.2">S.2 Environment configs</a><a href="#step-S.3">S.3 CI/CD workflows</a>
+  <a href="#p0" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">GCP Infrastructure & Database</a><a href="#step-0.1">0.1 GCP project creation & IAM</a><a href="#step-0.2">0.2 Cloud SQL PostgreSQL provisi</a><a href="#step-0.3">0.3 Schema deployment — core tab</a><a href="#step-0.4">0.4 Schema deployment — CCG tabl</a><a href="#step-0.5">0.5 Schema deployment — report p</a><a href="#step-0.6">0.6 Redis provisioning (Upstash)</a><a href="#step-0.7">0.7 Cloud Storage buckets</a><a href="#step-0.8">0.8 CCG data load pipeline — V7.</a><a href="#step-0.9">0.9 CI/CD pipeline setup</a><a href="#p1" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Backend Core (FastAPI)</a><a href="#step-1.1">1.1 FastAPI application scaffold</a><a href="#step-1.2">1.2 Authentication — Google OAut</a><a href="#step-1.3">1.3 Entity management APIs</a><a href="#step-1.4">1.4 Runs, scoring & evidence API</a><a href="#step-1.5">1.5 Insights, recommendations & </a><a href="#step-1.6">1.6 Alerts, annotations & contex</a><a href="#step-1.7">1.7 SSE real-time infrastructure</a><a href="#step-1.8">1.8 Gemini intelligence layer — </a><a href="#step-1.9">1.9 Admin & import audit APIs</a><a href="#p2" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Drive Import Pipeline (Phase 0 of Product)</a><a href="#step-2.1">2.1 Google Drive service account</a><a href="#step-2.2">2.2 Artifact classification & en</a><a href="#step-2.3">2.3 Deduplication & document par</a><a href="#p3" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Frontend Foundation (Next.js)</a><a href="#step-3.1">3.1 Next.js 14 scaffold & design</a><a href="#step-3.2">3.2 Core component library</a><a href="#step-3.3">3.3 Global layout — sidebar, top</a><a href="#step-3.4">3.4 Login page & auth flow</a><a href="#step-3.5">3.5 Entity directory page</a><a href="#p4" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Dashboard Clusters (D1–D6)</a><a href="#step-4.1">4.1 D1 — Executive Overview (/cl</a><a href="#step-4.2">4.2 D2 — Insight Cards (/clients</a><a href="#step-4.3">4.3 D3 — Interactive Heatmap (/c</a><a href="#step-4.4">4.4 D4 — Platform Opportunity Ma</a><a href="#step-4.5">4.5 D5 — Context & Timeline (/cl</a><a href="#step-4.6">4.6 D6 — Health & Alerts (/clien</a><a href="#p5" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Specialized Views & Cross-cutting Features</a><a href="#step-5.1">5.1 Tech Stack Overview & Drilld</a><a href="#step-5.2">5.2 Evidence Drawer</a><a href="#step-5.3">5.3 Intelligence Panel (Gemini)</a><a href="#step-5.4">5.4 Run Selector, Audience Toggl</a><a href="#step-5.5">5.5 Admin pages</a><a href="#step-5.6">5.6 Prospecting scorecard (AE se</a><a href="#p6" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Phase 1 Integration — Claude Project API</a><a href="#step-6.1">6.1 Phase 1 ingest API endpoint</a><a href="#step-6.2">6.2 Real-time progress tracking</a><a href="#step-6.3">6.3 Phase 0 → Phase 1 transition</a><a href="#step-6.4">6.4 Feedback loop & rerun intell</a><a href="#p7" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">Quality, Testing & Production Deployment</a><a href="#step-7.1">7.1 Visual regression testing</a><a href="#step-7.2">7.2 Performance optimization</a><a href="#step-7.3">7.3 Accessibility compliance</a><a href="#step-7.4">7.4 Mobile optimization</a><a href="#step-7.5">7.5 PDF scorecard export</a><a href="#step-7.6">7.6 Production deployment & moni</a>
+  <a href="#gemini-prompts" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">AI Prompt engineering</a><a href="#step-AI.1">AI.1 Prompt architecture</a><a href="#step-AI.2">AI.2 8 surface prompts</a><a href="#step-AI.3">AI.3 Rate limits &amp; errors</a><a href="#ops-ready" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">OPS Security &amp; ops</a><a href="#step-OPS.1">OPS.1 Security hardening</a><a href="#step-OPS.2">OPS.2 Seed data</a><a href="#step-OPS.3">OPS.3 DB migrations</a><a href="#failure-modes" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">FM Failure mode analysis</a><a href="#artifact-ref" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;padding-top:10px;">REF Design artifact map</a><a href="#final-qa" style="color:rgba(255,255,255,.75);font-weight:600;font-size:11px;">QA Completeness audit</a>
+  <div class="sidebar-section" style="margin-top:20px;">Source documents</div>
+  <a href="#" style="opacity:.4;">PRD v3.0</a>
+  <a href="#" style="opacity:.4;">TRD v4.0</a>
+  <a href="#" style="opacity:.4;">App Flow v3.0</a>
+  <a href="#" style="opacity:.4;">UI/UX Brief v3.0</a>
+  <a href="#" style="opacity:.4;">Backend Schema v2.0</a>
+  <a href="#" style="opacity:.4;">V7.0 Capability Mapping</a>
+</nav>
+
+<div class="content">
+
+<div class="ver-badge">DMA Visualizer <span>Implementation Steps v3.0</span> &nbsp;·&nbsp; May 19 2026 &nbsp;·&nbsp; Zennify</div>
+
+<h1 class="page-title">Implementation <span>Steps</span> <span style="font-size:14px;color:#735BA1;font-weight:500;">Claude Code Edition</span></h1>
+<p class="page-subtitle">Comprehensive, phase-ordered implementation plan for the DMA Visualizer web application. Derived from PRD v3.0, TRD v4.0, App Flow v3.0, UI/UX Design Brief v3.0 (43 sections), Backend Schema v2.0 (19 sections, 43+ tables), and V7.0 Capability Mapping (4 pillars, 25 tabs, 851 sub-capabilities). Every step traces to a source document. Every step has a QA checklist. Optimised for Claude Code execution: includes CLAUDE.md project instructions, exact file paths, configuration file templates, and design artifact references per step.</p>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="val">12</div><div class="lbl">Phases</div></div>
+  <div class="stat-card"><div class="val">57</div><div class="lbl">Steps</div></div>
+  <div class="stat-card"><div class="val">375</div><div class="lbl">Substeps</div></div>
+  <div class="stat-card"><div class="val">222</div><div class="lbl">QA checks</div></div>
+  <div class="stat-card"><div class="val">43+</div><div class="lbl">DB tables</div></div>
+  <div class="stat-card"><div class="val">16</div><div class="lbl">Routes</div></div>
+  <div class="stat-card"><div class="val">8</div><div class="lbl">Gemini prompts</div></div><div class="stat-card"><div class="val">13</div><div class="lbl">Failure modes</div></div><div class="stat-card"><div class="val">851</div><div class="lbl">Sub-caps in CCG</div></div>
+</div>
+
+
+
+<section id="scaffold">
+<h2><span class="sec-num">S</span>Project Scaffolding &amp; Claude Code Setup</h2>
+<p class="lead">Initialize the monorepo, create CLAUDE.md project instructions, configure all tooling, and establish the file structure that every subsequent phase builds on. <strong>Claude Code reads CLAUDE.md first on every session.</strong> This phase produces zero application code — only project skeleton and configuration.</p>
+
+<div class="table-card" id="step-S.1">
+<div class="table-header"><span class="table-name">Step S.1</span><span class="table-badge">Scaffold</span></div>
+<h3 class="subsec">Repository initialization &amp; CLAUDE.md</h3>
+<p class="lead">Create the monorepo with CLAUDE.md as the authoritative project instruction file. Claude Code reads this file at the start of every session to understand project conventions, tech stack, and file locations.</p>
+<p class="note">Source: All source documents (PRD v3, TRD v4, Backend Schema v2, UI/UX Brief v3, V7 Cap Map Schema)</p>
+
+<h4 class="h4">Design artifacts to read before implementing</h4>
+<table class="field-table">
+<tr><th>Document</th><th>Section(s)</th><th>What to extract</th></tr>
+<tr><td style="font-weight:600;color:#27BBAF;">All documents</td><td>All sections</td><td>Project-wide architecture understanding</td></tr><tr><td style="font-weight:600;color:#27BBAF;">Backend Schema v2</td><td>section 00 System architecture</td><td>Table count, domain breakdown, FK graph</td></tr><tr><td style="font-weight:600;color:#27BBAF;">UI/UX Brief v3</td><td>s40 Engineering handoff</td><td>BEM naming, React structure, Storybook targets</td></tr><tr><td style="font-weight:600;color:#27BBAF;">V7 Cap Map Schema</td><td>sections 01–05</td><td>25-tab canonical structure, 851 sub-cap taxonomy</td></tr></table>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Create GitHub repo: <code>zennify/dma-visualizer</code> (private)</td></tr>
+<tr><td>2</td><td>Initialize as monorepo: <code>/backend</code>, <code>/frontend</code>, <code>/infra</code>, <code>/etl</code>, <code>/docs</code></td></tr>
+<tr><td>3</td><td>Create <code>CLAUDE.md</code> at repository root — contains full repo structure, design artifact map, conventions, and database table inventory. See code block below.</td></tr>
+<tr><td>4</td><td>Create <code>.gitignore</code> (Python, Node, Terraform, IDE, .env, *.xlsx, service-account.json)</td></tr>
+<tr><td>5</td><td>Copy all design artifact HTML files to <code>/docs/</code> folder for Claude Code reference</td></tr>
+<tr><td>6</td><td>Set branch protection on <code>main</code>: require PR review, CI pass, no force push</td></tr>
+</table>
+
+<h4 class="h4">CLAUDE.md — full content</h4>
+<p class="note">This is the most important file in the repository. Claude Code reads it at session start.</p>
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>CLAUDE.md</span><span style="color:#27BBAF;">markdown</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;"># DMA Visualizer — Claude Code Project Instructions
+
+## Project overview
+Internal Zennify web app that transforms completed Digital Maturity Assessments into an interactive intelligence workspace. Two phases: Phase 0 (Google Drive import) and Phase 1 (Claude Project API real-time streaming).
+
+## Tech stack
+- **Backend**: FastAPI (Python 3.11+) on Google Cloud Run
+- **Frontend**: Next.js 14 (App Router) + TypeScript on Cloud Run
+- **Database**: Cloud SQL PostgreSQL 15 with pgvector extension
+- **Cache**: Upstash Redis (SSE fan-out + job queue)
+- **Storage**: Google Cloud Storage (artifacts, PDFs)
+- **AI**: Vertex AI Gemini 2.0 Flash (8 intelligence surfaces) + Gemini Pro (meeting_prep)
+- **Auth**: Google OAuth 2.0 + JWT (httpOnly cookie), @zennify.com domain restriction
+- **CI/CD**: GitHub Actions → Cloud Build → Cloud Run
+- **Monitoring**: Cloud Monitoring + Cloud Trace + structured JSON logging
+
+## Repository structure
+```
+dma-visualizer/
+├── CLAUDE.md                          # THIS FILE — read first every session
+├── backend/
+│   ├── app/
+│   │   ├── main.py                    # FastAPI app factory, middleware, startup
+│   │   ├── config.py                  # Pydantic Settings (env vars)
+│   │   ├── database.py                # Async SQLAlchemy engine + session
+│   │   ├── models/                    # SQLAlchemy ORM models (1 file per domain)
+│   │   │   ├── auth.py                # users, session_log
+│   │   │   ├── entities.py            # entities, firmographics
+│   │   │   ├── runs.py                # runs, pillar_scores, subcap_scores, peer_benchmarks
+│   │   │   ├── evidence.py            # evidence_index, evidence_subcap_links
+│   │   │   ├── insights.py            # insight_cards, annotations, recommendations, platform_scores
+│   │   │   ├── alerts.py              # alerts, alert_actions
+│   │   │   ├── techstack.py           # tech_stack_entries
+│   │   │   ├── context.py             # timeline_events, issue_register
+│   │   │   ├── admin.py               # import_scans, import_files, audit_log, safeguard_gates
+│   │   │   ├── gemini.py              # gemini_cache
+│   │   │   ├── ccg.py                 # ALL 18 ccg_* tables
+│   │   │   ├── documents.py           # document_parse_jobs, document_sections, document_evidence_items, document_lineage
+│   │   │   └── streaming.py           # score_stream_jobs, score_stream_events
+│   │   ├── routers/                   # FastAPI router modules (1 per API domain)
+│   │   │   ├── auth.py                # POST /auth/google, POST /auth/logout, GET /auth/me
+│   │   │   ├── entities.py            # GET /entities, GET /entities/:id/overview, etc.
+│   │   │   ├── runs.py                # GET /entities/:id/runs, GET /runs/:id
+│   │   │   ├── heatmap.py             # GET /entities/:id/heatmap
+│   │   │   ├── evidence.py            # GET /entities/:id/subcaps/:subcap_id/evidence
+│   │   │   ├── insights.py            # GET /entities/:id/insights
+│   │   │   ├── platforms.py           # GET /entities/:id/platforms
+│   │   │   ├── techstack.py           # GET /entities/:id/techstack, /:tech_id
+│   │   │   ├── context.py             # GET /entities/:id/context
+│   │   │   ├── health.py              # GET /entities/:id/health
+│   │   │   ├── alerts.py              # GET /alerts, PATCH /alerts/:id/status
+│   │   │   ├── annotations.py         # GET/POST /entities/:id/annotations
+│   │   │   ├── sse.py                 # GET /sse/entities/:id (Server-Sent Events)
+│   │   │   ├── gemini.py              # POST /gemini/:surface
+│   │   │   ├── admin.py               # All /admin/* endpoints
+│   │   │   ├── ingest.py              # POST /api/v1/ingest/assessment (Phase 1)
+│   │   │   └── export.py              # GET /entities/:id/export/pdf
+│   │   ├── services/                  # Business logic (1 per domain)
+│   │   │   ├── auth_service.py
+│   │   │   ├── entity_service.py
+│   │   │   ├── scoring_service.py
+│   │   │   ├── evidence_service.py
+│   │   │   ├── insight_service.py
+│   │   │   ├── platform_service.py    # FitScore calculation, Readiness Index
+│   │   │   ├── techstack_service.py
+│   │   │   ├── alert_service.py
+│   │   │   ├── gemini_service.py      # Vertex AI client, prompt templates, caching
+│   │   │   ├── sse_service.py         # Redis pub/sub, SSE event emission
+│   │   │   ├── import_service.py      # Drive crawl, classify, infer, dedup, parse
+│   │   │   ├── ingest_service.py      # Phase 1 score streaming
+│   │   │   ├── feedback_service.py    # Rerun intelligence
+│   │   │   └── pdf_service.py         # Puppeteer PDF generation
+│   │   ├── schemas/                   # Pydantic v2 request/response schemas
+│   │   │   └── (mirrors routers/ — one file per domain)
+│   │   ├── middleware/
+│   │   │   ├── auth_middleware.py      # JWT extraction + role injection
+│   │   │   └── logging_middleware.py   # Structured JSON request logging
+│   │   └── utils/
+│   │       ├── redis_client.py
+│   │       ├── gcs_client.py
+│   │       └── vertex_client.py
+│   ├── alembic/
+│   │   ├── alembic.ini
+│   │   ├── env.py
+│   │   └── versions/                  # Migration files: YYYYMMDD_HHMM_description.py
+│   │       ├── 20260520_0001_core_tables.py
+│   │       ├── 20260520_0002_ccg_tables.py
+│   │       └── 20260520_0003_parsing_streaming_tables.py
+│   ├── tests/
+│   │   ├── conftest.py                # Fixtures: test DB, test client, mock Redis
+│   │   ├── test_auth.py
+│   │   ├── test_entities.py
+│   │   ├── test_heatmap.py
+│   │   ├── test_platforms.py
+│   │   ├── test_ingest.py
+│   │   └── test_gemini.py
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── pyproject.toml
+│   └── .env.example
+├── frontend/
+│   ├── src/
+│   │   ├── app/                       # Next.js App Router
+│   │   │   ├── layout.tsx             # Root layout: sidebar + topbar shell
+│   │   │   ├── page.tsx               # Redirect to /clients
+│   │   │   ├── login/page.tsx         # /login
+│   │   │   ├── clients/
+│   │   │   │   ├── page.tsx           # /clients (entity directory)
+│   │   │   │   └── [id]/
+│   │   │   │       ├── layout.tsx     # Entity layout: tabs D1-D6
+│   │   │   │       ├── overview/page.tsx    # D1
+│   │   │   │       ├── insights/page.tsx    # D2
+│   │   │   │       ├── heatmap/page.tsx     # D3
+│   │   │   │       ├── platform/page.tsx    # D4
+│   │   │   │       ├── context/page.tsx     # D5
+│   │   │   │       ├── health/page.tsx      # D6
+│   │   │   │       └── techstack/
+│   │   │   │           ├── page.tsx         # Tech stack overview
+│   │   │   │           └── [techId]/page.tsx # Tech stack drilldown
+│   │   │   ├── alerts/page.tsx        # /alerts
+│   │   │   ├── prospecting/page.tsx   # /prospecting
+│   │   │   └── admin/
+│   │   │       ├── settings/page.tsx
+│   │   │       ├── import/
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── audit/page.tsx
+│   │   │       └── entities/page.tsx
+│   │   ├── components/
+│   │   │   ├── ui/                    # Primitive components (BEM naming)
+│   │   │   │   ├── Button/
+│   │   │   │   │   ├── Button.tsx
+│   │   │   │   │   ├── Button.module.css
+│   │   │   │   │   └── Button.stories.tsx
+│   │   │   │   ├── Card/
+│   │   │   │   ├── Badge/
+│   │   │   │   ├── Table/
+│   │   │   │   ├── Input/
+│   │   │   │   ├── Select/
+│   │   │   │   ├── Toggle/
+│   │   │   │   ├── Modal/
+│   │   │   │   ├── Drawer/
+│   │   │   │   ├── Panel/
+│   │   │   │   ├── Sheet/
+│   │   │   │   ├── Toast/
+│   │   │   │   ├── Skeleton/
+│   │   │   │   └── Spinner/
+│   │   │   ├── layout/
+│   │   │   │   ├── Sidebar/
+│   │   │   │   ├── Topbar/
+│   │   │   │   ├── TabNav/
+│   │   │   │   ├── Breadcrumb/
+│   │   │   │   └── CommandPalette/
+│   │   │   ├── domain/                # Domain-specific composed components
+│   │   │   │   ├── EntityCard/
+│   │   │   │   ├── KpiTile/
+│   │   │   │   ├── PillarSummary/
+│   │   │   │   ├── InsightCard/
+│   │   │   │   ├── HeatmapGrid/
+│   │   │   │   ├── HeatmapCell/
+│   │   │   │   ├── HeatmapTooltip/
+│   │   │   │   ├── PlatformFitCard/
+│   │   │   │   ├── RecommendationCard/
+│   │   │   │   ├── TimelineNode/
+│   │   │   │   ├── GanttBar/
+│   │   │   │   ├── TechStackRow/
+│   │   │   │   ├── EvidenceItem/
+│   │   │   │   ├── AlertRow/
+│   │   │   │   ├── RunSelector/
+│   │   │   │   ├── AudienceToggle/
+│   │   │   │   ├── AnnotationBubble/
+│   │   │   │   └── GeminiStream/
+│   │   │   └── overlays/
+│   │   │       ├── EvidenceDrawer/
+│   │   │       ├── IntelligencePanel/
+│   │   │       └── InsightModal/
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useEntity.ts
+│   │   │   ├── useHeatmap.ts
+│   │   │   ├── usePlatforms.ts
+│   │   │   ├── useSSE.ts              # SSE subscription hook
+│   │   │   ├── useGemini.ts           # Gemini streaming hook
+│   │   │   └── useRunSelector.ts
+│   │   ├── stores/                    # Zustand state stores
+│   │   │   ├── authStore.ts
+│   │   │   ├── entityStore.ts
+│   │   │   ├── uiStore.ts            # Sidebar state, audience mode, active overlays
+│   │   │   └── sseStore.ts
+│   │   ├── lib/
+│   │   │   ├── api.ts                 # API client (fetch wrapper with JWT)
+│   │   │   ├── constants.ts           # Maturity palette, platform taxonomy, etc.
+│   │   │   └── utils.ts
+│   │   └── styles/
+│   │       ├── globals.css            # CSS custom properties (Zennify tokens)
+│   │       └── tokens.css             # Design token export
+│   ├── public/
+│   │   └── zennify-logo.svg
+│   ├── Dockerfile
+│   ├── next.config.ts
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── .env.local.example
+├── etl/
+│   ├── ccg_loader.py                  # Main ETL script: V7 XLSX → PostgreSQL CCG tables
+│   ├── parsers/
+│   │   ├── capability_map.py          # Tab 2 parser
+│   │   ├── user_stories.py            # Tab 3 parser
+│   │   ├── l3_platforms.py            # Tab 4 parser
+│   │   ├── l4_features.py             # Tab 5 parser
+│   │   ├── maturity_descriptors.py    # Tab 6 parser
+│   │   ├── products.py                # Tab 7 parser
+│   │   ├── agents.py                  # Tab 8 parser
+│   │   ├── constructs.py              # Tab 9 parser
+│   │   ├── offerings.py               # Tab 10 parser
+│   │   ├── data_products.py           # Tab 11 parser
+│   │   ├── offering_matrix.py         # Tab 12 parser
+│   │   ├── dp_matrix.py               # Tab 13 parser
+│   │   ├── cross_pillar.py            # Tab 14 parser
+│   │   ├── themes.py                  # Tab 15 parser
+│   │   ├── completeness.py            # Tab 18 parser
+│   │   ├── cascade.py                 # Tab 19 parser
+│   │   ├── vc_mapping.py              # Tab 21 parser
+│   │   └── qa_gates.py                # Z1 parser
+│   ├── dedup.py                       # Cross-pillar deduplication (L3, offerings, agents)
+│   ├── validate.py                    # Post-load FK validation
+│   ├── requirements.txt
+│   └── data/                          # V7 XLSX source files (gitignored, loaded from GCS)
+├── infra/
+│   ├── main.tf                        # GCP provider, project
+│   ├── database.tf                    # Cloud SQL instance + read replica
+│   ├── cloudrun.tf                    # Backend + frontend services
+│   ├── storage.tf                     # GCS buckets
+│   ├── iam.tf                         # Service accounts + IAM bindings
+│   ├── secrets.tf                     # Secret Manager entries
+│   ├── network.tf                     # VPC connector
+│   ├── variables.tf
+│   ├── outputs.tf
+│   └── terraform.tfvars.example
+├── .github/
+│   ├── workflows/
+│   │   ├── ci-backend.yml             # Lint + test + build backend
+│   │   ├── ci-frontend.yml            # Lint + test + build frontend
+│   │   ├── deploy-staging.yml         # Auto-deploy to staging on develop merge
+│   │   └── deploy-production.yml      # Manual approval deploy to production
+│   └── PULL_REQUEST_TEMPLATE.md
+└── docs/
+    ├── PRD_v3.html
+    ├── UIX_Brief_v3.html
+    ├── Backend_Schema_v2.html
+    ├── V7_Cap_Map_Schema.html
+    └── Implementation_Steps_v2.html   # THIS DOCUMENT
+```
+
+## Design artifact reference map
+When implementing a feature, read the relevant design artifact FIRST:
+| Feature area | Read this document | Section(s) |
+|---|---|---|
+| Database tables | Backend Schema v2.0 | sections 01–18 |
+| API endpoints | Backend Schema v2.0 | section 11 |
+| SSE events | Backend Schema v2.0 | section 12 |
+| Gemini surfaces | Backend Schema v2.0 | section 13 |
+| Drive import pipeline | Backend Schema v2.0 | sections 14–15 + PRD v3 sections 10–15 |
+| CCG data model | Backend Schema v2.0 | section 17 + V7 Cap Map Schema sections 01–09 |
+| Report parsing | Backend Schema v2.0 | section 18 |
+| Login page design | UI/UX Brief v3.0 | s19 |
+| Entity directory | UI/UX Brief v3.0 | s20 |
+| D1 Executive Overview | UI/UX Brief v3.0 | s20–s21 |
+| D2 Insight Cards | UI/UX Brief v3.0 | s22 |
+| D3 Heatmap | UI/UX Brief v3.0 | s23 |
+| D4 Platform Matrix | UI/UX Brief v3.0 | s24–s25 |
+| D5 Context Timeline | UI/UX Brief v3.0 | s26 |
+| D6 Health Alerts | UI/UX Brief v3.0 | s27 |
+| Tech Stack pages | UI/UX Brief v3.0 | s41–s42 |
+| Evidence Drawer | UI/UX Brief v3.0 | s32 |
+| Intelligence Panel | UI/UX Brief v3.0 | s35 |
+| Admin pages | UI/UX Brief v3.0 | s30–s31, s33 |
+| Component library | UI/UX Brief v3.0 | s11–s18 |
+| Brand / tokens | UI/UX Brief v3.0 | s00–s10 |
+| Accessibility | UI/UX Brief v3.0 | s38 |
+| Motion / animation | UI/UX Brief v3.0 | s37 |
+| Responsive / mobile | UI/UX Brief v3.0 | s39 |
+| Engineering handoff | UI/UX Brief v3.0 | s40 |
+| Phase 0 UI | UI/UX Brief v3.0 | s36 |
+| Platform taxonomy | PRD v3.0 | section 08 |
+| FitScore formula | PRD v3.0 | section 08 (Platform Fit Score) |
+| Entity inference | PRD v3.0 | section 12 |
+| Test case removal | PRD v3.0 | section 13 |
+| Deduplication | PRD v3.0 | section 14 |
+| Feedback loop | PRD v3.0 | section 17 |
+| Success metrics | PRD v3.0 | section 21 |
+
+## Key conventions
+- **BEM naming**: Block__Element--Modifier for CSS classes (e.g., `heatmap-cell__tooltip--active`)
+- **File naming**: PascalCase for React components, snake_case for Python modules
+- **API prefix**: All backend routes under /api/v1/
+- **Environment**: .env.local for frontend, .env for backend — NEVER commit secrets
+- **Maturity palette**: M1=#C25008, M2=#FE9732, M3=#FFD166, M4=#7BC47F, M5=#059669, No score=#E5E7EB
+- **Zennify brand**: Primary teal #27BBAF, Dark #1C4A4D, Purple #735BA1, Font: DM Sans
+- **Sub-cap ID format**: P{n}C{cat}.{l1}.{n}[.{sv}{n}] (e.g., P1C1.1.1, P2C1.4.IB1)
+
+## Database table count
+43+ tables total across 5 domains:
+- Core (18): auth, entities, runs, scoring, evidence, insights, alerts, tech stack, context, admin, Gemini cache
+- CCG (18): ccg_subcaps, ccg_l3_platforms, ccg_l4_features, ccg_maturity_descriptors, ccg_agents, ccg_constructs, ccg_products, ccg_offerings, ccg_data_products, ccg_offering_subcap_matrix, ccg_dataproduct_subcap_matrix, ccg_user_stories, ccg_cross_pillar_stories, ccg_theme_subcap_mapping, ccg_subcap_completeness, ccg_toggle_cascade, ccg_vc_mapping, ccg_qa_gates
+- Report parsing (4): document_parse_jobs, document_sections, document_evidence_items, document_lineage
+- Phase 1 streaming (2): score_stream_jobs, score_stream_events
+- Extended (1): subcap_scores (Phase 1 columns added)
+
+## CCG data volume
+- 851 sub-capabilities (P1:205, P2:292, P3:164, P4:190)
+- ~12,037 L4 features
+- ~17,377 user stories
+- ~470 Agentforce agents
+- ~205 platform constructs
+- 13 productized offerings
+- ~166 data products
+- 854 offering-subcap mappings
+- 3,771 cross-pillar stories
+- 927 QA gates</pre>
+</div>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>CLAUDE.md exists at repo root and contains complete repo structure tree</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All 5 top-level directories exist: backend/, frontend/, infra/, etl/, docs/</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Design artifacts copied to docs/ folder</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Branch protection active on main</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-S.2">
+<div class="table-header"><span class="table-name">Step S.2</span><span class="table-badge">Scaffold</span></div>
+<h3 class="subsec">Environment configuration files</h3>
+<p class="lead">Create all configuration files that define the development and deployment environment. These files must exist before any application code is written.</p>
+<p class="note">Source: TRD v4 section 01 (tech stack), Backend Schema v2 section 00 (architecture)</p>
+
+<h4 class="h4">Design artifacts to read before implementing</h4>
+<table class="field-table">
+<tr><th>Document</th><th>Section(s)</th><th>What to extract</th></tr>
+<tr><td style="font-weight:600;color:#27BBAF;">TRD v4</td><td>section 01 Tech stack</td><td>Exact versions for all dependencies</td></tr><tr><td style="font-weight:600;color:#27BBAF;">UI/UX Brief v3</td><td>s00–s10 Brand/tokens</td><td>Zennify colours and typography for Tailwind config</td></tr></table>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Create <code>backend/.env.example</code> — see code block</td></tr>
+<tr><td>2</td><td>Create <code>frontend/.env.local.example</code> — see code block</td></tr>
+<tr><td>3</td><td>Create <code>backend/requirements.txt</code> with pinned versions — see code block</td></tr>
+<tr><td>4</td><td>Create <code>frontend/package.json</code> with Next.js 14, TypeScript, Tailwind, Zustand, @tanstack/react-query, recharts, lucide-react</td></tr>
+<tr><td>5</td><td>Create <code>frontend/tsconfig.json</code> with strict mode, path aliases (@/components, @/hooks, @/stores, @/lib)</td></tr>
+<tr><td>6</td><td>Create <code>frontend/next.config.ts</code> with API proxy rewrite to backend</td></tr>
+<tr><td>7</td><td>Create <code>frontend/tailwind.config.ts</code> with all Zennify design tokens from UI/UX Brief s04–s10</td></tr>
+<tr><td>8</td><td>Create <code>backend/Dockerfile</code> — see code block</td></tr>
+<tr><td>9</td><td>Create <code>frontend/Dockerfile</code> (multi-stage: deps → build → runtime with standalone output)</td></tr>
+<tr><td>10</td><td>Create <code>docker-compose.yml</code> for local dev — see code block</td></tr>
+<tr><td>11</td><td>Create <code>backend/pyproject.toml</code> with ruff linter config, pytest config</td></tr>
+<tr><td>12</td><td>Create <code>frontend/.eslintrc.json</code> extending next/core-web-vitals</td></tr>
+<tr><td>13</td><td>Create <code>frontend/.prettierrc</code> with semi:false, singleQuote:true, tabWidth:2</td></tr>
+</table>
+
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>backend/.env.example</span><span style="color:#27BBAF;">env</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;"># Database
+DATABASE_URL=postgresql+asyncpg://dma_user:dma_pass@localhost:5432/dma_visualizer
+DATABASE_URL_SYNC=postgresql://dma_user:dma_pass@localhost:5432/dma_visualizer
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Google OAuth
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxx
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback
+
+# JWT
+JWT_SECRET=change-me-in-production
+JWT_ALGORITHM=HS256
+JWT_EXPIRY_HOURS=8
+
+# Vertex AI
+GCP_PROJECT_ID=dma-visualizer-prod
+GCP_REGION=us-central1
+GEMINI_MODEL_FLASH=gemini-2.0-flash
+GEMINI_MODEL_PRO=gemini-pro
+
+# Cloud Storage
+GCS_BUCKET=dma-viz-artifacts
+
+# Drive (Phase 0)
+DRIVE_SERVICE_ACCOUNT_KEY_PATH=./service-account.json
+DRIVE_ROOT_FOLDER_IDS=folder_id_1,folder_id_2
+
+# App
+ALLOWED_DOMAIN=zennify.com
+CORS_ORIGINS=http://localhost:3000
+LOG_LEVEL=INFO</pre>
+</div>
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>frontend/.env.local.example</span><span style="color:#27BBAF;">env</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;">NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+NEXT_PUBLIC_SSE_URL=http://localhost:8000/api/v1/sse</pre>
+</div>
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>backend/requirements.txt</span><span style="color:#27BBAF;">text</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;">fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.1
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-jose[cryptography]==3.3.0
+httpx==0.28.1
+google-auth==2.37.0
+google-api-python-client==2.159.0
+google-cloud-aiplatform==1.78.0
+google-cloud-storage==2.19.0
+redis==5.2.1
+openpyxl==3.1.5
+python-multipart==0.0.20
+python-docx==1.1.2
+structlog==24.4.0
+tenacity==9.0.0
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.1</pre>
+</div>
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>docker-compose.yml</span><span style="color:#27BBAF;">yaml</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;">services:
+  db:
+    image: pgvector/pgvector:pg15
+    ports: [&quot;5432:5432&quot;]
+    environment:
+      POSTGRES_DB: dma_visualizer
+      POSTGRES_USER: dma_user
+      POSTGRES_PASSWORD: dma_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports: [&quot;6379:6379&quot;]
+
+  backend:
+    build: ./backend
+    ports: [&quot;8000:8000&quot;]
+    env_file: ./backend/.env
+    depends_on: [db, redis]
+    volumes:
+      - ./backend/app:/app/app
+
+  frontend:
+    build: ./frontend
+    ports: [&quot;3000:3000&quot;]
+    env_file: ./frontend/.env.local
+    depends_on: [backend]
+
+volumes:
+  pgdata:</pre>
+</div>
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>backend/Dockerfile</span><span style="color:#27BBAF;">dockerfile</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;">FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD [&quot;uvicorn&quot;, &quot;app.main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]</pre>
+</div>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td><code>docker-compose up</code> starts PostgreSQL (pgvector), Redis, backend, frontend without errors</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Backend responds to <code>GET http://localhost:8000/api/v1/health</code></td></tr>
+<tr><td style="text-align:center;">☐</td><td>Frontend loads at <code>http://localhost:3000</code></td></tr>
+<tr><td style="text-align:center;">☐</td><td>TypeScript strict mode passes: <code>npx tsc --noEmit</code></td></tr>
+<tr><td style="text-align:center;">☐</td><td>Tailwind Zennify tokens render correctly (--z-teal: #27BBAF visible in browser DevTools)</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-S.3">
+<div class="table-header"><span class="table-name">Step S.3</span><span class="table-badge">Scaffold</span></div>
+<h3 class="subsec">GitHub Actions CI/CD workflows</h3>
+<p class="lead">Create CI/CD workflow files for automated testing, building, and deployment to Google Cloud Run.</p>
+<p class="note">Source: TRD v4 section 18 (deployment)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Create <code>.github/workflows/ci-backend.yml</code>: ruff lint → pytest → Docker build → push to Artifact Registry</td></tr>
+<tr><td>2</td><td>Create <code>.github/workflows/ci-frontend.yml</code>: eslint → tsc --noEmit → vitest → Docker build → push</td></tr>
+<tr><td>3</td><td>Create <code>.github/workflows/deploy-staging.yml</code>: auto-deploy to Cloud Run staging on develop merge</td></tr>
+<tr><td>4</td><td>Create <code>.github/workflows/deploy-production.yml</code>: manual approval → deploy to production</td></tr>
+<tr><td>5</td><td>Create <code>.github/PULL_REQUEST_TEMPLATE.md</code> with checklist</td></tr>
+</table>
+
+<div style="margin:8px 0 12px;">
+<div style="background:#1E293B;color:#94A3B8;padding:6px 14px;border-radius:8px 8px 0 0;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;">
+<span>.github/workflows/ci-backend.yml</span><span style="color:#27BBAF;">yaml</span></div>
+<pre style="margin:0;border-radius:0 0 8px 8px;font-size:11px;line-height:1.5;max-height:400px;overflow-y:auto;">name: Backend CI
+on:
+  push:
+    paths: [&#x27;backend/**&#x27;]
+  pull_request:
+    paths: [&#x27;backend/**&#x27;]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15
+        env:
+          POSTGRES_DB: test_dma
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports: [&#x27;5432:5432&#x27;]
+      redis:
+        image: redis:7-alpine
+        ports: [&#x27;6379:6379&#x27;]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: &#x27;3.11&#x27; }
+      - run: pip install -r backend/requirements.txt
+      - run: cd backend &amp;&amp; python -m pytest tests/ -v --tb=short
+        env:
+          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_dma
+          REDIS_URL: redis://localhost:6379</pre>
+</div>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>CI workflow runs on push to any feature branch</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Staging deploy triggers automatically on develop merge</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Production deploy requires explicit manual approval</td></tr>
+</table>
+</div>
+</section>
+<section id="p0">
+<h2><span class="sec-num">0</span>GCP Infrastructure &amp; Database</h2>
+<p class="lead">Provision all cloud infrastructure before any application code is written. Every downstream phase depends on these services being operational.</p>
+
+<div class="table-card" id="step-0.1">
+<div class="table-header"><span class="table-name">Step 0.1</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">GCP project creation &amp; IAM</h3>
+<p class="lead">Create a dedicated GCP project for the DMA Visualizer. Enable required APIs: Cloud Run, Cloud SQL, Cloud Storage, Secret Manager, Vertex AI, Identity Platform. Set up IAM roles: Cloud Run Invoker, Cloud SQL Client, Storage Admin, Vertex AI User, Secret Manager Accessor. Create a service account for the backend with minimum-privilege bindings.</p>
+<p class="note">Source: TRD v4 section 01 (infrastructure), Backend Schema v2 section 00 (system architecture)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Create GCP project &#x27;dma-visualizer-prod&#x27;</td></tr>
+<tr><td>2</td><td>Enable APIs: run.googleapis.com, sqladmin.googleapis.com, storage.googleapis.com, secretmanager.googleapis.com, aiplatform.googleapis.com, identitytoolkit.googleapis.com</td></tr>
+<tr><td>3</td><td>Create service account &#x27;dma-backend-sa&#x27; with Cloud SQL Client, Storage Object Admin, Vertex AI User, Secret Manager Accessor</td></tr>
+<tr><td>4</td><td>Create service account &#x27;dma-drive-crawler-sa&#x27; with Drive read-only scope for Phase 0 import</td></tr>
+<tr><td>5</td><td>Configure VPC connector for Cloud Run → Cloud SQL private IP connectivity</td></tr>
+<tr><td>6</td><td>Set up Cloud Armor WAF rules for the Cloud Run endpoint</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>All APIs enabled and billing confirmed</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Service accounts created with principle of least privilege verified</td></tr>
+<tr><td style="text-align:center;">☐</td><td>VPC connector tested with a ping to Cloud SQL private IP</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.2">
+<div class="table-header"><span class="table-name">Step 0.2</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">Cloud SQL PostgreSQL provisioning</h3>
+<p class="lead">Provision Cloud SQL PostgreSQL 15 with pgvector extension. This instance hosts all 43+ tables from Backend Schema v2.0. Configure a read replica for analytics/Gemini queries that do not affect write latency.</p>
+<p class="note">Source: Backend Schema v2 sections 00–18 (all 43 tables), TRD v4 section 02 (database tier)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Provision Cloud SQL PostgreSQL 15 instance (db-custom-4-16384, SSD, us-central1)</td></tr>
+<tr><td>2</td><td>Enable pgvector extension: CREATE EXTENSION vector</td></tr>
+<tr><td>3</td><td>Create read replica for analytics workloads (Gemini intelligence queries, heatmap aggregation)</td></tr>
+<tr><td>4</td><td>Configure automated backups (daily, 30-day retention, point-in-time recovery)</td></tr>
+<tr><td>5</td><td>Set connection pooling: max_connections=200, PgBouncer sidecar in Cloud Run</td></tr>
+<tr><td>6</td><td>Create database &#x27;dma_visualizer&#x27; with schema &#x27;public&#x27;</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>PostgreSQL 15 instance accessible via private IP from VPC</td></tr>
+<tr><td style="text-align:center;">☐</td><td>pgvector extension installed and verified: SELECT * FROM pg_extension WHERE extname=&#x27;vector&#x27;</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Read replica replication lag &lt; 1s confirmed</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Automated backup schedule active</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.3">
+<div class="table-header"><span class="table-name">Step 0.3</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">Schema deployment — core tables (sections 01–16)</h3>
+<p class="lead">Deploy the 18 original tables from Backend Schema v2 sections sections 01–16. These cover auth, entities, runs, scoring, evidence, insights, alerts, tech stack, context intelligence, admin/imports, and Gemini cache.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/Backend_Schema_v2.html</code> sections sections 01–16 before writing any DDL. Every column, type, index, and FK constraint is specified there.</div>
+<p class="note">Source: Backend Schema v2 sections 01–16 (18 tables: users, session_log, entities, firmographics, runs, pillar_scores, subcap_scores, peer_benchmarks, evidence_index, evidence_subcap_links, insight_cards, annotations, recommendations, platform_scores, alerts, alert_actions, tech_stack_entries, timeline_events, issue_register, import_scans, import_files, audit_log, safeguard_gates, gemini_cache)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Deploy DDL for auth domain: users, session_log</td></tr>
+<tr><td>2</td><td>Deploy DDL for core entities: entities (with subvertical_enum, inference_confidence, explorium_match_id), firmographics</td></tr>
+<tr><td>3</td><td>Deploy DDL for runs &amp; scoring: runs (UNIQUE constraint on entity_id WHERE status=&#x27;ACTIVE&#x27;), pillar_scores, subcap_scores (11 columns + Phase 1 extensions: ccg_subcap_id, stream_event_id, batch_id, stream_status, offering_gap_ids, maturity_descriptor_ref, scored_at), peer_benchmarks</td></tr>
+<tr><td>4</td><td>Deploy DDL for evidence: evidence_index, evidence_subcap_links</td></tr>
+<tr><td>5</td><td>Deploy DDL for insights: insight_cards, annotations, recommendations, platform_scores</td></tr>
+<tr><td>6</td><td>Deploy DDL for alerts: alerts, alert_actions</td></tr>
+<tr><td>7</td><td>Deploy DDL for tech stack: tech_stack_entries (tech_id slug, layer L1–L5, status CONFIRMED/PARTIAL/INFERRED/ABSENT, dma_impact_score, cap_contributions JSONB)</td></tr>
+<tr><td>8</td><td>Deploy DDL for context intelligence: timeline_events, issue_register</td></tr>
+<tr><td>9</td><td>Deploy DDL for admin/imports: import_scans, import_files, audit_log, safeguard_gates</td></tr>
+<tr><td>10</td><td>Deploy DDL for Gemini cache: gemini_cache (with TTL per surface)</td></tr>
+<tr><td>11</td><td>Create all indexes per Backend Schema v2 specifications (btree, GIN, partial indexes)</td></tr>
+<tr><td>12</td><td>Create UNIQUE constraints and foreign key relationships</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>All 18+ tables created: SELECT count(*) FROM information_schema.tables WHERE table_schema=&#x27;public&#x27;</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All indexes present: cross-check against Backend Schema v2 index notes</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Foreign key constraints verified via pg_catalog</td></tr>
+<tr><td style="text-align:center;">☐</td><td>subcap_scores has Phase 1 extension columns (ccg_subcap_id, stream_event_id, offering_gap_ids)</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.4">
+<div class="table-header"><span class="table-name">Step 0.4</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">Schema deployment — CCG tables (section 17)</h3>
+<p class="lead">Deploy the 18 Capability Map Graph tables from Backend Schema v2 section 17. These store the entire V7.0 framework: 851 sub-caps, 12,037 L4 features, 17,377 user stories, 470 agents, 205 constructs, 13 offerings, and all cross-pillar linkage.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/Backend_Schema_v2.html</code> section section 17 for all 18 CCG table definitions. Also read <code>docs/V7_Cap_Map_Schema.html</code> section 05 for the canonical 25-tab field definitions that these tables mirror.</div>
+<p class="note">Source: Backend Schema v2 section 17 (18 tables: ccg_subcaps, ccg_l3_platforms, ccg_l4_features, ccg_maturity_descriptors, ccg_agents, ccg_constructs, ccg_products, ccg_offerings, ccg_data_products, ccg_offering_subcap_matrix, ccg_dataproduct_subcap_matrix, ccg_user_stories, ccg_cross_pillar_stories, ccg_theme_subcap_mapping, ccg_subcap_completeness, ccg_toggle_cascade, ccg_vc_mapping, ccg_qa_gates)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Deploy ccg_subcaps (PK: sub_cap_id TEXT, indexes on pillar_code, category, tier, sub_vertical, zennify_status)</td></tr>
+<tr><td>2</td><td>Deploy ccg_l3_platforms (PK: l3_id TEXT, GIN on sub_caps_where_used, pillar_codes)</td></tr>
+<tr><td>3</td><td>Deploy ccg_l4_features (BIGSERIAL PK, UNIQUE on sub_cap_id+l3_platform_id+feature_name, FK to ccg_subcaps and ccg_l3_platforms)</td></tr>
+<tr><td>4</td><td>Deploy ccg_maturity_descriptors (PK: sub_cap_id → ccg_subcaps, 1:1 relationship)</td></tr>
+<tr><td>5</td><td>Deploy ccg_agents (PK: agent_id TEXT, GIN on anchor_subcaps, pillar_codes)</td></tr>
+<tr><td>6</td><td>Deploy ccg_constructs (UNIQUE on construct_name+vendor)</td></tr>
+<tr><td>7</td><td>Deploy ccg_products (UNIQUE on vendor+product_name)</td></tr>
+<tr><td>8</td><td>Deploy ccg_offerings (PK: offering_id TEXT) — 13 rows (canonical set shared across pillars)</td></tr>
+<tr><td>9</td><td>Deploy ccg_data_products (PK: module_id TEXT)</td></tr>
+<tr><td>10</td><td>Deploy ccg_offering_subcap_matrix (UNIQUE on offering_id+sub_cap_id, ~854 rows) — the core sales insight table</td></tr>
+<tr><td>11</td><td>Deploy ccg_dataproduct_subcap_matrix (UNIQUE on module_id+sub_cap_id, ~502 rows)</td></tr>
+<tr><td>12</td><td>Deploy ccg_user_stories (with run_id nullable FK to runs for Phase 1 scored evidence, e_id column for evidence IDs)</td></tr>
+<tr><td>13</td><td>Deploy ccg_cross_pillar_stories, ccg_theme_subcap_mapping, ccg_subcap_completeness, ccg_toggle_cascade, ccg_vc_mapping, ccg_qa_gates</td></tr>
+<tr><td>14</td><td>Verify all FK relationships per Backend Schema v2 section 17 FK graph</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>18 CCG tables created</td></tr>
+<tr><td style="text-align:center;">☐</td><td>FK graph complete: ccg_l4_features → ccg_subcaps ✓, ccg_l4_features → ccg_l3_platforms ✓, etc.</td></tr>
+<tr><td style="text-align:center;">☐</td><td>UNIQUE constraints prevent duplicate data on load</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All GIN indexes present for array columns (TEXT[])</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.5">
+<div class="table-header"><span class="table-name">Step 0.5</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">Schema deployment — report parsing &amp; streaming tables (section 18)</h3>
+<p class="lead">Deploy the 6 tables from Backend Schema v2 section 18: 4 for document parsing/lineage and 2 for Phase 1 real-time score streaming.</p>
+<p class="note">Source: Backend Schema v2 section 18 (document_parse_jobs, document_sections, document_evidence_items, document_lineage, score_stream_jobs, score_stream_events)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Deploy document_parse_jobs (UUID PK, FK to runs and entities, parse_status lifecycle, drive_file_id for Phase 0 provenance)</td></tr>
+<tr><td>2</td><td>Deploy document_sections (flexible section_type enum covering 18 document section types, nullable sub_cap_id FK to ccg_subcaps, extraction_confidence threshold for QA alerts)</td></tr>
+<tr><td>3</td><td>Deploy document_evidence_items (e_id column, evidence_index_id FK for cross-referencing pre-scoring evidence, subcap_mappings TEXT[] for multi-subcap evidence)</td></tr>
+<tr><td>4</td><td>Deploy document_lineage (FK to document_parse_jobs, document_sections, document_evidence_items, and subcap_scores — full traceability chain)</td></tr>
+<tr><td>5</td><td>Deploy score_stream_jobs (UNIQUE on run_id, heartbeat monitoring, scoring_scope JSONB for sub-vertical filtering)</td></tr>
+<tr><td>6</td><td>Deploy score_stream_events (append-only, event_type enum, offering_gaps_identified TEXT[], is_thin_evidence partial index)</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>6 tables created</td></tr>
+<tr><td style="text-align:center;">☐</td><td>document_sections.section_type enum covers all 18 section types listed in Backend Schema v2</td></tr>
+<tr><td style="text-align:center;">☐</td><td>score_stream_events is append-only (no UPDATE triggers, immutable log)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>score_stream_jobs has UNIQUE(run_id) constraint</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.6">
+<div class="table-header"><span class="table-name">Step 0.6</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">Redis provisioning (Upstash)</h3>
+<p class="lead">Provision Upstash Redis serverless instance for SSE fan-out and import job queue. Two primary uses: (1) publish score/alert events to connected frontend sessions via pub/sub channels, (2) queue Drive import jobs for background processing.</p>
+<p class="note">Source: Backend Schema v2 section 12 (SSE channels: entity:{entity_id}, admin:global, role:ADMIN), TRD v4 section 15 (real-time infrastructure)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Provision Upstash Redis instance (us-central1, TLS enabled)</td></tr>
+<tr><td>2</td><td>Configure pub/sub channels: entity:{entity_id} (per-entity score progress), admin:global (system-wide import events), role:ADMIN (admin-only alerts)</td></tr>
+<tr><td>3</td><td>Set up connection pooling: max 50 connections from Cloud Run</td></tr>
+<tr><td>4</td><td>Configure key TTL defaults: SSE session keys 30min, import job keys 24h</td></tr>
+<tr><td>5</td><td>Test pub/sub round-trip latency: target &lt; 50ms</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Redis accessible from Cloud Run via TLS</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Pub/sub channels functional: publish on entity:test → subscriber receives within 50ms</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Connection pool stable under 50 concurrent connections</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.7">
+<div class="table-header"><span class="table-name">Step 0.7</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">Cloud Storage buckets</h3>
+<p class="lead">Create GCS buckets for artifact storage (Drive-imported files, generated reports, exported PDFs, CCG source XLSX files).</p>
+<p class="note">Source: Backend Schema v2 section 09 (import pipeline), PRD v3 section 10 (artifact registry)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Create bucket &#x27;dma-viz-artifacts&#x27; (us-central1, Standard tier, versioning enabled)</td></tr>
+<tr><td>2</td><td>Create folder structure: /drive-imports/, /generated-reports/, /pdf-exports/, /ccg-source/</td></tr>
+<tr><td>3</td><td>Upload V7.0 pillar XLSX files to /ccg-source/</td></tr>
+<tr><td>4</td><td>Set lifecycle policy: move /drive-imports/ older than 90 days to Nearline</td></tr>
+<tr><td>5</td><td>Set CORS policy for frontend direct-download of PDFs</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Bucket accessible from backend service account</td></tr>
+<tr><td style="text-align:center;">☐</td><td>V7.0 XLSX files uploaded and verified</td></tr>
+<tr><td style="text-align:center;">☐</td><td>CORS policy tested with a browser fetch</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.8">
+<div class="table-header"><span class="table-name">Step 0.8</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">CCG data load pipeline — V7.0 XLSX ingest</h3>
+<p class="lead">Build and run the ETL pipeline that reads all 4 pillar XLSX workbooks (25 tabs each) and loads the canonical V7.0 data into the 18 CCG database tables. This is a one-time load per framework version, re-run only when V7.x is updated.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> The ETL script lives at <code>etl/ccg_loader.py</code> with per-tab parsers in <code>etl/parsers/</code>. Read the V7 XLSX files from <code>etl/data/</code> using openpyxl with <code>data_only=True</code>. Each parser handles one tab per pillar and writes to the corresponding CCG table. Cross-pillar deduplication for shared entities (L3 platforms, offerings, agents) happens in <code>etl/dedup.py</code>. Post-load FK validation in <code>etl/validate.py</code>.</div>
+<p class="note">Source: V7.0 Capability Mapping Schema (all 4 pillars, 25 tabs each), Backend Schema v2 section 17 (all CCG tables)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Python ETL script using openpyxl (data_only=True) to parse all 25 tabs per pillar</td></tr>
+<tr><td>2</td><td>Tab 2 (2_Capability_Map) → ccg_subcaps: 205+292+164+190 = 851 rows. Parse L3 platforms from col I into JSONB, use cases from col K into JSONB, story refs from col L into JSONB</td></tr>
+<tr><td>3</td><td>Tab 3 (3_User_Stories_Catalogue) → ccg_user_stories: ~17,377 rows. Parse L4 features, use case IDs, acceptance criteria, solution design, implementation steps, deployment checklist</td></tr>
+<tr><td>4</td><td>Tab 4 (4_L3_Detailed) → ccg_l3_platforms: deduplicate across pillars (same L3 ID = one row, multiple pillar_codes). ~45-54 unique L3 IDs per pillar; after dedup ~60-70 total</td></tr>
+<tr><td>5</td><td>Tab 5 (5_L4_Detailed_Features) → ccg_l4_features: ~12,037 rows. Composite UNIQUE on (sub_cap_id, l3_platform_id, feature_name)</td></tr>
+<tr><td>6</td><td>Tab 6 (6_Maturity_Descriptors) → ccg_maturity_descriptors: 851 rows. Parse M1-M5 narratives (≥1,000 chars for M4/M5), extract agent anchors into TEXT[] arrays</td></tr>
+<tr><td>7</td><td>Tab 7 → ccg_products, Tab 8 → ccg_agents, Tab 9 → ccg_constructs: deduplicate across pillars</td></tr>
+<tr><td>8</td><td>Tab 10 → ccg_offerings: 13 canonical offerings (same across all pillars — load once, verify consistency)</td></tr>
+<tr><td>9</td><td>Tab 11 → ccg_data_products, Tab 12 → ccg_offering_subcap_matrix (854 rows), Tab 13 → ccg_dataproduct_subcap_matrix (502 rows)</td></tr>
+<tr><td>10</td><td>Tab 14 → ccg_cross_pillar_stories (3,771 rows), Tab 15 → ccg_theme_subcap_mapping (171 rows)</td></tr>
+<tr><td>11</td><td>Tab 18 → ccg_subcap_completeness (851 rows with Core/Extended/Total scores)</td></tr>
+<tr><td>12</td><td>Tab 19 → ccg_toggle_cascade (851 rows with cascade severity), Tab 21 → ccg_vc_mapping (851 rows × 9 sub-verticals)</td></tr>
+<tr><td>13</td><td>Z1 → ccg_qa_gates (927 rows), Z2 not loaded (plan revisions are build metadata only)</td></tr>
+<tr><td>14</td><td>Run data integrity validation: verify all FK references resolve, no orphan sub_cap_ids, agent_id anchors in maturity descriptors resolve to ccg_agents</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>851 rows in ccg_subcaps (P1: 205, P2: 292, P3: 164, P4: 190)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>~12,037 rows in ccg_l4_features</td></tr>
+<tr><td style="text-align:center;">☐</td><td>~17,377 rows in ccg_user_stories</td></tr>
+<tr><td style="text-align:center;">☐</td><td>13 rows in ccg_offerings (verified identical across all 4 pillar workbooks)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>854 rows in ccg_offering_subcap_matrix</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All FK references validated: zero orphan sub_cap_ids across all CCG tables</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Agent anchors in ccg_maturity_descriptors all resolve to ccg_agents: zero broken references</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Completeness scores in ccg_subcap_completeness: min=0, max=8, mean verified per pillar</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-0.9">
+<div class="table-header"><span class="table-name">Step 0.9</span><span class="table-badge">Phase 0</span></div>
+<h3 class="subsec" style="margin-top:4px;">CI/CD pipeline setup</h3>
+<p class="lead">Configure GitHub Actions for continuous integration and Cloud Build for deployment. Two pipelines: backend (FastAPI → Docker → Cloud Run) and frontend (Next.js → Docker → Cloud Run).</p>
+<p class="note">Source: TRD v4 section 18 (deployment), PRD v3 (Phase architecture)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Create GitHub repository &#x27;zennify/dma-visualizer&#x27; with branch protection on main</td></tr>
+<tr><td>2</td><td>Configure GitHub Actions workflow: lint → test → build → push to Artifact Registry → deploy to Cloud Run</td></tr>
+<tr><td>3</td><td>Set up staging environment (Cloud Run service suffix &#x27;-staging&#x27;) with automatic deploy on PR merge to develop</td></tr>
+<tr><td>4</td><td>Set up production environment with manual approval gate on main branch</td></tr>
+<tr><td>5</td><td>Configure Terraform for infrastructure-as-code (Cloud SQL, Redis, Storage, IAM)</td></tr>
+<tr><td>6</td><td>Set up Secret Manager entries: DATABASE_URL, REDIS_URL, GOOGLE_CLIENT_SECRET, VERTEX_AI_PROJECT, JWT_SECRET</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>GitHub Actions CI passes on sample commit</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Docker build completes in &lt; 5 minutes</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Cloud Run staging deployment accessible at https://dma-viz-staging-xxx.run.app</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All secrets stored in Secret Manager (zero secrets in code)</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p1">
+<h2><span class="sec-num">1</span>Backend Core (FastAPI)</h2>
+<p class="lead">Build the FastAPI application serving all API endpoints from Backend Schema v2 section 11. Every endpoint must be tested, documented, and connected to the PostgreSQL database.</p>
+
+<div class="table-card" id="step-1.1">
+<div class="table-header"><span class="table-name">Step 1.1</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">FastAPI application scaffold</h3>
+<p class="lead">Initialize the FastAPI project with async SQLAlchemy, Pydantic v2 models, CORS middleware, health endpoint, and structured logging.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Follow the exact module structure in CLAUDE.md: <code>app/models/</code> (1 file per domain), <code>app/routers/</code> (1 file per API domain), <code>app/services/</code> (business logic), <code>app/schemas/</code> (Pydantic v2). The router files correspond 1:1 to Backend Schema v2 section 11 endpoint groups. All models inherit from a shared <code>Base = declarative_base()</code> in <code>app/database.py</code>.</div>
+<p class="note">Source: TRD v4 section 01 (tech stack), Backend Schema v2 section 11 (API endpoints)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Initialize FastAPI project with Python 3.11+, uvicorn, async-pg (asyncpg + SQLAlchemy 2.0 async)</td></tr>
+<tr><td>2</td><td>Configure Pydantic v2 settings for environment variables (DATABASE_URL, REDIS_URL, etc.)</td></tr>
+<tr><td>3</td><td>Set up CORS middleware allowing the frontend origin</td></tr>
+<tr><td>4</td><td>Create health check endpoint: GET /api/v1/health</td></tr>
+<tr><td>5</td><td>Configure structured JSON logging with request_id correlation</td></tr>
+<tr><td>6</td><td>Set up Alembic for database migrations</td></tr>
+<tr><td>7</td><td>Create base SQLAlchemy models matching all Backend Schema v2 tables</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>FastAPI starts and responds to GET /api/v1/health with 200</td></tr>
+<tr><td style="text-align:center;">☐</td><td>SQLAlchemy async session connects to Cloud SQL</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Alembic migration generates DDL matching Backend Schema v2</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.2">
+<div class="table-header"><span class="table-name">Step 1.2</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Authentication — Google OAuth + JWT</h3>
+<p class="lead">Implement Google OAuth 2.0 sign-in with JWT session tokens. Three roles: ADMIN, ANALYST, VIEWER. Google Workspace domain restriction to @zennify.com.</p>
+<p class="note">Source: Backend Schema v2 section 01 (users, session_log), UI/UX Brief v3 s19 (Login page), App Flow v3 (auth flow)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>POST /auth/google: exchange Google OAuth code for user identity, create/update users row, issue JWT with {sub, email, role, name, iat, exp}</td></tr>
+<tr><td>2</td><td>POST /auth/logout: invalidate session, log to session_log</td></tr>
+<tr><td>3</td><td>GET /auth/me: return current user profile from JWT</td></tr>
+<tr><td>4</td><td>Implement role-based middleware: extract JWT from Authorization header, verify signature, inject user context</td></tr>
+<tr><td>5</td><td>Configure Google OAuth client ID with @zennify.com domain restriction</td></tr>
+<tr><td>6</td><td>Implement session_log table writes for every auth event</td></tr>
+<tr><td>7</td><td>Set JWT expiry to 8 hours with refresh token flow</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Google OAuth login flow works end-to-end in browser</td></tr>
+<tr><td style="text-align:center;">☐</td><td>JWT contains correct role (ADMIN/ANALYST/VIEWER)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Unauthorized requests return 401</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Role-gated endpoints return 403 for insufficient permissions</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.3">
+<div class="table-header"><span class="table-name">Step 1.3</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Entity management APIs</h3>
+<p class="lead">CRUD for FSI client entities with subvertical classification, inference confidence, and Explorium match linking.</p>
+<p class="note">Source: Backend Schema v2 section 02 (entities, firmographics), PRD v3 section 12 (entity inference)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>GET /entities: list all entities with 7 filter params (subvertical, status, min_score, has_run, search, sort, page)</td></tr>
+<tr><td>2</td><td>GET /entities/:id/overview: full entity profile with latest run summary, pillar scores, firmographics</td></tr>
+<tr><td>3</td><td>PATCH /admin/entities/:id: update entity status, confirm/reject inference, merge duplicates</td></tr>
+<tr><td>4</td><td>Implement entity search with pg_trgm similarity for fuzzy matching on entity name</td></tr>
+<tr><td>5</td><td>Wire firmographics table with entity_id FK</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Entity list returns paginated results with all 7 filters functional</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Entity overview includes pillar_scores aggregation from latest active run</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Admin entity PATCH requires ADMIN role</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.4">
+<div class="table-header"><span class="table-name">Step 1.4</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Runs, scoring &amp; evidence APIs</h3>
+<p class="lead">APIs for DMA runs, subcap scores (with CCG template linkage), and evidence retrieval. This is the data backbone the entire visualizer reads from.</p>
+<p class="note">Source: Backend Schema v2 section 03 (runs, subcap_scores with Phase 1 extensions), section 04 (evidence_index, evidence_subcap_links)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>GET /entities/:id/runs: list all runs for entity, ordered by created_at desc</td></tr>
+<tr><td>2</td><td>GET /runs/:id: full run detail with pillar_scores, subcap count, evidence count, stream status</td></tr>
+<tr><td>3</td><td>GET /entities/:id/heatmap: return all subcap_scores for active run, joined with ccg_subcaps for maturity descriptors, ccg_subcap_completeness for framework context</td></tr>
+<tr><td>4</td><td>GET /entities/:id/subcaps/:subcap_id/evidence: return evidence_index rows linked via evidence_subcap_links, enriched with ccg_maturity_descriptors for the subcap</td></tr>
+<tr><td>5</td><td>POST /runs: create a new run (ADMIN only), enforce UNIQUE active run constraint</td></tr>
+<tr><td>6</td><td>Implement evidence_subcap_links join logic for multi-subcap evidence items</td></tr>
+<tr><td>7</td><td>Wire subcap_scores.ccg_subcap_id FK to ccg_subcaps for maturity descriptor inheritance</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Heatmap endpoint returns 851 subcap scores when all pillars scored</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Evidence endpoint returns E-ID labelled items with source URLs</td></tr>
+<tr><td style="text-align:center;">☐</td><td>subcap_scores.ccg_subcap_id correctly links to ccg_subcaps — maturity descriptors accessible via join</td></tr>
+<tr><td style="text-align:center;">☐</td><td>UNIQUE active run constraint enforced: only one status=&#x27;ACTIVE&#x27; per entity</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.5">
+<div class="table-header"><span class="table-name">Step 1.5</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Insights, recommendations &amp; platform APIs</h3>
+<p class="lead">Insight cards, platform opportunity matrix, tech stack, and recommendation endpoints. These power D2 (Insight Cards), D4 (Platform Opportunity), and the Tech Stack pages.</p>
+<p class="note">Source: Backend Schema v2 section 05 (insight_cards, recommendations, platform_scores), section 07 (tech_stack_entries), UI/UX Brief v3 s23–s25 (D4 Platform), s41–s42 (Tech Stack)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>GET /entities/:id/insights: paginated insight cards with severity filtering, sorted by priority</td></tr>
+<tr><td>2</td><td>GET /entities/:id/platforms: platform opportunity matrix — compute FitScore per platform using PRD v3 Platform Fit Score formula, joined with ccg_offering_subcap_matrix for gap identification</td></tr>
+<tr><td>3</td><td>GET /entities/:id/techstack: all tech_stack_entries with layer, status, dma_impact_score, source traceability</td></tr>
+<tr><td>4</td><td>GET /entities/:id/techstack/:tech_id: drilldown — detection evidence, subcap impact (before→after scores from ccg_offering_subcap_matrix), peer comparison, Zennify recommendation</td></tr>
+<tr><td>5</td><td>Implement Platform Fit Score calculation: Σ priority_score(s) × gap_size(s) for all subcaps where score &lt; 3.0, platform ∈ l3_platforms(s), tech_status = ABSENT</td></tr>
+<tr><td>6</td><td>Implement Platform Readiness Index prerequisite checks per PRD v3 specification</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Platform FitScore computation returns correct values for test entity</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Tech stack entries include source traceability (Explorium/job posting/press release badges)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Tech stack drilldown returns subcap impact table with before→after maturity scores</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Platform Readiness Index flags unmet prerequisites correctly</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.6">
+<div class="table-header"><span class="table-name">Step 1.6</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Alerts, annotations &amp; context APIs</h3>
+<p class="lead">Alert lifecycle, annotation layer, and context intelligence (timeline events, issue register).</p>
+<p class="note">Source: Backend Schema v2 section 06 (alerts, alert_actions), section 08 (timeline_events, issue_register), UI/UX Brief v3 s28 (alerts), s26 (context &amp; timeline)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>GET /alerts: global alert list with status filter, role-gated (ANALYST/ADMIN only)</td></tr>
+<tr><td>2</td><td>PATCH /alerts/:id/status: update alert status (OPEN→ACKNOWLEDGED→RESOLVED→DISMISSED), log to alert_actions</td></tr>
+<tr><td>3</td><td>GET /entities/:id/context: timeline events + issue register with Gantt-capable structure (start_date, end_date, severity)</td></tr>
+<tr><td>4</td><td>GET /entities/:id/annotations: user annotations on entity runs</td></tr>
+<tr><td>5</td><td>POST /entities/:id/annotations: create annotation (text + optional subcap_id anchor)</td></tr>
+<tr><td>6</td><td>Wire alert lifecycle: thin evidence alerts auto-generated when subcap evidence_count &lt; 2</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Alert status transitions persist correctly in alert_actions</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Context endpoint returns timeline events with Gantt-compatible date ranges</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Annotations are scoped to entity and optionally to subcap_id</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.7">
+<div class="table-header"><span class="table-name">Step 1.7</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">SSE real-time infrastructure</h3>
+<p class="lead">Server-Sent Events gateway using Redis pub/sub. Delivers real-time score progress, import status, and alert notifications to connected frontend sessions.</p>
+<p class="note">Source: Backend Schema v2 section 12 (9 SSE event types), TRD v4 section 15 (real-time architecture)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>GET /sse/entities/:id: SSE endpoint per entity — subscribes to Redis channel entity:{entity_id}</td></tr>
+<tr><td>2</td><td>Implement 9 event types: score_written, batch_complete, run_complete, stream_progress, import_started, import_complete, alert_created, annotation_added, entity_status_changed</td></tr>
+<tr><td>3</td><td>Implement heartbeat ping every 15s to keep connections alive</td></tr>
+<tr><td>4</td><td>Implement connection cleanup on client disconnect</td></tr>
+<tr><td>5</td><td>Wire score_stream_events inserts to publish SSE events via Redis</td></tr>
+<tr><td>6</td><td>Wire import pipeline completion to publish import_complete events</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>SSE connection established and heartbeat received</td></tr>
+<tr><td style="text-align:center;">☐</td><td>score_written event emitted when subcap_scores row inserted</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Connection recovers after network interruption (EventSource reconnect)</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.8">
+<div class="table-header"><span class="table-name">Step 1.8</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Gemini intelligence layer — 8 surfaces</h3>
+<p class="lead">Vertex AI Gemini integration for 8 intelligence surfaces with SSE streaming responses and caching. Each surface has a specific prompt template, TTL, and model tier.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/Backend_Schema_v2.html</code> section 13 for the exact 8 surface specifications: prompt template structure, TTL per surface, model selection (Flash vs Pro), and ANALYST role gate on alert_rationale. The Gemini service at <code>app/services/gemini_service.py</code> should use the Vertex AI Python SDK (<code>google.cloud.aiplatform</code>) with streaming enabled. Cache reads/writes go through the <code>gemini_cache</code> table — check cache BEFORE calling Vertex AI.</div>
+<p class="note">Source: Backend Schema v2 section 13 (Gemini contract: 8 surfaces, TTL, model selection), UI/UX Brief v3 s35 (Intelligence Panel)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>POST /gemini/:surface: unified Gemini endpoint with SSE streaming response</td></tr>
+<tr><td>2</td><td>Implement 8 surface handlers: why_now (72h, Flash), platform_story (72h, Flash), subcap_narrative (24h, Flash), insight_explanation (24h, Flash), peer_context (72h, Flash), data_cloud_readiness (72h, Flash), alert_rationale (24h, ANALYST-gated, Flash), meeting_prep (168h, Pro)</td></tr>
+<tr><td>3</td><td>Build prompt template system: each surface loads entity context (firmographics, scores, evidence) and injects into structured prompt</td></tr>
+<tr><td>4</td><td>Implement gemini_cache table: check cache before Vertex AI call, store response with TTL</td></tr>
+<tr><td>5</td><td>Implement SSE streaming: stream Gemini response tokens to frontend in real-time</td></tr>
+<tr><td>6</td><td>Set up Vertex AI client with Gemini 2.0 Flash (8 surfaces) and Gemini Pro (meeting_prep only)</td></tr>
+<tr><td>7</td><td>Implement ANALYST role gate on alert_rationale surface</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>All 8 surfaces return streaming responses</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Cache hit returns cached response without Vertex AI call</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Cache miss calls Vertex AI and stores response with correct TTL</td></tr>
+<tr><td style="text-align:center;">☐</td><td>alert_rationale returns 403 for VIEWER role</td></tr>
+<tr><td style="text-align:center;">☐</td><td>meeting_prep uses Gemini Pro (higher quality) with 168h cache</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-1.9">
+<div class="table-header"><span class="table-name">Step 1.9</span><span class="table-badge">Phase 1</span></div>
+<h3 class="subsec" style="margin-top:4px;">Admin &amp; import audit APIs</h3>
+<p class="lead">Admin endpoints for user management, entity management, Drive integration settings, system health, and import audit.</p>
+<p class="note">Source: Backend Schema v2 section 09 (import_scans, import_files, audit_log, safeguard_gates), section 11 (admin endpoints), UI/UX Brief v3 s30–s31 (admin pages)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>GET /admin/users: list all users with role, last_login, entity_count</td></tr>
+<tr><td>2</td><td>PATCH /admin/users/:id: update user role (ADMIN only)</td></tr>
+<tr><td>3</td><td>GET /admin/imports/audit: paginated import scan history with file counts, entity inference results, R01-R06 rule trigger counts</td></tr>
+<tr><td>4</td><td>POST /admin/imports/scan: trigger new Drive crawl scan (ADMIN only)</td></tr>
+<tr><td>5</td><td>GET /admin/health: system health dashboard — DB connection, Redis connection, Vertex AI availability, last import timestamp</td></tr>
+<tr><td>6</td><td>POST /admin/api-key/rotate: rotate API key for Claude Project ingest (Phase 1)</td></tr>
+<tr><td>7</td><td>Implement audit_log writes for all admin actions</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Admin endpoints return 403 for non-ADMIN roles</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Import audit shows scan history with per-file classification results</td></tr>
+<tr><td style="text-align:center;">☐</td><td>API key rotation generates new key and invalidates old one</td></tr>
+<tr><td style="text-align:center;">☐</td><td>System health endpoint returns status for all 4 dependencies</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p2">
+<h2><span class="sec-num">2</span>Drive Import Pipeline (Phase 0 of Product)</h2>
+<p class="lead">The Google Drive pre-connection bootstrap that ingests existing DMA artifacts without requiring any changes to the Claude DMA project. This is &#x27;Phase 0&#x27; from the PRD — the system&#x27;s ability to work from day one with artifacts already in Drive.</p>
+
+<div class="table-card" id="step-2.1">
+<div class="table-header"><span class="table-name">Step 2.1</span><span class="table-badge">Phase 2</span></div>
+<h3 class="subsec" style="margin-top:4px;">Google Drive service account &amp; folder traversal</h3>
+<p class="lead">Configure Drive service account with read-only access. Implement recursive folder crawl that discovers all DOCX, XLSX, CSV, PDF files in the DMA output folders.</p>
+<p class="note">Source: PRD v3 section 10 (folder traversal), Backend Schema v2 section 14 (Drive pipeline 14-step)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Configure dma-drive-crawler-sa service account with Drive read-only scope</td></tr>
+<tr><td>2</td><td>Share target Drive folders with the service account email</td></tr>
+<tr><td>3</td><td>Build recursive folder crawler: list files with mimeType filter, paginate with nextPageToken, depth limit 5</td></tr>
+<tr><td>4</td><td>Log discovered files to import_scans table (scan_id, started_at, folder_root, file_count)</td></tr>
+<tr><td>5</td><td>Filter by file extension: .docx, .xlsx, .csv, .pdf — skip images, presentations, other binary</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Crawler discovers all files in test Drive folder</td></tr>
+<tr><td style="text-align:center;">☐</td><td>import_scans row created with accurate file count</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Pagination handles folders with &gt; 1000 files</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-2.2">
+<div class="table-header"><span class="table-name">Step 2.2</span><span class="table-badge">Phase 2</span></div>
+<h3 class="subsec" style="margin-top:4px;">Artifact classification &amp; entity inference</h3>
+<p class="lead">Classify each discovered file by document_type and infer the FSI entity it belongs to using the 4-signal cascade. Then apply the 6 test-case removal rules (R01-R06) to filter out non-production data.</p>
+<p class="note">Source: PRD v3 section 11 (artifact registry), section 12 (entity inference — 4-signal cascade), section 13 (test case removal — R01-R06), Backend Schema v2 section 15 (entity inference)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Classify files into document_type enum: client_profile_research, assessment_report, governance_audit, evidence_workbook, scoring_workbook, narrative_deck, issue_register, peer_benchmark, appendix</td></tr>
+<tr><td>2</td><td>Implement 4-signal entity inference cascade: (1) filename entity name extraction, (2) folder path entity detection, (3) content header parsing (DOCX first 500 chars), (4) scoring workbook entity cell</td></tr>
+<tr><td>3</td><td>Calculate inference_confidence (0.0–1.0) based on signal agreement</td></tr>
+<tr><td>4</td><td>Apply R01-R06 test case removal: R01 test-case keywords in filename, R02 confidence &lt; 0.6 → PENDING_REVIEW, R03 non-FSI entity detected, R04 template file (no entity-specific content), R05 owner not in Zennify domain, R06 schema version mismatch</td></tr>
+<tr><td>5</td><td>Route entities below confidence threshold to PENDING_REVIEW status for manual admin confirmation</td></tr>
+<tr><td>6</td><td>Create import_files rows with classification, inference result, and rule trigger flags</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Classification accuracy &gt; 90% on test corpus of 50 DMA files</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Entity inference correctly identifies entity for files with clear naming</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Low-confidence files routed to PENDING_REVIEW (not auto-accepted)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>R01-R06 rules correctly filter test/template/non-production files</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-2.3">
+<div class="table-header"><span class="table-name">Step 2.3</span><span class="table-badge">Phase 2</span></div>
+<h3 class="subsec" style="margin-top:4px;">Deduplication &amp; document parsing</h3>
+<p class="lead">Apply deduplication winner selection rules and parse winning files into document_sections and document_evidence_items.</p>
+<p class="note">Source: PRD v3 section 14 (deduplication — 4 winner rules), Backend Schema v2 section 18 (document_parse_jobs, document_sections, document_evidence_items, document_lineage)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Implement 4 deduplication winner rules (applied in order): (1) FINAL suffix in filename wins, (2) assessment ID date (most recent wins), (3) modifiedTime (most recent wins), (4) owner priority (Zennify employee &gt; external)</td></tr>
+<tr><td>2</td><td>Create document_parse_jobs row for each winning file</td></tr>
+<tr><td>3</td><td>Parse DOCX files: extract sections by heading style (Heading 1/2/3), classify into section_type enum, compute word_count and evidence_density_score</td></tr>
+<tr><td>4</td><td>Parse XLSX files: extract scoring data into subcap_scores format, evidence data into evidence_index format</td></tr>
+<tr><td>5</td><td>Parse CSV files: import evidence_index, issue_register, peer data into appropriate tables</td></tr>
+<tr><td>6</td><td>Extract document_evidence_items: find E-ID citations, source titles, claim text, subcap mappings</td></tr>
+<tr><td>7</td><td>Build document_lineage entries: connect parsed sections → evidence items → subcap_scores</td></tr>
+<tr><td>8</td><td>Compute extraction_confidence per section (trigger QA alert below 0.6)</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Dedup correctly selects FINAL-suffixed files over earlier versions</td></tr>
+<tr><td style="text-align:center;">☐</td><td>DOCX parsing extracts sections with correct section_type classification</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Evidence items have E-IDs and subcap mappings populated</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Document lineage chain is complete: job → section → evidence → subcap_score</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p3">
+<h2><span class="sec-num">3</span>Frontend Foundation (Next.js)</h2>
+<p class="lead">Build the Next.js application shell with Zennify design system tokens, component library, and global layout. Every component follows the UI/UX Brief v3.0 specifications.</p>
+
+<div class="table-card" id="step-3.1">
+<div class="table-header"><span class="table-name">Step 3.1</span><span class="table-badge">Phase 3</span></div>
+<h3 class="subsec" style="margin-top:4px;">Next.js 14 scaffold &amp; design tokens</h3>
+<p class="lead">Initialize Next.js 14 with App Router, TypeScript, and the complete Zennify CSS design token system from UI/UX Brief v3.0 s04–s10.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/UIX_Brief_v3.html</code> sections s00–s10 for the complete Zennify design token system. Every CSS custom property, font weight, spacing value, border radius, and elevation level is specified there. The Tailwind config at <code>frontend/tailwind.config.ts</code> must include these as <code>extend</code> values. Follow the component file structure in CLAUDE.md: <code>components/ui/</code> (primitives), <code>components/layout/</code> (navigation), <code>components/domain/</code> (business components), <code>components/overlays/</code> (drawer, panel, modal).</div>
+<p class="note">Source: UI/UX Brief v3 s00–s10 (brand, colour, typography, spacing, elevation), TRD v4 section 01 (frontend stack)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Initialize Next.js 14 App Router with TypeScript, ESLint, Prettier</td></tr>
+<tr><td>2</td><td>Install dependencies: tailwindcss (configured with Zennify tokens), lucide-react (icons), recharts (charts), @tanstack/react-query (data fetching), zustand (state)</td></tr>
+<tr><td>3</td><td>Create CSS custom properties file with all design tokens: --z-teal (#27BBAF), --z-dark (#1C4A4D), --z-purple (#735BA1), --z-blue (#3D81F6), --z-orange (#FE9732), --z-below (#C25008), --z-above (#059669), maturity palette (M1 #C25008 through M5 #059669), spacing scale (4/8/12/16/20/24/32/40/48/64px), border-radius scale (4/6/8/12/16/9999px), elevation levels (sm/md/lg/xl)</td></tr>
+<tr><td>4</td><td>Configure DM Sans font family (300/400/500/600/700 weights) via next/font/google</td></tr>
+<tr><td>5</td><td>Set up BEM component naming convention per UI/UX Brief v3 s40</td></tr>
+<tr><td>6</td><td>Create Storybook configuration for component development</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Next.js dev server runs at localhost:3000</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All CSS custom properties render correctly in browser</td></tr>
+<tr><td style="text-align:center;">☐</td><td>DM Sans loads at all 5 weights</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Storybook runs at localhost:6006</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-3.2">
+<div class="table-header"><span class="table-name">Step 3.2</span><span class="table-badge">Phase 3</span></div>
+<h3 class="subsec" style="margin-top:4px;">Core component library</h3>
+<p class="lead">Build the reusable component library: buttons (5 variants), cards (4 variants), badges (8 types), form elements, tables, and overlay patterns (modal, drawer, panel, sheet).</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/UIX_Brief_v3.html</code> sections s11–s18 for the complete component specification. Every variant, size, state, and colour rule is defined there. Each component gets its own directory under <code>components/ui/</code> with ComponentName.tsx, ComponentName.module.css, and ComponentName.stories.tsx. BEM naming convention: <code>block__element--modifier</code>. Build components in isolation using Storybook before integrating into pages.</div>
+<p class="note">Source: UI/UX Brief v3 s11 (buttons), s12 (cards), s13 (badges), s14 (forms), s15 (tables), s16 (navigation), s17 (overlays), s18 (feedback &amp; loading)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Button component: primary, secondary, ghost, destructive, outline variants × 3 sizes (sm/md/lg) × 4 states (default/hover/active/disabled)</td></tr>
+<tr><td>2</td><td>Build Card component: metric card, entity card, insight card shell, recommendation card</td></tr>
+<tr><td>3</td><td>Build Badge components: status badges, role badges, Phase badges (DRIVE_PARSED/API_DIRECT), severity badges, pillar badges, maturity level pills, E-ID chips, freshness indicators</td></tr>
+<tr><td>4</td><td>Build Form components: text input, textarea, select/dropdown, search bar (compound), audience toggle (Internal/Customer), checkbox, radio</td></tr>
+<tr><td>5</td><td>Build Table component: standard anatomy (header, row, cell), sortable columns, paginated, with specialized table variants per UI/UX Brief</td></tr>
+<tr><td>6</td><td>Build Overlay components: Modal (confirmation + full-screen insight card), Drawer (evidence drawer, right slide-in), Panel (Intelligence Panel, right persistent), Sheet (mobile bottom sheet)</td></tr>
+<tr><td>7</td><td>Build Feedback components: toast (success/error/warning/info), skeleton loader, spinner, streaming text indicator (Gemini), progress bar</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>All button variants render correctly in Storybook</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Badge colour rules match UI/UX Brief v3 s13 specifications exactly</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Modal/Drawer/Panel/Sheet stacking order correct per z-index hierarchy</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Skeleton loaders match the exact shapes of their content counterparts</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-3.3">
+<div class="table-header"><span class="table-name">Step 3.3</span><span class="table-badge">Phase 3</span></div>
+<h3 class="subsec" style="margin-top:4px;">Global layout — sidebar, topbar, command palette</h3>
+<p class="lead">Build the persistent application shell: sidebar navigation, top bar with entity context, command palette (⌘K), and responsive breakpoint behaviour.</p>
+<p class="note">Source: UI/UX Brief v3 s16 (sidebar, topbar, tabs, breadcrumbs, command palette), s39 (responsive/engineering), App Flow v3 (navigation flows)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Sidebar: Zennify logo, entity directory link, D1–D6 tab navigation (context-sensitive — only visible when entity selected), alerts link, admin section (ADMIN role only), prospecting link</td></tr>
+<tr><td>2</td><td>Build Topbar: entity name + subvertical badge, run selector dropdown, audience toggle (Internal/Customer), Phase 0/Phase 1 source badge, search input</td></tr>
+<tr><td>3</td><td>Build Command Palette (⌘K): search entities, navigate to any page, switch runs, toggle audience mode</td></tr>
+<tr><td>4</td><td>Build Tab Navigation: D1–D6 horizontal tabs with active indicator, scroll behaviour on mobile</td></tr>
+<tr><td>5</td><td>Build Breadcrumb: heatmap zoom levels (Pillar → Category → Capability → Subcap)</td></tr>
+<tr><td>6</td><td>Implement responsive behaviour: sidebar collapses to icons at &lt; 1024px, bottom nav on mobile &lt; 768px</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Sidebar highlights correct nav item based on current route</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Command palette opens on ⌘K, searches entities, navigates correctly</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Responsive breakpoints function at 1024px and 768px boundaries</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Run selector dropdown shows all runs with version diff indicator</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-3.4">
+<div class="table-header"><span class="table-name">Step 3.4</span><span class="table-badge">Phase 3</span></div>
+<h3 class="subsec" style="margin-top:4px;">Login page &amp; auth flow</h3>
+<p class="lead">Build the login page with Google sign-in button, error states, and post-login redirect.</p>
+<p class="note">Source: UI/UX Brief v3 s19 (Login page mockup, real Google G SVG), App Flow v3 (auth flow)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build /login page with Zennify branding, tagline, and Google sign-in button (real Google G SVG logo per brand guidelines)</td></tr>
+<tr><td>2</td><td>Implement Google OAuth redirect flow: click → Google consent screen → callback → JWT stored in httpOnly cookie</td></tr>
+<tr><td>3</td><td>Handle auth error states: invalid domain (not @zennify.com), expired session, network error</td></tr>
+<tr><td>4</td><td>Implement post-login redirect to /clients (entity directory) or deep-link target</td></tr>
+<tr><td>5</td><td>Build loading state during OAuth exchange</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Login page renders with correct Zennify branding</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Google sign-in redirects to Google, returns JWT on success</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Non-@zennify.com email shows domain restriction error inline</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Deep-link redirect works: /login?redirect=/clients/fce-001/heatmap</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-3.5">
+<div class="table-header"><span class="table-name">Step 3.5</span><span class="table-badge">Phase 3</span></div>
+<h3 class="subsec" style="margin-top:4px;">Entity directory page</h3>
+<p class="lead">Build /clients — the entity list view with search, filter, sort, and entity cards showing latest run status.</p>
+<p class="note">Source: UI/UX Brief v3 s20 (entity directory mockup), PRD v3 section 04 (dashboard cluster D0)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build /clients page with search bar, subvertical filter, status filter, sort controls</td></tr>
+<tr><td>2</td><td>Build Entity Card: entity name, subvertical badge, overall maturity score, pillar mini-bars, last run date, Phase 0/Phase 1 source indicator, PENDING_REVIEW state variant</td></tr>
+<tr><td>3</td><td>Implement infinite scroll or pagination (page_size=20)</td></tr>
+<tr><td>4</td><td>Build empty state for new installations (no entities yet)</td></tr>
+<tr><td>5</td><td>Wire to GET /entities API with all 7 filter params</td></tr>
+<tr><td>6</td><td>Implement SSE subscription for entity_status_changed events (live updates when import completes)</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Entity cards show correct pillar scores from latest run</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Search filters entities by name with debounced input</td></tr>
+<tr><td style="text-align:center;">☐</td><td>PENDING_REVIEW entities show confirmation prompt per UI/UX Brief</td></tr>
+<tr><td style="text-align:center;">☐</td><td>SSE updates card when new import completes</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p4">
+<h2><span class="sec-num">4</span>Dashboard Clusters (D1–D6)</h2>
+<p class="lead">Build all six dashboard cluster pages. Each cluster is a tab within /clients/:id/ and presents a different analytical lens on the DMA data.</p>
+
+<div class="table-card" id="step-4.1">
+<div class="table-header"><span class="table-name">Step 4.1</span><span class="table-badge">Phase 4</span></div>
+<h3 class="subsec" style="margin-top:4px;">D1 — Executive Overview (/clients/:id/overview)</h3>
+<p class="lead">The landing page for any entity. KPI tiles, overall maturity score, pillar summary bars, recent insights, quick-action buttons. Role-customized content per UI/UX Brief.</p>
+<p class="note">Source: UI/UX Brief v3 s20–s21 (D1 mockup, KPI tiles, scroll sequence), PRD v3 section 04 (D1 cluster)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build KPI tile row: Overall Maturity Score (gauge), Evidence Count, Thin Evidence %, Platform Opportunity Count, Last Run Date</td></tr>
+<tr><td>2</td><td>Build Pillar Summary: 4 pillar cards with score, trend arrow, top-3 strengths, top-3 gaps</td></tr>
+<tr><td>3</td><td>Build Recent Insights carousel: top 5 insight cards by priority, click → D2</td></tr>
+<tr><td>4</td><td>Build Quick Actions: &#x27;View Heatmap&#x27; → D3, &#x27;Platform Opportunities&#x27; → D4, &#x27;Export PDF&#x27; → scorecard generator</td></tr>
+<tr><td>5</td><td>Build One-Sentence Summary (OSS) cards: SCQA-structured narrative per pillar, generated via Gemini if available</td></tr>
+<tr><td>6</td><td>Implement role customization: ANALYST sees full detail; VIEWER (Customer mode) sees redacted internal notes</td></tr>
+<tr><td>7</td><td>Wire to GET /entities/:id/overview API</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>KPI tiles populate from API data</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Pillar cards show correct scores with colour coding per maturity palette</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Role-based content filtering works: Customer view hides internal annotations</td></tr>
+<tr><td style="text-align:center;">☐</td><td>PDF export button generates downloadable scorecard</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-4.2">
+<div class="table-header"><span class="table-name">Step 4.2</span><span class="table-badge">Phase 4</span></div>
+<h3 class="subsec" style="margin-top:4px;">D2 — Insight Cards (/clients/:id/insights)</h3>
+<p class="lead">Paginated grid of insight cards with severity filtering, drill-down to evidence drawer, and Gemini explanation surface.</p>
+<p class="note">Source: UI/UX Brief v3 s22 (D2 mockup, insight card anatomy, severity colours), PRD v3 section 06 (insight card spec)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build insight card grid with severity colour coding: CRITICAL (red), HIGH (orange), MEDIUM (amber), LOW (teal)</td></tr>
+<tr><td>2</td><td>Build card anatomy: headline, severity badge, affected subcap chips, evidence count, action recommendation</td></tr>
+<tr><td>3</td><td>Build severity filter bar and search</td></tr>
+<tr><td>4</td><td>Build drill-down: click card → full-screen modal with 3-zone layout (WHAT / WHY / SO WHAT) per UI/UX Brief</td></tr>
+<tr><td>5</td><td>Wire evidence drawer trigger from insight card → right slide-in drawer with E-ID items</td></tr>
+<tr><td>6</td><td>Wire Gemini &#x27;insight_explanation&#x27; surface: streaming AI explanation in Intelligence Panel when insight is selected</td></tr>
+<tr><td>7</td><td>Handle card lifecycle states: NEW → VIEWED → ACTIONED → DISMISSED</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Cards render with correct severity colours per UI/UX Brief palette</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Full-screen modal shows WHAT/WHY/SO WHAT structure</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Evidence drawer opens with correct E-IDs for the selected insight</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Gemini explanation streams in real-time</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-4.3">
+<div class="table-header"><span class="table-name">Step 4.3</span><span class="table-badge">Phase 4</span></div>
+<h3 class="subsec" style="margin-top:4px;">D3 — Interactive Heatmap (/clients/:id/heatmap)</h3>
+<p class="lead">The signature visualization: a zoomable heatmap from pillar → category → capability → subcap level, with maturity colour scale, cell tooltips, and mode toggles.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/UIX_Brief_v3.html</code> section s23 for the complete heatmap specification including: 4-level zoom hierarchy, maturity colour scale (M1=#C25008 through M5=#059669), cell hover tooltip anatomy, zoom animation timing, mode toggles, and performance requirements (60fps at 851 cells). The heatmap data comes from <code>GET /entities/:id/heatmap</code> which joins <code>subcap_scores</code> with <code>ccg_subcaps</code> and <code>ccg_maturity_descriptors</code>. For performance, virtualize the grid at subcap level — only render visible cells. Consider canvas rendering as fallback for > 200 visible cells.</div>
+<p class="note">Source: UI/UX Brief v3 s23 (D3 mockup, maturity colour scale, zoom levels, cell hover tooltip, mode toggles, performance considerations), PRD v3 section 07 (heatmap design)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build 4-level zoom hierarchy: Pillar (4 cells) → Category (4×4 grid) → Capability (variable grid) → Subcap (~851 cells)</td></tr>
+<tr><td>2</td><td>Implement maturity colour scale: M1 (#C25008 burnt orange) → M2 (#FE9732 amber) → M3 (#FFD166 gold) → M4 (#7BC47F sage) → M5 (#059669 emerald). No score = #E5E7EB light grey.</td></tr>
+<tr><td>3</td><td>Build cell hover tooltip: subcap name, score, confidence, evidence count, top evidence headline, offering gaps</td></tr>
+<tr><td>4</td><td>Build zoom animation: click cell → smooth zoom to next level with breadcrumb update</td></tr>
+<tr><td>5</td><td>Build mode toggles: Score view (default), Confidence view, Evidence Density view, Peer Comparison view</td></tr>
+<tr><td>6</td><td>Build subcap-level click → evidence drawer (right slide-in) with all E-IDs for that subcap</td></tr>
+<tr><td>7</td><td>Implement performance optimization: virtualize grid at subcap level (851 cells), canvas rendering fallback if DOM exceeds 60fps target</td></tr>
+<tr><td>8</td><td>Wire to GET /entities/:id/heatmap API (returns all subcap scores with CCG metadata)</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Heatmap renders all 4 pillars at pillar zoom level</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Zoom transitions are smooth (&lt; 300ms per UI/UX Brief animation spec)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Cell tooltip shows correct data on hover</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Mode toggle switches colour scheme without data refetch</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Performance: subcap-level grid renders at 60fps on mid-tier hardware</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-4.4">
+<div class="table-header"><span class="table-name">Step 4.4</span><span class="table-badge">Phase 4</span></div>
+<h3 class="subsec" style="margin-top:4px;">D4 — Platform Opportunity Matrix (/clients/:id/platform)</h3>
+<p class="lead">Platform-centric view showing Salesforce ecosystem opportunity: FitScore cards for 5 platform families, readiness prerequisites, conversation starters, and comparison view.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/UIX_Brief_v3.html</code> sections s24–s25 for platform card layouts, readiness index UI, and conversation starter templates. Read <code>docs/PRD_v3.html</code> section 08 for the Platform Fit Score formula and Platform Readiness Index prerequisite table. The offering gap identification comes from <code>ccg_offering_subcap_matrix</code> joined with <code>tech_stack_entries</code> — the Salesforce opportunity is every offering row where the sub-cap's L3 platform has status=ABSENT in the client's tech stack.</div>
+<p class="note">Source: UI/UX Brief v3 s24–s25 (D4 mockup, platform fit score cards, readiness index, conversation starters, recommendation cards, comparison view), PRD v3 section 08 (platform layer)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build 5 Platform Fit Score cards: Salesforce (SF), Databricks (DB), Tableau (TBL), Twilio (TW), nCino — each with computed FitScore, gap count, top-3 opportunity subcaps</td></tr>
+<tr><td>2</td><td>Build Platform Readiness Index: prerequisite check per platform per PRD v3 specification (Agentforce requires P4C1.x ≥ 2.0, etc.)</td></tr>
+<tr><td>3</td><td>Build Conversation Starter generator: template-fill with entity name, gap subcaps, and offering recommendations</td></tr>
+<tr><td>4</td><td>Build Recommendation Cards (REC-XX): offering-level recommendations with maturity lift (current → target), linked subcaps, and Zennify offering details from ccg_offerings</td></tr>
+<tr><td>5</td><td>Build Comparison View: 5 platforms side-by-side with subcap coverage, gap count, readiness status</td></tr>
+<tr><td>6</td><td>Wire to GET /entities/:id/platforms API and ccg_offering_subcap_matrix for offering gap identification</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>FitScore computation matches PRD v3 formula</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Readiness prerequisites correctly flag unmet conditions</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Conversation starters populate with entity-specific data (no generic templates)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Recommendation cards link to correct ccg_offerings entries</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-4.5">
+<div class="table-header"><span class="table-name">Step 4.5</span><span class="table-badge">Phase 4</span></div>
+<h3 class="subsec" style="margin-top:4px;">D5 — Context &amp; Timeline (/clients/:id/context)</h3>
+<p class="lead">Entity context intelligence: timeline events with drilldown-capable Gantt, sentiment analysis, financial trajectory, regulatory landscape, and competitive positioning.</p>
+<p class="note">Source: UI/UX Brief v3 s26 (D5 redesigned with no emojis, drilldown Gantt, Zennify tokens), Backend Schema v2 section 08 (timeline_events, issue_register)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Timeline section: chronological event nodes with Zennify token system (teal for completed, orange for in-progress, purple for planned, dashed-blue for regulatory)</td></tr>
+<tr><td>2</td><td>Build Issue Register Gantt: drilldown-capable bars showing issue severity, start/end dates, owner assignment. Click bar → inline detail panel.</td></tr>
+<tr><td>3</td><td>Build Sentiment section: aggregated sentiment score from evidence sources (no emojis — Zennify teal/orange/red colour indicators)</td></tr>
+<tr><td>4</td><td>Build Financial Trajectory: charts sourced from firmographics table</td></tr>
+<tr><td>5</td><td>Build Regulatory Landscape: regulatory events filtered from timeline_events with regulator badges</td></tr>
+<tr><td>6</td><td>Wire to GET /entities/:id/context API</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Timeline renders events in correct chronological order</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Gantt bars are drilldown-capable — click opens inline detail panel</td></tr>
+<tr><td style="text-align:center;">☐</td><td>No emojis anywhere on the page (Zennify design compliance)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Financial charts render from firmographics data</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-4.6">
+<div class="table-header"><span class="table-name">Step 4.6</span><span class="table-badge">Phase 4</span></div>
+<h3 class="subsec" style="margin-top:4px;">D6 — Health &amp; Alerts (/clients/:id/health)</h3>
+<p class="lead">Assessment health dashboard: thin evidence alerts, version diff, safeguard gates, and data freshness indicators.</p>
+<p class="note">Source: UI/UX Brief v3 s27 (D6 mockup, thin evidence alerts, version diff, safeguard gates), PRD v3 section 20 (rerun intelligence)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Thin Evidence alerts table: subcaps with &lt; 2 evidence items, proxy search status, resolution action buttons</td></tr>
+<tr><td>2</td><td>Build Version Diff view: run-to-run score comparison with colour coding (improved = green, regressed = red, unchanged = grey)</td></tr>
+<tr><td>3</td><td>Build Safeguard Gate definitions panel: R01-R12 hard rules from the DMA execution plan with PASS/FAIL indicators</td></tr>
+<tr><td>4</td><td>Build Data Freshness indicators: per-section freshness badges showing age of underlying evidence</td></tr>
+<tr><td>5</td><td>Wire thin evidence alert lifecycle: NEW → ACKNOWLEDGED → RESOLVED → DISMISSED with alert_actions logging</td></tr>
+<tr><td>6</td><td>Wire to GET /entities/:id/health API</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Thin evidence table highlights all subcaps with &lt; 2 evidence items</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Version diff correctly compares two runs and colour codes changes</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Safeguard gates show current pass/fail status per hard rule</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p5">
+<h2><span class="sec-num">5</span>Specialized Views &amp; Cross-cutting Features</h2>
+<p class="lead">Build the views and interaction patterns that span across multiple dashboard clusters: tech stack pages, evidence drawer, Intelligence Panel, annotations, run selector, admin pages, and prospecting scorecard.</p>
+
+<div class="table-card" id="step-5.1">
+<div class="table-header"><span class="table-name">Step 5.1</span><span class="table-badge">Phase 5</span></div>
+<h3 class="subsec" style="margin-top:4px;">Tech Stack Overview &amp; Drilldown</h3>
+<p class="lead">Two-page tech stack surface: overview at /clients/:id/techstack (all detected technologies with layer/status/source badges) and drilldown at /clients/:id/techstack/:tech_id (5-zone detail page).</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/UIX_Brief_v3.html</code> sections s41–s42. CRITICAL: These pages use LIGHT surfaces (white/lavender backgrounds), NOT dark surfaces. This was a redesign fix — all text uses <code>var(--z-dark)</code>, <code>var(--z-body)</code>, <code>var(--z-muted)</code> on white cards. Source traceability badges (Explorium / Job posting / Press release / Assessment) use colour-tinted chips. The drilldown page has 5 zones: header, detection evidence, subcap impact table, gap chips, peer comparison + recommendation.</div>
+<p class="note">Source: UI/UX Brief v3 s41 (Tech Stack Overview — light surfaces), s42 (Tech Stack Drilldown — 5 zones), Backend Schema v2 section 07 (tech_stack_entries)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Tech Stack Overview: technology rows as cards on light surfaces (not dark — per s41 redesign), with L1–L5 layer indicator, CONFIRMED/PARTIAL/INFERRED/ABSENT status badge, source traceability badges (Explorium/Job posting/Press release/Assessment), DMA impact score chip</td></tr>
+<tr><td>2</td><td>Build Tech Stack Drilldown (5 zones): (1) Header card with technology name + vendor + layer + status, (2) Detection evidence with source badges and E-ID chips, (3) Subcap impact table showing before→after scores from ccg_offering_subcap_matrix, (4) Gap chips for absent technologies on white surface, (5) Peer comparison + Zennify recommendation on purple-tint surface</td></tr>
+<tr><td>3</td><td>Wire to GET /entities/:id/techstack and GET /entities/:id/techstack/:tech_id APIs</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Tech stack pages use light surfaces (white/lavender) not dark backgrounds</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Source traceability badges correctly identify detection source</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Subcap impact table shows maturity lift (current → target) from ccg_offering_subcap_matrix</td></tr>
+<tr><td style="text-align:center;">☐</td><td>ABSENT technologies show Zennify offering recommendation</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-5.2">
+<div class="table-header"><span class="table-name">Step 5.2</span><span class="table-badge">Phase 5</span></div>
+<h3 class="subsec" style="margin-top:4px;">Evidence Drawer</h3>
+<p class="lead">Right slide-in drawer showing all evidence items for a selected subcap, insight, or tech stack entry. Layered pattern: can open inside the insight card modal.</p>
+<p class="note">Source: UI/UX Brief v3 s32 (evidence drawer anatomy, item card detail, drawer states, layered pattern)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Evidence Drawer component: right slide-in (400px width on desktop, full-width on mobile)</td></tr>
+<tr><td>2</td><td>Build Evidence Item Card: E-ID chip, source title, source date, claim text, claim label badge, confidence score, source URL link</td></tr>
+<tr><td>3</td><td>Implement drawer states: loading (skeleton), populated, empty (with &#x27;no evidence&#x27; message), error</td></tr>
+<tr><td>4</td><td>Implement layered drawer pattern: drawer can open inside the full-screen insight card modal (z-index stacking per UI/UX Brief s17)</td></tr>
+<tr><td>5</td><td>Implement deep-link parameter: ?evidence=E-001 opens drawer pre-scrolled to that evidence item</td></tr>
+<tr><td>6</td><td>Wire to GET /entities/:id/subcaps/:subcap_id/evidence API</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Drawer opens smoothly from right (300ms slide per motion spec)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>E-ID chips are clickable deep links</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Layered drawer inside modal works without z-index conflicts</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Deep-link parameter opens correct evidence item</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-5.3">
+<div class="table-header"><span class="table-name">Step 5.3</span><span class="table-badge">Phase 5</span></div>
+<h3 class="subsec" style="margin-top:4px;">Intelligence Panel (Gemini)</h3>
+<p class="lead">Right persistent panel for Gemini AI intelligence surfaces. Streaming text display with 8 surface triggers.</p>
+<p class="note">Source: UI/UX Brief v3 s35 (Intelligence Panel anatomy, 8 surfaces, streaming state), Backend Schema v2 section 13 (Gemini contract)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Intelligence Panel: right persistent panel (360px width), toggle-able open/close</td></tr>
+<tr><td>2</td><td>Build streaming text display: characters appear in sequence with cursor indicator, markdown rendering for formatted output</td></tr>
+<tr><td>3</td><td>Implement 8 surface triggers: contextual buttons throughout D1–D6 that open the panel with the appropriate surface</td></tr>
+<tr><td>4</td><td>Build panel states: idle (prompt visible), streaming (text appearing), complete (full response + copy button), error (retry option), cached (cache badge + timestamp)</td></tr>
+<tr><td>5</td><td>Build ANALYST role gate: alert_rationale surface shows lock icon for VIEWER role</td></tr>
+<tr><td>6</td><td>Wire to POST /gemini/:surface API with SSE streaming response</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Panel streams Gemini response with visible character-by-character animation</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Cached responses show cache badge with age indicator</td></tr>
+<tr><td style="text-align:center;">☐</td><td>ANALYST-gated surface shows appropriate access control UI</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All 8 surfaces trigger correctly from their respective pages</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-5.4">
+<div class="table-header"><span class="table-name">Step 5.4</span><span class="table-badge">Phase 5</span></div>
+<h3 class="subsec" style="margin-top:4px;">Run Selector, Audience Toggle &amp; Annotations</h3>
+<p class="lead">Cross-cutting controls that affect all dashboard clusters: run version selection, Internal/Customer audience toggle, and user annotations.</p>
+<p class="note">Source: UI/UX Brief v3 s37 (run selector), s37 (audience toggle), s36 (annotations), App Flow v3 (run selection, audience toggle)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build Run Selector dropdown: list all runs with version date, score summary, compare mode (select two runs for diff view in D6)</td></tr>
+<tr><td>2</td><td>Build Audience Toggle: Internal ↔ Customer mode switch in topbar. Internal shows all data; Customer mode hides internal annotations, thin evidence details, governance findings, and raw scores (shows only maturity level labels)</td></tr>
+<tr><td>3</td><td>Build Annotation layer: inline annotation bubbles on subcap scores, insight cards, and recommendations. POST /entities/:id/annotations to save. Display as comment threads.</td></tr>
+<tr><td>4</td><td>Persist audience mode and selected run in URL params for shareable deep links</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Run selector shows all runs with correct metadata</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Audience toggle removes sensitive content in Customer mode per UI/UX Brief specification</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Annotations persist across sessions and appear for all users with access to the entity</td></tr>
+<tr><td style="text-align:center;">☐</td><td>URL params (?run=xxx&amp;view=customer) restore correct state on page load</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-5.5">
+<div class="table-header"><span class="table-name">Step 5.5</span><span class="table-badge">Phase 5</span></div>
+<h3 class="subsec" style="margin-top:4px;">Admin pages</h3>
+<p class="lead">Build all admin-only pages: settings, import management, import audit, entity management, and user management.</p>
+<p class="note">Source: UI/UX Brief v3 s30–s31 (admin pages), s33 (import audit), s36 (Phase 0 UI)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build /admin/settings: Drive integration settings (folder IDs, crawl frequency), system configuration, API key display (masked) with rotate button</td></tr>
+<tr><td>2</td><td>Build /admin/import: import job queue with status indicators, manual scan trigger button, last scan timestamp</td></tr>
+<tr><td>3</td><td>Build /admin/import/audit: full audit trail table with per-file classification, entity inference cascade visualization (4 signals), R01-R06 rule trigger display, dedup winner selection explanation</td></tr>
+<tr><td>4</td><td>Build /admin/entities: entity management table with status column (ACTIVE/PENDING_REVIEW/ARCHIVED), confirm/reject/merge actions</td></tr>
+<tr><td>5</td><td>Build user management: user list with role column (ADMIN/ANALYST/VIEWER), role change dropdown (ADMIN only)</td></tr>
+<tr><td>6</td><td>Gate all admin pages behind ADMIN role check</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>All admin pages return 403 redirect for non-ADMIN users</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Import audit shows complete file-by-file classification with inference cascade</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Entity management allows confirm/reject of PENDING_REVIEW entities</td></tr>
+<tr><td style="text-align:center;">☐</td><td>User role changes take effect immediately</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-5.6">
+<div class="table-header"><span class="table-name">Step 5.6</span><span class="table-badge">Phase 5</span></div>
+<h3 class="subsec" style="margin-top:4px;">Prospecting scorecard (AE self-service)</h3>
+<p class="lead">Build /prospecting — the AE-facing self-service scorecard that summarizes platform opportunities for a selected entity in a meeting-ready format.</p>
+<p class="note">Source: UI/UX Brief v3 s29 (prospecting scorecard), PRD v3 section 08 (platform layer)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build /prospecting page: entity selector + scorecard generator</td></tr>
+<tr><td>2</td><td>Build scorecard layout: entity summary header, top-5 platform opportunities ranked by FitScore, conversation starters per platform, key gap subcaps with offering recommendations</td></tr>
+<tr><td>3</td><td>Build PDF export: generate a clean, branded PDF of the scorecard for meeting prep</td></tr>
+<tr><td>4</td><td>Wire meeting_prep Gemini surface: generate personalized talking points using entity context + platform gaps + recent news</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Scorecard populates correctly for selected entity</td></tr>
+<tr><td style="text-align:center;">☐</td><td>PDF export generates clean Zennify-branded PDF</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Gemini meeting prep generates entity-specific talking points (not generic)</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p6">
+<h2><span class="sec-num">6</span>Phase 1 Integration — Claude Project API</h2>
+<p class="lead">Connect the DMA Visualizer directly to the Claude Project execution pipeline for real-time score streaming, evidence delivery, and feedback loop. This is &#x27;Phase 1&#x27; from the PRD — structured, real-time payload delivery.</p>
+
+<div class="table-card" id="step-6.1">
+<div class="table-header"><span class="table-name">Step 6.1</span><span class="table-badge">Phase 6</span></div>
+<h3 class="subsec" style="margin-top:4px;">Phase 1 ingest API endpoint</h3>
+<p class="lead">Build the authenticated REST endpoint that the Claude Project posts scored subcap data to in real-time during DMA execution.</p>
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Read <code>docs/Backend_Schema_v2.html</code> section 18 for the complete streaming pipeline: score_stream_jobs lifecycle (INITIALIZING→STREAMING→GATE_PENDING→PAUSED→COMPLETE→ERRORED), score_stream_events (append-only, 8 event types), and the Phase 1 streaming flow (7-step sequence from Claude project write through SSE emission). The ingest endpoint at <code>app/routers/ingest.py</code> authenticates via API key (rotatable from admin panel), validates sub_cap_ids against ccg_subcaps, and publishes SSE events via Redis. Every score write UPSERTS into subcap_scores WITH the ccg_subcap_id link.</div>
+<p class="note">Source: PRD v3 section 16 (communication protocol), Backend Schema v2 section 18 (score_stream_jobs, score_stream_events)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>POST /api/v1/ingest/assessment: authenticated endpoint accepting scored subcap payloads (API key auth from admin rotation)</td></tr>
+<tr><td>2</td><td>Payload schema: {run_id, entity_id, batch_id, sub_batch_label, subcaps: [{sub_cap_id, score, confidence, evidence_ids, rationale, l3_platforms_detected, offering_gaps}]}</td></tr>
+<tr><td>3</td><td>On receive: create/update score_stream_jobs, INSERT score_stream_events (append-only), UPSERT subcap_scores with ccg_subcap_id link, UPSERT evidence_index rows</td></tr>
+<tr><td>4</td><td>Validate sub_cap_id against ccg_subcaps (reject unknown IDs)</td></tr>
+<tr><td>5</td><td>Publish SSE events: score_written per subcap, batch_complete per batch</td></tr>
+<tr><td>6</td><td>Update score_stream_jobs.last_heartbeat_at on every request</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Ingest endpoint accepts valid payload and persists to all 3 tables</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Invalid sub_cap_id returns 422 with specific error</td></tr>
+<tr><td style="text-align:center;">☐</td><td>SSE event published within 200ms of score write</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Heartbeat updates correctly</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-6.2">
+<div class="table-header"><span class="table-name">Step 6.2</span><span class="table-badge">Phase 6</span></div>
+<h3 class="subsec" style="margin-top:4px;">Real-time progress tracking</h3>
+<p class="lead">Frontend components that display live scoring progress during a Claude Project execution run.</p>
+<p class="note">Source: Backend Schema v2 section 18 (score_stream_jobs — stream_status lifecycle), UI/UX Brief v3 (progress indicators)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build real-time progress bar on entity overview: scored_subcaps / total_subcaps with percentage and estimated completion time</td></tr>
+<tr><td>2</td><td>Build per-pillar progress indicators: show which pillar is currently being scored, which are complete</td></tr>
+<tr><td>3</td><td>Build sub-batch progress: show current batch_id and sub_batch_label</td></tr>
+<tr><td>4</td><td>Subscribe to SSE stream_progress events for live updates</td></tr>
+<tr><td>5</td><td>Handle PAUSED state: show warning when heartbeat is stale (&gt; 15 minutes)</td></tr>
+<tr><td>6</td><td>Handle ERRORED state: show error details from score_stream_jobs.error_log</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Progress bar updates in real-time as scores arrive</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Per-pillar indicators correctly show completion state</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Stale heartbeat triggers visible warning within 15 minutes</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-6.3">
+<div class="table-header"><span class="table-name">Step 6.3</span><span class="table-badge">Phase 6</span></div>
+<h3 class="subsec" style="margin-top:4px;">Phase 0 → Phase 1 transition</h3>
+<p class="lead">UI and backend logic for transitioning an entity from Drive-imported data (Phase 0) to Claude-streamed data (Phase 1).</p>
+<p class="note">Source: PRD v3 section 18 (phase transition conditions), UI/UX Brief v3 s36 (Phase 0 UI, transition flow)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Detect Phase 1 data arrival: when first score_stream_event appears for an entity, flag transition available</td></tr>
+<tr><td>2</td><td>Build transition modal: explain to user that Phase 1 data is available, show comparison of Phase 0 vs Phase 1 data coverage</td></tr>
+<tr><td>3</td><td>Implement merge strategy: Phase 1 scores override Phase 0 scores for same sub_cap_id; Phase 0 evidence preserved as supplementary</td></tr>
+<tr><td>4</td><td>Update entity source badge: DRIVE_PARSED → API_DIRECT (or HYBRID if both sources present)</td></tr>
+<tr><td>5</td><td>Preserve Phase 0 run as historical version accessible via run selector</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Transition modal appears when Phase 1 data first arrives</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Phase 1 scores correctly override Phase 0 for matching subcaps</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Phase 0 evidence preserved alongside Phase 1 evidence</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Source badge correctly reflects data provenance</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-6.4">
+<div class="table-header"><span class="table-name">Step 6.4</span><span class="table-badge">Phase 6</span></div>
+<h3 class="subsec" style="margin-top:4px;">Feedback loop &amp; rerun intelligence</h3>
+<p class="lead">Generate quality feedback signals that flow back to the DMA Claude Project to improve future reruns.</p>
+<p class="note">Source: PRD v3 section 17 (feedback loop), section 20 (rerun intelligence)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Generate thin_evidence_report: list all subcaps with &lt; 2 evidence items, with diagnostic questions from ccg_subcaps.description to guide proxy searches</td></tr>
+<tr><td>2</td><td>Generate score_drift_report: compare current run scores against peer benchmarks and prior runs, flag statistical outliers</td></tr>
+<tr><td>3</td><td>Generate coverage_gaps_report: subcaps with NO_EVIDENCE that have ccg_subcap_completeness.total_score &gt; 5 (well-defined in framework but missed in execution)</td></tr>
+<tr><td>4</td><td>Expose feedback files via GET /entities/:id/runs/:run_id/feedback endpoint</td></tr>
+<tr><td>5</td><td>Store feedback signals in dedicated feedback table for calibration baseline per PRD v3 section 20</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Thin evidence report correctly identifies all under-evidenced subcaps</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Score drift report flags scores that deviate &gt; 1.5 from peer mean</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Coverage gap report prioritizes well-defined subcaps that were missed</td></tr>
+</table>
+</div>
+</section>
+
+<section id="p7">
+<h2><span class="sec-num">7</span>Quality, Testing &amp; Production Deployment</h2>
+<p class="lead">Comprehensive QA, performance optimization, accessibility compliance, and production deployment.</p>
+
+<div class="table-card" id="step-7.1">
+<div class="table-header"><span class="table-name">Step 7.1</span><span class="table-badge">Phase 7</span></div>
+<h3 class="subsec" style="margin-top:4px;">Visual regression testing</h3>
+<p class="lead">Automated visual regression tests for all pages and component states.</p>
+<p class="note">Source: UI/UX Brief v3 s40 (QA checklist, visual regression targets)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Set up Playwright or Chromatic for visual regression testing</td></tr>
+<tr><td>2</td><td>Capture baseline screenshots for all 14 routes: /login, /clients, /clients/:id/overview, /insights, /heatmap, /platform, /context, /health, /techstack, /techstack/:tech_id, /alerts, /prospecting, /admin/settings, /admin/import/audit</td></tr>
+<tr><td>3</td><td>Test all component states: buttons (4 states × 5 variants), cards (4 variants × 3 states), badges (8 types), modals, drawers, panels</td></tr>
+<tr><td>4</td><td>Test responsive breakpoints: 1440px (desktop), 1024px (tablet), 768px (mobile landscape), 375px (mobile portrait)</td></tr>
+<tr><td>5</td><td>Test colour contrast: all text/background combinations meet WCAG 2.1 AA (4.5:1 normal, 3:1 large)</td></tr>
+<tr><td>6</td><td>Test dark surface text: verify all text on dark surfaces meets contrast requirements</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Zero visual regressions on baseline comparison</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All 14 routes render correctly at all 4 breakpoints</td></tr>
+<tr><td style="text-align:center;">☐</td><td>WCAG colour contrast passes for every text/background combination</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-7.2">
+<div class="table-header"><span class="table-name">Step 7.2</span><span class="table-badge">Phase 7</span></div>
+<h3 class="subsec" style="margin-top:4px;">Performance optimization</h3>
+<p class="lead">Meet performance budgets from UI/UX Brief v3.0: LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1, heatmap 60fps.</p>
+<p class="note">Source: UI/UX Brief v3 s39 (performance budgets), s23 (heatmap performance considerations)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Implement code splitting: each D1–D6 cluster as a separate chunk</td></tr>
+<tr><td>2</td><td>Implement heatmap virtualization: only render visible cells, use canvas for &gt; 200 visible subcap cells</td></tr>
+<tr><td>3</td><td>Implement SSR for entity directory (SEO not required but improves LCP)</td></tr>
+<tr><td>4</td><td>Implement image optimization: Zennify logo as inline SVG, lazy-load non-critical images</td></tr>
+<tr><td>5</td><td>Implement API response caching: react-query staleTime=30s for entity data, staleTime=5min for CCG reference data</td></tr>
+<tr><td>6</td><td>Implement skeleton loading for all data-dependent components (no layout shift)</td></tr>
+<tr><td>7</td><td>Run Lighthouse audit: target LCP &lt; 2.5s, FID &lt; 100ms, CLS &lt; 0.1, Accessibility score &gt; 95</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Lighthouse LCP &lt; 2.5s on 3G throttled connection</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Heatmap maintains 60fps at subcap zoom level (851 cells)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>No layout shift on any page (CLS &lt; 0.1)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Bundle size: main chunk &lt; 200KB gzipped</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-7.3">
+<div class="table-header"><span class="table-name">Step 7.3</span><span class="table-badge">Phase 7</span></div>
+<h3 class="subsec" style="margin-top:4px;">Accessibility compliance</h3>
+<p class="lead">Full WCAG 2.1 AA compliance across all pages.</p>
+<p class="note">Source: UI/UX Brief v3 s38 (accessibility: contrast, keyboard nav, ARIA roles, focus management, target sizes, screen reader targets)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Implement keyboard navigation map: Tab through all interactive elements, Enter/Space to activate, Escape to close overlays, arrow keys in heatmap grid</td></tr>
+<tr><td>2</td><td>Implement ARIA roles per UI/UX Brief s38 catalogue: role=grid on heatmap, role=dialog on modals, role=complementary on panels, role=alert on toasts</td></tr>
+<tr><td>3</td><td>Implement focus management: focus trap in modals, focus return on close, visible focus indicator on all interactive elements</td></tr>
+<tr><td>4</td><td>Implement reduced motion mode: respect prefers-reduced-motion media query, disable animations</td></tr>
+<tr><td>5</td><td>Test with screen readers: VoiceOver (Safari), NVDA (Chrome)</td></tr>
+<tr><td>6</td><td>Verify touch target sizes: minimum 44×44px per WCAG 2.5.5</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Tab order is logical on every page</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All modals trap focus correctly</td></tr>
+<tr><td style="text-align:center;">☐</td><td>prefers-reduced-motion disables all animations</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Screen reader announces heatmap cell content correctly</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-7.4">
+<div class="table-header"><span class="table-name">Step 7.4</span><span class="table-badge">Phase 7</span></div>
+<h3 class="subsec" style="margin-top:4px;">Mobile optimization</h3>
+<p class="lead">Responsive design for tablet and mobile viewports per UI/UX Brief v3.0 breakpoint specifications.</p>
+<p class="note">Source: UI/UX Brief v3 s39 (breakpoints, mobile layout, touch patterns, mobile-optimised pages)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Implement sidebar → bottom navigation conversion at &lt; 768px</td></tr>
+<tr><td>2</td><td>Implement heatmap mobile view: horizontal scroll with snap, 2-column layout at subcap level</td></tr>
+<tr><td>3</td><td>Implement evidence drawer as full-screen bottom sheet on mobile</td></tr>
+<tr><td>4</td><td>Implement touch interaction patterns: swipe to dismiss drawers, long-press for tooltip on heatmap cells</td></tr>
+<tr><td>5</td><td>Implement mobile-specific type scale adjustments per UI/UX Brief s39</td></tr>
+<tr><td>6</td><td>Test on iOS Safari and Android Chrome</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Bottom navigation visible and functional at 375px width</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Heatmap scrolls horizontally with snap on mobile</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Bottom sheet pattern works for evidence drawer on mobile</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All touch targets ≥ 44×44px</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-7.5">
+<div class="table-header"><span class="table-name">Step 7.5</span><span class="table-badge">Phase 7</span></div>
+<h3 class="subsec" style="margin-top:4px;">PDF scorecard export</h3>
+<p class="lead">Generate downloadable PDF scorecards from entity DMA data, matching Zennify brand standards.</p>
+<p class="note">Source: UI/UX Brief v3 s29 (prospecting scorecard, PDF on mobile), PRD v3 section 05 (feature register — PDF export)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Build server-side PDF generation using Puppeteer (headless Chrome) on Cloud Run</td></tr>
+<tr><td>2</td><td>Design PDF template: Zennify header, entity summary, pillar scores, top opportunities, evidence highlights, platform recommendations</td></tr>
+<tr><td>3</td><td>Implement PDF generation endpoint: GET /entities/:id/export/pdf</td></tr>
+<tr><td>4</td><td>Optimize for print: remove interactive elements, add page breaks at section boundaries</td></tr>
+<tr><td>5</td><td>Test on A4 and US Letter page sizes</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>PDF generates in &lt; 10 seconds</td></tr>
+<tr><td style="text-align:center;">☐</td><td>PDF renders correctly in Adobe Reader, Chrome PDF viewer, and Preview.app</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Zennify branding (logo, colours, DM Sans font) renders correctly in PDF</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-7.6">
+<div class="table-header"><span class="table-name">Step 7.6</span><span class="table-badge">Phase 7</span></div>
+<h3 class="subsec" style="margin-top:4px;">Production deployment &amp; monitoring</h3>
+<p class="lead">Deploy to production GCP environment with monitoring, alerting, and operational runbooks.</p>
+<p class="note">Source: TRD v4 section 18 (deployment), section 19 (monitoring)</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Substep</th></tr>
+<tr><td>1</td><td>Deploy backend to Cloud Run production: min instances 1, max instances 10, concurrency 80, memory 2Gi, CPU 2</td></tr>
+<tr><td>2</td><td>Deploy frontend to Cloud Run production: min instances 1, max instances 5, memory 1Gi</td></tr>
+<tr><td>3</td><td>Configure Cloud Monitoring dashboards: request latency (p50/p95/p99), error rate, active connections, database connections, Gemini API usage</td></tr>
+<tr><td>4</td><td>Configure alerting: error rate &gt; 1% for 5 minutes → PagerDuty, p99 latency &gt; 3s → Slack, DB connection pool exhaustion → PagerDuty</td></tr>
+<tr><td>5</td><td>Configure Cloud Trace for distributed tracing across backend services</td></tr>
+<tr><td>6</td><td>Set up daily backup verification: Cloud SQL backup + restore test to staging monthly</td></tr>
+<tr><td>7</td><td>Create operational runbook: incident response, rollback procedure, CCG data reload, Drive import troubleshooting</td></tr>
+<tr><td>8</td><td>Configure uptime checks: /api/v1/health endpoint every 60s from 3 regions</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th style="width:30px">✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Production endpoints accessible via custom domain (dma.zennify.com)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Monitoring dashboards show baseline metrics</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Alert rules trigger correctly on simulated failure</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Uptime checks green from all 3 regions</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Rollback procedure tested: previous Cloud Run revision activatable in &lt; 2 minutes</td></tr>
+</table>
+</div>
+</section>
+
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GEMINI PROMPT ENGINEERING & AI SAFEGUARDS
+     ════════════════════════════════════════════════════════════ -->
+<section id="gemini-prompts">
+<h2><span class="sec-num">AI</span>Gemini Prompt Engineering, Grounding &amp; Safeguards</h2>
+<p class="lead">Every Gemini surface must produce grounded, institution-specific output — never generic AI slop. This section defines the prompt engineering methodology, grounding enforcement, hallucination safeguards, and QA gates for all 8 intelligence surfaces. These are production prompts, not experiments.</p>
+
+<div class="table-card" id="step-AI.1">
+<div class="table-header"><span class="table-name">Step AI.1</span><span class="table-badge">AI Safeguards</span></div>
+<h3 class="subsec">Prompt architecture — 4-layer template system</h3>
+<p class="lead">Every Gemini prompt follows a 4-layer structure: System Persona + Grounding Context + Task Instruction + Output Constraints. This prevents hallucination by injecting entity-specific data into every call.</p>
+<p class="note">Source: Backend Schema v2 section 13 (Gemini contract), DMA Execution Plan (R4/R12 hard rules)</p>
+
+<div style="background:#EDE9FE;border-left:3px solid #735BA1;padding:8px 12px;margin:6px 0 8px;border-radius:0 6px 6px 0;font-size:12px;color:#4A5568;">
+<strong style="color:#735BA1;">Claude Code:</strong> Implement prompt templates in <code>app/services/gemini_service.py</code> using Python f-strings with strict variable injection. Each surface gets its own prompt builder function. Store templates in <code>app/prompts/</code> directory as plain text files for version control. NEVER hardcode entity data — always inject from database.</div>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td><strong>System Persona layer (all surfaces):</strong> "You are a senior Zennify consultant specialising in digital maturity assessments for financial services institutions. You are presenting findings to {role} at {entity_name}, a {subvertical} institution with {asset_size} in assets. Your analysis must be specific to this institution — generic statements are a failure mode."</td></tr>
+<tr><td>2</td><td><strong>Grounding Context layer (injected per call):</strong> Pull from database and inject: entity firmographics (name, subvertical, asset_size, employee_count, HQ), current run scores (pillar_scores, top-3 strength subcaps, top-3 gap subcaps with actual scores), evidence items (E-IDs, source titles, claim text — up to 15 most relevant), tech stack entries (confirmed technologies with status), peer benchmark data (peer names, peer scores for comparison). Maximum context: 8,000 tokens.</td></tr>
+<tr><td>3</td><td><strong>Task Instruction layer (surface-specific):</strong> Each of the 8 surfaces has a unique task instruction. See step AI.2 for all 8 prompts. Use chain-of-thought: "First, identify the 3 most relevant evidence items. Then, reason about what they tell us. Finally, synthesise into a {format} response."</td></tr>
+<tr><td>4</td><td><strong>Output Constraints layer (all surfaces):</strong> "CONSTRAINTS: (1) Every claim must reference a specific E-ID or named source. (2) Do NOT mention investment amounts, cost estimates, or ROI projections. (3) Do NOT use generic phrases: 'should improve digital capabilities', 'establish a centre of excellence', 'hire a CDO'. (4) If evidence is insufficient for a claim, say 'Evidence limited — proxy signal from [source]' rather than asserting. (5) Output must be specific enough that replacing {entity_name} with a different institution would make the text factually wrong."</td></tr>
+<tr><td>5</td><td><strong>Anti-hallucination gate:</strong> After Gemini returns, run a post-processing check: (a) count E-ID references in output — reject if zero, (b) verify each referenced E-ID exists in the entity's evidence_index, (c) check for forbidden phrases per DMA hard rule R12, (d) verify entity_name appears at least twice (institution-specificity check). Log rejection reasons to gemini_cache with status='REJECTED'.</td></tr>
+<tr><td>6</td><td><strong>Confidence scoring:</strong> Append to every Gemini response a structured confidence footer: "Grounding: {n} evidence items referenced | Confidence: {HIGH/MEDIUM/LOW based on evidence count} | Data freshness: {days since newest evidence}" — rendered as a subtle chip in the Intelligence Panel UI.</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Every Gemini response contains at least 1 E-ID reference</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Zero forbidden phrases from R12 kill list in any Gemini output</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Entity name appears ≥2 times in every response</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Replacing entity name with a different institution would make the text factually incorrect</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Anti-hallucination gate rejects responses with fabricated E-IDs</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-AI.2">
+<div class="table-header"><span class="table-name">Step AI.2</span><span class="table-badge">AI Safeguards</span></div>
+<h3 class="subsec">8 surface prompt specifications</h3>
+<p class="lead">Complete prompt specifications for every Gemini intelligence surface, with model selection, TTL, role gates, and chain-of-thought instructions.</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td><strong>why_now (Flash, 72h cache):</strong> "Given {entity_name}'s current maturity profile and the evidence collected, explain why NOW is the right time for a Zennify engagement. Step 1: Identify the 3 strongest gap signals from the evidence (cite E-IDs). Step 2: Connect each gap to a market or regulatory catalyst (CFPB actions, FDIC guidance, competitive moves by peers {peer_names}). Step 3: Articulate the cost of inaction in operational terms — not dollar amounts. Format: 3 paragraphs, each anchored to evidence."</td></tr>
+<tr><td>2</td><td><strong>platform_story (Flash, 72h cache):</strong> "For {platform_name} at {entity_name}: Step 1: List the {n} subcaps where this platform addresses a gap (score &lt; 3.0 AND platform confirmed ABSENT). Step 2: For each gap, describe what the institution is doing today (M1/M2 state from maturity descriptors) and what the platform enables (M3/M4 target). Step 3: Identify prerequisites from the Readiness Index. Format: bullet list with subcap IDs and maturity transitions."</td></tr>
+<tr><td>3</td><td><strong>subcap_narrative (Flash, 24h cache):</strong> "For subcap {sub_cap_id} ({sub_cap_name}) at {entity_name}: Score is {score}/5.0 with {evidence_count} evidence items. Step 1: Summarise the evidence (cite each E-ID). Step 2: Explain why the score is {score} by referencing the M{score} maturity descriptor. Step 3: Identify the specific gap between current state and M3 (Competing). Format: 2 paragraphs + evidence list."</td></tr>
+<tr><td>4</td><td><strong>insight_explanation (Flash, 24h cache):</strong> "For insight card '{card_headline}' at {entity_name}: Step 1: Restate the finding in context of {entity_name}'s specific situation. Step 2: Explain WHY this matters for a {subvertical} institution (regulatory, competitive, or operational impact). Step 3: Suggest the specific next step (not generic — reference the actual platform/offering that addresses this). Format: 3 short paragraphs."</td></tr>
+<tr><td>5</td><td><strong>peer_context (Flash, 72h cache):</strong> "Compare {entity_name} against peers {peer_names} on {pillar_name}: Step 1: State {entity_name}'s pillar score vs peer mean. Step 2: Identify the 3 subcaps with the largest negative gap vs peers (cite specific peer scores). Step 3: Identify 2 subcaps where {entity_name} leads peers. Step 4: Contextualise with subvertical benchmarks. Format: table + 2 paragraphs."</td></tr>
+<tr><td>6</td><td><strong>data_cloud_readiness (Flash, 72h cache):</strong> "Assess {entity_name}'s readiness for Salesforce Data Cloud: Step 1: Check prerequisite subcap scores (P4C1.x data governance ≥ 2.0, P4C1.4.x MDM ≥ 2.0). Step 2: Identify current data sources from tech stack (confirmed technologies in Data layer). Step 3: Map the gap from current state to Data Cloud zero-copy architecture. Format: readiness scorecard + narrative."</td></tr>
+<tr><td>7</td><td><strong>alert_rationale (Flash, 24h cache, ANALYST-gated):</strong> "For alert '{alert_title}' at {entity_name}: Step 1: Explain the technical basis for this alert (thin evidence, score drift, or coverage gap). Step 2: Recommend the specific proxy searches or additional research that would resolve it (reference DMA skill R11 proxy tiers). Step 3: Estimate the impact on the overall assessment if this alert remains unresolved. Format: structured analysis."</td></tr>
+<tr><td>8</td><td><strong>meeting_prep (Pro, 168h cache):</strong> "Prepare a meeting brief for {user_name} ({user_role}) meeting with {entity_name} leadership: Step 1: Summarise the entity profile (subvertical, size, key strengths, key gaps — all from evidence). Step 2: Generate 5 tailored conversation starters that reference specific findings (cite E-IDs and scores). Step 3: List the top-3 Zennify offerings that address the widest gap clusters (from ccg_offering_subcap_matrix). Step 4: Anticipate 3 likely objections based on the entity's profile and prepare responses grounded in peer benchmarks. Format: meeting-ready brief with sections."</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>All 8 prompt templates stored in <code>app/prompts/</code> directory</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Each prompt uses chain-of-thought (Step 1/2/3 pattern)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Each prompt injects entity-specific data (no hardcoded institution names)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>meeting_prep uses Gemini Pro (not Flash) for higher quality</td></tr>
+<tr><td style="text-align:center;">☐</td><td>alert_rationale returns 403 for VIEWER role</td></tr>
+<tr><td style="text-align:center;">☐</td><td>All 8 surfaces tested with real entity data — output is institution-specific</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-AI.3">
+<div class="table-header"><span class="table-name">Step AI.3</span><span class="table-badge">AI Safeguards</span></div>
+<h3 class="subsec">Rate limiting, error handling &amp; graceful degradation</h3>
+<p class="lead">Protect against Vertex AI quota exhaustion, network failures, and malformed responses. The visualizer must remain fully functional even when Gemini is unavailable.</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td><strong>Rate limiting:</strong> Implement per-user rate limits: 20 Gemini requests per hour for VIEWER, 60 for ANALYST, 120 for ADMIN. Use Redis sliding window counter. Return 429 with retry-after header when exceeded.</td></tr>
+<tr><td>2</td><td><strong>Vertex AI retry logic:</strong> Use tenacity library with exponential backoff: max 3 retries, initial wait 1s, max wait 10s, retry on 429/500/503. Log each retry to structured logging. On final failure, return cached response if available (even if expired), else return graceful degradation message.</td></tr>
+<tr><td>3</td><td><strong>Graceful degradation:</strong> When Gemini is unavailable, the Intelligence Panel shows: "AI intelligence temporarily unavailable. Showing data-only view." All data-driven surfaces (heatmap, insight cards, platform scores) continue to function without AI — they never depend on Gemini for core data display.</td></tr>
+<tr><td>4</td><td><strong>Error boundary (frontend):</strong> Wrap every Gemini-consuming component in a React Error Boundary. On error: (a) log error to structured logger, (b) show fallback UI, (c) offer retry button. Never let a Gemini failure crash the page.</td></tr>
+<tr><td>5</td><td><strong>Response validation:</strong> After Gemini returns, validate: (a) response length &gt; 50 chars (reject empty/minimal), (b) response does not contain "I don't have", "I cannot", "As an AI" (meta-responses), (c) response passes anti-hallucination gate from AI.1. Log validation failures with full prompt + response for debugging.</td></tr>
+<tr><td>6</td><td><strong>Cost monitoring:</strong> Track Vertex AI token usage per surface, per entity, per user. Store in audit_log. Set up Cloud Monitoring alert when daily token spend exceeds budget threshold (configurable in admin settings).</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Rate limit correctly enforced: 21st request in an hour returns 429</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Retry logic handles 503 and returns cached response on final failure</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Page remains fully functional when Gemini is simulated as unavailable</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Error boundary catches rendering errors without crashing the page</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Token usage tracked and visible in admin dashboard</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SECURITY, SEED DATA & OPERATIONAL READINESS
+     ════════════════════════════════════════════════════════════ -->
+<section id="ops-ready">
+<h2><span class="sec-num">OPS</span>Security, Seed Data &amp; Operational Readiness</h2>
+<p class="lead">Production hardening: security controls, development seed data, monitoring, and operational runbooks. These are the items that prevent production failures.</p>
+
+<div class="table-card" id="step-OPS.1">
+<div class="table-header"><span class="table-name">Step OPS.1</span><span class="table-badge">Security</span></div>
+<h3 class="subsec">Security hardening</h3>
+<p class="lead">Application-level security controls beyond Google OAuth. Covers CSRF, injection, secrets management, and audit trails.</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td><strong>CORS:</strong> Restrict CORS origins to the exact frontend domain (no wildcards in production). Configure via CORS_ORIGINS environment variable.</td></tr>
+<tr><td>2</td><td><strong>CSRF protection:</strong> Use SameSite=Strict on JWT cookie. All state-changing endpoints require POST/PATCH/DELETE (never GET for mutations).</td></tr>
+<tr><td>3</td><td><strong>SQL injection prevention:</strong> All database queries use SQLAlchemy ORM or parameterised queries — NEVER raw string interpolation. Enforce via ruff linter rule banning f-string SQL.</td></tr>
+<tr><td>4</td><td><strong>Input validation:</strong> Every API endpoint validates input via Pydantic v2 schemas with strict type checking. sub_cap_id inputs validated against regex pattern P[1-4]C[1-4]\.[0-9]+\.[0-9]+(\..*)?</td></tr>
+<tr><td>5</td><td><strong>Secrets management:</strong> All secrets in Google Secret Manager — zero secrets in code, env files, or Docker images. Backend reads secrets at startup via Secret Manager API.</td></tr>
+<tr><td>6</td><td><strong>Audit logging:</strong> Every admin action, auth event, and data mutation logged to audit_log table with: user_id, action, entity_id, timestamp, IP address, request_id. Retain for 2 years.</td></tr>
+<tr><td>7</td><td><strong>Content Security Policy:</strong> Set CSP headers on frontend: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' {api_domain} {sse_domain}; img-src 'self' data: blob:;</td></tr>
+<tr><td>8</td><td><strong>Role enforcement:</strong> Test every endpoint with all 3 roles (ADMIN, ANALYST, VIEWER). VIEWER cannot access admin endpoints. ANALYST cannot modify user roles. ADMIN has full access. Document the role matrix.</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>CORS rejects requests from unauthorized origins</td></tr>
+<tr><td style="text-align:center;">☐</td><td>No raw SQL queries anywhere in codebase (grep confirms)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Pydantic validation rejects malformed sub_cap_id inputs</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Every role permutation tested against every endpoint family</td></tr>
+<tr><td style="text-align:center;">☐</td><td>CSP headers present on all frontend responses</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-OPS.2">
+<div class="table-header"><span class="table-name">Step OPS.2</span><span class="table-badge">Dev Data</span></div>
+<h3 class="subsec">Seed data &amp; development fixtures</h3>
+<p class="lead">Create realistic seed data for development and testing. Without this, developers cannot work on frontend features until the full backend + CCG load is complete.</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td><strong>Create etl/seed_data.py:</strong> Generates a complete development dataset: 3 sample entities (one credit union, one regional bank, one insurance broker), 1 run per entity with pillar_scores and ~50 subcap_scores each, 20 evidence items per entity, 5 insight cards per entity, 10 tech stack entries per entity, 3 timeline events per entity.</td></tr>
+<tr><td>2</td><td><strong>CCG subset loader:</strong> For development, load only P1 CCG data (205 subcaps) instead of all 851. Create etl/ccg_loader.py --pillar P1 mode. Full load is for staging/production only.</td></tr>
+<tr><td>3</td><td><strong>Test user fixtures:</strong> Create 3 test users: admin@zennify.com (ADMIN), analyst@zennify.com (ANALYST), viewer@zennify.com (VIEWER). Seeded via backend/tests/conftest.py.</td></tr>
+<tr><td>4</td><td><strong>Mock Gemini responses:</strong> Create app/services/gemini_service_mock.py that returns pre-written responses for all 8 surfaces. Use in development when GEMINI_MOCK=true env var is set. This lets frontend developers work on the Intelligence Panel without Vertex AI credentials.</td></tr>
+<tr><td>5</td><td><strong>Seed data command:</strong> Add a CLI command: python -m app.cli seed --entities 3 --evidence 20 that populates the local database. Idempotent — safe to run multiple times.</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>Seed data populates all tables needed for D1–D6 dashboard rendering</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Mock Gemini service returns realistic responses for all 8 surfaces</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Seed command is idempotent (running twice does not create duplicates)</td></tr>
+<tr><td style="text-align:center;">☐</td><td>Frontend renders all pages with seed data without errors</td></tr>
+</table>
+</div>
+
+<div class="table-card" id="step-OPS.3">
+<div class="table-header"><span class="table-name">Step OPS.3</span><span class="table-badge">Ops</span></div>
+<h3 class="subsec">Database migrations &amp; schema evolution</h3>
+<p class="lead">Alembic migration strategy for managing schema changes across environments without data loss.</p>
+
+<h4 class="h4">Implementation substeps</h4>
+<table class="field-table">
+<tr><th>#</th><th>Substep</th></tr>
+<tr><td>1</td><td><strong>Migration file structure:</strong> backend/alembic/versions/ with naming: YYYYMMDD_HHMM_description.py. Three initial migrations: 20260520_0001_core_tables.py (sections 01–16 tables), 20260520_0002_ccg_tables.py (section 17 tables), 20260520_0003_parsing_streaming_tables.py (section 18 tables).</td></tr>
+<tr><td>2</td><td><strong>Migration testing:</strong> Every migration must be tested: upgrade → verify schema → downgrade → verify rollback. CI runs alembic upgrade head + alembic downgrade base on every PR.</td></tr>
+<tr><td>3</td><td><strong>CCG data reload strategy:</strong> When V7 capability mapping is updated (e.g., V7.1), the reload process is: (a) create new migration adding/modifying CCG columns if needed, (b) run etl/ccg_loader.py --version v7.1 which truncates and reloads CCG tables while preserving engagement data (subcap_scores, evidence), (c) verify FK integrity post-reload.</td></tr>
+<tr><td>4</td><td><strong>Zero-downtime migrations:</strong> All production migrations must be backwards-compatible. Strategy: add new column (nullable) → deploy new code → backfill → add NOT NULL constraint. Never drop columns in the same deployment that removes the code using them.</td></tr>
+</table>
+
+<h4 class="h4">QA checklist</h4>
+<table class="field-table">
+<tr><th>✓</th><th>Verification</th></tr>
+<tr><td style="text-align:center;">☐</td><td>alembic upgrade head succeeds from empty database</td></tr>
+<tr><td style="text-align:center;">☐</td><td>alembic downgrade base succeeds from fully migrated database</td></tr>
+<tr><td style="text-align:center;">☐</td><td>CCG reload preserves existing engagement data (subcap_scores untouched)</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     FAILURE MODE ANALYSIS
+     ════════════════════════════════════════════════════════════ -->
+<section id="failure-modes">
+<h2><span class="sec-num">FM</span>Failure Mode Analysis — What Could Kill This Project</h2>
+<p class="lead">An honest assessment of the highest-risk failure modes and the specific mitigations built into this implementation plan. Ordered by impact severity.</p>
+
+<div class="table-card" id="failure-analysis">
+<div class="table-header"><span class="table-name">13 failure modes ranked by severity</span></div>
+<table class="field-table">
+<tr><th style="width:30px">#</th><th>Failure mode</th><th>Impact</th><th>Mitigation in this plan</th></tr>
+<tr><td style="color:#C25008;font-weight:700;">1</td><td><strong>CCG schema drift:</strong> V7 XLSX structure changes but ETL pipeline does not adapt, causing broken FK references and missing subcaps in the heatmap</td><td>All scoring/heatmap pages show incomplete data — users lose trust immediately</td><td>framework_version column on every CCG table. ETL validate.py runs post-load FK check (step 0.8). CCG reload strategy preserves engagement data (step OPS.3). QA gate: 851 subcaps loaded or STOP.</td></tr>
+<tr><td style="color:#C25008;font-weight:700;">2</td><td><strong>Gemini hallucination:</strong> AI generates fabricated evidence IDs, invents statistics, or produces generic text that could mislead an AE in a client meeting</td><td>Zennify loses credibility with the client; AE presents false data</td><td>4-layer prompt template with grounding injection (step AI.1). Anti-hallucination gate: verify E-ID existence, reject zero-reference responses, check entity specificity. R12 forbidden phrase filter. Confidence scoring on every response.</td></tr>
+<tr><td style="color:#C25008;font-weight:700;">3</td><td><strong>Phase 0 entity misclassification:</strong> Drive import assigns files to wrong entity, creating contaminated assessment data</td><td>Entity shows another institution's scores and evidence — catastrophic data integrity failure</td><td>4-signal inference cascade with confidence scoring (step 2.2). Files below 0.6 confidence routed to PENDING_REVIEW. Admin confirmation required before entity appears in directory. R01–R06 test-case removal filters non-production data.</td></tr>
+<tr><td style="color:#FE9732;font-weight:700;">4</td><td><strong>Performance collapse at subcap scale:</strong> Heatmap with 851 cells crashes browser or drops below 30fps, making the signature visualization unusable</td><td>Core differentiating feature is broken — app feels like a slow prototype</td><td>Grid virtualization at subcap level (step 4.3). Canvas rendering fallback for 200+ visible cells. Performance budget: 60fps, LCP &lt; 2.5s (step 7.2). Lighthouse CI gate in GitHub Actions.</td></tr>
+<tr><td style="color:#FE9732;font-weight:700;">5</td><td><strong>Phase 1 streaming stall:</strong> Claude project execution stalls mid-scoring, leaving score_stream_jobs in STREAMING state with partial data, and no recovery path</td><td>Entity dashboard shows incomplete/misleading partial scores</td><td>Heartbeat monitoring with 15-minute stale threshold (step 6.2). PAUSED state auto-triggered on stale heartbeat. Frontend shows explicit "Scoring in progress — X/851 complete" UI. Partial data clearly marked with progress indicators.</td></tr>
+<tr><td style="color:#FE9732;font-weight:700;">6</td><td><strong>Offering-subcap matrix staleness:</strong> ccg_offering_subcap_matrix (the core Salesforce opportunity signal) becomes outdated as offerings evolve, producing wrong recommendations</td><td>AE pitches wrong Zennify offerings to client based on stale mapping</td><td>framework_version on all CCG tables enables versioned reload. Admin dashboard shows CCG load date. QA gate: verify offering matrix row count matches expected (854). Offering changes trigger CCG reload (step OPS.3).</td></tr>
+<tr><td style="color:#FE9732;font-weight:700;">7</td><td><strong>SSE connection instability:</strong> EventSource connections drop on mobile/unreliable networks, causing missed real-time updates and stale UI</td><td>Users see outdated scores, miss alerts, think the system is broken</td><td>SSE heartbeat every 15s (step 1.7). Automatic reconnection via EventSource built-in. On reconnect, fetch latest state from REST API (not just wait for next event). Show "Connection lost — reconnecting" toast.</td></tr>
+<tr><td style="color:#FFD166;font-weight:700;">8</td><td><strong>Report parsing variability:</strong> DMA reports have highly variable structure — parser misclassifies sections or extracts wrong evidence, poisoning the document lineage</td><td>Evidence drawer shows wrong evidence for subcaps; audit trail is unreliable</td><td>extraction_confidence score per section (step 2.3). Sections below 0.6 trigger QA alert. document_lineage table enables trace-back from score to exact paragraph. 18-type section_type enum handles all known report variants.</td></tr>
+<tr><td style="color:#FFD166;font-weight:700;">9</td><td><strong>Vertex AI cost overrun:</strong> Heavy usage of Gemini Pro for meeting_prep (168h cache) leads to unexpected cloud bills</td><td>Project budget overrun; leadership pulls funding</td><td>Per-user rate limiting (step AI.3). 72h/24h/168h TTL caching reduces repeat calls. Cost monitoring with budget alerts (step AI.3). Flash model for 7/8 surfaces (cheaper). Token usage tracking in audit_log.</td></tr>
+<tr><td style="color:#FFD166;font-weight:700;">10</td><td><strong>Role-based access failure:</strong> Customer View mode accidentally exposes internal DMA notes, thin evidence details, or raw scores to client-facing AE output</td><td>Confidential assessment methodology exposed; client sees unflattering raw scores</td><td>Audience toggle implemented as server-side filter (step 5.4). Customer mode API responses strip internal fields at the serialization layer — not just UI hiding. Visual regression test for Customer mode on all 6 dashboard tabs.</td></tr>
+<tr><td style="color:#FFD166;font-weight:700;">11</td><td><strong>Single-tenant scaling:</strong> As Zennify completes more DMAs (50+ entities), the entity directory and global queries become slow</td><td>App performance degrades over time; users wait 5+ seconds for entity list</td><td>Paginated entity directory (step 3.5). Database indexes on all query columns (steps 0.3–0.5). Read replica for analytics queries (step 0.2). Cloud Run auto-scaling to 10 instances (step 7.6).</td></tr>
+<tr><td style="color:#FFD166;font-weight:700;">12</td><td><strong>Developer onboarding friction:</strong> New Claude Code sessions or new developers cannot understand the codebase quickly enough to be productive</td><td>Development velocity drops; features ship slowly</td><td>CLAUDE.md at repo root (step S.1) with complete repo structure, design artifact map, and conventions. Seed data for instant local development (step OPS.2). Mock Gemini service eliminates Vertex AI credential dependency. Storybook for component development.</td></tr>
+<tr><td style="color:#FFD166;font-weight:700;">13</td><td><strong>Drive API quota exhaustion:</strong> Frequent crawl scans of large DMA folders exceed Google Drive API rate limits</td><td>Import pipeline fails; new entities not discoverable</td><td>Crawl frequency configurable in admin settings (step 5.5). Incremental crawl (track lastScanTime, only process new/modified files). Exponential backoff on 403 rate limit errors. Admin notification on crawl failure.</td></tr>
+</table>
+</div>
+</section>
+
+<section id="artifact-ref">
+<h2><span class="sec-num">REF</span>Design Artifact Quick Reference for Claude Code</h2>
+<p class="lead">For every implementation task, Claude Code should read the relevant design artifact BEFORE writing code. This table maps every feature area to the exact document and section to read.</p>
+
+<div class="table-card">
+<div class="table-header"><span class="table-name">Complete artifact-to-feature map</span></div>
+<table class="field-table">
+<tr><th>Feature / Area</th><th>Read this doc</th><th>Section(s)</th><th>Key things to extract</th></tr>
+<tr><td>All database DDL</td><td>Backend Schema v2</td><td>sections 01–18</td><td>Column names, types, indexes, FK constraints, UNIQUE constraints</td></tr>
+<tr><td>API endpoint contracts</td><td>Backend Schema v2</td><td>section 11</td><td>HTTP method, path, query params, request/response shapes</td></tr>
+<tr><td>SSE event types</td><td>Backend Schema v2</td><td>section 12</td><td>9 event types, channel naming, payload structure</td></tr>
+<tr><td>Gemini prompts &amp; caching</td><td>Backend Schema v2</td><td>section 13</td><td>8 surfaces, TTL per surface, model selection, role gates</td></tr>
+<tr><td>Drive import pipeline</td><td>Backend Schema v2 + PRD v3</td><td>sections 14–15 + sections 10–15</td><td>14-step pipeline, entity inference 4-signal cascade, R01–R06 rules, dedup winner selection</td></tr>
+<tr><td>CCG data model</td><td>Backend Schema v2 + V7 Cap Map Schema</td><td>section 17 + sections 01–09</td><td>18 CCG tables, 25-tab canonical structure, field-level joins</td></tr>
+<tr><td>Report parsing</td><td>Backend Schema v2</td><td>section 18</td><td>4 parsing tables, section_type enum (18 types), extraction_confidence threshold</td></tr>
+<tr><td>Phase 1 streaming</td><td>Backend Schema v2</td><td>section 18</td><td>score_stream_jobs lifecycle, score_stream_events append-only log, 7-step streaming flow</td></tr>
+<tr><td>Zennify brand tokens</td><td>UI/UX Brief v3</td><td>s00–s10</td><td>Colours (#27BBAF teal, #1C4A4D dark, etc.), DM Sans font weights, spacing scale, elevation levels, border-radius scale</td></tr>
+<tr><td>Button component</td><td>UI/UX Brief v3</td><td>s11</td><td>5 variants × 3 sizes × 4 states, composition rules</td></tr>
+<tr><td>Card component</td><td>UI/UX Brief v3</td><td>s12</td><td>4 card variants, specialized patterns, card states</td></tr>
+<tr><td>Badge components</td><td>UI/UX Brief v3</td><td>s13</td><td>8 badge types: status, role, phase, severity, pillar, maturity, E-ID chips, freshness</td></tr>
+<tr><td>Form elements</td><td>UI/UX Brief v3</td><td>s14</td><td>Input, textarea, select, search bar, audience toggle, checkbox/radio, form layout rules</td></tr>
+<tr><td>Table component</td><td>UI/UX Brief v3</td><td>s15</td><td>Standard anatomy, specialized tables, sorting/filtering</td></tr>
+<tr><td>Navigation components</td><td>UI/UX Brief v3</td><td>s16</td><td>Sidebar, topbar, tab nav, breadcrumb, command palette (⌘K)</td></tr>
+<tr><td>Overlay patterns</td><td>UI/UX Brief v3</td><td>s17</td><td>Modal (confirmation + full-screen), Drawer (evidence), Panel (intelligence), Sheet (mobile), stacking/layering rules</td></tr>
+<tr><td>Feedback &amp; loading</td><td>UI/UX Brief v3</td><td>s18</td><td>Toast types, skeleton loading, spinner, streaming text indicator, progress bar, wait-time budgets</td></tr>
+<tr><td>Login page</td><td>UI/UX Brief v3</td><td>s19</td><td>Page mockup, Google G SVG, error states, auth flow</td></tr>
+<tr><td>Entity directory</td><td>UI/UX Brief v3</td><td>s20</td><td>Full-page mockup, entity card anatomy, state variations, empty states</td></tr>
+<tr><td>D1 Executive Overview</td><td>UI/UX Brief v3</td><td>s20–s21</td><td>KPI tiles, pillar summary, OSS cards, scroll sequence, role customizations</td></tr>
+<tr><td>D2 Insight Cards</td><td>UI/UX Brief v3</td><td>s22</td><td>Card anatomy, severity colours, card grid, drill-down modal (WHAT/WHY/SO WHAT)</td></tr>
+<tr><td>D3 Heatmap</td><td>UI/UX Brief v3</td><td>s23</td><td>Full heatmap mockup, zoom levels, cell tooltip, mode toggles, maturity palette, performance spec (60fps)</td></tr>
+<tr><td>D4 Platform Matrix</td><td>UI/UX Brief v3 + PRD v3</td><td>s24–s25 + section 08</td><td>FitScore cards, readiness index, conversation starters, comparison view, FitScore formula</td></tr>
+<tr><td>D5 Context &amp; Timeline</td><td>UI/UX Brief v3</td><td>s26</td><td>Redesigned: no emojis, drilldown-capable Gantt, Zennify token system, light surfaces</td></tr>
+<tr><td>D6 Health &amp; Alerts</td><td>UI/UX Brief v3</td><td>s27</td><td>Thin evidence alerts, version diff, safeguard gates, freshness indicators</td></tr>
+<tr><td>Alerts page</td><td>UI/UX Brief v3</td><td>s28</td><td>/alerts global dashboard, bulk actions, ANALYST/ADMIN role gate</td></tr>
+<tr><td>Prospecting scorecard</td><td>UI/UX Brief v3</td><td>s29</td><td>/prospecting AE self-service, scorecard generator, PDF export</td></tr>
+<tr><td>Admin pages</td><td>UI/UX Brief v3</td><td>s30–s31, s33</td><td>Settings, import management, import audit, user management, entity management</td></tr>
+<tr><td>Evidence Drawer</td><td>UI/UX Brief v3</td><td>s32</td><td>Drawer anatomy, evidence item card, drawer states, layered pattern (inside modal), deep-link</td></tr>
+<tr><td>Intelligence Panel</td><td>UI/UX Brief v3</td><td>s35</td><td>Panel anatomy, streaming state, 8 surface triggers, panel states, ANALYST role gate</td></tr>
+<tr><td>Phase 0 UI</td><td>UI/UX Brief v3</td><td>s36</td><td>DRIVE_PARSED badges, PENDING_REVIEW state, import audit layout, inference cascade visual, R01–R06 legend</td></tr>
+<tr><td>Run selector &amp; audience toggle</td><td>UI/UX Brief v3</td><td>s37</td><td>Dropdown anatomy, compare mode, audience toggle behaviour, Customer view redactions</td></tr>
+<tr><td>Accessibility</td><td>UI/UX Brief v3</td><td>s38</td><td>Contrast rules, keyboard nav map, ARIA catalogue, focus management, target sizes, screen reader targets</td></tr>
+<tr><td>Responsive / mobile</td><td>UI/UX Brief v3</td><td>s39</td><td>Breakpoints (1440/1024/768/375), mobile layout changes, touch patterns, mobile-specific type scale</td></tr>
+<tr><td>Engineering handoff</td><td>UI/UX Brief v3</td><td>s40</td><td>BEM convention, React component structure, Storybook targets, TRD v4 API map, state management contract, performance budgets</td></tr>
+<tr><td>Tech Stack pages</td><td>UI/UX Brief v3</td><td>s41–s42</td><td>Light surface redesign, 5-layer architecture model, source traceability badges, 5-zone drilldown</td></tr>
+<tr><td>Platform taxonomy &amp; FitScore</td><td>PRD v3</td><td>section 08</td><td>5 platform families (SF/DB/TBL/TW/nCino), FitScore formula, Readiness Index prerequisites</td></tr>
+<tr><td>Entity inference</td><td>PRD v3</td><td>section 12</td><td>4-signal cascade, confidence scoring</td></tr>
+<tr><td>Test case removal</td><td>PRD v3</td><td>section 13</td><td>R01–R06 detection rules</td></tr>
+<tr><td>Deduplication</td><td>PRD v3</td><td>section 14</td><td>4 winner selection rules (FINAL suffix → assessment date → modifiedTime → owner priority)</td></tr>
+<tr><td>Feedback loop</td><td>PRD v3</td><td>section 17</td><td>Thin evidence report, score drift report, coverage gaps report</td></tr>
+<tr><td>Success metrics</td><td>PRD v3</td><td>section 21</td><td>Primary + secondary metrics for measuring visualizer impact</td></tr>
+</table>
+</div>
+</section>
+
+<section id="final-qa">
+<h2><span class="sec-num">QA</span>Completeness verification</h2>
+<p class="lead">Cross-check every requirement from every source document against the implementation steps above. Any uncovered requirement is a gap.</p>
+
+<div class="table-card">
+<div class="table-header"><span class="table-name">Source document coverage audit</span></div>
+<table class="field-table">
+<tr><th>Source document</th><th>Key requirements</th><th>Covered in step(s)</th></tr>
+<tr><td>PRD v3.0 (21 sections)</td><td>Phase 0 Drive import, Phase 1 Claude API, 6 dashboard clusters, insight cards, heatmap, platform matrix, entity inference, test case removal, dedup, feedback loop, rerun intelligence, success metrics</td><td>0.7–0.8 (infra), 1.3–1.9 (APIs), 2.1–2.3 (Drive import), 4.1–4.6 (D1–D6), 5.6 (prospecting), 6.1–6.4 (Phase 1), AI.1–AI.3 (Gemini prompts + safeguards)</td></tr>
+<tr><td>TRD v4.0 (22 tables, 27 endpoints)</td><td>Cloud Run, FastAPI, PostgreSQL 15, pgvector, Redis, Vertex AI Gemini, Google OAuth, CI/CD, Docker, performance budgets</td><td>0.1–0.2 (GCP), 0.6 (Redis), 0.9 (CI/CD), 1.1 (FastAPI), 1.2 (OAuth), 1.8 (Gemini), 7.2 (performance), 7.6 (deployment)</td></tr>
+<tr><td>App Flow v3.0 (28 UX flows)</td><td>Auth flow, entity selection, D1–D6 navigation, evidence drilldown, Intelligence Panel, run selection, audience toggle, Phase 0 bootstrap, admin flows</td><td>3.3–3.5 (layout, login, directory), 4.1–4.6 (D1–D6), 5.2–5.4 (drawer, panel, controls), 5.5 (admin)</td></tr>
+<tr><td>UI/UX Brief v3.0 (43 sections)</td><td>Brand tokens, component library (buttons, cards, badges, forms, tables, overlays, feedback), 14 page routes, motion specs, accessibility, responsive breakpoints, engineering handoff (BEM, React structure, Storybook)</td><td>3.1 (tokens), 3.2 (components), 3.3 (layout), 3.4 (login), 4.1–4.6 (pages), 5.1–5.6 (specialized), 7.1 (visual regression), 7.3 (accessibility), 7.4 (mobile)</td></tr>
+<tr><td>Backend Schema v2.0 (19 sections)</td><td>43+ tables (18 core + 18 CCG + 4 report parsing + 2 streaming + 1 extended), 26 API endpoints, SSE spec (9 event types), Gemini contract (8 surfaces), Drive pipeline (14 steps), entity inference, QA matrix</td><td>0.3 (core tables), 0.4 (CCG tables), 0.5 (parsing + streaming), 1.2–1.9 (all APIs), 1.7 (SSE), 1.8 (Gemini), 2.1–2.3 (Drive pipeline)</td></tr>
+<tr><td>V7.0 Capability Mapping (4 pillars, 25 tabs)</td><td>851 subcaps, 12K L4 features, 17K user stories, 470 agents, 13 offerings, 854 offering-subcap mappings, cross-pillar stories, maturity descriptors M1–M5, value chain mapping, QA gates</td><td>0.4 (CCG schema), 0.8 (V7 XLSX ingest ETL), 1.4 (heatmap + scoring APIs joined with CCG), 4.3 (heatmap uses CCG maturity), 4.4 (platform uses ccg_offering_subcap_matrix)</td></tr>
+<tr><td>DMA Execution Plan</td><td>4-layer pipeline (Research → Assessment → Governance → Narrative), sub-batch execution, evidence_index.json, scoring_scratchpad.json, R1–R12 hard rules, report templates</td><td>6.1 (ingest API receives sub-batch scores), 6.4 (feedback loop references R1–R12), 2.3 (report parsing handles all output file types)</td></tr>
+</table>
+</div>
+
+<div class="table-card">
+<div class="table-header"><span class="table-name">Route coverage audit</span></div>
+<table class="field-table">
+<tr><th>Route</th><th>Step</th><th>Status</th></tr>
+<tr><td>/login</td><td>3.4</td><td>✓</td></tr>
+<tr><td>/clients</td><td>3.5</td><td>✓</td></tr>
+<tr><td>/clients/:id/overview</td><td>4.1</td><td>✓</td></tr>
+<tr><td>/clients/:id/insights</td><td>4.2</td><td>✓</td></tr>
+<tr><td>/clients/:id/heatmap</td><td>4.3</td><td>✓</td></tr>
+<tr><td>/clients/:id/platform</td><td>4.4</td><td>✓</td></tr>
+<tr><td>/clients/:id/context</td><td>4.5</td><td>✓</td></tr>
+<tr><td>/clients/:id/health</td><td>4.6</td><td>✓</td></tr>
+<tr><td>/clients/:id/techstack</td><td>5.1</td><td>✓</td></tr>
+<tr><td>/clients/:id/techstack/:tech_id</td><td>5.1</td><td>✓</td></tr>
+<tr><td>/alerts</td><td>1.6</td><td>✓</td></tr>
+<tr><td>/prospecting</td><td>5.6</td><td>✓</td></tr>
+<tr><td>/admin/settings</td><td>5.5</td><td>✓</td></tr>
+<tr><td>/admin/import</td><td>5.5</td><td>✓</td></tr>
+<tr><td>/admin/import/audit</td><td>5.5</td><td>✓</td></tr>
+<tr><td>/admin/entities</td><td>5.5</td><td>✓</td></tr>
+</table>
+<p class="note">16/16 routes covered. Zero gaps.</p>
+</div>
+
+<div class="table-card">
+<div class="table-header"><span class="table-name">Database table coverage audit</span></div>
+<p class="lead">All 43+ tables from Backend Schema v2.0 are deployed across steps 0.3 (18 core), 0.4 (18 CCG), and 0.5 (6 report parsing + streaming + 1 extension). Zero gaps.</p>
+</div>
+</section>
+
+
+<div style="margin-top:40px;padding:12px 20px;background:var(--lav);border-radius:var(--r);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <span>DMA Visualizer Implementation Steps v3.0 · Generated May 19 2026 · Zennify</span>
+  <span>Source: PRD v3 · TRD v4 · App Flow v3 · UI/UX Brief v3.0 · Backend Schema v2.0 · V7.0 Capability Mapping · DMA Execution Plan — Claude Code Edition — with Gemini prompt engineering + failure mode analysis</span>
+</div>
+
+</div><!-- /content -->
+</div><!-- /shell -->
+</body>
+</html>

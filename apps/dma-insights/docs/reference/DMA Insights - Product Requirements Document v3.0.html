@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<!-- saved from url=(0058)file:///Users/Mishley/Downloads/DMA_Visualizer_PRD_v3.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DMA Visualizer — Product Requirements Document v3.0</title>
+<link href="./DMA Insights - Product Requirements Document v3.0_files/css2" rel="stylesheet">
+<style>
+/* ─── ZENNIFY TOKEN MAP ──────────────────────────────────────── */
+:root {
+  --z-teal:      #27BBAF;   /* brand teal — headlines, accents     */
+  --z-teal-dark: #185F60;   /* dark teal  — sidebar, dark cards    */
+  --z-teal-mid:  #139F94;   /* accent green — icons, sub-labels    */
+  --z-mint:      #79E2BF;   /* mint — curve, highlight             */
+  --z-ice:       #E8F7F6;   /* ice — card tint, soft bg            */
+  --z-green:     #1C4A4D;   /* dark green — primary body text      */
+  --z-green2:    #1A4D4D;   /* dark teal variant 2                 */
+  --z-lavender:  #F2F4F9;   /* card fill — most common card color  */
+  --z-purple:    #8094C0;   /* eyebrow / caption                   */
+  --z-orange:    #FE9732;   /* accent orange — warnings            */
+  --z-orange-lt: #FFCB99;   /* light orange — Activating level     */
+  --z-gray-bg:   #F5F5F5;   /* light slide background              */
+  --z-gray-sep:  #E5E7EB;   /* separator                           */
+  --z-gray-body: #4A5568;   /* alt body text                       */
+  --z-gray-muted:#6B7280;   /* footnotes, muted                    */
+  --z-white:     #FFFFFF;
+  --z-navy:      #001E48;   /* featured offerings dark             */
+  /* Maturity */
+  --m1: #FFCB99; --m1t: #7C3C00;   /* Activating */
+  --m2: #62D7B8; --m2t: #0D4F3C;   /* Building   */
+  --m3: #27BBAF; --m3t: #FFFFFF;   /* Competing  */
+  --m4: #139F94; --m4t: #FFFFFF;   /* Differentiating */
+  /* Phase colours */
+  --ph0: #735BA1; --ph0-lt: #EDE9FE; --ph0-bd: #C4B5FD;
+  --ph1: #3D81F6; --ph1-lt: #EFF6FF; --ph1-bd: #BFDBFE;
+  --radius: 8px; --radius-lg: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;font-weight:400;font-size:14px;line-height:1.65;background:var(--z-gray-bg);color:var(--z-green);}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.shell{display:flex;min-height:100vh;}
+
+/* Sidebar */
+.sb{width:240px;flex-shrink:0;background:var(--z-teal-dark);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo{font-size:13px;font-weight:600;color:var(--z-teal);letter-spacing:.1em;text-transform:uppercase;}
+.sb-doc{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;}
+.sb-ver{font-size:10px;color:rgba(255,255,255,.2);margin-top:2px;font-family:'DM Mono',monospace;}
+.sb-grp{padding:14px 10px 2px;}
+.sb-grp-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.22);letter-spacing:.14em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.48);font-size:12px;font-weight:400;transition:all .13s;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);}
+.sb-item.on{background:rgba(39,187,175,.16);color:var(--z-teal);}
+.sb-item.ph0{color:rgba(196,181,253,.65);}
+.sb-item.ph0:hover{background:rgba(115,91,161,.12);color:#c4b5fd;}
+.sb-item.ph0.on{background:rgba(115,91,161,.2);color:#c4b5fd;}
+.sb-item.ph1{color:rgba(147,197,253,.65);}
+.sb-item.ph1:hover{background:rgba(61,129,246,.12);color:#93c5fd;}
+.sb-item.ph1.on{background:rgba(61,129,246,.2);color:#93c5fd;}
+.sb-tag{font-size:9px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 5px;min-width:22px;text-align:center;}
+.sb-item.on .sb-tag{background:rgba(39,187,175,.25);color:var(--z-teal);}
+.sb-item.ph0.on .sb-tag{background:rgba(115,91,161,.25);color:#c4b5fd;}
+.sb-item.ph1.on .sb-tag{background:rgba(61,129,246,.25);color:#93c5fd;}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.2);}
+
+/* Main */
+.main{flex:1;min-width:0;}
+.topbar{background:var(--z-white);border-bottom:1px solid var(--z-gray-sep);padding:14px 36px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+.tb-title{font-size:15px;font-weight:600;color:var(--z-green);}
+.tb-meta{font-size:11px;color:var(--z-gray-muted);}
+.content{padding:36px;max-width:980px;}
+.section{display:none;}
+.section.on{display:block;}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────── */
+h1{font-size:26px;font-weight:600;color:var(--z-green);letter-spacing:-.018em;line-height:1.2;margin-bottom:6px;}
+.eyebrow{font-size:11px;font-weight:400;color:var(--z-purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+h2{font-size:17px;font-weight:600;color:var(--z-green);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--z-ice);}
+h3{font-size:14px;font-weight:600;color:var(--z-green);margin:20px 0 8px;}
+h4{font-size:13px;font-weight:500;color:var(--z-green2);margin:14px 0 6px;}
+p{color:var(--z-gray-body);line-height:1.75;margin-bottom:10px;}
+.lead{font-size:15px;font-weight:300;color:var(--z-gray-body);line-height:1.85;margin-bottom:22px;max-width:820px;}
+code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--z-lavender);padding:2px 5px;border-radius:4px;color:var(--z-teal-dark);}
+strong{font-weight:600;color:var(--z-green);}
+hr{border:none;border-top:1px solid var(--z-gray-sep);margin:24px 0;}
+
+/* ─── BADGES ─────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.b-teal{background:var(--z-ice);color:var(--z-teal-dark);}
+.b-green{background:#D1FAE5;color:#065F46;}
+.b-amber{background:#FEF3C7;color:#92400E;}
+.b-red{background:#FEE2E2;color:#991B1B;}
+.b-gray{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-navy{background:#E0E7FF;color:var(--z-navy);}
+.b-ph0{background:var(--ph0-lt);color:#5B21B6;}
+.b-ph1{background:var(--ph1-lt);color:#1D4ED8;}
+.b-p0{background:#FEE2E2;color:#991B1B;}
+.b-p1{background:#FFEDD5;color:#C2410C;}
+.b-p2{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-new{background:var(--z-teal);color:var(--z-white);font-size:9px;}
+
+/* ─── CALL-OUT BOXES ─────────────────────────────────────────── */
+.callout{border-radius:var(--radius);padding:13px 16px;margin:12px 0;}
+.callout p{margin:0;font-size:13px;line-height:1.7;}
+.co-teal{background:var(--z-ice);border-left:3px solid var(--z-teal);}
+.co-teal p{color:var(--z-teal-dark);}
+.co-orange{background:#FFF7ED;border-left:3px solid var(--z-orange);}
+.co-orange p{color:#7C2D12;}
+.co-dark{background:var(--z-teal-dark);border-left:3px solid var(--z-mint);}
+.co-dark .co-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--z-mint);margin-bottom:5px;}
+.co-dark p{color:rgba(255,255,255,.78);}
+.co-ph0{background:var(--ph0-lt);border-left:3px solid var(--ph0);}
+.co-ph0 p{color:#4C1D95;}
+.co-ph1{background:var(--ph1-lt);border-left:3px solid var(--ph1);}
+.co-ph1 p{color:#1E3A8A;}
+
+/* ─── CARDS ─────────────────────────────────────────────────── */
+.card{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;}
+.card-lav{background:var(--z-lavender);border:none;}
+.card-ice{background:var(--z-ice);border:none;}
+.card-dark{background:var(--z-teal-dark);border:none;color:var(--z-white);}
+.card-title{font-size:14px;font-weight:600;color:var(--z-green);}
+.card-dark .card-title{color:var(--z-white);}
+.card-sub{font-size:12px;color:var(--z-gray-muted);margin-top:2px;}
+.card-dark .card-sub{color:rgba(255,255,255,.45);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+
+/* ─── GRIDS ─────────────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;}
+
+/* ─── PHASE BANNER ───────────────────────────────────────────── */
+.phase-banner{display:flex;gap:0;border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:18px 0;}
+.pb-col{flex:1;padding:18px 16px;}
+.pb-0{background:linear-gradient(135deg,rgba(115,91,161,.07),rgba(115,91,161,.03));}
+.pb-1{background:linear-gradient(135deg,rgba(61,129,246,.07),rgba(61,129,246,.03));}
+.pb-div{width:1px;background:var(--z-gray-sep);}
+.pb-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.pb-0 .pb-eye{color:var(--ph0);}
+.pb-1 .pb-eye{color:var(--ph1);}
+.pb-h{font-size:14px;font-weight:600;color:var(--z-green);margin-bottom:5px;}
+.pb-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;margin-bottom:10px;}
+.pb-li{font-size:12px;color:var(--z-gray-body);line-height:1.8;list-style:none;}
+.pb-li li{display:flex;gap:6px;align-items:flex-start;}
+.pb-0 .pb-li li::before{content:'→';color:var(--ph0);font-weight:600;flex-shrink:0;}
+.pb-1 .pb-li li::before{content:'→';color:var(--ph1);font-weight:600;flex-shrink:0;}
+
+/* ─── FEATURE TABLE ──────────────────────────────────────────── */
+.ft{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.ft th{background:var(--z-teal-dark);color:rgba(255,255,255,.82);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.ft th:first-child{border-radius:6px 0 0 6px;}
+.ft th:last-child{border-radius:0 6px 6px 0;}
+.ft td{padding:9px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.ft tr:last-child td{border-bottom:none;}
+.ft tr:hover td{background:#FAFBFD;}
+.ft .fn{font-weight:600;color:var(--z-green);margin-bottom:2px;}
+.ft .fd{font-size:11px;color:var(--z-gray-muted);}
+
+/* ─── FLOW ───────────────────────────────────────────────────── */
+.flow{display:flex;flex-direction:column;}
+.f-row{display:flex;gap:13px;}
+.f-spine{display:flex;flex-direction:column;align-items:center;}
+.f-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.f-dot-teal{background:var(--z-teal);color:var(--z-white);}
+.f-dot-0{background:var(--ph0);color:var(--z-white);}
+.f-dot-1{background:var(--ph1);color:var(--z-white);}
+.f-line{flex:1;width:2px;min-height:12px;}
+.f-line-teal{background:var(--z-ice);}
+.f-line-0{background:var(--ph0-lt);}
+.f-line-1{background:var(--ph1-lt);}
+.f-body{flex:1;padding-bottom:16px;}
+.f-title{font-size:13px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.f-desc{font-size:12px;color:var(--z-gray-muted);line-height:1.7;}
+.f-sub{background:var(--z-lavender);border-radius:var(--radius);padding:9px 12px;margin-top:7px;}
+.f-sub p{font-size:11px;color:var(--z-gray-body);margin:0;line-height:1.65;}
+
+/* ─── PERSONA CARDS ──────────────────────────────────────────── */
+.personas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0;}
+.persona{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px;}
+.p-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-bottom:10px;}
+.p-name{font-size:13px;font-weight:600;color:var(--z-green);}
+.p-role{font-size:11px;color:var(--z-gray-muted);margin-bottom:8px;}
+.p-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.p-missions{margin-top:10px;padding-top:10px;border-top:1px solid var(--z-lavender);}
+.p-m{font-size:11px;color:var(--z-gray-muted);padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.p-m::before{content:'→';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* ─── DASHBOARD BLOCKS ───────────────────────────────────────── */
+.db{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:16px 0;}
+.db-head{background:var(--z-teal-dark);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.db-num{width:28px;height:28px;border-radius:8px;background:rgba(39,187,175,.25);color:var(--z-teal);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.db-info{flex:1;}
+.db-title{font-size:14px;font-weight:600;color:var(--z-white);}
+.db-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px;}
+.db-body{padding:18px;}
+.db-desc{font-size:13px;color:var(--z-gray-body);margin-bottom:14px;line-height:1.75;}
+.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.db-feat{background:var(--z-lavender);border-radius:var(--radius);padding:10px 12px;}
+.db-ft{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.db-fd{font-size:11px;color:var(--z-gray-muted);line-height:1.6;}
+
+/* ─── TABLES ─────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.tbl th{background:var(--z-teal-dark);color:rgba(255,255,255,.8);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.tbl th:first-child{border-radius:6px 0 0 6px;}
+.tbl th:last-child{border-radius:0 6px 6px 0;}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafbfd;}
+.tk{color:var(--z-teal-mid);font-weight:600;font-family:'DM Mono',monospace;}
+.tv{color:var(--z-gray-body);}
+
+/* ─── CODE BLOCK ─────────────────────────────────────────────── */
+.code{background:var(--z-teal-dark);border-radius:var(--radius);padding:14px 16px;font-family:'DM Mono',monospace;font-size:11.5px;color:#e2e8f0;overflow-x:auto;margin:10px 0;line-height:1.75;}
+.code .kw{color:#60a5fa;}
+.code .str{color:#6ee7b7;}
+.code .cmt{color:#475569;}
+.code .key{color:#f0abfc;}
+.code .num{color:#fbbf24;}
+
+/* ─── HEATMAP DEMO ───────────────────────────────────────────── */
+.hm-wrap{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.hm-bar{background:var(--z-lavender);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--z-gray-muted);border-bottom:1px solid var(--z-gray-sep);}
+.hm-grid{padding:12px;display:grid;grid-template-columns:88px repeat(8,1fr);gap:3px;}
+.hm-c{height:22px;border-radius:3px;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
+.hm-c:hover{transform:scale(1.1);z-index:1;}
+.hm-label{font-size:10px;color:var(--z-gray-muted);text-align:right;padding-right:8px;display:flex;align-items:center;justify-content:flex-end;}
+.hm-ch{font-size:9px;color:var(--z-gray-muted);text-align:center;display:flex;align-items:flex-end;justify-content:center;height:22px;}
+.m1s{background:#FFCB99;color:#7C3C00;}
+.m2s{background:#B0EDD3;color:#0D4F3C;}
+.m3s{background:#27BBAF;color:#fff;}
+.m4s{background:#139F94;color:#fff;}
+.m5s{background:#185F60;color:#fff;}
+.thin{outline:2px dashed #C25008;outline-offset:1px;}
+
+/* ─── MATURITY PILLS ─────────────────────────────────────────── */
+.m-legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.m-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+
+/* ─── ARTIFACT CARDS ─────────────────────────────────────────── */
+.art-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.art{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.art-head{padding:9px 13px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.art-body{padding:10px 13px;}
+.art-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--z-lavender);font-size:11px;}
+.art-row:last-child{border-bottom:none;}
+.art-k{color:var(--z-gray-muted);}
+.art-v{color:var(--z-gray-body);}
+.ah-doc{background:var(--z-ice);color:var(--z-teal-dark);}
+.ah-xlsx{background:#D1FAE5;color:#065F46;}
+.ah-json{background:#FEF3C7;color:#92400E;}
+.ah-zip{background:var(--ph0-lt);color:#5B21B6;}
+
+/* ─── DEDUP ──────────────────────────────────────────────────── */
+.dd-group{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:10px 0;overflow:hidden;}
+.dd-head{background:var(--z-lavender);padding:8px 13px;font-size:12px;font-weight:600;color:var(--z-green);display:flex;align-items:center;gap:8px;}
+.dd-file{display:flex;align-items:center;gap:10px;padding:8px 13px;border-top:1px solid var(--z-lavender);font-size:12px;}
+.dd-name{flex:1;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--z-gray-body);}
+.dd-date{font-size:10px;color:var(--z-gray-muted);}
+.win{background:#F0FDF4;}
+.win .dd-name{color:var(--z-green);font-weight:500;}
+.lose .dd-name{text-decoration:line-through;color:var(--z-gray-muted);}
+
+/* ─── API ENDPOINTS ──────────────────────────────────────────── */
+.ep{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;}
+.method{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 6px;border-radius:3px;font-family:'DM Mono',monospace;flex-shrink:0;}
+.mget{background:#DBEAFE;color:#1E40AF;}
+.mpost{background:#D1FAE5;color:#065F46;}
+.mput{background:#FFEDD5;color:#C2410C;}
+.ep-path{font-family:'DM Mono',monospace;font-size:12px;color:var(--z-green);font-weight:500;}
+.ep-desc{font-size:11px;color:var(--z-gray-muted);margin-top:1px;}
+
+/* ─── CHECKLIST ──────────────────────────────────────────────── */
+.chk{list-style:none;font-size:13px;}
+.chk li{padding:4px 0;display:flex;gap:8px;align-items:flex-start;}
+.chk li::before{content:'✓';color:var(--z-teal);font-weight:700;flex-shrink:0;margin-top:1px;}
+.chk-x li::before{content:'✗';color:#DC2626;}
+
+/* ─── PLATFORM CHIPS ─────────────────────────────────────────── */
+.plat{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid;}
+.pl-sf{background:#E0F4FC;color:#005C82;border-color:#B8E4F5;}
+.pl-db{background:#FFF0EE;color:#9B1A08;border-color:#FFD0C9;}
+.pl-tbl{background:#FFF3E8;color:#7A3C00;border-color:#FFD9B0;}
+.pl-tw{background:#FFEEF0;color:#8B0012;border-color:#FFCCD1;}
+.pl-nc{background:#E8EEF8;color:#1B5298;border-color:#C5D4EE;}
+
+/* ─── STAT CARDS ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+.stat{background:var(--z-lavender);border-radius:var(--radius-lg);padding:16px 14px;}
+.stat-num{font-size:28px;font-weight:600;color:var(--z-teal);line-height:1;}
+.stat-label{font-size:12px;font-weight:500;color:var(--z-green);margin-top:4px;}
+.stat-desc{font-size:11px;color:var(--z-gray-muted);margin-top:4px;line-height:1.5;}
+
+/* ─── INSIGHT CARD DEMO ──────────────────────────────────────── */
+.ic{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.ic-head{background:var(--z-teal-dark);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ic-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-teal);}
+.ic-body{padding:0;}
+.ic-row{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:9px 14px;border-bottom:1px solid var(--z-lavender);}
+.ic-row:last-child{border-bottom:none;}
+.ic-label{font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--z-gray-muted);padding-top:2px;}
+.ic-text{font-size:12px;color:var(--z-gray-body);line-height:1.65;}
+
+/* SCOPE TABLE */
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:768px){.sb{display:none;}.personas,.stats,.g3{grid-template-columns:1fr;}.g2,.db-grid,.art-grid,.scope-grid{grid-template-columns:1fr;}.phase-banner{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">Zennify</div>
+    <div class="sb-doc">DMA Visualizer · PRD</div>
+    <div class="sb-ver">v3.0 · May 2026</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Product</div>
+    <div class="sb-item" onclick="go(&#39;s01&#39;)"><span class="sb-tag">01</span> Overview</div>
+    <div class="sb-item" onclick="go(&#39;s02&#39;)"><span class="sb-tag">02</span> Problem statement</div>
+    <div class="sb-item" onclick="go(&#39;s03&#39;)"><span class="sb-tag">03</span> User personas</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Application</div>
+    <div class="sb-item on" onclick="go(&#39;s04&#39;)"><span class="sb-tag">04</span> Dashboard clusters</div>
+    <div class="sb-item" onclick="go(&#39;s05&#39;)"><span class="sb-tag">05</span> Feature register</div>
+    <div class="sb-item" onclick="go(&#39;s06&#39;)"><span class="sb-tag">06</span> Insight cards</div>
+    <div class="sb-item" onclick="go(&#39;s07&#39;)"><span class="sb-tag">07</span> Heatmap design</div>
+    <div class="sb-item" onclick="go(&#39;s08&#39;)"><span class="sb-tag">08</span> Platform layer</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(196,181,253,.3)">Phase 0 · Drive</div>
+    <div class="sb-item ph0" onclick="go(&#39;s09&#39;)"><span class="sb-tag">09</span> Phase architecture</div>
+    <div class="sb-item ph0" onclick="go(&#39;s10&#39;)"><span class="sb-tag">10</span> Folder traversal</div>
+    <div class="sb-item ph0" onclick="go(&#39;s11&#39;)"><span class="sb-tag">11</span> Artifact registry</div>
+    <div class="sb-item ph0" onclick="go(&#39;s12&#39;)"><span class="sb-tag">12</span> Entity inference</div>
+    <div class="sb-item ph0" onclick="go(&#39;s13&#39;)"><span class="sb-tag">13</span> Test case removal</div>
+    <div class="sb-item ph0" onclick="go(&#39;s14&#39;)"><span class="sb-tag">14</span> Deduplication</div>
+    <div class="sb-item ph0" onclick="go(&#39;s15&#39;)"><span class="sb-tag">15</span> Import pipeline</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(147,197,253,.3)">Phase 1 · Claude</div>
+    <div class="sb-item ph1" onclick="go(&#39;s16&#39;)"><span class="sb-tag">16</span> Communication protocol</div>
+    <div class="sb-item ph1" onclick="go(&#39;s17&#39;)"><span class="sb-tag">17</span> Feedback loop</div>
+    <div class="sb-item ph1" onclick="go(&#39;s18&#39;)"><span class="sb-tag">18</span> Phase transition</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Operations</div>
+    <div class="sb-item" onclick="go(&#39;s19&#39;)"><span class="sb-tag">19</span> Data persistence</div>
+    <div class="sb-item" onclick="go(&#39;s20&#39;)"><span class="sb-tag">20</span> Rerun intelligence</div>
+    <div class="sb-item" onclick="go(&#39;s21&#39;)"><span class="sb-tag">21</span> Success metrics</div>
+  </div>
+  <div class="sb-foot">© 2026 Zennify · Confidential</div>
+</nav>
+
+<!-- ── MAIN ────────────────────────────────────────────────────── -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="tb-title">04 — Dashboard Clusters</div>
+      <div class="tb-meta">DMA Visualizer Web App · Product Requirements Document</div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center">
+      <span class="badge b-teal">PRD v3.0</span>
+      <span class="badge b-ph0">Phase 0</span>
+      <span class="badge b-ph1">Phase 1</span>
+    </div>
+  </div>
+  <div class="content">
+
+<!-- ══════════════════════ 01 OVERVIEW ══════════════════════════ -->
+<div id="s01" class="section">
+  <div class="eyebrow">Product Requirements Document</div>
+  <h1>DMA Visualizer Web App</h1>
+  <p class="lead">An interactive intelligence platform that transforms completed Digital Maturity Assessments into a living, queryable workspace. It stores, revises, and presents the full depth of every DMA run — from entity identity through subcapability-level evidence — and feeds quality signals back into the DMA execution engine to drive stronger reruns. It operates in two phases: <strong>Phase 0</strong> bootstraps from existing Google Drive artifacts without requiring any changes to the DMA project; <strong>Phase 1</strong> connects directly to the Claude Project API for structured, real-time payload delivery.</p>
+
+  <div class="callout co-dark">
+    <div class="co-label">Core thesis</div>
+    <p>The DMA produces ~836 scored subcapabilities, hundreds of evidence items, insight cards, issue registers, peer benchmarks, financial trajectories, and platform opportunity maps. Less than 20% of this reaches an AE today. The Visualizer surfaces the other 80% — selectively, interactively, and without overwhelming the viewer. It does this without replacing the DMA engine; it extends it.</p>
+  </div>
+
+  <h2>Scope</h2>
+  <div class="scope-grid">
+    <div>
+      <h4>In scope — v1</h4>
+      <ul class="chk" style="font-size:13px">
+        <li>Internal tool: Zennify AEs and delivery team</li>
+        <li>Phase 0: Drive crawl, classify, parse, and import existing artifacts</li>
+        <li>Phase 1: Direct Claude Project API ingest channel</li>
+        <li>Interactive heatmap (pillar → subcap drill-down)</li>
+        <li>Insight cards with evidence drill-down</li>
+        <li>Platform opportunity matrix (SF, DB, Tableau, Twilio, nCino)</li>
+        <li>Thin-evidence detection + feedback to DMA project</li>
+        <li>Version history and run-to-run diff</li>
+        <li>Lightweight scorecard and PDF export</li>
+        <li>Internal/customer view toggle</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Out of scope — v1</h4>
+      <ul class="chk chk-x" style="font-size:13px">
+        <li>Customer-facing portal</li>
+        <li>Real-time research or live scraping</li>
+        <li>Replacing the Claude DMA execution engine</li>
+        <li>Salesforce / CRM write-back</li>
+        <li>Octar console integration (v2 candidate)</li>
+        <li>Natural language chatbot query interface (v2)</li>
+        <li>Cost, ROI, or investment projections</li>
+        <li>Multi-tenant white-label deployment</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Document map</h2>
+  <table class="tbl">
+    <thead><tr><th>Sections</th><th>What they cover</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">01–03</td><td class="tv">Product framing: overview, problem statement, user personas with jobs-to-be-done</td></tr>
+      <tr><td class="tk">04–08</td><td class="tv">Application design: the six dashboard clusters, full feature register, insight card spec, heatmap design, platform layer spec</td></tr>
+      <tr><td class="tk">09–15</td><td class="tv">Phase 0 (Pre-connection): phase architecture, Google Drive folder traversal, artifact registry, entity inference, test case removal, deduplication, and the full import pipeline</td></tr>
+      <tr><td class="tk">16–18</td><td class="tv">Phase 1 (Post-connection): Claude Project communication protocol, feedback loop, and phase transition rules</td></tr>
+      <tr><td class="tk">19–21</td><td class="tv">Operations: data persistence and revision model, rerun intelligence system, success metrics</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 02 PROBLEM ══════════════════════════ -->
+<div id="s02" class="section">
+  <div class="eyebrow">Section 02</div>
+  <h1>Problem statement</h1>
+  <p class="lead">The DMA pipeline produces some of the richest institutional intelligence in Zennify's possession. It is being systematically underused. Four compounding failure points prevent it from reaching its audience.</p>
+
+  <h2>The static artifact problem</h2>
+  <p>Every completed DMA produces DOCX and XLSX files written to Google Drive. To access a specific finding, an AE opens a 40–80 page Word document, navigates manually, and interprets tables without context. The assessment report alone contains 12 structured sections — executive summary (SCQA format), trend analysis, issue register with timeline, four pillar deep-dives, benchmark comparison, gap prioritization, recommendations with root cause analysis, a transformation roadmap, data gaps, and a full evidence registry. None of this is searchable, filterable, or cross-referenceable in a static document.</p>
+
+  <h2>The evidence depth problem</h2>
+  <p>Each subcapability score is backed by evidence items with tier ratings, ERS scores, claim-type labels (FACT / INFERENCE / HYPOTHESIS / CEILING_ESTIMATE), source URLs, and verbatim excerpts. The insight cards from the Client Profile — each structured around WHAT / WHY / SO WHAT — contain the most commercially relevant analysis in the engagement. They sit as rows in a table on page 20 of a Word document that AEs rarely open.</p>
+
+  <h2>The platform recommendation problem</h2>
+  <p>Recommendations reference named platforms: Salesforce Agentforce, Databricks Mosaic AI, Tableau Next, Twilio Engage, nCino Workflow Engine, Salesforce Data Cloud. Each subcapability gap maps to L3 platforms with L4 features and use cases from the V7 capability catalog. Today this is prose in a recommendations section with no way to filter by platform, see all gaps a specific platform addresses, or understand platform fit relative to the client's full maturity profile.</p>
+
+  <h2>The rerun quality problem</h2>
+  <p>When a DMA is rerun the project has no memory of where the prior run was thin. Subcapabilities with fewer than three evidence items receive no special attention. Proxy searches that were not attempted are not flagged. The result is reruns that replicate the same evidence gaps, with no mechanism to improve coverage over time.</p>
+
+  <h2>The version coherence problem</h2>
+  <p>Multiple runs for the same entity accumulate in Drive with no comparison mechanism. An AE asking whether a client's P4 score improved must open two XLSX files and manually compare rows. No delta view, no signal of regression or improvement, no way to trace whether a prior recommendation was ever actioned.</p>
+</div>
+
+<!-- ══════════════════════ 03 PERSONAS ══════════════════════════ -->
+<div id="s03" class="section">
+  <div class="eyebrow">Section 03</div>
+  <h1>User personas</h1>
+  <p class="lead">Three personas. Each has a distinct relationship to the assessment data and a distinct primary question. The app must serve all three without privileging any one view by default.</p>
+
+  <div class="personas">
+    <div class="persona">
+      <div class="p-av" style="background:#E8F7F6;color:var(--z-teal-dark)">AE</div>
+      <div class="p-name">Account Executive</div>
+      <div class="p-role">Sales · Client-facing</div>
+      <div class="p-desc">Needs a fast ramp on an entity before a meeting. Looking for angles — what platform gaps exist, what the peer story is, what the "why now" trigger is, and what the one-page framing for a conversation looks like. Does not read the full DOCX.</div>
+      <div class="p-missions">
+        <div class="p-m">Understand an entity's maturity posture in under 3 minutes</div>
+        <div class="p-m">Identify the strongest platform opportunity and its evidence base</div>
+        <div class="p-m">See how the entity compares to named peers in the same subvertical</div>
+        <div class="p-m">Generate a clean export for a first call or follow-up</div>
+        <div class="p-m">Know whether the assessment data is current</div>
+      </div>
+    </div>
+    <div class="persona">
+      <div class="p-av" style="background:#D1FAE5;color:#065F46">DL</div>
+      <div class="p-name">Delivery lead</div>
+      <div class="p-role">Internal · Pre-sales + post-sale</div>
+      <div class="p-desc">Works after the AE opens the door. Needs to go deeper — which subcapabilities are driving the score, what the "What We See / Why It Matters" narrative says for each pillar, what the transformation roadmap implies for scoping. Uses the app to prepare for discovery and to frame the solution design conversation.</div>
+      <div class="p-missions">
+        <div class="p-m">Navigate pillar deep-dives without reading a Word document</div>
+        <div class="p-m">Understand which issues are capping scores and by how much</div>
+        <div class="p-m">Map gaps to specific platforms with L3/L4 feature detail from V7 catalog</div>
+        <div class="p-m">Annotate insight cards with post-meeting context</div>
+        <div class="p-m">Compare this entity's profile to similar completed engagements</div>
+      </div>
+    </div>
+    <div class="persona">
+      <div class="p-av" style="background:#FEF3C7;color:#92400E">AN</div>
+      <div class="p-name">DMA Analyst</div>
+      <div class="p-role">Internal · Assessment operations</div>
+      <div class="p-desc">Runs and manages DMA executions. Primary operator of the feedback loop between the app and the DMA engine. Needs to see which subcaps are thin on evidence, confirm which entities are due for a rerun, review version diffs after a refresh, and manage the quality health of the scoring database.</div>
+      <div class="p-missions">
+        <div class="p-m">Review thin-evidence alerts and mark them for next rerun</div>
+        <div class="p-m">Compare run N to run N−1: what changed, what regressed, what resolved</div>
+        <div class="p-m">Monitor assessment health across all entities</div>
+        <div class="p-m">Verify each recommendation traces to a named platform and evidence-backed gap</div>
+        <div class="p-m">Schedule reruns for stale entities</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout co-teal"><p><strong>Visibility model.</strong> All three personas see the same data by default. The internal/customer toggle controls which sections are safe to screen-share with a prospect. It hides fields tagged <code>internal_only: true</code> — evidence excerpts, raw rationales, ERS scores, issue severities, and event timelines. The toggle is a display-mode switch, not a separate data tier. Analysts always see everything regardless of mode.</p></div>
+</div>
+
+<!-- ══════════════════════ 04 DASHBOARDS ════════════════════════ -->
+<div id="s04" class="section on">
+  <div class="eyebrow">Section 04</div>
+  <h1>Dashboard clusters</h1>
+  <p class="lead">The app organises into six dashboard experiences, each answering a single primary question. They are navigable as tabs on the client detail page. The Entity Intelligence Hub is the default entry point for all personas.</p>
+
+  <div class="db">
+    <div class="db-head"><div class="db-num">1</div><div class="db-info"><div class="db-title">Entity Intelligence Hub</div><div class="db-sub">Default landing · "Who is this institution and what is the conversation?"</div></div><div style="display:flex;gap:5px"><span class="badge b-teal" style="font-size:9px">AE</span><span class="badge b-teal" style="font-size:9px">Delivery</span></div></div>
+    <div class="db-body">
+      <div class="db-desc">Consolidates the executive summary, entity snapshot, and top strategic signals into a single scrollable page. Designed for the AE who has 3 minutes before a call. Every element answers a question an AE would actually ask in a client meeting.</div>
+      <div class="db-grid">
+        <div class="db-feat"><div class="db-ft">Entity snapshot card</div><div class="db-fd">Legal name, subvertical, size tier, primary financial metric, HQ, footprint, assessment date, evidence mode. Assessment freshness indicator: green (&lt;6 months), amber (6–12 months), red (&gt;12 months or alerts open).</div></div>
+        <div class="db-feat"><div class="db-ft">Opportunity Surface Score <span class="badge b-new">NEW</span></div><div class="db-fd">Composite 0–100 score: Σ(priority_score × gap_size) for all subcaps where score &lt; 3.0 and platform status is ABSENT. Broken out per platform. The primary commercial signal at entity-directory level.</div></div>
+        <div class="db-feat"><div class="db-ft">"Why now" signal engine <span class="badge b-new">NEW</span></div><div class="db-fd">2–4 trigger events from the Digital Evolution Timeline and Issue Register that create urgency: pending core system migration, recent acquisition creating integration debt, enforcement action, leadership hire. Formatted as conversation starters, not assessment findings.</div></div>
+        <div class="db-feat"><div class="db-ft">SCQA executive narrative</div><div class="db-fd">Situation-Complication-Question-Answer from Assessment Report §1 rendered as an expandable card. Collapsed: 2-sentence summary. Expanded: full narrative with clickable E-ID citations that open the evidence drawer.</div></div>
+        <div class="db-feat"><div class="db-ft">Pillar score bar</div><div class="db-fd">Four horizontal bars (P1–P4) with score, peer median, and delta. M1–M5 colour-coded. Clicking a pillar navigates directly to that pillar's deep-dive in the Maturity Heatmap.</div></div>
+        <div class="db-feat"><div class="db-ft">Top findings strip</div><div class="db-fd">5–7 findings from Assessment Report §1.2: finding title, observation, maturity implication, and platform implicated. Clicking a finding expands inline with linked evidence items.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="db">
+    <div class="db-head"><div class="db-num">2</div><div class="db-info"><div class="db-title">Insight Card Surface</div><div class="db-sub">Strategic intelligence · "What does the research actually mean for this institution?"</div></div><div style="display:flex;gap:5px"><span class="badge b-teal" style="font-size:9px">Delivery</span><span class="badge b-teal" style="font-size:9px">AE</span></div></div>
+    <div class="db-body">
+      <div class="db-desc">Insight cards (from Client Profile §4.1 and the "Why It Matters" narratives from Assessment Report §6) are the analytical core of the DMA. This cluster makes them fully navigable, filterable by pillar/platform/flag, and annotatable by the delivery team.</div>
+      <div class="db-grid">
+        <div class="db-feat"><div class="db-ft">Insight card grid</div><div class="db-fd">Each card: IC-ID, pillar tag, WHAT observation with E-IDs, WHY interpretation, SO WHAT Zennify implication with named platforms. Filterable by pillar, confidence, flag (CRITICAL / OPPORTUNITY / MONITOR), and platform. Sorted by flag severity.</div></div>
+        <div class="db-feat"><div class="db-ft">Card drill-down</div><div class="db-fd">Full-page modal: complete WHAT/WHY/SO WHAT, all supporting evidence items (tier, ERS, excerpt), affected capabilities linked to subcap scores in the heatmap, platform recommendation, and related REC-XX records.</div></div>
+        <div class="db-feat"><div class="db-ft">Pillar deep-dive narratives</div><div class="db-fd">"What We See" and "Why It Matters" blocks from each pillar (Assessment Report §6) rendered with inline E-ID citation chips. The "Why It Matters" block's references to specific recommendations (REC-XX) are rendered as navigable links.</div></div>
+        <div class="db-feat"><div class="db-ft">Analyst annotation layer <span class="badge b-new">NEW</span></div><div class="db-fd">Free-form notes on any insight card with status tags (ACTIONED / PENDING / SUPERSEDED) and optional Salesforce opportunity ID. Versioned with timestamp and author. Annotations survive reruns — they are entity-scoped, not run-scoped.</div></div>
+        <div class="db-feat"><div class="db-ft">Technology landscape</div><div class="db-fd">Client Profile §4.2 four-column grid: Confirmed (T1–T3), Claimed (T4–T5), Job Posting Signals, Technology Gaps. Gap column links directly to the Platform Opportunity Matrix.</div></div>
+        <div class="db-feat"><div class="db-ft">Leadership panel</div><div class="db-fd">Executives from Client Profile §4.3: name, title, tenure, background, and a leadership gap flag if a critical role (CDO, CTO, CISO) is absent from evidence. Clay enrichment surfaces email and LinkedIn where available.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="db">
+    <div class="db-head"><div class="db-num">3</div><div class="db-info"><div class="db-title">Maturity Heatmap</div><div class="db-sub">Score explorer · "Where exactly is this institution on the maturity curve?"</div></div><div style="display:flex;gap:5px"><span class="badge b-teal" style="font-size:9px">Delivery</span><span class="badge b-teal" style="font-size:9px">Analyst</span></div></div>
+    <div class="db-body">
+      <div class="db-desc">A four-level drill-down from pillar (4 cells) to subcapability (~708 cells). Two view modes: standard pillar/category/capability/subcap taxonomy and value chain mode using the V7 21_VC_Mapping_PerSubcap groupings.</div>
+      <div class="db-grid">
+        <div class="db-feat"><div class="db-ft">Four-level drill-down</div><div class="db-fd">Click any cell to zoom: Pillar → Category → Capability → SubCap. Each level shows score, peer median gap, evidence count. At subcap level: score badge, confidence indicator, dashed red outline for thin-evidence flag (evidence_count &lt; 3).</div></div>
+        <div class="db-feat"><div class="db-ft">Value chain mode <span class="badge b-new">NEW</span></div><div class="db-fd">Row axis switches to value chain groupings from V7 21_VC_Mapping_PerSubcap (Digital Account Opening, Loan Origination, Member Servicing, etc.). The same 708 subcap cells reorganised by business context — the framing AEs use in meetings.</div></div>
+        <div class="db-feat"><div class="db-ft">Peer overlay toggle</div><div class="db-fd">Second row per capability showing peer median. Gap cells highlight where entity trails by &gt;0.5 (amber) or &gt;1.0 (red). Peer names visible in tooltip. Sourced from the locked peer set in Peer_Benchmarks sheet.</div></div>
+        <div class="db-feat"><div class="db-ft">Issue timeline overlay <span class="badge b-new">NEW</span></div><div class="db-fd">Overlays the Issue Register on the heatmap: score-capped capabilities shown with a lock icon. Hover reveals issue ID, severity, cap value, and resolution status — making the relationship between issues and scores visually direct.</div></div>
+        <div class="db-feat"><div class="db-ft">Evidence drawer per subcap</div><div class="db-fd">Clicking any subcap cell opens a side drawer: subcap name, score, confidence, evidence ceiling, caps applied, proxy_searched status, full rationale (internal_only), all evidence items with tier, ERS, claim type, excerpt, and URL.</div></div>
+        <div class="db-feat"><div class="db-ft">Stairstepped maturity curve <span class="badge b-new">NEW</span></div><div class="db-fd">For a selected capability cluster or value chain: current score → M3 target → M5, annotated with which platform enables each step-up. Vertical-specific — the curve shape varies by subvertical pillar weights. Exported from the heatmap view.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="db">
+    <div class="db-head"><div class="db-num">4</div><div class="db-info"><div class="db-title">Platform Opportunity Matrix</div><div class="db-sub">Commercial layer · "Which platforms have the strongest case for this institution?"</div></div><div style="display:flex;gap:5px"><span class="badge b-teal" style="font-size:9px">AE</span><span class="badge b-teal" style="font-size:9px">Delivery</span></div></div>
+    <div class="db-body">
+      <div class="db-desc">Reframes the entire assessment through a platform lens. Instead of "how mature is this institution?" it asks "which platforms have the most evidence-backed business case here?" This is the primary commercial view before a platform-specific conversation.</div>
+      <div class="db-grid">
+        <div class="db-feat"><div class="db-ft">Platform Fit Score cards <span class="badge b-new">NEW</span></div><div class="db-fd">One card per platform (Salesforce, Databricks, Tableau, Twilio, nCino): composite fit score, gap count, confirmed-absent technology count, top 3 subcap opportunities. Sortable by fit score. The fastest way to see which platform conversation to lead with.</div></div>
+        <div class="db-feat"><div class="db-ft">Platform Readiness Index <span class="badge b-new">NEW</span></div><div class="db-fd">Per platform: prerequisite subcap check (e.g., Agentforce requires P4C1 Data Foundation ≥ 2.0). Traffic-light status per prerequisite. Prevents recommending platforms where the foundational capability is absent.</div></div>
+        <div class="db-feat"><div class="db-ft">Gap-to-platform mapping table</div><div class="db-fd">Each high-priority gap subcap (score &lt; 3.0) mapped to its L3 platform, L4 feature set, and use case IDs from the V7 catalog. Filterable by platform. The basis for the delivery lead's solution scope discussion.</div></div>
+        <div class="db-feat"><div class="db-ft">Transformation roadmap</div><div class="db-fd">Phased roadmap from Assessment Report §10: Phase (duration) → key recommendations → maturity target → success metrics. Linked to specific platform deployments. Each phase shows the maturity trajectory by period end.</div></div>
+        <div class="db-feat"><div class="db-ft">Recommendation cards</div><div class="db-fd">Each REC-XX from the assessment: root cause with E-IDs, solution with named platform + Zennify offering, expected outcomes table. Filterable by platform and phase. Root cause E-IDs are clickable to the evidence drawer.</div></div>
+        <div class="db-feat"><div class="db-ft">Conversation Starter Generator <span class="badge b-new">NEW</span></div><div class="db-fd">For a selected platform: 3–5 concise evidence-backed talking points for a first call. Entity-specific, peer-comparative, evidence-cited. Template-fill from stored assessment fields — not AI-generated. Copyable to clipboard.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="db">
+    <div class="db-head"><div class="db-num">5</div><div class="db-info"><div class="db-title">Context &amp; Timeline</div><div class="db-sub">Historical intelligence · "What has happened here and what does it signal?"</div></div><div style="display:flex;gap:5px"><span class="badge b-teal" style="font-size:9px">Delivery</span><span class="badge b-teal" style="font-size:9px">AE</span></div></div>
+    <div class="db-body">
+      <div class="db-desc">Surfaces the historical context layers: financial trajectory, digital evolution timeline, issue register with visual Gantt, regulatory standing, acquisition history, and sentiment overview. Flagged <code>internal_only</code> by default — team preparation, not client-facing.</div>
+      <div class="db-grid">
+        <div class="db-feat"><div class="db-ft">Digital evolution timeline</div><div class="db-fd">Interactive horizontal timeline: each event is a node (Date, Initiative, Evidence ID, Capability Impact, Maturity Signal). Colour-coded by signal type: positive (teal), negative (orange), neutral (gray). "Why now" signals in Dashboard 1 are drawn from this timeline.</div></div>
+        <div class="db-feat"><div class="db-ft">Issue register — Gantt view</div><div class="db-fd">Issue Timeline from Assessment Report §4 as a Gantt-style track. Each issue shown as a bar (start → resolution or open). Severity by colour (CRITICAL=red, MATERIAL=amber, MINOR=gray). Expanding any bar shows: type, description, capability impact, cap value, status.</div></div>
+        <div class="db-feat"><div class="db-ft">Financial trajectory</div><div class="db-fd">5-year financial growth chart with CAGR annotation (from Client Profile §3.2). Trend classification (ACCELERATING / STABLE / DECLINING / VARIABLE). Context for budget conversations — an institution at 12% asset CAGR is in a different investment posture than one at −2%.</div></div>
+        <div class="db-feat"><div class="db-ft">Regulatory standing</div><div class="db-fd">Primary regulator, license status, enforcement action history (or confirmed-clean from negative search results), additional jurisdictions. Enforcement actions that cap scores are linked to their issue records. Directly impacts deal complexity framing.</div></div>
+        <div class="db-feat"><div class="db-ft">Sentiment overview</div><div class="db-fd">Employee sentiment (Glassdoor), customer sentiment (app store, complaint trends), and media sentiment distribution. From Client Profile §3.4. Sentiment data impacts P2 scoring caps — low customer sentiment caps customer experience subcapabilities at M3.</div></div>
+        <div class="db-feat"><div class="db-ft">Acquisition history</div><div class="db-fd">M&amp;A activity from Client Profile §4.4 as timeline events. Each acquisition: entity acquired, date, integration status, and technology fragmentation implication — explaining P4 fragmentation signals where applicable.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="db">
+    <div class="db-head"><div class="db-num">6</div><div class="db-info"><div class="db-title">Assessment Health</div><div class="db-sub">Analyst workspace · "What is the quality of this data and what needs to be done?"</div></div><div style="display:flex;gap:5px"><span class="badge b-teal" style="font-size:9px">Analyst</span></div></div>
+    <div class="db-body">
+      <div class="db-desc">The Analyst's primary workspace. Surfaces quality signals, thin evidence, safeguard gate statuses, and version diffs. Provides the controls that drive the feedback loop back to the DMA engine for stronger reruns.</div>
+      <div class="db-grid">
+        <div class="db-feat"><div class="db-ft">Thin evidence alert dashboard</div><div class="db-fd">All subcaps with evidence_count &lt; 3 or NO_EVIDENCE. Ranked by severity. Alert workflow: OPEN → IN_REVIEW → RESOLVED / WAIVED. Resolution triggers regeneration of <code>thin_evidence_feedback.json</code> and Drive write-back.</div></div>
+        <div class="db-feat"><div class="db-ft">Version diff view</div><div class="db-fd">Side-by-side subcap score comparison between any two runs for the same entity. Delta cells colour-coded. Evidence count delta column. Score regressions &gt;1.0 flagged. New/resolved alerts shown. Exportable as CSV.</div></div>
+        <div class="db-feat"><div class="db-ft">Safeguard gate status</div><div class="db-fd">All 10 gates from the assessment (G01–G10) shown as PASS/FAIL with supporting evidence. FAIL gates are blockers shown in red. Must be resolved before the run is considered delivery-ready.</div></div>
+        <div class="db-feat"><div class="db-ft">Cross-entity pattern finder <span class="badge b-new">NEW</span></div><div class="db-fd">Global view: for each category, distribution of scores across all entities in the same subvertical. Surfaces categories where ≥60% of a subvertical scores &lt;2.5 — potential multi-account platform campaign. Filtered by subvertical.</div></div>
+        <div class="db-feat"><div class="db-ft">Evidence age tracker <span class="badge b-new">NEW</span></div><div class="db-fd">Per subcap: publication date of most recent evidence item. Subcaps with newest evidence &gt;18 months flagged as potentially stale. Entity-level: if &gt;40% of subcaps are stale → entity marked for rerun in the freshness dashboard.</div></div>
+        <div class="db-feat"><div class="db-ft">Assessment freshness dashboard</div><div class="db-fd">Global view across all entities: last run date, evidence age indicator, open alert count, whether a rerun is scheduled. Sortable by staleness. Primary triage tool for the Analyst deciding which entities to prioritise for a research refresh.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ 05 FEATURES ══════════════════════════ -->
+<div id="s05" class="section">
+  <div class="eyebrow">Section 05</div>
+  <h1>Feature register</h1>
+  <p class="lead">Complete feature register across all dashboard clusters. Priority P0 = MVP; P1 = ships within 6 weeks of launch; P2 = future. <span class="badge b-new">NEW</span> marks net-new ideas not drawn from meeting notes.</p>
+  <table class="ft">
+    <thead><tr><th style="width:22%">Feature</th><th style="width:7%">Pri.</th><th style="width:10%">Dashboard</th><th>Specification</th></tr></thead>
+    <tbody>
+      <tr><td><div class="fn">Entity directory</div></td><td><span class="badge b-p0">P0</span></td><td>Global</td><td>Search, filter (subvertical, size tier, maturity band, freshness), sort. Each card shows name, subvertical, overall score, date, open alert count, top platform fit. Sortable by Opportunity Surface Score.</td></tr>
+      <tr><td><div class="fn">Entity snapshot card</div></td><td><span class="badge b-p0">P0</span></td><td>Hub (D1)</td><td>All fields from the parameter lock block: name, subvertical, size tier, primary metric, HQ, footprint, assessment ID, evidence mode, date. Freshness indicator colour-coded. Sourced from run_manifest.json — never from chat memory.</td></tr>
+      <tr><td><div class="fn">Opportunity Surface Score <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p0">P0</span></td><td>Hub (D1)</td><td>Σ(priority_score × gap_size) for all subcaps where score &lt; 3.0, platform confirmation is ABSENT, and confidence ≠ LOW. Computed on ingest. Broken out per platform. Displayed at entity-directory level as the primary commercial signal.</td></tr>
+      <tr><td><div class="fn">SCQA executive narrative</div></td><td><span class="badge b-p0">P0</span></td><td>Hub (D1)</td><td>Assessment Report §1 SCQA framework rendered as an expandable card. Collapsed: 2-sentence summary. Expanded: full narrative with clickable E-ID citation chips opening the evidence drawer. Stored verbatim — never regenerated.</td></tr>
+      <tr><td><div class="fn">"Why now" signals <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p0">P0</span></td><td>Hub (D1)</td><td>2–4 trigger events from the digital evolution timeline and issue register. Tags: MIGRATION / ACQUISITION / REGULATORY / LEADERSHIP. Filtered for recency (&lt;24 months) and commercial relevance (P2/P4 categories affected). 1-sentence conversation starters. Template-fill, not generative.</td></tr>
+      <tr><td><div class="fn">Insight cards with drill-down</div></td><td><span class="badge b-p0">P0</span></td><td>Insights (D2)</td><td>All insight cards from Client Profile §4.1: IC-ID, pillar, affected capability IDs, confidence, flag (CRITICAL / OPPORTUNITY / MONITOR), implicated platforms. Full-page modal on click with linked evidence, related REC-XX, and linked subcap scores in the heatmap.</td></tr>
+      <tr><td><div class="fn">Pillar deep-dive narratives</div></td><td><span class="badge b-p0">P0</span></td><td>Insights (D2)</td><td>"What We See" and "Why It Matters" blocks from Assessment Report §6. Stored as structured text with E-ID annotations. Inline E-ID citation chips clickable to evidence drawer. REC-XX references rendered as navigable links.</td></tr>
+      <tr><td><div class="fn">Technology landscape grid</div></td><td><span class="badge b-p0">P0</span></td><td>Insights (D2)</td><td>Client Profile §4.2: four-column grid (Confirmed T1–T3, Claimed T4–T5, Job Posting Signals, Technology Gaps). Gap column links to Platform Opportunity Matrix. Each item links to its confirming evidence.</td></tr>
+      <tr><td><div class="fn">Analyst annotation layer <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Insights (D2)</td><td>Free-form notes on any insight card. Status tags (ACTIONED / PENDING / SUPERSEDED). Optional Salesforce opportunity ID. Append-only versioned log with timestamp + author. Entity-scoped — persists across reruns.</td></tr>
+      <tr><td><div class="fn">Heatmap — 4-level drill-down</div></td><td><span class="badge b-p0">P0</span></td><td>Heatmap (D3)</td><td>D3.js heatmap with DMA maturity colour encoding (Activating #FFCB99 → Differentiating #139F94). 4 zoom levels (pillar=4, category=17, capability=144, subcap=~708 cells). Thin-evidence cells: dashed orange outline (#C25008). Evidence count chip on subcap cells. Click → evidence drawer.</td></tr>
+      <tr><td><div class="fn">Value chain heatmap mode <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p0">P0</span></td><td>Heatmap (D3)</td><td>Row axis switches to value chain groupings from V7 21_VC_Mapping_PerSubcap. Same 708 subcap cells reorganised by business process. Toggle — standard taxonomy view preserved as alternate mode.</td></tr>
+      <tr><td><div class="fn">Peer overlay toggle</div></td><td><span class="badge b-p0">P0</span></td><td>Heatmap (D3)</td><td>Second row per capability: peer median score. Gap cells highlighted: &gt;0.5 amber, &gt;1.0 red. Peer names visible in tooltip. Sourced from locked peer set in Peer_Benchmarks sheet.</td></tr>
+      <tr><td><div class="fn">Issue timeline overlay <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Heatmap (D3)</td><td>Overlays Issue Register on heatmap. Capped capabilities shown with lock icon. Hover: issue ID, severity, cap value, status. Makes severity-to-maturity cap matrix visual rather than table-only.</td></tr>
+      <tr><td><div class="fn">Stairstepped maturity curve <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Heatmap (D3)</td><td>For a selected capability cluster/value chain: current score → M3 → M5 per subcap, annotated with which platform enables each step-up. SVG/D3. Subvertical-specific using pillar weights. Exportable.</td></tr>
+      <tr><td><div class="fn">Platform Fit Score cards <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p0">P0</span></td><td>Platform (D4)</td><td>One card per platform (SF, Databricks, Tableau, Twilio, nCino): composite fit score, gap count, confirmed-absent count, top 3 subcap opportunities. The fastest way to see which platform conversation to lead with.</td></tr>
+      <tr><td><div class="fn">Platform Readiness Index <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Platform (D4)</td><td>Prerequisite subcap check per platform. E.g., Agentforce: P4C1 ≥ 2.0, P2C2 ≥ 2.0. Traffic-light status per prerequisite. Prevents recommending platforms without the foundational capability in place.</td></tr>
+      <tr><td><div class="fn">Recommendation cards (REC-XX)</div></td><td><span class="badge b-p0">P0</span></td><td>Platform (D4)</td><td>Each REC-XX: root cause with E-IDs, solution with named platform + Zennify offering, expected outcomes table. Filterable by platform and phase. Root cause E-IDs clickable to evidence drawer.</td></tr>
+      <tr><td><div class="fn">Conversation Starter Generator <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Platform (D4)</td><td>For a selected platform: 3–5 evidence-backed talking points formatted for a first call. Entity-specific, peer-comparative, evidence-cited. Template-fill from stored fields — not generative AI. Copyable.</td></tr>
+      <tr><td><div class="fn">Digital evolution timeline</div></td><td><span class="badge b-p0">P0</span></td><td>Context (D5)</td><td>Interactive horizontal timeline from Assessment Report §3. Nodes colour-coded by signal type. Hover: full event record. Linked to "Why now" signals. Flagged <code>internal_only: true</code> by default.</td></tr>
+      <tr><td><div class="fn">Issue register — Gantt view</div></td><td><span class="badge b-p1">P1</span></td><td>Context (D5)</td><td>Issue Register rendered as Gantt-style track. Open issues extend to today. Severity by colour. Expanding a bar shows: type, description, capability impact, cap value, resolution status.</td></tr>
+      <tr><td><div class="fn">Financial trajectory chart</div></td><td><span class="badge b-p0">P0</span></td><td>Context (D5)</td><td>5-year growth chart with CAGR annotation (Client Profile §3.2). Trend classification. Flagged internal_only. Contextualises budget conversations.</td></tr>
+      <tr><td><div class="fn">Thin-evidence alert dashboard</div></td><td><span class="badge b-p0">P0</span></td><td>Health (D6)</td><td>All subcaps with evidence_count &lt; 3 across all runs. Alert workflow: OPEN → IN_REVIEW → RESOLVED / WAIVED. Resolution triggers regeneration of <code>thin_evidence_feedback.json</code> and Drive write-back to the entity's folder.</td></tr>
+      <tr><td><div class="fn">Version diff view</div></td><td><span class="badge b-p0">P0</span></td><td>Health (D6)</td><td>Side-by-side subcap comparison between any two runs. Delta cells colour-coded. Evidence count delta. Score regressions &gt;1.0 flagged. New/resolved alerts shown. Exportable as CSV.</td></tr>
+      <tr><td><div class="fn">Cross-entity pattern finder <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Health (D6)</td><td>Global: for each category, score distribution across all entities in the same subvertical. Surfaces categories where ≥60% of a subvertical scores &lt;2.5 — potential multi-account campaign. AEs filter by subvertical for a vertical-wide platform story.</td></tr>
+      <tr><td><div class="fn">Evidence age tracker <span class="badge b-new">NEW</span></div></td><td><span class="badge b-p1">P1</span></td><td>Health (D6)</td><td>Per subcap: publication date of most recent evidence item. Subcaps with newest evidence &gt;18 months flagged as stale. Entity-level stale threshold: &gt;40% of subcaps → flagged for rerun.</td></tr>
+      <tr><td><div class="fn">Internal/customer view toggle</div></td><td><span class="badge b-p0">P0</span></td><td>Global</td><td>Display mode switch on every client page. Customer View server-side filters all <code>internal_only: true</code> fields. Toggle state persists in session. Resets on new visit.</td></tr>
+      <tr><td><div class="fn">Lightweight scorecard export</div></td><td><span class="badge b-p1">P1</span></td><td>Global</td><td>Single-page HTML export: entity snapshot, pillar bar, top 3 platform opportunities, technology gap highlights. Always customer-safe. Downloadable as HTML or PDF. Generated from stored data — no real-time computation.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 06 INSIGHT CARDS ═════════════════════ -->
+<div id="s06" class="section">
+  <div class="eyebrow">Section 06</div>
+  <h1>Insight card specification</h1>
+  <p class="lead">The insight card is the most commercially valuable unit of information in the DMA. It is the bridge between raw evidence and a sales conversation. Each card maps directly to a row in Client Profile §4.1.</p>
+
+  <h2>Card anatomy</h2>
+  <div class="ic">
+    <div class="ic-head">
+      <span class="ic-id">IC-003</span>
+      <div style="display:flex;gap:6px"><span class="badge b-p0" style="font-size:9px">CRITICAL</span><span class="badge b-navy" style="font-size:9px">P4 · Data &amp; Analytics</span><span class="plat pl-sf">Data Cloud</span><span class="plat pl-db">Mosaic AI</span></div>
+    </div>
+    <div class="ic-body">
+      <div class="ic-row"><div class="ic-label">WHAT</div><div class="ic-text">The institution's data architecture shows fragmentation across 3 distinct core systems with no unified customer data layer confirmed [E-047, E-089]. Job postings for "Data Cloud Architect" in Q1 2026 signal awareness of the gap but no deployment in progress [E-112].</div></div>
+      <div class="ic-row"><div class="ic-label">WHY</div><div class="ic-text">Without a unified customer data foundation, real-time personalisation, AI-driven decisioning, and cross-channel consistency are architecturally impossible regardless of front-end investment. This is the root constraint behind the M2 scores across P2C2, P2C3, and P4C1.</div></div>
+      <div class="ic-row"><div class="ic-label">SO WHAT</div><div class="ic-text">Salesforce Data Cloud + Databricks Lakehouse removes this constraint. The institution is at the stage — hiring signals, leadership awareness — where this conversation is timely before they commit to a point-solution that creates further fragmentation.</div></div>
+      <div class="ic-row"><div class="ic-label">AFFECTS</div><div class="ic-text"><code>P2C2.3.1</code> · <code>P2C3.2.4</code> · <code>P4C1.1.1</code> · <code>P4C1.2.3</code> — <span style="color:var(--z-teal);font-size:12px;cursor:pointer">View in heatmap →</span></div></div>
+    </div>
+  </div>
+
+  <h2>Drill-down triggers (where drill-downs are required)</h2>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>Source element</th><th>Target</th><th>What it reveals</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>E-ID chip on any insight card or narrative</td><td>Evidence side drawer</td><td>Tier, ERS score, claim type, excerpt, source URL, all subcaps the evidence is mapped to</td></tr>
+      <tr><td>2</td><td>Capability ID chip in AFFECTS row</td><td>Heatmap with subcap selected + evidence drawer pre-open</td><td>Exact score, confidence, evidence ceiling, caps applied — the path from "SO WHAT" to the scored evidence</td></tr>
+      <tr><td>3</td><td>Click any subcap cell in the heatmap</td><td>Evidence drawer for that subcap</td><td>All evidence items, full rationale, confidence, evidence ceiling, caps applied</td></tr>
+      <tr><td>4</td><td>REC-XX root cause E-IDs on a recommendation card</td><td>Evidence drawer</td><td>Evidence grounding the recommendation — the path from "we recommend X" to "here is why"</td></tr>
+      <tr><td>5</td><td>Issue record in issue register / Gantt</td><td>Heatmap with issue overlay active and affected capabilities highlighted</td><td>Which cells are being score-capped by the issue and by how much</td></tr>
+      <tr><td>6</td><td>Platform name on a Platform Fit Score card</td><td>Heatmap filtered to subcaps where that platform is the recommended solution</td><td>The complete gap surface addressable by a single platform — the commercial scope in one view</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Card lifecycle states</h2>
+  <table class="tbl">
+    <thead><tr><th>State</th><th>Trigger</th><th>Display behaviour</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">ACTIVE</td><td>Card created on ingest of a new run</td><td>Default display in the insight card grid</td></tr>
+      <tr><td class="tk">ANNOTATED</td><td>Team member adds a note or action tag</td><td>Annotation badge with author initials. Note visible on expand.</td></tr>
+      <tr><td class="tk">REVISED</td><td>A rerun produces an updated version of the same IC-ID</td><td>New card shown as ACTIVE. Prior version in version history with a delta flag if SO WHAT changed.</td></tr>
+      <tr><td class="tk">SUPERSEDED</td><td>The underlying subcap score moves above 3.0, eliminating the gap</td><td>Moved to archived state. Visible in version history. Annotation notes whether closure was due to a platform deployment or evidence revision.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 07 HEATMAP ═══════════════════════════ -->
+<div id="s07" class="section">
+  <div class="eyebrow">Section 07</div>
+  <h1>Heatmap design specification</h1>
+  <p class="lead">The heatmap is the primary data-dense visualisation. It supports four zoom levels, two structural modes, and a peer overlay. The maturity colour scale uses the DMA-specific palette from the Zennify design system.</p>
+
+  <h2>Maturity colour scale — DMA palette</h2>
+  <div class="m-legend">
+    <div class="m-pill" style="background:#FFCB99"><span style="color:#7C3C00;font-weight:600">Activating · M1–M2</span></div>
+    <div class="m-pill" style="background:#62D7B8"><span style="color:#0D4F3C;font-weight:600">Building · M2–M3</span></div>
+    <div class="m-pill" style="background:#27BBAF"><span style="color:#fff;font-weight:600">Competing · M3–M4</span></div>
+    <div class="m-pill" style="background:#139F94"><span style="color:#fff;font-weight:600">Differentiating · M4–M5</span></div>
+    <div class="m-pill" style="background:#C25008;color:white"><span style="font-weight:600">Thin evidence flag</span></div>
+  </div>
+
+  <h2>Interactive preview — subcap level (P1C1: Strategy)</h2>
+  <div class="hm-wrap">
+    <div class="hm-bar">
+      <strong style="color:var(--z-green)">P1 Strategy</strong> → P1C1: Digital Strategy
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <span style="font-size:10px">Peer overlay: ON</span>
+        <span class="badge b-teal" style="font-size:9px">8 subcaps shown</span>
+        <span class="badge b-red" style="font-size:9px">1 thin</span>
+      </div>
+    </div>
+    <div class="hm-grid">
+      <div></div>
+      <div class="hm-ch">Dig. Strategy</div><div class="hm-ch">Biz Align</div><div class="hm-ch">Strat Refresh</div><div class="hm-ch">Vision Comm</div><div class="hm-ch">OKR Cascade</div><div class="hm-ch">Board Gov</div><div class="hm-ch">Risk Fmwk</div><div class="hm-ch">Reg Compl</div>
+      <div class="hm-label">This entity</div>
+      <div class="hm-c m2s">2.5</div><div class="hm-c m3s">3.0</div><div class="hm-c m2s thin">2.0</div><div class="hm-c m2s">2.0</div><div class="hm-c m4s">4.0</div><div class="hm-c m1s">1.5</div><div class="hm-c m2s">2.5</div><div class="hm-c m3s">3.0</div>
+      <div class="hm-label">Peer median</div>
+      <div class="hm-c m3s">3.0</div><div class="hm-c m3s">3.0</div><div class="hm-c m2s">2.5</div><div class="hm-c m3s">3.0</div><div class="hm-c m3s">3.5</div><div class="hm-c m2s">2.0</div><div class="hm-c m3s">3.0</div><div class="hm-c m3s">3.0</div>
+    </div>
+    <div style="padding:7px 12px;font-size:10px;color:var(--z-gray-muted);background:var(--z-lavender);border-top:1px solid var(--z-gray-sep)">Dashed orange outline = thin evidence (&lt;3 items) · Hover = tooltip: score, evidence count, platform · Click = evidence drawer opens</div>
+  </div>
+
+  <h2>Drill-down level behaviour</h2>
+  <table class="tbl">
+    <thead><tr><th>Level</th><th>Cell count</th><th>Cell shows</th><th>Click action</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">Pillar</td><td>4</td><td>Score + peer gap</td><td>Zooms to category level</td></tr>
+      <tr><td class="tk">Category</td><td>17</td><td>Score + weight + peer median</td><td>Zooms to capability level</td></tr>
+      <tr><td class="tk">Capability</td><td>144</td><td>Score + evidence count chip</td><td>Zooms to subcap level</td></tr>
+      <tr><td class="tk">SubCap</td><td>~708</td><td>Score + thin flag + platform chip</td><td>Opens evidence side drawer</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 08 PLATFORM LAYER ═══════════════════ -->
+<div id="s08" class="section">
+  <div class="eyebrow">Section 08</div>
+  <h1>Platform layer specification</h1>
+  <p class="lead">Recommendations in the DMA are platform-specific. They reference named L3 platforms from the V7 capability catalog. The platform layer translates subcapability gaps into named platform opportunities with evidence backing and a commercial fit score.</p>
+
+  <h2>Platform taxonomy</h2>
+  <div class="g-auto" style="margin:12px 0">
+    <div class="card card-ice" style="text-align:center;padding:14px 10px"><div style="font-size:16px;font-weight:600;color:#005C82">SF</div><div style="font-size:11px;font-weight:600;color:#005C82;margin:3px 0">Salesforce</div><div style="font-size:10px;color:var(--z-gray-muted)">Agentforce · Data Cloud · FSC · CRMA · Marketing · Platform</div></div>
+    <div class="card" style="text-align:center;background:#FFF0EE;border:none;padding:14px 10px"><div style="font-size:16px;font-weight:600;color:#9B1A08">DB</div><div style="font-size:11px;font-weight:600;color:#9B1A08;margin:3px 0">Databricks</div><div style="font-size:10px;color:var(--z-gray-muted)">Mosaic AI · Agent Bricks · Lakeflow</div></div>
+    <div class="card" style="text-align:center;background:#FFF3E8;border:none;padding:14px 10px"><div style="font-size:16px;font-weight:600;color:#7A3C00">TBL</div><div style="font-size:11px;font-weight:600;color:#7A3C00;margin:3px 0">Tableau</div><div style="font-size:10px;color:var(--z-gray-muted)">Embedded · Next · Pulse</div></div>
+    <div class="card" style="text-align:center;background:#FFEEF0;border:none;padding:14px 10px"><div style="font-size:16px;font-weight:600;color:#8B0012">TW</div><div style="font-size:11px;font-weight:600;color:#8B0012;margin:3px 0">Twilio</div><div style="font-size:10px;color:var(--z-gray-muted)">Engage · Conversations</div></div>
+    <div class="card" style="text-align:center;background:#E8EEF8;border:none;padding:14px 10px"><div style="font-size:16px;font-weight:600;color:#1B5298">nCino</div><div style="font-size:11px;font-weight:600;color:#1B5298;margin:3px 0">nCino</div><div style="font-size:10px;color:var(--z-gray-muted)">Workflow Engine · Document Manager</div></div>
+  </div>
+
+  <h2>Platform Fit Score formula</h2>
+  <div class="code"><span class="cmt">// FitScore(Platform P, Entity E)</span>
+FitScore = Σ priority_score(s) × gap_size(s)
+  <span class="kw">for all</span> subcaps s <span class="kw">where</span>:
+    score(s, E) &lt; <span class="num">3.0</span>                    <span class="cmt">// gap exists</span>
+    P ∈ l3_platforms(s)              <span class="cmt">// platform addresses this subcap in V7 catalog</span>
+    tech_status(P, E) = <span class="str">ABSENT</span>      <span class="cmt">// platform not deployed — confirmed by Explorium</span>
+    confidence(s, E) ≠ <span class="str">LOW</span>          <span class="cmt">// evidence-backed gap, not speculative</span>
+
+<span class="cmt">// priority_score uses the 6-factor formula from Assessment Report §8:</span>
+priority = (0.25 × gap_size) + (0.20 × peer_comparison) + (0.15 × strategic_alignment)
+         + (0.15 × implementation_complexity) + (0.15 × investment_efficiency)
+         + (0.10 × stakeholder_readiness)
+<span class="cmt">// gap_size = 3.0 − score(s, E) for scores below 3.0. Threshold = M3 (Competing)</span></div>
+
+  <h2>Platform Readiness Index — prerequisites</h2>
+  <table class="tbl">
+    <thead><tr><th>Platform</th><th>Prerequisites (subcap, min score)</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td><span class="plat pl-sf">Agentforce</span></td><td><code>P4C1.x</code> ≥ 2.0 · <code>P2C2.x</code> ≥ 2.0 · <code>P1C1.x</code> ≥ 2.0</td><td>Requires a data context layer and a service model for agents to augment. Without these, agents have nothing to ground on.</td></tr>
+      <tr><td><span class="plat pl-db">Mosaic AI</span></td><td><code>P4C1.x</code> ≥ 2.5 · <code>P4C2.x</code> ≥ 2.0</td><td>A capability amplifier — requires an existing data lake or warehouse. Fragmented data architecture creates high implementation risk.</td></tr>
+      <tr><td><span class="plat pl-tbl">Tableau</span></td><td><code>P4C1.x</code> ≥ 2.0 · <code>P4C2.x</code> ≥ 1.5</td><td>Requires a queryable data source. Lower bar than AI-layer platforms — any institution with a basic data warehouse can benefit.</td></tr>
+      <tr><td><span class="plat pl-tw">Twilio</span></td><td><code>P2C1.x</code> ≥ 2.0 · <code>P2C3.x</code> ≥ 1.5</td><td>Adds omnichannel execution. Requires a basic digital channel presence and at least an awareness of customer journeys.</td></tr>
+      <tr><td><span class="plat pl-nc">nCino</span></td><td><code>P3C1.x</code> ≥ 1.5 · <code>P3C2.x</code> ≥ 1.5</td><td>Requires basic operational process definition. Financial institutions with fully manual lending workflows benefit most.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 09 PHASE ARCHITECTURE ════════════════ -->
+<div id="s09" class="section">
+  <div class="eyebrow">Section 09</div>
+  <h1>Phase architecture</h1>
+  <p class="lead">The app operates in two distinct phases that reflect the maturity of the DMA project's infrastructure. <strong>Phase 0</strong> enables immediate value from existing Drive artifacts. <strong>Phase 1</strong> replaces the parsing layer with a direct API channel to the Claude Project.</p>
+
+  <div class="phase-banner">
+    <div class="pb-col pb-0">
+      <div class="pb-eye">Phase 0 · Pre-connection</div>
+      <div class="pb-h">Google Drive ingestion</div>
+      <div class="pb-desc">The app bootstraps from completed DMA artifacts already in Google Drive. No changes to the DMA project required. The app discovers, classifies, parses, and deduplicates files autonomously using the confirmed Drive structure: flat file layout in DMA Assets, mixed naming conventions, multiple owners, and test cases co-mingled with production runs.</div>
+      <ul class="pb-li">
+        <li>Crawls Drive folder <code>1uvt3kh8vPIygFwUNfKQSol0m5OYj2O0P</code> recursively</li>
+        <li>Classifies each file by MIME type, filename pattern, and header scan</li>
+        <li>Infers entity identity without manual tagging</li>
+        <li>Removes test cases (Nyumba Zetu pattern) and unfilled templates</li>
+        <li>Deduplicates — FINAL suffix, Assessment ID date, then modifiedTime</li>
+        <li>Parses each artifact type, assembles synthetic <code>app_payload</code></li>
+        <li>Read-only — never writes back to Drive artifacts</li>
+      </ul>
+    </div>
+    <div class="pb-div"></div>
+    <div class="pb-col pb-1">
+      <div class="pb-eye">Phase 1 · Post-connection</div>
+      <div class="pb-h">Claude Project API</div>
+      <div class="pb-desc">The DMA project (Claude) posts a structured <code>app_payload_v1.json</code> directly to the app's ingest API on completion of every run. The app processes it, stores it, and writes feedback back to the project's Drive folder. Phase 0 entities coexist — they are not displaced, just not updated until the project re-runs them.</div>
+      <ul class="pb-li">
+        <li>Claude Project posts payload on Batch 6 / Phase 7 completion</li>
+        <li>Schema-validated JSON — no parsing inference required</li>
+        <li>All 708 subcap scores, evidence items, insight cards in one payload</li>
+        <li>App writes thin_evidence_feedback.json back to Drive after ingest</li>
+        <li>DMA project reads feedback at Batch 1 pre-flight on next run</li>
+        <li>Real-time SSE notification to connected sessions on new ingest</li>
+        <li>Entity flag updates: DRIVE_PARSE → PROJECT_API on first Phase 1 run</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Phase comparison</h2>
+  <table class="tbl">
+    <thead><tr><th>Dimension</th><th>Phase 0 — Drive ingestion</th><th>Phase 1 — Claude Project</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">Data source</td><td>Google Drive artifacts (DOCX, XLSX, JSON)</td><td>Claude Project API POST → ingest endpoint</td></tr>
+      <tr><td class="tk">Trigger</td><td>Scheduled crawl (every 6 hrs) or manual admin action</td><td>DMA project posts payload on run completion</td></tr>
+      <tr><td class="tk">Data quality</td><td>Medium — parsing introduces an error margin</td><td>High — same structured data the DMA project used to score</td></tr>
+      <tr><td class="tk">Subcap rows</td><td>Variable — depends on whether XLSX is present and parseable</td><td>Canonical 708 rows per run, all 11 columns</td></tr>
+      <tr><td class="tk">Deduplication</td><td>Complex — inferred from filename, date, Assessment ID</td><td>Simple — run_id is canonical, idempotent upsert</td></tr>
+      <tr><td class="tk">Test case handling</td><td>Automated 6-rule detection (§13)</td><td>Not needed — only real runs are posted by the project</td></tr>
+      <tr><td class="tk">Feedback loop</td><td>None — Phase 0 is read-only</td><td>app → thin_evidence_feedback.json → Drive → DMA Batch 1</td></tr>
+      <tr><td class="tk">Entity flag</td><td><code>data_source: DRIVE_PARSE</code></td><td><code>data_source: PROJECT_API</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 10 FOLDER TRAVERSAL ══════════════════ -->
+<div id="s10" class="section">
+  <div class="eyebrow">Section 10 · Phase 0</div>
+  <h1>Folder traversal</h1>
+  <p class="lead">The traversal algorithm crawls the target Drive folder and all sub-folders recursively, collecting all files. It treats the entire tree as a flat pool of candidate artifacts and classifies each one independently — no assumed folder structure.</p>
+
+  <div class="callout co-ph0"><p><strong>Target folder:</strong> <code>drive.google.com/drive/folders/1uvt3kh8vPIygFwUNfKQSol0m5OYj2O0P</code>. Confirmed structure from Drive search: artifacts live largely flat in <strong>DMA Assets</strong>. Files owned by <code>dma@zennify.com</code> (programmatic) or named users (manual). No enforced per-client sub-folder structure — inference required.</p></div>
+
+  <h2>Traversal sequence</h2>
+  <div class="flow">
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">1</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Root folder metadata crawl</div><div class="f-desc">List all files in the target folder ID. Collect: Drive file ID, MIME type, name, modifiedTime, createdTime, owner email, parent folder ID. No content fetch at this stage — metadata only. Paginate via pageToken (100 files per call).</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">2</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Recursive sub-folder expansion</div><div class="f-desc">For every item where mimeType = <code>application/vnd.google-apps.folder</code>: recurse. Track the folder path as an entity inference signal. Max depth 6. Sub-folder names that match known clients (e.g., "Farm Credit East") are logged as strong entity signals even if the file ultimately has a different name.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">3</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">MIME type filter</div><div class="f-desc">Retain: Google Docs, Google Sheets, Google Slides, DOCX, XLSX, PPTX, JSON, and ZIP. All other MIME types discarded silently (logged at DEBUG). This is the first reduction of the candidate pool.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">4</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Delta filtering</div><div class="f-desc">For scheduled crawls: retain only files with modifiedTime &gt; last_crawl_at. Full rescan available via admin trigger. Candidate pool sorted by modifiedTime descending before further processing — ensures newer files are processed first, which matters for test case detection on ambiguous files.</div></div></div>
+  </div>
+
+  <h2>Crawl configuration</h2>
+  <table class="tbl">
+    <thead><tr><th>Parameter</th><th>Default</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">Crawl frequency</td><td>Every 6 hours (scheduled) + manual trigger</td><td>New DMA runs are infrequent. 6h catches same-day completions without excessive API quota usage.</td></tr>
+      <tr><td class="tk">Max folder depth</td><td>6 levels</td><td>DMA output taxonomy is max 3 levels deep. 6 provides buffer without infinite recursion risk.</td></tr>
+      <tr><td class="tk">Content fetch parallelism</td><td>5 concurrent requests</td><td>Balances speed vs Drive API rate limits (1000 req/100 sec per user).</td></tr>
+      <tr><td class="tk">Batch size (metadata)</td><td>100 files per Drive API call</td><td>Drive Files.list maximum per page.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 11 ARTIFACT REGISTRY ══════════════════ -->
+<div id="s11" class="section">
+  <div class="eyebrow">Section 11 · Phase 0</div>
+  <h1>Artifact registry</h1>
+  <p class="lead">Each artifact type has a classification signal, extractable fields, and a source priority. Classification uses folder path signal first, then filename pattern, then header scan of first 500 characters.</p>
+
+  <div class="art-grid">
+    <div class="art">
+      <div class="art-head ah-doc">Assessment Report <span class="badge b-gray" style="font-size:9px">Google Doc / DOCX</span></div>
+      <div class="art-body">
+        <div class="art-row"><div class="art-k">Name patterns</div><div class="art-v"><code>DMA_Assessment_Report_*</code> · <code>*_DMA_Assessment_Report*</code> · <code>*Assessment*FINAL*</code></div></div>
+        <div class="art-row"><div class="art-k">Header scan</div><div class="art-v">"DIGITAL MATURITY ASSESSMENT" + "Overall Score:" + "Assessment ID:" in first 500 chars</div></div>
+        <div class="art-row"><div class="art-k">Parsed fields</div><div class="art-v">Entity name, Assessment ID, overall score, evidence mode, date, pillar scores, SCQA summary, pillar deep-dives, recommendations (REC-XX), issue register, roadmap, peer set</div></div>
+        <div class="art-row"><div class="art-k">Confidence</div><div class="art-v"><span class="badge b-green">HIGH</span> — strict template with named section headers</div></div>
+      </div>
+    </div>
+    <div class="art">
+      <div class="art-head ah-doc">Client Profile Research Report <span class="badge b-gray" style="font-size:9px">Google Doc / DOCX</span></div>
+      <div class="art-body">
+        <div class="art-row"><div class="art-k">Name patterns</div><div class="art-v"><code>DMA_Research_Report_*</code> · <code>DMA_Client_Profile_*</code> · <code>*Client_Profile_Research*</code></div></div>
+        <div class="art-row"><div class="art-k">Header scan</div><div class="art-v">"CLIENT PROFILE" + "Background Research Report" in first 200 chars</div></div>
+        <div class="art-row"><div class="art-k">Parsed fields</div><div class="art-v">Entity name, Assessment ID, subvertical, size tier, peer set, insight cards (IC-001+), technology landscape, leadership overview, digital evolution timeline, issue register, financial trajectory, sentiment</div></div>
+        <div class="art-row"><div class="art-k">Confidence</div><div class="art-v"><span class="badge b-green">HIGH</span> — strict template with labelled section headers</div></div>
+      </div>
+    </div>
+    <div class="art">
+      <div class="art-head ah-xlsx">Scoring Workbook <span class="badge b-gray" style="font-size:9px">Google Sheets / XLSX</span></div>
+      <div class="art-body">
+        <div class="art-row"><div class="art-k">Name patterns</div><div class="art-v"><code>DMA_Research_Workbook_*</code> · <code>DMA_Scoring_Workbook_*</code> · <code>*Assessment_Workbook*</code></div></div>
+        <div class="art-row"><div class="art-k">Sheet detection</div><div class="art-v">Header row must contain: SubCap_ID, SubCap_Name, Category, Score, Confidence, Evidence_IDs (11-column v5.5 schema). Validate ≥50 rows per pillar sheet.</div></div>
+        <div class="art-row"><div class="art-k">Parsed fields</div><div class="art-v">All ~708 subcap rows (11 columns) + Evidence_Master, Pillar_Summary, Category_Detail, Peer_Benchmarks, Recommendations, Run_Metadata sheets. Computes evidence_count and thin_flag on ingest.</div></div>
+        <div class="art-row"><div class="art-k">Confidence</div><div class="art-v"><span class="badge b-green">HIGH</span> for v5.5 format · <span class="badge b-amber">MEDIUM</span> for legacy column layouts</div></div>
+      </div>
+    </div>
+    <div class="art">
+      <div class="art-head ah-json">JSON Artifacts <span class="badge b-gray" style="font-size:9px">.json files</span></div>
+      <div class="art-body">
+        <div class="art-row"><div class="art-k">Types</div><div class="art-v"><code>app_payload_v1.json</code> · <code>research_handoff.json</code> · <code>evidence_index.json</code> · <code>qa_verdict.json</code> · <code>run_manifest.json</code></div></div>
+        <div class="art-row"><div class="art-k">Priority rule</div><div class="art-v">If <code>app_payload_v1.json</code> found → treat as Phase 1 payload, skip document parsing for this entity entirely. Always the highest priority source.</div></div>
+        <div class="art-row"><div class="art-k">Confidence</div><div class="art-v"><span class="badge b-green">AUTHORITATIVE</span> — no inference needed if schema version matches</div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Source priority hierarchy</h2>
+  <div class="code"><span class="cmt">// For each data field, use the HIGHEST available source:</span>
+<span class="num">1</span>. <span class="str">app_payload_v1.json</span>       <span class="cmt">// authoritative — Phase 1 format</span>
+<span class="num">2</span>. <span class="str">research_handoff.json</span>     <span class="cmt">// structured handoff from DMA project</span>
+<span class="num">3</span>. <span class="str">Scoring Workbook (XLSX)</span>   <span class="cmt">// subcap scores, evidence — most structured document</span>
+<span class="num">4</span>. <span class="str">Assessment Report (DOCX)</span>  <span class="cmt">// narrative, pillar scores, recommendations</span>
+<span class="num">5</span>. <span class="str">Client Profile (DOCX)</span>     <span class="cmt">// entity profile, insight cards, tech landscape</span>
+<span class="num">6</span>. <span class="str">Narrative Deck (PPTX)</span>     <span class="cmt">// fallback only — entity name + overall score</span></div>
+</div>
+
+<!-- ══════════════════════ 12 ENTITY INFERENCE ══════════════════ -->
+<div id="s12" class="section">
+  <div class="eyebrow">Section 12 · Phase 0</div>
+  <h1>Entity inference</h1>
+  <p class="lead">Entity inference determines which real-world institution a Drive file belongs to. It uses a four-signal cascade. Confidence below 0.7 triggers a manual review flag rather than automatic import.</p>
+
+  <h2>Signal cascade</h2>
+  <div class="flow">
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">1</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Assessment ID extraction — confidence 1.0</div><div class="f-desc">Scan filename and first 2,000 characters for pattern <code>DMA-(?:ASM|RES)-([A-Z0-9]+)-(\d{8})-(\d{4})</code>. The entity code (e.g., FCE, ZION, PMTCAN, SLGreen) is the canonical identifier. If the code is in the entity table → immediate match. If new → entity created as PENDING_REVIEW.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">2</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Entity name from document header — confidence 0.9</div><div class="f-desc">First 500 characters of document content. Entity name appears as a heading immediately following "CLIENT PROFILE" or "DIGITAL MATURITY ASSESSMENT". Extracted name is normalised (strip legal suffixes: ACA, NA, N.A., Corp, Inc., LLC) and fuzzy-matched against the entity table (Levenshtein ≤ 3).</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">3</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Filename token extraction — confidence 0.75</div><div class="f-desc">Split filename on <code>_</code>, <code>-</code>, spaces. Strip DMA prefixes/suffixes (DMA, Assessment, Report, Research, Scoring, Workbook, FINAL, v1, v2, FINAL, 2024–2026). Match remaining tokens against entity table.
+          <div class="f-sub"><p><strong>Confirmed mappings from Drive:</strong> DMA_Assessment_Report_FCE → Farm Credit East · DMA_Assessment_Report_SLGreen_FINAL → SL Green · Fulton_Bank_DMA_Assessment_Report → Fulton Bank · DMA_Client_Profile_Research_Report_Zions_Bancorporation → Zions Bancorporation · Payments_Canada_Client_Profile_Research_Report → Payments Canada</p></div></div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">4</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Parent folder name — confidence 0.65</div><div class="f-desc">If the file is inside a sub-folder (not Drive root), the folder name is matched against the entity table using the same fuzzy matching. E.g., a file inside a folder named "Farm Credit East" → entity = Farm Credit East.</div></div></div>
+  </div>
+  <div class="callout co-orange"><p><strong>Confidence &lt;0.7:</strong> File placed in the UNRESOLVED queue, visible in the admin UI at <code>/admin/import?status=unresolved</code>. The file is not imported until an admin confirms or corrects the entity assignment. Non-DMA collateral files (e.g., Ag_Lending_Solution_Blueprint_v2) typically fall here and are excluded after admin review.</p></div>
+</div>
+
+<!-- ══════════════════════ 13 TEST CASE REMOVAL ══════════════════ -->
+<div id="s13" class="section">
+  <div class="eyebrow">Section 13 · Phase 0</div>
+  <h1>Test case removal</h1>
+  <p class="lead">Test cases, sandbox runs, and non-FSI entities must be excluded before import. Six detection rules are applied in priority order. A single EXCLUDE decision terminates processing for that file.</p>
+
+  <h2>Detection rules</h2>
+  <table class="tbl">
+    <thead><tr><th>Rule</th><th>Detection logic</th><th>Action</th><th>Specimen from Drive</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">R01</td><td>Filename contains (case-insensitive): <code>test</code>, <code>demo</code>, <code>sandbox</code>, <code>example</code>, <code>template</code>, <code>sample</code>, <code>dummy</code>, <code>mock</code>, <code>copy of</code></td><td><span class="badge b-red">EXCLUDE</span></td><td>"Test_Assessment_Run.gdoc"</td></tr>
+      <tr><td class="tk">R02</td><td>No Assessment ID pattern AND entity cannot be resolved to a known FSI entity with confidence ≥ 0.7</td><td><span class="badge b-red">EXCLUDE</span></td><td>"Nyumba Zetu Final Research Report" — no Assessment ID, no FSI entity match</td></tr>
+      <tr><td class="tk">R03</td><td>Resolved entity is classified as non-FSI (PropTech, EdTech, Healthcare, Nonprofit outside FSI) based on entity description keyword matching</td><td><span class="badge b-red">EXCLUDE</span></td><td>Nyumba Zetu (Nairobi PropTech)</td></tr>
+      <tr><td class="tk">R04</td><td>Document contains ≥3 unfilled template tokens: <code>{{entity_name}}</code>, <code>[INSTRUCTION:</code>, <code>{{...}}</code>, <code>{{primary_metric}}</code></td><td><span class="badge b-red">EXCLUDE</span></td><td>Any unfilled template copy including DMA_Assessment_Report_Template.docx</td></tr>
+      <tr><td class="tk">R05</td><td>File owner email is outside <code>@zennify.com</code> and <code>dma@zennify.com</code></td><td><span class="badge b-amber">REVIEW</span></td><td>Client-provided documents shared to the Drive folder</td></tr>
+      <tr><td class="tk">R06</td><td>Document contains "Framework v4", "Framework v5.0", "Framework v5.1" on cover page — schema incompatible with v5.5</td><td><span class="badge b-amber">REVIEW</span></td><td>Pre-v5.5 assessments requiring legacy parsing confirmation</td></tr>
+    </tbody>
+  </table>
+  <div class="callout co-teal"><p>Every excluded file is written to the <code>import_audit</code> table with: Drive file ID, filename, rules triggered, timestamp, and status (EXCLUDED / REVIEW). Analysts access this at <code>/admin/import?status=excluded</code> to override false positives. An override requires a confirmed entity assignment and explicit admin confirmation.</p></div>
+</div>
+
+<!-- ══════════════════════ 14 DEDUPLICATION ══════════════════════ -->
+<div id="s14" class="section">
+  <div class="eyebrow">Section 14 · Phase 0</div>
+  <h1>Deduplication and recency</h1>
+  <p class="lead">For any given entity × artifact type, there may be multiple versions in Drive. The deduplication key is <code>(resolved_entity_id, artifact_type)</code>. Within each key there is exactly one winner — all others are logged as SUPERSEDED.</p>
+
+  <h2>Winner selection rules — applied in order</h2>
+  <div class="flow">
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">1</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">FINAL suffix wins</div><div class="f-desc">If any candidate has <code>_FINAL</code> in the filename and others do not, the FINAL version wins regardless of date. FINAL indicates analyst-approved delivery. If multiple FINAL versions exist, proceed to rule 2.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">2</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Assessment ID date wins</div><div class="f-desc">If Assessment IDs are extractable: the candidate with the highest <code>YYYYMMDD</code> component wins. Equal dates: higher sequence number wins. E.g., <code>DMA-ASM-FCE-20260312-0001</code> beats <code>DMA-ASM-FCE-20260201-0001</code>.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">3</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Drive modifiedTime wins</div><div class="f-desc">Fallback when rules 1–2 do not resolve: the file with the latest <code>modifiedTime</code> from Drive metadata wins.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">4</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">DMA Agent owner beats named-user owner</div><div class="f-desc">Final tiebreaker: a file owned by <code>dma@zennify.com</code> (engine-generated) wins over a manually uploaded file. The engine-generated version is the canonical output.</div></div></div>
+  </div>
+
+  <h2>Confirmed examples from Drive</h2>
+  <div class="dd-group">
+    <div class="dd-head">SL Green · Assessment Report · 2 candidates</div>
+    <div class="dd-file win"><div class="dd-name">DMA_Assessment_Report_SLGreen_FINAL.gdoc</div><span class="badge b-green" style="font-size:9px">WINNER — _FINAL suffix</span><div class="dd-date">May 14 2026</div></div>
+    <div class="dd-file lose"><div class="dd-name">DMA_Assessment_Report_SLGreen.gdoc</div><span class="badge b-gray" style="font-size:9px">SUPERSEDED</span><div class="dd-date">May 10 2026</div></div>
+  </div>
+  <div class="dd-group">
+    <div class="dd-head">Farm Credit East · Assessment Report · 2 candidates</div>
+    <div class="dd-file win"><div class="dd-name">DMA_Assessment_Report_FCE.gdoc</div><span class="badge b-green" style="font-size:9px">WINNER — Assessment ID 20260312</span><div class="dd-date">Mar 12 2026</div></div>
+    <div class="dd-file lose"><div class="dd-name">DMA_Assessment_Report_FCE_draft.gdoc</div><span class="badge b-gray" style="font-size:9px">SUPERSEDED — no Assessment ID</span><div class="dd-date">Mar 10 2026</div></div>
+  </div>
+
+  <div class="callout co-teal"><p><strong>Partial imports:</strong> If only a Research Report exists for an entity (no Assessment Report or Workbook), the entity is imported with <code>completeness: PARTIAL</code>. It appears in the directory with a dashed border and a "Research only" badge. AEs can still view insight cards, technology landscape, and entity profile — but no subcap scores or heatmap are available.</p></div>
+</div>
+
+<!-- ══════════════════════ 15 IMPORT PIPELINE ════════════════════ -->
+<div id="s15" class="section">
+  <div class="eyebrow">Section 15 · Phase 0</div>
+  <h1>Import pipeline</h1>
+  <p class="lead">The end-to-end flow from Drive crawl to database record. Ten sequential steps with logging at each stage.</p>
+
+  <div class="flow">
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">1</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Crawl trigger</div><div class="f-desc">Scheduled (every 6 hours) or manual (<code>POST /api/v1/admin/import/trigger</code>). Delta mode by default — only files with modifiedTime &gt; last_crawl_at. Full rescan via <code>full_rescan: true</code>.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">2</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Metadata collection → candidate pool</div><div class="f-desc">Recursive folder traversal (§10). MIME filter applied. Candidate pool assembled in memory, sorted by modifiedTime descending.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">3</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Artifact classification</div><div class="f-desc">Each candidate classified by folder path → filename pattern → header scan (§11). Unclassified files → UNRESOLVED queue.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">4</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Test case filtering</div><div class="f-desc">All 6 detection rules applied (§13). EXCLUDED files logged to audit. REVIEW files flagged for admin. Production files proceed.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">5</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Entity inference</div><div class="f-desc">4-signal cascade (§12). Files below 0.7 confidence → UNRESOLVED. New entities → PENDING_REVIEW (not shown in directory until admin confirms).</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">6</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Deduplication per entity × artifact type</div><div class="f-desc">4-rule winner selection (§14). Losers marked SUPERSEDED. One winner per entity × artifact type proceeds to content fetch.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">7</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Deep content fetch and parse</div><div class="f-desc">Winners fetched from Drive API (5 concurrent). Parsed per artifact type using section header anchors for documents and header-row detection for workbooks. Structured data written to <code>parsed_artifact</code> staging table.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">8</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Synthetic payload assembly</div><div class="f-desc">All parsed fields from all artifact types for one entity merged using the source priority hierarchy (§11). Fields from higher-priority sources overwrite lower-priority ones. Assessment ID set as run_id; if absent, a deterministic ID is generated: <code>DRIVE-{entity_code}-{content_hash[:8]}</code>.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">9</div><div class="f-line f-line-0"></div></div><div class="f-body"><div class="f-title">Database upsert</div><div class="f-desc">Synthetic payload upserted into the same schema as Phase 1 payloads (idempotent on run_id). <code>data_source: DRIVE_PARSE</code> set. Thin-evidence alerts auto-generated from <code>thin_flag</code> fields.</div></div></div>
+    <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-0">10</div></div><div class="f-body"><div class="f-title">Audit log and admin notification</div><div class="f-desc">Import summary written to <code>import_audit</code>: total files found, classified, excluded, resolved, imported, errors. Admin notified via SSE if new entities are PENDING_REVIEW or error count &gt; 5.</div></div></div>
+  </div>
+
+  <h2>Admin API endpoints (Phase 0)</h2>
+  <div class="ep"><span class="method mpost">POST</span><div><div class="ep-path">/api/v1/admin/import/trigger</div><div class="ep-desc">Trigger a full or delta Drive crawl. Body: <code>{full_rescan: bool, folder_id: string}</code>. Returns job_id.</div></div></div>
+  <div class="ep"><span class="method mget">GET</span><div><div class="ep-path">/api/v1/admin/import/status/:job_id</div><div class="ep-desc">Poll import job progress. Returns counts: files_found, classified, excluded, pending_review, imported, errors.</div></div></div>
+  <div class="ep"><span class="method mget">GET</span><div><div class="ep-path">/api/v1/admin/import/audit</div><div class="ep-desc">Full audit log. Filter: <code>?status=EXCLUDED|REVIEW|SUPERSEDED|IMPORTED&amp;entity_id=&amp;drive_file_id=</code></div></div></div>
+  <div class="ep"><span class="method mput">PUT</span><div><div class="ep-path">/api/v1/admin/import/audit/:id/resolve</div><div class="ep-desc">Resolve a REVIEW or UNRESOLVED item. Body: <code>{entity_id, action: IMPORT|EXCLUDE}</code>. Import triggers immediate parse + upsert.</div></div></div>
+</div>
+
+<!-- ══════════════════════ 16 COMMUNICATION PROTOCOL ════════════ -->
+<div id="s16" class="section">
+  <div class="eyebrow">Section 16 · Phase 1</div>
+  <h1>Communication protocol</h1>
+  <p class="lead">One POST per completed run. One acknowledgement response. The channel is unidirectional for data delivery. Feedback returns via Drive — the exchange medium the DMA project already knows how to read.</p>
+
+  <div class="callout co-ph1"><p><strong>What "connected" means:</strong> The Claude DMA Project gains a new end-of-run step (Batch 6) that calls <code>POST /api/v1/ingest/assessment</code> with the structured <code>app_payload_v1.json</code>. No manual file upload. No Drive polling. No content parsing. The payload arrives as schema-validated JSON that the database can ingest without inference.</p></div>
+
+  <h2>Ingest API contract</h2>
+  <div class="ep"><span class="method mpost">POST</span><div><div class="ep-path">/api/v1/ingest/assessment</div><div class="ep-desc">Primary ingest endpoint. Accepts <code>app_payload_v1.json</code>. Authenticated with API key (Bearer token). Returns 201 + <code>ingest_receipt.json</code> on success. Idempotent on run_id — posting the same run_id twice returns 200.</div></div></div>
+
+  <div class="code"><span class="cmt">// ingest_receipt.json — response body on 201</span>
+{
+  <span class="key">"run_id"</span>: <span class="str">"DMA-ASM-FCE-20260601-0001"</span>,
+  <span class="key">"entity_id"</span>: <span class="str">"uuid..."</span>,
+  <span class="key">"status"</span>: <span class="str">"ACTIVE"</span>,
+  <span class="key">"thin_evidence_count"</span>: <span class="num">43</span>,
+  <span class="key">"alerts_generated"</span>: <span class="num">43</span>,
+  <span class="key">"feedback_written_to_drive"</span>: <span class="kw">true</span>,
+  <span class="key">"feedback_path"</span>: <span class="str">"drive://DMA Assets/{entity}/{run_id}/thin_evidence_feedback.json"</span>
+}</div>
+
+  <h2>Payload schema highlights</h2>
+  <table class="tbl">
+    <thead><tr><th>Field</th><th>Type</th><th>Source in DMA project</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">run_id</td><td>string</td><td>run_manifest.json — canonical, immutable across all artifacts</td></tr>
+      <tr><td class="tk">entity</td><td>object</td><td>entity_profile.json — name, domain, subvertical</td></tr>
+      <tr><td class="tk">subcap_scores</td><td>array (~708 rows)</td><td>P#_Subcap_Scoring sheets — 11 columns + evidence_count (new field)</td></tr>
+      <tr><td class="tk">evidence_items</td><td>array</td><td>evidence_index.json — full ERS-scored evidence set</td></tr>
+      <tr><td class="tk">insight_cards</td><td>array</td><td>Client Profile §4.1 — structured IC objects</td></tr>
+      <tr><td class="tk">recommendations</td><td>array</td><td>Assessment Report §9 — REC-XX objects with named <code>platform</code> field</td></tr>
+      <tr><td class="tk">value_chain_mappings</td><td>array</td><td>V7 catalog 21_VC_Mapping_PerSubcap sheet</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 17 FEEDBACK LOOP ═════════════════════ -->
+<div id="s17" class="section">
+  <div class="eyebrow">Section 17 · Phase 1</div>
+  <h1>Feedback loop</h1>
+  <p class="lead">The app writes structured feedback files to the entity's Drive folder after every Phase 1 ingest. The DMA project reads these files at Batch 1 pre-flight before generating its research query plan for the next run — making each successive run more rigorous than the last.</p>
+
+  <h2>Feedback files generated per ingest</h2>
+  <table class="tbl">
+    <thead><tr><th>File</th><th>Trigger condition</th><th>DMA project reads at</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">thin_evidence_feedback.json</td><td>Always — generated after every ingest. Lists all subcaps with evidence_count &lt; 3, tier distribution, and recommended_action (PROXY_ESCALATION / FORCE_RERUN).</td><td>Batch 1 pre-flight: thin_subcaps → mandatory proxy queue</td></tr>
+      <tr><td class="tk">evidence_freshness_alert.json</td><td>When &gt;40% of subcaps have evidence &gt;18 months old. Lists stale subcap IDs.</td><td>Batch 1 pre-flight: stale_subcaps → exclude prior URLs, treat as new search</td></tr>
+      <tr><td class="tk">calibration_flag.json</td><td>When entity score &gt;1.5 above peer median in any category — possible overscoring.</td><td>Phase 2 (peer scoring): loads calibration_flags → peer score double-check</td></tr>
+      <tr><td class="tk">regression_flag.json</td><td>When subcap score drops &gt;1.0 from prior run with no evidence count change — scoring inconsistency.</td><td>Phase 4 (scoring): regression_subcaps → explicit rationale requirement (≥300 chars)</td></tr>
+      <tr><td class="tk">evidence_reuse_alert.json</td><td>When &gt;80% of evidence URLs are duplicated from prior run — rerun found no new sources.</td><td>Batch 2 (research): reuse_urls → excluded from search results</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Required DMA project changes</h2>
+  <div class="g2">
+    <div class="card card-lav"><div class="card-title">dma-research v2.4</div><div class="card-sub" style="margin-top:6px;color:var(--z-gray-body)">Add Batch 1 pre-flight: read all feedback files from entity Drive folder. Amend query plan: thin_subcaps → <code>proxy_required: true, min_queries: 5</code>; stale_subcaps → <code>exclude_prior_urls: true</code>. Add <code>evidence_count</code> field to all subcap rows. Add <code>scripts/post_to_app.py</code> to Batch 6.</div></div>
+    <div class="card card-lav"><div class="card-title">dma-assessment v5.6</div><div class="card-sub" style="margin-top:6px;color:var(--z-gray-body)">Add <code>evidence_count</code> field to subcap score schema (count of Evidence_IDs). Add <code>value_chain_mappings</code> field to app_payload assembly. Add <code>insight_cards</code> structured objects from Client Profile §4.1. Increment workbook schema version to v5.6.</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ 18 PHASE TRANSITION ═══════════════════ -->
+<div id="s18" class="section">
+  <div class="eyebrow">Section 18 · Phase 1</div>
+  <h1>Phase transition</h1>
+  <p class="lead">How the app transitions from Phase 0 to Phase 1 without disruption to existing records or user workflows. Phase 0 is never fully removed — it becomes the "manual import" feature for ad-hoc Drive artifacts.</p>
+
+  <h2>Transition conditions</h2>
+  <ul class="chk" style="font-size:13px;margin:10px 0">
+    <li>DMA project has <code>scripts/post_to_app.py</code> installed and validated in a sandbox run</li>
+    <li>Ingest endpoint is live and returns 201 for a test payload</li>
+    <li>API key is provisioned and stored in the DMA project's environment variables</li>
+    <li>End-to-end test completed: DMA run → POST to app → DB record → UI visible</li>
+    <li>Batch 1 pre-flight reads thin_evidence_feedback.json correctly (tested in sandbox)</li>
+  </ul>
+
+  <h2>Per-entity transition</h2>
+  <table class="tbl">
+    <thead><tr><th>Event</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">Before Phase 1</td><td>Entity exists with <code>data_source: DRIVE_PARSE</code>. All fields from parsed documents, with possible NULL fields where parsing was incomplete.</td></tr>
+      <tr><td class="tk">First Phase 1 run</td><td>DMA project posts payload. New run_id created. Prior run → SUPERSEDED. Entity flag → <code>data_source: PROJECT_API</code>. NULL fields filled. Subcap count → canonical 708 rows.</td></tr>
+      <tr><td class="tk">Annotations carry forward</td><td>All analyst annotations are entity-scoped — they survive the transition automatically and display on the new Phase 1 run's insight cards.</td></tr>
+      <tr><td class="tk">Phase 0 record retention</td><td>Phase 0 run record is retained as SUPERSEDED — never deleted. Accessible via version history for diff comparison: "Drive parse vs Phase 1 structured" is a valid and useful diff.</td></tr>
+      <tr><td class="tk">Entities never re-run</td><td>Phase 0 entities the project never re-runs remain as <code>data_source: DRIVE_PARSE</code> indefinitely. They display with a "Drive import" badge. No data is lost — both entity types coexist in the same database.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 19 DATA PERSISTENCE ══════════════════ -->
+<div id="s19" class="section">
+  <div class="eyebrow">Section 19</div>
+  <h1>Data persistence and revision model</h1>
+  <p class="lead">Assessment data is created by a run, stored, revised through reruns and analyst annotations, and always served in the most current state. Each data type has its own persistence rule.</p>
+
+  <table class="tbl">
+    <thead><tr><th>Data type</th><th>Created by</th><th>Modified by</th><th>Immutable after</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">Entity record</td><td>First ingest of any run for a new domain</td><td>Every subsequent run: updates latest_run_id, overall_score, metadata</td><td>Never — entity record is always current-state</td></tr>
+      <tr><td class="tk">Assessment run</td><td>Each ingest creates a new record with a unique run_id</td><td>Status transitions: PENDING_INGEST → ACTIVE → SUPERSEDED</td><td>Data is immutable after ACTIVE. Status may change.</td></tr>
+      <tr><td class="tk">Subcap scores</td><td>708 rows per run on ingest</td><td>Never — scores are the source of truth from the DMA engine. Score changes require a new run.</td><td>Immediately on ingest</td></tr>
+      <tr><td class="tk">Evidence items</td><td>One row per evidence item per run</td><td>Never. Cross-run deduplication is flagged in diff view but does not modify records.</td><td>Immediately on ingest</td></tr>
+      <tr><td class="tk">Insight cards</td><td>On ingest from Client Profile §4.1</td><td>When a rerun produces an updated IC-ID: old card → REVISED, new card → ACTIVE</td><td>Cards are revised by reruns. Annotations are append-only.</td></tr>
+      <tr><td class="tk">Thin-evidence alerts</td><td>Auto-generated on ingest for any subcap with evidence_count &lt; 3</td><td>Analyst: OPEN → IN_REVIEW → RESOLVED / WAIVED. Auto-resolved if rerun achieves evidence_count ≥ 3.</td><td>Never — alerts are a living workflow record</td></tr>
+      <tr><td class="tk">Analyst annotations</td><td>Free-form notes on any insight card, subcap, or recommendation</td><td>Append-only log. Current annotation = most recent. Prior versions accessible.</td><td>Never — always annotatable</td></tr>
+      <tr><td class="tk">V7 capability catalog</td><td>Admin import script. Each import creates a versioned catalog record.</td><td>New catalog import creates a new version record. Runs reference the catalog version active at their ingest time.</td><td>A catalog version is immutable once published.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════════ 20 RERUN INTELLIGENCE ════════════════ -->
+<div id="s20" class="section">
+  <div class="eyebrow">Section 20</div>
+  <h1>Rerun intelligence system</h1>
+  <p class="lead">The scoring database is not passive storage — it is the primary mechanism for making each successive DMA run more rigorous. The app generates five types of feedback signal and writes them back to the project's Drive folder. Neither type overrides the DMA engine's judgment — they are inputs to its research planning.</p>
+
+  <h2>Feedback signals generated per ingest</h2>
+  <table class="tbl">
+    <thead><tr><th>Signal</th><th>Detection logic</th><th>Recommended action to DMA project</th></tr></thead>
+    <tbody>
+      <tr><td class="tk">Thin evidence</td><td>evidence_count &lt; 3 per subcap after ingest</td><td>PROXY_ESCALATION for subcaps where proxy_searched = false; TIER_UPGRADE for those with only T4/T5 evidence; FORCE_RERUN for critical subcaps below threshold</td></tr>
+      <tr><td class="tk">Stale evidence</td><td>Newest evidence publication &gt;18 months across &gt;40% of subcaps</td><td>EVIDENCE_REFRESH — treat affected subcaps as new search, exclude prior URLs</td></tr>
+      <tr><td class="tk">Peer calibration drift</td><td>Entity score in any category &gt;1.5 above peer median — possible overscoring</td><td>CALIBRATION_REVIEW — analyst confirms before next run proceeds</td></tr>
+      <tr><td class="tk">Score regression</td><td>Subcap score drops &gt;1.0 from prior run with no evidence count change</td><td>RATIONALE_REQUIRED — 300+ char rationale explaining the change</td></tr>
+      <tr><td class="tk">Evidence reuse</td><td>&gt;80% of evidence URLs duplicated from prior run — rerun found no new sources</td><td>PROXY_ESCALATION — deeper Tier 7–10 proxy searches required</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Scoring database as calibration baseline</h2>
+  <p>As the database accumulates assessments across multiple entities in the same subvertical, it becomes a calibration reference. In Phase 1 v1.1, the app exposes a <strong>subvertical score distribution API</strong> that the DMA project can query during Phase 2: median score per subcap ID, score range (10th–90th percentile), and sample size. If sample size &lt;3 entities, the API returns null to prevent premature calibration from thin samples.</p>
+</div>
+
+<!-- ══════════════════════ 21 SUCCESS METRICS ════════════════════ -->
+<div id="s21" class="section">
+  <div class="eyebrow">Section 21</div>
+  <h1>Success metrics</h1>
+  <p class="lead">The app succeeds when it makes the DMA more valuable to more people with less friction. These metrics track that directly.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">&lt;3 min</div><div class="stat-label">AE time-to-insight</div><div class="stat-desc">From entity selection to a platform opportunity understanding. Baseline: ~25 minutes to read the DOCX. Measured via session analytics.</div></div>
+    <div class="stat"><div class="stat-num">+25%</div><div class="stat-label">Evidence coverage</div><div class="stat-desc">Increase in subcaps with ≥3 evidence items across consecutive runs, attributable to the thin-evidence feedback loop.</div></div>
+    <div class="stat"><div class="stat-num">≥70%</div><div class="stat-label">Data utilisation</div><div class="stat-desc">Percentage of DMA sections accessed (beyond executive summary) per AE session. Baseline: ~15% of the report gets read today.</div></div>
+  </div>
+
+  <h2>Secondary metrics</h2>
+  <div class="g2">
+    <div class="card card-lav"><div class="card-title">Thin evidence resolution rate</div><div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Percentage of OPEN thin-evidence alerts resolved within 14 days of a new run being ingested. Target: 80%.</div></div>
+    <div class="card card-lav"><div class="card-title">Platform recommendation precision</div><div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Percentage of recommendations confirmed as accurate by the delivery lead post-engagement. Target: &lt;10% recommendation revisions due to incorrect platform mapping.</div></div>
+    <div class="card card-lav"><div class="card-title">Insight card annotation rate</div><div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Percentage of CRITICAL insight cards annotated by a team member within 7 days. Target: 60%. Measures whether the app is used in client meeting preparation.</div></div>
+    <div class="card card-lav"><div class="card-title">Version diff adoption</div><div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Percentage of reruns where the Analyst reviews the diff view before marking the run as delivery-ready. Target: 100%. Non-negotiable quality gate.</div></div>
+  </div>
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const titles = {
+  s01:'01 — Product Overview', s02:'02 — Problem Statement', s03:'03 — User Personas',
+  s04:'04 — Dashboard Clusters', s05:'05 — Feature Register', s06:'06 — Insight Cards',
+  s07:'07 — Heatmap Design', s08:'08 — Platform Layer', s09:'09 — Phase Architecture',
+  s10:'10 — Folder Traversal', s11:'11 — Artifact Registry', s12:'12 — Entity Inference',
+  s13:'13 — Test Case Removal', s14:'14 — Deduplication', s15:'15 — Import Pipeline',
+  s16:'16 — Communication Protocol', s17:'17 — Feedback Loop', s18:'18 — Phase Transition',
+  s19:'19 — Data Persistence', s20:'20 — Rerun Intelligence', s21:'21 — Success Metrics'
+};
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(l => l.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(l => {
+    if ((l.getAttribute('onclick')||'').includes("'"+id+"'")) l.classList.add('on');
+  });
+  document.getElementById('tb-title').textContent = titles[id]||id;
+  window.scrollTo(0,0);
+}
+</script>
+
+
+</body></html>
