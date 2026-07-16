@@ -1,0 +1,173 @@
+{
+  "entity_display_id": "rockland-trust-company-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Platform Health Check + FSC Optimization",
+          "maturity_lift": "+2.18",
+          "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Platform Health & Modernization"
+        },
+        {
+          "feature": "Experience Cloud + Data Cloud + MuleSoft Integration",
+          "maturity_lift": "+2.18",
+          "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Unified Channel Orchestration"
+        },
+        {
+          "feature": "Data Cloud + CRM Analytics Consolidation",
+          "maturity_lift": "+2.18",
+          "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Enterprise Data Governance Framework"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C2 score 2.85 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P1C2 score 2.85 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Shield + Security Health Check Remediation",
+          "maturity_lift": "+1.15",
+          "metric": "P1C2 score 2.85 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C2 score 2.85 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Cybersecurity Posture Enhancement"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+3.0",
+          "metric": "P3C3 score 1.00 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C3 score 1.00 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Digital Strategy Formalization"
+        },
+        {
+          "feature": "MuleSoft Integration Platform + Agentforce",
+          "maturity_lift": "+1.71",
+          "metric": "P1C1 score 2.29 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 2.29 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Process Automation Acceleration"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P3C3, P1C1"
+    },
+    {
+      "customer_impact": {
+        "AUM $": "9.2B",
+        "Outcome": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "AUM $9.2B",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "FSC + Data Cloud Customer 360",
+          "maturity_lift": "+2.18",
+          "metric": "AUM $9.2B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "AUM $9.2B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Customer 360 & Insights Platform"
+        },
+        {
+          "feature": "Marketing Cloud Optimization + Data Cloud Personalization",
+          "maturity_lift": "+2.18",
+          "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.82 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Marketing Automation & Engagement"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    }
+  ],
+  "run_request_id": "DMA-RES-RTC-20260311-0001",
+  "total_duration_months": 12
+}

@@ -1,0 +1,605 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "United Federal Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "id": "f4e9650a-1d3d-4adf-922b-c3cde53dcfe4",
+      "source_url": null,
+      "status": null,
+      "target": "Edgewater Bank",
+      "title": "Edgewater Bank"
+    }
+  ],
+  "entity_display_id": "united-federal-credit-un-0001",
+  "financials": {
+    "lines": [
+      "As of NCUA 5300, Q4 2025. Evidence: E-081, E-082, E-003",
+      "Health: MonitorBankRates A+ (98/100); Texas Ratio 3.35% (excellent, < 6.13% sector); 60-day delinquency 0.86%; ROA ~0.64\u20131.2%; Well Capitalized (11.69% > 7%)",
+      "So what: 3-year equity growth (+~57% 2023\u21922025) and clean asset quality fund continued tech investment; GOLD/PA + multi-state expansion drive member growth that compounds the value of a unified member data platform. [E-081, E-082]"
+    ],
+    "metrics": {
+      "so_what": "3-year equity growth (+~57% 2023\u21922025) an",
+      "trajectory": {
+        "branches": 44,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 704,
+        "events": [
+          {
+            "fy": "FY2023",
+            "label": "NEWLY-CREATED role: Mitch Speer promoted to Director of AI\u2026"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "HQ 150 Hilltop Rd, St. Joseph MI 49085; 7 states (MI/OH/IN/NV/NC/PA/AR)",
+        "headline": "$496M net income \u00b7 FY2024",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            356.5,
+            496.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "MI",
+      "OH",
+      "IN",
+      "NV",
+      "NC",
+      "PA",
+      "AR"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Terry O'Rourke",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kaylee Ganus",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Renee Johnson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Chief Commercial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lee Beason",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Commercial Officer (commercial & SBA)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Knight",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Sales & Service Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "William 'Will' Schirmer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO / Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Duane Wilcoxson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tim Gray",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stacy Fillmore",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mitch Speer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of AI & Data Science"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mike Benassi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Enterprise Analytics"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Frank Witucki",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Risk & Compliance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kylie Glupker",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Digital Marketing & Personalization"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Katrina Leach",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Digital Experience"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Most recent strategic objectives (these frame every finding below):\n\nCommercial & SBA lending expansion \u2014 Named 'a cornerstone of long-term growth strategy'; CCO Lee Beason elevated to SLT (Jul 2025), EVP CCO Renee Johnson (Nov 2024); SBA Preferred Lender; mandate to 'elevate the business-member experience and drive personalized engagement' [E-022, E-070, E-079, E-086]\n\nAI & Data-Science scale-up \u2014 Newly-created Director of AI & Data Science (Mitch Speer, 2025) + AI Council governing model risk/bias; Copilot/ChatGPT approved; GenAI/agentic roadmap [E-046, E-047]\n\nPersonalized digital engagement \u2014 Q2 Composable Dashboard tripled engagement; predictive models triple conversion; Director of Digital Marketing & Personalization [E-004, E-035, E-019, E-085]\n\nGeographic & membership growth \u2014 NV (Lemmon Valley/Fernley), NC post-Helene reinvestment, GOLD/PA integration \u2192 ~190K members / $4.24B [E-077, E-078, E-080, E-081]\n\nPeople-first culture & talent \u2014 #10 Top Inspiring Workplaces in North America 2025 (only credit union); American Banker Best CU to Work For [E-066, E-065]\n\nEvidence: E-001, E-081, E-060, E-064",
+    "primary_regulator": "NCUA",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-004",
+        "excerpt": "UFCU on Q2 digital banking platform since 2011; implemented Q2 Composable Dashboard (Q2 Engage), tripled member engagement in 12mo; Skip-a-Payment +379% via Q2 Innovation Studio SDK. Uses Q2 Innovation Studio (pre-integr",
+        "title": "UFCU on Q2 digital banking platform since 2011; implemented Q2\u2026",
+        "type": "article",
+        "url": "https://s205.q4cdn.com/339010283/files/doc_news/Q2-Helps-United-Federal-Credit-Union-Triple-Member-Engagement-2025.pdf"
+      },
+      {
+        "author": "Duane Wilcoxson",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-092",
+        "excerpt": "CONFIRMED (was hypothesis): UFCU selected Fiserv DNA core account-processing platform + Fiserv card/payments in Oct 2020 (CIO Duane Wilcoxson quoted: deep core+card integration). DNA is an open-API, DNAapps-extensible co",
+        "title": "UFCU selected Fiserv DNA core account-processing platform",
+        "type": "article",
+        "url": "https://www.cutoday.info/Fresh-Today/United-FCU-Selects-Fiserv-s-DNA-Core-Solution-Card-and-Payment-Services"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "36389eb9-b2dd-446c-80bf-c163b8339507",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P1_Scoring_Detail has 188 rows, expected ~199"
+    },
+    {
+      "id": "1f8648e9-dd55-4492-8543-035be8f9076b",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P2_Scoring_Detail has 233 rows, expected ~288"
+    },
+    {
+      "id": "889ab0b7-9e1f-4c6f-82d4-ff5e84d3ea1f",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P3_Scoring_Detail has 115 rows, expected ~162"
+    },
+    {
+      "id": "0d572b7e-f725-436d-ad34-6a20bc3bb190",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P4_Scoring_Detail has 171 rows, expected ~187"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Most recent reported financials: $496M net income as of FY2024, within a series tracked FY2023 to FY2024.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 2.2,
+        "P1C3": 2.28,
+        "P1C4": 2.29,
+        "P2C1": 2.61,
+        "P2C2": 2.11,
+        "P2C3": 2.69,
+        "P2C4": 2.47,
+        "P3C1": 2.53,
+        "P3C2": 2.83,
+        "P3C3": 2.76,
+        "P3C4": 2.57,
+        "P4C1": 2.48,
+        "P4C2": 2.61,
+        "P4C3": 2.81,
+        "P4C4": 2.62
+      },
+      "overall_score": 2.5,
+      "peer_name": "Financial Partners Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.84,
+        "P1C2": 2.69,
+        "P1C3": 1.76,
+        "P1C4": 2.79,
+        "P1C5": 1.68,
+        "P2C1": 2.85,
+        "P2C2": 2.11,
+        "P2C3": 3.2,
+        "P2C4": 2.83,
+        "P3C1": 1.97,
+        "P3C2": 2.38,
+        "P3C3": 2.84,
+        "P3C4": 2.67,
+        "P4C1": 2.03,
+        "P4C2": 2.7,
+        "P4C3": 2.35,
+        "P4C4": 2.48
+      },
+      "overall_score": 2.48,
+      "peer_name": "Langley Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.41,
+        "P1C2": 2.54,
+        "P1C3": 2.06,
+        "P1C4": 2.84,
+        "P2C1": 2.51,
+        "P2C2": 2.01,
+        "P2C3": 2.78,
+        "P2C4": 2.17,
+        "P3C1": 2.56,
+        "P3C2": 2.63,
+        "P3C3": 2.71,
+        "P3C4": 2.19,
+        "P4C1": 2.04,
+        "P4C2": 2.24,
+        "P4C3": 2.89,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.47,
+      "peer_name": "AmeriCU Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.29,
+        "P1C2": 2.63,
+        "P1C3": 2.33,
+        "P1C4": 2.33,
+        "P1C5": 2.57,
+        "P2C1": 2.39,
+        "P2C2": 2.31,
+        "P2C3": 2.05,
+        "P2C4": 2.33,
+        "P3C1": 2.26,
+        "P3C2": 2.56,
+        "P3C3": 2.48,
+        "P3C4": 2.48,
+        "P4C1": 2.33,
+        "P4C2": 2.47,
+        "P4C3": 2.47,
+        "P4C4": 3.02
+      },
+      "overall_score": 2.43,
+      "peer_name": "Spokane Teachers Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.64,
+        "P1C3": 2.34,
+        "P1C4": 2.77,
+        "P1C5": 2.0,
+        "P2C1": 2.54,
+        "P2C2": 2.57,
+        "P2C3": 2.79,
+        "P2C4": 2.31,
+        "P3C1": 2.36,
+        "P3C2": 2.5,
+        "P3C3": 2.59,
+        "P3C4": 2.81,
+        "P4C1": 1.73,
+        "P4C2": 1.73,
+        "P4C3": 2.06,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.41,
+      "peer_name": "CCU",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-UFCU-20260604-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Indeed overall 3.3/5; culture&values 3.0; management 2.8; advancement 2.9; WLB 3.1; comp 3.7; CEO approval 56%; wellbeing 'belonging/flexibility/energy' below average \u2014 change-readiness/adoption caution",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.3
+      },
+      {
+        "drilldown": "Digital-app sentiment STRONG: Apple App Store 4.7/5 (21K ratings); Google Play 4.6/5 (~3.57K) / AppRecs 4.5 (4K, 77% 5-star)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "App Store",
+        "themes": [],
+        "value": 4.7
+      },
+      {
+        "drilldown": "app sentiment STRONG: Apple App Store 4.7/5 (21K ratings); Google Play 4.6/5 (~3.57K) / AppRecs 4.5 (4K, 77% 5-star)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Google Play",
+        "themes": [],
+        "value": 4.7
+      },
+      {
+        "drilldown": "app + culture awards): WalletHub 3.0/5 (225 reviews); Trustpilot 2.9/5 (UFCU replies to 100% of negatives = responsiveness)",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 225,
+        "polarity": "neutral",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": 3.0
+      },
+      {
+        "drilldown": "BBB: 2 unresolved complaints (e.g., #22403338 ChexSystems/identity-theft removal delay)",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Chief Commercial Officer = Lee Beason (promoted Jul 2025; oversees Commercial Ops, Commercial Sales, SBA lending). Reconciles prior 'CCO' ambiguity = Chief COMMERCIAL Officer (not Compliance).",
+      "date_precision": "month",
+      "e_id": "E-055",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-055"
+      ],
+      "id": "cfa0a0d8-d59c-4cb2-b508-1665b582faa4",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://theorg.com/org/united-federal-credit-union",
+      "subcap_ids": [],
+      "title": "Chief Commercial Officer = Lee Beason promoted Jul 2025"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "b95b8ae4-7e15-4009-bdf5-9982f3dfaeca",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Multi-state branch expansion"
+    },
+    {
+      "body": "UFCU named Q2 2024 'Credit Union of the Year' for driving member innovation \u2014 strong innovation-maturity signal.",
+      "date_precision": "quarter",
+      "e_id": "E-005",
+      "event_date": "2024-05-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "b90ff6f4-c23b-4bc3-b345-b29fca0a001e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.businesswire.com/news/home/20240604539305/en",
+      "subcap_ids": [],
+      "title": "UFCU named Q2 2024 'Credit Union of the Year' for driving\u2026"
+    },
+    {
+      "body": "NEWLY-CREATED role: Mitch Speer promoted to Director of AI & Data Science (joined 2023); leads AI & data science strategy \u2014 oversees predictive modeling, ML solutions, and GENERATIVE AI applications aligned to org goals.",
+      "date_precision": "year",
+      "e_id": "E-046",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "716f9d55-1298-4139-a44e-47b4209c163c",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://unitedfcu.com/press-releases/new-director-of-ai-data-science",
+      "subcap_ids": [],
+      "title": "NEWLY-CREATED role: Mitch Speer promoted to Director of AI\u2026"
+    },
+    {
+      "body": "AI chatbot 'Mya' launched Mar 2021, powered by Finn AI (NLP; Finn AI later acquired by Glia); on UnitedFCU.com + mobile app; ~5,000 engaged sessions/month; 51% containment rate; seamless handoff to live rep.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-041",
+      "event_date": "2021-10-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "c36e8211-2f75-4c06-bd07-b30ecd067c56",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://creditunions.com/features/high-tech-meets-high-touch-how-avatars-help-5-credit-unions-advance-member-service-2/",
+      "subcap_ids": [],
+      "title": "Finn AI acquired"
+    },
+    {
+      "body": "AI chatbot 'Mya' launched Mar 2021, powered by Finn AI (NLP; Finn AI later acquired by Glia); on UnitedFCU.com + mobile app; ~5,000 engaged sessions/month; 51% containment rate; seamless handoff to live rep.",
+      "date_precision": "month",
+      "e_id": "E-041",
+      "event_date": "2021-03-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "a0cf8774-85c3-468e-ac60-558d413b50b8",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://creditunions.com/features/high-tech-meets-high-touch-how-avatars-help-5-credit-unions-advance-member-service-2/",
+      "subcap_ids": [],
+      "title": "AI chatbot 'Mya' launched Mar 2021, powered by Finn AI (NLP"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "f4e9650a-1d3d-4adf-922b-c3cde53dcfe4",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Edgewater Bank"
+    },
+    {
+      "body": "2020: 'signed on to complete a CORE and CARD SERVICES conversion' (core kicked off) -> dates the core+card conversion; corroborates new-core (E-034). CIO Duane Wilcoxson.",
+      "date_precision": "year",
+      "e_id": "E-073",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-073",
+        "E-034"
+      ],
+      "id": "a78883c2-8387-45c1-b9a6-6a7be5eb5c2b",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://creditunions.com/features/how-covid-19-forced-a-shift-in-technology-production-at-united-fcu/",
+      "subcap_ids": [],
+      "title": "> dates the core+card conversion"
+    },
+    {
+      "body": "CMO Kaylee Ganus (joined 2020) states she has led change-comms for large initiatives incl. CORE SYSTEM and card-processor CONVERSIONS, CRM IMPLEMENTATIONS, and numerous M&A activities \u2014 UFCU HAS a CRM (identity TBD Batch 3); thesis shifts greenfield\u2192identify/expand.",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "900980e7-f02c-40ab-a752-e9c920117bb3",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/kayleeganus",
+      "subcap_ids": [],
+      "title": "CMO Kaylee Ganus joined"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2006-01-01",
+      "evidence_e_ids": [],
+      "id": "2b76d7fa-758a-427f-b286-70ac66351624",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "First Resource FCU (FRFCU)"
+    }
+  ]
+}

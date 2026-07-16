@@ -1,0 +1,223 @@
+{
+  "entity_display_id": "loandepot-inc-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C5",
+        "P1C5.1.1",
+        "P4C3.4.8",
+        "P1C5.2.1",
+        "P1C5.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P1C5",
+      "id": "e278a927-a5e4-4db9-80cc-5169307d2b27",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-049",
+        "E-051",
+        "E-048",
+        "E-050",
+        "E-047"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Close the ESG & Sustainability gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-048].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "ESG & Sustainability trails peers by 1.0",
+      "what_text": "ESG strategy is one of loanDepot, Inc.'s least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes loanDepot, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E-051].",
+      "why_text": "ESG & Sustainability trails the peers by 1.0 points — a competitive maturity gap that compounds across the pillars it feeds [E-049, E-051].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.3.1",
+        "P1C4.8.4",
+        "P1C4.8.3",
+        "P3C2.7.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-046",
+        "E-073",
+        "E-075"
+      ],
+      "ic_id": "GAP-P1C4",
+      "id": "9f71e2bd-b8fe-4ac8-8b85-f07ad8482b84",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-046",
+            "E-073",
+            "E-075"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-020",
+        "E-008"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize Culture & Change: recovering the 0.9-point deficit against the cohort moves overall maturity more than any at-parity category can [E-008].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Culture & Change trails peers by 0.9",
+      "what_text": "Champions Program is one of loanDepot, Inc.'s least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes loanDepot, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E-020].",
+      "why_text": "The peer benchmark for Culture & Change is 2.9; at 2.0 this institution operates 0.9 points behind the peers it competes with for the same customers [E-029, E-020].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P3C1.2.2",
+        "P3C2.1.4",
+        "P3C2.1.1",
+        "P3C2.2.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P3C2",
+      "id": "03f1e910-9af6-490c-b55b-293f3a9eec97",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P3C4"
+        }
+      ],
+      "linked_e_ids": [
+        "E-081",
+        "E-079",
+        "E-071",
+        "E-076",
+        "E-080"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Start with Operational Workflow & Risk — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-071].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Operational Workflow & Risk trails peers by 0.9",
+      "what_text": "Loss Data Collection is one of loanDepot, Inc.'s least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes loanDepot, Inc.'s ability to deliver more efficient, dependable operations [E-079].",
+      "why_text": "Peers score 2.7 on Operational Workflow & Risk against this institution's 1.8 — the 0.9-point shortfall shows up in every capability rolled into this category [E-081, E-079].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4",
+        "P3C4.2.3",
+        "P1C2.3.6",
+        "P1C2.3.3",
+        "P1C2.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P3C4",
+      "id": "fa9062ba-95db-4a6a-a5f5-d60f1ea07c16",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P3C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-082",
+        "E-081",
+        "E-084"
+      ],
+      "linked_subcap_id": "P3C4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Sequence Business Resilience & Third-Party Management into the near-term roadmap: the 0.8-point peer gap is measurable, so progress is provable quarter over quarter [E-084].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Business Resilience & Third-Party Management trails peers by 0.8",
+      "what_text": "BCP Plan Development is one of loanDepot, Inc.'s least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes loanDepot, Inc.'s ability to deliver more efficient, dependable operations [E-081].",
+      "why_text": "The assessment found: “23 putative class action cases from Jan 2024 cybersecurity incident — consolidated into single action 'In re loanDepot Data Breach Litigation' in Central District of California Settlement” [E-082]. At 1.8/5, Business Resilience & Third-Party Management is the widest measured deficit vs the peer median (2.6) among this run's remaining categories.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 20% | Score: 2.13 | vs Median: -0.67 | maturity level 2",
+        "heading": "6.1. Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 35% | Score: 2.44 | vs Median: -0.46 | maturity level 2",
+        "heading": "6.2. Pillar 2: Customer Experience & Engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.08 | vs Median: -0.82 | maturity level 2",
+        "heading": "6.3. Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 2.25 | vs Median: -0.75 | maturity level 2",
+        "heading": "6.4. Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each includes institution-specific root cause analysis grounded in assessment evidence."
+  },
+  "run_request_id": "DMA-ASM-LOANDEPOT-20260324-0001"
+}

@@ -1,0 +1,1131 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "TII",
+      "amount": null,
+      "announced_on": null,
+      "body": "TII integrated into C&F A&H Division. Underwriter switched to United States Fire Insurance Co. Glastonbury CT operations maintained.",
+      "closed_on": null,
+      "details": "TII integrated into C&F A&H Division. Underwriter switched to United States Fire Insurance Co. Glastonbury CT operations maintained.",
+      "e_id": "E-002",
+      "event_date": "2015-10-01",
+      "id": "6b4fbf66-8ab4-47f7-89ce-cc8468696d9d",
+      "source_url": null,
+      "status": null,
+      "target": "Crum & Forster Holdings",
+      "title": "TII acquired by Crum & Forster Holdings, Inc. from prior ownership"
+    },
+    {
+      "acquirer": "C&F",
+      "amount": null,
+      "announced_on": null,
+      "body": "Oct 2015: C&F acquired TII as wholly-owned subsidiary. CEO Jon Gehris: 'Our existing partnership will be completely seamless for our customers and staff allowing us to accelerate our growth and expand opportunities for both our partners and employees' \u2014 explicit cultural-integration framing.",
+      "closed_on": null,
+      "details": "Oct 2015: C&F acquired TII as wholly-owned subsidiary. CEO Jon Gehris: 'Our existing partnership will be completely seamless for our customers and staff allowing us to accelerate our growth and expand opportunities for both our partners and employees' \u2014 explicit cultural-integration framing.",
+      "e_id": "E-014",
+      "event_date": "2015-10-01",
+      "id": "a959395f-5258-44e2-b47e-190002fde2bf",
+      "source_url": "https://www.travelinsured.com/news-resources/press-releases/2015/10/11/crum-forster-acquires-travel-insured-international/",
+      "status": "integrating",
+      "target": "TII",
+      "title": "C&F acquired TII"
+    }
+  ],
+  "entity_display_id": "tii-0001",
+  "financials": {
+    "lines": [
+      "Note: TII-specific revenue is not separately disclosed. C&F parent financials are used as the primary proxy. [E-001, E-021, E-022]",
+      "Financial data sourced from Fairfax Financial SEC filings (Q4 2025 press release) and Fairfax Annual Reports 2024+2025. C&F GWP used as proxy for TII parent environment. TII-specific P&L is not publicly disclosed."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 150,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "AM Best Dec 2025: is underwriting productivity gains'\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "C&F launched FInTECH ONE (Nov 2024)"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$6.2B assets \u00b7 FY2025 \u00b7 +10.7% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            3800.0,
+            4300.0,
+            5100.0,
+            625.9,
+            159.8
+          ],
+          "total_assets": [
+            null,
+            null,
+            null,
+            5.6,
+            6.2
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (national)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jared Ionin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Digital Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Barbra Taylor",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President, TII"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Denise Bialek",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Business Development & Partnerships"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sherry Sutton",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marzena Bak",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Product, Underwriting & Analytics"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Isaac Cymrot",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Sales & Account Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stephen Forbes",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Manager, Salesforce Platform"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Ahmed Yaknour",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP & CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Christopher Holden",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Chris Livingston",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Deputy CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marc Adee",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Bryan Brizzi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO, Surplus & Specialty"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "TII is an insurance carrier. It reports $6.2 billion in annual premium volume and has operated since 1994. It is regulated by SEC and employs approximately 150 people. Its overall digital maturity is assessed at 2.0 out of 5 across the DMA capability framework.",
+    "primary_regulator": "SEC",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": "Marc Adee",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "Marc Adee \u2014 Chairman/CEO Crum & Forster (TII parent). Northwestern BA, U Chicago Booth MBA, Fellow Casualty Actuarial Society, Member American Academy of Actuaries. Joined Fairfax 2000. Authored 'The Once and Future C&F'",
+        "title": "Marc Adee",
+        "type": "article",
+        "url": "https://cfnj.org/about-us/leadership/marc-adee/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-103",
+        "excerpt": "TII publishes 'a daily blog detailing travel tips ideas for planning your next vacation' at travelinsured.com/news-resources/tips-ideas/ \u2014 confirmed active blog with regular cadence.",
+        "title": "TII publishes a daily blog detailing travel tips ideas for planning\u2026",
+        "type": "blog",
+        "url": "https://www.travelinsured.com/news-resources/tips-ideas/travel/2025/04/25/understanding-specific-coverage-needs-for-different-trips"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-046",
+        "excerpt": "C&F article (Dec 2025): 'implementing robust data governance frameworks, advanced encryption techniques, strict access controls, and a clear ethical charter for data usage' \u2014 named data governance framework exists at par",
+        "title": "C&F article (Dec 2025): 'implementing robust data governance\u2026",
+        "type": "article",
+        "url": "https://apipark.com/techblog/en/crum-forster-leading-the-future-of-insurance/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "C&F operates 'LaunchPAD Trainee' program \u2014 graduate hire pipeline (S&S Division specifically referenced; multiple 2025-2026 LinkedIn posts from new hires e.g. Wagner College graduate joining July). Talent program proxy f",
+        "title": "C&F operates LaunchPAD Trainee' program \u2014 graduate hire pipeline",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/in/marcadee/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "053c4c81-d7ec-4464-a8ea-a4b05d6a954a",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "E-097 and E-098 are referenced in REC-03 (Data Cloud) with specific claim context (USAA 14M channel, Squaremouth aggregator) but are not registered in the evidence_index.json registry."
+    },
+    {
+      "id": "e8edc5c2-6f9f-47e0-b98d-c840416d678b",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Phase 4.5 adversarial critic was run (236 subcaps challenged, 0 downgraded per calculation_chain.json), but no standalone critic_log.json file was generated. The skill requires this as a governable artifact."
+    },
+    {
+      "id": "37d343b1-073a-46b1-8fec-ccfcd19feea2",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "16 of 17 categories score below their peer median. The only exception is P3C3 Compliance (+0.59 above peer). This pattern is consistent with a genuine M2 Developing institution and is not a scoring bias indicator."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "BORROW operation: Issue Register from Client Profile Research Report (DMA-RES-TII-20260427-0001, Section 5.1), enriched with Phase 3 cap determination and assessment scoring impact. MATERIAL issues verified against Phase 3 caps_index.json. ISS-004 FL OIR: correctly attributed to C&F Specialty (sister entity), NOT TII [E-159].",
+    "trend_md": "BORROW operation: content derived from Client Profile Research Report (DMA-RES-TII-20260427-0001, Section 3.3) and enriched with assessment-layer maturity annotations. Financial data validated against Fairfax Financial SEC filings (Q4 2025 press release)."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.8,
+        "P1C3": 4.0,
+        "P1C4": 3.5,
+        "P1C5": 4.0,
+        "P2C1": 4.5,
+        "P2C2": 4.0,
+        "P2C3": 4.5,
+        "P2C4": 4.0,
+        "P3C1": 4.0,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 4.0,
+        "P4C2": 4.0,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.9,
+      "peer_name": "Allianz Partners",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.8,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.5,
+        "P1C5": 3.8,
+        "P2C1": 3.8,
+        "P2C2": 3.5,
+        "P2C3": 4.0,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.55,
+      "peer_name": "Generali Global Assistance",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 4.0,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.29,
+      "peer_name": "BHTP",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.8,
+        "P1C3": 2.8,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.8,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.92,
+      "peer_name": "Seven Corners",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.8,
+        "P1C2": 2.8,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 2.5,
+        "P3C1": 2.8,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.8,
+        "P4C3": 3.0,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.85,
+      "peer_name": "Travelex Insurance",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-TII-20260427-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "suite provides travellers with meaningful benefits.' C&F Glassdoor: 4.3/5 stars (272 reviews, above Insurance industry avg of 3.6)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 272,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.3
+      },
+      {
+        "drilldown": "TII Indeed profile: 51-200 employees, $25M-$100M revenue",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Intelligence or custom dashboards? C&F leadership page (Comparably): 'Nick is Chief Risk Officer, based in Morristown, NJ' \u2014 full-time, named CRO function at parent level",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Comparably",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Earlier 2025: TII mobile app was UNPUBLISHED from Apple App Store Feb 2024 (rated 1.47/5 on 140 ratings, last updated Apr 2023)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 140,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": 7.0
+      },
+      {
+        "drilldown": "TII mobile app: App Store / Google Play listing published Feb 2024 but rated 1.47/5 (unpublished quality) \u2014 mobile app marketing () is a gap",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": 7.0
+      },
+      {
+        "drilldown": "Reviews \u2014 Experience Measurement: multi-channel NPS/CSAT proxy scores",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Trustpilot 1,927 reviews on TII as of April 2026 \u2014 measurable Voice of Customer signal",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 1927,
+        "polarity": "neutral",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "TII BBB Accredited since 2006-02-10; A+ rating maintained through 2026",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "2026: C&F's Kathleen Alicks named to Insurance Business America's Elite Women of Insurance 2026 List \u2014 external DEI recognition. Fortune Best Workplaces for Women 2025 (C&F). Employee Resource Groups actively promoted. 'Committed to equal employment opportunity and welcome everyone regardless of race, color, ancestry, religion, sex, national origin, sexual orientation, age, citizenship, marital status, disability, gender identity, or Veteran status' (C&F Indeed job post).",
+      "date_precision": "year",
+      "e_id": "E-080",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-080"
+      ],
+      "id": "8b06491c-2014-437b-8c78-c9f257ee2df3",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.cfins.com/",
+      "subcap_ids": [],
+      "title": "C&F's Kathleen Alicks named to Insurance Business America's\u2026"
+    },
+    {
+      "body": "P3C3.5.4 Regulatory Change Management: NAIC Annual Statement Instructions updated annually. 'Crum & Forster's Kathleen Alicks Named to Insurance Business America's Elite Women of Insurance 2026' = active regulatory/industry community engagement. CLO McTigue monitors regulatory horizon. CT DOI AI Bulletin MC-25 = recent regulatory change TII adopted Feb 2024 = evidence of regulatory change management (P3C3.5.4 QA for compliance reviews: PwC annual audit provides inter-reviewer consistency). P3C3.2.3 Sanctions Screening: Embedded in battleface policy language (confirmed E-167).",
+      "date_precision": "year",
+      "e_id": "E-175",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-175",
+        "E-167"
+      ],
+      "id": "cf586ebc-a86d-41b3-ad0e-0ab047af0cf0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.cfins.com/accident-health/travel-insurance/",
+      "subcap_ids": [
+        "P3C3.5.4",
+        "P3C3.2.3"
+      ],
+      "title": "Crum & Forster's Kathleen Alicks Named to Insurance\u2026"
+    },
+    {
+      "body": "AM Best March 2026: 'C&F EVP: On-Demand Coverage, Digital Claims Redefine Travel Insurance' = TII actively pursuing digital claims analytics (P4C2.2.3 Embedded Analytics & Actionable Insights). AM Best Dec 2025: 'AI's most tangible impact is underwriting productivity gains' = BI/analytics deployed in underwriting workflow (P4C2.2.1 Enterprise Reporting Platform). C&F GWP analytics: Magellan award 47.7% conversion rate from email campaign = marketing analytics/attribution (P4C2.2.6 BI Asset Inventory signal).",
+      "date_precision": "month",
+      "e_id": "E-190",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-190"
+      ],
+      "id": "af227d9e-25c8-46e4-bec0-420d8b8a8ca1",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://news.ambest.com/newscontent.aspx?refnum=271054&altsrc=23",
+      "subcap_ids": [
+        "P4C2.2.3",
+        "P4C2.2.1",
+        "P4C2.2.6"
+      ],
+      "title": "AM Best Dec 2025: is underwriting productivity gains'\u2026"
+    },
+    {
+      "body": "C&F article (Dec 2025): 'implementing robust data governance frameworks, advanced encryption techniques, strict access controls, and a clear ethical charter for data usage' \u2014 named data governance framework exists at parent level.",
+      "date_precision": "month",
+      "e_id": "E-046",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "6af74c0f-5e75-489d-b6cd-cf96e64a3d58",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://apipark.com/techblog/en/crum-forster-leading-the-future-of-insurance/",
+      "subcap_ids": [],
+      "title": "C&F article (Dec 2025): 'implementing robust data\u2026"
+    },
+    {
+      "body": "Jared Ionin appointed Chief Digital Officer of C&F Accident & Health (A&H) Division on Nov 21, 2025 \u2014 'oversee the Division's technology strategy and operations, strengthening its digital infrastructure and establishing a roadmap for continued innovation and scalability.' This IS the digital strategy ownership for TII (no need to look for a TII-direct CDO).",
+      "date_precision": "day",
+      "e_id": "E-003",
+      "event_date": "2025-11-21",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "29844e3d-3a55-436d-86c6-5345aa7b40f2",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forster-accident--health-division-appoints-jared-ionin-as-chief-digital-officer-302623355.html",
+      "subcap_ids": [],
+      "title": "Jared Ionin appointed Chief Digital Officer of C&F Accident\u2026"
+    },
+    {
+      "body": "C&F S&S UP platform (Bryan Brizzi, CDO S&S): 'integrated an in-house generative AI and Optical Character Recognition solution' \u2014 sibling division deployed AI in production with 35% quote-turnaround reduction (Sept 2025 Datos award). This establishes parent-group AI model deployment discipline as the target-state reference for TII's A&H Division.",
+      "date_precision": "month",
+      "e_id": "E-045",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "1ef2bd99-b487-43d7-b413-141b0e9eddfd",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://content.naic.org/sites/default/files/cmte-h-big-data-artificial-intelligence-wg-ai-model-bulletin.pdf.pdf",
+      "subcap_ids": [],
+      "title": "C&F S&S UP platform (Bryan Brizzi, CDO S&S): ' integrated\u2026"
+    },
+    {
+      "body": "S&S UP platform: 'deployed successfully across multiple business units, with additional lines of business planned for integration' (Sept 2025). Multi-phased deployment with planned expansion = documented multi-stage project governance framework at C&F sibling division.",
+      "date_precision": "month",
+      "e_id": "E-049",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "5fff07d0-41fb-4099-bd66-697a8919a538",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forsters-surplus--specialty-division-earns-datos-insights-insurance-technology-impact-award-for-its-transformative-underwriting-platform-302569629.html",
+      "subcap_ids": [],
+      "title": "S&S UP platform: 'deployed successfully across multiple\u2026"
+    },
+    {
+      "body": "Christopher Holden = Chief Information Security Officer (CISO) of Crum & Forster. Named CISO function exists at parent level covering TII. CISO role directly fills P1C2.6.2. Chris Livingston (Deputy CISO, promoted Mar 2025) directs Security Operations + Engineering team + Identity & Access Management team.",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "a8159638-b0e1-4366-9c0f-f3a6459bf67e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forster-promotes-chris-livingston-to-deputy-chief-information-security-officer-302405570.html",
+      "subcap_ids": [
+        "P1C2.6.2"
+      ],
+      "title": "Chris Livingston (Deputy CISO, promoted Mar 2025)"
+    },
+    {
+      "body": "C&F has named CISO (Christopher Holden) and Deputy CISO (Chris Livingston, promoted Mar 2025). Two-officer cybersecurity leadership structure at parent = P1C2.6.2 CISO Function confirmed. Livingston holds CISSP certification \u2014 industry-standard cyber governance credential.",
+      "date_precision": "month",
+      "e_id": "E-047",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "c6e33451-a2bf-4f48-951c-3e6de48ece68",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.cfins.com/livingston-promoted-to-deputy-chief-information-security-officer/",
+      "subcap_ids": [
+        "P1C2.6.2"
+      ],
+      "title": "C&F has named CISO (Christopher Holden)"
+    },
+    {
+      "body": "TII launched 3-tier product suite Jan 15, 2025 (Essential/Deluxe/Platinum), replacing Worldwide Trip Protector and WTP Edge. New plans feature 'flexibility to add optional coverage bundles for greater customization.' = P4C1.1.1 Data strategy supports rapid product iteration; P4C1.9.IB1 carrier relationship/commission/policy data normalization required for 3-tier structure. Ionin CDO (Nov 2025): 'strengthening digital infrastructure and establishing roadmap for continued innovation and scalability' = data strategy mandate confirmed.",
+      "date_precision": "day",
+      "e_id": "E-187",
+      "event_date": "2025-01-15",
+      "evidence_e_ids": [
+        "E-187"
+      ],
+      "id": "0fe754a7-d513-4cdf-8dde-af1b87229d80",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://leadiq.com/c/crum--forster/5a1d854c24000024005fd447",
+      "subcap_ids": [
+        "P4C1.1.1",
+        "P4C1.9"
+      ],
+      "title": "TII launched 3-tier product suite Jan 15, 2025\u2026"
+    },
+    {
+      "body": "C&F leadership page (Comparably): 'Nick is Chief Risk Officer, based in Morristown, NJ' \u2014 full-time, named CRO function at parent level. CRO handles enterprise risk appetite and risk escalation protocols. TII A&H Division inherits CRO oversight for operational and digital risk (P1C2.2.x).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-053",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-053"
+      ],
+      "id": "23249e33-be81-49cb-be80-4859f620b6a6",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.comparably.com/companies/crum-forster/executive-team",
+      "subcap_ids": [
+        "P1C2.2"
+      ],
+      "title": "C&F leadership page ( is Chief Risk Officer, based in\u2026"
+    },
+    {
+      "body": "Jan 2025: TII launched three-tier Worldwide Trip Protector suite (Essential, Deluxe, Platinum) replacing former Worldwide Trip Protector and Worldwide Trip Protector Edge \u2014 formal segmented portfolio strategy executed.",
+      "date_precision": "month",
+      "e_id": "E-005",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "533f52d4-982d-47d3-94ac-d6511db45048",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.travelinsured.com/news-resources/press-releases/2025/01/15/travel-insured-international-unveils-new-travel-protection-product-suite-to-simplify-traveler-decision-making",
+      "subcap_ids": [],
+      "title": "TII launched three-tier Worldwide Trip Protector suite\u2026"
+    },
+    {
+      "body": "BHTP partners transitioned to Travelex. Market consolidation in travel insurance distribution.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "aaef8b29-1fb1-45ce-b414-3af7922e8875",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "BHTP announced partnership/transition to Travelex (peer event)"
+    },
+    {
+      "body": "C&F launched CISO Professional Liability Insurance (Nov 2024): 'CISOs are the front line of defense against cyber threats, yet their role may leave them exposed to personal liabilities \u2013 particularly in light of the Securities and Exchange Commission's (SEC) new cyber disclosure rules.' Nick Economidis SVP eRisk. Product demonstrates C&F's deep CISO risk expertise = advanced internal cyber governance at C&F group level (P3C4.1.1 Resilience Strategy, P3C4.4.4 Cyber Crisis Response Playbook).",
+      "date_precision": "month",
+      "e_id": "E-170",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-170"
+      ],
+      "id": "c01e77e9-9b1e-4e98-9f30-24fadb211f1d",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forster-introduces-professional-liability-insurance-for-chief-information-security-officers-302300733.html",
+      "subcap_ids": [
+        "P3C4.1.1",
+        "P3C4.4.4"
+      ],
+      "title": "C&F launched CISO Professional Liability Insurance (Nov\u2026"
+    },
+    {
+      "body": "C&F also launched CISO Professional Liability Insurance product (Nov 2024): 'committed to supporting CISOs as they navigate their high-stakes role.' Demonstrates active understanding of CISO governance risks \u2014 market intelligence informing internal practice.",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "a23f8b49-4139-456b-96b8-18a40c51478e",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forster-promotes-chris-livingston-to-deputy-chief-information-security-officer-302405570.html",
+      "subcap_ids": [],
+      "title": "C&F launched CISO Professional Liability Insurance product\u2026"
+    },
+    {
+      "body": "C&F Nick Economidis (SVP eRisk) + Leigh McMullan (SVP Executive Risk) launched CISO Professional Liability product Nov 2024 \u2014 demonstrates board-level awareness of CISO personal liability risks from SEC cyber disclosure rules. Cyber governance board-level exposure understood and product-ized.",
+      "date_precision": "month",
+      "e_id": "E-047",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "813c63c2-eef6-40d6-a3d2-9eea921452e3",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.cfins.com/livingston-promoted-to-deputy-chief-information-security-officer/",
+      "subcap_ids": [],
+      "title": "C&F Nick Economidis (SVP eRisk) + Leigh McMullan (SVP\u2026"
+    },
+    {
+      "body": "C&F launched FInTECH ONE (Nov 2024): integrated FinTech Errors & Omissions + Cyber + Multimedia Liability product \u2014 demonstrates deep understanding of cyber risk governance at board and product levels. Internal cyber risk appetite informed by product development.",
+      "date_precision": "month",
+      "e_id": "E-055",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-055"
+      ],
+      "id": "d93e1a0f-e6d4-4f27-bb96-34e9d7ce2e1e",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news/crum-%26-forster/?page=1&pagesize=25",
+      "subcap_ids": [],
+      "title": "C&F launched FInTECH ONE (Nov 2024)"
+    },
+    {
+      "body": "Florida OIR issued Consent Order to C&F Specialty Insurance Company on July 29, 2024 (OIR reference). Related to claims handling processes (mentions 'Claims-', Senate Bill 2-A prompt payment, electronic methods of claims investigation, claims filing deadlines). C&F Specialty (not TII) received regulatory action \u2014 signal of active regulatory examination management at C&F group level (P3C3.6.2 Exam Execution, P3C3.6.3 Finding Remediation).",
+      "date_precision": "day",
+      "e_id": "E-159",
+      "event_date": "2024-07-29",
+      "evidence_e_ids": [
+        "E-159"
+      ],
+      "id": "d57e4232-cc3b-4911-b772-10495f1edaac",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://floir.gov/resources-and-reports/orders-and-memoranda/docs-sf/default-source/orders/property-and-casualty/2024/crum-forster-speciality-insurance-company-co327705-24",
+      "subcap_ids": [
+        "P3C3.6.2",
+        "P3C3.6.3"
+      ],
+      "title": "Florida OIR issued Consent Order"
+    },
+    {
+      "body": "battleface vendor relationship: 'Robin Assist is a wholly owned subsidiary of battleface.' C&F underwriting partner relationship with battleface (multiple jurisdictions: US, UK, EU, AU, CA). 2024 new product: 'Corporate Group Plan launched in 2024 in partnership with Crum & Forester.' Multi-jurisdiction TPA = tier-1 vendor requiring formal due diligence (P3C4.6.1 Due Diligence Program). Livingston 'exceptional TPRM program' at C&F covers battleface/Robin Assist.",
+      "date_precision": "year",
+      "e_id": "E-171",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-171"
+      ],
+      "id": "ce499adf-1174-4111-ae9e-bf92ad7556ff",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.cfins.com/a-tour-operators-practical-guide-to-creating-your-next-travel-protection-rfp/",
+      "subcap_ids": [
+        "P3C4.6.1"
+      ],
+      "title": "2024 new product: 'Corporate Group Plan launched in 2024 in\u2026"
+    },
+    {
+      "body": "TII Certified Specialist Program (launched 2024): 91% course completion rate, 4.8\u2605 satisfaction, 123% growth in total learners since 2024, 60% monthly certificate conversion rate \u2014 formal partner education platform (P2C3.6.4 Training & Coaching, P2C4.5.2 Staff Cross-Sell Enablement: certifies advisors on TII plans). Self-paced certification platform. 'Empowers travel advisors with knowledge, confidence, and compliance tools.'",
+      "date_precision": "year",
+      "e_id": "E-133",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-133"
+      ],
+      "id": "3d7be815-908c-443a-b4ae-746f4f465a53",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.travelinsured.com/news-resources/press-releases/2025/11/03/travel-insured-international-wins-two-gold-magellan-awards-from-travel-weekly",
+      "subcap_ids": [
+        "P2C3.6.4",
+        "P2C4.5.2"
+      ],
+      "title": "TII Certified Specialist Program (launched 2024): 91%\u2026"
+    },
+    {
+      "body": "Bryan Brizzi named Insurance Luminary for Technology Innovation 2024 by PropertyCasualty360. Tom Bredahl (President S&S): 'Bryan's innovative leadership and relentless pursuit of digital excellence have not only modernized our underwriting process but also set a new industry standard.' \u2014 C&F peer CDO recognized for responsible AI deployment in underwriting.",
+      "date_precision": "year",
+      "e_id": "E-060",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-060"
+      ],
+      "id": "4108260e-4808-49f3-84d8-fd6e044ec57d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.cfins.com/crum-forsters-bryan-brizzi-named-an-insurance-luminary-in-technology-innovation/",
+      "subcap_ids": [],
+      "title": "Bryan Brizzi named Insurance Luminary for Technology\u2026"
+    },
+    {
+      "body": "Dec 2, 2024: Zurich Insurance Group completed $600M acquisition of AIG's global personal travel insurance + Travel Guard, forming 'Zurich Cover-More' brand led by CEO David Fike, headquartered in U.S. Combined ~$2B GWP, 20M+ customers, 200+ distribution partners.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-035",
+      "event_date": "2024-06-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "76755b61-a02d-417a-9298-c59a4f9b6eec",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.zurich.com/media/news-releases/2024/2024-1203-01",
+      "subcap_ids": [],
+      "title": "Zurich Insurance Group completed $600M acquisition of AIG's\u2026"
+    },
+    {
+      "body": "RPA bots 'several hundred' deployed at C&F (NJ Tech April 2024). Marc Adee CEO personally champions GenAI rollout. 'Starting small, with people who are interested then they socialize it into organization' = informal champions-network scaling model for automation (P3C1.1.2 Governance Framework: CEO-driven informal governance). Ionin CDO A&H Nov 2025 mandate covers TII automation roadmap.",
+      "date_precision": "month",
+      "e_id": "E-153",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-153"
+      ],
+      "id": "f3e12983-b894-49df-886d-2c00bd6075a4",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://apipark.com/techblog/en/crum-forster-enterprise-an-in-depth-look/",
+      "subcap_ids": [
+        "P3C1.1.2"
+      ],
+      "title": "RPA bots 'several hundred' deployed at C&F (NJ Tech April\u2026"
+    },
+    {
+      "body": "C&F S&S UP: 'technology and underwriting teams who worked side by side to reinvent how our division operates' \u2014 cross-functional innovation team (P1C3.9.2). In-house GenAI + OCR solution launched early 2024. 35% quote turnaround reduction.",
+      "date_precision": "year",
+      "e_id": "E-063",
+      "event_date": "2024-02-15",
+      "evidence_e_ids": [
+        "E-063"
+      ],
+      "id": "ee3787f4-5d66-4c02-a947-bfd7e388d2dc",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forsters-surplus--specialty-division-earns-datos-insights-insurance-technology-impact-award-for-its-transformative-underwriting-platform-302569629.html",
+      "subcap_ids": [
+        "P1C3.9.2"
+      ],
+      "title": "In-house GenAI + OCR solution launched"
+    },
+    {
+      "body": "Bryan Brizzi, Chief Digital Officer S&S Division Crum & Forster: 'S&S UP is more than a technology upgrade, it represents a cultural shift in how we use innovation' \u2014 internally-built modern underwriting platform with in-house GenAI + OCR, deployed early 2024, 35% quote turnaround reduction.",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2024-02-15",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "4d24c5eb-107e-4ede-a8d9-e0bd60d1fb94",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/crum--forsters-surplus--specialty-division-earns-datos-insights-insurance-technology-impact-award-for-its-transformative-underwriting-platform-302569629.html",
+      "subcap_ids": [],
+      "title": "Bryan Brizzi, Chief Digital Officer S&S Division Crum\u2026"
+    },
+    {
+      "body": "March 2023: Paige Bagwell promoted to President & COO of Redwoods (post-acquisition cultural integration milestone, 8 years post-acquisition). Bagwell joined Redwoods 2015 as Chief Talent Officer \u2192 COO 2020 \u2192 President 2023 \u2014 internal succession demonstrating cultural-continuity integration approach.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-032",
+      "event_date": "2023-03-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "3831acbc-15fd-4ca2-9f92-3a34de314971",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.cfins.com/the-redwoods-group-names-paige-bagwell-president-and-chief-operating-officer/",
+      "subcap_ids": [],
+      "title": "Paige Bagwell promoted"
+    },
+    {
+      "body": "Feb 21, 2023: C&F A&H Division acquired Partners Managing General Underwriters LLC (PMGU) \u2014 medical stop loss MGA. Most recent A&H Division M&A event before TII assessment cycle. Same division that holds TII.",
+      "date_precision": "day",
+      "e_id": "E-031",
+      "event_date": "2023-02-21",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "80a71186-36b2-4585-baa3-a3c63e660cf9",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://www.cfins.com/crum-forster-accident-health-division-announces-acquisition-of-partners-mgu/",
+      "subcap_ids": [],
+      "title": "C&F A&H Division acquired Partners Managing General\u2026"
+    },
+    {
+      "body": "API-based embedded insurance channel for travel operators.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "3ffe782e-7edb-45e0-b2eb-d70b33e05e2b",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "battleface embedded insurance technology partnership (not acquisition)"
+    },
+    {
+      "body": "C&F S&S deployed Convr for AI intake: 40% staff redeployment, zero submission backlog.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-153"
+      ],
+      "id": "22a461a5-8a66-4aa4-90b2-2040581d3e5c",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Convr AI partnership at C&F S&S \u2014 NLP intake automation (not TII-specific)"
+    },
+    {
+      "body": "NJ DOBI Financial Examination 2020-2023 (completed): 'NJDOBI obtained information regarding the Company's corporate governance environment, identified and assessed inherent risks to which it is exposed and evaluated the Company's system of internal controls and procedures used to mitigate identified risks. The examination also included assessing the principles used and significant estimates made by management.' \u2014 FORMAL REGULATORY EXAM of operational risk and internal controls framework (P3C2.1.1 Operational Risk Framework, P3C3.6.1 Exam Preparation).",
+      "date_precision": "year",
+      "e_id": "E-157",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-157"
+      ],
+      "id": "da24aa34-8f07-4dc8-a2a4-c03ac1d7dd1c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.nj.gov/dobi/division_insurance/solvency/finexamrpt42471crumforster2023.pdf",
+      "subcap_ids": [
+        "P3C2.1.1",
+        "P3C3.6.1"
+      ],
+      "title": "NJ DOBI Financial Examination 2020-2023 obtained\u2026"
+    },
+    {
+      "body": "C&F documented executive bench (sister-division to Marc Adee CEO): Don Parker (COO since 2018), Anthony Slimowicz (EVP & COO), Stephen Mulready (EVP & COO), Jorge Echemendia (CMO), Barbra Katz (CHRO), Robert Soto (AVP IT Infrastructure since 1997), Mike McTigue (Chief Legal Officer & Secretary), Alex Morales (SVP Chief Actuary, joined 2018), Arleen Paladino (CFO since 1979), Bryan Brizzi (CDO S&S Division), John Greisbach (President Commercial Lines), Tom Gusman (E&S leadership), Steve (Property Division SVP). Multi-officer governance structure cascades to TII.",
+      "date_precision": "year",
+      "e_id": "E-029",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "bf3b50b9-ae69-4d42-8dbd-9e10f7de6266",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.cfins.com/about/leadership/",
+      "subcap_ids": [],
+      "title": "Anthony Slimowicz (EVP & COO), Stephen Mulready (EVP\u2026"
+    },
+    {
+      "body": "C&F leadership also has Alex Morales (SVP Chief Actuary, joined 2018, 15+ years P/C insurance, prior AIG + CUNA Mutual + ISO) \u2014 actuarial risk quantification function supporting risk tolerance metrics and model risk (P1C2.4.x).",
+      "date_precision": "year",
+      "e_id": "E-053",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-053"
+      ],
+      "id": "589c6cb1-682c-49e7-a459-e8822d10d1ee",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.comparably.com/companies/crum-forster/executive-team",
+      "subcap_ids": [
+        "P1C2.4"
+      ],
+      "title": "C&F leadership has Alex Morales (SVP Chief Actuary"
+    },
+    {
+      "body": "TII integrated into C&F A&H Division. Underwriter switched to United States Fire Insurance Co. Glastonbury CT operations maintained.",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2015-10-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "6b4fbf66-8ab4-47f7-89ce-cc8468696d9d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "TII acquired by Crum & Forster Holdings, Inc. from prior ownership"
+    },
+    {
+      "body": "Oct 2015: C&F acquired TII as wholly-owned subsidiary. CEO Jon Gehris: 'Our existing partnership will be completely seamless for our customers and staff allowing us to accelerate our growth and expand opportunities for both our partners and employees' \u2014 explicit cultural-integration framing.",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2015-10-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "a959395f-5258-44e2-b47e-190002fde2bf",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.travelinsured.com/news-resources/press-releases/2015/10/11/crum-forster-acquires-travel-insured-international/",
+      "subcap_ids": [],
+      "title": "C&F acquired TII"
+    },
+    {
+      "body": "March 2023: Paige Bagwell promoted to President & COO of Redwoods (post-acquisition cultural integration milestone, 8 years post-acquisition). Bagwell joined Redwoods 2015 as Chief Talent Officer \u2192 COO 2020 \u2192 President 2023 \u2014 internal succession demonstrating cultural-continuity integration approach.",
+      "date_precision": "year",
+      "e_id": "E-032",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "9335fad4-2039-4052-91b7-f4c4dc64ffb0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.cfins.com/the-redwoods-group-names-paige-bagwell-president-and-chief-operating-officer/",
+      "subcap_ids": [],
+      "title": "Bagwell joined Redwoods 2015"
+    },
+    {
+      "body": "Redwoods integration model: Paige Bagwell joined 2015 as Chief Talent Officer \u2192 COO 2020 \u2192 President 2023 (8 years post-acquisition). Internal succession = successful cultural integration (P1C4.10.1 Cultural Due Diligence confirmed via talent retention/promotion).",
+      "date_precision": "year",
+      "e_id": "E-074",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-074"
+      ],
+      "id": "1f98c912-cee0-4a39-be53-8725e53dba46",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.cfins.com/the-redwoods-group-names-paige-bagwell-president-and-chief-operating-officer/",
+      "subcap_ids": [
+        "P1C4.10.1"
+      ],
+      "title": "Redwoods integration model: Paige Bagwell joined 2015 as\u2026"
+    },
+    {
+      "body": "TII operates TAP (TravelInsured Agent Portal) \u2014 agent dashboard for quoting, booking, processing travel insurance. Originally launched 2013; ongoing enhancement per TII 'About' page references. Producer/advisor channel digital enablement is documented and operational.",
+      "date_precision": "year",
+      "e_id": "E-008",
+      "event_date": "2013-07-01",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "00508063-51bf-4c9c-a2c6-df6409e1c696",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prweb.com/releases/travel_insured_introduces_tap_travelinsured_agent_portal_to_travel_agents/prweb11061050.htm",
+      "subcap_ids": [],
+      "title": "Originally launched 2013"
+    },
+    {
+      "body": "Marc Adee \u2014 Chairman/CEO Crum & Forster (TII parent). Northwestern BA, U Chicago Booth MBA, Fellow Casualty Actuarial Society, Member American Academy of Actuaries. Joined Fairfax 2000. Authored 'The Once and Future C&F' chronicling 200-year history.",
+      "date_precision": "year",
+      "e_id": "E-028",
+      "event_date": "2000-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "750ad8ba-39c3-409e-8e01-8ff1dd824fdf",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://cfnj.org/about-us/leadership/marc-adee/",
+      "subcap_ids": [],
+      "title": "Joined Fairfax 2000"
+    },
+    {
+      "body": "Apr 2015: C&F acquired Redwoods Group (Morrisville NC, founded 1997, B Corp, insurer to YMCAs/JCCs/camps). Trapani (Redwoods CEO): 'a strong match in operating principles and values\u2026 accomplishes all of the goals we set out at the beginning of this process' \u2014 explicit cultural integration framing in deal narrative.",
+      "date_precision": "year",
+      "e_id": "E-030",
+      "event_date": "1997-07-01",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "21fe2888-0b13-4e4e-b529-31ffb51a1b67",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.insurancejournal.com/news/southeast/2015/04/07/363514.htm",
+      "subcap_ids": [],
+      "title": "C&F acquired Redwoods Group (Morrisville NC"
+    },
+    {
+      "body": "Proprietary systems built in-house from inception: agency mgmt + premium accounting + policy issuance + claims \u2014 all integrated.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "1994-01-01",
+      "evidence_e_ids": [
+        "E-154"
+      ],
+      "id": "6c381fe2-362a-45f1-8481-fe8ca4e41edd",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "TII founded by Peter Gehris as independent travel insurance distributor"
+    }
+  ]
+}

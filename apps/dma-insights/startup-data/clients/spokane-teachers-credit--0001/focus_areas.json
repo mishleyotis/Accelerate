@@ -1,0 +1,38 @@
+{
+  "entity_display_id": "spokane-teachers-credit--0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-011"
+        ],
+        "representative_quote": "STCU\u2019s strategic direction under CEO Lindsey Myhre centers on geographic expansion, technology modernization, and deepening member relationships.",
+        "source_kind": "docx"
+      },
+      "id": "1045fcc5-17c5-437c-96cf-d9f063ef1d9b",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.8.2",
+        "P4C1.2.1",
+        "P4C1.5.1",
+        "P4C3.3.3",
+        "P4C3.7.3",
+        "P4C3.3.3",
+        "P4C3.3.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "STCU\u2019s strategic direction under CEO Lindsey Myhre centers on geographic expansion\u2026",
+      "verbatim_quote": "STCU\u2019s strategic direction under CEO Lindsey Myhre centers on geographic expansion, technology modernization, and deepening member relationships [E-011]."
+    }
+  ]
+}

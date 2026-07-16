@@ -1,0 +1,404 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "acuity-a-mutual-insuranc-0001",
+  "financials": {
+    "lines": [
+      "Acuity's growth trajectory is accelerating. The 14.6% three-year CAGR outpaces the broader P&C mutual segment, driven by aggressive state expansion (now 32 states) and personal lines growth. The underwriting loss recovery from $153.7M (2022) to $6.8M (2024) demonstrates pricing discipline and portfolio management [E-003, E-079]."
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Wisconsin"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ben Salzmann's",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Partha Srinivasa",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Lloyd Scholz",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Chief Innovation",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Digital Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Chief Technology",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Data Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Digital Officer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Innovation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Data Officer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "State-licensed insurer",
+    "narrative_md": "Acuity, A Mutual Insurance Company (NAIC #14184) is a policyholder-owned mutual P&C insurer headquartered in Sheboygan, Wisconsin. Founded in 1925 as Heritage Mutual Insurance Company and renamed in March 2001, Acuity has grown into a mid-large carrier writing over $3.0 billion in annual premium across 32 states as of 2024 [E-001, E-003, E-035, E-079]. The company insures more than 125,000 businesses, 300,000 commercial vehicles, and 500,000 homes and personal vehicles, supported by approximately 1,700 employees [E-037]. Acuity operates exclusively through independent agents, making agent-channel digital integration a defining characteristic of its technology strategy.\n\nSubvertical: P&C Insurance - Mutual (Confidence: 98%)\n\nSize Tier: Mid-Large ($3B+ Written Premium)\n\nAcuity, A Mutual Insurance Company was incorporated on August 11, 1925, as Heritage Mutual Insurance Company in Wisconsin [E-001]. The company rebranded to Acuity in March 2001. As a policyholder-owned mutual, Acuity answers to its policyholders rather than public shareholders, which shapes both its governance transparency and its long-term investment horizon.\n\nThe company is regulated primarily by the Wisconsin Office of the Commissioner of Insurance (OCI). The most recent OCI examination produced zero recommendations and zero surplus adjustments [E-015], signaling disciplined operations. Acuity holds an A+ (Superior) rating from AM Best for the 23rd consecutive year [E-002] and an A+ from S&P Global, placing it among the top 19 carriers nationally by financial strength. The company has appeared on Ward's Top 50 P&C list for 26 consecutive years [E-003].\n\nNo enforcement actions, confirmed data breaches, or class action lawsuits were identified. An alleged breach reported through third-party aggregators was investigated and disproved [E-073]. The NAIC complaint index stands at 0.66, which is 34% below expected [E-014], indicating superior customer dispute resolution.",
+    "primary_regulator": "State Insurance Department (NAIC)",
+    "size_tier": "Mid-Large",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "8d264137-942a-422d-970f-4e75395c1e43",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Nevada market exit - unprofitable underwriting"
+    },
+    {
+      "id": "c52ac2d8-61bc-4e70-a080-e9c3f4d5892c",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Underwriting loss recovery $153.7M to $6.8M"
+    },
+    {
+      "id": "bf579b17-f4d1-4b00-97e7-65dee40b7479",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Tech leadership succession Knuth to Baierl"
+    },
+    {
+      "id": "498026fc-e554-478f-9867-050145e9dd1a",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Employee concerns: tech stack modernity and system changes"
+    },
+    {
+      "id": "992546de-1a98-4941-b05a-efcd20d345bb",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Acuity Advantage DTC net loss $682K after 4 years"
+    },
+    {
+      "id": "712238b8-5543-4b40-a820-5e7a69a76796",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "ESG framework absent - philanthropy only"
+    },
+    {
+      "id": "5b1ef647-e689-4113-9912-2d3c7e9f10c8",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Innovation model partner-led - no formal program"
+    },
+    {
+      "id": "ea12f96b-6fcc-489c-8c44-715180f05637",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Hybrid arch: SaaS edges + legacy IBM AIX core - no cloud migration"
+    },
+    {
+      "id": "f613b6bd-d4f2-4a52-bf86-ffeb7958a635",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "UW analytics gap - telematics commercial-only"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "The assessment identified 9 issues (6 active, 3 resolved). Two are classified MATERIAL with direct scoring impact.",
+    "trend_md": "Acuity's digital evolution follows a pattern typical of high-performing mutual carriers: steady operational investment punctuated by strategic pivots that signal emerging enterprise ambitions."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 4.0,
+        "P1C3": 3.5,
+        "P1C4": 3.5,
+        "P1C5": 2.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.44,
+      "peer_name": "Erie Insurance Group",
+      "role": "Aspirational Digital"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 2.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.03,
+      "peer_name": "Westfield Insurance Group",
+      "role": "Scale Comparator"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 1.5,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 3.5,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "Auto-Owners Insurance Group",
+      "role": "Aspirational"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.71,
+      "peer_name": "West Bend Mutual Insurance Company",
+      "role": "Direct Comparator"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ACUI-20260309-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "stack looks like', 'don't use Google Docs or SharePoint' Trustpilot 4.4-star rating from 2,100+ reviews Positive: efficient handling, fast processing, clear communication",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 2100,
+        "polarity": "neutral",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": 4.4
+      },
+      {
+        "drilldown": "in social media, email marketing, CMS, analytics tools BBB profile exists for Acuity, A Mutual Insurance Company in Sheboygan \u2014 complaints page accessible ~1,700 employees on LinkedIn Acuity philanthropy totaled $1.6M for 2025; $680K employ",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "over vehicle valuations, adjuster response delays 50 Yelp reviews, updated Feb 2026 Hiring GM Marketing & Communication to oversee comms to employees, agents, customers and ensure brand consistency Role requires proficiency in social media,",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Yelp",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Keith Baierl named VP-Enterprise Technology Feb 2025, succeeding Marcus Knuth (33yr tenure)",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "62da64fc-3e07-4413-9058-8e476db239cd",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.acuity.com/about/media-center/in-the-news/2025/2025-02-14-acuity-leadership-transition-baierl-to-succeed-knuth",
+      "subcap_ids": [],
+      "title": "Keith Baierl named VP-Enterprise Technology Feb 2025"
+    },
+    {
+      "body": "Neonatal Run/Walk raised $20K + Acuity match = $40K for Aurora Medical Center Sheboygan neonatal unit (2024)",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "41ae20e8-1ff8-4f9b-ae85-77cd6b5975ec",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.wisbusiness.com/2024/acuity-insurance-acuity-neonatal-run-walk-raises-over-40k/",
+      "subcap_ids": [],
+      "title": "Neonatal Run/Walk raised $20K + Acuity match"
+    },
+    {
+      "body": "Appointed dedicated distribution territory director (David Lynch, 26yr insurance veteran) for Maryland",
+      "date_precision": "publish_fallback",
+      "e_id": "E-076",
+      "event_date": "2024-03-01",
+      "evidence_e_ids": [
+        "E-076"
+      ],
+      "id": "c31fc938-3646-41f2-8703-d42d17c6829c",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.acuity.com/about/media-center/in-the-news/2024/acuity-to-become-newest-insurance-resource-in-maryland",
+      "subcap_ids": [],
+      "title": "Appointed dedicated distribution territory director (David\u2026"
+    },
+    {
+      "body": "Melissa Winter named President (2023) and to Board of Directors (2024)",
+      "date_precision": "year",
+      "e_id": "E-024",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "05ce27d9-71e1-4c4b-94b1-2a24f54fcb8c",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.cbinsights.com/company/acuity-insurance/people",
+      "subcap_ids": [],
+      "title": "Melissa Winter named President (2023)"
+    },
+    {
+      "body": "Launched automated billing chat using AI for omni-channel customer service (2018)",
+      "date_precision": "year",
+      "e_id": "E-011",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "0646f345-158e-4325-87c1-97e9839898d0",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.acuity.com/about/media-center/in-the-news/2018/acuity-adds-artificial-intelligence-capabilities-to-omni-channel-customer-service",
+      "subcap_ids": [],
+      "title": "Launched automated billing chat using AI for omni-channel\u2026"
+    }
+  ]
+}

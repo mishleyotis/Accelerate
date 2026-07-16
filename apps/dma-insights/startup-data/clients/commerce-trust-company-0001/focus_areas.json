@@ -1,0 +1,344 @@
+{
+  "entity_display_id": "commerce-trust-company-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-049",
+          "E-036",
+          "E-050"
+        ],
+        "representative_quote": "Analytical AI is real; customer-facing / generative AI is absent",
+        "source_kind": "docx"
+      },
+      "id": "fecb762f-a0bb-4237-b1d6-99a47ce1646d",
+      "involved_subcap_ids": [
+        "P4C2.4.7",
+        "P4C1.1.8",
+        "P4C2.4.10",
+        "P2C4.6.5",
+        "P3C1.6.4",
+        "P2C4.8.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "97%",
+          "delta": null,
+          "kpi_label": "Flow Orchestration seats",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "60 days",
+          "delta": null,
+          "kpi_label": "Progress",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "450",
+          "delta": null,
+          "kpi_label": "Seats",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 33,
+        "P3": 17,
+        "P4": 50
+      },
+      "source_path": "Enterprise Analytics & BI + data science (regression/trees/neural-nets/clustering, predictive models) [E-049]; no customer chatbot/AI agents/RAG [E-036,E-050]; AI named as an SEC risk factor [E-050].",
+      "title": "Customer-facing / generative AI is absent",
+      "verbatim_quote": "F-005 | Analytical AI is real; customer-facing / generative AI is absent | Enterprise Analytics & BI + data science (regression/trees/neural-nets/clustering, predictive models) [E-049]; no customer chatbot/AI agents/RAG [E-036,E-050]; AI named as an SEC risk factor [E-050]. | Servicing automation and GenAI are net-new; existing models are batch/analytical, not operationalized for real-time advisor NBA. | Agentforce + Einstein (EXPAND) to operationalize existing models and add servicing automation \u2014 genuine gap."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-057"
+        ],
+        "representative_quote": "FineMark closed 1/1/26; FIS Trust Desk cutover 13 Nov 2026; trading/business-platform integration Nov 2026; Q1'26 trust fees +25.5% YoY, AUA +19.5% YoY",
+        "source_kind": "docx"
+      },
+      "id": "a87af1f0-857d-414b-9f69-335b3a3a4c43",
+      "involved_subcap_ids": [
+        "P4C3.3.2",
+        "P4C1.3.3",
+        "P2C3.4.4",
+        "P1C4.10.2",
+        "P1C1.8.2",
+        "P2C2.9.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "25.5%",
+          "delta": null,
+          "kpi_label": "Q1'26 trust fees",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "19.5%",
+          "delta": null,
+          "kpi_label": "YoY AUA",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 34,
+        "P2": 33,
+        "P4": 33
+      },
+      "source_path": "FineMark closed 1/1/26; FIS Trust Desk cutover 13 Nov 2026; trading/business-platform integration Nov 2026; Q1'26 trust fees +25.5% YoY, AUA +19.5% YoY [E-057,INT-003,Q1'26-8K].",
+      "title": "FineMark integration is a time-boxed catalyst",
+      "verbatim_quote": "F-006 | FineMark integration is a time-boxed catalyst | FineMark closed 1/1/26; FIS Trust Desk cutover 13 Nov 2026; trading/business-platform integration Nov 2026; Q1'26 trust fees +25.5% YoY, AUA +19.5% YoY [E-057,INT-003,Q1'26-8K]. | Integration window drives urgency and temporary data/process fragmentation; a FineMark SF parallel-run dependency follows the FIS cutover. | Position as the migration partner for the consolidation within the FIS-gated timeline (LAND) \u2014 speed + Hubbl scan = differentiation."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-030",
+          "E-033",
+          "E-058",
+          "E-038"
+        ],
+        "representative_quote": "Fragmented martech with no unified personalization / CDP",
+        "source_kind": "docx"
+      },
+      "id": "e7b91d1f-f84e-45eb-9e5d-0714836ba70d",
+      "involved_subcap_ids": [
+        "P4C2.4.7",
+        "P4C2.5.2",
+        "P4C2.3.1",
+        "P4C2.8.1",
+        "P4C3.3.1",
+        "P4C3.7.1",
+        "P4C3.6.1",
+        "P4C3.5.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "97%",
+          "delta": null,
+          "kpi_label": "Flow Orchestration seats",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "60 days",
+          "delta": null,
+          "kpi_label": "Progress",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "450",
+          "delta": null,
+          "kpi_label": "Seats",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "HubSpot, Marketo, Pardot, Eloqua, Salesforce CRM, Adobe + FineMark Marketing Cloud [E-030,E-033,E-058,INT-002]; advisor-led personalization, no next-best-action engine [E-038].",
+      "title": "Fragmented martech with no unified personalization / CDP",
+      "verbatim_quote": "F-003 | Fragmented martech with no unified personalization / CDP | HubSpot, Marketo, Pardot, Eloqua, Salesforce CRM, Adobe + FineMark Marketing Cloud [E-030,E-033,E-058,INT-002]; advisor-led personalization, no next-best-action engine [E-038]. | Personalization-at-scale gap; duplicate marketing spend across overlapping platforms. | Marketing Cloud consolidation + Data Cloud + Agentforce/Einstein next-best-action (EXPAND) \u2014 genuine gap (no CDP deployed)."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-031",
+          "E-038"
+        ],
+        "representative_quote": "[INT-009]; corroborated by advisor-led/manual public onboarding signals",
+        "source_kind": "docx"
+      },
+      "id": "fbbb9255-2867-4d9c-8510-fabbce53438f",
+      "involved_subcap_ids": [
+        "P2C2.5.6",
+        "P3C2.3.4",
+        "P1C4.2.4",
+        "P2C2.6.5",
+        "P4C1.1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$35,700,000,000",
+          "delta": null,
+          "kpi_label": "Assets",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "60 days",
+          "delta": null,
+          "kpi_label": "Progress",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 20,
+        "P2": 40,
+        "P3": 20,
+        "P4": 20
+      },
+      "source_path": "Significant manual account opening through the middle office; behind on Quest onboarding workflows [INT-009]; corroborated by advisor-led/manual public onboarding signals [E-031,E-038].",
+      "title": "Manual middle-office account opening / onboarding gap in\u2026",
+      "verbatim_quote": "F-002 | Manual middle-office account opening / onboarding gap in Quest | Significant manual account opening through the middle office; behind on Quest onboarding workflows [INT-009]; corroborated by advisor-led/manual public onboarding signals [E-031,E-038]. | Caps P2C2/P2C4 maturity; clearest near-term efficiency gap in the front office. | FSC onboarding + Flow/account-opening automation (EXPAND, Phase 2) \u2014 validated genuine gap."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-017",
+          "E-027",
+          "E-044",
+          "E-052",
+          "E-048"
+        ],
+        "representative_quote": "Okta/Azure AD IAM, mature domain EA + CI/CD + Apigee",
+        "source_kind": "docx"
+      },
+      "id": "f7377ab5-c760-49e3-bb1c-e41f4c8fe00e",
+      "involved_subcap_ids": [
+        "P1C3.7.1",
+        "P1C3.3.1",
+        "P1C3.8.1",
+        "P1C3.1.1",
+        "P1C5.3.1",
+        "P1C5.7.1",
+        "P1C5.6.1",
+        "P1C5.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$35,700,000,000",
+          "delta": null,
+          "kpi_label": "Assets",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "Audit&Risk -> ERM -> Information Security Strategy Board; clean cyber/enforcement record [E-017,E-027]; Okta/Azure AD IAM, mature domain EA + CI/CD + Apigee [E-044,E-052]; Databricks/Azure [E-048].",
+      "title": "Strong governance, security and architecture = low\u2026",
+      "verbatim_quote": "F-007 | Strong governance, security and architecture = low integration risk | Audit&Risk -> ERM -> Information Security Strategy Board; clean cyber/enforcement record [E-017,E-027]; Okta/Azure AD IAM, mature domain EA + CI/CD + Apigee [E-044,E-052]; Databricks/Azure [E-048]. | High readiness and low technical-integration risk for a Salesforce expansion. | De-risked FSC + Data Cloud rollout (ENABLER); strengthens the consolidation business case."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-048",
+          "E-037"
+        ],
+        "representative_quote": "Teradata to Databricks modernization in flight = Data Cloud runway",
+        "source_kind": "docx"
+      },
+      "id": "c9ebcf06-8cc1-4b98-8b61-c138dc155447",
+      "involved_subcap_ids": [
+        "P4C2.4.7",
+        "P4C2.5.2",
+        "P4C2.3.1",
+        "P4C2.8.1",
+        "P4C3.3.1",
+        "P4C3.7.1",
+        "P4C3.6.1",
+        "P4C3.5.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "60 days",
+          "delta": null,
+          "kpi_label": "Core-banking pillar",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "3-pillar Teradata->Databricks migration; core-banking pillar ~60 days, Trust Data Warehouse next year [INT-006]; Databricks Lakehouse on Azure confirmed publicly [E-048]; wealth data partly manual today [E-037].",
+      "title": "Teradata to Databricks modernization in flight = Data Cloud\u2026",
+      "verbatim_quote": "F-004 | Teradata to Databricks modernization in flight = Data Cloud runway | 3-pillar Teradata->Databricks migration; core-banking pillar ~60 days, Trust Data Warehouse next year [INT-006]; Databricks Lakehouse on Azure confirmed publicly [E-048]; wealth data partly manual today [E-037]. | Strong, maturing data foundation; wealth/distribution data (TDW) is the lagging pillar. | Salesforce Data Cloud zero-copy federation with Databricks Lakehouse (EXPAND); aligns to Zennify's active Databricks practice."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-036"
+        ],
+        "representative_quote": "Three wealth Salesforce orgs anchored by a mature FSC org",
+        "source_kind": "docx"
+      },
+      "id": "34696a9c-1ffa-45e0-a8af-e6eef4c792ea",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P4C3.4.1",
+        "P4C3.4.6",
+        "P4C3.4.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "903",
+          "delta": null,
+          "kpi_label": "Seats",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P4": 50
+      },
+      "source_path": "Three SF orgs \u2014 Quest FSC (Unlimited, 436/450, since 2018, HNW advisors), CFA Service Cloud (69/78), FineMark Sales+Service+Shield+Marketing Cloud (297/375); 903 seats / 89% occupancy [INT-002]; separate commercial Service Cloud 'Insight 360' [E-036].",
+      "title": "Three wealth Salesforce orgs",
+      "verbatim_quote": "F-001 | Three wealth Salesforce orgs anchored by a mature FSC org | Three SF orgs \u2014 Quest FSC (Unlimited, 436/450, since 2018, HNW advisors), CFA Service Cloud (69/78), FineMark Sales+Service+Shield+Marketing Cloud (297/375); 903 seats / 89% occupancy [INT-002]; separate commercial Service Cloud 'Insight 360' [E-036]. | FSC is already mature in wealth but the footprint is fragmented across three orgs post-acquisition; consolidation, not greenfield. | Salesforce FSC 3-org consolidation into Quest \u2014 the active, CEO/COO-mandated LAND engagement; Zennify's FSC-formation pedigree directly applies."
+    }
+  ]
+}

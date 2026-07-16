@@ -1,0 +1,1263 @@
+{
+  "entity_display_id": "first-citizens-bancshare-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P2C4.1.2",
+        "P2C1.4.6",
+        "P1C4.1.2",
+        "P2C1.12.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "2d5ec8fb-1a7a-4faa-a419-3f7b68632959",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P4C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-007"
+        },
+        {
+          "e_ids": [
+            "E-P4C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C3-005",
+        "E-P2C4-003",
+        "E-P4C2-005"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Value Proposition Clarity a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-P4C2-005].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "CRM Platform Absence",
+      "what_text": "Value Proposition Clarity is one of First Citizens BancShares, Inc.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger, more personalised customer experience [E--003] [E--003] [E-P2C4-003].",
+      "why_text": "The research report pins the maturity impact at: Caps - front-office at level 2-level 3. averages 1.3/5 across its 59 scored capability (peer median ~ 3.0) on the current assessment [E--005, E--003] [E--005, E--003] [E--005, E--003] [E-P4C3-005, E-P2C4-003].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P3C1.2.5",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "14b90d68-11c8-4c66-954d-1ec333c5f8c0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C2-002",
+        "E-P3C4-003",
+        "E-P2C2-001"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make STP Monitoring & Reporting a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-P2C2-001].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Pega Cloud Pioneer",
+      "what_text": "STP Monitoring & Reporting is one of First Citizens BancShares, Inc.'s least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver more efficient, dependable operations [E--003] [E--003] [E-P3C4-003].",
+      "why_text": "The research report pins the maturity impact at: ceiling level 2-level 3 with strong level 3 execution. averages 1.9/5 across its 31 scored capability (peer median ~ 3.0) on the current assessment [E--002, E--003] [E--002, E--003] [E--002, E--003] [E-P2C2-002, E-P3C4-003].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.2.4",
+        "P1C2.1.10",
+        "P1C2.1.6",
+        "P1C2.6.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "ec56cd1a-0aad-46d7-b1d7-5bed2b478342",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C2-001",
+        "E-P4C2-010",
+        "E-P4C2-002"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make BI Validation Evidence Pack Automation a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P4C2-002].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "AI Council + board oversight",
+      "what_text": "BI Validation Evidence Pack Automation is one of First Citizens BancShares, Inc.'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger data and technology foundation [E--010] [E--010] [E-P4C2-010].",
+      "why_text": "The research report pins the maturity impact at: ceiling level 2-level 3, accelerating. averages 1.4/5 across its 54 scored capability (peer median ~ 3.0) on the current assessment [E--001, E--010] [E--001, E--010] [E--001, E--010] [E-P4C2-001, E-P4C2-010].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C1.1.6",
+        "P2C1.2.8",
+        "P2C3.2.2",
+        "P2C4.12.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "72834b30-334e-442a-bbbe-71ef9c0159cd",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-P2C1-009",
+            "E-P2C1-010",
+            "E-P4C4-012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C1-009",
+        "E-P2C1-010",
+        "E-P4C4-012"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Journey Design a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-P4C4-012].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Mobile App CX Gap",
+      "what_text": "Service Journey Design is one of First Citizens BancShares, Inc.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger, more personalised customer experience [E--010] [E--010] [E-P2C1-010].",
+      "why_text": "At 1.0 out of 5, Service Journey Design sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-P2C1-009, E-P2C1-010].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P1C4.1.2",
+        "P3C3.8.5",
+        "P3C1.8.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "173fcc2c-944b-4ea6-b4bd-6ce1e24f7047",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C1-001",
+        "E-P3C4-003",
+        "E-P3C4-005"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P3C4-005].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "CDAO Inflection Point",
+      "what_text": "Data Mesh Strategy & Domain Ownership is one of First Citizens BancShares, Inc.'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger data and technology foundation [E--003] [E--003] [E-P3C4-003].",
+      "why_text": "The research report pins the maturity impact at: ceiling level 2-level 3, ideal engagement window. averages 1.5/5 across its 40 scored capability (peer median ~ 3.0) on the current assessment [E--001, E--003] [E--001, E--003] [E--001, E--003] [E-P4C1-001, E-P3C4-003].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C2.2.4",
+        "P2C1.1.6",
+        "P2C3.2.2",
+        "P2C1.2.8",
+        "P2C1.5.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-001",
+      "id": "6ed27553-6601-46e1-b008-8ef085e6e516",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-P2C1-009",
+            "E-P2C1-010",
+            "E-P4C4-012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C1-010",
+        "E-P2C1-009",
+        "E-P4C4-012"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Application Flow Screen Configuration a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-P4C4-012].",
+      "source_rec_id": "REC-001",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Application Flow Screen Configuration",
+      "what_text": "Application Flow Screen Configuration is one of First Citizens BancShares, Inc.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger, more personalised customer experience [E--009] [E--009] [E-P2C1-009].",
+      "why_text": "At 1.0 out of 5, Application Flow Screen Configuration sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-P2C1-010, E-P2C1-009].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P1C1.6.3",
+        "P2C4.5.3",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-002",
+      "id": "8ff6295f-8705-45ee-9669-43fc7c783a0c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001",
+            "E-P3C3-008",
+            "E-P4C1-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-007"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001",
+            "E-P3C3-008",
+            "E-P4C1-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C3-001",
+        "E-P4C1-006",
+        "E-P3C3-008"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Zero Trust Architecture Strategy a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P3C3-008].",
+      "source_rec_id": "REC-002",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Zero Trust Architecture Strategy",
+      "what_text": "Zero Trust Architecture Strategy is one of First Citizens BancShares, Inc.'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger data and technology foundation [E--006] [E--006] [E-P4C1-006].",
+      "why_text": "At 1.0 out of 5, Zero Trust Architecture Strategy sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-P2C3-001, E-P4C1-006].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C4.1.2",
+        "P2C2.2.2",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-003",
+      "id": "c66518ef-66a1-4bb9-a254-5ead6047f47c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-004",
+            "E-P4C2-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P3C4-003",
+        "E-P3C4-004",
+        "E-P4C2-014"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Journey Design a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-P4C2-014].",
+      "source_rec_id": "REC-003",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Service Journey Design",
+      "what_text": "Service Journey Design is one of First Citizens BancShares, Inc.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger, more personalised customer experience [E--004] [E--004] [E-P3C4-004].",
+      "why_text": "At 1.0 out of 5, Service Journey Design sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-P3C4-003, E-P3C4-004].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P1C1.6.3",
+        "P2C4.5.3",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-004",
+      "id": "959c4412-186b-4159-a347-03b109f8a767",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001",
+            "E-P3C3-008",
+            "E-P4C1-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-007"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001",
+            "E-P3C3-008",
+            "E-P4C1-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C3-001",
+        "E-P4C1-006",
+        "E-P3C3-008"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Loss Data Collection a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-P3C3-008].",
+      "source_rec_id": "REC-004",
+      "theme": "Operational Workflow & Risk",
+      "title": "Loss Data Collection",
+      "what_text": "Loss Data Collection is one of First Citizens BancShares, Inc.'s least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver more efficient, dependable operations [E--006] [E--006] [E-P4C1-006].",
+      "why_text": "At 1.0 out of 5, Loss Data Collection sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-P2C3-001, E-P4C1-006].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C3.6.7",
+        "P1C1.5.1",
+        "P2C4.5.IB1",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-005",
+      "id": "2817edb6-f51d-419b-8e77-011b5ddb7ea7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P4C2-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C1-010",
+        "E-P4C2-014",
+        "E-P3C4-003"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P3C4-003].",
+      "source_rec_id": "REC-005",
+      "theme": "Data Management & Governance",
+      "title": "Data Mesh Strategy & Domain Ownership",
+      "what_text": "Data Mesh Strategy & Domain Ownership is one of First Citizens BancShares, Inc.'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger data and technology foundation [E--014] [E--014] [E-P4C2-014].",
+      "why_text": "At 1.0 out of 5, Data Mesh Strategy & Domain Ownership sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-P4C1-010, E-P4C2-014].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.1.2",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-006",
+      "id": "fe2d55d1-853b-4dff-ac80-f3ddf61636d6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-004",
+            "E-P4C2-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P3C4-003",
+        "E-P4C2-014",
+        "E-P3C4-004"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Value Proposition Clarity a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-P3C4-004].",
+      "source_rec_id": "REC-006",
+      "theme": "Digital Channels",
+      "title": "Value Proposition Clarity",
+      "what_text": "Value Proposition Clarity is one of First Citizens BancShares, Inc.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger, more personalised customer experience [E--014] [E--014] [E-P4C2-014].",
+      "why_text": "At 1.0 out of 5, Value Proposition Clarity sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-P3C4-003, E-P4C2-014].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P4C3.6.7",
+        "P1C1.6.3",
+        "P2C4.5.3",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-007",
+      "id": "d312b7d1-3883-449f-a61a-3df51a216199",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P4C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C3-005",
+        "E-P3C3-019",
+        "E-P2C3-001"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Experience Metrics a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-P2C3-001].",
+      "source_rec_id": "REC-007",
+      "theme": "Digital Strategy & Vision",
+      "title": "Customer Experience Metrics",
+      "what_text": "Customer Experience Metrics is one of First Citizens BancShares, Inc.'s least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E--019] [E--019] [E-P3C3-019].",
+      "why_text": "At 1.5 out of 5, Customer Experience Metrics sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-P4C3-005, E-P3C3-019].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2.2.4",
+        "P2C4.1.2",
+        "P2C1.4.6",
+        "P4C2.2.9",
+        "P4C2.2.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-008",
+      "id": "8cfb14df-52fb-4f4b-bd1c-265a9d34091b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-P4C1-010"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C4-001",
+        "E-P4C2-015",
+        "E-P4C1-010"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Behavioral Data Capture a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-P4C1-010].",
+      "source_rec_id": "REC-008",
+      "theme": "CX & Personalization",
+      "title": "Behavioral Data Capture",
+      "what_text": "Behavioral Data Capture is one of First Citizens BancShares, Inc.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger, more personalised customer experience [E--015] [E--015] [E-P4C2-015].",
+      "why_text": "At 1.0 out of 5, Behavioral Data Capture sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-P2C4-001, E-P4C2-015].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P1C1.6.3",
+        "P2C4.5.3",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-009",
+      "id": "51f7e130-caca-425d-9ee1-165fbf36c4bf",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001",
+            "E-P3C3-008",
+            "E-P4C1-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001",
+            "E-P3C3-008",
+            "E-P4C1-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P2C3-001",
+        "E-P4C1-006",
+        "E-P3C3-008"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make UDAAP Compliance a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-P3C3-008].",
+      "source_rec_id": "REC-009",
+      "theme": "Compliance & Surveillance",
+      "title": "UDAAP Compliance",
+      "what_text": "UDAAP Compliance is one of First Citizens BancShares, Inc.'s least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver more efficient, dependable operations [E--006] [E--006] [E-P4C1-006].",
+      "why_text": "At 1.0 out of 5, UDAAP Compliance sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-P2C3-001, E-P4C1-006].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3",
+        "P4C3.6.7",
+        "P1C1.6.3",
+        "P2C4.5.3",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-010",
+      "id": "37bb212f-9f2a-488c-9939-37e70f5c842f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P4C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        },
+        {
+          "e_ids": [
+            "E-P2C3-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C3-005",
+        "E-P3C3-019",
+        "E-P2C3-001"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Innovation Horizons a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 2.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-P2C3-001].",
+      "source_rec_id": "REC-010",
+      "theme": "Innovation & Investment",
+      "title": "Innovation Horizons",
+      "what_text": "Innovation Horizons is one of First Citizens BancShares, Inc.'s developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E--019] [E--019] [E-P3C3-019].",
+      "why_text": "At 2.0 out of 5, Innovation Horizons sits 1.5 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-P4C3-005, E-P3C3-019].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P1C2.6.2",
+        "P1C4.1.2",
+        "P1C3.9.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "c53d4eba-1cb2-4bfe-989b-728982c51afb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C4-002",
+        "E-P3C4-008",
+        "E-P3C4-013"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make API Lifecycle Management a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P3C4-013].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "CISO Marco Maiurano (EVP) grew",
+      "what_text": "API Lifecycle Management is one of First Citizens BancShares, Inc.'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger data and technology foundation [E--008] [E--008] [E-P3C4-008].",
+      "why_text": "The research report pins the maturity impact at: ceiling level 3-level 4, highest maturity area. averages 1.7/5 across its 47 scored capability (peer median ~ 3.0) on the current assessment [E--002, E--008] [E--002, E--008] [E--002, E--008] [E-P4C4-002, E-P3C4-008].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C3.6.7",
+        "P4C3.4.2",
+        "P4C3.1.7",
+        "P4C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "62bc249f-9800-4601-a975-138c0b7631a8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-P3C4-004",
+            "E-P4C2-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        },
+        {
+          "e_ids": [
+            "E-P4C2-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        },
+        {
+          "e_ids": [
+            "E-P3C4-004",
+            "E-P4C2-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C3-010",
+        "E-P4C2-014",
+        "E-P3C4-004"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Zero Trust Architecture Strategy a near-term focus for First Citizens BancShares, Inc.: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P3C4-004].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Finastra Core Banking",
+      "what_text": "Zero Trust Architecture Strategy is one of First Citizens BancShares, Inc.'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First Citizens BancShares, Inc.'s ability to deliver a stronger data and technology foundation [E--014] [E--014] [E-P4C2-014].",
+      "why_text": "The research report pins the maturity impact at: ceiling level 3-level 4. averages 1.8/5 across its 30 scored capability (peer median ~ 3.0) on the current assessment [E--010, E--014] [E--010, E--014] [E--010, E--014] [E-P4C3-010, E-P4C2-014].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "6.1 P1: Strategy, Governance & Culture (Score 2.36)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "6.2 P2: Member/Customer Experience (Score 1.29)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "6.3 P3: Operations, Risk & Compliance (Score 2.13)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "6.4 P4: Data, Analytics & Technology (Score 1.58)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-FCNCA-20260316-0001"
+}

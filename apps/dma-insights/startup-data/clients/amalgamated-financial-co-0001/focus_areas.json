@@ -1,0 +1,486 @@
+{
+  "entity_display_id": "amalgamated-financial-co-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-064",
+          "E-071"
+        ],
+        "representative_quote": "do not have strong command of what they need from an AI standpoint",
+        "source_kind": "docx"
+      },
+      "id": "b541f318-a2b4-4d15-85ab-f83fe7de3959",
+      "involved_subcap_ids": [
+        "P1C2.1.3",
+        "P1C4.2.1",
+        "P1C4.10.2",
+        "P1C3.8.3",
+        "P4C2.1.2",
+        "P1C2.1.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 83,
+        "P4": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "AI PMO Formation with Executive Sponsorship\u2026",
+      "verbatim_quote": "2. AI PMO Formation with Executive Sponsorship. Cross-functional AI Program Management Office forming with executive sponsorship from CTO, COO/CIO, CFO, and Head of Data Governance. Adrian Glace explicitly stated executives \u201cdo not have strong command of what they need from an AI standpoint\u201d \u2014 advisory authority being delegated to Zennify [E-064:F1, E-071:F3]."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-070",
+          "E-071"
+        ],
+        "representative_quote": "1. AI Strategic Plan Engagement. Six-to-seven-week prescriptive AI advisory across three phases (Assess/Align/Inventory \u2192 Blueprint \u2192 Mobilize) producing the Banking AI Value Framework, Enterprise AI Reference Architecture, Use Case Prioritization, Governance Framework with risk tiering, Data Readiness Roadmap, and 2-3 implementation-ready pilot designs.",
+        "source_kind": "docx"
+      },
+      "id": "a798e132-7dfa-4153-aa35-cdfff07c71bf",
+      "involved_subcap_ids": [
+        "P1C3.8.2",
+        "P4C2.4.7",
+        "P1C3.8.3",
+        "P4C2.1.2",
+        "P1C2.1.8",
+        "P1C1.5.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P4": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "AI Strategic Plan Engagement. Six-to-seven-week prescriptive AI advisory across three phases\u2026",
+      "verbatim_quote": "1. AI Strategic Plan Engagement. Six-to-seven-week prescriptive AI advisory across three phases (Assess/Align/Inventory \u2192 Blueprint \u2192 Mobilize) producing the Banking AI Value Framework, Enterprise AI Reference Architecture, Use Case Prioritization, Governance Framework with risk tiering, Data Readiness Roadmap, and 2-3 implementation-ready pilot designs [E-070:F1, E-071:F1]."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-068",
+          "E-064"
+        ],
+        "representative_quote": "Salesforce executive Eran Agrios committed to first Agentforce deployment for a bank under $10B in assets with Amalgamated as the target.",
+        "source_kind": "docx"
+      },
+      "id": "d79eb5b3-0589-4573-93ee-c2739820ae9a",
+      "involved_subcap_ids": [
+        "P1C2.1.3",
+        "P2C1.1.RB1",
+        "P1C2.1.7",
+        "P1C4.2.1",
+        "P1C3.8.2",
+        "P4C2.4.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$10,000,000,000",
+          "delta": null,
+          "kpi_label": "Bank under",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 70,
+        "P2": 13,
+        "P4": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Agentforce First Deployment. Salesforce executive Eran Agrios committed to first Agentforce\u2026",
+      "verbatim_quote": "4. Agentforce First Deployment. Salesforce executive Eran Agrios committed to first Agentforce deployment for a bank under $10B in assets with Amalgamated as the target. Two POC use cases scoped: (a) FSC\u2194Horizon Core bi-directional sync agent with approval workflow, (b) verbal data retrieval/input into FSC [E-068:F6, E-064:F6]."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-065",
+          "E-069"
+        ],
+        "representative_quote": "CTO Adrian Glace directing selective vendor strategy: \u201cwhere not MuleSoft\u201d \u2014 Zennify advisory engaged to recommend lower-cost alternatives where Mule is over-specified.",
+        "source_kind": "docx"
+      },
+      "id": "c6354da4-8c34-40d3-8ae9-a23196bec6af",
+      "involved_subcap_ids": [
+        "P1C1.5.5",
+        "P4C3.4.7",
+        "P4C3.4.1",
+        "P4C3.4.6",
+        "P1C3.7.1",
+        "P4C2.8.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P4": 67
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Cost-Optimized Cloud Strategy. CTO Adrian Glace directing selective vendor strategy: \u201cwhere not\u2026",
+      "verbatim_quote": "6. Cost-Optimized Cloud Strategy. CTO Adrian Glace directing selective vendor strategy: \u201cwhere not MuleSoft\u201d \u2014 Zennify advisory engaged to recommend lower-cost alternatives where Mule is over-specified. MuleSoft V-core entitlement gap and old SKU explicit; $250K Mule support change request pending [E-065:F2, E-069:F3]."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-068",
+          "E-073"
+        ],
+        "representative_quote": "Drawn from internal evidence dated November 2025 through April 2026 (E-068 through E-073), Amalgamated Bank\u2019s active strategic agenda comprises the following seven objectives",
+        "source_kind": "docx"
+      },
+      "id": "8bcec7b7-469f-4829-8aed-d730711354f4",
+      "involved_subcap_ids": [
+        "P2C1.1.RB1",
+        "P4C2.2.10",
+        "P4C3.5.8",
+        "P1C1.8.2",
+        "P2C3.5.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 21,
+        "P2": 37,
+        "P4": 42
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Drawn from internal evidence dated November 2025 through April 2026 (E-068 through E-073)\u2026",
+      "verbatim_quote": "Drawn from internal evidence dated November 2025 through April 2026 (E-068 through E-073), Amalgamated Bank\u2019s active strategic agenda comprises the following seven objectives:"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-072",
+          "E-058"
+        ],
+        "representative_quote": "MuleSoft as integration fabric extending to CreditLens (Moody\u2019s pilot customer), MANTL, and Horizon Core with bi-directional sync planned.",
+        "source_kind": "docx"
+      },
+      "id": "02436046-664a-412f-8728-d9260f8b6e22",
+      "involved_subcap_ids": [
+        "P2C3.5.7",
+        "P2C3.5.4",
+        "P2C3.5.2",
+        "P2C3.8.2",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.4.5",
+        "P2C4.4.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$450,000",
+          "delta": null,
+          "kpi_label": "Phase integration scope",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Integration Architecture Expansion. MuleSoft as integration fabric extending to CreditLens\u2026",
+      "verbatim_quote": "5. Integration Architecture Expansion. MuleSoft as integration fabric extending to CreditLens (Moody\u2019s pilot customer), MANTL, and Horizon Core with bi-directional sync planned. Phase 2 integration scope $450K in pipeline. Master Data Management strategy explicitly \u201cformative\u201d [E-072:F4, E-058:F8]."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-002",
+          "E-021",
+          "E-025"
+        ],
+        "representative_quote": "Workers United retains ~38% ownership; Delaware Public Benefit Corp; B Corp score 155.3; founding signatory NZBA, PRB, PCAF, SBTi.",
+        "source_kind": "docx"
+      },
+      "id": "42776146-4a8d-49a7-bed3-dc959f3d400f",
+      "involved_subcap_ids": [
+        "P4C2.8.5",
+        "P4C2.7.3",
+        "P4C2.8.6",
+        "P4C2.8.6",
+        "P4C4.3.3",
+        "P4C4.4.5",
+        "P4C4.6.4",
+        "P4C4.3.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "38%",
+          "delta": null,
+          "kpi_label": "Workers United retains",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Mission Alignment Preservation. Workers United retains ~38% ownership\u2026",
+      "verbatim_quote": "7. Mission Alignment Preservation. Workers United retains ~38% ownership; Delaware Public Benefit Corp; B Corp score 155.3; founding signatory NZBA, PRB, PCAF, SBTi. Climate strategy operational with named leadership across community impact, climate partnerships, sustainability advisory [E-002:F1, E-021:F1, E-025:F1]."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-071",
+          "E-072"
+        ],
+        "representative_quote": "Anchored on three strategic platforms: Salesforce FSC (Phase 2 in flight with Xede), MuleSoft (integration modernization led by Zennify), and Databricks (lakehouse Phase 1 complete with Phase 2 advisory underway).",
+        "source_kind": "docx"
+      },
+      "id": "d06e7c80-46f8-4310-9250-d2f3123e467d",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C1.5.2",
+        "P1C1.8.2",
+        "P4C3.5.2",
+        "P2C1.5.1",
+        "P4C1.2.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 17,
+        "P4": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Multi-Platform Digital Transformation. Anchored on three strategic platforms: Salesforce FSC\u2026",
+      "verbatim_quote": "3. Multi-Platform Digital Transformation. Anchored on three strategic platforms: Salesforce FSC (Phase 2 in flight with Xede), MuleSoft (integration modernization led by Zennify), and Databricks (lakehouse Phase 1 complete with Phase 2 advisory underway). Microsoft Copilot deployed for AI literacy [E-071:F2, E-072:F3]."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P4C2 AI Enablement (lowest ceiling M1.5)",
+        "source_kind": "docx"
+      },
+      "id": "29783316-b6af-493d-ae00-52aef9dcdff3",
+      "involved_subcap_ids": [
+        "P2C3.5.7",
+        "P2C3.5.4",
+        "P2C3.5.2",
+        "P2C3.8.2",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.4.5",
+        "P2C4.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "verbatim_quote": "P4C2 AI Enablement (lowest ceiling M1.5): SR 11-7 model governance framework, ML model inventory, Agentforce production rollout, AI risk tiering rubric. Engage CTO Adrian Glace, COO/CIO Sean Searby, CFO Jason Darby."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P1C3 Data Strategy (highest uncertainty \u00b11.50): MDM operating model, Unity Catalog deployment, data domain ownership matrix, and data product portfolio definition.",
+        "source_kind": "docx"
+      },
+      "id": "1f61d82d-23e0-45fd-88ff-e34f182a0303",
+      "involved_subcap_ids": [
+        "P2C3.5.7",
+        "P2C3.5.4",
+        "P2C3.5.2",
+        "P2C3.8.2",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.4.5",
+        "P2C4.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "verbatim_quote": "P1C3 Data Strategy (highest uncertainty \u00b11.50): MDM operating model, Unity Catalog deployment, data domain ownership matrix, and data product portfolio definition. Engage Brad Fiery (Head of Data Governance) plus Databricks/Zeb."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P3C2 Operational Risk & Fraud (vendor unknown): Fraud detection platform vendor identification, transaction fraud KRIs, operational loss event database trend.",
+        "source_kind": "docx"
+      },
+      "id": "43479b22-be6d-4751-8028-7e7c567ec6ac",
+      "involved_subcap_ids": [
+        "P2C3.5.7",
+        "P2C3.5.4",
+        "P2C3.5.2",
+        "P2C3.8.2",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.4.5",
+        "P2C4.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "verbatim_quote": "P3C2 Operational Risk & Fraud (vendor unknown): Fraud detection platform vendor identification, transaction fraud KRIs, operational loss event database trend. Engage CRO Ina Narula, BSA/AML Mark Fernandez."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P4C1 Data Management (foundation for AI): Unity Catalog activation, data lineage tooling selection, MDM hub strategy, data quality scorecards.",
+        "source_kind": "docx"
+      },
+      "id": "596e125d-f9cf-4bba-a6b2-24405b83a2bb",
+      "involved_subcap_ids": [
+        "P3C3.8.4",
+        "P1C2.5.3",
+        "P2C4.1.1",
+        "P4C1.5.1",
+        "P4C1.1.4",
+        "P4C1.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 17,
+        "P3": 17,
+        "P4": 49
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "verbatim_quote": "P4C1 Data Management (foundation for AI): Unity Catalog activation, data lineage tooling selection, MDM hub strategy, data quality scorecards. Engage Brad Fiery + data engineering bench."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P2C3 Channel Experience (largest CX risk): Service center technology stack, agent training program, BBB-cited issue remediation roadmap.",
+        "source_kind": "docx"
+      },
+      "id": "5ac1246c-bb11-49a3-9497-4330e06ac34d",
+      "involved_subcap_ids": [
+        "P4C3.1.2",
+        "P1C1.6.3",
+        "P2C3.8.1",
+        "P2C3.1.2",
+        "P2C3.5.6",
+        "P3C3.5.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 49,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "verbatim_quote": "P2C3 Channel Experience (largest CX risk): Service center technology stack, agent training program, BBB-cited issue remediation roadmap. Engage VP Director Customer Service Michael Pepe Jr., CMO Dawn Zappetti."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "From the seventeen capability discovery question sets above, the following focus areas are prioritized for internal stakeholder engagement during Layer 1 Assessment",
+        "source_kind": "docx"
+      },
+      "id": "102170f4-832b-4adf-9b5e-0eedbabe72e2",
+      "involved_subcap_ids": [
+        "P2C3.5.7",
+        "P2C3.5.4",
+        "P2C3.5.2",
+        "P2C3.8.2",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.4.5",
+        "P2C4.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "verbatim_quote": "From the seventeen capability discovery question sets above, the following focus areas are prioritized for internal stakeholder engagement during Layer 1 Assessment:"
+    }
+  ]
+}

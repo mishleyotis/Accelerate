@@ -1,0 +1,635 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "sl-green-realty-corp-nys-0001",
+  "financials": {
+    "lines": [
+      "Financial data confirmed from SEC EDGAR earnings releases (T1 sources). Five-year trajectory with CAGR analysis. Revenue labels corrected from entity profile: FY2025 data from Q4 2025 earnings release (SEC, filed Jan 28, 2026).",
+      "\u00b9 FY2025 total revenues $1,003M confirmed from Q4 2025 SEC earnings release (Jan 28, 2026). Highest in 5 years. [T1]",
+      "\u00b2 FY2024 FFO includes $216.1M ($3.08/share) one-time debt extinguishment gains [E-019]",
+      "\u00b3 FY2025 FFO includes $57.2M ($0.75/share) debt extinguishment gains [SEC FY2025 earnings]",
+      "Revenue Trend: VARIABLE-TO-RECOVERING. Decline FY2022\u2192FY2024 reflects $8B+ deliberate portfolio dispositions. FY2025 recovery to $1,003M driven by: (1) One Madison full-year contribution, (2) GLS CMBS securitization income ($62.7M new in FY2025), (3) strong leasing velocity. Normalized FFO stable ~$5.00/share across 3 years. SUMMIT trajectory ACCELERATING (23.4% 3yr CAGR) then slight FY2025 moderation \u2014 Paris 2027 is next growth catalyst.",
+      "Trend: VARIABLE (office declining) + SUMMIT ACCELERATING + GLS/CMBS EMERGING",
+      "The five-year revenue trajectory reflects a deliberate strategic pivot, not operational decline. SLG disposed $8B+ of assets between 2021 and 2025 to concentrate on trophy Manhattan buildings commanding record rents. This reduced portfolio sq ft but lifted per-sq-ft metrics to all-time highs: $56/sqft average starting rent, 8.5% above prior fully-escalated rents in FY2024. [E-007, E-019]",
+      "FY2025 revenue recovered to $1,003M \u2014 the highest in five years \u2014 driven by: (1) One Madison full-year contribution, (2) GLS CMBS special servicing fee income ($62.7M in FY2025 vs $19M in FY2024), and (3) strong rental recovery from record leasing activity. This revenue mix shift toward recurring fee income is the execution of strategic objective SO-02. [SEC Q4 2025 earnings, T1]",
+      "SUMMIT inflection point: Revenue grew from near-zero (Oct 2021) to $133.2M (FY2024) at 23.4% 3yr CAGR, before a slight decline to $122.3M in FY2025 reflecting NYC tourism patterns. Paris 2027 is the next growth catalyst. Without marketing automation (VG-03 CONFIRMED) and a visitor CRM, SUMMIT cannot drive repeat visitation, pre-launch demand generation, or global audience acquisition at scale. This is the most tangible Marketing Cloud use case in the portfolio. [E-087]",
+      "Normalized FFO: Both FY2024 ($3.08/share gains) and FY2025 ($0.75/share gains) included one-time debt extinguishment gains. Normalized FFO is stable: FY2023 $4.94 \u2192 FY2024 $5.03 \u2192 FY2025 $4.97 \u2192 FY2026 guidance $4.40\u2013$4.70. Reflects steady execution within a capital-recycling strategy. FY2026 guidance dilution reflects One Madison stabilization costs and casino license write-off. [E-086]"
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1200,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Dedicated HR/people function with formal team structure"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2024"
+        ],
+        "geography": "Maryland, New York",
+        "headline": "$1.3B net income \u00b7 FY2024",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            34.9,
+            1300.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Maryland",
+      "New York"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marc Holliday",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Harrison Sitomer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Edward Piccinich",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Matthew DiLiberto",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "John Mathews",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Information Technology"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Senior Director InfoSec",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Information Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Bill Hand",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Sr. Director, Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steven Durels",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Leasing & Real Property"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brett Herschenfeld",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Retail & Opportunistic"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Robert Schiffer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sr. Director, InfoSec",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Information Security"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "Legal Structure: SL Green Realty Corp. is a fully integrated, self-managed real estate investment trust (REIT) organized under the laws of the state of Maryland, incorporated in 1980 and publicly listed on the New York Stock Exchange under ticker SLG since 1997. [E-009] The company operates as Manhattan's largest office landlord, with its principal executive offices at One Vanderbilt Avenue, New York, NY 10017.\n\nThe self-managed REIT structure is directly relevant to Zennify's engagement model: all technology procurement \u2014 CRM, ESG platforms, and operations systems \u2014 is an internal corporate decision, not delegated to a third-party property manager. Technology investments must demonstrate clear operational ROI within the REIT's disciplined capital allocation framework (mandatory 90%+ taxable income distribution requirement).",
+    "primary_regulator": "SEC",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-002",
+        "excerpt": "SUMMIT 2024 revenue >$130M; Special Servicing FY2024: $13.2B active and designated assignments",
+        "title": "Summit 2024 revenue >$130M",
+        "type": "conference",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001040971/000110465925037534/tm252542-1"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-007",
+        "excerpt": "Digital business strategy embedded in CEO compensation structure: specific incentives for SUMMIT International, Debt Fund, Special Servicing, Casino bid",
+        "title": "Digital business strategy embedded in CEO compensation structure\u2026",
+        "type": "conference",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001040971/000110465925037534/tm252542-1"
+      },
+      {
+        "author": null,
+        "date": "2024-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Post-implementation optimization: SUMMIT celebrated 3rd anniversary Oct 2024 with record attendance; J\u014dji restaurant opened, then J\u014dji Box (284% YoY revenue growth) \u2014 continuous improvement post-launc",
+        "title": "J\u014dji restaurant opened",
+        "type": "conference",
+        "url": "https://www.costar.com/article/1584672744/sl-green-to-identify-two-sites-outside"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "No blog, research publication, or original content program found; content is primarily PR (press releases, deal announcements) not long-form editorial thought leadership",
+        "title": "Content is PR (press releases, deal announcements)",
+        "type": "blog",
+        "url": "https://slgreen.com/news/"
+      },
+      {
+        "author": null,
+        "date": "2024-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-062",
+        "excerpt": "SLG digital marketing stack as inferred: VTS (leasing CRM + marketing), Building Engines (tenant service), summitov.com (SUMMIT B2C ticketing), slgreen.com (corporate + properties portal), IR website",
+        "title": "SLG digital marketing stack",
+        "type": "conference",
+        "url": "https://www.vts.com/vts-market"
+      },
+      {
+        "author": "Marc Holliday",
+        "date": "2024-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "CEO Marc Holliday keynote at Commercial Observer Future of New York Forum March 2024 \u2014 active thought leadership participation",
+        "title": "CEO Marc Holliday keynote active thought leadership participation",
+        "type": "conference",
+        "url": "https://www.linkedin.com/company/sl-green"
+      }
+    ],
+    "ticker": "NYSE: SLG"
+  },
+  "issue_register": [
+    {
+      "id": "8ed82fe3-e17d-41ff-b58a-399e5277737e",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-14",
+      "rationale": "Calculation_Chain sheet missing from scoring workbook. v5.5 does not generate this sheet; v2.4 expects it for score audit trail.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Calculation_Chain sheet missing from scoring workbook. v5.5 does not generate this sheet; v2.4 expects it for score audit trail."
+    },
+    {
+      "id": "c972975d-23ae-4ccb-bc49-e0eba552d6fd",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-14",
+      "rationale": "9 sheet name mismatches between v5.5 workbook output and v2.4 audit expectations. v5.5 uses: 'P1_Subcap_Scoring', 'Category_Detail', 'Executive_Summary', 'Evidence_Master'. v2.4 expects: 'P1', 'Category_Summary', 'Caps_Applied', 'Evidence_Registry', 'Critic_Log'.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "9 sheet name mismatches between v5.5 workbook output and v2.4 audit expectations. v5.5 uses: 'P1_Subcap_Scoring', 'Category_Detail', 'Executive_Summary', 'Evidence_Master'. v2.4 expects: 'P1', 'Category_Summary', 'Caps_Applied', 'Evidence_Registry', 'Critic_Log'."
+    },
+    {
+      "id": "8bfb975a-da09-4c4f-8b48-bf8dfc190385",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-14",
+      "rationale": "Caps_Applied sheet not found in workbook; cap information embedded in export CSVs only. v2.4 expects a dedicated Caps_Applied worksheet with standardized columns.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Caps_Applied sheet not found in workbook; cap information embedded in export CSVs only. v2.4 expects a dedicated Caps_Applied worksheet with standardized columns."
+    },
+    {
+      "id": "11967eac-41e3-4484-8aad-3546eb5206ad",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-14",
+      "rationale": "Critic_Log sheet not found in workbook. v2.4 Check CR-01 expects a Critic_Log worksheet. In this engagement, critic findings are tracked in 03_issues/03_issue_register.json (v5.5 approach).",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Critic_Log sheet not found in workbook. v2.4 Check CR-01 expects a Critic_Log worksheet. In this engagement, critic findings are tracked in 03_issues/03_issue_register.json (v5.5 approach)."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section is BORROWED from the Client Profile Research Report (Section 5.1) and enriched with assessment-layer capability cap impacts. Issues were validated via connector searches on 2026-05-14. The cap values documented here are the ACTUAL caps applied in the scoring workbook.",
+    "trend_md": "This section is BORROWED from the Client Profile Research Report (Section 3.2 and 3.3) per Phase 7 Data Borrowing Protocol. Assessment-layer maturity signal annotations have been added to each milestone row."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 3.21,
+        "P1C3": 3.2,
+        "P1C4": 3.02,
+        "P1C5": 3.41,
+        "P2C1": 3.07,
+        "P2C2": 3.14,
+        "P2C3": 2.85,
+        "P2C4": 1.72,
+        "P3C1": 3.2,
+        "P3C2": 3.06,
+        "P3C3": 3.09,
+        "P3C4": 3.12,
+        "P4C1": 3.04,
+        "P4C2": 3.02,
+        "P4C3": 3.53,
+        "P4C4": 3.07
+      },
+      "overall_score": 3.04,
+      "peer_name": "Payments Canada (The Canadian Payments Association)",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-SLG-20260514-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "culture promotes teamwork, diversity, and inclusion' (Indeed reviews) 91% of senior management hired from local community (Greater NYC area) per GRI \u2014 talent development rooted in local market cultivation Work-life balance rating 3.7/5 (low",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.7
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Nscale (Nvidia-backed AI infrastructure, $14.6B valuation) signed 7,204 SF lease at $320/sqft April 2026 \u2014 SLG attracting cutting-edge AI tenants",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "30c6db82-07ef-42d0-9603-544aa6528ca4",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://slgreen.com/sl-green-and-mori-building-co-ltd-complete-investment-in-one-vanderbilt-avenue/",
+      "subcap_ids": [],
+      "title": "Nscale (Nvidia-backed AI infrastructure, $14.6B valuation)\u2026"
+    },
+    {
+      "body": "Harvey AI (legal AI, Fortune 500 platform) signed 185,326 SF at One Madison (March 2026 expansion); building now 100% leased; first quarter 2026 leasing 900,000+ SF \u2014 best in SLG history",
+      "date_precision": "month",
+      "e_id": "E-022",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "526224bc-dbd9-465c-8cba-9a576a118b9b",
+      "kind": "partnership",
+      "signal": "positive",
+      "source_url": "https://slgreen.gcs-web.com/news-releases/news-release-details/sl-green-reaches-100-leased-transformative-one-madison-avenue",
+      "subcap_ids": [],
+      "title": "Harvey AI (legal AI, Fortune 500 platform) signed 185,326 SF"
+    },
+    {
+      "body": "SLG 2026 strategy: sell ~$2.5B of property; pursue ~$1B in acquisitions; Park Avenue Tower acquired $730M (Jan 2026); 346 Madison purchased $160M for next major development",
+      "date_precision": "month",
+      "e_id": "E-024",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "269c3bb1-609e-48f4-963a-212f1b5a0662",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://therealdeal.com/national/2026/03/15/inside-sl-greens-busy-start-to-2026/",
+      "subcap_ids": [],
+      "title": "Park Avenue Tower acquired $730"
+    },
+    {
+      "body": "Debt fund launched 2024 \u2014 $1.3B final close Dec 2025; special servicing $13.2B active+designated assignments \u2014 quantified KPIs for new business lines",
+      "date_precision": "month",
+      "e_id": "E-019",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "298b74c3-4f3c-4baa-84a6-3b901dfd75a2",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://slgreen.com/sl-green-realty-corp-reports-fourth-quarter-2024-eps-of-0-13-per-share-and-ffo-of-1-81-per-share/",
+      "subcap_ids": [],
+      "title": "Debt fund launched"
+    },
+    {
+      "body": "Debt Fund (H2 innovation): 'in Q2 [2025], we closed over $500M in fund commitments, bringing total capital raised to more than $1B... surpassing our original target' \u2014 staged-gate funding model demonstrated",
+      "date_precision": "year",
+      "e_id": "E-048",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "f1d08de4-93b8-4651-8275-eab47177dfa0",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.leadersmag.com/issues/2025.4_Oct/NYC/LEADERS_Sitomer_SL_Green.html",
+      "subcap_ids": [],
+      "title": "We closed over $500M in fund commitments"
+    },
+    {
+      "body": "'People Experience' team is a named organizational unit under COO \u2014 dedicated HR/people function with formal team structure reported on slgreen.com/about/people-experience-team/",
+      "date_precision": "publish_fallback",
+      "e_id": "E-089",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-089"
+      ],
+      "id": "75fb6951-c1df-40c2-a977-da01e131c92f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.nyserda.ny.gov/About/Publications/Featured-Case-Studies/SL-Green-Realty-Corp",
+      "subcap_ids": [],
+      "title": "Dedicated HR/people function with formal team structure"
+    },
+    {
+      "body": "Mori Building Co. (Japan) acquired 16% cumulative stake in One Vanderbilt at $4.7B gross valuation \u2014 signals technology/quality premium in building valuation",
+      "date_precision": "publish_fallback",
+      "e_id": "E-010",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "075aedfe-248a-4f99-bdfd-e766131665e7",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://slgreen.com/sl-green-and-mori-building-co-ltd-complete-investment-in-one-vanderbilt-avenue/",
+      "subcap_ids": [],
+      "title": "Mori Building Co. (Japan) acquired 16% cumulative stake in\u2026"
+    },
+    {
+      "body": "$1.3B debt fund launched 2024, exceeded original $1B target \u2014 venture-style capital allocation with institutional LP returns tracking",
+      "date_precision": "year",
+      "e_id": "E-031",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "913511b4-ef3a-41b8-8d91-ace56c580364",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://slgreen.gcs-web.com/static-files/9376b5d8-e0d9-4061-80b9-d5beb6bbfd27",
+      "subcap_ids": [],
+      "title": "$1.3B debt fund launched"
+    },
+    {
+      "body": "10-K FY2024 Item 1C Cybersecurity: 'monitoring program deployed in Company's IT environment'; SVP IT + Senior Director InfoSec receive alerts from 'security measures deployed' \u2014 confirmed monitoring/alerting infrastructure",
+      "date_precision": "year",
+      "e_id": "E-080",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-080"
+      ],
+      "id": "ffc5f022-2ce0-4856-a3d6-7b5e254e5dae",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001040971/000104097125000010/slg-20241231.htm",
+      "subcap_ids": [],
+      "title": "10-K FY2024 Item 1C Cybersecurity: 'monitoring program\u2026"
+    },
+    {
+      "body": "188 Manhattan office leases signed in 2024 at starting rents 8.5% above previous fully-escalated rents on same spaces; office occupancy 92.5%",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "8320aac4-a6c1-4e50-a88f-54cee351bbfe",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001040971/000110465925037534/tm252542-1_def14a.htm",
+      "subcap_ids": [],
+      "title": "188 Manhattan office leases signed in 2024 at starting\u2026"
+    },
+    {
+      "body": "Above-market average occupancy since 1993 \u2014 demonstrated leasing effectiveness through relationship model; 188 Manhattan office leases signed in 2024 at 8.5% above prior escalated rents",
+      "date_precision": "year",
+      "e_id": "E-054",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-054"
+      ],
+      "id": "187982b8-fbb9-4ff0-98e2-ffcb92c470fa",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://slgreen.com/about/leasing/",
+      "subcap_ids": [],
+      "title": "188 Manhattan office leases signed in 2024 at 8.5% above\u2026"
+    },
+    {
+      "body": "ESG Report 2024 Business Continuity & Disaster Recovery focus areas: Cloud Disaster Recovery, Crisis Communication, Emergency Action Plan, Emergency Operations Center \u2014 structured BC framework with 4 named components",
+      "date_precision": "year",
+      "e_id": "E-071",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "b41c5d9b-0ecb-460e-aba8-a343bfee2472",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://sustainability.slgreen.com/2024-esg-report/",
+      "subcap_ids": [],
+      "title": "ESG Report 2024 Business Continuity & Disaster Recovery\u2026"
+    },
+    {
+      "body": "ESG Report 2024: SLG uses 'platforms including real-time energy management, fault detection, and automation' \u2014 confirms multiple analytics platforms beyond individually named tools",
+      "date_precision": "year",
+      "e_id": "E-075",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "124b6303-d59b-445a-bfd3-049e3434c7a4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://sustainability.slgreen.com/2024-esg-report/",
+      "subcap_ids": [],
+      "title": "ESG Report 2024: SLG uses 'platforms including real-time\u2026"
+    },
+    {
+      "body": "Cloud Disaster Recovery confirmed as named tool in SLG ESG Report 2024 Business Continuity section \u2014 cloud-based DR strategy operational; specific cloud provider not disclosed",
+      "date_precision": "year",
+      "e_id": "E-078",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "2fd5ba70-a619-40cf-8b85-0b1d46d1916d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://sustainability.slgreen.com/2024-esg-report/",
+      "subcap_ids": [],
+      "title": "Cloud Disaster Recovery confirmed 2024 Business Continuity\u2026"
+    },
+    {
+      "body": "SLG deployed a custom learning management platform in 2023 (in collaboration with Aetos Imaging Systems startup); hosted, distributed and monitored training content; self-paced, remote-accessible \u2014 formal LMS deployment confirmed",
+      "date_precision": "year",
+      "e_id": "E-047",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "366bfe1b-75c0-4743-ac7c-7a3cc764996f",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://ko.nyserda.ny.gov/Rescale%EC%9D%80%3F/%EB%AC%B8%ED%97%8C/%EC%A3%BC%EC%9A%94-%EC%82%AC%EB%A1%80-%EC%97%B0%EA%B5%AC/SL-%EA%B7%B8%EB%A6%B0-%EB%B6%80%EB%8F%99%EC%82%B0-%EA%B3%B5%EC%82%AC",
+      "subcap_ids": [],
+      "title": "SLG deployed a custom learning management platform"
+    },
+    {
+      "body": "IBM Envizi (SaaS) deployed June 2022: single system of record for ESG data; automates collection from utility data, RECs, waste data, business travel, purchased goods \u2014 multi-source automated data ingestion",
+      "date_precision": "month",
+      "e_id": "E-068",
+      "event_date": "2022-06-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "65ebaa53-453e-4159-aa98-ae80c669062f",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/sl-green-adopts-ibm-technology-to-operationalize-sustainability-initiatives-across-extensive-nyc-real-estate-portfolio-301559899.html",
+      "subcap_ids": [],
+      "title": "IBM Envizi (SaaS) deployed"
+    },
+    {
+      "body": "UiPath (automation software) occupies 26,363 SF at One Vanderbilt (15-year lease signed Sept 2021); technology tenant segment confirmed",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2021-09-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "f2bb860c-998c-4dc7-9e6f-d717c86e57b0",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://slgreen.com/sl-green-and-mori-building-co-ltd-complete-investment-in-one-vanderbilt-avenue/",
+      "subcap_ids": [],
+      "title": "UiPath (automation software) occupies 26,363 SF"
+    },
+    {
+      "body": "VTS named SL Green as confirmed adopter of VTS Market as 'system of record for digital leasing and marketing' \u2014 confirmed by VTS in Sept 2020 press release; SLG among 8 of top 10 NYC office landlords using VTS",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2020-09-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "404079a7-0d08-43ff-ae8f-b703ebd6a30b",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.vts.com/news/8-out-of-top-10-largest-new-york-office-landlords-including-sl-green-and-rudin-management-have-chosen-vts-market-as-system-of-record-for-digital-leasing-and-marketing",
+      "subcap_ids": [],
+      "title": "VTS named SL Green as confirmed adopter of VTS Market as\u2026"
+    },
+    {
+      "body": "Yardi Pulse Building Optimization at 1515 Broadway (deployed 2016): adjusts HVAC set points every 30 seconds; integrates with BMS; 7% HVAC spend savings; 99% ROI; 1.2yr payback \u2014 real-time building automation",
+      "date_precision": "year",
+      "e_id": "E-066",
+      "event_date": "2016-07-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "0aa7dd8d-4f60-4bdd-a0e4-e8d7a453f049",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.yardi.com/en-gb/about-us/success-stories/sl-green-corp-on-pulse-active-ee/",
+      "subcap_ids": [],
+      "title": "Yardi Pulse Building Optimization at 1515 Broadway deployed"
+    },
+    {
+      "body": "SLG appointed Parimala Rao as SVP of Information Technology in 2015 \u2014 role with Google, Microsoft, IBM, NY Times experience; background in data warehouse, cloud computing, enterprise application development",
+      "date_precision": "year",
+      "e_id": "E-016",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "cf3c79c7-f68f-47de-8212-3f8d92860525",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://slgreen.com/new-head-of-information-technology-joins-sl-green-realty-corp/",
+      "subcap_ids": [],
+      "title": "SLG appointed Parimala Rao"
+    },
+    {
+      "body": "Yardi Voyager Commercial deployed at SLG since 1998 \u2014 26+ year ERP incumbency; covers property management, leasing administration, financial accounting, tenant billing \u2014 primary SOR for operations and financials",
+      "date_precision": "year",
+      "e_id": "E-066",
+      "event_date": "1998-07-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "1d45dda9-23db-468d-8157-a16947ae8171",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.yardi.com/en-gb/about-us/success-stories/sl-green-corp-on-pulse-active-ee/",
+      "subcap_ids": [],
+      "title": "Yardi Voyager Commercial deployed at SLG"
+    },
+    {
+      "body": "Architecture is SaaS-centric: IBM Envizi (SaaS), ADP (SaaS), Building Engines (SaaS), VTS (SaaS), summitov.com (cloud commerce) alongside on-prem-likely Yardi Voyager (deployed 1998) and Cisco/AT&T MPLS network",
+      "date_precision": "year",
+      "e_id": "E-099",
+      "event_date": "1998-07-01",
+      "evidence_e_ids": [
+        "E-099"
+      ],
+      "id": "d7abea4f-8e0e-4665-ad8d-f6412339462f",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.datanyze.com/companies/sl-green-realty/96944426",
+      "subcap_ids": [],
+      "title": "IBM Envizi (SaaS), ADP (SaaS), Building Engines (SaaS), VTS\u2026"
+    }
+  ]
+}

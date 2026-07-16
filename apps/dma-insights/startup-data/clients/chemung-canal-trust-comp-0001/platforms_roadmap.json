@@ -1,0 +1,157 @@
+{
+  "entity_display_id": "chemung-canal-trust-comp-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.36",
+          "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Financial Services Cloud \u2014 Unified Relationship Platform"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.36",
+          "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce Marketing Cloud \u2014 Digital Acquisition & Campaign Intelligence"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.36",
+          "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Salesforce Data Cloud + CRM Analytics \u2014 Enterprise Data Foundation"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 1.64 \u2192 4.0 (peer median 1.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C1 score 1.64 \u2192 4.0 (peer median 1.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.36",
+          "metric": "P4C1 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Agentforce + Einstein AI \u2014 AI-Augmented Banking Operations"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.36",
+          "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "MuleSoft Anypoint Platform \u2014 Integration Backbone"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.36",
+          "metric": "P4C1 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Digital Strategy & Roadmap Workshop"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4, P4C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.36",
+          "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.64 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Wealth Management Platform Assessment & FSC Wealth Deployment"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CCTRUST-20260429-0001",
+  "total_duration_months": 12
+}

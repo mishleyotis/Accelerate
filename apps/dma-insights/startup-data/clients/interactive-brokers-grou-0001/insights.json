@@ -1,0 +1,263 @@
+{
+  "entity_display_id": "interactive-brokers-grou-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C1",
+        "P2C1.1.1",
+        "P2C1.2.CU1",
+        "P2C1.2.7",
+        "P2C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-038",
+        "E-039"
+      ],
+      "ic_id": "GAP-P2C1",
+      "id": "c9f6811a-06dc-4c6c-ae65-e972615674bd",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-038",
+            "E-039"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-036",
+        "E-040",
+        "E-020",
+        "E-042",
+        "E-023",
+        "E-033",
+        "E-041"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Close the Digital Channels gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-040].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Digital Channels trails peers by 1.4",
+      "what_text": "Digital Marketing Strategy Document is one of Interactive Brokers Group, Inc.'s least developed customer experience capabilities, scoring 1.4 out of 5 in Zennify's latest assessment, below the 3.2 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Interactive Brokers Group, Inc.'s ability to deliver a stronger, more personalised customer experience [E-036].",
+      "why_text": "Digital Channels trails the peers by 1.4 points — a competitive maturity gap that compounds across the pillars it feeds [E-037, E-036].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.5.1",
+        "P1C3.1.1",
+        "P1C1.1.4",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P1C1",
+      "id": "935c291a-7421-4e2c-a830-ffec2182ce08",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-011",
+        "E-091",
+        "E-010",
+        "E-094",
+        "E-024",
+        "E-014",
+        "E-012",
+        "E-013"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Start with Digital Strategy & Vision — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-091].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy & Vision trails peers by 0.9",
+      "what_text": "Multi-Year Roadmap is one of Interactive Brokers Group, Inc.'s least developed strategy and governance capabilities, scoring 1.9 out of 5 in Zennify's latest assessment, below the 3.4 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Interactive Brokers Group, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E-011].",
+      "why_text": "The assessment found: “Since inception, IBKR has focused on developing proprietary software to automate broker-dealer functions; technology is the key to the company's success per 10-K. Development queue is prioritized and” [E-010]. Peers score 3.4 on Digital Strategy & Vision against this institution's 2.5 — the 0.9-point shortfall shows up in every capability rolled into this category.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C2.5.1",
+        "P3C3.2.2",
+        "P3C1.8.AM2",
+        "P3C1.8.CL4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C2",
+      "id": "6365e4ca-7fe8-4a49-8b9c-3b9640b52728",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-047",
+        "E-044",
+        "E-045",
+        "E-046",
+        "E-050",
+        "E-043"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize Customer Journeys & Servicing: recovering the 0.9-point deficit against the cohort moves overall maturity more than any at-parity category can [E-045].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Customer Journeys & Servicing trails peers by 0.9",
+      "what_text": "E-Signature & Document Execution is one of Interactive Brokers Group, Inc.'s least developed customer experience capabilities, scoring 1.9 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Interactive Brokers Group, Inc.'s ability to deliver a stronger, more personalised customer experience [E-044].",
+      "why_text": "The assessment found: “CFPB Rule 1033 (Oct 2024) mandated consumer financial data portability; Apr 2026 compliance deadline for large institutions. July 2025: CFPB stayed rule and initiated new rulemaking” [E-047]. The peer benchmark for Customer Journeys & Servicing is 3.3; at 2.4 this institution operates 0.9 points behind the peers it competes with for the same customers.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P1C1.3.IC1",
+        "P2C1.1.IC1",
+        "P1C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C3",
+      "id": "a9a878c4-1e30-47fb-91a6-0103043cf12b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C1"
+        },
+        {
+          "e_ids": [
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-050",
+        "E-049",
+        "E-092",
+        "E-048",
+        "E-051"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Sequence Segment & Line-of-Business CX into the near-term roadmap: the 0.9-point peer gap is measurable, so progress is provable quarter over quarter [E-049].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Segment & Line-of-Business CX trails peers by 0.9",
+      "what_text": "Customer Context Visibility (360) is one of Interactive Brokers Group, Inc.'s least developed customer experience capabilities, scoring 1.4 out of 5 in Zennify's latest assessment, below the 3.2 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Interactive Brokers Group, Inc.'s ability to deliver a stronger, more personalised customer experience [E-050].",
+      "why_text": "At 2.3/5, Segment & Line-of-Business CX is the widest measured deficit vs the peer median (3.2) among this run's remaining categories [E-020, E-050].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": null,
+    "recommendations_md": "Five recommendations are presented below, ranked by the Six-Factor Priority Score. Each recommendation is: (1) validated against IBKR's confirmed tech stack — every solution is confirmed absent before inclusion; (2) argued with IBKR-specific rationale that passes the specificity test — no generic prose; (3) mapped to specific evidence citations; and (4) scoped per zennify_solutions.md — no investment amounts per engagement framework rules. See Appendix C (Sub-Vertical Weights) and the Scoring Workbook for underlying data."
+  },
+  "run_request_id": "DMA-SCORE-IBKR-20260514-0001"
+}

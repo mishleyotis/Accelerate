@@ -1,0 +1,572 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Guaranteed Rate, Inc. (dba Rate)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Gateless Inc. spun off as independent company. Series A led by Ciardelli + THL Partners (Thomas H. Lee). Paul Anastos = CEO Gateless + CIO Rate. Ciardelli retains equity.. P3C1 Automation M4 (Rate = primary Gateless customer); P3C4 TPRM risk from related-party dependency",
+      "closed_on": null,
+      "details": "Gateless Inc. spun off as independent company. Series A led by Ciardelli + THL Partners (Thomas H. Lee). Paul Anastos = CEO Gateless + CIO Rate. Ciardelli retains equity.. P3C1 Automation M4 (Rate = primary Gateless customer); P3C4 TPRM risk from related-party dependency",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "id": "181e68ce-2800-42be-98de-334ab29cbe4b",
+      "source_url": null,
+      "status": null,
+      "target": "Gateless Inc. spun as independent company",
+      "title": "Gateless Inc. spun as independent company"
+    },
+    {
+      "acquirer": "Guaranteed Rate, Inc. (dba Rate)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Acquired AI Foundry (Kodak Alaris business unit) \u2014 machine vision + document AI platform. Formed foundation of Gateless technology stack.. P4C2.8 Computer Vision M3\u2013M4; P3C1.2 STP M4 \u2014 provides Rate's core document AI capability",
+      "closed_on": null,
+      "details": "Acquired AI Foundry (Kodak Alaris business unit) \u2014 machine vision + document AI platform. Formed foundation of Gateless technology stack.. P4C2.8 Computer Vision M3\u2013M4; P3C1.2 STP M4 \u2014 provides Rate's core document AI capability",
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "id": "f7977631-944f-4eb2-96ba-d5e8b9d179ef",
+      "source_url": null,
+      "status": null,
+      "target": "AI Foundry",
+      "title": "Acquired AI Foundry (Kodak Alaris business unit)"
+    }
+  ],
+  "entity_display_id": "guaranteed-rate-inc-dba--0001",
+  "financials": {
+    "lines": [
+      "Rate\u2019s operational scale reflects a business that expanded aggressively during the 2020\u20132021 refi boom and has now right-sized for a purchase-market recovery. The H1 2025 data (+14% YoY) confirms the recovery trajectory is real. [E-143, E-015]",
+      "Rate's origination volume follows the US mortgage market macro cycle: peak refi boom (2020\u20132021), rate-shock contraction (2022\u20132023), and measurable purchase-market recovery (2024\u20132025). The H1 2025 +14% YoY acceleration confirms the recovery is structural, not episodic. [E-015, E-143]"
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 850,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 3871,
+        "events": [
+          {
+            "fy": "FY2021",
+            "label": "Gateless Inc. spun as independent company"
+          },
+          {
+            "fy": "FY2020",
+            "label": "Acquired AI Foundry (Kodak Alaris business unit)"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "United States National (all 50 states + DC + Puerto Rico)",
+        "headline": "$20.2B net income \u00b7 FY2025",
+        "regulator": "FTC (Gramm-Leach-Bliley Act, Safeguards Rule, FTC Act) + CFPB",
+        "series": {
+          "net_income_m": [
+            15.1,
+            75000.0,
+            25000.0,
+            24700.0,
+            24700.0,
+            20200.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States National (all 50 states + DC + Puerto Rico)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Victor F. Ciardelli III",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO, Chairman, Founder"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nikolaos Athanasiou",
+        "note": "Nik",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Suk Shah",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dr. Ramesh Sarukkai",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CPTO (Chief Product + Technology Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Darin Hurd",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Stenger",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Production Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Shant Banosian",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President, Rate Mortgage"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul Anastos",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Innovation Officer (Rate) + CEO, Gateless Inc."
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Andrew Hill",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO (reports to Sarukkai)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Arlyn Kalinski",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Fair & Equitable Lending Strategies"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "Guaranteed Rate, Inc. (dba Rate) is a lending institution. It reports $24.7 billion in total assets. It is regulated by FTC and employs approximately 3,871 people across 850 branches. Its overall digital maturity is assessed at 2.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FTC (Gramm-Leach-Bliley Act, Safeguards Rule, FTC Act) + CFPB",
+    "size_tier": "mid-size",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "2ac4a2d4-9e36-4645-9ea4-6576df256bea",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-16",
+      "rationale": "Score propagation: 30 violations. P1 calc=2.01 vs 2.01",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Score propagation: 30 violations. P1 calc=2.01 vs 2.01"
+    },
+    {
+      "id": "e7d1722a-57d3-45f3-9452-28a78d172fb6",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-16",
+      "rationale": "URL blank: 429/708 (60.6%)",
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "URL blank: 429/708 (60.6%)"
+    },
+    {
+      "id": "3581ec7c-8558-4890-b967-279e9f80e559",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-16",
+      "rationale": "No capped rows found despite active ISSUE-001/002",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "No capped rows found despite active ISSUE-001/002"
+    },
+    {
+      "id": "7b79ad81-b064-4c26-979f-ce5bcb5473b8",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-16",
+      "rationale": "Proof structure: 100.0% complete rationales, 47.6% with evidence links",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Proof structure: 100.0% complete rationales, 47.6% with evidence links"
+    },
+    {
+      "id": "7fd1796d-1b03-4920-8423-a317e20529e3",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-16",
+      "rationale": "Only 0.6% rationales contain counterclaim language (threshold \u226560%)",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Only 0.6% rationales contain counterclaim language (threshold \u226560%)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section is borrowed from the Rate Client Profile Research Report (DMA-RES-GRATE-20260415-0001, Section 5.1) and enriched with assessment scoring impacts. Issues identified here directly determine capability score caps applied in Section 6 Pillar Deep Dives. The assessment's scoring methodology is a binding constraint on capability scores \u2014 it is not an opinion, it is an enforced ceiling.",
+    "trend_md": "This section is borrowed from the Rate Client Profile Research Report (Research Run DMA-RES-GRATE-20260415-0001, Sections 3.2\u20133.4) with assessment-layer annotations added per the Data Borrowing Protocol. Historical context here PRECEDES scoring \u2014 it establishes the macro and digital arc that informs Pillar Deep Dives in Section 6."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.76,
+        "P1C2": 2.75,
+        "P1C3": 3.0,
+        "P1C4": 2.5,
+        "P1C5": 3.06,
+        "P2C1": 2.59,
+        "P2C2": 2.81,
+        "P2C3": 2.34,
+        "P2C4": 2.43,
+        "P3C1": 3.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 3.19,
+        "P4C2": 2.66,
+        "P4C3": 2.98,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.63,
+      "peer_name": "Bridgecrest",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.48,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.47,
+        "P2C2": 2.48,
+        "P2C3": 2.46,
+        "P2C4": 2.0,
+        "P3C1": 2.39,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.49,
+        "P4C2": 2.49,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.43,
+      "peer_name": "Compeer Financial",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.92,
+        "P1C4": 2.0,
+        "P1C5": 1.28,
+        "P2C1": 2.54,
+        "P2C2": 2.96,
+        "P2C3": 2.71,
+        "P2C4": 1.73,
+        "P3C1": 2.55,
+        "P3C2": 1.75,
+        "P3C3": 2.56,
+        "P3C4": 1.81,
+        "P4C1": 2.05,
+        "P4C2": 2.05,
+        "P4C3": 2.75,
+        "P4C4": 2.32
+      },
+      "overall_score": 2.29,
+      "peer_name": "loanDepot, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.82,
+        "P1C2": 1.82,
+        "P1C3": 1.51,
+        "P1C4": 1.82,
+        "P2C1": 2.5,
+        "P2C2": 2.52,
+        "P2C3": 2.39,
+        "P2C4": 2.01,
+        "P3C1": 2.5,
+        "P3C2": 2.38,
+        "P3C3": 2.41,
+        "P3C4": 1.93,
+        "P4C1": 2.54,
+        "P4C2": 1.84,
+        "P4C3": 2.88,
+        "P4C4": 2.58
+      },
+      "overall_score": 2.22,
+      "peer_name": "Security Finance Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.26,
+        "P1C2": 2.6,
+        "P1C3": 2.14,
+        "P1C4": 2.26,
+        "P1C5": 2.02,
+        "P2C1": 1.86,
+        "P2C2": 1.79,
+        "P2C3": 1.82,
+        "P2C4": 1.89,
+        "P3C1": 2.02,
+        "P3C2": 1.9,
+        "P3C3": 2.14,
+        "P3C4": 2.12,
+        "P4C1": 1.91,
+        "P4C2": 1.94,
+        "P4C3": 2.32,
+        "P4C4": 2.48
+      },
+      "overall_score": 2.09,
+      "peer_name": "WSFS Financial Corporation",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASS-GRATE-20260416-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "Agent Magazine, NerdWallet/Forbes/Fortune lender rankings, Glassdoor employment signals, Google Play app reviews, ICML proceedings, trade press conference citations, and market analysis reports",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "nel, NPS longitudinal P2 Rate App load-time issues; no App Store analytics 22 subcaps SuperApp (com.guaranteedrate.superapp) confirmed with user complaints",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "App Store",
+        "themes": [],
+        "trend": "Declining",
+        "value": null
+      },
+      {
+        "drilldown": "However, Google Play reviews for com.guaranteedrate.superapp confirm load-time issues and a missing mortgage payment feature \u2014 evidence of omnichannel aspiration exceeding current execution",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Rate's Same Day Mortgage and NPS 9.7/10 metrics,, T2] are representative of the evidence available for high-visibility public-facing capabilities, whereas internal processes (model governance, data architecture, board governance) requir",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 9,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "5.06M RESOLVED with self-correction credit, T1]); 39 CFPB consumer complaints in 2024 \u2014 all resolved, T1]; NMLS #2611 active in all 50 states + DC + Puerto Rico",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "trend": "Declining",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Rate\u2013Betterment Partnership: mortgage rate incentives (0.75% discount + $500 credits) for Betterment users with $100K+ AUM. Through Dec 2026.. P2C1 Digital Marketing M3; P4C3.2 Integration M3 \u2014 new FinTech wealth management acquisition channel",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [],
+      "id": "ab3fdeca-7ee6-4e78-8aa0-36d24f15af0d",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Rate\u2013Betterment Partnership: mortgage rate incentives\u2026"
+    },
+    {
+      "body": "HMDA confirmed: $24.7B. Rate Intelligence launched Oct 2024. [E-040, E-143]",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-040",
+        "E-143"
+      ],
+      "id": "e05b411e-3593-4b54-ab9d-ef503d47d242",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "HMDA confirmed"
+    },
+    {
+      "body": "Purchase-only market; margin compression; AI platform investment accelerated [E-040]",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "2a3f5c1f-8b74-4a6c-a773-640dda609a19",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AI platform investment accelerated"
+    },
+    {
+      "body": "Rate shock; industry-wide contraction; headcount reduction 11K\u21924K [E-015]",
+      "date_precision": "year",
+      "e_id": "E-015",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "f94d06a4-4d5d-4f22-8a27-3954c2bd7aca",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Rate shock; industry-wide contraction; headcount reduction\u2026"
+    },
+    {
+      "body": "Industry volume peak; Gateless spin-off; Sarukkai joins as CPTO [E-082, E-121]",
+      "date_precision": "year",
+      "e_id": "E-082",
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-082",
+        "E-121"
+      ],
+      "id": "4420c345-6bc4-4418-9a02-3d052a0c4e13",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Industry volume peak; Gateless spin-off joins as CPTO"
+    },
+    {
+      "body": "Gateless Inc. spun off as independent company. Series A led by Ciardelli + THL Partners (Thomas H. Lee). Paul Anastos = CEO Gateless + CIO Rate. Ciardelli retains equity.. P3C1 Automation M4 (Rate = primary Gateless customer); P3C4 TPRM risk from related-party dependency",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "181e68ce-2800-42be-98de-334ab29cbe4b",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Gateless Inc. spun as independent company"
+    },
+    {
+      "body": "Refi surge; COVID digital adoption; FlashClose tech leadership [E-034]",
+      "date_precision": "year",
+      "e_id": "E-034",
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "9d302731-c08d-4939-9019-735bcfc2a0ce",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Refi surge; COVID digital adoption; FlashClose tech\u2026"
+    },
+    {
+      "body": "Acquired AI Foundry (Kodak Alaris business unit) \u2014 machine vision + document AI platform. Formed foundation of Gateless technology stack.. P4C2.8 Computer Vision M3\u2013M4; P3C1.2 STP M4 \u2014 provides Rate's core document AI capability",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [],
+      "id": "f7977631-944f-4eb2-96ba-d5e8b9d179ef",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Acquired AI Foundry (Kodak Alaris business unit)"
+    },
+    {
+      "body": "Proper Rate LLC: JV with @properties (8th largest US brokerage) \u2014 boutique mortgage embedded in Chicago's largest independent brokerage.. P2C1 Marketing M3 \u2014 local real estate channel integration",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [],
+      "id": "6513c7b4-fd36-4cae-914c-f7eee84d58db",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Proper Rate LLC: JV with @properties (8th largest US\u2026"
+    },
+    {
+      "body": "Guaranteed Rate Affinity LLC: JV with Realogy/Anywhere/Coldwell Banker \u2014 embedded mortgage at real estate brokerage.. P2C1 Digital Marketing M3 \u2014 real estate channel partnership",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2017-01-01",
+      "evidence_e_ids": [],
+      "id": "e7be9e35-1acf-43d3-8537-85421c950371",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Guaranteed Rate Affinity LLC: JV with\u2026"
+    }
+  ]
+}

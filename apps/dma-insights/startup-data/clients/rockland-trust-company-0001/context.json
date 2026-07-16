@@ -1,0 +1,411 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Rockland Trust Company",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": "E-PUB-0005",
+      "event_date": "2025-01-01",
+      "id": "39978069-5637-48a2-b158-38291d4af552",
+      "source_url": null,
+      "status": null,
+      "target": "Enterprise Bancorp",
+      "title": "Enterprise Bancorp"
+    },
+    {
+      "acquirer": "Rockland Trust Company",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "id": "9e4fa526-6242-4bbc-a654-d9fc94f0dba8",
+      "source_url": null,
+      "status": null,
+      "target": "East Boston Savings Bank",
+      "title": "East Boston Savings Bank"
+    },
+    {
+      "acquirer": "Rockland Trust Company",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2019-01-01",
+      "id": "e237d53c-6b8c-4b02-8cc1-c063dbc5424a",
+      "source_url": null,
+      "status": null,
+      "target": "Blue Hills Bank",
+      "title": "Blue Hills Bank"
+    }
+  ],
+  "entity_display_id": "rockland-trust-company-0001",
+  "financials": {
+    "lines": [
+      "Rockland Trust operates 151 branches, 21 commercial lending centers, 12 investment management offices, and 5 mortgage centers across Massachusetts, Rhode Island, and New Hampshire, with 1,001\u20135,000 employees [E-071, E-072].",
+      "Asset growth CAGR (2023\u20132025): ~13%, driven by Enterprise Bank acquisition. Organic growth (2023\u20132024) was effectively flat [E-073\u2013E-075].",
+      "Overall trend: VARIABLE (acquisition-driven step-change with modest organic growth). NIM compressed from 3.54% to 3.28% (FY2023\u2013FY2024), partial recovery to 3.33% in Q4 2024. ROAA declined from 1.24% to 0.99%. The $300M subordinated debt raise in March 2025 provides acquisition funding and growth capital [E-071, E-073, E-075, E-076]."
+    ],
+    "metrics": {
+      "net_income": 50000000.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Northeast US"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lee C. Powlus",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Technology and Operations Officer"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Rockland Trust Company, a wholly-owned subsidiary of Independent Bank Corp. (NASDAQ: INDB), is a state-chartered commercial bank and FRB member founded in 1907 (FDIC Certificate #613008). Headquartered at 288 Union Street, Rockland, Massachusetts, the institution is relocating to One Technology Place - a purpose-built 140,000 square-foot campus consolidating five existing offices - by fall 2026 [E-055]. The holding company trades on the NASDAQ Global Select Market with a market capitalization of approximately $3.8 billion as of March 2026 [E-050, E-051].",
+    "primary_regulator": "Federal Reserve",
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-INT-0009",
+        "excerpt": "Hubbl flows: 326 rows. Columns: id, itemId, label, description, interviewLabel, status",
+        "title": "Hubbl flows 326 rows",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-INT-0201",
+        "excerpt": "Hubbl flows.csv: 326 rows. Columns: id, itemId, label, description, interviewLabel, status",
+        "title": "Hubbl flows.csv: 326 rows",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0042",
+        "excerpt": "Financial wellness tools: savings trackers (biweekly/monthly), budgeting resources, Learning Center articles, 'Voices of RT' expert series. Q2/Q3 2025 roadmap: advanced budgeting, personalized investment insights, real-t",
+        "title": "Financial wellness tools: savings trackers (biweekly/monthly)\u2026",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0020",
+        "excerpt": "Metropolitan Commercial Bank, Rockland Trust & Salem Five Bank revealed successful CX strategies to drive digital growth. Conference presentation on digital acquisition.",
+        "title": "Metropolitan Commercial Bank, Rockland Trust & Salem Five Bank\u2026",
+        "type": "conference",
+        "url": "einpresswire.com"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0039",
+        "excerpt": "PROXY: Rockland Connects (1,400 member customer community) used for feedback-driven improvement. CX Strategy conference presentation suggests measurement culture. Snowflake analytics platform enables funnel analysis.",
+        "title": "Rockland Connects (1,400 member customer community) used for\u2026",
+        "type": "conference",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0034",
+        "excerpt": "PROXY: Learning Center with financial education articles, savings trackers, 'Voices of Rockland Trust' series, Business Strategy Series. Thought leadership via banking conferences (CX Strategy conference).",
+        "title": "Learning Center with financial education articles, savings trackers\u2026",
+        "type": "conference",
+        "url": null
+      }
+    ],
+    "ticker": "INDB"
+  },
+  "issue_register": [
+    {
+      "id": "ddb68380-7647-41a5-9e85-8103cffe038e",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Run ID mismatch across artifacts"
+    },
+    {
+      "id": "7e429d4b-315c-43fb-bb1f-34e40204f003",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Score propagation errors"
+    },
+    {
+      "id": "779e4be0-9210-4cf1-8564-1a433c495dc4",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Evidence ID references not in registry"
+    },
+    {
+      "id": "2a1174b6-1224-44c1-87fa-faa6fbb98409",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Range-style evidence references found"
+    },
+    {
+      "id": "cd07e34b-c15e-45db-8b74-8101a30bce8c",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Evidence mode mismatch"
+    },
+    {
+      "id": "5917e328-d174-4a36-a32c-fa8c44ef618c",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Evidence completeness gap: EC-02_ERS"
+    },
+    {
+      "id": "9c353e7b-9f1c-4df6-9ad3-384d7cfc6059",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "High concentration at M1"
+    },
+    {
+      "id": "c9f56d15-1e5c-49a2-b24d-776c3d348c87",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Weak recommendation evidence anchoring"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Asset growth CAGR (2023\u20132025): ~13%, driven by Enterprise Bank acquisition.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 3.5,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P2C5": 2.5,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.88,
+      "peer_name": "Camden National Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P2C5": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.79,
+      "peer_name": "Eastern Bank / Eastern Bankshares",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P2C5": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.65,
+      "peer_name": "Provident Financial Services",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P2C5": 2.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.32,
+      "peer_name": "Beacon Bank & Trust (Brookline + Berkshire Hills)",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-RES-RTC-20260311-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "dies), and 25 T4 items (proxy indicators from job postings, Glassdoor, conference presentations)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-PUB-0005"
+      ],
+      "id": "39978069-5637-48a2-b158-38291d4af552",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Enterprise Bancorp"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "9e4fa526-6242-4bbc-a654-d9fc94f0dba8",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "East Boston Savings Bank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2019-01-01",
+      "evidence_e_ids": [],
+      "id": "e237d53c-6b8c-4b02-8cc1-c063dbc5424a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Blue Hills Bank"
+    }
+  ]
+}

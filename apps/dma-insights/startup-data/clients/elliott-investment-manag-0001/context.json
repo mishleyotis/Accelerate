@@ -1,0 +1,567 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "elliott-investment-manag-0001",
+  "financials": {
+    "lines": [
+      "AUM has compounded to mega-scale \u2014 ~$76.1B (Jun 2025) to ~$79.8B net / ~$128.6B regulatory (Dec 31 2025) [E-061, E-062], with the firm closed to new investors since mid-2024, signaling capacity-managed rather than asset-gathering growth. Returns are not publicly disclosed at the fund level (private LP). [E-061, E-062, E-075]"
+    ],
+    "metrics": {
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 657,
+        "events": [],
+        "fy": [
+          "FY2023",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$76.0B assets \u00b7 FY2025 \u00b7 +7.7% CAGR",
+        "regulator": "US SEC \u2014 registered investment adviser, IA #307151",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            65.5,
+            76.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        65500000000.0,
+        76000000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2023,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          65500000000.0,
+          76000000000.0
+        ]
+      }
+    ],
+    "years": [
+      2023,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (national)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Paul Singer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Founder, Co-CEO & Co-CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jonathan Pollock",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Co-CEO & Co-CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jesse Cohn",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Managing Partner (activism/equity)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gordon Singer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Equity Partner (London)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dave Miller",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Equity Partner / Head of U.S. Restructuring"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Richard Zabel",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "General Counsel & Chief Legal Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Shannon O'Connor",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jaime Hobbeheydar",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Marketing & Investor Relations Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steven Barg",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Global Co-Head of Engagement"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mart\u00edn Moore",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Engagement"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Jarvis",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, Engagement & Stewardship"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Christine O'Brien",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Investment Stewardship"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ken McComb",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Global Real Estate & Business Resiliency"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stefan Strid",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Senior Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Anthony Sweet",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Security Analyst"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jana Jacobson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Recruiting"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dan Senor",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Public Affairs"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Patrick Litr\u00e9",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Senior Advisor (ex-Bain)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered investment adviser",
+    "narrative_md": "Elliott Investment Management L.P. is an asset manager. It reports $79.8 billion in assets under management. It is regulated by US SEC \u2014 registered investment adviser and employs approximately 657 people. Its overall digital maturity is assessed at 3.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "US SEC \u2014 registered investment adviser, IA #307151",
+    "size_tier": "large",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-027",
+        "excerpt": "Elliott runs purpose-built activist-campaign communications: a dedicated microsite (Streamline66.com) hosting downloadable investor presentations ('Streamline 66: Elliott's Perspectives on Value Creation'), GOLD universa",
+        "title": "Elliott runs purpose-built activist-campaign communications: a\u2026",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-053",
+        "excerpt": "For the 2025 Phillips 66 campaign Elliott stood up a dedicated microsite (Streamline66.com) hosting downloadable investor presentations ('Streamline 66: Elliott's Perspectives on Value Creation'; 'The Choice for Sharehol",
+        "title": "For the 2025 Phillips 66 campaign Elliott stood up a dedicated\u2026",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-011",
+        "excerpt": "Employee sentiment: overall 3.3/5, culture 3.4, mgmt 3.3, work-life 3.4, comp 3.3; CEO approval 48%; recommend-to-friend 4 yes/5 no; interview experience POOR.",
+        "title": "Employee sentiment: overall 3.3/5, culture 3.4, mgmt 3.3, work-life\u2026",
+        "type": "article",
+        "url": null
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "4e30973f-84c3-47ef-b264-3b0163883358",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P1_Scoring_Detail has 182 rows, expected ~199"
+    },
+    {
+      "id": "462717cc-d1fd-4e5d-94c2-51b60d307104",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P2_Scoring_Detail has 226 rows, expected ~288"
+    },
+    {
+      "id": "151b587c-b8d6-46bf-bf1e-cea989242d58",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P3_Scoring_Detail has 115 rows, expected ~162"
+    },
+    {
+      "id": "8a41f2a3-b4b0-443d-a597-243664c98e6f",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P4_Scoring_Detail has 171 rows, expected ~187"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Value grew from $65.5B (2023) to $76.0B (2025) \u2014 7.7% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 4.0,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 3.5,
+        "P4C2": 4.0,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.29,
+      "peer_name": "Millennium Management",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "Pershing Square Capital Management",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.0,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "Third Point LLC",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.0,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.68,
+      "peer_name": "ValueAct Capital",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.8,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.46,
+      "peer_name": "Starboard Value LP",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-EIM-20260604-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "[UPDATE 2026: Glassdoor 4.5/5 (24 reviews, 21% above FS avg), 94% recommend; WLB 3.9, culture 3.9, careers 4.1",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 24,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.5
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Jason Genrich, partner/senior PM who led Elliott's TMT investments (HPE, Crown Castle, Citrix take-private), departed Jan 2026 (consultant to mid-year).",
+      "date_precision": "month",
+      "e_id": "E-016",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "bb4ea9dc-799d-4562-8a7e-1b851e43022c",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Jason Genrich, partner/senior PM who led Elliott's TMT\u2026"
+    },
+    {
+      "body": "Elliott had a Head of Artificial Intelligence (Jan 2024\u2013Jan 2026) and a Deputy CTO (2019\u20132023) \u2014 dedicated AI leadership within the technology org. [UPDATE 2026: Vinod Mathew departed as Head of AI in Jan 2026 (E-068); the AI mandate/org persists but the named role is now vacant per public signals \u2014 internal-discovery on successor.]",
+      "date_precision": "month",
+      "e_id": "E-019",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-019",
+        "E-068"
+      ],
+      "id": "837352c1-1e43-4303-98ba-bf1bcc05d684",
+      "kind": "leadership",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Vinod Mathew departed as Head of AI"
+    },
+    {
+      "body": "Named leaders include James Jarvis (Director, Engagement & Stewardship), Joy Semple (MD), Ethan Flint & Tracy Vo (Directors, Private Equity), Robert Bruno (Partner) and a Head of Recruitment; recent departures include Vinod Mathew (Head of AI, left Jan 2026) and Jordan Bryk (MD Private Credit, Apr 2026). Employer rating 4.5/5 (31 reviews): Work-Life 3.9, Compensation 4.7, Culture 3.9, Career 4.1.",
+      "date_precision": "month",
+      "e_id": "E-068",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "b58c36e5-74c2-430f-8aba-00e2aa9d6fbe",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Recent departures include Vinod Mathew (Head of AI, left\u2026"
+    },
+    {
+      "body": "Patrick Litr\u00e9 joined as Senior Advisor in 2025 \u2014 formerly led Bain's global transformation/Results Delivery practice; signals senior advisory capacity in transformation/change.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "e1960d41-9e9e-4f8c-aa64-514d43d283fc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Patrick Litr\u00e9 joined as Senior Advisor in 2025"
+    },
+    {
+      "body": "Elliott built a ~$1.9B Starbucks position entirely in private, engaging the board for ~two months before any public disclosure, with its August 13, 2024 release (signed by Jesse Cohn and Marc Steinberg) anchoring the thesis to auditable SEC-reported operating metrics rather than rhetoric \u2014 evidencing disciplined information-sequencing and operationally-grounded campaign design.",
+      "date_precision": "day",
+      "e_id": "E-056",
+      "event_date": "2024-08-13",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "3afc5002-853f-4cd4-97ef-2d460bf2ea51",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Elliott built a ~$1.9B"
+    },
+    {
+      "body": "AMF fined Elliott Advisors UK \u20ac15M + Elliott Capital Advisors \u20ac5M for tender-offer reporting failures + obstruction (SAN-2020-04); upheld by Paris Court of Appeal 2022 and Cour de cassation Apr 2024.",
+      "date_precision": "year",
+      "e_id": "E-009",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "69bee87d-ca9b-449e-9e0e-6f46ad5b76f8",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AMF fined Elliott Advisors UK"
+    },
+    {
+      "body": "Management Committee performs strategic & oversight functions: Singer & Pollock (co-CEO/co-CIO; Pollock also Chief Trading Officer), Gordon Singer (Mng Partner), Jesse Cohn (Mng Partner), Zion Shohet (COO, partner 2020), Richard Zabel (GC/CLO), Dan Senor (Chief Public Affairs Officer), Terry Kassel (Head Strategic HR), Patrick Litr\u00e9 (Senior Advisor, joined 2025).",
+      "date_precision": "year",
+      "e_id": "E-017",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "3ec606c3-0061-4d07-abac-570107fcd105",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Pollock also Chief Trading Officer), Gordon Singer (Mng\u2026"
+    },
+    {
+      "body": "AMF decision 17 Apr 2020 fined Elliott Advisors UK Ltd EUR15M and Elliott Capital Advisors LP EUR5M for inaccurate/late tender-offer reporting (reported cash-settled CFDs when instruments were equity swaps; belated declaration of intent) re: XPO's 2015 bid for Norbert Dentressangle; EAUK also fined for OBSTRUCTING the AMF investigation. Upheld by Paris Court of Appeal 24 Mar 2022 (EUR14M + EUR4.5M); appeal pending at Cour de Cassation. Aggravated by a prior EUR8M AMF insider-trading fine (2014). Repeat disclosure/conduct-controls weakness.",
+      "date_precision": "day",
+      "e_id": "E-036",
+      "event_date": "2020-04-17",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "96d5c008-a76b-48e0-94da-281231825033",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AMF decision 17 Apr 2020 fined Elliott Advisors UK Ltd\u2026"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "entity_display_id": "farm-credit-mid-america--0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 2.53 \u2192 4.0 (peer median 2.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 2.53 \u2192 4.0 (peer median 2.25)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Tableau",
+          "maturity_lift": "+1.47",
+          "metric": "P2C1 score 2.53 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.53 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-01",
+          "title": "Strengthen P2C1: SMS & Mobile Marketing"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.44",
+          "metric": "P2C3 score 2.56 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C3 score 2.56 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Strengthen P2C3: AI Claims Estimation"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C1, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C2 score 2.64 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P1C2 score 2.64 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "nCino",
+      "recommendations": [
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.36",
+          "metric": "P1C2 score 2.64 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C2 score 2.64 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-03",
+          "title": "Strengthen P1C2: Adoption-to-Value Measurement & Instrumentation"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.13",
+          "metric": "P2C4 score 2.87 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C4 score 2.87 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-04",
+          "title": "Strengthen P2C4: Optimization & Learning"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P1C2, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C1 score 2.97 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P1C1 score 2.97 \u2192 4.0 (peer median 2.75)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "nCino",
+      "recommendations": [
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.03",
+          "metric": "P1C1 score 2.97 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C1 score 2.97 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-05",
+          "title": "Strengthen P1C1: Data Strategy Alignment"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P1C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-FCMA-20260418-0001",
+  "total_duration_months": 12
+}

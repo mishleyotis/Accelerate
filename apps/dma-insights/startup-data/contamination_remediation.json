@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "1st-security-bank-of-was-0001",
+    "name": "1st Security Bank of Washington",
+    "tier": "A",
+    "markers": {
+      "foreign_tickers": [
+        "FSBW"
+      ],
+      "foreign_runid_tokens": [
+        "1SB"
+      ],
+      "foreign_entities": [
+        "Pacific West"
+      ]
+    }
+  },
+  {
+    "slug": "beacon-bank-0001",
+    "name": "Beacon Bank",
+    "tier": "A",
+    "markers": {
+      "foreign_tickers": [
+        "BBT"
+      ],
+      "foreign_runid_tokens": [
+        "BBT"
+      ],
+      "foreign_entities": [
+        "Berkshire",
+        "Legacy Berkshire"
+      ]
+    }
+  },
+  {
+    "slug": "southstate-corporation-0001",
+    "name": "SouthState Corporation",
+    "tier": "B",
+    "markers": {
+      "foreign_tickers": [
+        "SSB"
+      ],
+      "foreign_runid_tokens": [
+        "SSB"
+      ],
+      "foreign_entities": []
+    }
+  }
+]

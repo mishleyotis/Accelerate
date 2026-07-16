@@ -1,0 +1,786 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "bell-bank-5p78",
+    "domain": null,
+    "hq": null,
+    "id": "4434d02e-1b2e-4805-8b36-c442d03ceda4",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Bell Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:56.471592Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 1,
+    "undated_count": 1
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 1
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 1
+    },
+    "tiers": {
+      "T1": 1
+    },
+    "total_facts": 1,
+    "total_items": 1
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 14.1,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 14070000000.0,
+    "branches": 33,
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "total_assets": "$14.1B"
+    },
+    "headcount": 2000,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Michael Solberg",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Jena Cogswell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Marketing Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Chief Risk",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Risk Officer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "Bell Bank",
+    "license_type": "FDIC-insured bank",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Bell Bank is a regional bank. It reports $14.1 billion in total assets. It is regulated by FDIC and employs approximately 2,000 people across 33 branches. Its overall digital maturity is assessed at 2.0 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC",
+    "revenue_usd": null,
+    "sentiment": {
+      "sources": [
+        {
+          "rating": "3.5-4.0",
+          "source": "Glassdoor",
+          "themes": "Family culture, growth"
+        },
+        {
+          "rating": "4.0+",
+          "source": "Google",
+          "themes": "Customer service"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large",
+    "thought_leadership": null,
+    "tl_synced_at": null
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.458511+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Bell Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary: A Development-Stage Bank Positioned for Strategic Advancement",
+    "scqa_md": "Bell Bank is a $14.1B in assets regional bank regulated by FDIC with 2,000 employees. Zennify's assessment places overall digital maturity at 2.0/5. The deepest capability gap is Data Strategy & Vision at 1.7/5 against a 2.0 peer median. Next is AI-Powered Content Generation at 1.7/5 against a 2.0 peer median. Third is DevOps & Delivery Excellence at 1.7/5 against a 2.5 peer median.\n\nThe issue register adds Evidence index contains 50 unique evidence items; manifest reports 281 total evidence references across all capabilities…. The issue register adds Auditor flagged 'duplicate' capability IDs in P1_Scoring_Detail. This is expected structure: Column A contains Capability Cluster (…. Counter-signal: Security & Compliance Assessment already runs at 2.5/5 against a 2.0 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-001].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Bell Bank is whether to close Data Strategy & Vision first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Bell Bank should lead with Tableau (74/100 fit) against Strategy Refresh Cadence, then sequence Databricks behind it. Closing Data Strategy & Vision to the peer median alone is worth 0.3 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.\"."
+  },
+  "overall_score": 2.0,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/ASSESSMENT_MANIFEST.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 39 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.433293+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.447196+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.447737+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.448133+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_error_log.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.448372+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Sentiment_Analysis.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.449125+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Coverage_Matrix.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.449533+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A9_Tech_Utilization.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.450344+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/Bell_Bank_DMA_Execution_Plan.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 37 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.450717+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendation_summary.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:54.451223+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 3,
+      "INFO": 21
+    },
+    "stage_ms": {
+      "manifest": 9,
+      "parse": 5935,
+      "persist": 1473
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'Regional Bank'",
+        "severity": "INFO"
+      },
+      {
+        "code": "run_id format",
+        "detail": "run_id format: unrecognized run_id format: 'DMA-RES-BELL-20260305-P78'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_Be",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_Bell_Bank_20260305.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 139 cap event(s) parsed from 08_appendices/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 22 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 3 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 2 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/ASSESSMENT_MANIFEST.md — no fingerprint matched (best confidence 0.00); 39 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Sentiment_Analysis.csv — no fingerprint matched (best confidence 0.25); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A9_Tech_Utilization.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/Bell_Bank_DMA_Execution_Plan.md — no fingerprint matched (best confidence 0.00); 37 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendation_summary.md — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'Regional Bank'",
+      "run_id format: unrecognized run_id format: 'DMA-RES-BELL-20260305-P78'",
+      "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_Bell_Bank_20260305.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "governance_audit_logs: reasoning_chain=0 contradictions=1",
+      "caps_applied_log: 139 cap event(s) parsed from 08_appendices/caps_applied_log.csv",
+      "tech_stack_from_variant_source: 22 entries",
+      "used docx-extracted recommendations: 3 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "sentiment_from_csv: 2 sources",
+      "insights_derived_from_category_gaps: 4",
+      "INFO/pattern_gap: 06_peers/ASSESSMENT_MANIFEST.md — no fingerprint matched (best confidence 0.00); 39 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Sentiment_Analysis.csv — no fingerprint matched (best confidence 0.25); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A9_Tech_Utilization.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/Bell_Bank_DMA_Execution_Plan.md — no fingerprint matched (best confidence 0.00); 37 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendation_summary.md — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.38,
+      "pillar_id": "P1",
+      "score": 2.07,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.0,
+      "pillar_id": "P2",
+      "score": 2.13,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.0,
+      "pillar_id": "P3",
+      "score": 2.1,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.14,
+      "pillar_id": "P4",
+      "score": 1.7,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": null,
+    "assessment_date_source": null,
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:56.471592Z",
+    "created_at": "2026-07-02T23:10:56.471592Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "645a455a-9fb5-4586-be09-f4d4c658e65e",
+    "overall_score": null,
+    "request_id": "DMA-RES-BELL-20260305-P78",
+    "started_at": "2026-07-02T23:10:56.471592Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Salesforce"
+      ],
+      "score": 2.18,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "why": "The shortfall is relative, not absolute: 2.18/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Data Strategy & Vision is a priority capability gap in data and technology, scoring 1.68/5 against a peer median of 2.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [],
+      "magnitude": "0.3 pts below peer median",
+      "name": "Data Strategy & Vision",
+      "peer_median": 2.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.68,
+      "so_what": "Prioritize Data Strategy & Vision in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Data Strategy & Vision",
+      "what": "Data Strategy & Vision is a priority capability gap in data and technology, scoring 1.68/5 against a peer median of 2.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The shortfall is relative, not absolute: 1.68/5 sits below the 2.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "AI-Powered Content Generation is a priority capability gap in data and technology, scoring 1.69/5 against a peer median of 2.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [],
+      "magnitude": "0.3 pts below peer median",
+      "name": "AI-Powered Content Generation",
+      "peer_median": 2.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.69,
+      "so_what": "Prioritize AI-Powered Content Generation in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "AI-Powered Content Generation",
+      "what": "AI-Powered Content Generation is a priority capability gap in data and technology, scoring 1.69/5 against a peer median of 2.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The shortfall is relative, not absolute: 1.69/5 sits below the 2.0 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Competitive Intelligence averages 2.2/5 over 165 scored subcaps; ceiling 2.7 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Ongoing Monitoring averages 2.0/5 over 217 scored subcaps; ceiling 2.5 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "AI Use Case Pipeline averages 2.0/5 over 190 scored subcaps; ceiling 2.5 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Training Effectiveness averages 2.1/5 over 205 scored subcaps; ceiling 2.6 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Governance averages 2.1/5 over 70 scored subcaps; ceiling 2.6 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Lead Scoring & Qualification averages 1.9/5 over 287 scored subcaps; ceiling 2.4 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Embedded Finance Delivery averages 2.0/5 over 287 scored subcaps; ceiling 2.5 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Predictive Issue Detection averages 2.3/5 over 286 scored subcaps; ceiling 2.8 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "AI Financial Advisor averages 2.5/5 over 255 scored subcaps; ceiling 3.0 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Payment Processing Automation averages 1.8/5 over 143 scored subcaps; ceiling 2.3 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Change Management averages 2.0/5 over 130 scored subcaps; ceiling 2.5 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Disclosure Management averages 2.1/5 over 141 scored subcaps; ceiling 2.6 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Security & Compliance Assessment averages 2.5/5 over 145 scored subcaps; ceiling 3.0 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Strategy & Vision averages 1.7/5 over 200 scored subcaps; ceiling 2.2 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "AI-Powered Content Generation averages 1.7/5 over 270 scored subcaps; ceiling 2.2 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "DevOps & Delivery Excellence averages 1.7/5 over 235 scored subcaps; ceiling 2.2 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Security & Compliance averages 1.8/5 over 150 scored subcaps; ceiling 2.3 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of Bell Bank. Overall digital maturity scored 2.00/5.0 (Jul 2026).",
+      "evidence": [],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of Bell Bank",
+      "metric": null,
+      "peer_context": "Data Strategy & Vision runs 1.68/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Strategy Refresh Cadence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of Bell Bank. Overall digital maturity scored 2.00/5.0 (Jul 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-02",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Data Strategy & Vision scores 1.68/5 vs a typical 2.00 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Data Strategy & Vision scores 1.68/5",
+      "metric": "Data Strategy & Vision 1.68/5 vs peer 2.00",
+      "peer_context": "Data Strategy & Vision runs 1.68/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Strategy Refresh Cadence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Data Strategy & Vision scores 1.68/5 vs a typical 2.00 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "AI-Powered Content Generation at 1.69/5 is one of Bell Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap. The pattern is corroborated across the assessment's evidence index [E-001].",
+      "evidence": [
+        "E-001"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "AI-Powered Content Generation at 1.69/5 is one of Bell…",
+      "metric": null,
+      "peer_context": "Data Strategy & Vision runs 1.68/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Strategy Refresh Cadence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C2",
+      "text": "AI-Powered Content Generation at 1.69/5 is one of Bell Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

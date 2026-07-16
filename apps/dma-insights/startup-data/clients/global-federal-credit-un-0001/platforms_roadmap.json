@@ -1,0 +1,112 @@
+{
+  "entity_display_id": "global-federal-credit-un-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.11 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Strategic",
+      "metric": "P1C5 score 1.11 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Tableau \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.89",
+          "metric": "P1C5 score 1.11 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.11 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Strengthen P1C5: Green Products Strategy"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+2.51",
+          "metric": "P2C4 score 1.49 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.49 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-02",
+          "title": "Strengthen P2C4: Proactive Outreach & Alerts"
+        },
+        {
+          "feature": "Tableau",
+          "maturity_lift": "+2.14",
+          "metric": "P2C3 score 1.86 \u2192 4.0 (peer median 3.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.86 \u2192 4.0 (peer median 3.50)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-03",
+          "title": "Strengthen P2C3: Adapted Communication"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C5, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 1.90 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Aspirational",
+      "metric": "P4C1 score 1.90 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Databricks",
+      "recommendations": [
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+2.1",
+          "metric": "P4C1 score 1.90 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.90 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-04",
+          "title": "Strengthen P4C1: Synthetic Data Generation"
+        },
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+2.08",
+          "metric": "P4C2 score 1.92 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.92 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-05",
+          "title": "Strengthen P4C2: Experiment Tracking + Model Registry Operating Model"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P4C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-GFCU-20260309-0001",
+  "total_duration_months": 16
+}

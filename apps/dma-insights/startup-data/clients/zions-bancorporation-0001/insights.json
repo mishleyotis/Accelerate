@@ -1,0 +1,255 @@
+{
+  "entity_display_id": "zions-bancorporation-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C3",
+        "P1C1.3.IC1",
+        "P2C1.1.IC1",
+        "P1C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-021",
+        "E-031",
+        "E-035",
+        "E-054",
+        "E-072"
+      ],
+      "ic_id": "GAP-P2C3",
+      "id": "bcdc3e85-1c3c-458f-9026-29368f8ea7b3",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-021",
+            "E-031",
+            "E-035",
+            "E-054",
+            "E-072"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C4"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-009",
+        "E-034",
+        "E-058",
+        "E-066",
+        "E-030",
+        "E-038",
+        "E-044"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Start with Segment & Line-of-Business CX — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-034].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Segment & Line-of-Business CX trails peers by 1.3",
+      "what_text": "Service Journey Design is one of Zions Bancorporation's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Zions Bancorporation's ability to deliver a stronger, more personalised customer experience [E-019].",
+      "why_text": "The assessment found: “No AI/chatbot/virtual assistant mentioned in current state. No conversational AI, no NLP processing, no GenAI agent assist in existing platform” [E-009]. Peers score 2.7 on Segment & Line-of-Business CX against this institution's 1.4 — the 1.3-point shortfall shows up in every capability rolled into this category.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C4.2.1",
+        "P2C4.2.5",
+        "P2C4.8.4",
+        "P2C4.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C4",
+      "id": "a7b049d7-19f4-4bb9-afdd-ae642572276b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-019",
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-034",
+        "E-032"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Close the CX & Personalization gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-032].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "CX & Personalization trails peers by 1.6",
+      "what_text": "Next Best Action (NBA) is one of Zions Bancorporation's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Zions Bancorporation's ability to deliver a stronger, more personalised customer experience [E-034].",
+      "why_text": "The assessment found: “Zennify Proposal Phase 2 (Agent Automation, 4.5 months): Einstein Next Best Action for agents, guided workflows for top call types, knowledge article integration, automated after-call work, real-time” [E-019]. CX & Personalization trails the peers by 1.6 points — a competitive maturity gap that compounds across the pillars it feeds.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.4.3",
+        "P4C2.1.2",
+        "P1C3.8.3",
+        "P3C2.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-035"
+      ],
+      "ic_id": "GAP-P4C2",
+      "id": "d5a535ad-a6d6-4bdd-ad09-bf22cec1952c",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-035"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-009",
+        "E-058",
+        "E-020",
+        "E-033",
+        "E-069",
+        "E-012",
+        "E-016",
+        "E-040"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Prioritize Analytics & AI: recovering the 1.4-point deficit against the cohort moves overall maturity more than any at-parity category can [E-020].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Analytics & AI trails peers by 1.4",
+      "what_text": "Feature Store & Feature Lifecycle Management is one of Zions Bancorporation's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Zions Bancorporation's ability to deliver a stronger data and technology foundation [E-058].",
+      "why_text": "The assessment found: “No AI/chatbot/virtual assistant mentioned in current state. No conversational AI, no NLP processing, no GenAI agent assist in existing platform” [E-009]. The peer benchmark for Analytics & AI is 2.7; at 1.2 this institution operates 1.4 points behind the peers it competes with for the same customers.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C1.2.1",
+        "P2C1.2.CU1",
+        "P2C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C1",
+      "id": "bc6e14c7-d66c-4050-b9a2-ff0c4aa09932",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-008",
+        "E-046",
+        "E-072"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Sequence Digital Channels into the near-term roadmap: the 0.9-point peer gap is measurable, so progress is provable quarter over quarter [E-072].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Digital Channels trails peers by 0.9",
+      "what_text": "Website Quality is one of Zions Bancorporation's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Zions Bancorporation's ability to deliver a stronger, more personalised customer experience [E-046].",
+      "why_text": "The assessment found: “No mention of skills-based routing in current Genesys configuration. No mention of omnichannel routing. No digital channels (chat, messaging, social) integrated into contact center platform” [E-008]. At 2.0/5, Digital Channels is the widest measured deficit vs the peer median (2.9) among this run's remaining categories.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Digital Strategy & Vision (2.50/5.00)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience & Engagement (1.61/5.00)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Risk, Compliance & Resilience (2.58/5.00)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Technology & Data Infrastructure (1.86/5.00)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Gap Addressed: Agent Enablement\nZennify Solution: Salesforce FSC + Service Cloud Voice + Knowledge Management\nEvidence:,,,\nReplace Pega/Pegasus link aggregator with Salesforce FSC unified desktop integrating Genesys SCV for CTI screen pop, centralized knowledge base, and real-time customer 360 view. Directly addresses root cause of AHT inflation (30+ app context switches) and 30% attrition linked to poor agent tooling (E-005, E-049). Phase 1 priority."
+  },
+  "run_request_id": "DMA-ASM-ZIONS-20260306-0001"
+}

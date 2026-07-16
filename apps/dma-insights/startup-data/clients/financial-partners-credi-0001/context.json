@@ -1,0 +1,460 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "financial-partners-credi-0001",
+  "financials": {
+    "metrics": {
+      "Efficiency Ratio": "86.97%",
+      "Employees": "282",
+      "Hot Money Ratio": "26.22%",
+      "Members": "92,000",
+      "Net Worth": "Well-capitalized",
+      "ROAA": "0.34%",
+      "Total Assets": "$2.5B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "California"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Darren Herrmann",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "Financial Partners Credit Union is a credit union headquartered in Costa Mesa, CA. It reports $2.5 billion in total assets and has operated since 1937. It is regulated by NCUA and employs approximately 282 people across 14 branches. Its overall digital maturity is assessed at 2.5 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA + CA DFPI (dual regulated)",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-079",
+        "excerpt": "Adobe Analytics + Google Analytics Enhanced Link Attribution \u2014 dual web analytics Mixpanel \u2014 product/behavioral analytics",
+        "title": "Adobe Analytics + Google Analytics Enhanced Link Attribution",
+        "type": "conference",
+        "url": "https://fpcu.org"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-155",
+        "excerpt": "17 BI/analytics tools: Adobe Analytics, Alexa, Datadog, Experian, Google Analytics, IBM SPSS, Power BI, Mixpanel, New Relic, Optimizely, Plaid, Salesforce Connect, SFMC, Siteimprove, Tableau Server, Tableau Software, Yah",
+        "title": "17 BI/analytics tools: Adobe Analytics, Alexa, Datadog, Experian\u2026",
+        "type": "conference",
+        "url": "https://fpcu.org"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "Summit Club for members 55+ \u2014 defined segment program with dedicated support 700+ Select Employer Groups (Boeing, Rockwell) \u2014 SEG-based segmentation strategy",
+        "title": "Summit Club for members 55",
+        "type": "conference",
+        "url": "https://fpcu.org/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-077",
+        "excerpt": "Blog content: 'Smarter Starts Here: Teach Teens Financial Confidence', 'Hidden Cost of Checking', 'Auto Loan Tips', 'Credit Scores 101' Annual Economic Forum with Dr. Christopher Thornberg \u2014 premium thought leadership ev",
+        "title": "Blog content: 'Smarter Starts Here: Teach Teens Financial Confidence",
+        "type": "blog",
+        "url": "https://fpcu.org/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-101",
+        "excerpt": "Medallia + QuantumMetric + Mixpanel = multi-layer service analytics capability Sharpen contact center includes quality management and call analytics",
+        "title": "Medallia + QuantumMetric + Mixpanel",
+        "type": "conference",
+        "url": "https://fpcu.org"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-085",
+        "excerpt": "QuantumMetric + Mixpanel + Google Analytics = digital funnel analytics capability exists No public onboarding metrics: time-to-activate, digital conversion rate, cross-sell within 90 days",
+        "title": "QuantumMetric + Mixpanel + Google Analytics",
+        "type": "conference",
+        "url": "PROXY_SEARCH"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "f3f0a149-91d4-4534-85ce-85b3819c87a4",
+      "issue_id": "ISS-G001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Specificity test (<20% generic): 35% generic (7/20 sampled paras)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Latest available financials show Total Assets of $2.5B.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.82,
+      "peer_name": "California CU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 1.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.47,
+      "peer_name": "Unify Financial CU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 3.0,
+        "P4C3": 2.5,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.35,
+      "peer_name": "Firefighters First CU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.26,
+      "peer_name": "Mission FCU",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-FPCU-20260408-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 100,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [
+          "Teamwork, growth, people-first"
+        ],
+        "trend": "Stable",
+        "value": 3.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CEO Approval",
+        "themes": [
+          "Leadership confidence"
+        ],
+        "trend": "Stable",
+        "value": 81.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Top Workplaces 2025",
+        "themes": [
+          "Professional development, well-being"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Frontline Workers 2026",
+        "themes": [
+          "Frontline employee recognition"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "App Store",
+        "themes": [
+          "Loan rates, customer service, guidance"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "social",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "LinkedIn",
+        "themes": [
+          "CEO Inman Award post"
+        ],
+        "trend": "Active",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "NPS",
+        "themes": [
+          "Industry avg 68"
+        ],
+        "trend": "Unknown",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Member Service Officer hired (Sep 2025) + Member Service Officer hired (Nov 2024) \u2014 ongoing member service staffing",
+      "date_precision": "month",
+      "e_id": "E-148",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-148"
+      ],
+      "id": "20c02150-3769-4fc1-a1b5-168c834acd2e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Member Service Officer hired"
+    },
+    {
+      "body": "Explorium events: Marketing Specialist + Marketing Content Specialist hired 2025 \u2014 marketing team actively expanding",
+      "date_precision": "year",
+      "e_id": "E-081",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "bb2cf15a-238a-46c3-bee7-deac930205a9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Explorium events: Marketing Specialist + Marketing Content\u2026"
+    },
+    {
+      "body": "System Administrator hired in Operations dept (Jun 2025) \u2014 systems management/automation support role",
+      "date_precision": "month",
+      "e_id": "E-128",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-128"
+      ],
+      "id": "1a5973b3-2765-4afd-a5f1-6f2204c3ba35",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "System Administrator hired systems management/automation\u2026"
+    },
+    {
+      "body": "Mortgage Servicing Specialist hired in Finance dept (Feb 2025) \u2014 lending operations capacity",
+      "date_precision": "month",
+      "e_id": "E-128",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-128"
+      ],
+      "id": "4796c123-dd7c-43c1-a0de-afa31f442334",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Mortgage Servicing Specialist hired lending operations\u2026"
+    },
+    {
+      "body": "Service Desk Analyst hired (Jan 2025) \u2014 IT service management staffing",
+      "date_precision": "month",
+      "e_id": "E-148",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-148"
+      ],
+      "id": "66c221b7-2652-43eb-a183-87a5de5523af",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Service Desk Analyst hired (Jan 2025)"
+    },
+    {
+      "body": "Personal Banking Officer hired in Finance dept (Nov 2024) \u2014 member-facing financial services",
+      "date_precision": "month",
+      "e_id": "E-128",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-128"
+      ],
+      "id": "7147c0a4-0870-4b93-ba87-4e7e9a8f77f2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Personal Banking Officer hired member-facing financial\u2026"
+    },
+    {
+      "body": "Member Service Officer hired (Sep 2025) + Member Service Officer hired (Nov 2024) \u2014 ongoing member service staffing",
+      "date_precision": "month",
+      "e_id": "E-148",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-148"
+      ],
+      "id": "2bd6b657-72a0-4a61-ac02-c4b03631633b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Member Service Officer hired"
+    },
+    {
+      "body": "Director of BI hired Nov 2024 = recent investment in analytics leadership",
+      "date_precision": "month",
+      "e_id": "E-154",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-154"
+      ],
+      "id": "f8a79dab-75f3-497a-b62d-9650a6c89f43",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Director of BI hired Nov 2024"
+    },
+    {
+      "body": "Verafin acquired by Nasdaq (2021) for $2.75B \u2014 enterprise-grade, continuously updated AI fraud models",
+      "date_precision": "year",
+      "e_id": "E-131",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-131"
+      ],
+      "id": "207e45bd-8d67-4ac0-ba31-781af8d0be4b",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://fpcu.org",
+      "subcap_ids": [],
+      "title": "Verafin acquired by Nasdaq (2021) for $2.75B\u2026"
+    }
+  ]
+}

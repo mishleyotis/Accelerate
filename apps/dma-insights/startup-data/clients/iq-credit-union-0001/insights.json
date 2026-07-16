@@ -1,0 +1,391 @@
+{
+  "entity_display_id": "iq-credit-union-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C4",
+        "P4C4",
+        "P4C4.3.2",
+        "P3C4.6.2",
+        "P1C1.3.CU2",
+        "P3C2.6.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "744f17f8-7949-4900-bbc2-e81240a7c6cc",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-016",
+        "E-053"
+      ],
+      "linked_subcap_id": "P3C4",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Vendor Due Diligence a near-term focus for iQ Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-053].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Critical Third-Party Vendor Breach",
+      "what_text": "Vendor Due Diligence is one of iQ Credit Union's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes iQ Credit Union's ability to deliver more efficient, dependable operations [E-053].",
+      "why_text": "The research report pins the maturity impact at: CRITICAL cap / at level 2. averages 2.5/5 across its 29 scored capability (peer median ~ 2.5) on the current assessment [E-016, E-053].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.8.8",
+        "P1C2.3.1",
+        "P4C2.6.1",
+        "P1C2.5.2",
+        "P1C2.5.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "c57b5094-030a-43da-af36-57cea51b05cb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-010",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-035",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Data Lifecycle & Privacy Governance a near-term focus for iQ Credit Union: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-011].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Governance: Zero to Warehouse",
+      "what_text": "Data Lifecycle & Privacy Governance is one of iQ Credit Union's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes iQ Credit Union's ability to deliver a stronger data and technology foundation [E-035].",
+      "why_text": "The assessment found: “iQ CU partnered with Arkatechture for Data Governance Accelerator program Data governance was 'basically nonexistent' prior to Arkatechture engagement” [E-010]. The research report pins the maturity impact at: moving level 1 to level 2. averages 3.0/5 across its 40 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1",
+        "P2C4.3.2",
+        "P2C1.4.6",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "71cb3e68-6f67-48e4-9ac1-cb77adf6ae2c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-060"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-057",
+        "E-059",
+        "E-060"
+      ],
+      "linked_subcap_id": "P2C4.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Customer Intelligence Foundation a near-term focus for iQ Credit Union: a scoped investment here would lift it from 3.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-060].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "No CRM System Identified",
+      "what_text": "Customer Intelligence Foundation is one of iQ Credit Union's solid customer experience capabilities, scoring 3.5 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes iQ Credit Union's ability to deliver a stronger, more personalised customer experience [E-059].",
+      "why_text": "The research report pins the maturity impact at: capped level 1-level 2. averages 4.0/5 across its 6 scored capability (peer median ~ 2.5) on the current assessment [E-057, E-059].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C2.5.5",
+        "P3C2",
+        "P3C2.6.1",
+        "P3C4.5.5",
+        "P3C3.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "8d5a35cd-e15f-40f9-98fd-75d434351f3c",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-040",
+        "E-036",
+        "E-045"
+      ],
+      "linked_subcap_id": "P3C2.5.5",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for iQ Credit Union: invest to move it toward best practice. Because it underpins the core processes that keep the institution running, the improvement reaches well beyond this single capability [E-045].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Forbes #1 CU in WA + Growth",
+      "what_text": "Forbes #1 WA; 25% member growth; Portland expansion; $2.076B assets. It underpins the core processes that keep the institution running, so its current level directly shapes iQ Credit Union's ability to deliver more efficient, dependable operations [E-036].",
+      "why_text": "The assessment found: “Forbes ranked iQ CU #1 Credit Union in Washington state Only 3.4% of credit unions nationwide made the Forbes list” [E-040]. Strengthening this capability matters because it shapes more efficient, dependable operations. It builds on the core processes that keep the institution running, so progress here lifts the wider business too.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C1.8.8",
+        "P4C2.4.1",
+        "P2C4.3.2",
+        "P4C4.5.4",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "21bdc5a5-8739-43d6-afa7-b8d5ed2fad9d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-010",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-011",
+        "E-038"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Deploy Salesforce Data Cloud to unify member data across Alkami, Arkalytics, and Genesys — enabling single member view and advanced analytics — addressable via salesforce [E-038].",
+      "source_rec_id": "REC-04",
+      "theme": "CX & Personalization",
+      "title": "Deploy Salesforce Data Cloud to unify member data across Alkami, Arkalytics, and Genesys — enabling single member view and advanced analytics",
+      "what_text": "Proactive Outreach & Alerts is one of iQ Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes iQ Credit Union's ability to deliver a stronger, more personalised customer experience [E-011].",
+      "why_text": "The assessment found: “iQ CU partnered with Arkatechture for Data Governance Accelerator program Data governance was 'basically nonexistent' prior to Arkatechture engagement” [E-010]. At 1.5 out of 5, Proactive Outreach & Alerts sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C2",
+        "P4C4.3.2",
+        "P1C4.9.2",
+        "P1C4.1.2",
+        "P3C4.7.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "1d091805-342e-4849-9472-5a84806f73c4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-017",
+        "E-052"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "salesforce",
+        "twilio",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Channel Strategy a near-term focus for iQ Credit Union: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-052].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Tech-Forward Leadership Restructuring",
+      "what_text": "Channel Strategy is one of iQ Credit Union's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes iQ Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-017].",
+      "why_text": "The research report pins the maturity impact at: / ceiling level 3+. averages 3.3/5 across its 34 scored capability (peer median ~ 2.5) on the current assessment [E-027, E-017].",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P1C3.8",
+        "P4C2.4.1",
+        "P2C2.3.2",
+        "P1C3.8.1",
+        "P2C3.2.9",
+        "P1C3.8.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "6a074f08-81d0-4948-aed8-a1281b8689ba",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-060"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-012",
+        "E-060"
+      ],
+      "linked_subcap_id": "P1C3.8",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make AI/GenAI Innovation a near-term focus for iQ Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-060].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "GenAI Early Mover (Contact Center)",
+      "what_text": "AI/GenAI Innovation is one of iQ Credit Union's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes iQ Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-060].",
+      "why_text": "The assessment found: “iQ CU selected Cresta as GenAI partner for contact center after evaluating 9 vendors, narrowing to 3 finalists Goal: automate 50% of QA initially, target 100% automation” [E-012]. The research report pins the maturity impact at: ceiling level 3. averages 1.8/5 across its 4 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P2C4.5",
+        "P2C4.7",
+        "P2C4.3.2",
+        "P2C4.5.3",
+        "P1C1.3.CU2",
+        "P2C4.5.CU1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "85deddeb-c209-44be-9b1e-57b52b039c3a",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-014",
+        "E-024"
+      ],
+      "linked_subcap_id": "P2C4.5",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Cross-Sell & Deepening a near-term focus for iQ Credit Union: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-024].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Member Perks Cross-Sell Engine",
+      "what_text": "Cross-Sell & Deepening is one of iQ Credit Union's solid customer experience capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes iQ Credit Union's ability to deliver a stronger, more personalised customer experience [E-024].",
+      "why_text": "The assessment found: “iQ CU uses Marquis for data-driven personalized multi-channel campaigns (email + direct mail) 32% of all members enrolled in Member Perks program” [E-014]. The research report pins the maturity impact at: / ceiling level 3. averages 3.1/5 across its 8 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P2",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture — 3.16 vs Median 2.4 (+0.76)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience — 3.18 vs Median 2.75 (+0.43)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — 2.39 vs Median 2.62 (-0.23)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology — 2.26 vs Median 2.50 (-0.24)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-IQCU-20260310-0001"
+}

@@ -1,0 +1,52 @@
+{
+  "entity_display_id": "american-homes-4-rent-lp-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 1.50 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C2 score 1.50 \u2192 4.0 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.5",
+          "metric": "P2C2 score 1.50 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 1.50 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "through"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.5",
+          "metric": "P2C2 score 1.50 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 1.50 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": ") adds new integration requirements. Service Cloud \u2192 Yardi work orders, Sales Cloud \u2192 4Platform resident events, Data Cloud \u2192 all three systems, Agentforce \u2192 all Salesforce products. Without an integration bus, each connection is a custom Kafka bridge \u2014 the same architecture pattern that already created the fragmentation AMH is solving. MuleSoft's pre-built Yardi connector eliminates the most complex custom bridge (Yardi \u2194 Salesforce) from the very first deployment."
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-AMH-20260506-0001",
+  "total_duration_months": 4
+}

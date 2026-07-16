@@ -1,0 +1,336 @@
+{
+  "entity_display_id": "first-united-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-908",
+          "E-905",
+          "E-919"
+        ],
+        "representative_quote": "Gallup Exceptional Workplace Award 2024 with 70% employee engagement (vs. 33% national avg).",
+        "source_kind": "docx"
+      },
+      "id": "14c614c3-1314-4170-a893-01d994b15eca",
+      "involved_subcap_ids": [
+        "P1C4.8.1",
+        "P1C4.8.3",
+        "P1C4.8.4",
+        "P1C3.3.3",
+        "P1C3.2.2",
+        "P2C3.6.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,000,000,000",
+          "delta": null,
+          "kpi_label": "Above average for",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "70%",
+          "delta": null,
+          "kpi_label": "Exceptional Workplace Award",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 83,
+        "P2": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Culture & Employee Investment",
+      "verbatim_quote": "F-003 | Culture & Employee Investment | Gallup Exceptional Workplace Award 2024 with 70% employee engagement (vs. 33% national avg). 9 consecutive years on American Banker Best Banks to Work For. Dedicated Chief Culture Officer (Melissa Perrin). Spend Life Wisely 4-pillar wellness program [E-908, E-905, E-919] | P1C4 Culture ceiling L3.5\u20134.0 (above average for $16B regional banks) | Strong culture = higher adoption likelihood for new Salesforce implementations. Change management risk is LOW. Leverage culture infrastructure for user adoption strategy."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-804",
+          "E-805",
+          "E-102",
+          "E-137",
+          "E-138"
+        ],
+        "representative_quote": "Arctic Wolf MDR with 24/7 SOC monitoring.",
+        "source_kind": "docx"
+      },
+      "id": "68a047b9-705c-4986-9bfd-fbdf90e690a6",
+      "involved_subcap_ids": [
+        "P4C4.8.1",
+        "P3C4.6.3",
+        "P4C4.5.3",
+        "P4C4.4.1",
+        "P4C4.7.1",
+        "P4C4.6.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Strong capability as",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "Fraud & Security Tooling Confirmed",
+      "verbatim_quote": "F-006 | Fraud & Security Tooling Confirmed | Verafin AML/BSA/OFAC platform (Nasdaq vendor case study). Arctic Wolf MDR with 24/7 SOC monitoring. Okta IAM + SailPoint IGA + Fortinet + Proofpoint email security [E-804, E-805, E-102, E-137, E-138] | P3C2 fraud ceiling L3.0+; P4C4 security tooling ceiling L3.0+ | Security stack is vendor-managed. Opportunity for Salesforce Shield integration, security posture assessment, and identity governance optimization."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-608",
+          "E-016"
+        ],
+        "representative_quote": "Google Cloud partnership confirmed alongside existing AWS and Azure presence, creating a triple-cloud environment unusual for a $16B bank",
+        "source_kind": "docx"
+      },
+      "id": "5d911ecd-a7ac-49a3-bbe4-77d5be6fe317",
+      "involved_subcap_ids": [
+        "P1C5.1.1",
+        "P1C5.2.3",
+        "P1C5.4.1",
+        "P1C5.4.1",
+        "P1C1.5.1",
+        "P1C1.4.1",
+        "P1C1.1.3",
+        "P1C1.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,000,000,000",
+          "delta": null,
+          "kpi_label": "Environment unusual for",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Google Cloud Strategic Partnership",
+      "verbatim_quote": "F-004 | Google Cloud Strategic Partnership | Google Cloud partnership confirmed alongside existing AWS and Azure presence, creating a triple-cloud environment unusual for a $16B bank [E-608, E-016] | P4C3 cloud ceiling elevated to L3.0+, but multi-cloud complexity risk applies | Multi-cloud creates integration complexity. MuleSoft + Salesforce Data Cloud can unify data layer. Cloud strategy advisory + MuleSoft implementation consulting opportunity."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-019"
+        ],
+        "representative_quote": "Exhaustive 10-tier search found no Chief Data Officer, no data governance committee, no BCBS 239 references despite Snowflake, Tableau, and Power BI deployments",
+        "source_kind": "docx"
+      },
+      "id": "0d8ebce4-50ce-4424-957d-8929a6293563",
+      "involved_subcap_ids": [
+        "P4C1.3.4",
+        "P4C1.1.6",
+        "P4C1.2.1",
+        "P4C1.8.8",
+        "P4C2.5.7",
+        "P4C2.5.6",
+        "P4C2.5.5",
+        "P4C2.7.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Developing capability as",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No CDO or Formal Data Governance",
+      "verbatim_quote": "F-005 | No CDO or Formal Data Governance | Exhaustive 10-tier search found no Chief Data Officer, no data governance committee, no BCBS 239 references despite Snowflake, Tableau, and Power BI deployments [Proxy escalation complete, E-019] | P4C1 Data Governance capped at M2 for organizational subcaps. Impact across 40+ subcapabilities. | Greenfield: data governance strategy, CDO advisory, Salesforce Data Cloud as governance platform, data quality program, BCBS 239 readiness."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-004",
+          "E-005",
+          "E-014",
+          "E-037"
+        ],
+        "representative_quote": "Full Salesforce stack confirmed: CRM, Sales Cloud, Service Cloud, Experience Cloud, FSC, Marketing Cloud, MuleSoft.",
+        "source_kind": "docx"
+      },
+      "id": "2adee624-0871-4d12-847c-589ba9ac7e42",
+      "involved_subcap_ids": [
+        "P1C1.5.5",
+        "P4C3.4.6",
+        "P4C3.4.1",
+        "P4C3.4.7",
+        "P4C3.4.2",
+        "P1C2.1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Developing capability as",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Foundational capability as",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Strong capability as",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": 2,
+      "pillars_weight": {
+        "P1": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "Salesforce Ecosystem Depth",
+      "verbatim_quote": "F-002 | Salesforce Ecosystem Depth | Full Salesforce stack confirmed: CRM, Sales Cloud, Service Cloud, Experience Cloud, FSC, Marketing Cloud, MuleSoft. 14 Salesforce products detected via Explorium T1 scan [E-004, E-005, E-014, E-037] | M3+ for CRM-adjacent subcaps across P2 and P4 | Existing multi-cloud Salesforce customer with expansion potential: Data Cloud, Einstein AI, Industry Cloud optimization, Agentforce. High-value account."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-500",
+          "E-510"
+        ],
+        "representative_quote": "Strong tech stack (Salesforce Service Cloud, Banno 4.5-star apps) but CFPB complaint data and app reviews reveal process gaps: slow response times, poor inter-department communication, payment processing delays",
+        "source_kind": "docx"
+      },
+      "id": "a51efbc6-a289-430b-9326-f3823549143c",
+      "involved_subcap_ids": [
+        "P2C2.6.6",
+        "P2C2.3.5",
+        "P2C2.2.10",
+        "P2C2.2.10",
+        "P2C4.4.1",
+        "P2C4.4.1",
+        "P2C4.4.1",
+        "P2C4.4.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Developing capability as",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Service Quality Disconnect",
+      "verbatim_quote": "F-007 | Service Quality Disconnect | Strong tech stack (Salesforce Service Cloud, Banno 4.5-star apps) but CFPB complaint data and app reviews reveal process gaps: slow response times, poor inter-department communication, payment processing delays [E-500, E-510] | P2C3 omnichannel ceiling capped at M3.5 by operational execution despite technology presence | Service Cloud optimization, case management automation, knowledge base deployment, and Agentforce for service. Process consulting wrapped around platform tuning."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-003",
+          "E-008",
+          "E-901"
+        ],
+        "representative_quote": "CTO Tadd Tobkin: 2026 Dallas CIO ORBIE Award finalist, serves on Salesforce FSC Strategic Advisory Board and Jack Henry Mid-Tier Advisory Board",
+        "source_kind": "docx"
+      },
+      "id": "cb8e923d-3d88-4402-bf9f-3e0ab48eca8f",
+      "involved_subcap_ids": [
+        "P1C1.1.5",
+        "P1C2.1.6",
+        "P1C2.6.4",
+        "P1C4.2.3",
+        "P2C1.3.4",
+        "P1C2.1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Developing capability as",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Foundational capability as",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$16,300,000,000",
+          "delta": null,
+          "kpi_label": "Strong capability as",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 83,
+        "P2": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Technology Leadership Maturity",
+      "verbatim_quote": "F-001 | Technology Leadership Maturity | CTO Tadd Tobkin: 2026 Dallas CIO ORBIE Award finalist, serves on Salesforce FSC Strategic Advisory Board and Jack Henry Mid-Tier Advisory Board [E-003, E-008, E-901] | Ceiling L3.5+ for P1C1 strategy and P1C2 governance subcaps | Salesforce advisory board = warm relationship. FSC optimization, MuleSoft integration, Data Cloud, and Agentforce are natural expansion plays."
+    }
+  ]
+}

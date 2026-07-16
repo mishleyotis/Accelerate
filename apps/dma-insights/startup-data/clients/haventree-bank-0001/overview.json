@@ -1,0 +1,1051 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 186,
+        "subcaps": 186,
+        "thin": 134
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 232,
+        "subcaps": 232,
+        "thin": 209
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 112
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "haventree-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "0f5aa606-8cf2-4679-9a5c-c39e57d63bcb",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Haventree Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CL",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:41.356499Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 21,
+    "current_count": 48,
+    "dated_count": 20,
+    "median_age_months": 19.3,
+    "oldest_published_date": "2017-01-01",
+    "stale_count": 8,
+    "stale_pct": 8.25,
+    "total": 97,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "NEGATIVE": 4,
+      "NEUTRAL": 20,
+      "POSITIVE": 73
+    },
+    "connectors": {
+      "Clay": 3,
+      "Indeed": 1,
+      "LinkedIn": 5
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 5,
+      "NEUTRAL": 77,
+      "POSITIVE": 15
+    },
+    "tiers": {
+      "T1": 9,
+      "T2": 23,
+      "T3": 24,
+      "T4": 35,
+      "T5": 6
+    },
+    "total_facts": 424,
+    "total_items": 97
+  },
+  "financial_trajectory": {
+    "cagr": "10.4%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Trend Classification: ACCELERATING | 3-Year CAGR: ~10.4%",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 3670000000.0,
+    "cagr": "10.4%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Trend Classification: ACCELERATING | 3-Year CAGR: ~10.4%",
+        "Narrative: Haventree demonstrates accelerating asset growth with strong capitalization (CET1 18.2% vs 7.0% OSFI floor). NHA MBS approval (Sept 2025) creates funding tailwind. Retained earnings of $169M support Haventree 2.0 transformation investment.",
+        "Evidence: E-003, E-061, E-088, E-096"
+      ],
+      "tier_1_2_pct": 33.0
+    },
+    "footprint": "Canada (Ontario HQ)",
+    "footprint_basis": "derived:geography",
+    "founded": 1990,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "Canada (Ontario HQ)",
+    "headcount": 227,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tech Team",
+        "recent_hire": false,
+        "tenure": null,
+        "title": ""
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "Haventree Bank",
+    "license_type": "Federally regulated financial institution (OSFI, Canada)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Haventree Bank is a lending institution. It reports $3.7 billion in total assets. It is regulated by OSFI (Office of the Superintendent of Financial Institutions and employs approximately 227 people. Its overall digital maturity is assessed at 2.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OSFI (Office of the Superintendent of Financial Institutions)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "n": 239,
+          "scale": 5,
+          "score": 4.1,
+          "source": "Trustpilot"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.1/5",
+          "signal": "place) — technology-native competitors Haventree must track Trustpilot rating: 4.1/5 from 239 reviews — above-average external customer satisfaction for alt-mortgage lender Positive reviews: quick phone responses, responsive email, fee waiv",
+          "source": "Trustpilot"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Small ($1B-$5B assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-060",
+        "excerpt": "LinkedIn: 17,102 followers with +12.9% growth in the past year — healthy social media presence in financial services segment 227 employees (+16.3% YoY) — employer brand growth signal aligning with talent marketing",
+        "title": "17,102 followers with +12.9% growth in the past year — healthy social…",
+        "type": "linkedin-post",
+        "url": "https://ca.linkedin.com/company/haventree-bank"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-067",
+        "excerpt": "Haventree Bank Instagram (@haventreebank): active Reels content in addition to static posts — video/short-form content marketing confirmed Instagram post: 'We are currently at the Monarch Advisor Conference for the first",
+        "title": "Haventree Bank Instagram (@haventreebank): active Reels content in…",
+        "type": "conference",
+        "url": "https://www.instagram.com/haventreebank/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "hometrust.ca",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v6.3",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.898078+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Haventree Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Haventree Bank DMA",
+    "scqa_md": "Haventree Bank is a $3.7B in assets commercial lender regulated by OSFI (Office of the Superintendent of Financial Institutions) with 227 employees. A 10.4% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-011, E-040]. Zennify's assessment places overall digital maturity at 2.9/5. The deepest capability gap is Digital Operations Footprint at 2.2/5 against a 2.5 peer median [E-054, E-024].\n\nNext is Marketing Analytics & Optimization at 2.4/5 against a 3.0 peer median [E-062, E-002]. Third is Voice Biometric Authentication at 2.5/5 against a 3.0 peer median [E-013, E-019]. Counter-signal: Risk Quantification Methods already runs at 3.9/5 against a 3.0 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Haventree Bank is whether to close Digital Operations Footprint first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Haventree Bank should lead with nCino (68/100 fit) against Digital Due Diligence, then sequence Tableau behind it. Closing Digital Operations Footprint to the peer median alone is worth 0.3 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.9,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/research_workbook_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.295496+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/safeguard_gates_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.295926+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/caps_applied_log_cross_pillar.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.296420+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.297611+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/final_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.297863+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_phase7_qa_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.298304+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass1_automated_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.298815+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass2_llm_reasoning_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.299347+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.299591+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A4_Tier_Distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.313337+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Issues_Register.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.315547+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/phase_1_inheritance_audit.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.316933+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.317644+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.318317+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendations.csv",
+        "reason": "no fingerprint matched (best confidence 0.14); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.318804+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:41.320350+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 30
+    },
+    "stage_ms": {
+      "manifest": 141,
+      "parse": 10395,
+      "persist": 1099
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 08_appendices/run_manifest_assessment.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 708 subcaps from DMA_Scoring_Workbook_HA",
+        "detail": "xlsx fallback extracted 708 subcaps from DMA_Scoring_Workbook_HAVENTREE_20260429.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 29 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_Research_HAVENTREE_20260429.docx count=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=31 subcaps=16 replaced_docx_scqa=False",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 11 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 7",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/research_workbook_validation.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/safeguard_gates_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/caps_applied_log_cross_pillar.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/final_summary.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_phase7_qa_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass1_automated_check_results.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass2_llm_reasoning_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A4_Tier_Distribution.csv — no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Issues_Register.csv — no fingerprint matched (best confidence 0.20); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/phase_1_inheritance_audit.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_register.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_register.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendations.csv — no fingerprint matched (best confidence 0.14); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_auto_bootstrapped",
+        "detail": "catalogue_auto_bootstrapped:708 ccg_subcaps rows seeded from scoring workbook taxonomy for v6.3 (no ccg_loader run required).",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 16",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 08_appendices/run_manifest_assessment.json",
+      "xlsx fallback extracted 708 subcaps from DMA_Scoring_Workbook_HAVENTREE_20260429.xlsx",
+      "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_workbook)",
+      "caps_applied_log: 29 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_Research_HAVENTREE_20260429.docx count=1",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=31 subcaps=16 replaced_docx_scqa=False",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "tech_stack_from_report_prose: 11 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 7",
+      "INFO/pattern_gap: 02_research_workbook/research_workbook_validation.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/safeguard_gates_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/caps_applied_log_cross_pillar.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/final_summary.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_phase7_qa_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass1_automated_check_results.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass2_llm_reasoning_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A4_Tier_Distribution.csv — no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Issues_Register.csv — no fingerprint matched (best confidence 0.20); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/phase_1_inheritance_audit.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_register.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_register.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendations.csv — no fingerprint matched (best confidence 0.14); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "timeline_events_persisted: 12",
+      "catalogue_auto_bootstrapped:708 ccg_subcaps rows seeded from scoring workbook taxonomy for v6.3 (no ccg_loader run required).",
+      "insight_cards_persisted: 16"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 186,
+      "peer_median": 2.71,
+      "pillar_id": "P1",
+      "score": 2.62,
+      "subcaps_scored": 186
+    },
+    {
+      "peer_benchmarked": 232,
+      "peer_median": 2.65,
+      "pillar_id": "P2",
+      "score": 2.49,
+      "subcaps_scored": 232
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 2.88,
+      "pillar_id": "P3",
+      "score": 3.57,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.59,
+      "pillar_id": "P4",
+      "score": 3.1,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-29",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v6.3",
+    "completed_at": "2026-07-02T23:09:41.356499Z",
+    "created_at": "2026-07-02T23:09:41.356499Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "9399f816-1791-4704-b6ea-cdc5f7b884ca",
+    "overall_score": 2.9,
+    "request_id": "DMA-ASM-HAVENTREE-20260429-0001",
+    "started_at": "2026-07-02T23:09:41.356499Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "n": 239,
+        "scale": 5,
+        "score": 4.1,
+        "source": "Trustpilot"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "DTC + Payments roadmap signals fundamental business model evolution Observation: /deposits dummy page (Sept 2025) [E-095], DTC + payment products in Director PM job posting (Apr 2026) [E-041], DTC explicitly tagged in Senior Analyst role [E-017]. CEO's prior role: CEO Merrco Payments [E-011]. — Lifts P2C1 Digital Marketing and P2C2 Onboarding ceilings (NEW capability). Triggers P3C2 Fraud cap re-assessment for new transaction types.",
+      "evidence": [
+        "E-095",
+        "E-041",
+        "E-017",
+        "E-011"
+      ],
+      "magnitude": null,
+      "name": "DTC + Payments roadmap",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 3.23,
+      "so_what": "Protect DTC + Payments roadmap as a proof point: use it to anchor the operations story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P3C1",
+      "theme": "Operations",
+      "title": "DTC + Payments roadmap",
+      "what": "DTC + Payments roadmap signals fundamental business model evolution Observation. /deposits dummy page (Sept 2025). [E-095], DTC + payment products in Director PM job posting (Apr 2026). [E-041], DTC explicitly tagged in Senior Analyst role [E-017]. CEO's prior role: CEO Merrco Payments [E-011].",
+      "why": "The linked evidence records: `/deposits` route on haventreebank.com confirmed as 'dummy page' (Sept 2 2025) — text reads: 'This is a dummy page for the deposits route. The route name is: /deposits' — STRONG SIGNAL of DTC deposit product in active development Existence of /deposits"
+    },
+    {
+      "body": "Strong regulatory posture with zero FINTRAC penalties + comprehensive Pillar III ERM framework Observation: FINTRAC zero administrative penalties [E-005], OSFI Schedule I supervised [E-001/E-018], Pillar III ERM Framework with three lines of defense, BCP across all business units, ICAAP annual stress testing [E-085, E-088, E-003]. CCO Tanya Graham-Smith CAMS/CFCS/FIS [E-089]. CRO Brent Bishop with 35+ years in financial services [E-087]",
+      "evidence": [
+        "E-005",
+        "E-001",
+        "E-018",
+        "E-085"
+      ],
+      "magnitude": "0.3 pts below peer median",
+      "name": "Strong regulatory posture",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.23,
+      "so_what": "Prioritize Strong regulatory posture in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Strong regulatory posture",
+      "what": "Strong regulatory posture with zero FINTRAC penalties + comprehensive Pillar III ERM framework Observation. FINTRAC zero administrative penalties. [E-005], OSFI Schedule I supervised [E-001/E-018], Pillar III ERM Framework with three lines of defense, BCP across all business units, ICAAP annual stress testing [E-085, E-088, E-003].",
+      "why": "The linked evidence records: NEGATIVE EVIDENCE: Haventree Bank NOT listed in FINTRAC penalty registry 2008-2026 Sector context: TD Bank $9.185M (2024), Wealth One $676,500 (2023), Laurentian $486,750 (2022)"
+    },
+    {
+      "body": "Data and Analytics maturity is leading capability gap Observation: NO Chief Data Officer publicly identified [E-097, ISS-002]. Data Governance Working Group confirmed but no enterprise data catalog / MDM evidence [E-091]. Data lifecycle policy exists but limited automation evidence [E-093]",
+      "evidence": [
+        "E-097",
+        "E-091",
+        "E-093",
+        "E-008"
+      ],
+      "magnitude": null,
+      "name": "Data and Analytics maturity",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.94,
+      "so_what": "Protect Data and Analytics maturity as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Data and Analytics maturity",
+      "what": "Data and Analytics maturity is leading capability gap Observation. NO Chief Data Officer publicly identified [E-097, ISS-002]. Data Governance Working Group confirmed but no enterprise data catalog / MDM evidence [E-091]. Data lifecycle policy exists but limited automation evidence [E-093].",
+      "why": "The linked evidence records: Joel Cote: Chief Operating Officer (March 2026 About-Us update) — succeeded John Bourassa (COO Oct 2022 - early 2026) Stephen J. Griggs: Chair of the Board — referenced in CEO appointment release [E-011]"
+    },
+    {
+      "body": "Haventree 2.0 transformation programme is core strategic anchor Observation: Temenos cloud-native SaaS migration on Microsoft Azure announced June 2024 [E-008]; CEO frames as 'expansion of product suite and digital transformation towards Haventree 2.0' [E-008]. AI integration roadmap stated on careers page [E-015]. 8-person C-suite with CPIO and dedicated tech directors [E-097, E-081, E-082]",
+      "evidence": [
+        "E-008",
+        "E-015",
+        "E-097",
+        "E-081"
+      ],
+      "magnitude": null,
+      "name": "Haventree 2.0 transformation programme",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 3.23,
+      "so_what": "Protect Haventree 2.0 transformation programme as a proof point: use it to anchor the operations story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P3C1",
+      "theme": "Operations",
+      "title": "Haventree 2.0 transformation programme",
+      "what": "Haventree 2.0 transformation programme is core strategic anchor Observation. Temenos cloud-native SaaS migration on Microsoft Azure announced June 2024. [E-008]; CEO frames as 'expansion of product suite and digital transformation towards Haventree 2.0'. [E-008]. AI integration roadmap stated on careers page. [E-015].",
+      "why": "The linked evidence records: June 26 2024: Haventree Bank selected Temenos core banking SaaS for digital transformation Temenos implementation: cloud-native API-first banking on continuously updated SaaS"
+    },
+    {
+      "body": "Cultural and management ratings depress people/change capability Observation: Indeed culture rating 2.1/5; CEO approval 16.15% [E-002, E-007]. Glassdoor sentiment likely similar (proxy). Class action settlement $1.5M (July 2024) [E-078] for auto-renewal without consent — conduct risk signal. — ISS-001 caps P1C4 Culture & Change Management at M3; ISS-005 caps P2C3 Omnichannel at M3.",
+      "evidence": [
+        "E-002",
+        "E-007",
+        "E-078",
+        "E-024"
+      ],
+      "magnitude": "16.15%",
+      "name": "Cultural and management ratings depress people/change…",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.23,
+      "so_what": "Prioritize Cultural and management ratings depress people/change… in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Cultural and management ratings depress people/change…",
+      "what": "Cultural and management ratings depress people/change capability Observation. Indeed culture rating 2.1/5; CEO approval 16.15%. [E-002, E-007]. Glassdoor sentiment likely similar (proxy). Class action settlement $1.5M (July 2024). [E-078] for auto-renewal without consent — conduct risk signal.",
+      "why": "The linked evidence records: Privately-owned Schedule 1 bank; Great Place to Work certified Leadership: Fern Glowinsky (CEO/President since Feb 2023), Sarim Farooqi (CFO), Brent Bishop (CRO), Salil Vijay (Chief Product and Innovation Officer), Julie-Anne Cardinal (CLO), Paula Fernandes (CHRO)"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.5,
+      "ceiling": 2.8,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Digital Strategy"
+      ],
+      "rationale": "Register-sourced ceiling across 43 capability rows."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 3.2,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-028"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Governance"
+      ],
+      "rationale": "Register-sourced ceiling across 55 capability rows."
+    },
+    "P1C3": {
+      "band": 0.5,
+      "ceiling": 2.7,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-040"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Innovation"
+      ],
+      "rationale": "Register-sourced ceiling across 48 capability rows."
+    },
+    "P1C4": {
+      "band": 0.5,
+      "ceiling": 2.8,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-011"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Culture & Change"
+      ],
+      "rationale": "Register-sourced ceiling across 52 capability rows."
+    },
+    "P1C5": {
+      "band": 0.4,
+      "ceiling": 2.1,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-053"
+      ],
+      "modifiers": [
+        "coverage 0.0% on ESG"
+      ],
+      "rationale": "Register-sourced ceiling across 37 capability rows."
+    },
+    "P2C1": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Digital Marketing"
+      ],
+      "rationale": "Register-sourced ceiling across 68 capability rows."
+    },
+    "P2C2": {
+      "band": 0.5,
+      "ceiling": 3.1,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Onboarding"
+      ],
+      "rationale": "Register-sourced ceiling across 70 capability rows."
+    },
+    "P2C3": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Omnichannel"
+      ],
+      "rationale": "Register-sourced ceiling across 72 capability rows."
+    },
+    "P2C4": {
+      "band": 0.4,
+      "ceiling": 3.1,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-080"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Personalization"
+      ],
+      "rationale": "Register-sourced ceiling across 60 capability rows."
+    },
+    "P3C1": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-097"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Automation"
+      ],
+      "rationale": "Register-sourced ceiling across 44 capability rows."
+    },
+    "P3C2": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-088"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Fraud & Op Risk"
+      ],
+      "rationale": "Register-sourced ceiling across 34 capability rows."
+    },
+    "P3C3": {
+      "band": 0.3,
+      "ceiling": 3.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-005"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Compliance"
+      ],
+      "rationale": "Register-sourced ceiling across 36 capability rows."
+    },
+    "P3C4": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-090"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Resilience & TPRM"
+      ],
+      "rationale": "Register-sourced ceiling across 38 capability rows."
+    },
+    "P4C1": {
+      "band": 0.5,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-003"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Data Governance"
+      ],
+      "rationale": "Register-sourced ceiling across 49 capability rows."
+    },
+    "P4C2": {
+      "band": 0.5,
+      "ceiling": 2.9,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-008"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Analytics & AI"
+      ],
+      "rationale": "Register-sourced ceiling across 65 capability rows."
+    },
+    "P4C3": {
+      "band": 0.5,
+      "ceiling": 2.9,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-096"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Tech Architecture"
+      ],
+      "rationale": "Register-sourced ceiling across 55 capability rows."
+    },
+    "P4C4": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "coverage 0.0% on Cybersecurity"
+      ],
+      "rationale": "Register-sourced ceiling across 39 capability rows."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Joel Cote: Chief Operating Officer (March 2026 About-Us update) — succeeded John Bourassa (COO Oct 2022 - early 2026) (Mar 2026).",
+      "evidence": [
+        "E-097"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Joel Cote: Chief Operating Officer",
+      "metric": null,
+      "peer_context": "Digital Operations Footprint runs 2.23/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Joel Cote: Chief Operating Officer (March 2026 About-Us update) — succeeded John Bourassa (COO Oct 2022 - early 2026) (Mar 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Joel Cote: Chief Operating Officer"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Joel Cote joined very new hire. Joel Cote joined as COO March 2026 — very new hire (Mar 2026).",
+      "evidence": [
+        "E-006"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Joel Cote joined very new hire",
+      "metric": null,
+      "peer_context": "Digital Operations Footprint runs 2.23/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Joel Cote joined very new hire. Joel Cote joined as COO March 2026 — very new hire (Mar 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Joel Cote joined very new hire"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "September 25, 2025: Haventree Bank CEO Glowinsky + CFO Farooqi opened Toronto Stock Exchange market to celebrate CMHC approval for NHA MBS and Canada Mortgage Bond programs (Sep 2025).",
+      "evidence": [
+        "E-061"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Haventree Bank CEO Glowinsky + CFO Farooqi opened Toronto…",
+      "metric": null,
+      "peer_context": "Digital Operations Footprint runs 2.23/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Digital Due Diligence — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "September 25, 2025: Haventree Bank CEO Glowinsky + CFO Farooqi opened Toronto Stock Exchange market to celebrate CMHC approval for NHA MBS and Canada Mortgage Bond programs (Sep 2025).",
+      "timeline": {
+        "date": "2025-09-25",
+        "event": "Haventree Bank CEO Glowinsky + CFO Farooqi opened Toronto…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Tarun Shashank Sanagapalli Senior Cyber Security Engineer…. Tarun Shashank Sanagapalli Senior Cyber Security Engineer joined July 2025 (Jul 2025).",
+      "evidence": [
+        "E-006"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Tarun Shashank Sanagapalli Senior Cyber Security Engineer…",
+      "metric": null,
+      "peer_context": "Digital Operations Footprint runs 2.23/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Digital Due Diligence — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Tarun Shashank Sanagapalli Senior Cyber Security Engineer…. Tarun Shashank Sanagapalli Senior Cyber Security Engineer joined July 2025 (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Tarun Shashank Sanagapalli Senior Cyber Security Engineer…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Digital Operations Footprint scores 2.23/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-054",
+        "E-024",
+        "E-053",
+        "E-055"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Digital Operations Footprint scores vs a typical 2.50 at…",
+      "metric": "Digital Operations Footprint 2.23/5 vs peer 2.50",
+      "peer_context": "Digital Operations Footprint runs 2.23/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Digital Due Diligence — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "Digital Operations Footprint scores 2.23/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,485 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "propartners-financial-0001",
+  "financials": {
+    "lines": [
+      "Financial trajectory analysis is limited by PPF's private status within the Farm Credit System. No entity-level balance sheet, income statement, or call report data is publicly available. Available indicators: revenue estimated at $10M-$25M (Clay), employee headcount grew from 47 to 53 over three years (+13% CAGR), and the owner association network maintains $36B in combined assets with $6.2B capital [E-002:F3]. The Farm Credit System overall is well-capitalized per FCA annual reports. TREND CLASSIFICATION: INSUFFICIENT DATA for entity-level assessment."
+    ]
+  },
+  "firmographics": {
+    "entity_type": "Privately Held \u2014 Farm Credit System Service Entity",
+    "jurisdictions": [
+      "National (all 50 US states)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jedd Wennerberg",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rob Vold",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SR VP - Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "BJ Schaben",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SR VP Relationship Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Daniel Pederson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Senior Vice President Finance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chelsa Lien",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP of Digital Strategy & Partner Success"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Thomas Levasseur",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Executive Advisor"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Sr. Credit and Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Di Chapdelaine",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Marketing and Sales Enablement Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Noelle Hanson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Business Process and Solutions Analyst"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "ProPartners Financial (PPF) operates as Compeer Financial, PCA d/b/a ProPartners Financial, a specialized crop input lending entity within the Farm Credit System. Founded in 2001, PPF is the system's designated Center of Excellence for input financing programs [E-006:F2]. The entity is owned by nine Farm Credit associations with combined assets exceeding $36 billion and combined capital of $6.2 billion [E-008:F3]. PPF maintains operations centers in St. Paul, Minnesota (primary) and Normal, Illinois (secondary), with relationship staff covering the continental United States [E-006:F1].\n\nPPF's operating model is distinctive: technology operations are outsourced to GreenStone Farm Credit Services, HR administration is handled by Compeer Financial, and hiring uses the Greenhouse ATS hosted through GreenStone's careers portal [E-006:F9]. This creates a lean 53-person organization focused on credit, relationships, and product management while dependent on owner associations for technology infrastructure and back-office functions.",
+    "primary_regulator": "FCA",
+    "size_tier": "Small",
+    "thought_leadership": [
+      {
+        "author": "Jedd Wennerberg",
+        "date": "2025-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-023",
+        "excerpt": "Jedd Wennerberg named President Nov 2024; Chelsa Lien VP Digital Strategy Feb 2025; BJ Schaben SVP RM Mar 2025 Rob Vold SVP Chief Credit & Operations Officer authors strategy content (Jan 2025 blog on competitive ag mark",
+        "title": "Jedd Wennerberg named President Nov 2024",
+        "type": "blog",
+        "url": "https://ppfcredit.com/resources/for-immediate-release-propartners-financial-welcomes-jedd-wennerberg-as-president/"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "PPF publishes thought leadership on private label strategy \u2014 growers with branded financing increase purchases by 27% Blog cites external sources (Agribusiness Global, CropLife News) \u2014 competitive awareness demonstrated",
+        "title": "Competitive awareness demonstrated",
+        "type": "blog",
+        "url": "https://ppfcredit.com/resources/private-label-financing-a-game-changer-for-crop-input-dealers/"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-030",
+        "excerpt": "PPF website: WordPress + WP Engine. Blog with thought leadership content (private label financing articles). Yoast SEO Premium. Social presence: LinkedIn (760 followers), Facebook (72 likes), Twitter. Minimal engagement.",
+        "title": "PPF website: WordPress + WP Engine",
+        "type": "blog",
+        "url": "multiple"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "NO public BCP, DR plan, crisis management framework, or RTO/RPO targets documented for PPF Veeam blog references PPF in data portability context \u2014 possible backup/DR vendor relationship but not confirmed",
+        "title": "NO public BCP, DR plan, crisis management framework, or RTO/RPO\u2026",
+        "type": "blog",
+        "url": "multiple"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "23bb8bc1-e089-463d-ac6f-a9184542e8ba",
+      "issue_id": "GAP-1-P1C1.1.1",
+      "linked_subcap_ids": [
+        "P1C1.1.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CL peer median (3.0/5). Among this client's lowest-scored capabilities \u2014 a near-term modernization opportunity.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Digital Strategy Document"
+    },
+    {
+      "id": "4f1178bc-2f9e-402b-b7da-783aeb30fd3f",
+      "issue_id": "GAP-2-P1C1.3.1",
+      "linked_subcap_ids": [
+        "P1C1.3.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CL peer median (3.0/5). Among this client's lowest-scored capabilities \u2014 a near-term modernization opportunity.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Customer Segment Definition"
+    },
+    {
+      "id": "c83bf4b3-5334-4399-9275-3aba596db2f0",
+      "issue_id": "GAP-3-P1C1.7.4",
+      "linked_subcap_ids": [
+        "P1C1.7.4"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CL peer median (3.0/5). Among this client's lowest-scored capabilities \u2014 a near-term modernization opportunity.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Regulatory Trend Analysis"
+    },
+    {
+      "id": "140649a0-4333-4d01-80f6-71d5b6c45dda",
+      "issue_id": "GAP-4-P1C2.1.1",
+      "linked_subcap_ids": [
+        "P1C2.1.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CL peer median (3.0/5). Among this client's lowest-scored capabilities \u2014 a near-term modernization opportunity.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Digital Governance Charter"
+    },
+    {
+      "id": "919ac502-de65-4844-b3d0-046858560787",
+      "issue_id": "GAP-5-P1C2.1.2",
+      "linked_subcap_ids": [
+        "P1C2.1.2"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CL peer median (3.0/5). Among this client's lowest-scored capabilities \u2014 a near-term modernization opportunity.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Steering Committee"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Financial trajectory analysis is limited by PPF's private status within the Farm Credit System.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.92,
+        "P1C4": 2.0,
+        "P1C5": 1.28,
+        "P2C1": 2.54,
+        "P2C2": 2.96,
+        "P2C3": 2.71,
+        "P2C4": 1.73,
+        "P3C1": 2.55,
+        "P3C2": 1.75,
+        "P3C3": 2.56,
+        "P3C4": 1.81,
+        "P4C1": 2.05,
+        "P4C2": 2.05,
+        "P4C3": 2.75,
+        "P4C4": 2.32
+      },
+      "overall_score": 2.29,
+      "peer_name": "loanDepot, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.16,
+        "P1C2": 2.08,
+        "P1C3": 2.26,
+        "P1C4": 1.83,
+        "P1C5": 1.7,
+        "P2C1": 2.0,
+        "P2C2": 2.27,
+        "P2C3": 2.03,
+        "P2C4": 1.87,
+        "P3C1": 2.67,
+        "P3C2": 2.23,
+        "P3C3": 3.57,
+        "P3C4": 2.45,
+        "P4C1": 1.86,
+        "P4C2": 2.15,
+        "P4C3": 1.96,
+        "P4C4": 2.6
+      },
+      "overall_score": 2.22,
+      "peer_name": "Guaranteed Rate, Inc. (dba Rate)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.82,
+        "P1C2": 1.82,
+        "P1C3": 1.51,
+        "P1C4": 1.82,
+        "P2C1": 2.5,
+        "P2C2": 2.52,
+        "P2C3": 2.39,
+        "P2C4": 2.01,
+        "P3C1": 2.5,
+        "P3C2": 2.38,
+        "P3C3": 2.41,
+        "P3C4": 1.93,
+        "P4C1": 2.54,
+        "P4C2": 1.84,
+        "P4C3": 2.88,
+        "P4C4": 2.58
+      },
+      "overall_score": 2.22,
+      "peer_name": "Security Finance Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.26,
+        "P1C2": 2.6,
+        "P1C3": 2.14,
+        "P1C4": 2.26,
+        "P1C5": 2.02,
+        "P2C1": 1.86,
+        "P2C2": 1.79,
+        "P2C3": 1.82,
+        "P2C4": 1.89,
+        "P3C1": 2.02,
+        "P3C2": 1.9,
+        "P3C3": 2.14,
+        "P3C4": 2.12,
+        "P4C1": 1.91,
+        "P4C2": 1.94,
+        "P4C3": 2.32,
+        "P4C4": 2.48
+      },
+      "overall_score": 2.09,
+      "peer_name": "WSFS Financial Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.03,
+        "P1C2": 1.74,
+        "P1C3": 1.0,
+        "P1C4": 1.13,
+        "P1C5": 1.06,
+        "P2C1": 1.15,
+        "P2C2": 1.38,
+        "P2C3": 1.25,
+        "P2C4": 1.0,
+        "P3C1": 1.38,
+        "P3C2": 2.08,
+        "P3C3": 2.58,
+        "P3C4": 2.08,
+        "P4C1": 1.13,
+        "P4C2": 1.33,
+        "P4C3": 1.5,
+        "P4C4": 2.69
+      },
+      "overall_score": 1.5,
+      "peer_name": "United Business Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASS-PPFIN-20260317-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "yes: 6, no: 0, pct: 100%",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Salary Satisfaction",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "yes: 2, no: 4, pct: 33%",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Recommend Friend",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Ceo Approval",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Reviews mention good pay, generous benefits, annual retreat; some IT department concerns",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Notes",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Source Urls",
+        "themes": [
+          "https://www.indeed.com/cmp/Propartners-Financial/reviews",
+          "https://www.glassdoor.com/Overview/Working-at-ProPartners-Financial-EI_IE680323.11,32.htm"
+        ],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "FCS America + AgCountry launched sustainable ag grant-writing pilot with Lasso (Mar 2026) \u2014 ESG innovation partnership",
+      "date_precision": "month",
+      "e_id": "E-013",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-013",
+        "E-029"
+      ],
+      "id": "76cb9bf6-77e9-4e26-bd92-d9ec0d6c53a4",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "multiple",
+      "subcap_ids": [],
+      "title": "FCS America + launched sustainable ag grant-writing pilot"
+    },
+    {
+      "body": "Peer FCS America + AgCountry launched Lasso grant-writing pilot (Mar 2026) \u2014 peers innovating on ESG/sustainability",
+      "date_precision": "month",
+      "e_id": "E-027",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "f1555241-40a0-4ad3-bb6a-6739dd7a47f3",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "multiple",
+      "subcap_ids": [],
+      "title": "Peer FCS America + launched Lasso grant-writing pilot (Mar\u2026"
+    },
+    {
+      "body": "PPF's Noelle Hanson (Bus Process & Solutions Analyst) named ARA Rising Stars finalist 2025 for 'improving dealer platforms and streamlining interdepartmental processes'",
+      "date_precision": "year",
+      "e_id": "E-012",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "5a41f23c-e35e-4469-8a57-55c197cfd213",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/feed/update/urn:li:activity:7384797421165273088",
+      "subcap_ids": [],
+      "title": "PPF's Noelle Hanson (Bus Process & Solutions Analyst) named\u2026"
+    },
+    {
+      "body": "Chelsa Lien appointed VP Digital Strategy & Client Success on Feb 20 2025 \u2014 dedicated digital leadership role created",
+      "date_precision": "day",
+      "e_id": "E-009",
+      "event_date": "2025-02-20",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "b84b0a54-aec0-45ec-aeaf-ce3c068a927d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://ppfcredit.com/resources/propartners-financial-welcomes-chelsa-lien-as-vice-president-digital-strategy-and-client-success/",
+      "subcap_ids": [],
+      "title": "Chelsa Lien appointed VP Digital Strategy & Client Success\u2026"
+    },
+    {
+      "body": "Jedd Wennerberg named President Nov 2024; Chelsa Lien VP Digital Strategy Feb 2025; BJ Schaben SVP RM Mar 2025",
+      "date_precision": "month",
+      "e_id": "E-023",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "9a6c63bd-b474-4907-b4fe-47d587ea7681",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://ppfcredit.com/resources/for-immediate-release-propartners-financial-welcomes-jedd-wennerberg-as-president/",
+      "subcap_ids": [],
+      "title": "Jedd Wennerberg named President Nov 2024"
+    }
+  ]
+}

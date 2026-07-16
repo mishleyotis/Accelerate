@@ -1,0 +1,120 @@
+{
+  "entity_display_id": "pentegra-retirement-serv-0001",
+  "items": [
+    {
+      "affects": [],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "93cf0635-d854-482a-8584-588b8c96395b",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-035",
+        "E-043",
+        "E-019",
+        "E-022",
+        "E-026"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Board-level cyber governance established — L3.0+ for P4C4 — Security posture review, platform hardening.",
+      "source_rec_id": null,
+      "theme": null,
+      "title": "Yonesy Núñez (global infosec exec)",
+      "what_text": "Yonesy Núñez (global infosec exec) + Gregory Wilson (NACD.DC, later Whirlpool CISO) [E-035, E-043]",
+      "why_text": "P4C4 averages 2.5/5 across its 30 scored sub-capabilities on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "ccc3e7a0-e696-495c-af7d-d30cf2428a00",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-020",
+        "E-019",
+        "E-021",
+        "E-022",
+        "E-024",
+        "E-025"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Marketing Cloud optimization, Account Engagement, SEO strategy.",
+      "source_rec_id": null,
+      "theme": null,
+      "title": "National firm with $16B gets fewer visitors than local businesses",
+      "what_text": "National firm with $16B AUA gets fewer visitors than local businesses [E-020]",
+      "why_text": "The research report pins the maturity impact at: Critical digital marketing gap — P2C1 likely L1.5-L2.0. P2C1 averages 2.1/5 across its 59 scored sub-capabilities on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "0588e855-2ffa-4287-a50c-f1c72dcf0859",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-005",
+        "E-023",
+        "E-007",
+        "E-008",
+        "E-009",
+        "E-012",
+        "E-013",
+        "E-014"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Service Cloud case management, Salesforce Shield, compliance dashboards.",
+      "source_rec_id": null,
+      "theme": null,
+      "title": "Final approval Dec 2025. Unreasonable fees + prohibited transactions in MEP [E-005, E-023]",
+      "what_text": "Final approval Dec 2025. Unreasonable fees + prohibited transactions in MEP [E-005, E-023]",
+      "why_text": "The research report pins the maturity impact at: MATERIAL severity → M3 cap on P1C2/P3C2/P3C3. P1C2 averages 2.7/5 across its 45 scored sub-capabilities on the current assessment.",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture (P1) — Score 2.3 vs Median 2.81 (-0.51)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience (P2) — Score 2.31 vs Median 2.97 (-0.66)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 2.45 vs Median 2.72 (-0.27)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 2.2 vs Median 2.81 (-0.61)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Ten evidence-grounded recommendations map to 10 of 12 Zennify solutions, organized by priority. Each recommendation follows the Root Cause (evidence) + Solution (Zennify offering) + Expected Outcomes structure. No investment amounts, cost estimates, or timelines are included per assessment protocol."
+  },
+  "run_request_id": "DMA-ASM-PENT-20260317-0001"
+}

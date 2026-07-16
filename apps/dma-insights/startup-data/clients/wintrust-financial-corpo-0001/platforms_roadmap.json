@@ -1,0 +1,202 @@
+{
+  "entity_display_id": "wintrust-financial-corpo-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C3 score 2.49 \u2192 4.0 (peer median 3.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C3 score 2.49 \u2192 4.0 (peer median 3.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Agentforce + Einstein AI + Financial Services Cloud",
+          "maturity_lift": "+1.51",
+          "metric": "P2C3 score 2.49 \u2192 4.0 (peer median 3.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.49 \u2192 4.0 (peer median 3.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Deploy Agentforce for Customer AI & Personalization"
+        },
+        {
+          "feature": "Service Cloud + Digital Engagement + Omni-Channel Routing",
+          "maturity_lift": "+2.09",
+          "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Unify Omnichannel Experience with Service Cloud"
+        },
+        {
+          "feature": "Marketing Cloud + Journey Builder + Personalization Builder",
+          "maturity_lift": "+2.09",
+          "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Rationalize Marketing Cloud (3 Platforms \u2192 1)"
+        },
+        {
+          "feature": "Data Cloud + Customer 360",
+          "maturity_lift": "+2.09",
+          "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy Data Cloud for 16-Charter Customer 360"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Zennify Digital Strategy Workshop + Salesforce Platform",
+          "maturity_lift": "+2.09",
+          "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Platform Consolidation Strategy (3 CRM \u2192 1)"
+        },
+        {
+          "feature": "MuleSoft Anypoint Platform + API Management",
+          "maturity_lift": "+1.11",
+          "metric": "P4C3 score 2.89 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C3 score 2.89 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Expand MuleSoft to External APIs (Open Banking)"
+        },
+        {
+          "feature": "CRM Analytics + Einstein Analytics",
+          "maturity_lift": "+2.09",
+          "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Deploy CRM Analytics for Customer Intelligence"
+        },
+        {
+          "feature": "Zennify Digital Strategy Workshop",
+          "maturity_lift": "+0.84",
+          "metric": "P1C1 score 3.16 \u2192 4.0 (peer median 3.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C1 score 3.16 \u2192 4.0 (peer median 3.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Digital Strategy Workshop (CIO Entry Point)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4, P4C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C4 score 3.98 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C4 score 3.98 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Shield + Event Monitoring",
+          "maturity_lift": "+0.02",
+          "metric": "P4C4 score 3.98 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "S",
+            "metric": "P4C4 score 3.98 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "0\u20136 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "Shield + Event Monitoring for SFDC Security"
+        },
+        {
+          "feature": "Experience Cloud + Identity Verification + DocuSign",
+          "maturity_lift": "+1.76",
+          "metric": "P2C2 score 2.24 \u2192 4.0 (peer median 3.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 2.24 \u2192 4.0 (peer median 3.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-10",
+          "title": "Experience Cloud for Digital Onboarding"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2, P4C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-WTFC-20260408-0001",
+  "total_duration_months": 12
+}

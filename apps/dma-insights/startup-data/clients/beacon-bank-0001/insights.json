@@ -1,0 +1,404 @@
+{
+  "entity_display_id": "beacon-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C1.2.4",
+        "P2C2.7.3",
+        "P2C4.5.IB1",
+        "P2C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "070ddc59-3e5f-463f-b84b-bc1b61bb8258",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-053",
+        "E-054"
+      ],
+      "linked_subcap_id": "P3C1.2.4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Settlement Automation a near-term focus for Beacon Bank: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-054].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "11.5pp Operating Efficiency Gap Is 2026's #1 Priority — Automation Urgency",
+      "what_text": "Settlement Automation is one of Beacon Bank's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Beacon Bank's ability to deliver more efficient, dependable operations [E-053].",
+      "why_text": "The assessment found: “Core systems conversion completed mid-February 2026 — Paul Perrault (CEO): 'a major milestone in our integration process” [E-048]. At 2.5 out of 5, Settlement Automation sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3.4.10",
+        "P2C4.1.1",
+        "P1C2.1.7",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "b8350730-828f-4492-b49d-be5d755ad288",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-083",
+        "E-085",
+        "E-081"
+      ],
+      "linked_subcap_id": "P4C3.4.10",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) a near-term focus for Beacon Bank: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-085].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Salesforce + MuleSoft Confirmed Deployed",
+      "what_text": "Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) is one of Beacon Bank's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Beacon Bank's ability to deliver a stronger data and technology foundation [E-083].",
+      "why_text": "The assessment found: “**Todd Byers — Chief Technology Officer at Beacon Bank (Current)** (LinkedIn-verified); previously **SVP Chief Technology Officer at Berkshire Bank (Apr 2024 – Jan 2026)*” [E-081]. At 3.0 out of 5, Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.2.4",
+        "P1C3.8.2",
+        "P1C3.8.1",
+        "P2C1.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "0e7ba01b-9b3e-4ce3-9259-20bbced70e98",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-080"
+      ],
+      "linked_subcap_id": "P4C2.2.4",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Natural Language Query (NLQ) a near-term focus for Beacon Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-080].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "'Help From Actual Humans, Not AI' Brand vs Confirmed Internal GenAI Deployment",
+      "what_text": "Natural Language Query (NLQ) is one of Beacon Bank's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, ahead of the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Beacon Bank's ability to deliver a stronger data and technology foundation [E-080].",
+      "why_text": "The assessment found: “**Berkshire (now Beacon) confirmed data warehouse/analytics stack** (LinkedIn-verified via current BI Analyst Matthew Jones): * *Snowflake** data warehouse + **DB2** + PostgreSQL + SQLite + Microsoft” [E-073]. At 2.5 out of 5, Natural Language Query (NLQ) shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.1",
+        "P1C1.2.2",
+        "P1C2.1.5",
+        "P4C2.1.4",
+        "P4C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "cde1ddfd-b5c0-476c-bc06-b1c0e8cce72b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-040",
+        "E-045",
+        "E-064"
+      ],
+      "linked_subcap_id": "P2C4.1.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for Beacon Bank: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-045].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "6-Region Post-Merger Structure + 4 Legacy Divisions = Unified FSC Urgency",
+      "what_text": "Customer Data Foundation (CDP) is one of Beacon Bank's solid customer experience capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Beacon Bank's ability to deliver a stronger, more personalised customer experience [E-040].",
+      "why_text": "The assessment found: “**Brookline Bank CRA Rating Sept 9, 2024: SATISFACTORY** (overall); Lending Test = **High Satisfactory** (weighted heaviest); Investment Test = **High Satisfactory**; Service Test = Satisfactory” [E-064]. At 3.0 out of 5, Customer Data Foundation (CDP) shows a maturing capability within reach of best practice. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.6.1",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "6e7f567a-5f9a-476b-9688-559065a5c466",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-082",
+        "E-084"
+      ],
+      "linked_subcap_id": "P4C4.6.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Cybersecurity & Privacy discovery conversation — the finding is documented in the client's research report [E-084].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "CrowdStrike + Okta + Netskope + CyberArk Mature Security Stack",
+      "what_text": "Threat Intelligence Program is one of Beacon Bank's strongest data and technology capabilities, scoring 4.0 out of 5 in Zennify's latest assessment, ahead of the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Beacon Bank's ability to deliver a stronger data and technology foundation [E-082].",
+      "why_text": "The assessment found: “Brookline Cybersecurity Risk Management Program ('Program') adheres to **FFIEC handbook + NIST Cybersecurity Framework (CSF)* * — adheres to regulatory requirements + tenets of these formal” [E-060]. At 4.0 out of 5, Threat Intelligence Program is a relative strength worth protecting and extending. Sustaining it keeps Beacon Bank ahead while peers keep investing, and it anchors the data and technology foundation the rest of the business is built on.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.10",
+        "P4C3.5.8",
+        "P2C1.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "6de4968b-e3ac-4e45-95ae-f6d4ece0349d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-080",
+        "E-065",
+        "E-037"
+      ],
+      "linked_subcap_id": "P4C2.2.10",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make BI Validation Evidence Pack Automation a near-term focus for Beacon Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-037].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "7 findings with quantified observations (evidence IDs), maturity implications, and…",
+      "what_text": "BI Validation Evidence Pack Automation is one of Beacon Bank's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, ahead of the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Beacon Bank's ability to deliver a stronger data and technology foundation [E-065].",
+      "why_text": "At 2.5 out of 5, BI Validation Evidence Pack Automation shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-080, E-065].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.1.3",
+        "P1C2.5.2",
+        "P1C2.5.5",
+        "P4C1.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "8cf1b9bb-64f9-4b69-a94f-b608573dbb89",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-003",
+        "E-005",
+        "E-025",
+        "E-019",
+        "E-010",
+        "E-011",
+        "E-008",
+        "E-009"
+      ],
+      "linked_subcap_id": "P1C4.1.3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Stakeholder Analysis a near-term focus for Beacon Bank: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-025].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Macero EVP CDO 'Monetize Data' Mandate + Snowflake Deployed = Data Cloud Entry Point",
+      "what_text": "Stakeholder Analysis is one of Beacon Bank's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Beacon Bank's ability to deliver sharper strategic direction and stronger oversight [E-003].",
+      "why_text": "The assessment found: “CEO Perrault on Q1 2026: 'The first quarter results reflect near-term pressures and the tail end of merger activity as we completed the core system conversion in February.' — confirms successful Feb” [E-005]. At 2.5 out of 5, Stakeholder Analysis sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Where does Beacon sit relative to peers across all four pillars? Above/at/below peer median, and the competitive implication.\nBeacon leads all peers in P4 Technology (3.47 vs EBC 3.0, WBS 3.4) — genuine infrastructure advantage\nBeacon is below EBC and WBS in all other pillars — the aspiration gap is real but bounded\nBeacon's P3 (2.58) is below even INDB (2.9) — Marshall caps are the sole driver\nNBTB's P3 (3.1) is the compliance benchmark: the same NBT Bank that detected Marshall scores above Beacon in P3",
+        "heading": "7.2 Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "6.2  Pillar 2: Customer Experience — Score 2.89 vs Peer Median 3.0 (Gap -0.11)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "6.3  Pillar 3: Operations, Risk & Compliance — Score 2.58 vs Peer Median 3.0 (Gap -0.42)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "6.4  Pillar 4: Data, Analytics & Technology — Score 3.47 vs Peer Median 2.9 (Gap +0.57)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": null
+  },
+  "run_request_id": "DMA-ASM-BBT-20260511-0001"
+}

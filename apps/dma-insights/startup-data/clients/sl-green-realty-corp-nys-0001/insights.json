@@ -1,0 +1,456 @@
+{
+  "entity_display_id": "sl-green-realty-corp-nys-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.5.6",
+        "P4C1",
+        "P1C1.5.1",
+        "P4C2.6.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "43239039-6653-4246-8747-c490bf11880d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-028",
+        "E-012"
+      ],
+      "linked_subcap_id": "P4C1.5.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Governed Federation of External Data Sources a near-term focus for SL Green Realty Corp (NYSE:SLG): a scoped investment here would lift it from 1.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-012].",
+      "source_rec_id": "REC-01",
+      "theme": "Data Management & Governance",
+      "title": "Governed Federation of External Data Sources",
+      "what_text": "Governed Federation of External Data Sources is one of SL Green Realty Corp (NYSE:SLG)'s least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, roughly in line with the 1.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes SL Green Realty Corp (NYSE:SLG)'s ability to deliver a stronger data and technology foundation [E-052].",
+      "why_text": "The assessment found: “Proxy Compensation Committee uses peer group to calibrate executive pay — formal competitive intelligence integrated into governance process” [E-028]. At 1.0 out of 5, Governed Federation of External Data Sources shows an early-stage capability with the widest distance to close. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.6.2",
+        "P2C4",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "00fc6e6d-eecc-4ba3-89d0-2c2e8ea78fe7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-028",
+        "E-016",
+        "E-092"
+      ],
+      "linked_subcap_id": "P2C4.6.2",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Goal Setting & Tracking a near-term focus for SL Green Realty Corp (NYSE:SLG): a scoped investment here would lift it from 1.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-092].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Goal Setting & Tracking",
+      "what_text": "Goal Setting & Tracking is one of SL Green Realty Corp (NYSE:SLG)'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, roughly in line with the 1.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes SL Green Realty Corp (NYSE:SLG)'s ability to deliver a stronger, more personalised customer experience [E-016].",
+      "why_text": "The assessment found: “Proxy Compensation Committee uses peer group to calibrate executive pay — formal competitive intelligence integrated into governance process” [E-028]. At 1.0 out of 5, Goal Setting & Tracking shows an early-stage capability with the widest distance to close. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C1.8.CIB1",
+        "P3C1",
+        "P3C1.8",
+        "P1C1.5.1",
+        "P3C1.8.RIA1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "6982e745-b59d-4dfe-b58e-adea1b0f8305",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-028",
+        "E-067"
+      ],
+      "linked_subcap_id": "P3C1.8.CIB1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Trade Lifecycle Automation a near-term focus for SL Green Realty Corp (NYSE:SLG): a scoped investment here would lift it from 1.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": "REC-03",
+      "theme": "Core Automation",
+      "title": "Trade Lifecycle Automation",
+      "what_text": "Trade Lifecycle Automation is one of SL Green Realty Corp (NYSE:SLG)'s least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, roughly in line with the 1.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes SL Green Realty Corp (NYSE:SLG)'s ability to deliver more efficient, dependable operations [E-052].",
+      "why_text": "The assessment found: “Proxy Compensation Committee uses peer group to calibrate executive pay — formal competitive intelligence integrated into governance process” [E-028]. At 1.0 out of 5, Trade Lifecycle Automation shows an early-stage capability with the widest distance to close. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2.4.8",
+        "P2C2",
+        "P4C2.9.CIB1",
+        "P3C1.8.CIB1",
+        "P1C1.5.1",
+        "P3C1.8.IC1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "5a0be625-c18d-4cd9-a913-53938389387a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-028",
+        "E-052",
+        "E-086"
+      ],
+      "linked_subcap_id": "P2C2.4.8",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Model Bias Monitoring a near-term focus for SL Green Realty Corp (NYSE:SLG): a scoped investment here would lift it from 1.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-086].",
+      "source_rec_id": "REC-04",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Model Bias Monitoring",
+      "what_text": "Model Bias Monitoring is one of SL Green Realty Corp (NYSE:SLG)'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, roughly in line with the 1.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes SL Green Realty Corp (NYSE:SLG)'s ability to deliver a stronger, more personalised customer experience [E-052].",
+      "why_text": "The assessment found: “Proxy Compensation Committee uses peer group to calibrate executive pay — formal competitive intelligence integrated into governance process” [E-028]. At 1.0 out of 5, Model Bias Monitoring shows an early-stage capability with the widest distance to close. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.3.6",
+        "P2C1",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "14508ae9-b1de-43e8-807a-2b34521ff619",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-028",
+        "E-052",
+        "E-086"
+      ],
+      "linked_subcap_id": "P2C1.3.6",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Localization a near-term focus for SL Green Realty Corp (NYSE:SLG): a scoped investment here would lift it from 1.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-086].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Localization",
+      "what_text": "Localization is one of SL Green Realty Corp (NYSE:SLG)'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, roughly in line with the 1.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes SL Green Realty Corp (NYSE:SLG)'s ability to deliver a stronger, more personalised customer experience [E-052].",
+      "why_text": "The assessment found: “Proxy Compensation Committee uses peer group to calibrate executive pay — formal competitive intelligence integrated into governance process” [E-028]. At 1.0 out of 5, Localization shows an early-stage capability with the widest distance to close. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "ESG & Sustainability (3.98 — above peer median 3.50, highest score in assessment): IBM Envizi SaaS deployed June 2022 as the single ESG system of record for GHG calculation and energy tracking across 30+ LL97-covered buildings [E-068]. SBTi validated January 2023: 50.4% absolute Scope 1+2 reduction by 2031 (2019 baseline), 1.5°C aligned — same ambition as BXP's 2020 commitment [E-090]. LL97 annual GHG compliance reports filed May 2025 (first cycle, within grace period); zero fines through 2024. ESG reporting aligns to GRI, CDP, SASB, and TCFD simultaneously [E-003, E-004]. EcoVadis TPRM covers 60+ Tier 1 vendors with annual assessments and published Vendor Code of Conduct [E-082].\n Governance & Leadership (3.24 — at peer median 3.25): COO Edward Piccinich has served 22+ years with formal authority over information technology, sustainability, construction, operations, and human resources — the single executive sponsor for any Zennify engagement [E-088]. Harrison Sitomer promoted to President and Chief Investment Officer in March 2026 with 'CIO' in his title — signaling elevated technology agenda at C-suite level. Board ESG oversight confirmed (Corporate Governance Committee, quarterly sustainability updates). ISS Governance Score 9 reflects proxy advisor scrutiny primarily on CEO compensation, not operational concerns [E-013].\n Digital Strategy (3.02 — at peer median 3.00): Investor Day December 5, 2025 produced four-pillar public strategy with quantified KPIs: FFO guidance $4.40–$4.70/share, $7B financing plan, named milestones per pillar [E-086]. CEO Marc Holliday explicitly mandated AI in construction efficiency, legal document management, complex cashflow modeling, and financial statement auditing in the FY2025 Annual Letter — active AI mandate without governed platform [E-098]. Annual strategic planning with board-approved KPIs and compensation linkage confirms level 3.\n Culture & People (2.98) and Innovation & Culture (2.53): Indeed rating 4.1/5.0 with 76% recommend-to-friend and 4.2/5.0 management score — high-performance culture, no toxic culture indicators [E-088]. Aetos Imaging 3D training platform deployed 2023 signals digital learning investment [E-089]. SUMMIT Paris 2027, Tokyo LOI, casino bid pivot to 1515 Broadway entertainment conversion confirm H2/H3 innovation execution [E-087]. AI vendor consumption (Yardi Pulse, IBM Envizi GHG AI, VTS Demand Model) confirms appetite but no internal AI innovation program yet.",
+        "heading": "P1 — What We See",
+        "linked_e_ids": [
+          "E-003",
+          "E-004",
+          "E-013",
+          "E-068",
+          "E-082",
+          "E-086",
+          "E-087",
+          "E-088",
+          "E-089",
+          "E-090",
+          "E-098"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Personalization & Analytics (1.42 — lowest P2 category, root cause of pillar weakness): No CDP (VG-02 CONFIRMED across 8 proxy searches: Segment, mParticle, Salesforce Data Cloud all negative), no CRM (VG-01 CONFIRMED: no Salesforce in any SLG entity across LinkedIn, AppExchange, and datanyze scans), no NBA engine anywhere in the stack [E-059, E-077, E-097]. Three CIB relationship tracks — 2,000+ tenant contacts via VTS, $1.3B Debt Fund LPs via email, $13.2B GLS CMBS borrowers — operate in disconnected systems. Renewal propensity analytics and cross-sell identification are structurally impossible without a unified tenant data layer. SLG's tenants include Clay (Salesforce CRM, 163,000 SF at 11 Madison), Harvey AI (185,000 SF), and UiPath — the companies building the digital stack SLG does not operate [E-022, E-077].\n Digital Marketing & Origination (1.91 — below peer median 2.75): VTS Market confirmed as SLG's leasing SOR — a deal pipeline and broker collaboration tool, not a CRM [E-021, E-052]. Leasing model is 100% broker-mediated: 188 leases signed FY2024 at 8.5% above prior rents with zero digital demand generation upstream of broker engagement [E-019]. No marketing automation detected (VG-03 CONFIRMED: Marketo, HubSpot, Pardot, Salesforce Marketing Cloud all negative). SUMMIT ($122.3M FY2025, 2.25M visitors, $500K single-day record Q1 2026) operates B2C ticketing with no visitor CRM, no email nurture, and no loyalty program (VG-10 CONFIRMED) [E-053, E-087].\n Client Onboarding (1.85 — below peer median 2.50): $1.3B Debt Fund (first close December 2025) manages institutional LP relationships via direct email with no onboarding platform, no document management portal, no capital call workflow (VG-04 CONFIRMED) [E-055]. GLS CMBS special servicing ($8.4B active, $9.9B designated) has no confirmed borrower communication platform — technology stack not publicly disclosed [E-056]. 'My Building' tenant portal is a basic HTML maintenance-request form with no self-service lease data or service escalation capability [E-057].\n Service Operations & Experience (2.64 — below peer median 3.25, strongest P2 category): Building Engines (Prism) deployed ~2018 with 96% digital WO adoption and 98.6% WO completion rate — the only quantitative service metric in the P2 assessment [E-057]. Thumbs-up/down feedback system provides basic tenant sentiment capture. Above level 2 but below peer median 3.25 because Building Engines is a point solution: no enterprise case management above it, no integration with lease data, no 360-degree tenant view.",
+        "heading": "P2 — What We See",
+        "linked_e_ids": [
+          "E-019",
+          "E-021",
+          "E-022",
+          "E-052",
+          "E-053",
+          "E-055",
+          "E-056",
+          "E-057",
+          "E-059",
+          "E-077",
+          "E-087",
+          "E-097"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Resilience & Business Continuity (3.41 — above peer median 3.25): EcoVadis TPRM covers 60+ Tier 1 vendors with annual assessments, Vendor Code of Conduct enforcement, and published metrics — the most robust vendor governance program in the peer set [E-082]. Cloud DR confirmed via datanyze. BCP documented in GRI 2024 ESG report with implied quarterly exercises [E-071]. AWS as primary cloud provider with redundancy. Above peer median; reflects disciplined risk management culture of a NYSE-listed institutional landlord.\n Regulatory Compliance & Sustainability Tech (3.00 — at peer median): IBM Envizi SaaS handles GHG data capture, carbon accounting, and energy tracking for LL97 compliance [E-068]. Annual GHG compliance reports filed with NYC DOB BEAM portal in May 2025; zero fines. SBTi 50.4% Scope 1+2 by 2031 tracked through Envizi. At peer median. Gap to level 4: no automated workflow connecting Envizi to BEAM portal submission, SBTi scenario modeling, or 2030 stricter cap planning — compliance workflow remains partially manual [E-071].\n Cybersecurity & Information Security (2.87 — near peer median 3.00): NIST CSF adopted as operative security standard — confirmed in FY2024 10-K Item 1C [E-069]. No material cybersecurity incidents FY2024 or FY2025 (confirmed negative search against breach notification databases). Annual external penetration testing and IT General Controls review confirmed. Check Point Next-Gen Firewall, Cisco VoIP, and Prove identity verification confirmed via datanyze scan [E-100]. Senior Director of Information Security confirmed, reporting to SVP IT.\n Process & Workflow Automation (1.49 — critical gap, 1.01 below peer median): No enterprise RPA platform (VG-07 CONFIRMED: UiPath is an SLG tenant at 11 Madison, NOT an internal tool; Blue Prism, Automation Anywhere, Power Automate all negative) [E-081]. Automation bounded entirely by vendor-native capabilities: Yardi Pulse HVAC control, Building Engines WO routing, IBM Envizi scheduled data extraction [E-066]. No cross-system workflow orchestration. connected cap applied: (2.23) < 2.5 threshold → constrained to max 3.0.",
+        "heading": "P3 — What We See",
+        "linked_e_ids": [
+          "E-066",
+          "E-068",
+          "E-069",
+          "E-071",
+          "E-081",
+          "E-082",
+          "E-100"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Security Architecture & Identity (3.23 — at peer median 3.25): NIST CSF is the operative standard [E-069]. Check Point Next-Gen Firewall, Cisco VoIP, and Prove identity verification confirmed via datanyze [E-096, E-100]. No material cybersecurity incidents FY2024 or FY2025 — a confirmed negative that is actively positive evidence for level 3+ security posture. Annual external penetration testing and IT General Controls review. Senior Director of Information Security reporting to SVP IT John Mathews. Strong security foundation that supports Salesforce Shield deployment with no remediation prerequisite.\n Technology Architecture & Integration (2.23 — below peer median 3.00): Yardi Voyager Commercial deployed since 1998 — a 26-year-old property management ERP that remains the financial and leasing SOR [E-066]. M365 migration partially underway (SharePoint Online and O365 confirmed); legacy Micro Focus GroupWise email co-detected via datanyze — migration incomplete (ISS-007 cap applied: max level 3) [E-096]. AWS confirmed as primary cloud provider. No enterprise integration layer: Yardi, VTS, Building Engines, IBM Envizi, WellStat, and iES EnergyDesk operate independently. No published technology roadmap.\n Analytics, AI & Decision Intelligence (1.95 — below peer median 2.75): CEO Holliday mandated AI in four functions in FY2025 Annual Letter: construction efficiency, legal document management, complex cashflow modeling, financial statement auditing [E-098]. AI consumed exclusively through vendor SaaS: Yardi Pulse (HVAC), IBM Envizi (GHG), VTS Demand Model (rent prediction). No enterprise BI platform (VG-05 CONFIRMED: Power BI, Tableau, Looker all negative). No enterprise DWH (VG-09 CONFIRMED: Snowflake, Databricks, BigQuery all negative). No MLOps, no AI governance (VG-06 CONFIRMED).\n Data Governance & Architecture (1.38 — lowest score in entire assessment): Six confirmed data silos — Yardi (financial/property), VTS (leasing pipeline), Building Engines (WO/maintenance), IBM Envizi (ESG/energy), WellStat (wellness), iES EnergyDesk (energy monitoring) — with no integration layer and no semantic data model [E-097]. No MDM platform, no enterprise data catalog, no CDO role confirmed (VG-05 proxy negative) [E-075]. No enterprise DWH (VG-09 CONFIRMED). connected cap: at 1.38 → practical ceiling of 3.0.",
+        "heading": "P4 — What We See",
+        "linked_e_ids": [
+          "E-066",
+          "E-069",
+          "E-075",
+          "E-096",
+          "E-097",
+          "E-098",
+          "E-100"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All 7 recommendations below follow the mandatory protocol: [ROOT CAUSE] with specific E-IDs → [SOLUTION] with named Salesforce product and Zennify scope → [EXPECTED OUTCOMES] table with maturity delta. Every recommendation maps to one or more Strategic Objectives (SO-01 through SO-10) and has been triple-validated: root cause confirmed by evidence, technology gap confirmed absent (VG register), peer deployment confirmed by connector searches."
+  },
+  "run_request_id": "DMA-ASM-SLG-20260514-0001"
+}

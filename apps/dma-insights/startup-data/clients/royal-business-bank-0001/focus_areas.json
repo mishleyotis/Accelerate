@@ -1,0 +1,209 @@
+{
+  "entity_display_id": "royal-business-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Ongoing digital and data processing improvements",
+        "source_kind": "docx"
+      },
+      "id": "27b507e5-b0a5-4047-bf82-9842fdfcf53a",
+      "involved_subcap_ids": [
+        "P4C2.4.16",
+        "P4C2.1.2",
+        "P4C2.8.4",
+        "P4C2.4.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.5.6",
+        "P4C1.5.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-1: \"Ongoing digital and data processing improvements\"\u2026",
+      "verbatim_quote": "SO-1: \"Ongoing digital and data processing improvements\" \u2014 the only technology reference in 10-K product development"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Expansion of SBA lending as Preferred Lender",
+        "source_kind": "docx"
+      },
+      "id": "e71272bd-d2ba-49d2-aa95-333decccaa03",
+      "involved_subcap_ids": [
+        "P1C2.9.RB1",
+        "P2C1.7.4",
+        "P3C3.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$712,700,000",
+          "delta": null,
+          "kpi_label": "as Preferred Lender",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 27,
+        "P2": 37,
+        "P3": 36
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-2: \"Expansion of SBA lending as Preferred Lender\" \u2014 $712.7M annual originations",
+      "verbatim_quote": "SO-2: \"Expansion of SBA lending as Preferred Lender\" \u2014 $712.7M annual originations"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Enhancement of trade finance and international banking services",
+        "source_kind": "docx"
+      },
+      "id": "a36971df-b15c-4dc1-96a5-833944db87f1",
+      "involved_subcap_ids": [
+        "P2C4.2.7",
+        "P2C4.8.4",
+        "P2C4.2.5",
+        "P2C4.4.6",
+        "P2C2.2.6",
+        "P2C2.2.6",
+        "P2C2.9.4",
+        "P2C2.8.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-3: \"Enhancement of trade finance and international banking services\"\u2026",
+      "verbatim_quote": "SO-3: \"Enhancement of trade finance and international banking services\" \u2014 SWIFT + Asia correspondents"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": "deposits: $3.4B",
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Maintain competitive deposit rates, manage deposit mix",
+        "source_kind": "docx"
+      },
+      "id": "30787c07-39f5-412b-85de-5c03cf800c10",
+      "involved_subcap_ids": [
+        "P4C2.4.16",
+        "P4C2.1.2",
+        "P4C2.8.4",
+        "P4C2.4.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.5.6",
+        "P4C1.5.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "8.6%",
+          "delta": null,
+          "kpi_label": "B deposits",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$3,400,000,000",
+          "delta": null,
+          "kpi_label": "Deposits",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\" \u2014 $3.4B deposits (+8.6% YoY)",
+      "verbatim_quote": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\" \u2014 $3.4B deposits (+8.6% YoY)"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Established new executive management team",
+        "source_kind": "docx"
+      },
+      "id": "7d6686d2-087d-48d8-ba2e-e50d653bb84f",
+      "involved_subcap_ids": [
+        "P1C3.9.2",
+        "P1C2.1.3",
+        "P1C4.2.1",
+        "P4C2.2.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 75,
+        "P4": 25
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-5: \"Established new executive management team\" (FY2024)\u2026",
+      "verbatim_quote": "SO-5: \"Established new executive management team\" (FY2024) \u2014 CEO Johnny Lee, CRO Rizkalla, CFO Hopkins"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Leverage branch network and community relationships",
+        "source_kind": "docx"
+      },
+      "id": "d9fe8a54-718b-49d1-b60e-6039ecd74f32",
+      "involved_subcap_ids": [
+        "P3C3.6.4",
+        "P2C3.3.RB1",
+        "P4C4.3.1",
+        "P2C1.8.1",
+        "P2C1.1.1",
+        "P1C5.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 14,
+        "P2": 50,
+        "P3": 18,
+        "P4": 18
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-6: \"Leverage branch network and community relationships\"\u2026",
+      "verbatim_quote": "SO-6: \"Leverage branch network and community relationships\" \u2014 marketing strategy = relationship-first"
+    }
+  ]
+}

@@ -1,0 +1,936 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 159,
+        "subcaps": 159,
+        "thin": 3
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 0
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 0
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 0
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "aafcu-0001",
+    "domain": null,
+    "hq": null,
+    "id": "f586562c-59ba-4009-abcd-3f68f3d5f1ac",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "AAFCU",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:51.245164Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 19,
+    "current_count": 124,
+    "dated_count": 4,
+    "median_age_months": 20.2,
+    "oldest_published_date": "1993-07-01",
+    "stale_count": 13,
+    "stale_pct": 8.02,
+    "total": 162,
+    "undated_count": 2
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 6,
+      "NEGATIVE": 3,
+      "NEUTRAL": 36,
+      "POSITIVE": 117
+    },
+    "connectors": {
+      "Clay": 6,
+      "Glassdoor": 1,
+      "Indeed": 9,
+      "LinkedIn": 6
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 9,
+      "NEUTRAL": 136,
+      "POSITIVE": 17
+    },
+    "tiers": {
+      "T1": 42,
+      "T2": 77,
+      "T3": 21,
+      "T4": 22
+    },
+    "total_facts": 4072,
+    "total_items": 162
+  },
+  "financial_trajectory": {
+    "cagr": "1.9%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2024,
+      2025
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        9.07,
+        9.24
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 9240000000.0,
+    "branches": "47",
+    "cagr": "1.9%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "net_income": 34906000.0,
+      "series": {
+        "2024": 9066879000.0,
+        "2025": 9240000000.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 426,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Aafcu has named role 'Vice President, Enterprise Solutions…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Wings 2024 annual report: mobile app launched April 2024…"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$9.2B assets · FY2025 · +1.9% CAGR",
+        "regulator": "NCUA (National Credit Union Administration)",
+        "series": {
+          "net_income_m": [
+            50.3,
+            34.9,
+            null
+          ],
+          "total_assets": [
+            null,
+            9.07,
+            9.24
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "founded": 1936,
+    "headcount": 426,
+    "hq": "Fort Worth, TX",
+    "hq_address": "Fort Worth, TX",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Gail Enda",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Recent (within past ~24 months per LeadIQ",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "LEADERSHIP TRANSITION RECENCY"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "NOT YET CONFIRMED via public proxy searches",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "NAMED CDO CTO CISO FOUND"
+      }
+    ],
+    "legal_name": "American Airlines Federal Credit Union",
+    "license_type": "Federal Credit Union",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "AAFCU is a credit union headquartered in Fort Worth, TX. It reports $9.2 billion in total assets and has operated since 1936. It is regulated by NCUA (National Credit Union Administration) and employs approximately 426 people across 47 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (National Credit Union Administration)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.8,
+          "source": "App Store"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 73,
+          "scale": 5,
+          "score": 3.8,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.8,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.8/5",
+          "signal": "Glassdoor: 3.8/5 overall (73 reviews), 72% recommend, 80% positive business outlook",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.8/5",
+          "signal": "Indeed AAFCU ratings (Fort Worth TX): Overall 3.8/5; Culture & Values 3.6; Job Security/Advancement 3.6; Management 3.5; Work-Life 3.9; Compensation 3.4",
+          "source": "Indeed"
+        },
+        {
+          "rating": "4.8/5",
+          "signal": "2024 annual report: mobile app launched April 2024, 4.8/5 app store rating; 'differentiator for us'; CEO R",
+          "source": "App Store"
+        },
+        {
+          "signal": "review: 'highly rated app...close to five stars on both the Google Play store and the Apple app store'; 'impressive array of helpful resources to learn financial skills, build an emergency fund and develop a budget' including financial coac",
+          "source": "Google Play"
+        },
+        {
+          "signal": "BBB profile exists (Fort Worth TX); complaint themes/volume require deeper search in Batch 2 P2 sentiment work — placeholder evidence",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-099",
+        "excerpt": "DIRECT P2C1.2.7 + P2C1.3.2 VIDEO/WEBINAR EVIDENCE: AAFCU runs 'weekly webinars which are also available on our YouTube channel' (per President's Corner). YouTube channel ID UCEo8aQXrOlU9wSArihD75Aw operating with archive",
+        "title": "Aafcu runs weekly webinars which are also available on our YouTube…",
+        "type": "webinar",
+        "url": "https://www.aacreditunion.org/learning/financial-wellness/ + linkedin.com/company/aacreditunion"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "DIRECT P1C3.1.1 INNOVATION VISION EVIDENCE — Anthony Fletcher, VP Payments & Digital Strategy at AAFCU, quoted: 'Fintech provides the Credit Union with an opportunity to stay competitive in a rapidly evolving market.",
+        "title": "Anthony Fletcher, VP Payments & Digital Strategy at AAFCU, quoted",
+        "type": "article",
+        "url": "https://www.aacreditunion.org/blog/future-banking-fintech/"
+      },
+      {
+        "author": null,
+        "date": "2010-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-080",
+        "excerpt": "DIRECT DESIGN THINKING EVIDENCE — Pedro Noda (eMarketing Manager/Webmaster at AAFCU) quoted on 2010 web redesign: 'Working with our stakeholders and member-owners, we studied the behaviors of financial customers to bette",
+        "title": "Pedro Noda (eMarketing Manager/Webmaster at AAFCU) quoted on 2010 web…",
+        "type": "article",
+        "url": "https://www.cutimes.com/2010/aafcu-new-website"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-087",
+        "excerpt": "DIRECT P1C4.4 + P1C4.7 EVIDENCE: AAFCU LinkedIn post: 'Aviation Week has launched! Join us at all 46 of our branches for a week of fun with $1,000 cash prizes, treats and more.' Annual member-engagement programmatic even",
+        "title": "Direct P1C4.4",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/aacreditunion"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-026",
+        "excerpt": "CEO public communication channels: weekly webinars (also available on YouTube channel), Navigator interactive financial guide, online blog, quarterly magazine 'cent$'. Multi-channel content marketing infrastructure alrea",
+        "title": "CEO public communication channels: weekly webinars (also available on…",
+        "type": "webinar",
+        "url": "https://www.aacreditunion.org/about-us/presidents-corner/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-100",
+        "excerpt": "DIRECT P2C1.2.4 SOCIAL MEDIA PRESENCE — Quantified snapshot (April 2026):",
+        "title": "Direct P2C1.2.4 Social Media Presence",
+        "type": "linkedin-post",
+        "url": "https://www.facebook.com/AmericanAirlinesCreditUnion/ + https://www.instagram.com/aacreditunion/ + https://www.linkedin.com/company/aacreditunion + https://www.youtube.com/channel/UCEo8aQXrOlU9wSArihD75Aw"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.866874+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# AAFCU — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "AAFCU is a $9.2B in assets credit union regulated by NCUA (National Credit Union Administration), operating since 1936 with 426 employees. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is Prompt Management & Engineering at 1.7/5 against a 2.8 peer median [E-159, E-161]. Next is Industry Trend Monitoring at 1.9/5 against a 3.0 peer median [E-040, E-045].\n\nThird is MDM Strategy & Golden Record at 2.0/5 against a 2.5 peer median [E-027, E-110]. The issue register adds Benchmark section Section 7 contains range-style evidence reference: ' through '…. The issue register adds run_manifest.json missing 'evidence_mode' key. RESEARCH_HANDOFF mode confirmed via P1='SKIPPED_RESEARCH_HANDOFF' in phase_complete….\n\nCounter-signal: Reporting Technology already runs at 3.0/5 against a 3.0 peer median — a strength to build on, not rebuild. The question for AAFCU is whether to close Prompt Management & Engineering first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. AAFCU should lead with nCino (78/100 fit) against Competitive Analysis, then sequence Tableau behind it. Closing Prompt Management & Engineering to the peer median alone is worth 1.0 maturity points, and the capabilities that depend on it compound the gain.\n\nThe analyst's own priority framing: \"Reset enterprise priorities + governance cadence to close the 13 P1 capability gaps that surfaced in this assessment.\"."
+  },
+  "overall_score": 2.36,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:51.213565+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/gap_priority_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:51.214393+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:51.215098+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass1_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:51.215503+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:51.215721+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 15
+    },
+    "stage_ms": {
+      "manifest": 15,
+      "parse": 10153,
+      "persist": 3856
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'SV2'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: AAFCU_TechStack_Explorium.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name', 'primary_regulator'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_recommendations",
+        "detail": "insights_derived_from_recommendations: 5",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=3",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/gap_priority_register.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass1_check_results.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 22",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:29/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 5",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'SV2'",
+      "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+      "used variant tech stack xlsx: AAFCU_TechStack_Explorium.xlsx",
+      "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name', 'primary_regulator'] leadership=0",
+      "insights_derived_from_recommendations: 5",
+      "firmographics_leadership_healed: count=3",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/gap_priority_register.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass1_check_results.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "timeline_events_persisted: 22",
+      "catalogue_unresolved:29/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 5"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 159,
+      "peer_median": 2.86,
+      "pillar_id": "P1",
+      "score": 2.24,
+      "subcaps_scored": 159
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.99,
+      "pillar_id": "P2",
+      "score": 2.42,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.63,
+      "pillar_id": "P3",
+      "score": 2.63,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.65,
+      "pillar_id": "P4",
+      "score": 2.15,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-01",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:51.245164Z",
+    "created_at": "2026-07-02T23:09:51.245164Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "1095ce52-4a18-40b7-8e99-ca314f0fb2e6",
+    "overall_score": null,
+    "request_id": "DMA-ASM-AAFCU-20260501-0001",
+    "started_at": "2026-07-02T23:09:51.245164Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.8,
+        "source": "App Store"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 73,
+        "scale": 5,
+        "score": 3.8,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.8,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 13 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-040",
+        "E-045",
+        "E-046",
+        "E-050"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.93,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 13 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: AAFCU has formal 'Data Analytics' department (named in role title 'AA Credit Union Data Analytics - Business'). Role sits within Finance and Analytics Team. Confirms named, dedicated analytics function — proxy for documented data strategy."
+    },
+    {
+      "body": "Treat the 6 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "evidence": [
+        "E-159",
+        "E-161",
+        "E-020",
+        "E-021"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Build the data foundation",
+      "peer_median": 2.75,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.71,
+      "so_what": "Prioritize Build the data foundation in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Build the data foundation",
+      "what": "Treat the 6 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "why": "The linked evidence records: P4C1 DATA GOVERNANCE BASELINE: NCUA GLBA compliance (E-147) mandates data governance. ARCU data warehouse (E-137) = enterprise data architecture with consistent business definitions + automated reporting. Oracle Siebel CRM (E-110) = customer master data."
+    },
+    {
+      "body": "Unify the 5 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-127",
+        "E-132",
+        "E-027",
+        "E-030"
+      ],
+      "magnitude": "0.4 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.75,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.34,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 5 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: NEGATIVE SEARCH (P2C2.8.1 BaaS API + P2C2.8.2 WHITE-LABEL): No public BaaS API platform or developer-facing integration program identified. AAFCU is API CONSUMER (via Velera/PSCU, MeridianLink, DocuSign, Q2 APIs) not API PUBLISHER."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.3,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap applied: FOM-structural N/A (NCUA charter restriction)",
+        "15 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Trend Monitoring averages 1.9/5 over 167 scored subcaps; ceiling 2.9 reflects thin evidence density (152/167 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.3,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-038"
+      ],
+      "modifiers": [],
+      "rationale": "Portfolio Management averages 2.6/5 over 217 scored subcaps; ceiling 3.6 reflects solid evidence density (217/217 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.3,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-083"
+      ],
+      "modifiers": [],
+      "rationale": "AI Governance for Innovation averages 2.1/5 over 192 scored subcaps; ceiling 3.1 reflects solid evidence density (192/192 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.3,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-094"
+      ],
+      "modifiers": [],
+      "rationale": "Stakeholder Engagement averages 2.2/5 over 205 scored subcaps; ceiling 3.2 reflects solid evidence density (205/205 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.3,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-101"
+      ],
+      "modifiers": [],
+      "rationale": "Developer & API Marketing averages 2.3/5 over 293 scored subcaps; ceiling 3.3 reflects solid evidence density (293/293 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.3,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-118"
+      ],
+      "modifiers": [
+        "cap applied: FOM-structural N/A (NCUA charter restriction)"
+      ],
+      "rationale": "Aggregator Integration averages 2.3/5 over 291 scored subcaps; ceiling 3.3 reflects solid evidence density (291/291 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.3,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-118"
+      ],
+      "modifiers": [],
+      "rationale": "Context & Channel Integration averages 2.6/5 over 289 scored subcaps; ceiling 3.6 reflects solid evidence density (289/289 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-142"
+      ],
+      "modifiers": [
+        "cap M3 applied: CROSS-PILLAR: P4C1<2.5→P2C4 cap 3.0"
+      ],
+      "rationale": "Dynamic Journey Pivoting averages 2.5/5 over 259 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: CROSS-PILLAR: P4C1<2.5→P2C4 cap 3.0); band ±0.3 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.3,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [],
+      "rationale": "Exception Management averages 2.6/5 over 146 scored subcaps; ceiling 3.6 reflects solid evidence density (146/146 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.3,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-150"
+      ],
+      "modifiers": [],
+      "rationale": "Account Takeover Prevention averages 2.5/5 over 130 scored subcaps; ceiling 3.5 reflects solid evidence density (130/130 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.3,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-150"
+      ],
+      "modifiers": [],
+      "rationale": "Reporting Technology averages 3.0/5 over 142 scored subcaps; ceiling 4.0 reflects solid evidence density (142/142 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.3,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [],
+      "rationale": "Ongoing Vendor Monitoring averages 2.4/5 over 145 scored subcaps; ceiling 3.4 reflects solid evidence density (145/145 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [],
+      "rationale": "MDM Strategy & Golden Record averages 2.0/5 over 200 scored subcaps; ceiling 3.0 reflects solid evidence density (200/200 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.3,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-136"
+      ],
+      "modifiers": [],
+      "rationale": "Prompt Management & Engineering averages 1.7/5 over 270 scored subcaps; ceiling 2.7 reflects solid evidence density (270/270 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.3,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [],
+      "rationale": "DevOps & Delivery Excellence averages 2.4/5 over 235 scored subcaps; ceiling 3.4 reflects solid evidence density (235/235 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.3,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [],
+      "rationale": "Continuous Trust Verification averages 2.7/5 over 150 scored subcaps; ceiling 3.7 reflects solid evidence density (150/150 full-evidence cells); band ±0.3 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Symitar serves 535 credit unions (2025 market share data) — most-deployed CU core platform; AAFCU is among 60+ Symitar clients with assets >$1B (Jul 2025).",
+      "evidence": [
+        "E-027"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Aafcu is $1B (Jul 2025)",
+      "metric": "assets $1B",
+      "peer_context": "Prompt Management & Engineering runs 1.71/5 vs a 2.75 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Symitar serves 535 credit unions (2025 market share data) — most-deployed CU core platform; AAFCU is among 60+ Symitar clients with assets >$1B (Jul 2025). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Symitar serves 535 credit unions (2025 market share data)…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "P2C4.3.5 HOUSEHOLD COORDINATION + P2C4.5.7 CLV INVESTMENT: Loan Loyalty discount requires '2 or more loans with active balance within last 2 years' = recognizes multi-product households. Bonus Dividend: 'more you participate as a member, the more you'll receive' = participation-based CLV recognition (Apr 2026).",
+      "evidence": [
+        "E-144"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Household Coordination + P2C4.5.7 CLV Investment",
+      "metric": null,
+      "peer_context": "Prompt Management & Engineering runs 1.71/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "P2C4.3.5 HOUSEHOLD COORDINATION + P2C4.5.7 CLV INVESTMENT: Loan Loyalty discount requires '2 or more loans with active balance within last 2 years' = recognizes multi-product households. Window: 240-month window.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Named loan officers: ' is the main reason I use AA Credit…"
+      },
+      "window": "240-month window"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "DIRECT P3C3.1.1+1.2 COMPLIANCE GOVERNANCE: Brian Kilian, CCUFC, NAFCU NCCO = Compliance Officer at AAFCU (since January 2021, 4+ yrs). NAFCU NCCO = National Association of Federal Credit Unions Certified Compliance Officer = professional regulatory compliance certification. CCUFC = Certified Credit Union Financial Counselor (Apr 2026).",
+      "evidence": [
+        "E-146"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Direct P3C3.1.1+1.2 Compliance GOVERNANCE: Brian Kilian…",
+      "metric": null,
+      "peer_context": "Prompt Management & Engineering runs 1.71/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "DIRECT P3C3.1.1+1.2 COMPLIANCE GOVERNANCE: Brian Kilian, CCUFC, NAFCU NCCO = Compliance Officer at AAFCU (since January 2021, 4+ yrs). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Named Compliance Officer with dual professional…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "NEGATIVE SEARCH RESULT: No formal enforcement orders, administrative orders, civil money penalties, or consent orders identified for American Airlines FCU in NCUA enforcement records search (Apr 2026).",
+      "evidence": [
+        "E-008"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "No formal enforcement orders, administrative orders, civil…",
+      "metric": null,
+      "peer_context": "Prompt Management & Engineering runs 1.71/5 vs a 2.75 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "NEGATIVE SEARCH RESULT: No formal enforcement orders, administrative orders, civil money penalties, or consent orders identified for American Airlines FCU in NCUA enforcement records search (Apr 2026). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Clean regulatory standing"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Prompt Management & Engineering scores 1.71/5 vs a typical 2.75 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-159",
+        "E-161",
+        "E-020",
+        "E-021"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Prompt Management & Engineering scores 1.71/5 vs a typical…",
+      "metric": "Prompt Management & Engineering 1.71/5 vs peer 2.75",
+      "peer_context": "Prompt Management & Engineering runs 1.71/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Competitive Analysis — highest-fit surface at 78/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C2",
+      "text": "Prompt Management & Engineering scores 1.71/5 vs a typical 2.75 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

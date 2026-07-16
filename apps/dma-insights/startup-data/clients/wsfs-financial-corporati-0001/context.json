@@ -1,0 +1,1064 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "wsfs-financial-corporati-0001",
+  "financials": {
+    "lines": [
+      "Total assets have grown at approximately 8-10% CAGR over five years, with the single largest step change driven by the Bryn Mawr Trust acquisition (January 1, 2022). Wealth AUM/AUA is in strong acceleration, growing 35% in two years. Core EPS increased 19% year-over-year in FY2025, placing WSFS in the top quartile of the $15-30B regional bank peer group. [E-002, E-003, E-059]",
+      "WSFS's financial trajectory is classified as ACCELERATING. The five-year asset CAGR of ~8-10% total assets reflects both the step change from the Bryn Mawr Trust acquisition (January 2022, +$7B) and sustained organic growth. Key acceleration signals: Core EPS +19% YoY (2024\u21922025); ROA improved from 1.22% to 1.39%; Wealth AUM/AUA grew 35% in two years to $97.4B. WSFS is at KRX 80th percentile versus its defined peer group (2023). [E-002, E-003, E-059]"
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 87,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 6500,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026)"
+          },
+          {
+            "fy": "FY2025",
+            "label": "NCino Digital Partners launched"
+          },
+          {
+            "fy": "FY2024",
+            "label": "External Wall Street financial strategy expertise added"
+          },
+          {
+            "fy": "FY2022",
+            "label": "Ferrante joined Dec 2022"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Mid-Atlantic \u2014 PA, DE, NJ, FL, NV, VA",
+        "headline": "$22.1B net income \u00b7 FY2026",
+        "regulator": "OCC",
+        "series": {
+          "net_income_m": [
+            7000.0,
+            20600.0,
+            20900.0,
+            21300.0,
+            22100.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Mid-Atlantic \u2014 PA",
+      "DE",
+      "NJ",
+      "FL",
+      "NV",
+      "VA"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jim Wechsler",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "EVP Chief Commercial Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Frank McGrane",
+        "recent_hire": false,
+        "tenure_months": 480,
+        "title": "EVP Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jim Gise",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "EVP Corporate & Specialty Banking / Deputy CCBO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Allan Matyger",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "EVP Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Rene Gonzales",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Staszewski",
+        "recent_hire": false,
+        "tenure_months": 24,
+        "title": "Enterprise Architect"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Nick Ferrante",
+        "recent_hire": false,
+        "tenure_months": 60,
+        "title": "VP Enterprise Data Manager (de-facto CDO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Christine Davis",
+        "recent_hire": false,
+        "tenure_months": 276,
+        "title": "EVP Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kate McGlinchey",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "SVP Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Robert Eastwood",
+        "recent_hire": false,
+        "tenure_months": 300,
+        "title": "SVP Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Vennela Kondapally",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "AVP Salesforce App Admin II"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Krishna Chaitanya",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "AVP Salesforce & nCino Admin/Dev + Agentforce Specialist"
+      }
+    ],
+    "license_type": "National bank charter (OCC)",
+    "narrative_md": "Every data point in this section is anchored to a specific evidence item (E-ID) from the research corpus. Financial data covers the five-year period 2021\u20132026 to meet the trend analysis requirement.",
+    "primary_regulator": "OCC",
+    "size_tier": "LARGE_REGIONAL",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-038",
+        "excerpt": "Board diversity: 'As part of our Board refreshment process, we look for diversity of Board tenure and potential Director candidates who bring perspectives from different backgrounds, education, culture, experience, talen",
+        "title": "Board diversity: 'As part of our Board refreshment process, we look\u2026",
+        "type": "article",
+        "url": "https://www.marketscreener.com/quote/stock/WSFS-FINANCIAL-CORPORATIO-11417/news/WSFS-Financial-2024-Environmental-Social-and-Governance-Report-49510848/"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-089",
+        "excerpt": "ARS 2025 (April 2025): 'Advancing how we use data, the deployment of artificial intelligence, and predictive modeling' \u2014 formal AI/ML strategy stated at executive level WSFS leveraged Upstart AI platform for consumer cre",
+        "title": "ARS 2025 (April 2025): 'Advancing how we use data, the deployment of\u2026",
+        "type": "webinar",
+        "url": "https://s201.q4cdn.com/286818350/files/doc_financials/2024/ar/wsfsars04-02x2025v2.htm"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "Customer segmentation: commercial clients, SMB, wealth/HNW, consumer \u2014 multi-segment marketing model LinkedIn ABM + CFO panels + content syndication for commercial/middle market acquisition \u2014 B2B digital marketing active",
+        "title": "Customer segmentation: commercial clients, SMB, wealth/HNW, consumer",
+        "type": "conference",
+        "url": "https://matrixbcg.com/blogs/marketing-strategy/wsfsbank"
+      }
+    ],
+    "ticker": "WSFS"
+  },
+  "issue_register": [
+    {
+      "id": "281aafdd-7f0d-43d9-8d75-2ab38b34f57c",
+      "issue_id": "ISS-GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "run_manifest missing required fields: {'overall_score', 'pillar_scores'}"
+    },
+    {
+      "id": "1a07d663-ece6-4a5c-aad5-ad861cb83f32",
+      "issue_id": "ISS-GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "caps_applied_log.csv absent \u2014 caps stored in issue_register.json instead (v5.5/v2.4 schema drift)"
+    },
+    {
+      "id": "7f91a62e-3cb6-4599-8b85-b6c848604926",
+      "issue_id": "ISS-GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "contradiction_log.csv not generated (v5.5/v2.4 schema drift)"
+    },
+    {
+      "id": "22219a41-bc5f-44d3-b9d0-16e4e89a84c1",
+      "issue_id": "ISS-GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "evidence_index stored as JSON not CSV (v5.5/v2.4 schema drift)"
+    },
+    {
+      "id": "8685a566-6df9-4724-ad8b-8248d48b027b",
+      "issue_id": "ISS-GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Workbook missing v2.4 schema tabs: {'Critic_Log', 'QA_Validation_Log', 'Calculation_Chain', 'Absent_Evidence_Log'} (schema drift)"
+    },
+    {
+      "id": "bc593772-523b-490e-b860-bf28c94063ab",
+      "issue_id": "ISS-GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "reasoning_chain_log.json not generated (v5.5/v2.4 schema drift)"
+    },
+    {
+      "id": "b966ecdb-3b31-4182-88bd-61d760eedf16",
+      "issue_id": "ISS-GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "run_manifest.json lacks $schema field and full run_manifest_v2 required fields"
+    },
+    {
+      "id": "9adeb5ff-15c1-4938-9b61-7bc3628043e7",
+      "issue_id": "ISS-GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Column S (Proof_Claims) absent from workbook \u2014 v5.5/v2.4 schema drift"
+    },
+    {
+      "id": "40e27976-bda3-45bc-9eb9-a925d7f7ca01",
+      "issue_id": "ISS-GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Column T (Proof_Links) absent from workbook \u2014 v5.5/v2.4 schema drift"
+    },
+    {
+      "id": "17d3e771-6c8d-498c-9550-0eca43915650",
+      "issue_id": "ISS-GOV-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Calculation_Chain worksheet absent from workbook (v5.5/v2.4 schema drift)"
+    },
+    {
+      "id": "6cf5edcd-ed4d-4c89-8d14-755efe0a2b3c",
+      "issue_id": "ISS-GOV-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "caps_applied_log.csv ABSENT (schema drift: HIGH file not generated by v5.5)"
+    },
+    {
+      "id": "77300979-e0ec-46fc-b8d0-099d167730a1",
+      "issue_id": "ISS-GOV-012",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "contradiction_log.csv ABSENT (schema drift: HIGH file not generated by v5.5)"
+    },
+    {
+      "id": "e8bf3982-34bd-454f-b5e0-4ceae7f1fd28",
+      "issue_id": "ISS-GOV-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "reasoning_chain_log.json ABSENT (schema drift: HIGH file not generated by v5.5)"
+    },
+    {
+      "id": "2ed3fb77-ab6a-45d0-81b8-620ff206c731",
+      "issue_id": "ISS-GOV-014",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Rationale format (v5.5) lacks formal RULE_ citations and structured C1/C2/C3 claims per v2.4 proof standard"
+    },
+    {
+      "id": "e243023b-e378-4724-a112-adeae0c3d25f",
+      "issue_id": "ISS-GOV-015",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Zero RULE_ citations in 708 rationales \u2014 v5.5 uses narrative maturity descriptors not formal rule IDs"
+    },
+    {
+      "id": "740dcf5b-9062-4657-8ca4-e255594b19e3",
+      "issue_id": "ISS-GOV-016",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Counterclaim quality: 95% substantive (peer gap framing, not formal C1/C2/C3 rebuttals)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Issues identified during research (Layer 0) were confirmed and enriched during assessment scoring (Layer 1). Each issue has a quantified scoring impact: the \"Cap Value\" column shows the maximum maturity score achievable for affected capability regardless of other evidence. Issues marked MATERIAL represent confirmed technology or process gaps; issues marked MINOR represent governance gaps or regulatory requirements.",
+    "trend_md": "This section is adapted from the WSFS Client Profile Research Report (Layer 0, Batch 5, Assessment ID DMA-RES-WSFS-20260519-0001). Financial trajectory and digital evolution timeline establish the historical context for the scoring results in Section 5."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.5,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.0,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.41,
+      "peer_name": "Atlantic Union Bankshares Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.97,
+      "peer_name": "Fulton Financial Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.0,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.68,
+      "peer_name": "Independent Bank Group",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.65,
+      "peer_name": "S&T Bancorp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-WSFS-20260519-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Overall",
+        "themes": [],
+        "value": 3.6
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Culture & Values",
+        "themes": [],
+        "value": 3.5
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Work-Life Balance",
+        "themes": [],
+        "value": 3.6
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Management Quality",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Job Security / Advancement",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Compensation & Benefits",
+        "themes": [],
+        "value": 3.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CEO Approval",
+        "themes": [],
+        "value": 55.8
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Recommend to Friend",
+        "themes": [],
+        "value": 55.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Interview Experience",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Above-Average Wellbeing",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Below-Average Wellbeing",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Forbes Best Banks 2025",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Gallup Exceptional Workplace",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "KRX Index",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026) \u2014 reports to CIO Matyger; leads technology strategy, infrastructure, and operations",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "0a91f994-1db3-473c-b9b9-53709f839b17",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://investors.wsfsbank.com/news-and-events/press-releases/press-releases-details/2026/WSFS-Bank-Announces-Rene-Gonzales-as-Senior-Vice-President-Chief-Technology-Officer/",
+      "subcap_ids": [],
+      "title": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026)"
+    },
+    {
+      "body": "CTO appointment March 2026 \u2014 new relationship entry point, likely in technology vendor evaluation mode",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "3b8e25c3-ed41-439a-a340-9e76cf3aded6",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://investors.wsfsbank.com/news-and-events/press-releases/press-releases-details/2026/WSFS-Bank-Announces-Rene-Gonzales-as-Senior-Vice-President-Chief-Technology-Officer/",
+      "subcap_ids": [],
+      "title": "CTO appointment March 2026"
+    },
+    {
+      "body": "Michelle Hong (Harvard JD, Duke BA) appointed to board Dec 2025 \u2014 Harvard Law/legal/financial expertise",
+      "date_precision": "month",
+      "e_id": "E-019",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "487d0654-a974-4525-9853-ed7a05924f52",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/sec-filings/WSFS/ars-wsfs-financial-corp-sec-filing-17feabdfcba6.html",
+      "subcap_ids": [],
+      "title": "Michelle Hong (Harvard JD, Duke BA) appointed"
+    },
+    {
+      "body": "nCino Digital Partners launched November 2025: 5 role-based AI agents \u2014 Analyst, Executive, Service, Processor, Client Digital Partners",
+      "date_precision": "month",
+      "e_id": "E-069",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-069"
+      ],
+      "id": "2561e031-ad65-46aa-b7dd-5f6d43b54647",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://investor.ncino.com/news-releases/news-release-details/ncino-introduces-digital-partners-role-based-agents-purpose",
+      "subcap_ids": [],
+      "title": "NCino Digital Partners launched"
+    },
+    {
+      "body": "Analyst Digital Partner (launched Nov 2025): 'credit analyst can ask analyst digital partner to pull a borrower's portfolio data, recent financials, covenant status and peer benchmarks, and then draft a risk summary' \u2014 directly addresses WSFS manual credit memo workflow",
+      "date_precision": "month",
+      "e_id": "E-069",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-069"
+      ],
+      "id": "7633ceeb-b801-4d39-a57c-c5068baf2d0e",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://investor.ncino.com/news-releases/news-release-details/ncino-introduces-digital-partners-role-based-agents-purpose",
+      "subcap_ids": [],
+      "title": "Credit analyst can ask analyst digital partner"
+    },
+    {
+      "body": "Major banks continue launching open banking partnerships despite rule pause \u2014 Truist-Plaid announced Nov 2025; WSFS no comparable announcement confirmed",
+      "date_precision": "month",
+      "e_id": "E-062",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "1413cd5e-1f81-4add-a09d-6226490fe0ac",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.americanbanker.com/news/on-the-day-of-a-would-be-deadline-open-banking-is-in-flux",
+      "subcap_ids": [],
+      "title": "Truist-Plaid announced Nov 2025"
+    },
+    {
+      "body": "Frank McGrane named EVP Chief Credit Officer (July 9, 2025) \u2014 oversees commercial, consumer and other credit exposures and loan policies; prior Citizens Bank, Mellon Bank; nearly 40 years banking experience",
+      "date_precision": "day",
+      "e_id": "E-071",
+      "event_date": "2025-07-09",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "ba8973c0-764e-45d3-ae87-4dcaf07a4b95",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250709419416/en/WSFS-Names-Frank-McGrane-Executive-Vice-President-Chief-Credit-Officer",
+      "subcap_ids": [],
+      "title": "Frank McGrane named EVP Chief Credit Officer (July 9, 2025)"
+    },
+    {
+      "body": "Jim Wechsler (Chief Commercial Banking Officer) promoted in 2025 after 15 years at WSFS \u2014 deep regional commercial banking expertise",
+      "date_precision": "year",
+      "e_id": "E-027",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "76f15a61-02fc-473d-ae3b-16b027ebd973",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.ainvest.com/news/wsfs-bank-generational-leadership-stability-fuels-long-term-growth-prospects-2506/",
+      "subcap_ids": [],
+      "title": "Jim Wechsler (Chief Commercial Banking Officer) promoted in\u2026"
+    },
+    {
+      "body": "WSFS proactively hired a change management specialist from TD Bank \u2014 second dedicated change management leader added in 2025 alongside OCM Analyst hiring",
+      "date_precision": "year",
+      "e_id": "E-032",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "89573357-185c-44d2-92c1-0149ea65f951",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250428691440/en/WSFS-Names-Rebecca-Seeman-as-Chief-Operating-Officer-Consumer-Banking",
+      "subcap_ids": [],
+      "title": "WSFS hired a change management specialist from TD Bank"
+    },
+    {
+      "body": "WSFS divested Upstart partnership: completed sale of Upstart portfolio July 2025 and exited Spring EQ \u2014 WSFS demonstrated ability to exit fintech partnerships and manage wind-down",
+      "date_precision": "month",
+      "e_id": "E-086",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-086"
+      ],
+      "id": "ea573d6b-0a22-4353-b5b1-0029c8100705",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://investors.wsfsbank.com/news-and-events/press-releases/press-releases-details/2025/WSFS-Names-Frank-McGrane-Executive-Vice-President-Chief-Credit-Officer/",
+      "subcap_ids": [],
+      "title": "WSFS divested Upstart partnership: completed sale of\u2026"
+    },
+    {
+      "body": "Allan Matyger named EVP and CIO of WSFS Bank (May 2025) \u2014 25-year WSFS veteran, prior CTO of Cash Connect division",
+      "date_precision": "month",
+      "e_id": "E-009",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "e32a32ad-915e-4f4f-9678-adb8d80cc5ce",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250501655181/en/WSFS-Names-Allan-Matyger-Executive-Vice-President-Chief-Information-Officer",
+      "subcap_ids": [],
+      "title": "Allan Matyger named EVP and CIO of WSFS Bank (May 2025)"
+    },
+    {
+      "body": "Kate McGlinchey named SVP CCO (April 2025): 'lead design and execution of the bank's Compliance Management, Fraud, and Bank Secrecy Act (BSA) and Anti-Money Laundering (AML) programs' \u2014 formal compliance program with executive ownership",
+      "date_precision": "month",
+      "e_id": "E-074",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-074"
+      ],
+      "id": "65759846-4fbe-4b25-9ba5-e92cb613a04b",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.businesswire.com/news/home/20250414392454/en/WSFS-Names-Kate-McGlinchey-Senior-Vice-President-Chief-Compliance-Officer",
+      "subcap_ids": [],
+      "title": "Kate McGlinchey named SVP CCO (April 2025): '"
+    },
+    {
+      "body": "Rebecca Seeman named SVP COO Consumer Banking (April 2025) \u2014 prior role: Head of US Retail Change Management, Customer and Colleague Experience at TD Bank",
+      "date_precision": "month",
+      "e_id": "E-032",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "6ab5bbff-9277-4674-b695-66785bc41b45",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250428691440/en/WSFS-Names-Rebecca-Seeman-as-Chief-Operating-Officer-Consumer-Banking",
+      "subcap_ids": [],
+      "title": "Rebecca Seeman named SVP COO Consumer Banking (April 2025)"
+    },
+    {
+      "body": "Youth financial education banking products \u2014 API integration capability confirmed; digital banking product expansion",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-065"
+      ],
+      "id": "40af4f71-a563-48ed-8f03-3798f01673d0",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Greenlight (continued) Value: Ongoing partnership"
+    },
+    {
+      "body": "Lynn Hobson named SVP CMO effective December 2, 2024 \u2014 16 years at BNY Pershing as Director/Head of Marketing; leads digital marketing, data analytics, brand awareness, advertising, customer experience",
+      "date_precision": "day",
+      "e_id": "E-046",
+      "event_date": "2024-12-02",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "b1233471-8961-45e9-933d-ea133c94ea6a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://investors.wsfsbank.com/news-and-events/press-releases/press-releases-details/2024/WSFS-Appoints-New-Chief-Marketing-Officer-and-Chief-Community-Impact-Officer/",
+      "subcap_ids": [],
+      "title": "Lynn Hobson named SVP CMO"
+    },
+    {
+      "body": "10-K 2024 explicitly states: 'Building out Salesforce to support our client relationship management with focus on change management, adoption and governance' \u2014 Salesforce build-out is a named 2024 strategic initiative",
+      "date_precision": "year",
+      "e_id": "E-059",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-059"
+      ],
+      "id": "732162d9-2f29-415d-a837-e234918bb9dc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s201.q4cdn.com/286818350/files/doc_financials/2024/q4/Form-10-K-WSFS-12-31-2024_final.pdf",
+      "subcap_ids": [],
+      "title": "10-K 2024 states"
+    },
+    {
+      "body": "10-K 2024 explicitly: 'Increased control, transparency, automation & efficiencies through platform integrations, enhancements and bot implementations' \u2014 RPA/bots are a named operational investment",
+      "date_precision": "year",
+      "e_id": "E-066",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "48a6ced1-6673-41b4-9d24-db8ac53436a5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://theorg.com/org/wsfs-bank/teams/technology-and-data-analysis",
+      "subcap_ids": [],
+      "title": "RPA/bots are a named operational investment"
+    },
+    {
+      "body": "David Burg (CFO) hired from Citigroup in 2024 \u2014 external Wall Street financial strategy expertise added",
+      "date_precision": "year",
+      "e_id": "E-027",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "9f5c4385-076b-40c9-b0d2-2befb1609025",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.ainvest.com/news/wsfs-bank-generational-leadership-stability-fuels-long-term-growth-prospects-2506/",
+      "subcap_ids": [],
+      "title": "External Wall Street financial strategy expertise added"
+    },
+    {
+      "body": "Post-BMT merger (Jan 2022): Ferrante joined Dec 2022 specifically to address data integration complexity from Bryn Mawr Trust merger \u2014 data quality and MDM are active post-merger workstreams",
+      "date_precision": "month",
+      "e_id": "E-101",
+      "event_date": "2022-12-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "f5d90aca-087c-435c-a894-e6b65819718a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://theorg.com/org/wsfs-bank/org-chart/nick-f",
+      "subcap_ids": [],
+      "title": "Ferrante joined Dec 2022"
+    },
+    {
+      "body": "Full BMT systems and brand conversion completed in 2022 \u2014 large-scale post-M&A technology integration executed",
+      "date_precision": "year",
+      "e_id": "E-019",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "c63aae70-ab7f-415c-9f4d-cbd687fa79bc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/sec-filings/WSFS/ars-wsfs-financial-corp-sec-filing-17feabdfcba6.html",
+      "subcap_ids": [],
+      "title": "Full BMT systems and brand conversion completed in 2022\u2026"
+    },
+    {
+      "body": "Robert Moore (SVP Director Enterprise Data and Engineering) leads enterprise data and engineering since January 2022 \u2014 joined via BMT merger; prior Bryn Mawr Trust, Toll Brothers IT",
+      "date_precision": "month",
+      "e_id": "E-066",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "01eb28ae-668c-4d03-a186-17c24dc496db",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://theorg.com/org/wsfs-bank/teams/technology-and-data-analysis",
+      "subcap_ids": [],
+      "title": "Robert Moore (SVP Director Enterprise Data and Engineering)\u2026"
+    },
+    {
+      "body": "Post-BMT merger (Jan 2022): Ferrante joined Dec 2022 specifically to address data integration complexity from Bryn Mawr Trust merger \u2014 data quality and MDM are active post-merger workstreams",
+      "date_precision": "month",
+      "e_id": "E-101",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "7cd175bf-a633-42f8-ac14-787705a50711",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://theorg.com/org/wsfs-bank/org-chart/nick-f",
+      "subcap_ids": [],
+      "title": "Post-BMT merger (Jan 2022)"
+    },
+    {
+      "body": "Wealth expansion + PA banking scale; doubled AUM/AUA to $70B+ \u2014 Created the data fragmentation problem (7 wealth systems \u2192 unified 2025 via Wealth Access; commercial data still fragmented)",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "b691e11c-4538-432d-8aae-42c51123fd1c",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Bryn Mawr Bank Corporation Value: ~$976M (stock deal)"
+    },
+    {
+      "body": "WSFS launched digital personal loans powered by Upstart AI platform in Sept 2021 \u2014 AI credit decisioning for consumer lending deployed",
+      "date_precision": "month",
+      "e_id": "E-008",
+      "event_date": "2021-09-01",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "80e2c7e1-758e-4217-ba96-3c9748f61931",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.globenewswire.com/news-release/2021/09/21/2300656/9130/en/WSFS-Bank-Launches-Digital-Personal-Loans-Platform-Powered-by-Upstart.html",
+      "subcap_ids": [],
+      "title": "WSFS launched digital personal loans powered by Upstart AI\u2026"
+    },
+    {
+      "body": "2021 Upstart partnership demonstrated AI lending appetite: launched digital personal loans 'powered by Upstart AI'; exited 2025 as part of commercial focus strategy \u2014 AI model for CL now relevant",
+      "date_precision": "year",
+      "e_id": "E-064",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "20ec91aa-fffa-4443-a5b7-46436778e003",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.panabee.com/news/wsfs-financial-earnings-2025-annual",
+      "subcap_ids": [],
+      "title": "2021 Upstart partnership demonstrated AI lending appetite"
+    },
+    {
+      "body": "MuleSoft named in WSFS 2021 digital transformation plan (E-028): 'Salesforce and MuleSoft' cited by CDO Ciber \u2014 MuleSoft deployment confirmed in 2021 planning context",
+      "date_precision": "year",
+      "e_id": "E-095",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-095",
+        "E-028"
+      ],
+      "id": "c41904b8-49ee-4bb0-8d79-be73c9361a07",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://accutive.com/mulesoft-year-in-review-financial-services-2023/",
+      "subcap_ids": [],
+      "title": "MuleSoft named in WSFS 2021 digital transformation plan"
+    },
+    {
+      "body": "CDO Corynn Ciber confirmed: 'We've established a digital office, hired a chief digital officer, and we're introducing new tools, new applications like Salesforce and MuleSoft, and we're upgrading and enhancing our technical architecture'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-028",
+      "event_date": "2021-02-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "08850952-b677-450b-95ec-187d60d52a83",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://technical.ly/startups/wsfs-new-tech-jobs/",
+      "subcap_ids": [],
+      "title": "CDO Corynn Ciber confirmed"
+    },
+    {
+      "body": "Consumer loan growth via AI decisioning (Upstart), digital banking (Greenlight, cred.ai, LendKey, Spring EQ) \u2014 WSFS is simplifying \u2014 consumer fintech exits; commercial platform investment is the strategic focus",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2019-01-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "0a076af7-2166-4ace-bbd6-1270503cd941",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Multiple fintech consumer partnerships Value: Revenue share arrangements"
+    }
+  ]
+}

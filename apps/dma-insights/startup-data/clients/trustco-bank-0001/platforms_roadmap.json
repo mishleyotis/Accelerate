@@ -1,0 +1,164 @@
+{
+  "entity_display_id": "trustco-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+        "technology staff for $": "6.4B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud (FSC)",
+          "maturity_lift": "+2.91",
+          "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Financial Services Cloud: Consolidate CRM Landscape"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.91",
+          "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Data Cloud: Activate Tealium CDP Investment"
+        },
+        {
+          "feature": "MuleSoft",
+          "maturity_lift": "+2.65",
+          "metric": "P2C3 score 1.35 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.35 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "MuleSoft: Build Integration Layer to Decouple Fiserv"
+        },
+        {
+          "feature": "Managed Services",
+          "maturity_lift": null,
+          "metric": "technology staff for $6.4B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "technology staff for $6.4B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Managed Services: Augment Technology Capacity"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+        "average hold times": "11%",
+        "outcome": "20%"
+      },
+      "dependencies": [
+        "REC-02",
+        "REC-04",
+        "REC-08"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "average hold times 11%",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Service Cloud, Agentforce",
+          "maturity_lift": "+2.91",
+          "metric": "average hold times 11%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "average hold times 11%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Service Cloud + Agentforce: Replace Legacy Contact Center"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.91",
+          "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Marketing Cloud: Enable Data-Driven Customer Acquisition"
+        },
+        {
+          "feature": "CRM Analytics / Tableau",
+          "maturity_lift": "+2.91",
+          "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-06",
+          "title": "Tableau: Establish Enterprise Analytics Foundation"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": null,
+          "metric": "outcome 20%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome 20%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Experience Cloud: Enable Digital Account Origination"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TRST-20260330-0001",
+  "total_duration_months": 8
+}

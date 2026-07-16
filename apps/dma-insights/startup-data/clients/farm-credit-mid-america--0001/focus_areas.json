@@ -1,0 +1,305 @@
+{
+  "entity_display_id": "farm-credit-mid-america--0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-204",
+          "E-209"
+        ],
+        "representative_quote": "FCMA careers page Mar 2026: (1) BT Student Specialist (AI), (2) Salesforce Administrator, (3) Salesforce Software Systems Engineer / Platform Developer, (4) ServiceNow Platform Developer, (5) ServiceNow Administrator.",
+        "source_kind": "docx"
+      },
+      "id": "73a04ef8-a3fb-491f-858b-97f96bbecd05",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P2C1.8.7",
+        "P2C2.8.4",
+        "P4C1.1.8",
+        "P4C3.4.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 20,
+        "P2": 40,
+        "P4": 40
+      },
+      "source_path": "FCMA careers page Mar 2026: (1) BT Student Specialist (AI), (2) Salesforce Administrator, (3) Salesforce Software Systems Engineer / Platform Developer, (4) ServiceNow Platform Developer, (5) ServiceNow Administrator. 4/5 technical positions. [E-204,E-209]",
+      "title": "Active Salesforce hiring = buying signal",
+      "verbatim_quote": "F-005 | Active Salesforce hiring = buying signal for expansion | FCMA careers page Mar 2026: (1) BT Student Specialist (AI), (2) Salesforce Administrator, (3) Salesforce Software Systems Engineer / Platform Developer, (4) ServiceNow Platform Developer, (5) ServiceNow Administrator. 4/5 technical positions. [E-204,E-209] | Active technology team expansion. AI program formalizing. | MORE Salesforce licenses coming + new SF developer will drive customization. Einstein Studio training for AI Student Specialist. Direct buying signal. | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-003",
+          "E-205"
+        ],
+        "representative_quote": "ACLL increased 38% YoY from $59.9M (YE2024) to $82.9M (H1 2025).",
+        "source_kind": "docx"
+      },
+      "id": "a45440d3-7bf0-4fb3-86aa-87bbaf07d8ec",
+      "involved_subcap_ids": [
+        "P2C2.4.2",
+        "P2C2.4.1",
+        "P3C1.8.CL3",
+        "P2C2.4.CL1",
+        "P2C2.1.CL1",
+        "P4C2.9.CL1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$82,900,000",
+          "delta": null,
+          "kpi_label": "M YE2024",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$59,900,000",
+          "delta": null,
+          "kpi_label": "YoY",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "38%",
+          "delta": null,
+          "kpi_label": "credit analytics ACLL",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 66,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "ACLL increased 38% YoY from $59.9M (YE2024) to $82.9M (H1 2025). Credit quality pressure in tree nuts/wine/spirits. Gary Book (Director Retail Credit Underwriting) publishes stress-testing materials. Credit Factors Tool + Monthly Cash Flow Tool are FCMA proprietary customer-facing tools [E-003,E-205]",
+      "title": "Credit portfolio stress + Einstein Discovery opportunity\u2026",
+      "verbatim_quote": "F-006 | Credit portfolio stress + Einstein Discovery opportunity for predictive credit analytics | ACLL increased 38% YoY from $59.9M (YE2024) to $82.9M (H1 2025). Credit quality pressure in tree nuts/wine/spirits. Gary Book (Director Retail Credit Underwriting) publishes stress-testing materials. Credit Factors Tool + Monthly Cash Flow Tool are FCMA proprietary customer-facing tools [E-003,E-205] | CECL 2-component methodology (asset-specific + pooled) + PD migration modeling. Analytics sophistication evident but scope for enhancement. | Salesforce Einstein Discovery for predictive credit risk + CRMA dashboards for portfolio monitoring + Industries Cloud FSC for integrated credit view + OmniStudio to consolidate Credit Factors + Cash Flow tools. | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-197",
+          "E-150",
+          "E-165"
+        ],
+        "representative_quote": "Kevin Kleinholter (Director of Business Applications) quote: 'Connecting disparate data sources and deepening their understanding of their customers'.",
+        "source_kind": "docx"
+      },
+      "id": "623d9e60-42b6-4937-a6be-57027c2ac18d",
+      "involved_subcap_ids": [
+        "P4C3.4.8",
+        "P4C3.4.8",
+        "P4C3.6.9",
+        "P4C3.4.11",
+        "P4C2.4.6",
+        "P4C2.4.16",
+        "P4C2.4.16",
+        "P4C2.4.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Kevin Kleinholter (Director of Business Applications) quote: 'Connecting disparate data sources and deepening their understanding of their customers'. FCMA runs Fiserv DNA core + Salesforce FSC + nCino + ServiceNow + AWS + VMware + Ceridian HCM + Sitefinity + OnBase ECM \u2014 no explicitly disclosed MDM platform [E-197,E-150,E-165]",
+      "title": "Data fragmentation + explicit Data Cloud opportunity",
+      "verbatim_quote": "F-004 | Data fragmentation + explicit Data Cloud opportunity | Kevin Kleinholter (Director of Business Applications) quote: 'Connecting disparate data sources and deepening their understanding of their customers'. FCMA runs Fiserv DNA core + Salesforce FSC + nCino + ServiceNow + AWS + VMware + Ceridian HCM + Sitefinity + OnBase ECM \u2014 no explicitly disclosed MDM platform [E-197,E-150,E-165] | P4C1 Data Management foundational but MDM/Data Cloud gap at M2-M3. | EXPLICIT Salesforce Data Cloud + Customer 360 pitch. Address Midsouth merger data unification + Rural 1st/AgDirect/main brand data integration. URF-04-02, URF-04-03, URF-04-19 gaps. | CRITICAL"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-197"
+        ],
+        "representative_quote": "FCMA + Zennify implemented Salesforce FSC + Marketing Cloud + MC Personalization + MC Intelligence, delivering 33x customer engagement, 82x faster email creation, 385% increase in engaged leads",
+        "source_kind": "docx"
+      },
+      "id": "1468aef0-b919-4fd4-ab80-01995290eea0",
+      "involved_subcap_ids": [
+        "P4C1.1.8",
+        "P1C2.1.7",
+        "P4C1.5.4",
+        "P2C1.2.5",
+        "P1C3.6.4",
+        "P4C4.2.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "385%",
+          "delta": null,
+          "kpi_label": "Faster email creation",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "33x",
+          "delta": null,
+          "kpi_label": "MC Intelligence delivering",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "82x",
+          "delta": null,
+          "kpi_label": "X customer engagement",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P4": 50
+      },
+      "source_path": "FCMA + Zennify implemented Salesforce FSC + Marketing Cloud + MC Personalization + MC Intelligence, delivering 33x customer engagement, 82x faster email creation, 385% increase in engaged leads [E-197]",
+      "title": "Existing Zennify Salesforce partnership with proven ROI",
+      "verbatim_quote": "F-001 | Existing Zennify Salesforce partnership with proven ROI | FCMA + Zennify implemented Salesforce FSC + Marketing Cloud + MC Personalization + MC Intelligence, delivering 33x customer engagement, 82x faster email creation, 385% increase in engaged leads [E-197] | Marketing/sales capability foundation already at M3-M4 with proven incremental value. Expansion-ready. | REFERENCE ACCOUNT. Expansion opportunities: Data Cloud (disparate source consolidation), Einstein Studio (AI Student role), Agentforce (Gen AI parity), MuleSoft (ETL gap), Industries Cloud (financial tools consolidation). | CRITICAL"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-178",
+          "E-215",
+          "E-216",
+          "E-217"
+        ],
+        "representative_quote": "FCA Cyber Rule compliance + UNC6040 Salesforce attack defense",
+        "source_kind": "docx"
+      },
+      "id": "56654f6c-a799-410b-8031-f6fe1cde17f2",
+      "involved_subcap_ids": [
+        "P3C2.3.2",
+        "P3C2.3.2",
+        "P3C2.8.2",
+        "P3C2.8.2",
+        "P3C4.8.3",
+        "P3C4.8.3",
+        "P3C4.8.3",
+        "P3C4.8.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "FCA 12 CFR 609.930 effective Jan 1, 2025 mandates 7 cyber program elements. Farmers Insurance Salesforce breach May 29, 2025 (1.1M customers) via UNC6040/UNC6240 (ShinyHunters). FCMA has 9-person security team (Joe Martinez CISSP+CEH, James Mills Security Architect CISSP, 4 Security Engineers, Matt Kelley Access Management Tech, 2 Network Engineers) + Tiffany Smith CSO 25yr Fortune 500 [E-178,E-215,E-216,E-217]",
+      "title": "FCA Cyber Rule compliance + UNC6040 Salesforce attack\u2026",
+      "verbatim_quote": "F-007 | FCA Cyber Rule compliance + UNC6040 Salesforce attack defense | FCA 12 CFR 609.930 effective Jan 1, 2025 mandates 7 cyber program elements. Farmers Insurance Salesforce breach May 29, 2025 (1.1M customers) via UNC6040/UNC6240 (ShinyHunters). FCMA has 9-person security team (Joe Martinez CISSP+CEH, James Mills Security Architect CISSP, 4 Security Engineers, Matt Kelley Access Management Tech, 2 Network Engineers) + Tiffany Smith CSO 25yr Fortune 500 [E-178,E-215,E-216,E-217] | P4C4 InfoSec at M3-M4. 100% subcap saturation. Mature security org. | Salesforce Shield + Event Monitoring + Privacy Center + Einstein Trust Layer alignment to FCA's 7 elements. Defense against UNC6040-type Salesforce supply-chain attacks. Joe Martinez + Tiffany Smith = high-credibility stakeholders. | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-162",
+          "E-163",
+          "E-204",
+          "E-206"
+        ],
+        "representative_quote": "nCino IQ automated spreading with OCR + ML, Banking Advisor conversational co-pilot powered by LLM on bank-grounded RAG",
+        "source_kind": "docx"
+      },
+      "id": "ddc02c52-adb3-4692-916a-66f934e6d077",
+      "involved_subcap_ids": [
+        "P2C4.6.5",
+        "P2C3.3.3",
+        "P4C1.1.8",
+        "P2C3.3.5",
+        "P4C1.5.4",
+        "P2C2.9.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "-35%",
+          "delta": null,
+          "kpi_label": "AI-powered CLV models",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 67,
+        "P4": 33
+      },
+      "source_path": "FCMA is nCino customer + confirmed Banking Advisor beta participant. GA June 17, 2024. nCino IQ automated spreading with OCR + ML, Banking Advisor conversational co-pilot powered by LLM on bank-grounded RAG [E-162,E-163,E-204,E-206]",
+      "title": "NCino Banking Advisor Gen AI",
+      "verbatim_quote": "F-003 | nCino Banking Advisor Gen AI + Automated Spreading in production | FCMA is nCino customer + confirmed Banking Advisor beta participant. GA June 17, 2024. nCino IQ automated spreading with OCR + ML, Banking Advisor conversational co-pilot powered by LLM on bank-grounded RAG [E-162,E-163,E-204,E-206] | Lending origination + credit analysis at M3-M4 for AI-assisted workflow. Ongoing vendor AI expansion. | Einstein Copilot + Einstein Trust Layer must prove parity with Banking Advisor in the lending moment-of-truth. Opportunity: Salesforce-nCino integration depth + CRM layer where nCino cannot reach. | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-043",
+          "E-203"
+        ],
+        "representative_quote": "ServiceNow Now Assist Gen AI roadmap = Agentforce competitive threat",
+        "source_kind": "docx"
+      },
+      "id": "2e0a4049-f90f-45e3-af9e-a51ee3d4637b",
+      "involved_subcap_ids": [
+        "P4C3.4.8",
+        "P4C3.4.8",
+        "P4C3.6.9",
+        "P4C3.4.11",
+        "P4C2.4.6",
+        "P4C2.4.16",
+        "P4C2.4.16",
+        "P4C2.4.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "87%",
+          "delta": null,
+          "kpi_label": "Ticket reduction",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Tiffany Smith (CSO) quoted: 'ServiceNow USED OUR OWN DATA to demonstrate Now Assist, and time after time it CAME UP WITH THE RIGHT ANSWERS'. FSO + IRM + ITSM + Legal Service Delivery + Now Assist = 5-product ServiceNow footprint expanding to Gen AI. NewRocket implementation partner. 68% ticket reduction + 87% call reduction + 220K knowledge views + 3hr SLA + 4.9\u2605 CSAT [E-043,E-203]",
+      "title": "ServiceNow Assist Gen AI roadmap = Agentforce competitive\u2026",
+      "verbatim_quote": "F-002 | ServiceNow Now Assist Gen AI roadmap = Agentforce competitive threat | Tiffany Smith (CSO) quoted: 'ServiceNow USED OUR OWN DATA to demonstrate Now Assist, and time after time it CAME UP WITH THE RIGHT ANSWERS'. FSO + IRM + ITSM + Legal Service Delivery + Now Assist = 5-product ServiceNow footprint expanding to Gen AI. NewRocket implementation partner. 68% ticket reduction + 87% call reduction + 220K knowledge views + 3hr SLA + 4.9\u2605 CSAT [E-043,E-203] | P3C1 Operations process automation at M3-M4. Gen AI moving to production 2025-2026. | URGENT: Agentforce vs Now Assist competitive positioning. Salesforce must respond with customer-facing + lending-specific Gen AI use cases before ServiceNow expands footprint. NewRocket displaces Zennify in IT workflow. | CRITICAL"
+    }
+  ]
+}

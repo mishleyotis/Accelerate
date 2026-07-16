@@ -1,0 +1,856 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "CI Financials",
+      "amount": null,
+      "announced_on": null,
+      "body": "Stanhope Capital Group SA CIRO acquisition approval \u2014 effective December 3, 2025 (Corient International Holdings Limited acquired all shares)",
+      "closed_on": null,
+      "details": "Stanhope Capital Group SA CIRO acquisition approval \u2014 effective December 3, 2025 (Corient International Holdings Limited acquired all shares)",
+      "e_id": "E-109",
+      "event_date": "2025-12-03",
+      "id": "dce54729-ee44-449e-a578-3080c6cca21c",
+      "source_url": "https://www.ciro.ca/newsroom/publications/ci-financial-corp",
+      "status": null,
+      "target": "Stanhope Capital Group SA CIRO",
+      "title": "Stanhope Capital Group SA CIRO acquisition approval\u2026"
+    }
+  ],
+  "entity_display_id": "ci-financials-0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: ACCELERATING (US RIA acquisition strategy (Corient) + organic Canadian WM growth + Invesco fund takeover (Jan 2026))"
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 2932,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Stanhope Capital Group SA CIRO acquisition approval\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "CI Financial partnered with Neo Financial (Calgary\u2026"
+          }
+        ],
+        "fy": [
+          "FY2016",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Canada (primary) + United States (Corient) + EMEA (Stonehage/Stanhope 2026) + Au",
+        "headline": "$975M net income \u00b7 FY2025",
+        "regulator": "OSC (Ontario Securities Commission)",
+        "series": {
+          "net_income_m": [
+            156.0,
+            1.0,
+            975.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Canada (primary) + United States (Corient) + EMEA (Stonehage/Stanhope 2026) + Au"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kurt MacAlpine",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Kambiz Vatan-Abadi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO / Chief Innovation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Douglas J. Jamieson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Raj Sivarajah",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP, Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "William Chinkiwsky",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Enterprise Compliance + CI GAM CCO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Marc-Andr\u00e9 Lewis",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CI GAM CIO (co-head)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Andy Cheung",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Data, Analytics & Reporting"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cheston Chiu",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Data, AI & Analytics (CI GAM)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sean Etherington",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Co-Head Wealth / President Assante & CIPW"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Manisha Burman",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jasnoor Chauhan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head Business Analytics & Insights"
+      }
+    ],
+    "license_type": "Provincially registered securities firm",
+    "narrative_md": "CI Financials is an asset manager. It reports $224.0 billion in assets under management. It is regulated by OSC (Ontario Securities Commission) and employs approximately 2,932 people. Its overall digital maturity is assessed at 1.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OSC (Ontario Securities Commission)",
+    "regulatory_standing": {
+      "as_of": "2025-03-25",
+      "e_id": "E-110",
+      "label": "Clean regulatory standing",
+      "note": "This is an individual registered representative misconduct matter \u2014 Assante Capital Management Ltd. (the firm) is not named as respondent. CI Financial/Assante firm-level enforcement record remains clean 2022-2025."
+    },
+    "size_tier": "large",
+    "thought_leadership": [
+      {
+        "author": "Manisha Burman",
+        "date": "2023-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "CI Financial named Greater Toronto Top Employer 2023 \u2014 recognized for progressive HR practices including training, skills development, employee communications, performance management, community involvement Chief Human Re",
+        "title": "CI Financial named Greater Toronto Top Employer 2023",
+        "type": "article",
+        "url": "https://www.glassdoor.ca/Overview/Working-at-CI-Financial-EI_IE354908.11,23.htm"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "CI GAM corporate website: thought leadership content hub where 'portfolio managers and thought leaders from across CI GAM offer insights into trends, events, policies and politics creating investment risks and opportunit",
+        "title": "CI GAM corporate website: thought leadership content hub where\u2026",
+        "type": "article",
+        "url": "https://www.cifinancial.com/ci-gam/ca/en/index.html"
+      },
+      {
+        "author": null,
+        "date": "2026-05-12",
+        "derived_from": "evidence_index",
+        "e_id": "E-064",
+        "excerpt": "No public confirmation of a named marketing automation platform (HubSpot, Marketo, Eloqua, Pardot) at CI Financial in any press release, job description or tech stack source \u2014 MAP not publicly disclosed; Salesforce Marke",
+        "title": "Salesforce Marketing Cloud NOT confirmed",
+        "type": "article",
+        "url": "https://schulich.yorku.ca/current-students/investing-in-the-future/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "83d801ed-b7a7-4897-af94-6ff66fb7f313",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "run_manifest.json missing \u2014 required Layer 2 contract artifact"
+    },
+    {
+      "id": "9c292b99-d9e6-4b4b-9c13-16bde3c3600e",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "contradiction_log.csv missing \u2014 Layer 2 contract artifact not generated"
+    },
+    {
+      "id": "b0863500-066f-4fc1-b3da-1b9aba2f129c",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "reasoning_chain_log.json missing \u2014 Contract 8 proof trail per subcap"
+    },
+    {
+      "id": "79956a72-067b-4a97-8049-01df62c8ebaa",
+      "issue_id": "ISS-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Counterclaim coverage 0% (target \u226575%)"
+    },
+    {
+      "id": "b36b8d3c-5d00-4830-966c-3ce435ad32d1",
+      "issue_id": "ISS-015",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "29% of capabilities (41/142) have uniform scores across subcaps"
+    },
+    {
+      "id": "76043602-22af-4e44-aed8-55fe95768fdf",
+      "issue_id": "ISS-018",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "RC-14 regex false positive: REC-03 'Agentforce' not matched by 'salesforce' keyword \u2014 governance script defect, NOT assessment defect"
+    },
+    {
+      "id": "1d42c9bf-bab0-4cee-bbe1-b256898b1e14",
+      "issue_id": "ISS-016",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "1 evidence item with non-standard tier classification"
+    },
+    {
+      "id": "e73ef669-79cc-4be0-a52a-9f2accfd5275",
+      "issue_id": "ISS-017",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "1 internal (_CF) source minor tier misclassification"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Most recent reported financials: $975M net income as of FY2025, within a series tracked FY2016 to FY2025. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.5,
+        "P1C4": 2.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 1.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 4.0,
+        "P4C3": 4.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "American Homes 4 Rent, LP",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.79,
+        "P1C2": 2.36,
+        "P1C3": 2.34,
+        "P1C4": 2.63,
+        "P1C5": 4.04,
+        "P2C1": 1.48,
+        "P2C2": 2.14,
+        "P2C3": 1.18,
+        "P2C4": 1.88,
+        "P3C1": 2.45,
+        "P3C2": 1.83,
+        "P3C3": 3.22,
+        "P3C4": 2.71,
+        "P4C1": 2.34,
+        "P4C2": 2.35,
+        "P4C3": 2.52,
+        "P4C4": 2.85
+      },
+      "overall_score": 2.42,
+      "peer_name": "VNO",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.37,
+        "P1C2": 2.5,
+        "P1C3": 1.51,
+        "P1C4": 3.34,
+        "P1C5": 2.93,
+        "P2C1": 2.44,
+        "P2C2": 2.4,
+        "P2C3": 1.67,
+        "P2C4": 2.47,
+        "P3C1": 3.0,
+        "P3C2": 2.0,
+        "P3C3": 3.0,
+        "P3C4": 2.0,
+        "P4C1": 1.42,
+        "P4C2": 1.6,
+        "P4C3": 1.69,
+        "P4C4": 1.5
+      },
+      "overall_score": 2.17,
+      "peer_name": "CI Segall Bryant & Hamill, LLC",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.15,
+        "P1C2": 2.47,
+        "P1C3": 1.76,
+        "P1C4": 1.95,
+        "P2C1": 2.03,
+        "P2C2": 2.07,
+        "P2C3": 1.84,
+        "P2C4": 1.64,
+        "P3C1": 2.08,
+        "P3C2": 2.38,
+        "P3C3": 2.6,
+        "P3C4": 2.43,
+        "P4C1": 1.64,
+        "P4C2": 1.72,
+        "P4C3": 1.96,
+        "P4C4": 2.62
+      },
+      "overall_score": 2.08,
+      "peer_name": "Chemung Canal Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.5,
+        "P1C2": 1.59,
+        "P1C3": 1.64,
+        "P1C4": 1.6,
+        "P2C1": 1.61,
+        "P2C2": 1.46,
+        "P2C3": 1.46,
+        "P2C4": 1.51,
+        "P3C1": 1.38,
+        "P3C2": 1.37,
+        "P3C3": 1.47,
+        "P3C4": 1.57,
+        "P4C1": 1.58,
+        "P4C2": 1.43,
+        "P4C3": 1.51,
+        "P4C4": 1.62
+      },
+      "overall_score": 1.52,
+      "peer_name": "PenderFund Capital Management Ltd.",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CIF-20260512-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee (Indeed/Glassdoor)",
+        "themes": [],
+        "value": 3.3
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee Signal",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Investment Quality",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Media Tone \u2014 Mubadala",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Media Tone \u2014 Corient",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Media Tone \u2014 Debt",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Regulatory Tone",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Stanhope Capital Group SA CIRO acquisition approval \u2014 effective December 3, 2025 (Corient International Holdings Limited acquired all shares)",
+      "date_precision": "day",
+      "e_id": "E-109",
+      "event_date": "2025-12-03",
+      "evidence_e_ids": [
+        "E-109"
+      ],
+      "id": "dce54729-ee44-449e-a578-3080c6cca21c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.ciro.ca/newsroom/publications/ci-financial-corp",
+      "subcap_ids": [],
+      "title": "Stanhope Capital Group SA CIRO acquisition approval\u2026"
+    },
+    {
+      "body": "CI Financial Mubadala take-private completed Aug 12, 2025. New board directors: Samuel Merksamer (Mubadala Capital Executive Director, formerly SoftBank Investment Advisers partner), Murat Konuk, Glyn Barker replaced 4 prior directors. William Holland and Kurt MacAlpine remain directors.",
+      "date_precision": "day",
+      "e_id": "E-111",
+      "event_date": "2025-08-12",
+      "evidence_e_ids": [
+        "E-111"
+      ],
+      "id": "9eec9673-ccee-48cc-afd5-b769db1ac620",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250812851536/en/CI-Financial-and-Mubadala-Capital-Announce-Completion-of-Take-Private-Transaction-by-Mubadala-Capital",
+      "subcap_ids": [],
+      "title": "CI Financial Mubadala take-private completed Aug 12, 2025"
+    },
+    {
+      "body": "CI Board has Audit and Risk Committee with formal charter \u2014 documented oversight structure; new Mubadala directors (Merksamer, Konuk, Barker) joined Aug 2025 with alternative investment / technology backgrounds",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "a6e0a912-3799-493b-b601-a74301f9d16c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_financials/2024/ar/CI-Financial-2025-Annual-Information-Form-120894321-5-CI-v4_EN.pdf",
+      "subcap_ids": [],
+      "title": "New Mubadala directors (Merksamer, Konuk, Barker) joined\u2026"
+    },
+    {
+      "body": "May 2025: Vestmark selected as enterprise portfolio management and trading technology partner across Corient's entire ~$177B AUM network \u2014 consolidating disparate legacy trading platforms from 40+ acquired RIA firms",
+      "date_precision": "month",
+      "e_id": "E-027",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "dc14043d-f70f-4a3b-9ed0-e9b75770f6c9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://t3technologyhub.com/vestmark-partners-with-corient-to-provide-consolidated-trading-and-portfolio-management-across-entire-network-of-advisors/",
+      "subcap_ids": [],
+      "title": "Vestmark selected as enterprise portfolio management and\u2026"
+    },
+    {
+      "body": "Corient Partners LLC partnership structure designed to retain, motivate and align talent \u2014 explicit cultural integration design principle for acquired firms",
+      "date_precision": "publish_fallback",
+      "e_id": "E-013_CF",
+      "event_date": "2025-03-20",
+      "evidence_e_ids": [
+        "E-013_CF"
+      ],
+      "id": "7f672087-c955-43f5-a68b-1fa1f676e452",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_financials/2024/ar/CI-Financial-2025-Annual-Information-Form-120894321-5-CI-v4_EN.pdf",
+      "subcap_ids": [],
+      "title": "Corient Partners LLC partnership structure designed to\u2026"
+    },
+    {
+      "body": "March 6, 2025: CI Wealth (Canadian wealth management division) partnered with Conquest Planning \u2014 AI-powered financial planning software providing advisors access to AI-driven hyper-personalized client financial plans",
+      "date_precision": "day",
+      "e_id": "E-034",
+      "event_date": "2025-03-06",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "f180c41a-411c-4e26-9ba5-3706b028fb92",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250306689650/en/CI-Wealth-Partners-with-Conquest-to-Provide-Advisors-with-AI-Powered-Financial-Planning-Software",
+      "subcap_ids": [],
+      "title": "CI Wealth (Canadian wealth management division) partnered\u2026"
+    },
+    {
+      "body": "Conquest Planning = AI-powered financial planning platform deployed to CI Wealth advisors (March 2025) \u2014 automated delivery of hyper-personalized financial plans, hybrid human-AI advice model",
+      "date_precision": "month",
+      "e_id": "E-034_CF_P2",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-034_CF_P2"
+      ],
+      "id": "2791e8b6-682b-487e-a636-acbd05bfaf0e",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250306689650/en/CI-Wealth-Partners-with-Conquest-to-Provide-Advisors-with-AI-Powered-Financial-Planning-Software",
+      "subcap_ids": [],
+      "title": "Conquest Planning = AI-powered financial planning platform\u2026"
+    },
+    {
+      "body": "Raymond James: Chief AI Officer (Stuart Feld) appointed Feb 2025; $975M annual tech investment; AI Search launched Apr 2025 (GenAI for advisors); Salesforce FSC confirmed at US RIA advisors. Raymond James Canada: FNZ integrated wealth platform, retiring ~24 legacy systems, 'tens of millions' investment, 3-year rollout. Total client assets US$1.58T.",
+      "date_precision": "month",
+      "e_id": "E-117",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-117"
+      ],
+      "id": "9081f4e9-e002-432d-a320-81660dc7d492",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://ir.cifinancial.com/news/news-details/2022/CI-Financial-Wins-Digital-Transformation-Award-Recognized-as-an-Innovation-Leader/default.aspx",
+      "subcap_ids": [],
+      "title": "Raymond James: Chief AI Officer (Stuart Feld) appointed"
+    },
+    {
+      "body": "October 9, 2024: CI Financial partnered with Neo Financial (Calgary challenger bank) to launch co-branded everyday deposit and credit products for CI Wealth clients \u2014 embedded banking/loyalty product launched",
+      "date_precision": "day",
+      "e_id": "E-061",
+      "event_date": "2024-10-09",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "fd492332-d54f-420b-ac17-5e5181f9f354",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://finance.yahoo.com/news/neo-financial-partners-ci-financial-120000838.html",
+      "subcap_ids": [],
+      "title": "CI Financial partnered with Neo Financial (Calgary\u2026"
+    },
+    {
+      "body": "CIRO ARQ platform (launched 2024): streamlined annual questionnaire for all CI dealer entities \u2014 regulatory reporting calendar management and data quality controls for regulatory submissions confirmed via CIRO ARQ workflow",
+      "date_precision": "year",
+      "e_id": "E-090",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-090"
+      ],
+      "id": "b4fc3759-e705-4798-a631-d74c73098273",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_financials/2024/ar/CI-Financial-2025-Annual-Information-Form-120894321-5-CI-v4_EN.pdf",
+      "subcap_ids": [],
+      "title": "CIRO ARQ platform (launched 2024): streamlined annual\u2026"
+    },
+    {
+      "body": "CIRO 2024 compliance priorities included T+1 settlement readiness (implemented May 27, 2024 Canada) \u2014 CI Financial's dealer and AM entities completed T+1 settlement cycle transition as a regulated compliance requirement",
+      "date_precision": "day",
+      "e_id": "E-071",
+      "event_date": "2024-05-27",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "0e1b07a4-8d17-4ece-b9b8-05b551093ba5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.ciro.ca/newsroom/publications/ciro-compliance-report-2026-helping-dealers-compliance",
+      "subcap_ids": [],
+      "title": "CIRO 2024 compliance priorities included settlement\u2026"
+    },
+    {
+      "body": "CI GAM launched CIAI ETF (CI AI Global Equity ETF) in May 2024, reaching C$1.17B AUM \u2014 AI/ML strategy translated into investable product demonstrating organizational capability to deploy AI in portfolio construction and thematic investment selection",
+      "date_precision": "month",
+      "e_id": "E-033_CF_P4",
+      "event_date": "2024-05-01",
+      "evidence_e_ids": [
+        "E-033_CF_P4"
+      ],
+      "id": "d1a115b5-be06-4684-90cc-cd123f4217b4",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.cifinancial.com/ci-gam/ca/en/products/etf/ci-ai-global-equity-etf/",
+      "subcap_ids": [],
+      "title": "CI GAM launched CIAI ETF (CI AI Global Equity ETF)"
+    },
+    {
+      "body": "CI Financial named Greater Toronto Top Employer 2023 \u2014 recognized for progressive HR practices including training, skills development, employee communications, performance management, community involvement",
+      "date_precision": "year",
+      "e_id": "E-037",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-037"
+      ],
+      "id": "24d513da-e71b-4bd9-868f-a7d14713a4d2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.glassdoor.ca/Overview/Working-at-CI-Financial-EI_IE354908.11,23.htm",
+      "subcap_ids": [],
+      "title": "CI Financial named Greater Toronto Top Employer 2023"
+    },
+    {
+      "body": "CIRO 2023-2024 enforcement report: no CI Financial entities named in major CIRO enforcement proceedings \u2014 CI Financial maintains clean enforcement record under new CIRO framework (2023-present)",
+      "date_precision": "year",
+      "e_id": "E-085",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-085"
+      ],
+      "id": "b63f19f7-cdda-4299-9ebd-01d4fcbd3ac7",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_financials/2024/ar/CI-Financial-2025-Annual-Information-Form-120894321-5-CI-v4_EN.pdf",
+      "subcap_ids": [],
+      "title": "CI Financial maintains clean enforcement record under new\u2026"
+    },
+    {
+      "body": "Jennifer Sinopoli appointed Head of Distribution July 2023; 'rationalization of sales territories to improve coverage' and 'augmented talent development and training' \u2014 data-driven distribution strategy redesign",
+      "date_precision": "month",
+      "e_id": "E-060",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-060"
+      ],
+      "id": "95d9c650-5ed7-4c8e-8d0f-267831ec35a1",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_downloads/2024/2024/24-5215_aoda_ci-financial_annual-report_cda.pdf",
+      "subcap_ids": [],
+      "title": "Jennifer Sinopoli appointed Head of Distribution"
+    },
+    {
+      "body": "CI launched CI Private Markets Growth Fund + CI Private Markets Income Fund (2023) \u2014 first private markets retail products in Canada; advanced innovation in product development beyond traditional AM",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "7f29eaa5-7d86-4d2c-b5d1-866a2a3d94ba",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_downloads/2024/2024/24-5215_aoda_ci-financial_annual-report_cda.pdf",
+      "subcap_ids": [],
+      "title": "CI launched CI Private Markets Growth Fund + CI Private\u2026"
+    },
+    {
+      "body": "Board governance changes 2022-2024: David Miller (11yr term), Tom Muir (12yr term) departed; Sarah Ward (global law firm Banking Group partner) added \u2014 governance refresh with external expertise",
+      "date_precision": "year",
+      "e_id": "E-017",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "3f27c15c-7c8a-407c-8ad0-28d97177dbd3",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_financials/2024/ar/CI-Financial-2025-Annual-Information-Form-120894321-5-CI-v4_EN.pdf",
+      "subcap_ids": [],
+      "title": "David Miller (11yr term), Tom Muir (12yr term) departed"
+    },
+    {
+      "body": "DT Award 2022: 'application of AI and ML in sales processes' \u2014 AI-based next best action / lead scoring deployed in advisor-facing sales process (pre-dates 2022)",
+      "date_precision": "year",
+      "e_id": "E-060",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-060"
+      ],
+      "id": "17847cf9-17c5-4fc3-ae69-7766b144fc7c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://s28.q4cdn.com/266555903/files/doc_downloads/2024/2024/24-5215_aoda_ci-financial_annual-report_cda.pdf",
+      "subcap_ids": [],
+      "title": "DT Award 2022: 'application of AI and ML in sales processes'"
+    },
+    {
+      "body": "Previously VP CCO at CI GAM (Feb 2021\u2013Dec 2023), promoted to SVP grade in Dec 2023 \u2014 signals enterprise-wide compliance program elevation and expanded governance scope",
+      "date_precision": "month",
+      "e_id": "E-079",
+      "event_date": "2021-02-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "128a66db-c7cc-47ad-b129-e08dddb7fc6e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/william-a-bill-chinkiwsky-b79bb5126",
+      "subcap_ids": [],
+      "title": "Previously VP CCO at CI GAM (Feb 2021\u2013Dec 2023), promoted\u2026"
+    },
+    {
+      "body": "RPA (Robotic Process Automation) deployed to automate manual tasks \u2014 confirmed attended and unattended bots at CI Financial; deployed under CIO Kambiz Vatan-Abadi mandate 2019\u20132022",
+      "date_precision": "year",
+      "e_id": "E-019_CF_P3",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-019_CF_P3"
+      ],
+      "id": "f2cc2c58-812c-48ec-aa10-c69dc0c4deb1",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://ir.cifinancial.com/news/news-details/2022/CI-Financial-Wins-Digital-Transformation-Award-Recognized-as-an-Innovation-Leader/default.aspx",
+      "subcap_ids": [],
+      "title": "Deployed under CIO Kambiz Vatan-Abadi mandate 2019\u20132022"
+    },
+    {
+      "body": "CIO Kambiz Vatan-Abadi confirmed: CI Financial deployed Microservice Architectures + Cloud computing + DevOps/CI-CD as part of DT journey (2019-2022) \u2014 cloud-native architecture with microservices implies distributed deployment enabling DR redundancy and multi-region failover capability",
+      "date_precision": "year",
+      "e_id": "E-091",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "ca176f73-b903-4681-8772-9c9008682225",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://schulich.yorku.ca/current-students/investing-in-the-future/",
+      "subcap_ids": [],
+      "title": "CIO Kambiz Vatan-Abadi confirmed DevOps/CI-CD"
+    },
+    {
+      "body": "CIO Kambiz Vatan-Abadi confirmed full technology stack deployed at CI Financial (2019-2022): AI/ML, ICR, RPA, Automation, Agile methodologies, DevOps, CI/CD, Data Visualization, Microservice Architectures, Cloud computing \u2014 enterprise-wide digital transformation covering every major P4C3 technology pillar",
+      "date_precision": "year",
+      "e_id": "E-032_CF_P4",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-032_CF_P4"
+      ],
+      "id": "14df8844-7f71-45d6-a107-6bb40e5cd7f5",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://schulich.yorku.ca/current-students/investing-in-the-future/",
+      "subcap_ids": [],
+      "title": "CIO Kambiz Vatan-Abadi confirmed full technology stack\u2026"
+    },
+    {
+      "body": "CIO Kambiz confirmed: Cloud computing + Microservice Architectures + DevOps + CI/CD deployed 2019-2022 \u2014 cloud-native application development with microservices is the target architecture state; CI/CD pipeline automation in production",
+      "date_precision": "year",
+      "e_id": "E-101",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "c3bef25b-cec5-4c3c-a671-5331ce234f8b",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://ir.cifinancial.com/news/news-details/2022/CI-Financial-Wins-Digital-Transformation-Award-Recognized-as-an-Innovation-Leader/default.aspx",
+      "subcap_ids": [],
+      "title": "CIO Kambiz confirmed"
+    },
+    {
+      "body": "CI's environmental commitment: partnered with Toronto and Region Conservation Foundation (2019) for employee volunteering (Ray Days) \u2014 community environmental engagement but limited operational footprint disclosure",
+      "date_precision": "year",
+      "e_id": "E-043",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "12bbbfa1-6b4b-4799-97c1-9a6e42853224",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.cifinancial.com/content/ci-financial/ca/en/about-us/environmental-social-governance.html",
+      "subcap_ids": [],
+      "title": "CI's environmental commitment: partnered with Toronto and\u2026"
+    }
+  ]
+}

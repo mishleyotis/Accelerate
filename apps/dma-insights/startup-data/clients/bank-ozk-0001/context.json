@@ -1,0 +1,488 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "bank-ozk-0001",
+  "financials": {
+    "lines": [
+      "Total assets: 2023 $34.2B \u2192 2024 $38.3B \u2192 2025 $40.8B",
+      "Deposits: 2023 $27.4B \u2192 2024 $31.0B",
+      "Deposits: Growing 13.3% YoY",
+      "Net Income: 2024 $700M \u2192 2025 $699M",
+      "Net Income: Stable at ~$700M"
+    ],
+    "metrics": {
+      "cagr_3yr": "9.5%",
+      "deposits_2024": "$31.0B",
+      "net_income": 699300000.0,
+      "net_income_2025": "$699M",
+      "net_market_funding_reliance": "Low",
+      "problem_loans": "0.3",
+      "roaa": "1.7",
+      "tce_rwa": "11.3",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": null,
+        "events": [],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Arkansas",
+        "headline": "$40.8B assets \u00b7 FY2025 \u00b7 +9.2% CAGR",
+        "regulator": "OCC (National Bank)",
+        "series": {
+          "net_income_m": [
+            null,
+            700.0,
+            699.0
+          ],
+          "total_assets": [
+            34.24,
+            38.26,
+            40.8
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        34240000000.0,
+        38260000000.0,
+        40800000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2023,
+          2024,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          34240000000.0,
+          38260000000.0,
+          40800000000.0
+        ]
+      }
+    ],
+    "years": [
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Arkansas"
+    ],
+    "leadership": [
+      {
+        "background": "Chairman and CEO since 1979. One of the longest-tenured bank CEOs in the US, known for conservative credit culture and hands-on management of the RESG portfolio",
+        "critical_role": false,
+        "name": "George Gleason II",
+        "recent_hire": false,
+        "tenure_months": 564,
+        "title": "CEO"
+      },
+      {
+        "background": "appointed 2022. Oversees technology strategy including OZK Labs",
+        "critical_role": true,
+        "name": "Jason Cathey",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "CIO"
+      },
+      {
+        "background": "leading operational risk transformation with MetricStream platform [E-065",
+        "critical_role": false,
+        "name": "Arindam Majumdar",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Deputy CRO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered bank",
+    "narrative_md": "Bank OZK (NYSE: OZK) is an Arkansas state-chartered bank headquartered in Little Rock, AR. Founded in 1903 as Bank of the Ozarks, it rebranded to Bank OZK in 2018. The bank operates approximately 230-265 retail branches across 9 states, primarily in the southeastern and south-central United States [E-001].\n\nCEO: George Gleason II, Chairman and CEO since 1979. One of the longest-tenured bank CEOs in the US, known for conservative credit culture and hands-on management of the RESG portfolio.\n\nCIO: Jason Cathey, appointed 2022. Oversees technology strategy including OZK Labs.\n\nDeputy CRO: Arindam Majumdar, leading operational risk transformation with MetricStream platform [E-065].",
+    "primary_regulator": "OCC (National Bank)",
+    "size_tier": "mid-size",
+    "thought_leadership": null,
+    "ticker": "NYSE: OZK"
+  },
+  "issue_register": [
+    {
+      "id": "a0be9d51-fe7b-4b6c-92b2-d0ad9411eee2",
+      "issue_id": "GAP-1-P3C4.1.4",
+      "linked_subcap_ids": [
+        "P3C4.1.4"
+      ],
+      "opened_on": "2026-03-06",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Resilience Reporting at Bank OZK assessed at M1 (Ad hoc, no formal process) based on proxy research. Institution context: No BCP/DR details in public evidence (regulatory requirement met by default), no... Gap identified: No public BCP/DR disclosure.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Resilience Reporting"
+    },
+    {
+      "id": "e5a1288f-a0bd-49f2-a668-bf1a1b6a1dca",
+      "issue_id": "GAP-2-P3C4.2.3",
+      "linked_subcap_ids": [
+        "P3C4.2.3"
+      ],
+      "opened_on": "2026-03-06",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). BCP Plan Development at Bank OZK assessed at M1 (Ad hoc, no formal process) based on proxy research. Institution context: No BCP/DR details in public evidence (regulatory requirement met by default), no... Gap identified: No public BCP/DR disclosure.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: BCP Plan Development"
+    },
+    {
+      "id": "472baa64-1c09-4fb9-a543-f681bea0a742",
+      "issue_id": "GAP-3-P3C4.2.4",
+      "linked_subcap_ids": [
+        "P3C4.2.4"
+      ],
+      "opened_on": "2026-03-06",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Plan Maintenance at Bank OZK assessed at M1 (Ad hoc, no formal process) based on proxy research. Institution context: No BCP/DR details in public evidence (regulatory requirement met by default), no... Gap identified: No public BCP/DR disclosure. No",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Plan Maintenance"
+    },
+    {
+      "id": "7ce5b936-276d-4fe4-9c99-d3a774f3934c",
+      "issue_id": "GAP-4-P3C4.4.4",
+      "linked_subcap_ids": [
+        "P3C4.4.4"
+      ],
+      "opened_on": "2026-03-06",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Post-Incident Review at Bank OZK assessed at M1 (Ad hoc, no formal process) based on proxy research. Institution context: No BCP/DR details in public evidence (regulatory requirement met by default), no... Gap identified: No public BCP/DR disclosure.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Post-Incident Review"
+    },
+    {
+      "id": "25d62a1d-1d7b-4f11-b28c-6ce41324e7af",
+      "issue_id": "GAP-5-P3C4.5.1",
+      "linked_subcap_ids": [
+        "P3C4.5.1"
+      ],
+      "opened_on": "2026-03-06",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). TPRM Strategy at Bank OZK assessed at M1 (Ad hoc, no formal process) based on proxy research. Institution context: No BCP/DR details in public evidence (regulatory requirement met by default), no... Gap identified: No public BCP/DR disclosure. No dir",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: TPRM Strategy"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Value grew from $34.2B (2023) to $40.8B (2025) \u2014 9.2% CAGR. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 3.86,
+        "P1C3": 2.03,
+        "P1C4": 2.66,
+        "P1C5": 1.71,
+        "P2C1": 1.6,
+        "P2C2": 2.15,
+        "P2C3": 2.07,
+        "P2C4": 1.61,
+        "P3C1": 1.98,
+        "P3C2": 2.37,
+        "P3C3": 3.0,
+        "P3C4": 2.28,
+        "P4C1": 1.58,
+        "P4C2": 1.56,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.27,
+      "peer_name": "1st Security Bank of Washington",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.56,
+        "P1C2": 1.94,
+        "P1C3": 1.68,
+        "P1C4": 2.49,
+        "P1C5": 1.93,
+        "P2C1": 1.94,
+        "P2C2": 1.94,
+        "P2C3": 1.9,
+        "P2C4": 1.74,
+        "P3C1": 2.0,
+        "P3C2": 3.0,
+        "P3C3": 4.0,
+        "P3C4": 3.0,
+        "P4C1": 1.8,
+        "P4C2": 1.75,
+        "P4C3": 1.88,
+        "P4C4": 1.92
+      },
+      "overall_score": 2.2,
+      "peer_name": "East West Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 2.64,
+        "P1C3": 1.63,
+        "P1C4": 1.56,
+        "P2C1": 1.98,
+        "P2C2": 2.12,
+        "P2C3": 1.6,
+        "P2C4": 1.43,
+        "P3C1": 1.76,
+        "P3C2": 2.87,
+        "P3C3": 3.4,
+        "P3C4": 2.72,
+        "P4C1": 1.59,
+        "P4C2": 1.68,
+        "P4C3": 2.0,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.18,
+      "peer_name": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.17,
+        "P1C2": 2.34,
+        "P1C3": 2.34,
+        "P1C4": 1.71,
+        "P1C5": 1.86,
+        "P2C1": 1.95,
+        "P2C2": 2.39,
+        "P2C3": 1.93,
+        "P2C4": 2.02,
+        "P3C1": 2.27,
+        "P3C2": 2.21,
+        "P3C3": 2.45,
+        "P3C4": 1.95,
+        "P4C1": 2.31,
+        "P4C2": 2.04,
+        "P4C3": 1.98,
+        "P4C4": 1.98
+      },
+      "overall_score": 2.17,
+      "peer_name": "TriState Capital Holdings, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.23,
+        "P1C2": 2.41,
+        "P1C3": 1.86,
+        "P1C4": 2.09,
+        "P2C1": 2.27,
+        "P2C2": 2.08,
+        "P2C3": 1.97,
+        "P2C4": 2.11,
+        "P3C1": 2.19,
+        "P3C2": 2.27,
+        "P3C3": 2.17,
+        "P3C4": 2.1,
+        "P4C1": 1.81,
+        "P4C2": 2.49,
+        "P4C3": 2.19,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.16,
+      "peer_name": "Fulton Bank, National Association",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-OZK-20260306-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "Customer Satisfaction (2.04): NPS 18, CSAT 3.3/5 vs peer 35+ NPS",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 18,
+        "polarity": "positive",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Improving",
+        "value": 3.3
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Active hiring for VP/EVP Data Engineering, Enterprise Analytics in Dallas hub [E-077, E-079]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-077",
+        "E-079"
+      ],
+      "id": "72167522-6975-4c0a-aaf7-ee866e949f32",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Active hiring for VP/EVP Data Engineering, Enterprise\u2026"
+    },
+    {
+      "body": "Mosaicx AI IVA \u201cOzzy\u201d deployed; MetricStream GRC Visionary Award; Risk Committee charter updated [E-012, E-065, E-066]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-012",
+        "E-065",
+        "E-066"
+      ],
+      "id": "fde1bbac-46f2-477e-8446-3ad0974c63c8",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Mosaicx AI IVA \u201cOzzy deployed"
+    },
+    {
+      "body": "MetricStream GRC platform go-live; $42.5M digital banking investment; 14% digital transaction growth [E-001, E-061, E-075]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-001",
+        "E-061",
+        "E-075"
+      ],
+      "id": "7234c7b1-6c74-476b-8bcd-8394f6cf57ee",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "MetricStream GRC platform go-live"
+    },
+    {
+      "body": "Jason Cathey appointed CIO; technology leadership formalized [E-001]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "bd9c0eeb-2bef-4508-8286-8be2c1fac4af",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Technology leadership formalized"
+    },
+    {
+      "body": "Fiserv Premier core banking platform go-live; DocuSign adoption [E-004, E-069, E-071]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-004",
+        "E-069",
+        "E-071"
+      ],
+      "id": "d61af530-31ef-4088-b357-1910cfb0ad0d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Fiserv Premier core banking platform go-live"
+    },
+    {
+      "body": "Microsoft Azure Cloud adoption for infrastructure [E-005, E-070]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [
+        "E-005",
+        "E-070"
+      ],
+      "id": "fabfa2db-6477-4c10-bb00-4b7dc523bcb4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Microsoft Azure Cloud adoption for infrastructure"
+    },
+    {
+      "body": "Holding company dissolution simplifies regulatory structure [E-096]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2017-01-01",
+      "evidence_e_ids": [
+        "E-096"
+      ],
+      "id": "5ae0e6f7-dc9f-49a0-88e3-aa9d9da2a5d0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Holding company dissolution simplifies regulatory structure"
+    },
+    {
+      "body": "Acquisition of C1 Financial brings Labs team of ~40 to St. Petersburg, FL [E-074, E-098]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2016-01-01",
+      "evidence_e_ids": [
+        "E-074",
+        "E-098"
+      ],
+      "id": "d78d62c0-637b-46e0-bebf-657619e9d5b6",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Acquisition of C1 Financial brings Labs"
+    },
+    {
+      "body": "OZK Labs founded as internal innovation team [E-002]",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2012-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "c3ed2d79-f90a-495d-b462-6102ff00d5e2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "OZK Labs founded as internal innovation team"
+    }
+  ]
+}

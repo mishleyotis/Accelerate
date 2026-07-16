@@ -1,0 +1,1618 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "hapo-community-credit-un-0001",
+  "financials": {
+    "lines": [
+      "Assets: $2.39B (Q3 2025 NCUA), approximately $2.9B post-CFB acquisition",
+      "Members: 215,995 (Q3 2025), 220,000+ post-acquisition",
+      "Employees: 606 (NCUA Q3 2025). 42% headcount growth over 3 years.",
+      "Branches: 20+ locations across WA and OR. 21 ATMs (CO-OP network).",
+      "Net Worth: $290.7M | NW Ratio: 12.2% (vs 10.95% industry avg) | Texas Ratio: 6.99% | Health: A",
+      "Revenue: $200M-$500M (Explorium T1)"
+    ],
+    "metrics": {
+      "assets": "2.39B (Q3 2025 NCUA), approximately $2.9B pos",
+      "branches": "20+ locations across WA and OR. 21 ATMs (C",
+      "employees": "606 (NCUA Q3 2025). 42% headcount growth ov",
+      "members": "215,995 (Q3 2025), 220,000+ post-acquisitio",
+      "revenue": "200M-$500M (Explorium T1)"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Washington",
+      "Oregon",
+      "Idaho",
+      "Texas"
+    ],
+    "leadership": [
+      {
+        "background": "Aug 2024). 19-year HAPO veteran, ex-EVP/CFO/CRO. Finance-first leader",
+        "critical_role": false,
+        "name": "Scott Mitchell",
+        "recent_hire": false,
+        "tenure_months": 228,
+        "title": "CEO"
+      },
+      {
+        "background": "Jan 2022). SVP. Ex-CIO Hanford HMIS, ex-Lockheed Martin Sr Engineer. 18+ years enterprise tech",
+        "critical_role": true,
+        "name": "Ashley Ward",
+        "recent_hire": false,
+        "tenure_months": 216,
+        "title": "CIO"
+      },
+      {
+        "background": "Oct 2018). Published peer-reviewed AI paper (Journal of Digital Banking, Dec 2023",
+        "critical_role": false,
+        "name": "Jeremy O'Niel",
+        "recent_hire": false,
+        "tenure_months": 96,
+        "title": "VP Marketing"
+      },
+      {
+        "background": "Nov 2024). First dedicated InfoSec leadership role at HAPO",
+        "critical_role": false,
+        "name": "Daniel M",
+        "recent_hire": false,
+        "tenure_months": 24,
+        "title": "InfoSec Director"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Legal Name: HAPO Community Credit Union\n\nHQ: 601 Williams Blvd, Richland, WA 99354 (Benton County)\n\nFounded: 1953 (Hanford Atomic Products Operations nuclear site workers). Community charter 1997.\n\nCharter: Washington State-chartered, NCUA federally insured. NMLS #477622.\n\nFOM: Anyone who lives, works, worships, or attends school in Washington state. Expanded to Oregon (2011) and partial Idaho counties.",
+    "primary_regulator": "NCUA",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-066",
+        "excerpt": "NO AI/ML platforms detected in Explorium technographics. No TensorFlow, no AWS SageMaker, no Azure ML, no Google Vertex, no DataRobot, no H2O.ai. NO Customer Data Platform (CDP) detected. No Salesforce Data Cloud, no Seg",
+        "title": "NO AI/ML platforms detected in Explorium technographics",
+        "type": "article",
+        "url": "https://vibeprospecting.explorium.ai"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "HAPO is Equal Employment Opportunity Employer 'committed to creating a diverse workforce' Culture 'inclusive of ethnicity, age, disability, religious belief and sexual orientation, cultural backgrounds and different pers",
+        "title": "HAPO is Equal Employment Opportunity Employer",
+        "type": "article",
+        "url": "https://www.hapo.org/hapo-about/about/careers"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-044",
+        "excerpt": "Dollars & Sense podcast: 44 episodes over 3 seasons as of June 2025 \u2014 active, sustained content program Available on Buzzsprout, Spotify, Apple Podcasts \u2014 multi-platform distribution",
+        "title": "Dollars & Sense podcast: 44 episodes over 3 seasons as of June 2025",
+        "type": "podcast",
+        "url": "https://dollarssense.buzzsprout.com/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-048",
+        "excerpt": "Blog on hapo.org covering financial topics from 'budgeting basics to fraud prevention' \u2014 active content marketing 'It's a Money Thing' educational video series \u2014 third-party content syndication (common CU program via CU ",
+        "title": "It 's a Money Thing' educational video series \u2014 third-party content\u2026",
+        "type": "blog",
+        "url": "https://www.hapo.org/services/tools-resources/blog"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "Full digital product catalog on BBB: Mobile Banking, Online Banking, Digital Wallet, CoBrowse, E-Statements, Express Pickup, Financial Coaching, Podcast, SavvyMoney, AutoBooks \u2014 10+ digital services listed CoBrowse = Gli",
+        "title": "Full digital product catalog on BBB: Mobile Banking, Online Banking\u2026",
+        "type": "podcast",
+        "url": "https://www.bbb.org/us/wa/richland/profile/credit-union/hapo-community-credit-un"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "c3a6fc48-e0da-473a-8948-793fc14e5eb8",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "ed50e7d4-2460-4ba6-926b-2106a2d2317e",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "5f9d3f59-90b4-4b56-882d-fdd5d2fa3bf5",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6ca1418c-9e97-4b5f-b7b1-ccde70dd05d4",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "ff6fc572-4c87-4172-956d-dcc295c9528c",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "f1ee0e78-f781-4a8c-a9e8-61ddd78521f2",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "a1941989-951c-4d3e-b696-ce47747e1bc3",
+      "issue_id": "GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "aa1da8f9-2f87-4b22-8a6c-6b99def46059",
+      "issue_id": "GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "746f3679-8f7b-443e-9e37-d265a8c9a963",
+      "issue_id": "GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "2a09f95d-b61a-48c8-a2f4-42a8379d53bb",
+      "issue_id": "GOV-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "3e4be027-7738-4b9c-90cd-73ef632890c3",
+      "issue_id": "GOV-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "f4f89751-cea0-4134-bb4f-687d4164fd29",
+      "issue_id": "GOV-012",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "58c6b890-3a71-4139-a103-983bd756162a",
+      "issue_id": "GOV-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "88354d3f-4a2b-4798-8802-be0f9091b4d6",
+      "issue_id": "GOV-014",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "9e8036b2-3f7c-4344-8c64-8076f23732d6",
+      "issue_id": "GOV-015",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "a968990e-fa63-43c2-92c9-f191f3bd8a23",
+      "issue_id": "GOV-016",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "4d903b04-6d6a-450f-a2d8-91be38ebb2cf",
+      "issue_id": "GOV-017",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "dc13ba09-7546-4c31-83be-b8760fb59a89",
+      "issue_id": "GOV-018",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "9490ed54-b1a9-4b7f-8638-83800de63000",
+      "issue_id": "GOV-019",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "4f80800d-43b1-43c8-a72f-4ded9a433fae",
+      "issue_id": "GOV-020",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "93fd210b-1315-46bd-b760-fafdfcd97683",
+      "issue_id": "GOV-021",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "99410b55-c688-4eeb-b06a-3a4fa2283207",
+      "issue_id": "GOV-022",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "378d1586-0318-4bad-a577-31f4b6ba33ac",
+      "issue_id": "GOV-023",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "4e3073de-c94a-49a9-8555-b726e11348e7",
+      "issue_id": "GOV-024",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "eed224c9-5ad0-4ee4-a8dc-9a15f4d581e9",
+      "issue_id": "GOV-025",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "b0ce834b-83e8-444e-978b-e14a21ae104c",
+      "issue_id": "GOV-026",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "c35d1571-eefa-44a8-998c-9d256a94c756",
+      "issue_id": "GOV-027",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "eac80007-5660-4c08-b5ec-d31839586ea8",
+      "issue_id": "GOV-028",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "bd3656c0-1a54-4073-8a0d-1a1679673c11",
+      "issue_id": "GOV-029",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "146fe56b-ac1f-4307-b0ad-13ea943eca54",
+      "issue_id": "GOV-030",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "95f80407-3625-4c75-9c52-8490b9fe871d",
+      "issue_id": "GOV-031",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "9752d1db-00d4-464c-9466-874705a85fb8",
+      "issue_id": "GOV-032",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "2f033956-fe37-421a-8757-170a22fe8287",
+      "issue_id": "GOV-033",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e9864431-77e3-460a-99d7-dac6b29c8604",
+      "issue_id": "GOV-034",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "3c92aedc-04e0-4a90-844e-7a7e45deeaf0",
+      "issue_id": "GOV-035",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "bf59c955-b300-41d3-a15c-a050fbc9b67d",
+      "issue_id": "GOV-036",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e2378da4-ffdd-4c36-ad62-7d5642c6b87d",
+      "issue_id": "GOV-037",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "2c070dbf-a904-4f7d-bab0-e87675800516",
+      "issue_id": "GOV-038",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "47471162-f681-4311-b099-7de0dc343deb",
+      "issue_id": "GOV-039",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "5f9a250c-3c34-449a-913b-91b26929ec31",
+      "issue_id": "GOV-040",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "37f5e8d6-6b8c-42f7-bc1b-91e441ea5ca7",
+      "issue_id": "GOV-041",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "f1fde47f-d293-4ee8-849d-aadf93832e49",
+      "issue_id": "GOV-042",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "64bb7a24-2ea1-49a3-90e3-175716d6163e",
+      "issue_id": "GOV-043",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "7224ca4d-51e5-47f1-b45c-9f93e62184fa",
+      "issue_id": "GOV-044",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "1698b362-93f0-4cb4-be24-fc23f48068fe",
+      "issue_id": "GOV-045",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "a1d05942-084c-41be-a813-c193ea1f89e2",
+      "issue_id": "GOV-046",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "c2b4172d-a3c9-47ed-8bfa-a598e003f24e",
+      "issue_id": "GOV-047",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "35ea413c-11ee-44ba-92fa-5dc5b3216fbd",
+      "issue_id": "GOV-048",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "56ecd9ce-e908-44d6-8c02-0a2726a31afa",
+      "issue_id": "GOV-049",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "4f212a13-b23d-4845-a2a1-2a2c2e76ef88",
+      "issue_id": "GOV-050",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "446d2f1f-4862-4b09-ba0c-19b61cf8e069",
+      "issue_id": "GOV-051",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "0a989b28-32c0-41ff-a781-2a3b87f002d4",
+      "issue_id": "GOV-052",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "0987fb2f-7ca5-4565-9905-ed4bef642f9f",
+      "issue_id": "GOV-053",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6dced413-a5f0-4b79-a62b-4c250625e494",
+      "issue_id": "GOV-054",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e5edd6dd-07cb-4380-9dcc-4e48bee2e520",
+      "issue_id": "GOV-055",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "b2f3806e-c3c9-4bef-a227-da10dc5f2a3d",
+      "issue_id": "GOV-056",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "9ecab98c-2bc3-4ac1-9efe-9ae280f2cf39",
+      "issue_id": "GOV-057",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "c6057c40-d18f-4aba-8bff-95db0a7432ec",
+      "issue_id": "GOV-058",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "9fa8b126-2965-47e0-9fb9-afb926a1463c",
+      "issue_id": "GOV-059",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e9c06b69-bc3f-4f34-9d2d-b4ae8d7abe02",
+      "issue_id": "GOV-060",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "31cf627b-79f8-49c8-ba47-48bd6c24e33f",
+      "issue_id": "GOV-061",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "2a6e295c-f2ec-41ac-b1dd-8bd47bcd50de",
+      "issue_id": "GOV-062",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "aa688b92-2321-4d45-a5ad-a1ba8649d243",
+      "issue_id": "GOV-063",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "dec4e312-c9da-4ca6-873c-034c32880e8c",
+      "issue_id": "GOV-064",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "831edad8-5dc5-4eca-90d4-28a0347f2f62",
+      "issue_id": "GOV-065",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6fad6d09-37a6-4d71-ad7c-62c2f6fd8e2e",
+      "issue_id": "GOV-066",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "90a2c998-f64d-423a-a199-1785a74f95cc",
+      "issue_id": "GOV-067",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "8b6b4fc4-7a93-4331-a78f-9cea96016fdf",
+      "issue_id": "GOV-068",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e128503d-4a09-4e5f-981d-33be4663f24d",
+      "issue_id": "GOV-069",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "60704814-7f04-4e93-8dba-893a29725d00",
+      "issue_id": "GOV-070",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "1d631401-4465-4dca-94d2-c7259904e9a8",
+      "issue_id": "GOV-071",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "c550cdab-36a0-4bbb-b876-6d8f6a3c7744",
+      "issue_id": "GOV-072",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "1c644e69-1f3e-4665-a861-aac0dfe37c19",
+      "issue_id": "GOV-073",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "815b3f47-c96c-4f94-ae6a-4c202e388421",
+      "issue_id": "GOV-074",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "71c397b0-1e92-4f74-8e45-9dddca90b8fd",
+      "issue_id": "GOV-075",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "7eafb992-2453-4d1c-8b37-9899b1b94e4a",
+      "issue_id": "GOV-076",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "5b412bdd-ecdd-4c74-9672-f91557e950cb",
+      "issue_id": "GOV-077",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "133a6f6e-71f6-4c6d-9898-67cbec868648",
+      "issue_id": "GOV-078",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "7883bc68-6937-4b27-9b64-e23d05003f33",
+      "issue_id": "GOV-079",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "daaf30e7-e6d7-471a-a6d7-f46aa4ef91c2",
+      "issue_id": "GOV-080",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "a2bfb67e-9dc2-47b9-be5f-a5019f183533",
+      "issue_id": "GOV-081",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "2bb40e8f-11dd-43d8-a305-2de1d381bda7",
+      "issue_id": "GOV-082",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6bd23bbe-b813-4c85-ab5f-a27ed4bd74ad",
+      "issue_id": "GOV-083",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "d7acbe80-5f40-4c89-b2c2-408b2c11e9f9",
+      "issue_id": "GOV-084",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "b62ecb74-56b3-4ddb-b4e2-2146a838c12d",
+      "issue_id": "GOV-085",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "84f6c04b-d30f-402f-98b5-16702c130f39",
+      "issue_id": "GOV-086",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "bb41dcc2-cd37-4016-9350-664efb4cf775",
+      "issue_id": "GOV-087",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "7a11ff7b-9802-4c8b-b3bc-8ce1b25b1fbb",
+      "issue_id": "GOV-088",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "c5532554-f7bf-4a01-9572-7f77d4834d59",
+      "issue_id": "GOV-089",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "21ecbb5f-1be4-4c17-8c16-4d55a16f0113",
+      "issue_id": "GOV-090",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "9fd05089-3e4b-4e54-97b1-923ab8e0cc66",
+      "issue_id": "GOV-091",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "3e8d1459-f107-4bf9-ab4b-68d1e25e65c8",
+      "issue_id": "GOV-092",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "b9f81e3f-72fc-4065-899e-8e49f52fa247",
+      "issue_id": "GOV-093",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e9a0fab3-3c34-4b92-ad63-8ea92283507b",
+      "issue_id": "GOV-094",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "58ebfaaf-fd0e-4451-af84-5b5fd6fb6aab",
+      "issue_id": "GOV-095",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "0b9367d9-86fe-48e8-8a21-21909465cbae",
+      "issue_id": "GOV-096",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "3e728c76-16f8-4b49-9dd4-e2855bbe2411",
+      "issue_id": "GOV-097",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "45b2bbe1-5ff3-46b6-8e98-e4eacb903cd2",
+      "issue_id": "GOV-098",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "266e2e7d-09bc-4765-b28b-c7677b7b5bb4",
+      "issue_id": "GOV-099",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "1318fee0-13a7-41c7-87eb-137e78566c49",
+      "issue_id": "GOV-100",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "259589da-a947-4f2f-883b-f6e75d59f0e9",
+      "issue_id": "GOV-101",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "2605c651-15f7-454a-bb7c-54cb02230653",
+      "issue_id": "GOV-102",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "b1432276-459e-47ac-a812-eb15c5bac9b0",
+      "issue_id": "GOV-103",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "0061465e-692d-4ef6-8862-d7b834d5a28a",
+      "issue_id": "GOV-104",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6a073b67-8bc4-4c43-9ee5-66ac3768ed70",
+      "issue_id": "GOV-105",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "d4900b8d-6a98-4f00-95f3-ee7d80ebff95",
+      "issue_id": "GOV-106",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "b862c9e7-8f8d-4a9a-8d87-e7e4aa5b9e4a",
+      "issue_id": "GOV-107",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "40b18117-d8a5-4825-9642-dca0513a459d",
+      "issue_id": "GOV-108",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "782cd89d-97ff-4411-9d52-ff500ffbf05c",
+      "issue_id": "GOV-109",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "42be844b-b063-4aab-855f-ad00508c262f",
+      "issue_id": "GOV-110",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Employees: 606 (NCUA Q3 2025). 42% headcount growth over 3 years.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.93,
+        "P1C2": 2.61,
+        "P1C3": 2.14,
+        "P1C4": 2.17,
+        "P2C1": 2.27,
+        "P2C2": 2.33,
+        "P2C3": 2.58,
+        "P2C4": 2.53,
+        "P3C1": 2.58,
+        "P3C2": 2.54,
+        "P3C3": 3.0,
+        "P3C4": 2.38,
+        "P4C1": 2.04,
+        "P4C2": 1.71,
+        "P4C3": 2.38,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.37,
+      "peer_name": "AAFCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.94,
+        "P1C2": 2.89,
+        "P1C3": 2.4,
+        "P1C4": 2.38,
+        "P1C5": 1.86,
+        "P2C1": 1.89,
+        "P2C2": 2.4,
+        "P2C3": 2.81,
+        "P2C4": 1.37,
+        "P3C1": 2.39,
+        "P3C2": 2.38,
+        "P3C3": 2.86,
+        "P3C4": 2.41,
+        "P4C1": 1.88,
+        "P4C2": 1.88,
+        "P4C3": 2.45,
+        "P4C4": 2.98
+      },
+      "overall_score": 2.36,
+      "peer_name": "Hudson Valley Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.57,
+        "P1C2": 2.64,
+        "P1C3": 2.26,
+        "P1C4": 2.39,
+        "P1C5": 1.75,
+        "P2C1": 2.22,
+        "P2C2": 2.45,
+        "P2C3": 2.22,
+        "P2C4": 2.0,
+        "P3C1": 2.42,
+        "P3C2": 2.38,
+        "P3C3": 2.69,
+        "P3C4": 2.5,
+        "P4C1": 2.14,
+        "P4C2": 1.99,
+        "P4C3": 2.23,
+        "P4C4": 2.2
+      },
+      "overall_score": 2.3,
+      "peer_name": "APG Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.49,
+        "P1C2": 1.98,
+        "P1C3": 1.99,
+        "P1C4": 2.24,
+        "P1C5": 1.11,
+        "P2C1": 1.95,
+        "P2C2": 2.25,
+        "P2C3": 1.86,
+        "P2C4": 1.48,
+        "P3C1": 2.31,
+        "P3C2": 2.83,
+        "P3C3": 3.03,
+        "P3C4": 2.29,
+        "P4C1": 1.9,
+        "P4C2": 1.92,
+        "P4C3": 2.79,
+        "P4C4": 3.12
+      },
+      "overall_score": 2.21,
+      "peer_name": "Global Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.99,
+        "P1C2": 1.97,
+        "P1C3": 1.95,
+        "P1C4": 1.88,
+        "P2C1": 2.34,
+        "P2C2": 2.35,
+        "P2C3": 2.38,
+        "P2C4": 2.19,
+        "P3C1": 2.19,
+        "P3C2": 2.15,
+        "P3C3": 2.17,
+        "P3C4": 2.09,
+        "P4C1": 2.09,
+        "P4C2": 1.94,
+        "P4C3": 2.06,
+        "P4C4": 2.13
+      },
+      "overall_score": 2.12,
+      "peer_name": "Empower Federal Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-HAPO-20260324-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor: 3.2/5 overall (36 reviews)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 36,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": "Azure (AD, CDN, Blob, Front Door) + on-prem VMware/Citrix Indeed overall rating 3.4/5; culture 3.2; management 2.7; work-life balance 3.2; compensation 3.7 CEO approval 52.38% \u2014 low for CU sector Member review: 'website absolutely atrocious",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.4
+      },
+      {
+        "drilldown": "NO published service-level metrics (CSAT, NPS, FCR, AHT, wait times) found publicly",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "with business objectives, strategies, and plans' BBB complaint: HAPO allowed someone to open/attempt account using complainant's SSN \u2014 SECOND TIME in <10 years at same institution First incident resulted in ChexSystems Freeze, months withou",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "rowse, and AI-enabled self-service for CU member engagement Yelp average: 1.5/5 from 104 reviews \u2014 severely negative member sentiment",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": 104,
+        "polarity": "neutral",
+        "source": "Yelp",
+        "themes": [],
+        "value": 1.5
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Eric Pearson (ex-CFB CEO) brought in as Chief Banking Officer \u2014 leadership integration strategy for acquired team",
+      "date_precision": "publish_fallback",
+      "e_id": "E-035",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "15f437c8-d64a-4c1c-96b2-13461cb9b082",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.hapo.org/docs/default-source/resources/cfb-acquisition-booklet_business-web.pdf",
+      "subcap_ids": [],
+      "title": "Eric Pearson (ex-CFB CEO) brought as Chief Banking Officer\u2026"
+    },
+    {
+      "body": "Matt Backlund (ex-CFB) brought in as Chief Commercial Officer \u2014 further leadership integration from acquired institution",
+      "date_precision": "publish_fallback",
+      "e_id": "E-035",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "e0d5da32-860f-4af8-ba88-14b26df39b9d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.hapo.org/docs/default-source/resources/cfb-acquisition-booklet_business-web.pdf",
+      "subcap_ids": [],
+      "title": "Matt Backlund (ex-CFB) brought further leadership\u2026"
+    },
+    {
+      "body": "Director of Information Security hired Nov 2024 (Daniel M.) \u2014 dedicated security leadership reporting under CIO",
+      "date_precision": "month",
+      "e_id": "E-018",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-018",
+        "E-079"
+      ],
+      "id": "9a99dc6d-7917-4546-8aac-d0f92fd7edf6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://vibeprospecting.explorium.ai",
+      "subcap_ids": [],
+      "title": "Director of Information Security hired Nov 2024 (Daniel M.)"
+    },
+    {
+      "body": "Scott Mitchell appointed President/CEO Aug 2024 after 19 years at HAPO, formerly EVP/CFO",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "43a18ce0-b691-4f12-a4e8-4a8aabb48d00",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.hapo.org/hapo-about/about/news/2024/10/08/hapo-community-credit-union-expands-with-acquisition-of-community-first-bank",
+      "subcap_ids": [],
+      "title": "Scott Mitchell appointed President/CEO Aug 2024"
+    },
+    {
+      "body": "Ashley Ward hired as SVP/CIO in 2022 \u2014 dedicated C-suite technology leader",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "cb6f6ba9-a208-48eb-b365-42122c49f357",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.adapt.io/contact/ashley-ward/476110582",
+      "subcap_ids": [],
+      "title": "Ashley Ward hired dedicated C-suite technology leader"
+    },
+    {
+      "body": "Corelation KeyStone core signed May 2018, conversion completed late spring 2019. Replaced prior core that 'lacked functionality' for efficient member service.",
+      "date_precision": "month",
+      "e_id": "E-072",
+      "event_date": "2018-05-01",
+      "evidence_e_ids": [
+        "E-072"
+      ],
+      "id": "3d7aa6d3-2922-42fc-9c31-4de90c9014c5",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.cuinsight.com/press-release/1-5-billion-hapo-community-signs-with-corelation-to-increase-core-functionality-for-more-efficient-member-service/",
+      "subcap_ids": [],
+      "title": "Corelation KeyStone core signed May 2018"
+    }
+  ]
+}

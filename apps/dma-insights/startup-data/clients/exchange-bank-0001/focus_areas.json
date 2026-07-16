@@ -1,0 +1,232 @@
+{
+  "entity_display_id": "exchange-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "12+ person risk/compliance org with 134yr clean record \u2014 mature manual compliance",
+        "source_kind": "docx"
+      },
+      "id": "e5e6db5c-b795-4507-b1cc-2ba49d0ad309",
+      "involved_subcap_ids": [
+        "P3C1.1.3",
+        "P3C1.7.1",
+        "P3C1.6.3",
+        "P3C1.1.2",
+        "P3C4.8.1",
+        "P3C4.8.2",
+        "P3C4.8.3",
+        "P3C4.8.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "12+ person risk/compliance org with 134yr clean record",
+      "verbatim_quote": "F-007 | 12+ person risk/compliance org with 134yr clean record \u2014 mature manual compliance | BSA/AML: Kerri Howard (24yr BSA/OFAC Officer) + Hana Camilleri (14yr BSA/AML Spe | This is not 'no RegTech therefore weak compliance.' This is 'mature compliance that has kept the bank clean for 134 years.' The humans are effective. Technology would make them MORE effective, not replace gaps. | FSC Compliance: Pitch EFFICIENCY not REMEDIATION. '12 people manually doing what 6 could do with automation.' Clean record is the selling point \u2014 tech protects the franchise as the bank grows."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-158"
+        ],
+        "representative_quote": "129 technologies with zero API management \u2014 but vendor ecosystems provide integration paths",
+        "source_kind": "docx"
+      },
+      "id": "0b870398-76f6-4389-b21c-5b6cfeb7c8f0",
+      "involved_subcap_ids": [
+        "P4C2.3.2",
+        "P4C2.4.2",
+        "P4C2.8.6",
+        "P4C2.4.11",
+        "P4C1.6.1",
+        "P4C1.5.2",
+        "P4C1.6.1",
+        "P4C1.4.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "129 technologies with zero API management \u2014 but provide\u2026",
+      "verbatim_quote": "F-004 | 129 technologies with zero API management \u2014 but vendor ecosystems provide integration paths | No MuleSoft/Apigee/Kong/AWS API Gateway in 129 techs [E-158]. However: Fiserv Co | Integration debt is real but partially mitigated by vendor ecosystems. Fiserv and Q2 provide managed integration for banking-specific functions. MuleSoft gap is most acute for connecting NON-banking systems (CRM, marketing, analytics) to the core. | MuleSoft: Foundation for connecting Salesforce TO the banking core. Fiserv APIs are the bridge. Position: 'MuleSoft connects your Salesforce investment to what Fiserv already exposes.'"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-143"
+        ],
+        "representative_quote": "No CDO, no data governance committee, no formal program.",
+        "source_kind": "docx"
+      },
+      "id": "61b4706a-321c-4b90-bc53-f0db0732cba0",
+      "involved_subcap_ids": [
+        "P1C2.5.3",
+        "P1C2.5.1",
+        "P1C2.5.4",
+        "P4C1.5.4",
+        "P4C1.1.2",
+        "P1C2.7.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "No CDO title",
+      "verbatim_quote": "F-003 | No CDO title \u2014 but de facto data leadership with world-class credentials + existing governance | No CDO, no data governance committee, no formal program [E-143:F1]. BUT: Lisa Ga | The person (Ganame) has the expertise to BUILD a data governance program. The compliance foundation (OneTrust + FDIC reporting) means data quality disciplines exist. Gap is organizational authority (CDO title) and enterprise scope, not capability. | Data Cloud: Ganame IS the champion. She understands platform value from JPMorgan Finance Transformation. Don't pitch 'you need data governance' \u2014 pitch 'let's formalize what you're already doing and extend Ganame's mandate.'"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-093"
+        ],
+        "representative_quote": "No marketing automation \u2014 but a 5+ person team actively building capability",
+        "source_kind": "docx"
+      },
+      "id": "45855a5d-a549-4c5a-aeba-f71312ee697a",
+      "involved_subcap_ids": [
+        "P3C1.1.3",
+        "P3C1.7.1",
+        "P3C1.6.3",
+        "P3C1.1.2",
+        "P3C4.8.1",
+        "P3C4.8.2",
+        "P3C4.8.3",
+        "P3C4.8.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No marketing automation \u2014 but building capability",
+      "verbatim_quote": "F-002 | No marketing automation \u2014 but a 5+ person team actively building capability | No HubSpot/Marketo/Pardot/SFMC in 129 techs [E-093]. But: Campaign Monitor (emai | Marketing is people + fragmented-tools driven. Team expanding RAPIDLY (3 hires in 2025, 2 more open). Marketing Data Analyst = analytics capability building. Stack has behavioral data (Crazy Egg, GA) but no journey orchestration. | Marketing Cloud: Team exists, data exists, tools fragmented. Consolidation play. Knowlton is champion. Data Analyst role signals analytical maturity for SFMC reporting."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-094"
+        ],
+        "representative_quote": "No CRM platform in 129-tech stack.",
+        "source_kind": "docx"
+      },
+      "id": "f2af6d23-9fb5-441d-b72a-651fe29f4ce7",
+      "involved_subcap_ids": [
+        "P2C1.4.6",
+        "P1C3.4.1",
+        "P4C4.2.6",
+        "P3C3.6.4",
+        "P2C3.3.RB1",
+        "P4C1.1.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 30,
+        "P3": 17,
+        "P4": 36
+      },
+      "source_path": "(unknown)",
+      "title": "No sales CRM \u2014 but exists",
+      "verbatim_quote": "F-001 | No sales CRM \u2014 but structured relationship banking infrastructure exists | No CRM platform in 129-tech stack [E-094]. However: Desk.com (deprecated Salesfo | Cross-sell is human-driven via Relationship Bankers (tiered levels I/II/VP). Effective at community bank scale but doesn't scale. Existing Salesforce DNA (Desk.com + Quip) lowers adoption barrier. | Sales Cloud: NOT greenfield \u2014 migration from Desk.com ecosystem. 7+ BDOs are day-one users. VP Ruppert (24yr) + SVP Daulton (15yr) are adoption champions."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-159"
+        ],
+        "representative_quote": "No standalone SIEM/SOC \u2014 but 6-layer defense-in-depth with enterprise products, likely vendor-managed monitoring",
+        "source_kind": "docx"
+      },
+      "id": "c0be8efe-db3a-4fe7-b944-9dd48d9d593d",
+      "involved_subcap_ids": [
+        "P4C2.6.3",
+        "P4C4.8.1",
+        "P1C2.4.4",
+        "P3C4.7.2",
+        "P3C3.5.1",
+        "P4C1.1.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 33,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "No standalone SIEM/SOC",
+      "verbatim_quote": "F-005 | No standalone SIEM/SOC \u2014 but 6-layer defense-in-depth with enterprise products, likely vendor-managed monitoring | No Splunk/QRadar/Sentinel [E-159]. But: Cisco AMP (endpoint) + Cisco IronPort (e | Defense-in-depth is STRONG at every layer. The monitoring gap is likely vendor-managed (Fiserv/FIS SOC). 3 concurrent IAM platforms (Okta + OneLogin + Azure AD) suggest migration, not redundancy. | Shield: Complement existing defense with Salesforce-specific event monitoring. Don't position as 'you need SIEM' \u2014 position as 'extend your strong security posture to the Salesforce layer.'"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Wildfire-tested DR proven by 3 real events \u2014 not tabletop exercises",
+        "source_kind": "docx"
+      },
+      "id": "97be3267-3af7-479d-af6b-8ed5fa1c842f",
+      "involved_subcap_ids": [
+        "P3C4.3.1",
+        "P3C4.3.4",
+        "P2C1.1.RB1",
+        "P4C3.4.9",
+        "P4C3.6.5",
+        "P2C4.7.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 30,
+        "P3": 35,
+        "P4": 35
+      },
+      "source_path": "(unknown)",
+      "title": "Wildfire-tested DR proven tabletop exercises",
+      "verbatim_quote": "F-006 | Wildfire-tested DR proven by 3 real events \u2014 not tabletop exercises | Tubbs Fire 2017 (5,300 homes destroyed in EB's market), Kincade 2019, Glass/LNU | DR is battle-tested, not theoretical. This is a DIFFERENTIATOR, not a gap. The bank's ability to launch products under crisis conditions (Community Rebuild Loans, PPP) demonstrates operational agility beyond typical community banks. | Position Salesforce as STRENGTHENING proven resilience. Hyperforce on existing AWS/Azure aligns with dual-cloud strategy. Do NOT pitch DR remediation."
+    }
+  ]
+}

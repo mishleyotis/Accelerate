@@ -1,0 +1,34 @@
+{
+  "entity_display_id": "texas-capital-bancshares-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[NO_DIRECT_RULE] Omnichannel Vision in P1C1.",
+        "source_kind": "heuristic"
+      },
+      "id": "58f20619-75c4-42ce-98af-7e90b18f2e95",
+      "involved_subcap_ids": [
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.4",
+        "P1C1.6.2",
+        "P1C1.6.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

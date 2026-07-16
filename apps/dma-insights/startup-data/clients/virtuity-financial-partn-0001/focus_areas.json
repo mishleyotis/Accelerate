@@ -1,0 +1,66 @@
+{
+  "entity_display_id": "virtuity-financial-partn-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-101",
+          "E-149"
+        ],
+        "representative_quote": "[EVIDENCE]: NO_EVIDENCE found for P2C1.1.IB1.",
+        "source_kind": "heuristic"
+      },
+      "id": "6ad736ab-bc33-4bdb-8939-be2738fc062e",
+      "involved_subcap_ids": [
+        "P2C1.1.IB1",
+        "P2C1.4.IB1",
+        "P2C2.2.IB1",
+        "P2C2.5.IB1",
+        "P2C4.1.1",
+        "P2C4.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 17 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE]: NO_EVIDENCE found for P1C1.4.IB1.",
+        "source_kind": "heuristic"
+      },
+      "id": "770b28ad-ef43-43d7-b283-e770abca2e3c",
+      "involved_subcap_ids": [
+        "P1C1.4.IB1",
+        "P1C2.1.7",
+        "P1C2.1.8",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 7 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

@@ -1,0 +1,1998 @@
+{
+  "cards": [
+    {
+      "absent_count": 4,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.3.5",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P2C1.2.1",
+        "P2C1.2.2",
+        "P2C1.2.3",
+        "P2C1.2.4",
+        "P2C1.3.1",
+        "P2C1.3.2",
+        "P2C1.3.3",
+        "P2C1.3.4",
+        "P2C1.4.1",
+        "P2C1.4.2",
+        "P2C1.4.3",
+        "P2C3.2.1",
+        "P2C3.2.2",
+        "P2C3.2.3",
+        "P2C3.3.4",
+        "P2C3.4.1",
+        "P2C3.4.2",
+        "P2C3.4.3",
+        "P2C3.5.1",
+        "P2C3.5.2",
+        "P2C3.5.3",
+        "P2C3.5.4",
+        "P2C3.5.5",
+        "P2C4.3.2",
+        "P3C1.1.1",
+        "P3C1.1.2",
+        "P3C1.1.3",
+        "P3C1.1.4",
+        "P3C1.2.1",
+        "P3C1.2.2",
+        "P3C1.2.3",
+        "P3C1.2.4",
+        "P3C1.3.2",
+        "P3C1.4.1",
+        "P3C1.4.2",
+        "P3C1.4.3",
+        "P3C2.1.1",
+        "P3C2.1.3",
+        "P3C2.2.2",
+        "P3C2.2.3",
+        "P3C2.3.1",
+        "P3C2.3.2",
+        "P3C2.3.3",
+        "P3C2.3.4",
+        "P3C3.1.1",
+        "P3C3.1.2",
+        "P3C3.1.3",
+        "P3C3.1.4",
+        "P3C3.2.2",
+        "P3C3.2.3",
+        "P3C3.2.4",
+        "P3C3.3.1",
+        "P3C3.3.2",
+        "P3C3.3.3",
+        "P3C3.3.4",
+        "P3C4.1.1",
+        "P3C4.1.2",
+        "P3C4.1.3",
+        "P3C4.2.1",
+        "P3C4.2.2",
+        "P3C4.2.3",
+        "P3C4.2.4",
+        "P3C4.3.1",
+        "P3C4.3.2",
+        "P3C4.3.3",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.3.1",
+        "P4C1.3.2",
+        "P4C1.3.3",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.4.3",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C3.1.1",
+        "P4C3.1.2",
+        "P4C3.2.1",
+        "P4C3.2.2",
+        "P4C3.2.3",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C3.3.3",
+        "P4C3.3.4",
+        "P4C4.1.1",
+        "P4C4.1.2",
+        "P4C4.2.1",
+        "P4C4.2.2"
+      ],
+      "conversation_starter": "Salesforce (pillar P2) addresses 178 subcaps, starting with P1C1.1.1; fit is 38/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.1 (prereq 'Customer data foundation': current 2.0 vs. threshold 3.0, status UNMET).\n3. Sequence: outline a 178-subcap roadmap starting at P1C1.1.1 and extending to 177 additional subcaps.\nNext step: book a Salesforce workshop scoped to P2, covering the 178-subcap addressable surface.",
+      "conversation_starters": [
+        "HAPO Community Credit Union scores 1.0 on Device & Identity Verification (P3C2.3.3) — 0.9 points below the peer median 1.9 [E-016, E-016]. Ask who owns it today, what tooling backs it, and what the review cadence is — Salesforce addresses 178 linked subcaps here and is not ready (prerequisites block deployment) (fit 38/100).",
+        "Probe the blocker first: 'Customer data foundation' (P4C1.1.1) sits at 2.0 vs the 3.0 readiness threshold (UNMET). That gap is what keeps HAPO Community Credit Union from landing Salesforce now.",
+        "Peer framing: AAFCU and Hudson Valley Credit Union are in HAPO Community Credit Union's benchmark cohort holding the 1.9 median on Device & Identity Verification. Sequence Salesforce after Databricks; next step is a Salesforce workshop scoped to P2."
+      ],
+      "display_name": "Salesforce",
+      "evidence_ids": [
+        "E-016",
+        "E-085",
+        "E-066",
+        "E-036",
+        "E-048",
+        "E-008",
+        "E-011"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5286,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 55,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 36.1,
+            "value": 0.6015
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -23.2
+          }
+        },
+        "n_addressable": 178,
+        "prereqs": {
+          "P1C2.2.1": {
+            "current_score": 2.5,
+            "name": "Identity & access management",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P2C1.1.1": {
+            "current_score": 2.5,
+            "name": "Sales process digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C1.1.1": {
+            "current_score": 2.0,
+            "name": "Customer data foundation",
+            "status": "UNMET",
+            "threshold": 3.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks"
+          ],
+          "rank": 2
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 3.0,
+            "name": "Device & Identity Verification",
+            "opportunity": 0.81,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.0,
+            "subcap_id": "P3C2.3.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 3.0,
+            "name": "Account Takeover Prevention",
+            "opportunity": 0.81,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.0,
+            "subcap_id": "P3C2.3.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Risk Reporting & Analytics",
+            "opportunity": 0.7723,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.2.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Proactive Opportunity Identification",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Operational Risk Framework",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Loss Data Collection",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Scenario Analysis",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Transaction Monitoring",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-008",
+              "E-011"
+            ],
+            "gap": 2.7,
+            "name": "EA Framework & Governance",
+            "opportunity": 0.729,
+            "peer_median": 2.3,
+            "pillar": "P4",
+            "score": 1.3,
+            "subcap_id": "P4C3.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-008",
+              "E-011"
+            ],
+            "gap": 2.7,
+            "name": "Technology Roadmap & Investment Planning",
+            "opportunity": 0.729,
+            "peer_median": 2.3,
+            "pillar": "P4",
+            "score": 1.3,
+            "subcap_id": "P4C3.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-008",
+              "E-011"
+            ],
+            "gap": 2.7,
+            "name": "Legacy Modernization Strategy",
+            "opportunity": 0.729,
+            "peer_median": 2.3,
+            "pillar": "P4",
+            "score": 1.3,
+            "subcap_id": "P4C3.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-008",
+              "E-011"
+            ],
+            "gap": 2.7,
+            "name": "Event-Driven Integration",
+            "opportunity": 0.729,
+            "peer_median": 2.3,
+            "pillar": "P4",
+            "score": 1.3,
+            "subcap_id": "P4C3.3.2",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 37.9,
+      "pillar": "P2",
+      "platform_id": "salesforce",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Customer data foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.1",
+          "status": "UNMET",
+          "threshold": 3.0
+        },
+        {
+          "current_score": 2.5,
+          "name": "Sales process digitization",
+          "note": null,
+          "required_subcap_id": "P2C1.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.5,
+          "name": "Identity & access management",
+          "note": null,
+          "required_subcap_id": "P1C2.2.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 2,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Device & Identity Verification",
+        "Account Takeover Prevention"
+      ],
+      "opportunity_md": "**Salesforce** at 38/100 fit addresses 178 scored capability gaps in P2, led by Device & Identity Verification. Device & Identity Verification scores 1.0/5 against a 1.9 peer median; Account Takeover Prevention is the next surface. 1 prerequisite gate deployment (e.g. Customer data foundation: 2.0 vs 3.0 threshold)."
+    },
+    {
+      "absent_count": 1,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C1.5.1",
+        "P2C1.5.2",
+        "P2C1.5.3",
+        "P2C4.1.1",
+        "P2C4.1.2",
+        "P2C4.1.3",
+        "P2C4.4.1",
+        "P2C4.4.3",
+        "P3C2.2.1",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.3.1",
+        "P4C1.3.2",
+        "P4C1.3.3",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.4.3",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C3.3.3",
+        "P4C3.3.4"
+      ],
+      "conversation_starter": "Databricks (pillar P4) addresses 97 subcaps, starting with P1C1.1.1; fit is 52/100 and the platform is near-ready (one or two prereqs to close).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.2 (prereq 'Data lake / lakehouse foundation': current 2.0 vs. threshold 2.5, status PARTIAL).\n3. Sequence: outline a 97-subcap roadmap starting at P1C1.1.1 and extending to 96 additional subcaps.\nNext step: book a Databricks workshop scoped to P4, covering the 97-subcap addressable surface.",
+      "conversation_starters": [
+        "HAPO Community Credit Union scores 1.2 on Behavioral Data Capture (P2C4.1.2) — 0.7 points below the peer median 1.9 [E-066, E-036]. Ask who owns it today, what tooling backs it, and what the review cadence is — Databricks addresses 97 linked subcaps here and is near-ready (one or two prereqs to close) (fit 52/100).",
+        "Probe the blocker first: 'Data lake / lakehouse foundation' (P4C1.1.2) sits at 2.0 vs the 2.5 readiness threshold (PARTIAL). That gap is what keeps HAPO Community Credit Union from landing Databricks now.",
+        "Peer framing: AAFCU and Hudson Valley Credit Union are in HAPO Community Credit Union's benchmark cohort holding the 1.9 median on Behavioral Data Capture. Sequence Databricks; next step is a Databricks workshop scoped to P4."
+      ],
+      "display_name": "Databricks",
+      "evidence_ids": [
+        "E-066",
+        "E-036",
+        "E-048",
+        "E-016",
+        "E-085",
+        "E-008",
+        "E-011",
+        "E-039"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5286,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 99,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 35.6,
+            "value": 0.5938
+          },
+          "readiness": {
+            "light": "amber",
+            "multiplier": 0.85,
+            "penalty_points": -9.1
+          }
+        },
+        "n_addressable": 97,
+        "prereqs": {
+          "P3C1.1.1": {
+            "current_score": 2.5,
+            "name": "Cloud infrastructure baseline",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C1.1.2": {
+            "current_score": 2.0,
+            "name": "Data lake / lakehouse foundation",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          },
+          "P4C2.1.1": {
+            "current_score": 2.0,
+            "name": "Data governance",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [],
+          "rank": 1
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Behavioral Data Capture",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Transaction-Based Triggers",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.4.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Journey Orchestration",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Risk Quantification Methods",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-008",
+              "E-011"
+            ],
+            "gap": 2.7,
+            "name": "Event-Driven Integration",
+            "opportunity": 0.729,
+            "peer_median": 2.3,
+            "pillar": "P4",
+            "score": 1.3,
+            "subcap_id": "P4C3.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-039",
+              "E-039"
+            ],
+            "gap": 2.4,
+            "name": "Data Mesh Strategy & Domain Ownership",
+            "opportunity": 0.648,
+            "peer_median": 2.8,
+            "pillar": "P4",
+            "score": 1.6,
+            "subcap_id": "P4C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-039",
+              "E-039"
+            ],
+            "gap": 2.4,
+            "name": "Automated Data Quality Monitoring",
+            "opportunity": 0.648,
+            "peer_median": 2.8,
+            "pillar": "P4",
+            "score": 1.6,
+            "subcap_id": "P4C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-039",
+              "E-039"
+            ],
+            "gap": 2.4,
+            "name": "Real-Time (Zero-Copy) Integration",
+            "opportunity": 0.648,
+            "peer_median": 2.8,
+            "pillar": "P4",
+            "score": 1.6,
+            "subcap_id": "P4C1.3.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-039",
+              "E-039"
+            ],
+            "gap": 2.4,
+            "name": "Identity Resolution & Unified Customer Profile",
+            "opportunity": 0.648,
+            "peer_median": 2.8,
+            "pillar": "P4",
+            "score": 1.6,
+            "subcap_id": "P4C1.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-039",
+              "E-039"
+            ],
+            "gap": 2.4,
+            "name": "Reference Data Management",
+            "opportunity": 0.648,
+            "peer_median": 2.8,
+            "pillar": "P4",
+            "score": 1.6,
+            "subcap_id": "P4C1.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-008",
+              "E-011"
+            ],
+            "gap": 2.4,
+            "name": "Enterprise Integration Strategy",
+            "opportunity": 0.648,
+            "peer_median": 2.3,
+            "pillar": "P4",
+            "score": 1.6,
+            "subcap_id": "P4C3.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066"
+            ],
+            "gap": 2.3,
+            "name": "Customer Data Foundation (CDP)",
+            "opportunity": 0.6344,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.7,
+            "subcap_id": "P2C4.1.1",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 51.5,
+      "pillar": "P4",
+      "platform_id": "databricks",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Data lake / lakehouse foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.2",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.0,
+          "name": "Data governance",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.5,
+          "name": "Cloud infrastructure baseline",
+          "note": null,
+          "required_subcap_id": "P3C1.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "amber",
+      "sequence_rank": 1,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Behavioral Data Capture",
+        "Transaction-Based Triggers"
+      ],
+      "opportunity_md": "**Databricks** at 52/100 fit addresses 97 scored capability gaps in P4, led by Behavioral Data Capture. Behavioral Data Capture scores 1.2/5 against a 1.9 peer median; Transaction-Based Triggers is the next surface."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.3.5",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P2C1.1.1",
+        "P2C1.6.1",
+        "P2C1.6.2",
+        "P2C1.6.3",
+        "P2C1.6.4",
+        "P2C3.1.1",
+        "P2C3.1.2",
+        "P2C3.1.3",
+        "P2C3.1.4",
+        "P4C2.1.1",
+        "P4C2.1.2",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C2.2.3"
+      ],
+      "conversation_starter": "Tableau (pillar P4) addresses 83 subcaps, starting with P1C1.1.1; fit is 45/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C3.1.1 (prereq 'BI / analytics literacy': current 1.3 vs. threshold 2.0, status UNMET).\n3. Sequence: outline a 83-subcap roadmap starting at P1C1.1.1 and extending to 82 additional subcaps.\nNext step: book a Tableau workshop scoped to P4, covering the 83-subcap addressable surface.",
+      "conversation_starters": [
+        "HAPO Community Credit Union scores 1.7 on Innovation Vision (P1C3.1.1) — 1.3 points below the peer median 3.0 [E-022, E-022]. Ask who owns it today, what tooling backs it, and what the review cadence is — Tableau addresses 83 linked subcaps here and is not ready (prerequisites block deployment) (fit 45/100). Tableau is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'BI / analytics literacy' (P4C3.1.1) sits at 1.3 vs the 2.0 readiness threshold (UNMET). That gap is what keeps HAPO Community Credit Union from landing Tableau now.",
+        "Peer framing: AAFCU and Hudson Valley Credit Union are in HAPO Community Credit Union's benchmark cohort holding the 3.0 median on Innovation Vision. Sequence Tableau after Salesforce → Databricks; next step is a Tableau workshop scoped to P4."
+      ],
+      "display_name": "Tableau",
+      "evidence_ids": [
+        "E-022",
+        "E-026",
+        "E-043",
+        "E-001",
+        "E-019",
+        "E-023"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Tableau"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.5249,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 97,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 33.1,
+            "value": 0.5513
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -27.8
+          }
+        },
+        "n_addressable": 83,
+        "prereqs": {
+          "P4C2.1.1": {
+            "current_score": 2.0,
+            "name": "Governed reporting layer",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          },
+          "P4C3.1.1": {
+            "current_score": 1.3,
+            "name": "BI / analytics literacy",
+            "status": "UNMET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "salesforce",
+            "databricks"
+          ],
+          "rank": 3
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Vision",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Themes",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Horizons",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Sandbox Environments",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Change Impact Assessment",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Stakeholder Analysis",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Change Readiness Assessment",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Digital Literacy Training",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.5.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-023"
+            ],
+            "gap": 2.2,
+            "name": "Just-In-Time Learning",
+            "opportunity": 0.5935,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.5.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.1,
+            "name": "Innovation KPIs",
+            "opportunity": 0.567,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.9,
+            "subcap_id": "P1C3.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.1,
+            "name": "Pilot Framework",
+            "opportunity": 0.567,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.9,
+            "subcap_id": "P1C3.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.1,
+            "name": "Fail-Fast Culture",
+            "opportunity": 0.567,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.9,
+            "subcap_id": "P1C3.3.3",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 45.3,
+      "pillar": "P4",
+      "platform_id": "tableau",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Governed reporting layer",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 1.3,
+          "name": "BI / analytics literacy",
+          "note": null,
+          "required_subcap_id": "P4C3.1.1",
+          "status": "UNMET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 3,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Innovation Vision",
+        "Innovation Themes"
+      ],
+      "opportunity_md": "**Tableau** at 45/100 fit addresses 83 scored capability gaps in P4, led by Innovation Vision. Innovation Vision scores 1.7/5 against a 3.0 peer median; Innovation Themes is the next surface. The platform family is confirmed absent from the current stack (Tableau) — greenfield rather than displacement. 1 prerequisite gate deployment (e.g. BI / analytics literacy: 1.3 vs 2.0 threshold)."
+    },
+    {
+      "absent_count": 1,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P2C3.3.1",
+        "P2C3.3.2",
+        "P2C3.3.3",
+        "P2C3.3.5"
+      ],
+      "conversation_starter": "Twilio (pillar P2) addresses 59 subcaps, starting with P1C1.1.1; fit is 50/100 and the platform is near-ready (one or two prereqs to close).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P2C3.1.1 (prereq 'Omnichannel CX baseline': current 2.0 vs. threshold 2.5, status PARTIAL).\n3. Sequence: outline a 59-subcap roadmap starting at P1C1.1.1 and extending to 58 additional subcaps.\nNext step: book a Twilio workshop scoped to P2, covering the 59-subcap addressable surface.",
+      "conversation_starters": [
+        "HAPO Community Credit Union scores 1.5 on Voice-Activated Banking (P2C3.3.5) — 1.4 points below the peer median 2.9 [E-059, E-059]. Ask who owns it today, what tooling backs it, and what the review cadence is — Twilio addresses 59 linked subcaps here and is near-ready (one or two prereqs to close) (fit 50/100).",
+        "Probe the blocker first: 'Omnichannel CX baseline' (P2C3.1.1) sits at 2.0 vs the 2.5 readiness threshold (PARTIAL). That gap is what keeps HAPO Community Credit Union from landing Twilio now.",
+        "Peer framing: AAFCU and Hudson Valley Credit Union are in HAPO Community Credit Union's benchmark cohort holding the 2.9 median on Voice-Activated Banking. Sequence Twilio after Salesforce → Databricks; next step is a Twilio workshop scoped to P2."
+      ],
+      "display_name": "Twilio",
+      "evidence_ids": [
+        "E-059",
+        "E-068",
+        "E-022",
+        "E-026",
+        "E-043",
+        "E-001",
+        "E-019"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.525,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 118,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 34.3,
+            "value": 0.5722
+          },
+          "readiness": {
+            "light": "amber",
+            "multiplier": 0.85,
+            "penalty_points": -8.9
+          }
+        },
+        "n_addressable": 59,
+        "prereqs": {
+          "P1C3.2.1": {
+            "current_score": 2.5,
+            "name": "Communications compliance",
+            "status": "PARTIAL",
+            "threshold": 3.0
+          },
+          "P2C3.1.1": {
+            "current_score": 2.0,
+            "name": "Omnichannel CX baseline",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "salesforce",
+            "databricks",
+            "tableau",
+            "ncino"
+          ],
+          "rank": 5
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-059",
+              "E-059",
+              "E-068"
+            ],
+            "gap": 2.5,
+            "name": "Voice-Activated Banking",
+            "opportunity": 0.675,
+            "peer_median": 2.9,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.3.5",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Vision",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Themes",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Horizons",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Change Impact Assessment",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Stakeholder Analysis",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Change Readiness Assessment",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Champions Program",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Champion Training",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Champion Coordination",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.3.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Two-Way Communication",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-043",
+              "E-001",
+              "E-019"
+            ],
+            "gap": 2.2,
+            "name": "Digital Literacy Training",
+            "opportunity": 0.594,
+            "peer_median": 2.8,
+            "pillar": "P1",
+            "score": 1.8,
+            "subcap_id": "P1C4.5.2",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 50.4,
+      "pillar": "P2",
+      "platform_id": "twilio",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Omnichannel CX baseline",
+          "note": null,
+          "required_subcap_id": "P2C3.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.5,
+          "name": "Communications compliance",
+          "note": null,
+          "required_subcap_id": "P1C3.2.1",
+          "status": "PARTIAL",
+          "threshold": 3.0
+        }
+      ],
+      "readiness_index": "amber",
+      "sequence_rank": 5,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Voice-Activated Banking",
+        "Innovation Vision"
+      ],
+      "opportunity_md": "**Twilio** at 50/100 fit addresses 59 scored capability gaps in P2, led by Voice-Activated Banking. Voice-Activated Banking scores 1.5/5 against a 2.9 peer median; Innovation Vision is the next surface."
+    },
+    {
+      "absent_count": 0,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.3.5",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P2C2.1.1",
+        "P2C2.1.2",
+        "P2C2.1.3",
+        "P2C2.1.4",
+        "P2C2.2.1",
+        "P2C2.2.2",
+        "P2C2.2.3",
+        "P2C2.3.1",
+        "P2C2.3.2",
+        "P2C2.3.3",
+        "P2C2.3.4",
+        "P2C2.4.1",
+        "P2C2.4.2",
+        "P2C2.5.1",
+        "P2C2.5.2",
+        "P2C4.2.1",
+        "P2C4.2.2",
+        "P2C4.2.3",
+        "P2C4.2.4",
+        "P2C4.3.1",
+        "P2C4.3.3",
+        "P2C4.4.2",
+        "P3C1.3.1",
+        "P3C2.1.2",
+        "P3C2.1.4",
+        "P3C3.2.1"
+      ],
+      "conversation_starter": "nCino (pillar P3) addresses 92 subcaps, starting with P1C1.1.1; fit is 37/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P3C2.1.1 (prereq 'Loan origination digitization': current 1.2 vs. threshold 2.5, status UNMET).\n3. Sequence: outline a 92-subcap roadmap starting at P1C1.1.1 and extending to 91 additional subcaps.\nNext step: book a nCino workshop scoped to P3, covering the 92-subcap addressable surface.",
+      "conversation_starters": [
+        "HAPO Community Credit Union scores 1.2 on Next Best Action (NBA) (P2C4.2.1) — 0.7 points below the peer median 1.9 [E-066, E-036]. Ask who owns it today, what tooling backs it, and what the review cadence is — nCino addresses 92 linked subcaps here and is not ready (prerequisites block deployment) (fit 37/100).",
+        "Probe the blocker first: 'Loan origination digitization' (P3C2.1.1) sits at 1.2 vs the 2.5 readiness threshold (UNMET). That gap is what keeps HAPO Community Credit Union from landing nCino now.",
+        "Peer framing: AAFCU and Hudson Valley Credit Union are in HAPO Community Credit Union's benchmark cohort holding the 1.9 median on Next Best Action (NBA). Sequence nCino after Salesforce → Databricks; next step is a nCino workshop scoped to P3."
+      ],
+      "display_name": "nCino",
+      "evidence_ids": [
+        "E-066",
+        "E-036",
+        "E-048",
+        "E-016",
+        "E-085",
+        "E-022",
+        "E-026"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.525,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 142,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 34.7,
+            "value": 0.578
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -22.7
+          }
+        },
+        "n_addressable": 92,
+        "prereqs": {
+          "P3C2.1.1": {
+            "current_score": 1.2,
+            "name": "Loan origination digitization",
+            "status": "UNMET",
+            "threshold": 2.5
+          },
+          "P3C2.2.1": {
+            "current_score": 1.2,
+            "name": "Commercial lending workflow",
+            "status": "UNMET",
+            "threshold": 2.0
+          },
+          "P3C3.1.1": {
+            "current_score": 2.5,
+            "name": "Document management",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "salesforce",
+            "databricks",
+            "tableau"
+          ],
+          "rank": 4
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Next Best Action (NBA)",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Real-Time Decisioning",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Contextual Personalization",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.2.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Personalized Pricing",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.2.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Retention & At-Risk Intervention",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.3.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.8,
+            "name": "Life Event Triggers",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.2,
+            "subcap_id": "P2C4.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Risk Identification & Assessment",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-016",
+              "E-085"
+            ],
+            "gap": 2.8,
+            "name": "Key Risk Indicators",
+            "opportunity": 0.756,
+            "peer_median": 1.9,
+            "pillar": "P3",
+            "score": 1.2,
+            "subcap_id": "P3C2.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-066",
+              "E-036",
+              "E-048"
+            ],
+            "gap": 2.6,
+            "name": "Proactive Financial Guidance",
+            "opportunity": 0.702,
+            "peer_median": 1.9,
+            "pillar": "P2",
+            "score": 1.4,
+            "subcap_id": "P2C4.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Vision",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Themes",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-022",
+              "E-022",
+              "E-026"
+            ],
+            "gap": 2.3,
+            "name": "Innovation Horizons",
+            "opportunity": 0.621,
+            "peer_median": 3.0,
+            "pillar": "P1",
+            "score": 1.7,
+            "subcap_id": "P1C3.1.3",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 37.0,
+      "pillar": "P3",
+      "platform_id": "ncino",
+      "prereq_checks": [
+        {
+          "current_score": 1.2,
+          "name": "Loan origination digitization",
+          "note": null,
+          "required_subcap_id": "P3C2.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 1.2,
+          "name": "Commercial lending workflow",
+          "note": null,
+          "required_subcap_id": "P3C2.2.1",
+          "status": "UNMET",
+          "threshold": 2.0
+        },
+        {
+          "current_score": 2.5,
+          "name": "Document management",
+          "note": null,
+          "required_subcap_id": "P3C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 4,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Next Best Action (NBA)",
+        "Real-Time Decisioning"
+      ],
+      "opportunity_md": "**nCino** at 37/100 fit addresses 92 scored capability gaps in P3, led by Next Best Action (NBA). Next Best Action (NBA) scores 1.2/5 against a 1.9 peer median; Real-Time Decisioning is the next surface. 2 prerequisites gate deployment (e.g. Loan origination digitization: 1.2 vs 2.5 threshold)."
+    }
+  ],
+  "entity_display_id": "hapo-community-credit-un-0001",
+  "narrative": {
+    "gap_prioritization_md": "Gaps ranked using 6-factor priority model: Business Impact (25%), Risk Exposure (20%), Competitive Gap (20%), Effort Inverse (15%), Quick Win (10%), Trend Momentum (10%). Every gap is grounded in specific evidence IDs.",
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each includes institution-specific root cause analysis with evidence citations and expected score outcomes. Per assessment protocol, no cost estimates, investment ranges, or ROI projections are included.",
+    "roadmap_md": "Current state: level 1.98 — Developing (level 2)"
+  },
+  "pillar_offerings": {
+    "P1": [],
+    "P2": [],
+    "P3": [],
+    "P4": []
+  },
+  "run_request_id": "DMA-ASM-HAPO-20260324-0001"
+}

@@ -1,0 +1,1141 @@
+{
+  "assumptions_register": [
+    {
+      "assumption": "FIS Horizon is the core banking system (hypothesis)",
+      "basis": "CTO Birkmann worked at Pacific Mercantile Bank — a documented FIS Horizon client. FIS Deposit One (RDC) confirmed in production. FIS integration vocabulary used in DCBO job description. No alternative core banking vendor named in any public disclosure.",
+      "category": "Core Banking Platform",
+      "confidence": "MEDIUM-HIGH (80%)",
+      "id": "ASM-001",
+      "scoring_impact": "P4C3.2 Application Architecture scored at 2.5 (confirmed fragmentation); core banking vendor identity does not change the scoring direction, only the specific integration architecture recommendation (nCino→FIS Book-to-Core). If incorrect (e.g., Jack Henry Silverlake), R-002 MuleSoft recommendation remains valid with substituted connector.",
+      "validation_method": "Discovery session with CTO Birkmann or CIO Hurtik would confirm in 5 minutes. Priority 1 internal evidence request."
+    },
+    {
+      "assumption": "Microsoft Azure is the primary cloud provider (strong inference)",
+      "basis": "Microsoft 365, SharePoint Online, Teams, Power Apps, Power Automate, and Azure Active Directory all confirmed via Darren McClellan LinkedIn profile and IR deck references [E-0094]. M365 and Azure are bundled services. No alternative cloud provider (AWS, GCP) named in any source.",
+      "category": "Cloud Provider",
+      "confidence": "MEDIUM-HIGH (82%)",
+      "id": "ASM-002",
+      "scoring_impact": "P4C3.4 Cloud Architecture scored at 2.5. Hybrid FlexPod (on-premises) + Azure (inferred cloud) architecture is consistent with the score. If incorrect (e.g., no cloud at all), score would be adjusted downward to 2.0.",
+      "validation_method": "CTO Birkmann or IT architecture documentation. Azure subscription is typically documented in vendor disclosures."
+    },
+    {
+      "assumption": "D365 CRM is active but underutilized (partial adoption)",
+      "basis": "AlphaBOLD case study (Nov 2022) confirms D365 implemented for loan cycle management [E-0120]. Glassdoor reviews report staff using Excel for pipeline management [E-0012] — suggesting D365 adoption did not reach full RM workflow. The two sources together support a 'implemented but partially adopted' status. D365 may have been supplemented by nCino (2023) for lending workflows, creating the fragmentation scenario (ISS-002).",
+      "category": "D365 CRM Active Status",
+      "confidence": "MEDIUM (65%)",
+      "id": "ASM-003",
+      "scoring_impact": "ISS-002 (CRM Fragmentation MATERIAL) is grounded in this assumption. If D365 was fully decommissioned after nCino deployment, ISS-002 severity would be MINOR (Excel + nCino only). The Salesforce FSC recommendation (R-001) remains valid in either scenario, but the consolidation narrative changes from 'three competing platforms' to 'two competing platforms'.",
+      "validation_method": "PRIORITY 1 — Ask COO Pierron or CIO Hurtik: 'Is D365 currently in active use by Relationship Managers?' This is the most important gap to close in discovery."
+    },
+    {
+      "assumption": "nCino is deployed for commercial lending only (not deposit, consumer, or portfolio analytics)",
+      "basis": "DCBO job description requires 'nCino SME' for commercial banking officer management [E-0086]. nCino IR deck reference is in context of commercial loan origination [E-0105]. Portfolio Analytics and Deposit Account Opening modules are not referenced in any public source. 2023 Annual Report mentions DAP separately from nCino [E-0113].",
+      "category": "nCino Deployment Scope",
+      "confidence": "HIGH (90%)",
+      "id": "ASM-004",
+      "scoring_impact": "P2C2 Digital Onboarding scored at 2.02 (capped at 2.02 with DAP unconfirmed). If nCino Deposit Account Opening is already active, P2C2 would advance toward 2.5-3.0. R-004 recommendation scope would shift from 'deploy' to 'optimize' for the deposit module.",
+      "validation_method": "DCBO hire (role posting confirms SME needed) or CTO Birkmann. nCino admin login would show active modules."
+    },
+    {
+      "assumption": "BSA/AML monitoring platform vendor is unnamed (likely Verafin, NICE Actimize, or similar)",
+      "basis": "BSA/AML department confirmed with VP-level AML officer [E-0085]. CCO Meitzen background includes BSA/AML expertise [E-0019]. No specific AML monitoring platform named in any source. CalPrivate's size tier ($1B-$5B) typically uses Verafin, NICE Actimize, or Jack Henry BAM — but no public disclosure confirms any of these.",
+      "category": "BSA/AML Platform Vendor",
+      "confidence": "LOW (30%)",
+      "id": "ASM-005",
+      "scoring_impact": "P3C2.4 Fraud Detection scored at 3.0. BSA/AML platform presence is inferred from CCO expertise and department confirmation. If a sophisticated ML-based AML platform is confirmed (e.g., Verafin with AI), P3C2 score could increase by 0.5.",
+      "validation_method": "CCO Meitzen or Compliance team. AML platform is typically mentioned in vendor disclosures or compliance reports."
+    }
+  ],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 118
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 123
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 94
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 130
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "calprivate-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "b2d4b8ba-21e1-4d6a-9eaa-6ec1dc6db92b",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "CalPrivate Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:53.704238Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 18,
+    "current_count": 96,
+    "dated_count": 7,
+    "median_age_months": 7.8,
+    "oldest_published_date": "2021-09-10",
+    "stale_count": 4,
+    "stale_pct": 3.2,
+    "total": 125,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 39,
+      "NEGATIVE": 5,
+      "POSITIVE": 81
+    },
+    "connectors": {
+      "Indeed": 2,
+      "LinkedIn": 6
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 4,
+      "NEUTRAL": 103,
+      "POSITIVE": 18
+    },
+    "tiers": {
+      "T1": 19,
+      "T2": 71,
+      "T3": 11,
+      "T4": 4,
+      "T7": 20
+    },
+    "total_facts": 1010,
+    "total_items": 125
+  },
+  "financial_trajectory": {
+    "cagr": "19%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Financial data is derived from official PBAM quarterly press releases (T1 evidence). FY2021–FY2023 figures are approximate, based on trajectory analysis. FY2024 and FY2025 are prec",
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 12000000.0,
+        "year": null
+      },
+      {
+        "label": "NIM",
+        "unit": null,
+        "value": 4.65,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 2580000000.0,
+    "branches": "8",
+    "cagr": "14%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "210",
+    "financial_highlights": {
+      "core_deposit_growth_yoy_pct": 13.9,
+      "fy2024_q4_roa": 1.8,
+      "lines": [
+        "Financial data is derived from official PBAM quarterly press releases (T1 evidence). FY2021–FY2023 figures are approximate, based on trajectory analysis. FY2024 and FY2025 are precise from official Q4 earnings releases. CAGR (FY2021-FY2025): Total Assets ~14% | Net Income ~19% — both classified as ACCELERATING. [E-0001, E-0003, E-0004]",
+        "Key performance highlights (FY2025): Net Income +13.5% YoY | ROA 1.61% (#1 in asset class <$5B) | NIM 4.76% | Efficiency ratio 48.46% | NPS 81 World Class (×15 consecutive quarters) | EPS $6.92 | TBV/share $45.75 | Core deposits CAGR exceptional [E-0003, E-0004]",
+        "⚠️  CREDIT QUALITY FLAG: NPA/total assets deteriorated from 0.47% (Q4'24) to 2.00% (Q4'25). Nine classified loans as of Dec 31, 2024; new CCO (August 2025) + new COO (April 2026) both have credit/risk oversight mandates. This creates urgency for systematic credit portfolio analytics — a direct Data Cloud + nCino portfolio analytics opportunity. [E-0005]",
+        "CalPrivate Bank's financial trajectory is classified as ACCELERATING on core growth metrics (net income CAGR ~19%, assets CAGR ~14% over 5 years) with STABLE-HIGH profitability (ROA consistently in top decile nationally) and VARIABLE credit quality (significant Q4'25 deterioration from NPA 0.47% to 2.00%). The efficiency ratio improvement from ~52% to 48.46% reflects disciplined expense management and operating leverage. [E-0003, E-0004]"
+      ],
+      "net_income": 12000000.0,
+      "q1_2025_roa": 1.74,
+      "q3_2025_efficiency_ratio": 50.49,
+      "q3_2025_nim": 4.65,
+      "q4_2025_roa": 1.53,
+      "tbv_growth_yoy_pct": 19.1,
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 210,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Legal Services Specialties vertical: separate dedicated…"
+          },
+          {
+            "fy": "FY2025",
+            "label": "NCino loan origination system Confirmed DEPLOYED: DCBO job…"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Northern California",
+        "headline": "$535.0B assets · FY2026",
+        "regulator": "FDIC",
+        "series": {
+          "net_income_m": [
+            20.0,
+            26.0,
+            29.0,
+            35.8,
+            40.7,
+            12.0
+          ],
+          "total_assets": [
+            1.5,
+            1.8,
+            2.1,
+            2.3,
+            2.5,
+            535.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Northern California",
+    "footprint_basis": "derived:geography",
+    "founded": 2006,
+    "geography": "Northern California",
+    "headcount": 210,
+    "hq": "La Jolla, CA",
+    "hq_address": "La Jolla, CA",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Rick L. Sowers",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 120,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Cory Stewart",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 300,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Curtis Birkmann",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 360,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Zina Robinson",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 300,
+        "title": "EVP & Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Michael Pierron",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Meghan Bish",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP, Treasury Management Sales Manager"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "CalPrivate Bank",
+    "license_type": "State-chartered",
+    "narrative_md": "CalPrivate Bank is a California state-chartered commercial bank founded in 2006, headquartered at 4265 Executive Drive, La Jolla, California 92037. The bank operates as a wholly-owned subsidiary of Private Bancorp of America, Inc. (OTCQX: PBAM) and is supervised by the Federal Deposit Insurance Corporation (FDIC) as its primary federal regulator and the California Department of Financial Protection and Innovation (DFPI) as its state regulator. [E-0024]",
+    "primary_regulator": "FDIC",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.4,
+          "source": "Employee"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.4",
+          "signal": "glassdoor_review_count: 8, glassdoor_compensation_rating: 4.4, glassdoor_themes_positive: ['pay well', 'close-knit team', 'strong & supportive leadership', 'executives listen and respond', 'professional/customer-oriented",
+          "source": "Employee"
+        },
+        {
+          "signal": "ios_app_store_app_id: 1017106053, ios_app_requires: iOS 13.0+ (later updated to iOS 16.0+; macOS 13.0+), google_play_present: True",
+          "source": "Customer"
+        },
+        {
+          "signal": "Positive Q4'24 record earnings narrative through 2025. LA wildfires brief loan exposure concern but not material per management. M&A activity in California regional banking (Pacific Premier→Columbia Sept 2025, First Foun",
+          "source": "News Sentiment"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "$1B-$5B",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-11-04",
+        "derived_from": "evidence_index",
+        "e_id": "E-0096",
+        "excerpt": "Crisis management demonstrated (anti-negative): CalPrivate's LinkedIn posts during 2024 LA/San Diego storms: 'They have played a proactive role in coordinating resources with the city and conducting door-to-door checks t",
+        "title": "Crisis management demonstrated anti",
+        "type": "linkedin-post",
+        "url": "https://finance.yahoo.com/news/calprivate-bank-celebrates-grand-opening-130000401.html"
+      },
+      {
+        "author": null,
+        "date": "2026-05-27",
+        "derived_from": "evidence_index",
+        "e_id": "E-0042",
+        "excerpt": "Content marketing assets identified: (1) 'Client Interview' video case studies featuring named clients (Jonathan Segal architect/developer, premier real estate education, restaurant/bar concepts, marketing agency, hospit",
+        "title": "Content marketing assets identified 1) 'Client Interview' video case…",
+        "type": "article",
+        "url": "https://calprivate.bank/lending/"
+      },
+      {
+        "author": null,
+        "date": "2026-05-27",
+        "derived_from": "evidence_index",
+        "e_id": "E-0069",
+        "excerpt": "Knowledge Center categories: Business Mobile Deposit, Consumer Mobile Deposit, General Q&A, Lost or Stolen Card, Mobile Banking App, Trouble Making Payments, Foreclosure Avoidance Assistance, Knowledgebase FAQ articles. ",
+        "title": "Knowledge Center categories: Business Mobile Deposit, Consumer Mobile…",
+        "type": "article",
+        "url": "https://calprivate.bank/knowledge-center/"
+      },
+      {
+        "author": null,
+        "date": "2026-05-27",
+        "derived_from": "evidence_index",
+        "e_id": "E-0061",
+        "excerpt": "Indeed company profile: Size 51-200 employees, Financial Services sector. Interview experience: MEDIUM difficulty, EXCELLENT experience, 1-week process. Salary satisfaction: 78% yes (7/9). Recommend to friend: 75% yes (6",
+        "title": "Indeed company profile: Size 51-200 employees, Financial Services…",
+        "type": "article",
+        "url": "https://www.indeed.com/cmp/Calprivate-Bank"
+      }
+    ],
+    "ticker": "OTCQX:PBAM",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$2.58B",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "calprivate.bank",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.474552+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# CalPrivate Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "The peers was locked in Batch 1 of the research phase and is immutable for this assessment. Five peers were selected based on sub-vertical match (SV1 Regional Banks), size tier proximity ($1B–$10B), geographic overlap (California-focused commercial banking), and competitive relevance: Bank of Marin Bancorp (BMRC), $3.7B, NorCal (60% overlap); Heritage Commerce Corp (HTBK), $5.0B, Bay Area (55% overlap); RBB Bancorp (RBB), $2.5B, LA/SoCal (85% overlap); Hanmi Financial (HAFC), $7.6B, LA/SoCal (70% overlap); and California BanCorp (BCAL), $2.8B, Oakland/California statewide (45% overlap). All peer scores are derived from public evidence and reflect category-level proxy assessments.",
+    "gap_prioritization_md": "Gaps are prioritized using a six-factor scoring model. Each factor is rated 1–10 and scored with the indicated weight. Final scores rank the 8 identified priority gaps from highest to lowest urgency. The model rewards gaps where the evidence of impact is strong, the window for action is present, and the Zennify solution directly addresses the root cause.\nThe three highest-priority gaps (Priority Score ≥8.7) all share a common characteristic: they are active, time-sensitive, and address leadership-confirmed objectives. CRM fragmentation (ISS-002 MATERIAL) and integration debt (ISS-005 MINOR) are confirmed active issues with cap consequences on current maturity scores. The COO operational assessment represents a narrow window where technology shortlists are being formed and decisions are being made in real time [E-0085, E-0119].",
+    "page_number": null,
+    "scqa_heading": "SCQA Framework",
+    "scqa_md": "CalPrivate Bank is a $2.6B in assets regional bank regulated by FDIC, operating since 2006 with 210 employees. A 14.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-0004, E-0119]. Zennify's assessment places overall digital maturity at 2.5/5. The deepest capability gap is KYC/CIP Compliance at 2.0/5 against a 2.5 peer median [E-0056, E-0064].\n\nNext is Welcome Journeys at 2.4/5 against a 2.5 peer median [E-0044, E-0051]. The issue register adds AP-04 flagged ' through ' in §12 Evidence Sources and Appendix C metadata summary lines…. The issue register adds P3 Operations, Risk & Compliance has 61.7% of subcaps at score 3.0, triggering SI-02 differentiation warning (threshold 60%)…. Counter-signal: Exam Preparation already runs at 3.1/5 against a 3.0 peer median — a strength to build on, not rebuild.\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for CalPrivate Bank is whether to close KYC/CIP Compliance first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. CalPrivate Bank should lead with Databricks (74/100 fit) against Unified Data + AI Asset Governance Control Plane, then sequence Tableau behind it. Closing KYC/CIP Compliance to the peer median alone is worth 0.5 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.54,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/calculation_chain.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.656040+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/A2_Peer_Benchmarking.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.656635+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.657090+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/GOV_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.657371+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A4_Safeguard_Gates.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.668035+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_Tier_Distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.668308+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Leadership_Summary.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.668728+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:53.669472+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 24
+    },
+    "stage_ms": {
+      "manifest": 16,
+      "parse": 8787,
+      "persist": 3860
+    },
+    "structured": [
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_Assessment_Workbook",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_Assessment_Workbook_CPB_20260527.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/GOV_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "assumptions_register",
+        "detail": "assumptions_register: 5 entry(ies) parsed from 08_appendices/assumptions_register.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 115 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "peers loaded from variant peer_set.json (5 peers)",
+        "detail": "peers loaded from variant peer_set.json (5 peers)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: CalPrivate_Technographic_Stack_Explorium.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'founded', 'hq', 'legal_name', 'primary_regulator', 'ticker', 'total_assets'] leadership=6",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 8 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 3 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/calculation_chain.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/A2_Peer_Benchmarking.csv — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/GOV_patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A4_Safeguard_Gates.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_Tier_Distribution.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Leadership_Summary.csv — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 22",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 6",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx fallback extracted 698 subcaps from DMA_Assessment_Workbook_CPB_20260527.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "used variant issue register: 07_governance/GOV_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "assumptions_register: 5 entry(ies) parsed from 08_appendices/assumptions_register.json",
+      "caps_applied_log: 115 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "peers loaded from variant peer_set.json (5 peers)",
+      "used variant tech stack xlsx: CalPrivate_Technographic_Stack_Explorium.xlsx",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'founded', 'hq', 'legal_name', 'primary_regulator', 'ticker', 'total_assets'] leadership=6",
+      "used docx-extracted recommendations: 8 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 3 sources",
+      "insights_from_client_profile_findings: 6",
+      "INFO/pattern_gap: 03_scoring_workbook/calculation_chain.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/A2_Peer_Benchmarking.csv — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/GOV_patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A4_Safeguard_Gates.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_Tier_Distribution.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Leadership_Summary.csv — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 22",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 6"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.48,
+      "pillar_id": "P1",
+      "score": 2.58,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.39,
+      "pillar_id": "P2",
+      "score": 2.4,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.63,
+      "pillar_id": "P3",
+      "score": 2.84,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.23,
+      "pillar_id": "P4",
+      "score": 2.35,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-27",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:53.704238Z",
+    "created_at": "2026-07-02T23:10:53.704238Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "f4489384-7d99-4046-b6d6-adcd774b7ca7",
+    "overall_score": null,
+    "request_id": "DMA-RES-CPB-20260527-0001",
+    "started_at": "2026-07-02T23:10:53.704238Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": null,
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.4,
+        "source": "Employee"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Seven primary findings are presented in order of sales-narrative priority. 🔴 CRITICAL = highest-confidence opportunity with immediate evidence base. 🟠 HIGH = strong opportunity with multiple corroborating signals. ⚡ TIMING = window-sensitive — Zennify engagement required before the COO assessment concludes.",
+      "evidence": [
+        "E-0064",
+        "E-0054",
+        "E-0055",
+        "E-0056"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "Seven primary findings",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 2.02,
+      "so_what": "Prioritize Seven primary findings in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Seven primary findings",
+      "what": "Seven primary findings are presented in order of sales-narrative priority. 🔴 CRITICAL = highest-confidence opportunity with immediate evidence base. 🟠 HIGH = strong opportunity with multiple corroborating signals. ⚡ TIMING = window-sensitive — Zennify engagement required before the COO assessment concludes.",
+      "why": "The linked evidence records: Client Relationship Management team described (The Org): 'dedicated to fostering long-term, personalized relationships with high net worth individuals and businesses."
+    },
+    {
+      "body": "Unify the 7 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-0044",
+        "E-0051",
+        "E-0061",
+        "E-0064"
+      ],
+      "magnitude": "0.1 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 2.43,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 7 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Marketing Automation Platform (P2C1.5.1): NO publicly observed evidence of HubSpot, Marketo, Pardot, Salesforce Marketing Cloud, ActiveCampaign, or other MAP. Forms appear to feed into manual relationship banker workflow consistent with B1 finding 'No CRM, use Excel'."
+    },
+    {
+      "body": "Treat the 17 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "evidence": [
+        "E-0104",
+        "E-0100",
+        "E-0101",
+        "E-0102"
+      ],
+      "magnitude": null,
+      "name": "Build the data foundation",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.09,
+      "so_what": "Protect Build the data foundation as a proof point: use it to anchor the data and technology story while the true gaps close — Databricks is the platform surface that addresses it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Build the data foundation",
+      "what": "Treat the 17 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "why": "The linked evidence records: Analytics data platform (anti-negative): No enterprise data warehouse or lakehouse confirmed. Power Automate + ServiceNow + SharePoint Online = Microsoft Azure ecosystem signals strong inference of Azure-based cloud infrastructure (see P4C3)."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0002"
+      ],
+      "modifiers": [
+        "60 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Due Diligence averages 2.7/5 over 165 scored subcaps; ceiling 3.5 reflects thin evidence density (105/165 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0004"
+      ],
+      "modifiers": [
+        "130 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "AI Ethics & Fairness averages 3.0/5 over 217 scored subcaps; ceiling 3.7 reflects thin evidence density (87/217 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0002"
+      ],
+      "modifiers": [
+        "165 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Evaluation Criteria averages 2.0/5 over 190 scored subcaps; ceiling 2.6 reflects thin evidence density (25/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0021"
+      ],
+      "modifiers": [
+        "190 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Leadership & Sponsorship averages 2.5/5 over 205 scored subcaps; ceiling 3.0 reflects thin evidence density (15/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0021"
+      ],
+      "modifiers": [
+        "45 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Policy Framework averages 2.7/5 over 70 scored subcaps; ceiling 3.4 reflects thin evidence density (25/70 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.3,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0050"
+      ],
+      "modifiers": [
+        "5 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Welcome Journeys averages 2.4/5 over 287 scored subcaps; ceiling 3.4 reflects thin evidence density (282/287 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0059"
+      ],
+      "modifiers": [
+        "252 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "KYC/CIP Compliance averages 2.0/5 over 287 scored subcaps; ceiling 2.6 reflects thin evidence density (35/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0073"
+      ],
+      "modifiers": [
+        "130 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Anticipated Needs Service averages 2.5/5 over 286 scored subcaps; ceiling 3.3 reflects thin evidence density (156/286 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0079"
+      ],
+      "modifiers": [
+        "220 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Data Foundation (CDP) averages 2.7/5 over 255 scored subcaps; ceiling 3.2 reflects thin evidence density (35/255 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0105"
+      ],
+      "modifiers": [
+        "123 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Investment & Prioritization averages 2.8/5 over 143 scored subcaps; ceiling 3.4 reflects thin evidence density (20/143 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0119"
+      ],
+      "modifiers": [
+        "105 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Collaboration averages 2.6/5 over 130 scored subcaps; ceiling 3.2 reflects thin evidence density (25/130 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.6,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0090"
+      ],
+      "modifiers": [
+        "101 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Exam Preparation averages 3.1/5 over 141 scored subcaps; ceiling 3.7 reflects thin evidence density (40/141 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0096"
+      ],
+      "modifiers": [
+        "125 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Financial & Operational Assessment averages 2.8/5 over 145 scored subcaps; ceiling 3.4 reflects thin evidence density (20/145 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0097"
+      ],
+      "modifiers": [
+        "175 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Metadata Management & Data Catalog averages 2.2/5 over 200 scored subcaps; ceiling 2.8 reflects thin evidence density (25/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0106"
+      ],
+      "modifiers": [
+        "210 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Autonomous AI Agent averages 2.1/5 over 270 scored subcaps; ceiling 2.7 reflects thin evidence density (60/270 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0112"
+      ],
+      "modifiers": [
+        "185 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Architecture & API averages 2.5/5 over 235 scored subcaps; ceiling 3.1 reflects thin evidence density (50/235 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.5,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-0115"
+      ],
+      "modifiers": [
+        "80 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Cyber Resilience & Recovery averages 2.7/5 over 150 scored subcaps; ceiling 3.4 reflects thin evidence density (70/150 full-evidence cells); band ±0.5 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Piper Sandler raised PBAM price target from $77 to $88 (April 20, 2026) — third Buy-side analyst upgrade since COO appointment. Angel Martinez appointed to CalPrivate Bank board — former President and CEO of Deckers Brands (Goleta, CA), $1B+ consumer brand. Martinez brings board-level consumer brand strategy and digital commerce experience (Apr 2026).",
+      "evidence": [
+        "E-0125"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Piper Sandler raised PBAM price target third Buy-side…",
+      "metric": "PBAM price target $77",
+      "peer_context": "KYC/CIP Compliance runs 2.02/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Piper Sandler raised PBAM price target from $77 to $88 (April 20, 2026) — third Buy-side analyst upgrade since COO appointment. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-20",
+        "event": "Piper Sandler raised PBAM price target third Buy-side…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "nCino loan origination system CONFIRMED DEPLOYED: DCBO job posting (Nov 2025) lists 'nCino SME, leveraging the platform to streamline sales processes and enhance client management' as REQUIRED qualification — not optional. nCino is a Salesforce-native cloud LOS with automated loan origination, credit analysis, and portfolio management workflows.",
+      "evidence": [
+        "E-0086"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "NCino loan origination system Confirmed DEPLOYED: DCBO job…",
+      "metric": null,
+      "peer_context": "KYC/CIP Compliance runs 2.02/5 vs a 2.50 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "nCino loan origination system CONFIRMED DEPLOYED: DCBO job posting (Nov 2025) lists 'nCino SME, leveraging the platform to streamline sales processes and enhance client management' as REQUIRED qualification — not. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "NCino loan origination system Confirmed DEPLOYED: DCBO job…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Legal Services Specialties vertical: separate dedicated page + Becky Mendoza named as 'Director, Legal Services Private Group' serving 'Mid to Large size [law] firms' in San Diego = dedicated named professional referral channel for legal sector (May 2026).",
+      "evidence": [
+        "E-0065"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Legal Services Specialties vertical: separate dedicated…",
+      "metric": null,
+      "peer_context": "KYC/CIP Compliance runs 2.02/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Legal Services Specialties vertical: separate dedicated page + Becky Mendoza named as 'Director, Legal Services Private Group' serving 'Mid to Large size [law] firms' in San Diego = dedicated named professional referral. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-05-27",
+        "event": "Legal Services Specialties vertical: separate dedicated…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Q1 2025 Isakow quote: 'The Bank continues to produce top tier financial results by seeking improved productivity through technology investments, streamlined systems and processes, and hiring top bankers in existing and potential new markets and market segments.",
+      "evidence": [
+        "E-0021"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Q1 2025 Isakow quote: 'The Bank continues to produce top…",
+      "metric": null,
+      "peer_context": "KYC/CIP Compliance runs 2.02/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Q1 2025 Isakow quote: 'The Bank continues to produce top tier financial results by seeking improved productivity through technology investments, streamlined systems and processes, and hiring top bankers in existing and. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Competitive intelligence statement Q3 2025: 'increased non-bank competition' explicitly named - competitive awareness across non-bank fintech entrants (Aug 2025).",
+      "evidence": [
+        "E-0022"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Competitive intelligence statement Q3 2025: 'increased…",
+      "metric": null,
+      "peer_context": "KYC/CIP Compliance runs 2.02/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Unified Data + AI Asset Governance Control Plane — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Competitive intelligence statement Q3 2025: 'increased non-bank competition' explicitly named - competitive awareness across non-bank fintech entrants (Aug 2025).",
+      "timeline": {
+        "date": "2025-08-01",
+        "event": "Competitive intelligence statement Q3 2025: 'increased…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "KYC/CIP Compliance scores 2.02/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-0056",
+        "E-0064",
+        "E-0054",
+        "E-0055"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "KYC/CIP Compliance scores 2.02/5",
+      "metric": "KYC/CIP Compliance 2.02/5 vs peer 2.50",
+      "peer_context": "KYC/CIP Compliance runs 2.02/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Unified Data + AI Asset Governance Control Plane — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C2",
+      "text": "KYC/CIP Compliance scores 2.02/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

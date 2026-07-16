@@ -1,0 +1,804 @@
+{
+  "entity_display_id": "ci-segall-bryant-hamill--0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.2",
+        "P4C3.3.1",
+        "P2C2.9.4",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-GAP-1",
+      "id": "dc3fecf2-2fc8-430f-b7cf-0c5b198d76f6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-075",
+            "E-076",
+            "E-077",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-4"
+        },
+        {
+          "e_ids": [
+            "E-076",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-5"
+        }
+      ],
+      "linked_e_ids": [
+        "E-077",
+        "E-078",
+        "E-075",
+        "E-076"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Real-Time API Development a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Real-Time API Development",
+      "what_text": "— Integration Stall (, CRITICAL): Two full sprints have elapsed with zero integration stories completed. Broadridge (SBH-71) blocked and unassigned. APX API error handling (D005) overdue since March 27. All 5 integration workstreams (APX UNI Sync, APX API, DocuSign, Pardot, Broadridge) remain To Do or Blocked. This creates a growing risk to the late May/early June go-live. (INT-002:F6, INT-004:F2, INT-005:F11). In Zennify's assessment Real-Time API Development scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-078].",
+      "why_text": "At 1.0 out of 5, Real-Time API Development sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-077, E-078].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C1.1.2",
+        "P1C4.9.1",
+        "P1C1.5.4",
+        "P3C3.8.3",
+        "P4C3.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "7e693e00-9291-4002-ae56-f2fe2c4c7929",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-3"
+        },
+        {
+          "e_ids": [
+            "E-014",
+            "E-017",
+            "E-018"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-014",
+        "E-018",
+        "E-017",
+        "E-019"
+      ],
+      "linked_subcap_id": "P1C1.1.2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-018].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"ZERO open positions found on Indeed for 'Segall Bryant Hamill' — any search variant. No technology, engineering, data, or IT roles posted. ZERO open positions found for 'Segall Bryant Hamill technology' specifically. Firm does not appear to recruit technology \". In Zennify's assessment Business Alignment scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-014].",
+      "why_text": "The client's own stated priority — \"SBH’s strategic direction is shaped by two layers: (1) parent-company mandates from CI Financial/Corient, and (2) firm-level business objectives defined within the active Zennify engagement. Understanding both layers is \" — needs the Databricks capability that is currently absent. scores 1.0/5 on the current assessment [E-025, E-014].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P2C2.2.RIA1",
+        "P3C2.3.4",
+        "P2C2.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-GAP-2",
+      "id": "108cd9d5-0bf7-4560-ad6c-c7503b120468",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-061",
+        "E-062"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automation Vision & Strategy a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-062].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Automation Vision & Strategy",
+      "what_text": "— Sprint Velocity Collapse (, HIGH): Sprint 2 velocity of 1 story completed is 93% below Sprint 1 (15 stories). Seven carry-forward stories have been in progress for 2+ sprints with no movement: SBH-7 (Person Account config), SBH-8 (Financial Account config — blocked on data migration review), SBH-9 (FAP config), SBH-30 (Account LRP), SBH-31 (PA LRP), SBH-34 (ARC), SBH-51 (Action Plan New Portfolio). Sprint 3 must resolve these carry-forwards or the backlog compounds. (INT-001:F12, INT-002:F9). In Zennify's assessment Automation Vision & Strategy scores 3.0 out of 5, versus a typical 2.5 at comparable institutions [E-061].",
+      "why_text": "At 3.0 out of 5, Automation Vision & Strategy shows a maturing capability within reach of best practice. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business [E-065, E-061].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.4",
+        "P2C4.7.2",
+        "P1C4.9.1",
+        "P3C2.7.4",
+        "P1C4.1.1",
+        "P1C4.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-GAP-3",
+      "id": "361a4892-ad80-49de-a536-a940533ece3e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-014",
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "XS-DATABRICKS"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-014",
+        "E-022",
+        "E-033",
+        "E-035",
+        "E-036",
+        "E-037",
+        "E-040"
+      ],
+      "linked_subcap_id": "P1C4.4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "twilio",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Multi-Channel Communications a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Multi-Channel Communications",
+      "what_text": "— Change Management Void (, HIGH): Change management is explicitly out of scope (INT-001:F9). Business readiness is ‘Not Started’ as of Sprint 3 (INT-005:F13). SBH has ~120 employees who will receive a fundamentally restructured Salesforce org (Person Accounts replacing Contacts, Financial Accounts replacing Portfolios, new PSG security model, new page layouts) with no training, no communication plan, and no adoption support. This directly threatens OBJ-1 (FSC adoption) and SO5 (customized service — which requires people to USE the system). In Zennify's assessment Multi-Channel Communications scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-014].",
+      "why_text": "At 3.0 out of 5, Multi-Channel Communications shows a maturing capability within reach of best practice. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business [E-029, E-014].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.2",
+        "P1C1.2.5",
+        "P1C3.5.1",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-GAP-4",
+      "id": "4496fc3f-2c4c-489e-a906-bd5ad3a63541",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-075",
+            "E-076",
+            "E-077",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-1"
+        },
+        {
+          "e_ids": [
+            "E-076",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-5"
+        }
+      ],
+      "linked_e_ids": [
+        "E-077",
+        "E-078",
+        "E-075",
+        "E-076"
+      ],
+      "linked_subcap_id": "P4C3.6.2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make DevSecOps & Security in Pipeline a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Budget Exhaustion Risk (MEDIUM): 905 total hours",
+      "what_text": "— Budget Exhaustion Risk (MEDIUM): 905 total hours. 409 consumed (45%). Forecast (497 hrs) equals remaining (496 hrs) exactly — zero buffer. SBH-72 (Lead Conversion) and SBH-61 (OmniStudio Doc Gen) added to backlog without Change Orders. OmniStudio hours are being logged against the project without confirmed scope (D011). Any blocker resolution, integration build, or UAT extension will exceed the 905-hour envelope. (INT-005:F6, INT-005:F12). In Zennify's assessment DevSecOps & Security in Pipeline scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-078].",
+      "why_text": "At 1.0 out of 5, DevSecOps & Security in Pipeline sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-077, E-078].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C4.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-GAP-5",
+      "id": "5a03b8b0-b75e-4ee5-a6c8-1c017a0d140e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-1"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-4"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-075",
+        "E-073",
+        "E-016"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "This creates a cross-workstream dependency between configuration and migration planning that must be resolved in Sprint 3 [E-073].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Enterprise Data Strategy & Roadmap",
+      "what_text": "— FA Config/Migration Sequencing (, MEDIUM): SBH-8 (Configure Financial Accounts) is blocked because Shawn Murray flagged on March 6 that the fields and Lightning Record Page cannot be finalized until the data migration approach is reviewed (INT-003:F8, DL-009). This creates a cross-workstream dependency between configuration and migration planning that must be resolved in Sprint 3. The original SDD design assumed FA config could proceed independently of data migration. (INT-003, INT-004:F4). In Zennify's assessment Enterprise Data Strategy & Roadmap scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-075].",
+      "why_text": "The assessment found: “Active niche strategies designed to deliver alpha in most inefficient market areas. Autonomous team-oriented approach focused on high quality proprietary research” [E-016]. Shawn Murray flagged on March 6 that the fields and Lightning Record Page cannot be finalized until the data migration approach is reviewed (INT-003:F8, DL-009). averages 1.4/5 across its 45 scored capability (peer median ~ 2.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.6.3",
+        "P4C1.5.2",
+        "P1C1.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-005",
+      "id": "d41f7cb6-76e4-4ee1-bfd2-3415e9ff2ea7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-072",
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-074",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C2.6.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Semantic Layer & Metrics Platform a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SBH’s strategic direction is shaped by two layers: (1) parent-company mandates from CI Financial/Corient, and (2) firm-l",
+      "what_text": "SBH’s strategic direction is shaped by two layers: (1) parent-company mandates from CI Financial/Corient, and (2) firm-level business objectives defined within the active Zennify engagement. Understanding both layers is critical for framing DMA recommendations. In Zennify's assessment Semantic Layer & Metrics Platform scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-074].",
+      "why_text": "At 1.0 out of 5, Semantic Layer & Metrics Platform sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-072, E-074].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.1",
+        "P3C4.6.2",
+        "P1C5.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-006",
+      "id": "508a0aff-d32b-49e3-b199-ae4db36f632b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-076",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-1"
+        },
+        {
+          "e_ids": [
+            "E-076",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-4"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-076",
+        "E-010"
+      ],
+      "linked_subcap_id": "P4C3.6.1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make CI/CD Pipeline & Automation a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-010].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "CI Financial embarked on a \"new strategic direction in November 2019\" (E-078, CI Financial acquisition press release) or",
+      "what_text": "CI Financial embarked on a \"new strategic direction in November 2019\" (, CI Financial acquisition press release) organized around three priorities that continue to govern subsidiary technology investments:. In Zennify's assessment CI/CD Pipeline & Automation scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-076].",
+      "why_text": "The assessment found: “CI Financial Corp (TSX:CIX) acquired SBH April 2021. CI described as 'diversified global asset and wealth management company' with C$261B total assets at time of deal” [E-078]. At 2.0 out of 5, CI/CD Pipeline & Automation sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.3.AM1",
+        "P1C1.3",
+        "P4C2.9.AM1",
+        "P1C1.3.WM1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-008",
+      "id": "8e8abf90-d4a0-4dcf-a447-2dc7f32d46c1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-014",
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-3"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-1"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-4"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-030",
+        "E-022",
+        "E-039",
+        "E-014",
+        "E-018",
+        "E-016",
+        "E-017"
+      ],
+      "linked_subcap_id": "P1C1.3.AM1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Asset & Wealth Segment Strategy a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "SO2 — Expanding its wealth management: Growing the U.S. wealth management footprint through 14+ acquisitions since 2020.",
+      "what_text": "SO2 — Expanding its wealth management: Growing the U.S. wealth management footprint through 14+ acquisitions since 2020. SBH was the largest by asset size. The Corient platform now manages $224B in aggregate client assets. (, INT-005). In Zennify's assessment Asset & Wealth Segment Strategy scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-078].",
+      "why_text": "The assessment found: “Mubadala acquisition (Nov 2024 agreement, closed Aug 2025) triggered 1940 Act 'change in control' — required new advisory agreements with all fund shareholders. Board approved new fee waiver” [E-030]. At 1.0 out of 5, Asset & Wealth Segment Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.8.2",
+        "P3C4.6.2",
+        "P4C3.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-009",
+      "id": "d11b5315-e480-464f-9e08-d1dd647b1679",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-1"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-4"
+        },
+        {
+          "e_ids": [
+            "E-072",
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-072",
+        "E-074"
+      ],
+      "linked_subcap_id": "P4C2.8.2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make BYOLLM (Bring Your Own LLM) a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-074].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO3 — Globalizing the company: CI Financial operates across Canada, U.S., and Australia. The Mubadala take-private bring",
+      "what_text": "BYOLLM (Bring Your Own LLM) is one of CI Segall Bryant & Hamill, LLC's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes CI Segall Bryant & Hamill, LLC's ability to deliver a stronger data and technology foundation [E-072].",
+      "why_text": "The assessment found: “CI Financial Corp (TSX:CIX) acquired SBH April 2021. CI described as 'diversified global asset and wealth management company' with C$261B total assets at time of deal” [E-078]. At 2.0 out of 5, BYOLLM (Bring Your Own LLM) sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.2",
+        "P2C4.7.2",
+        "P1C1.5.4",
+        "P1C2.1.7",
+        "P1C2.9.AM1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-010",
+      "id": "3e9a7f4e-883e-450d-9eea-11b55b057d11",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-075",
+            "E-076",
+            "E-077",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-1"
+        },
+        {
+          "e_ids": [
+            "E-075",
+            "E-076",
+            "E-077",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-GAP-4"
+        },
+        {
+          "e_ids": [
+            "E-076",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-077",
+        "E-075",
+        "E-076"
+      ],
+      "linked_subcap_id": "P4C3.6.2",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make DevSecOps & Security in Pipeline a near-term focus for CI Segall Bryant & Hamill, LLC: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "SO1 — Modernizing its asset management: Standardizing technology platforms across CI’s acquired RIAs. The FSC migration",
+      "what_text": "SO1 — Modernizing its asset management: Standardizing technology platforms across CI’s acquired RIAs. The FSC migration is a direct expression of this objective — aligning SBH’s Salesforce org with Corient’s FSC architecture. (, INT-001:F4). In Zennify's assessment DevSecOps & Security in Pipeline scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-077].",
+      "why_text": "At 1.0 out of 5, DevSecOps & Security in Pipeline sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-078, E-077].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "4.1 P1: Strategy, Governance & Culture (2.49)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "4.2 P2: Client Experience (2.34)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "4.3 P3: Operations, Risk & Compliance (2.80)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "4.4 P4: Data, Analytics & Technology (1.83)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Recommendations are phased: Current (active engagement), Phase 2 (post go-live), Phase 3 (post data foundation). Each includes evidence validation table and client outcome."
+  },
+  "run_request_id": "DMA-RES-CISBH-20260401-0001"
+}

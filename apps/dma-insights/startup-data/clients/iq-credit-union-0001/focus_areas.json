@@ -1,0 +1,253 @@
+{
+  "entity_display_id": "iq-credit-union-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-016",
+          "E-053"
+        ],
+        "representative_quote": "Marquis ransomware: 111,368 members' PII exposed via SonicWall exploit (Aug 2025)",
+        "source_kind": "docx"
+      },
+      "id": "5bdea488-c959-4efa-aee2-4e054a573fea",
+      "involved_subcap_ids": [
+        "P1C2.3.2",
+        "P1C2.3.4",
+        "P1C2.3.1",
+        "P1C2.3.3",
+        "P1C2.3.6",
+        "P1C2.3.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "111,368",
+          "delta": null,
+          "kpi_label": "Members",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "Marquis ransomware: 111,368 members' PII exposed via SonicWall exploit (Aug 2025) [E-016, E-053]",
+      "title": "Critical Third-Party Vendor Breach",
+      "verbatim_quote": "F-003 | Critical Third-Party Vendor Breach | Marquis ransomware: 111,368 members' PII exposed via SonicWall exploit (Aug 2025) [E-016, E-053] | CRITICAL cap P3C4/P4C4 at M2 | Shield/Security Cloud; vendor risk management consulting"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-010",
+          "E-035"
+        ],
+        "representative_quote": "Data governance 'basically nonexistent' pre-Arkatechture; CUSO investor-partner for Arkalytics data warehouse",
+        "source_kind": "docx"
+      },
+      "id": "ca18d91b-cc2a-44f4-ad04-cf726a35efd5",
+      "involved_subcap_ids": [
+        "P4C4.4.5",
+        "P4C4.2.2",
+        "P4C4.2.1",
+        "P4C4.1.2",
+        "P4C2.4.8",
+        "P4C2.7.4",
+        "P4C2.4.7",
+        "P4C2.7.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Data governance 'basically nonexistent' pre-Arkatechture; CUSO investor-partner for Arkalytics data warehouse [E-010, E-035]",
+      "title": "Data Governance: Zero to Warehouse",
+      "verbatim_quote": "F-002 | Data Governance: Zero to Warehouse | Data governance 'basically nonexistent' pre-Arkatechture; CUSO investor-partner for Arkalytics data warehouse [E-010, E-035] | P4C1 moving M1 to M2 | Data Cloud + Tableau to layer on Arkatechture foundation"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-040",
+          "E-036"
+        ],
+        "representative_quote": "Forbes #1 WA; 25% member growth; Portland expansion; $2.076B assets",
+        "source_kind": "docx"
+      },
+      "id": "8ee6dd18-ff45-45e9-97d9-35536874dda2",
+      "involved_subcap_ids": [
+        "P4C2.6.1",
+        "P4C2.6.2",
+        "P4C2.6.3",
+        "P4C2.6.6",
+        "P4C2.6.4",
+        "P4C2.6.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$2,076,000,000",
+          "delta": null,
+          "kpi_label": "Assets",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Forbes #1 WA; 25% member growth; Portland expansion; $2.076B assets [E-040, E-036]",
+      "title": "Forbes #1 CU in WA + Growth",
+      "verbatim_quote": "F-007 | Forbes #1 CU in WA + Growth | Forbes #1 WA; 25% member growth; Portland expansion; $2.076B assets [E-040, E-036] | Growth stresses current tech | Investment case for Salesforce platform consolidation"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-012"
+        ],
+        "representative_quote": "Selected Cresta from 9 vendors for GenAI QA; targeting 100% automated QA",
+        "source_kind": "docx"
+      },
+      "id": "89008892-2871-45a7-bb02-dc705d6511da",
+      "involved_subcap_ids": [
+        "P1C3.8"
+      ],
+      "kpis": [
+        {
+          "current_value": "100%",
+          "delta": null,
+          "kpi_label": "Targeting",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "Selected Cresta from 9 vendors for GenAI QA; targeting 100% automated QA [E-012]",
+      "title": "GenAI Early Mover (Contact Center)",
+      "verbatim_quote": "F-004 | GenAI Early Mover (Contact Center) | Selected Cresta from 9 vendors for GenAI QA; targeting 100% automated QA [E-012] | P1C3.8 ceiling M3 | Einstein AI/Agentforce to expand GenAI beyond contact center"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-014"
+        ],
+        "representative_quote": "32% enrollment, +1 product, +34% loan balances; Marquis multi-channel campaigns",
+        "source_kind": "docx"
+      },
+      "id": "115f7e04-2f87-48b7-813e-96aa8c63e9f2",
+      "involved_subcap_ids": [
+        "P2C4.5",
+        "P2C4.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "34%",
+          "delta": null,
+          "kpi_label": "Engine enrollment product",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "32%",
+          "delta": null,
+          "kpi_label": "Perks Cross-Sell Engine",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "32% enrollment, +1 product, +34% loan balances; Marquis multi-channel campaigns [E-014]",
+      "title": "Member Perks Cross-Sell Engine",
+      "verbatim_quote": "F-005 | Member Perks Cross-Sell Engine | 32% enrollment, +1 product, +34% loan balances; Marquis multi-channel campaigns [E-014] | P2C4.5/P2C4.7 ceiling M3 | Marketing Cloud + Data Cloud to scale personalization"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "PRIMARY: Financial Services Cloud for member 360",
+        "source_kind": "docx"
+      },
+      "id": "c71fce8a-4d2c-4af4-9f01-2eaf1a283118",
+      "involved_subcap_ids": [
+        "P2C4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "Zero evidence of any CRM platform across all searches [ABSENCE]",
+      "title": "No CRM System Identified",
+      "verbatim_quote": "F-006 | No CRM System Identified | Zero evidence of any CRM platform across all searches [ABSENCE] | P2C4.1 capped M1-M2 | PRIMARY: Financial Services Cloud for member 360"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-027",
+          "E-017"
+        ],
+        "representative_quote": "Created CTO (2021) and CXO (2024) roles; CTO oversees IS, InfoSec, data, BCDR",
+        "source_kind": "docx"
+      },
+      "id": "c4dda363-527a-4d8e-a6bf-2d158cb9271e",
+      "involved_subcap_ids": [
+        "P4C4.4.5",
+        "P4C4.2.2",
+        "P4C4.2.1",
+        "P4C4.1.2",
+        "P4C2.4.8",
+        "P4C2.7.4",
+        "P4C2.4.7",
+        "P4C2.7.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Created CTO (2021) and CXO (2024) roles; CTO oversees IS, InfoSec, data, BCDR [E-027, E-017]",
+      "title": "Tech-Forward Leadership Restructuring",
+      "verbatim_quote": "F-001 | Tech-Forward Leadership Restructuring | Created CTO (2021) and CXO (2024) roles; CTO oversees IS, InfoSec, data, BCDR [E-027, E-017] | P1C1/P1C2 ceiling M3+ | C-suite sponsors for Salesforce digital transformation"
+    }
+  ]
+}

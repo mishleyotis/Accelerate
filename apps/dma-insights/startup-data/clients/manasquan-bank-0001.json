@@ -1,0 +1,3437 @@
+{
+  "display_id": "manasquan-bank-0001",
+  "identity": {
+    "display_id": "manasquan-bank-0001",
+    "domain": null,
+    "hq": "Wall Township, NJ",
+    "lobs": [],
+    "name": "Manasquan Bank",
+    "subvertical": "RB"
+  },
+  "latest_run": {
+    "assessment_date": "2026-03-30",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:39.475242+00:00",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "request_id": "DMA-ASM-MBNK-20260330-0001",
+    "status": "ACTIVE"
+  },
+  "open_alerts": 17,
+  "scores": {
+    "overall": 1.6957158294163222,
+    "pillars": {
+      "P1": 2.04,
+      "P2": 1.64,
+      "P3": 1.61,
+      "P4": 1.49
+    },
+    "subcaps": [
+      {
+        "id": "P1C1.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.2",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.1.4",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.5",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.2.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.2.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.2.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.2.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.2.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.3.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.4.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.6.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.6.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.6.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.6.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.7.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.7.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C1.7.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C1.7.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.3",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.4",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.5",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.2.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.2.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.2.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.2.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.4.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.5.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.6.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.6.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C2.6.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P1C2.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C3.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C3.1.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.1.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.2.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.2.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.2.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.6.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.6.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.7.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.7.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C3.7.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C4.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C4.1.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.1.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.2.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C4.2.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.2.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.3.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C4.3.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C4.3.3",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C4.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.5.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.6.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.6.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.7.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.7.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C4.7.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C5.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C5.1.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.1.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.2.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C5.2.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C5.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.2.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P1C5.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.1.1",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.3",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.4",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.5",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.10.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.10.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.10.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.10.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.10.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.2.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.2.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.2.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.2.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.2.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.3.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.3.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.3.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.3.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.3.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.4.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.4.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.5.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.5.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.5.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.5.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.6.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.6.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.6.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.6.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.7.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.7.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.7.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.7.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.7.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.7.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.8.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.8.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.8.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.8.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.8.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.8.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.9.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.9.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.9.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C1.9.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C1.9.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.3",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.4",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.10.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.10.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.10.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.10.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.10.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.2.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C2.2.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C2.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.2.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.2.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.3.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.3.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.4.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.5.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.5.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.5.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.6.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.6.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.6.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.6.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.6.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.7.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.7.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.7.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.7.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.7.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.7.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.8.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.8.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.8.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.8.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.8.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C2.9.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.9.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.9.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.9.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C2.9.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.3",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.1.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.1.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.10.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.10.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.10.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.10.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.10.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.2.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C3.2.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.2.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.2.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.3.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.4.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.5.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.5.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.6.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.6.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.6.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.6.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.7.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.7.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.7.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.7.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.7.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.8.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.8.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.8.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.8.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.8.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.8.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.9.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.9.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C3.9.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.9.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C3.9.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C4.1.2",
+        "score": 1.0,
+        "thin": false
+      },
+      {
+        "id": "P2C4.1.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.1.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.1.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.1.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.10.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.10.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.10.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.10.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.10.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.2.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C4.2.2",
+        "score": 1.0,
+        "thin": false
+      },
+      {
+        "id": "P2C4.2.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.2.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.2.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.2.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.3.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.3.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.3.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.3.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.3.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.3.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.4.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.4.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.4.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.4.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.4.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.4.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.5.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.5.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.5.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.5.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.5.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.5.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.6.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.6.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.6.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.6.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.6.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.6.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.7.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.7.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.7.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P2C4.7.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.7.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.7.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.8.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.8.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.8.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.8.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.8.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.9.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.9.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.9.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.9.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P2C4.9.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C1.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C1.1.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.1.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.1.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.1.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.2.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.2.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.2.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.2.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.2.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.3.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.3.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.3.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.4.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.4.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.5.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.5.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C1.5.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C1.5.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C2.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C2.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C2.1.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.1.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.2.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C2.2.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.2.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.2.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.3.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C2.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.3.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.4.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C2.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.5.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C2.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C2.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C3.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C3.1.3",
+        "score": 2.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.1.5",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C3.2.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.2.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.2.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.2.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.3.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.3.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.3.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.3.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.4.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.4.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.4.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.5.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.5.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.5.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.5.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.6.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.6.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P3C3.6.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C3.6.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C4.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C4.1.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C4.1.3",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C4.1.4",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P3C4.1.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.1.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C4.2.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.2.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.2.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.2.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.2.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.2.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.3.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.3.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.3.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.3.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.3.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.3.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.4.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.4.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C4.4.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.4.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.4.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P3C4.5.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.5.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.5.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.5.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P3C4.5.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C1.1.2",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P4C1.1.3",
+        "score": 1.0,
+        "thin": false
+      },
+      {
+        "id": "P4C1.1.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.1.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.1.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.1.7",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.2.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.2.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.2.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.2.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.2.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.2.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.3.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.3.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.3.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.3.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.3.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.3.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.4.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.4.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.4.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.4.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.4.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.4.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.5.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.5.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.5.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.5.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.5.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.5.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.6.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.6.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.6.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.6.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.6.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.6.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.7.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.7.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.7.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.7.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C1.7.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C1.7.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C2.1.2",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P4C2.1.3",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P4C2.1.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.1.5",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C2.1.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.1.7",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.2.1",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P4C2.2.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.2.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.2.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.2.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.2.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.3.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.3.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.3.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.3.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.3.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.3.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.4.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.4.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.4.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.4.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.4.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.4.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.5.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.5.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.5.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.5.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.5.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.5.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.6.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.6.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.6.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C2.6.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.6.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.6.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.7.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.7.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.7.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.7.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C2.7.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C3.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C3.1.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.1.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.1.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.1.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.1.7",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.2.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C3.2.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C3.2.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.2.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.2.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.2.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.3.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.3.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.3.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.3.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.3.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.3.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.4.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.4.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.4.3",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.4.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.4.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.5.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.5.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.5.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.5.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.5.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.6.1",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.6.2",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.6.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.6.5",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.6.6",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.7.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.7.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.7.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C3.7.4",
+        "score": 1.0,
+        "thin": true
+      },
+      {
+        "id": "P4C3.7.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.3",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.4",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.5",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.6",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.7",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.2.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.2.2",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.2.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.2.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.2.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.2.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.3.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.3.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.3.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.3.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.3.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.3.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.4.1",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.4.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.4.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.4.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.4.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.4.6",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.5.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.5.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.5.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.5.4",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.5.5",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.5.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.6.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.6.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.6.3",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.6.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.6.5",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.6.6",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.7.1",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.7.2",
+        "score": 2.0,
+        "thin": true
+      },
+      {
+        "id": "P4C4.7.3",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.7.4",
+        "score": 1.5,
+        "thin": true
+      },
+      {
+        "id": "P4C4.7.5",
+        "score": 2.0,
+        "thin": true
+      }
+    ]
+  },
+  "top_platform": {
+    "fit_score": 71.6,
+    "platform_id": "tableau",
+    "short": "TBL"
+  }
+}

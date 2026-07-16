@@ -1,0 +1,688 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "tristate-capital-holding-0001",
+  "financials": {
+    "lines": [
+      "total assets growth yoy pct: 59.1"
+    ],
+    "metrics": {
+      "net_income": 13141.0,
+      "roa_pct": 0.89,
+      "roe_pct": 11.47,
+      "size_tier": "Large Community / Small Regional ($20B+ assets)",
+      "trajectory": {
+        "branches": 2,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 357,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Andrew Caudill appointed CTO"
+          },
+          {
+            "fy": "FY2025",
+            "label": "Vince Locher named Head of CRE - newly created\u2026"
+          }
+        ],
+        "fy": [
+          "FY2018",
+          "FY2019",
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "National (HQ: Pittsburgh PA)",
+        "headline": "$10.0B assets \u00b7 FY2021",
+        "regulator": "Federal Reserve, FDIC, PA DBS, CFPB",
+        "series": {
+          "net_income_m": [
+            23000.0,
+            7300.0,
+            8500.0,
+            11500.0,
+            14000.0,
+            17000.0,
+            20000.0,
+            100000.0,
+            23000.0
+          ],
+          "total_assets": [
+            null,
+            null,
+            null,
+            10.0,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "National (HQ: Pittsburgh PA)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Getz",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman/CEO, TriState Capital Holdings"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brian Fetterolf",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President/CEO, TriState Capital Bank"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Dan Pavlick",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Justin Sansonetti",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Landi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Data Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Darin Fabian",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Enterprise Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Sinagra",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Enterprise Apps & Data Integrations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Theophilus Hudson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Charles Fawcett",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Thad Clements",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kyle McNamara",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ismail Sawan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Information Security Risk"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tommy Moran",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Solutions Architect (Data)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Benji Opoku Agyemang",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Data Architect"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "TriState Capital Holdings, Inc. is a regional bank. It reports $21 million in total assets and has operated since 2007. It is regulated by Federal Reserve and employs approximately 357 people across 2 branches. Its overall digital maturity is assessed at 2.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Federal Reserve, FDIC, PA DBS, CFPB",
+    "size_tier": "Large Community / Small Regional ($20B+ assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-048",
+        "excerpt": "Common Data Platform unveiled at 2025 Innovation Summit - Azure-based cloud data lake supporting regulatory reporting, real-time analytics, and AI pilot AI pilot uses Azure AI Studio and RAG for internal data queries wit",
+        "title": "Common Data Platform unveiled at 2025 Innovation Summit - Azure-based\u2026",
+        "type": "conference",
+        "url": "https://hike2.com/resources/video/architecting-secure-scalable-cloud-data-lake/"
+      },
+      {
+        "author": "Dan Pavlick",
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "TSC held/participated in Innovation Summit 2025 where Common Data Platform was presented CIO Dan Pavlick was 2025 CIO of the Year finalist - external recognition of tech leadership",
+        "title": "CIO Dan Pavlick was 2025 CIO of the Year finalist - external\u2026",
+        "type": "conference",
+        "url": "https://www.linkedin.com/in/carlo-mciltrot-a13a45157/"
+      }
+    ],
+    "ticker": "TSC (delisted May 31, 2022)"
+  },
+  "issue_register": [
+    {
+      "id": "27275a62-86c9-41e9-8f78-4f29ea77af76",
+      "issue_id": "GAP-1-P1C4.1.4",
+      "linked_subcap_ids": [
+        "P1C4.1.4"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5. [EVIDENCE]: E-054 \u2014 RJF acquisition = major organizational change event with integration planning and stakeholder management. [MATURITY]: Maps to M1 Developing based on 1 sources across 1 tier(s) (best: T3, ERS 3.3). [CEILING]: Evidence supports max 2.5. [TSC]: technology-enabled approach positions TSC at M2 for Change Readiness Assessment.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Change Readiness Assessment"
+    },
+    {
+      "id": "d6132831-ccaf-428c-ba26-32e9b6a356a4",
+      "issue_id": "GAP-2-P1C4.1.5",
+      "linked_subcap_ids": [
+        "P1C4.1.5"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5. [EVIDENCE]: E-054 \u2014 RJF acquisition = major organizational change event with integration planning and stakeholder management. [MATURITY]: Maps to M1 Developing based on 1 sources across 1 tier(s) (best: T3, ERS 3.3). [CEILING]: Evidence supports max 2.5. [TSC]: technology-enabled approach positions TSC at M2 for Change Metrics.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Change Metrics"
+    },
+    {
+      "id": "c6cd88cb-ff3a-47a2-813b-de3847d3a290",
+      "issue_id": "GAP-3-P1C4.3.1",
+      "linked_subcap_ids": [
+        "P1C4.3.1"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5. [EVIDENCE]: E-054 \u2014 RJF acquisition = major organizational change event with integration planning and stakeholder management. [MATURITY]: Maps to M1 Developing based on 1 sources across 1 tier(s) (best: T3, ERS 3.3). [CEILING]: Evidence supports max 2.5. [TSC]: technology-enabled approach positions TSC at M2 for Champions Program.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Champions Program"
+    },
+    {
+      "id": "aa44f761-e12b-4899-b7c3-77807e878379",
+      "issue_id": "GAP-4-P1C4.3.2",
+      "linked_subcap_ids": [
+        "P1C4.3.2"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5. [EVIDENCE]: E-054 \u2014 RJF acquisition = major organizational change event with integration planning and stakeholder management. [MATURITY]: Maps to M1 Developing based on 1 sources across 1 tier(s) (best: T3, ERS 3.3). [CEILING]: Evidence supports max 2.5. [TSC]: technology-enabled approach positions TSC at M2 for Champion Training.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Champion Training"
+    },
+    {
+      "id": "a0729f91-a75a-4d5d-8fef-ceb98635f171",
+      "issue_id": "GAP-5-P1C4.3.4",
+      "linked_subcap_ids": [
+        "P1C4.3.4"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5. [EVIDENCE]: E-054 \u2014 RJF acquisition = major organizational change event with integration planning and stakeholder management. [MATURITY]: Maps to M1 Developing based on 1 sources across 1 tier(s) (best: T3, ERS 3.3). [CEILING]: Evidence supports max 2.5. [TSC]: technology-enabled approach positions TSC at M2 for Champion Recognition.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Champion Recognition"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Most recent reported financials: $10.0B assets as of FY2021, within a series tracked FY2018 to FY2026.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 2.3,
+        "P1C3": 2.26,
+        "P1C4": 2.21,
+        "P1C5": 2.25,
+        "P2C1": 2.19,
+        "P2C2": 2.03,
+        "P2C3": 2.13,
+        "P2C4": 2.04,
+        "P3C1": 2.56,
+        "P3C2": 2.67,
+        "P3C3": 2.34,
+        "P3C4": 1.53,
+        "P4C1": 1.75,
+        "P4C2": 2.19,
+        "P4C3": 2.34,
+        "P4C4": 1.83
+      },
+      "overall_score": 2.2,
+      "peer_name": "Bank OZK",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.56,
+        "P1C2": 1.94,
+        "P1C3": 1.68,
+        "P1C4": 2.49,
+        "P1C5": 1.93,
+        "P2C1": 1.94,
+        "P2C2": 1.94,
+        "P2C3": 1.9,
+        "P2C4": 1.74,
+        "P3C1": 2.0,
+        "P3C2": 3.0,
+        "P3C3": 4.0,
+        "P3C4": 3.0,
+        "P4C1": 1.8,
+        "P4C2": 1.75,
+        "P4C3": 1.88,
+        "P4C4": 1.92
+      },
+      "overall_score": 2.2,
+      "peer_name": "East West Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 2.64,
+        "P1C3": 1.63,
+        "P1C4": 1.56,
+        "P2C1": 1.98,
+        "P2C2": 2.12,
+        "P2C3": 1.6,
+        "P2C4": 1.43,
+        "P3C1": 1.76,
+        "P3C2": 2.87,
+        "P3C3": 3.4,
+        "P3C4": 2.72,
+        "P4C1": 1.59,
+        "P4C2": 1.68,
+        "P4C3": 2.0,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.18,
+      "peer_name": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.23,
+        "P1C2": 2.41,
+        "P1C3": 1.86,
+        "P1C4": 2.09,
+        "P2C1": 2.27,
+        "P2C2": 2.08,
+        "P2C3": 1.97,
+        "P2C4": 2.11,
+        "P3C1": 2.19,
+        "P3C2": 2.27,
+        "P3C3": 2.17,
+        "P3C4": 2.1,
+        "P4C1": 1.81,
+        "P4C2": 2.49,
+        "P4C3": 2.19,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.16,
+      "peer_name": "Fulton Bank, National Association",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 2.24,
+        "P1C3": 2.17,
+        "P1C4": 1.91,
+        "P2C1": 2.04,
+        "P2C2": 1.77,
+        "P2C3": 2.05,
+        "P2C4": 1.89,
+        "P3C1": 2.19,
+        "P3C2": 2.37,
+        "P3C3": 2.16,
+        "P3C4": 1.98,
+        "P4C1": 1.85,
+        "P4C2": 1.91,
+        "P4C3": 2.2,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.11,
+      "peer_name": "Frost Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TSCP-20260413-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Overall",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Culture",
+        "themes": [],
+        "value": 2.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Work Life Balance",
+        "themes": [],
+        "value": 2.5
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Compensation",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Management",
+        "themes": [],
+        "value": 2.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Job Security",
+        "themes": [],
+        "value": 3.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Ceo Approval",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Recommend Friend",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "difficulty: MEDIUM, experience: EXCELLENT, length: TWO_WEEKS",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Interview",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "work_life: 2.5, compensation: 3.8, culture: 2.9",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Exa Ratings",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Below-average employee satisfaction, particularly in work-life balance (2.5) and management (2.9). Compensation rates well (3.7-3.8). CEO approval below 50%. Mixed recommend-to-friend ratio.",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Assessment",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Andrew Caudill appointed CTO at TriState Capital Bank, Jan 2026",
+      "date_precision": "month",
+      "e_id": "E-037",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-037"
+      ],
+      "id": "872ffb8c-4639-4881-9651-6a2880d9ba31",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/andrewcaudill",
+      "subcap_ids": [],
+      "title": "Andrew Caudill appointed CTO"
+    },
+    {
+      "body": "TSC has a CTO: Andrew M. Caudill, appointed Jan 2026. Previously Head of Technology Strategy and Architecture (Nov 2024-Jan 2026)",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "e09cfd22-a2e0-486b-a91b-7b363363c2f5",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/andrewcaudill",
+      "subcap_ids": [],
+      "title": "TSC has a CTO: Andrew M. Caudill, appointed Jan 2026"
+    },
+    {
+      "body": "Vince Locher named Head of CRE - newly created enterprise-wide position",
+      "date_precision": "publish_fallback",
+      "e_id": "E-035",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "e6e7833d-8fba-43d6-9157-b7b53b106a52",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://tristatecapitalbank.com/tristate-capital-bank-announces-two-new-appointments-and-bolsters-growing-commercial-real-estate-practice/",
+      "subcap_ids": [],
+      "title": "Vince Locher named Head of CRE - newly created\u2026"
+    },
+    {
+      "body": "Joe Pascarella promoted to Regional President Western PA (Dec 2025)",
+      "date_precision": "month",
+      "e_id": "E-044",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-044",
+        "E-035",
+        "E-042"
+      ],
+      "id": "919b8ead-9524-467f-b0ff-9c00d7cbb5b2",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://tristatecapitalbank.com/tristate-capital-bank-announces-two-new-appointments-and-bolsters-growing-commercial-real-estate-practice/",
+      "subcap_ids": [],
+      "title": "Joe Pascarella promoted to Regional President Western PA\u2026"
+    },
+    {
+      "body": "Named Top 50 Bank for Equipment Finance by Monitor (2025) \u2014 external industry recognition",
+      "date_precision": "year",
+      "e_id": "E-041",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "640ca563-7ef1-4d05-b145-c384337813d7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://tscbank.com/tristate-capital-bank-named-top-50-bank-as-a-leading-equipment-finance-company/",
+      "subcap_ids": [],
+      "title": "Named Top 50 Bank for Equipment Finance by Monitor (2025)"
+    },
+    {
+      "body": "Acquisition completed June 1, 2022; $6 cash + 0.25 RJF shares per TSC share (~$30.62/share)",
+      "date_precision": "day",
+      "e_id": "E-036",
+      "event_date": "2022-06-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "6d8d8a51-a27f-41ea-bc81-f0c82ce7cd1b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000720005/000119312522165207/d357757dex991.htm",
+      "subcap_ids": [],
+      "title": "Acquisition completed"
+    },
+    {
+      "body": "Raymond James completed acquisition June 1 2022 for $1.1B cash+stock",
+      "date_precision": "day",
+      "e_id": "E-029",
+      "event_date": "2022-06-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "a622a650-ba6d-40a3-bb08-f46de9ed2eca",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.raymondjames.com/news-and-media/press-releases/2022/06/01/raymond-james-financial-completes-acquisition-of-tristate-capital-holdings",
+      "subcap_ids": [],
+      "title": "Raymond James completed acquisition June 1 2022"
+    },
+    {
+      "body": "Subject to FDIC, PA DBS, Federal Reserve, CFPB (crossed $10B threshold Q3 2021) \u2014 multi-regulator compliance",
+      "date_precision": "quarter",
+      "e_id": "E-087",
+      "event_date": "2021-08-01",
+      "evidence_e_ids": [
+        "E-087"
+      ],
+      "id": "86697b28-205b-4f97-bdff-9aeb81e9fa60",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://tristatecapitalbank.com/function-category/compliance/",
+      "subcap_ids": [],
+      "title": "Subject to FDIC, PA DBS, Federal Reserve, CFPB (crossed\u2026"
+    },
+    {
+      "body": "Kevin Sinagra: SVP Enterprise Applications & BI at TSC since 2016 (VP), promoted SVP 2021",
+      "date_precision": "year",
+      "e_id": "E-038",
+      "event_date": "2016-07-01",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "a6454900-d26f-40c9-9e4c-b05c44c9c2c8",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/ksinagra",
+      "subcap_ids": [],
+      "title": "Kevin Sinagra: SVP Enterprise Applications & BI at TSC\u2026"
+    }
+  ]
+}

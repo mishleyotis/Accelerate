@@ -1,0 +1,290 @@
+{
+  "entity_display_id": "americu-credit-union-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-052",
+          "E-027",
+          "E-029"
+        ],
+        "representative_quote": "Zero publicly-disclosed breaches across NCUA/CFPB/NYDFS/FinCEN/DOJ records; NYDFS 23 NYCRR 500 covered entity; CIO Lewin holds MBA in Economic Crime/Fraud",
+        "source_kind": "docx"
+      },
+      "id": "c2ee35a8-5e21-4f2e-b112-3adbb6b3dfaa",
+      "involved_subcap_ids": [
+        "P4C4.1.1",
+        "P1C2.7.CU1",
+        "P1C1.5.1",
+        "P2C1.7.CU1",
+        "P2C2.2.5",
+        "P4C1.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 32,
+        "P2": 32,
+        "P4": 36
+      },
+      "source_path": "Zero publicly-disclosed breaches across NCUA/CFPB/NYDFS/FinCEN/DOJ records [E-052:F1]; NYDFS 23 NYCRR 500 covered entity [E-027]; CIO Lewin holds MBA in Economic Crime/Fraud Mgmt [E-029:F1].",
+      "title": "1. Cybersecurity baseline is excellent",
+      "verbatim_quote": "1. Cybersecurity baseline is excellent | Zero publicly-disclosed breaches across NCUA/CFPB/NYDFS/FinCEN/DOJ records [E-052:F1]; NYDFS 23 NYCRR 500 covered entity [E-027]; CIO Lewin holds MBA in Economic Crime/Fraud Mgmt [E-029:F1]. | Strong public posture on a sensitive capability. Layer 1 should score this category at M3.0+; not a transformation target. | M3.0\u20133.5 | N/A \u2014 strength area"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-023",
+          "E-021"
+        ],
+        "representative_quote": "30-year Jack Henry Symitar partnership powering 14\u00d7 asset growth ($193M\u2192$2.7B)",
+        "source_kind": "docx"
+      },
+      "id": "7a3d552f-fe94-4264-b89a-902f04e15b71",
+      "involved_subcap_ids": [
+        "P4C1.8.3",
+        "P4C1.3.5",
+        "P4C1.1.3",
+        "P4C1.1.2",
+        "P4C2.6.1",
+        "P4C2.7.3",
+        "P4C2.8.1",
+        "P4C2.7.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$193,000,000",
+          "delta": null,
+          "kpi_label": "Powering asset growth",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$2,700,000,000",
+          "delta": null,
+          "kpi_label": "asset growth M",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "30-year Jack Henry Symitar partnership powering 14\u00d7 asset growth ($193M\u2192$2.7B) [E-023:F1]; private cloud transition; 4-unit tech department reorg with staff growth 11\u219225 [E-021:F2].",
+      "title": "2. Tech architecture is mature",
+      "verbatim_quote": "2. Tech architecture is mature | 30-year Jack Henry Symitar partnership powering 14\u00d7 asset growth ($193M\u2192$2.7B) [E-023:F1]; private cloud transition; 4-unit tech department reorg with staff growth 11\u219225 [E-021:F2]. | Stable platform spine de-risks transformation programs and signals capacity for additive modernization rather than replacement. | M3.0\u20133.5 | MEDIUM \u2014 opportunity area"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-047",
+          "E-048",
+          "E-049"
+        ],
+        "representative_quote": "Virtual Financial Center served 13,600+ members in year 1 across 5 modes; SAM 24/7 chatbot",
+        "source_kind": "docx"
+      },
+      "id": "620e642d-c8dc-45c5-b8bc-fc8ac97dda3f",
+      "involved_subcap_ids": [
+        "P2C2.7.3",
+        "P2C2.2.2",
+        "P2C2.1.3",
+        "P2C2.3.1",
+        "P2C4.2.6",
+        "P2C4.3.3",
+        "P2C4.7.3",
+        "P2C4.2.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "Virtual Financial Center served 13,600+ members in year 1 across 5 modes [E-047:F1, F2]; SAM 24/7 chatbot [E-048]; 25 financial centers averaging 4.0/5 across 535 reviews [E-049:F1].",
+      "title": "3. Omnichannel servicing is strong",
+      "verbatim_quote": "3. Omnichannel servicing is strong | Virtual Financial Center served 13,600+ members in year 1 across 5 modes [E-047:F1, F2]; SAM 24/7 chatbot [E-048]; 25 financial centers averaging 4.0/5 across 535 reviews [E-049:F1]. | Multi-modal service delivery is a competitive differentiator vs. peer set; member retention via virtual channel is documented strategy. | M3.0\u20133.5 | MEDIUM \u2014 opportunity area"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-037",
+          "E-038"
+        ],
+        "representative_quote": "Culture validation has 3-year streak with caveat",
+        "source_kind": "docx"
+      },
+      "id": "3452cb93-e3ca-4662-b7bc-0c2c74434e87",
+      "involved_subcap_ids": [
+        "P1C1.2.1",
+        "P1C4.8.1",
+        "P3C2.7.2",
+        "P1C2.4.3",
+        "P1C4.8.3",
+        "P4C2.5.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "-5%",
+          "delta": null,
+          "kpi_label": "Glassdoor",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "12 months",
+          "delta": null,
+          "kpi_label": "Glassdoor trend over",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "18 months",
+          "delta": null,
+          "kpi_label": "Next",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 66,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "American Banker Best CUs to Work For #27 (2024) \u2192 #38 (2025) \u2014 3 consecutive years [E-037:F1, E-038:F1]. Glassdoor -5% trend over 12 months.",
+      "title": "4. Culture validation has 3-year streak with caveat",
+      "verbatim_quote": "4. Culture validation has 3-year streak with caveat | American Banker Best CUs to Work For #27 (2024) \u2192 #38 (2025) \u2014 3 consecutive years [E-037:F1, E-038:F1]. Glassdoor -5% trend over 12 months. | Modest erosion concurrent with Mountain Valley merger period; cultural integration risk is the next 12-18 months' watch item. | M3.0 | LOW \u2014 adjacent"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-037"
+        ],
+        "representative_quote": "Three-pillars strategic framework published; SVP Digital Innovation (Kevin Porter, Sept 2025)",
+        "source_kind": "docx"
+      },
+      "id": "a8205358-327a-42d0-b542-4cfe64cf442e",
+      "involved_subcap_ids": [
+        "P1C3.5.2",
+        "P1C3.4.5",
+        "P1C3.3.2",
+        "P1C3.9.2",
+        "P1C1.7.1",
+        "P1C1.8.1",
+        "P1C1.7.3",
+        "P1C1.7.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "Three-pillars strategic framework published [E-037:F3]; SVP Digital Innovation (Kevin Porter, Sept 2025); AVP Salesforce Innovation (Jacquelyn Orvis, Feb 2025) \u2014 but no formal Chief Data Officer, no published enterprise data governance, no formal innovation lab.",
+      "title": "5. Strategic governance has form but lacks formal CDO/Innovation Lab",
+      "verbatim_quote": "5. Strategic governance has form but lacks formal CDO/Innovation Lab | Three-pillars strategic framework published [E-037:F3]; SVP Digital Innovation (Kevin Porter, Sept 2025); AVP Salesforce Innovation (Jacquelyn Orvis, Feb 2025) \u2014 but no formal Chief Data Officer, no published enterprise data governance, no formal innovation lab. | Layer 1 should not over-credit narrative-only capabilities. Material gap for transformation acceleration. | M2.5\u20133.0 | HIGH \u2014 opportunity area"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-036"
+        ],
+        "representative_quote": "Salesforce CRM + Marketing Cloud + Marketo + LiveRamp + Rapleaf detected via Clay tech-stack fingerprinting.",
+        "source_kind": "docx"
+      },
+      "id": "9db94971-7c6f-4c6f-b7ff-11c646e92adc",
+      "involved_subcap_ids": [
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C2.4.13",
+        "P4C1.1.7",
+        "P4C2.4.15"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Salesforce CRM + Marketing Cloud + Marketo + LiveRamp + Rapleaf detected via Clay tech-stack fingerprinting [E-036:F1, F3]. Four URF-02 red flags (vestigial-detection risk).",
+      "title": "6. Personalization stack is sophisticated but utilization is unknown",
+      "verbatim_quote": "6. Personalization stack is sophisticated but utilization is unknown | Salesforce CRM + Marketing Cloud + Marketo + LiveRamp + Rapleaf detected via Clay tech-stack fingerprinting [E-036:F1, F3]. Four URF-02 red flags (vestigial-detection risk). | Material over-estimation risk if utilization not validated. Active utilization could lift ceiling to M3.5\u20134.0; vestigial would cap at M2.0. | M2.0\u20133.0 | HIGH \u2014 opportunity area"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Q3 2025 NW ratio 9.74% versus credit union industry average 14.53% per BestCashCow",
+        "source_kind": "docx"
+      },
+      "id": "880fe17b-7394-4df8-b727-b5e22b1a55a8",
+      "involved_subcap_ids": [
+        "P1C1.1.1",
+        "P3C1.1.4",
+        "P3C2.8.4",
+        "P2C4.3.2",
+        "P2C2.4.2",
+        "P2C2.4.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "9.74%",
+          "delta": null,
+          "kpi_label": "Q3 NW ratio",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "14.53%",
+          "delta": null,
+          "kpi_label": "Union industry average",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 50,
+        "P3": 33
+      },
+      "source_path": "Q3 2025 NW ratio 9.74% versus credit union industry average 14.53% per BestCashCow [Financial Baseline].",
+      "title": "7. Net worth ratio sits below peer benchmark",
+      "verbatim_quote": "7. Net worth ratio sits below peer benchmark | Q3 2025 NW ratio 9.74% versus credit union industry average 14.53% per BestCashCow [Financial Baseline]. | Adequate but lean capital cushion. Investment capacity for digital transformation may be more constrained than peer set assumptions suggest. | Capital strategy flag | MEDIUM \u2014 opportunity area"
+    }
+  ]
+}

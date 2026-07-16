@@ -1,0 +1,21 @@
+{
+  "active_run_id": "b5debc71-17bb-49a6-8d27-a42624e1776e",
+  "items": [
+    {
+      "assessment_date": "2026-03-10",
+      "assessment_date_source": "run_manifest",
+      "ccg_catalog_version": "v5.5",
+      "completed_at": "2026-07-02T23:11:52.903714Z",
+      "created_at": "2026-07-02T23:11:52.903714Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "b5debc71-17bb-49a6-8d27-a42624e1776e",
+      "overall_score": 2.79,
+      "request_id": "DMA-ASM-IQCU-20260310-0001",
+      "started_at": "2026-07-02T23:11:52.903714Z",
+      "status": "ACTIVE",
+      "subcap_count": 707,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

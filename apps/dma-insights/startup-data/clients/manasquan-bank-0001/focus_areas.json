@@ -1,0 +1,253 @@
+{
+  "entity_display_id": "manasquan-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "5-person compliance team with NO regtech/GRC platform detected.",
+        "source_kind": "docx"
+      },
+      "id": "5e314f50-86c6-4a7c-882b-a71cf0c3ba0c",
+      "involved_subcap_ids": [
+        "P4C2.4.4",
+        "P4C2.4.4",
+        "P4C2.7.4",
+        "P4C2.7.2",
+        "P4C1.5.4",
+        "P4C1.1.3",
+        "P4C1.3.5",
+        "P4C1.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "5-person compliance team with NO regtech/GRC platform\u2026",
+      "verbatim_quote": "4 | 5-person compliance team with NO regtech/GRC platform detected. | FSC compliance workflows + regtech partner opportunity."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "CTO data strategy is ASPIRATIONAL not implemented.",
+        "source_kind": "docx"
+      },
+      "id": "baa9e4ea-291e-49e3-b9f9-23167dff9d8c",
+      "involved_subcap_ids": [
+        "P4C2.4.4",
+        "P4C2.4.4",
+        "P4C2.7.4",
+        "P4C2.7.2",
+        "P4C1.5.4",
+        "P4C1.1.3",
+        "P4C1.3.5",
+        "P4C1.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "CTO data strategy is Aspirational not implemented",
+      "verbatim_quote": "2 | CTO data strategy is ASPIRATIONAL not implemented. Zero data team, zero BI platform. | Data Cloud = the implementation vehicle for CTO\u2019s vision."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Cybersecurity unusually strong (3-person InfoSec, board Skoudis, InfraGard, clean record).",
+        "source_kind": "docx"
+      },
+      "id": "2d3ed3e2-7812-42fe-a603-f0b7a9fcac6a",
+      "involved_subcap_ids": [
+        "P4C4.1.1",
+        "P2C3.3.4",
+        "P1C1.1.5",
+        "P4C2.1.3",
+        "P4C4.1.3",
+        "P4C3.1.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "85%",
+          "delta": null,
+          "kpi_label": "Fiserv Premier",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 19,
+        "P2": 19,
+        "P4": 62
+      },
+      "source_path": "(unknown)",
+      "title": "Cybersecurity unusually strong (3-person InfoSec, board\u2026",
+      "verbatim_quote": "7 | Cybersecurity unusually strong (3-person InfoSec, board Skoudis, InfraGard, clean record). | Don\u2019t lead with security. Shield = add-on, not primary need."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Fiserv Premier (85% confidence) with Communicator Open = native Salesforce integration path.",
+        "source_kind": "docx"
+      },
+      "id": "be2664fe-a11f-453b-b02c-efedf0352fec",
+      "involved_subcap_ids": [
+        "P2C2.9.1",
+        "P4C3.3.1",
+        "P2C1.4.6",
+        "P2C2.9.4",
+        "P2C4.1.3",
+        "P4C3.3.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "85%",
+          "delta": null,
+          "kpi_label": "Fiserv Premier",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 67,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Fiserv Premier (85% confidence) with Communicator Open\u2026",
+      "verbatim_quote": "5 | Fiserv Premier (85% confidence) with Communicator Open = native Salesforce integration path. | Integration strategy is clear: 12\u201316 week FSC deployment via Communicator Open."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Loan origination is manual/semi-automated. Dovenmuehle = servicing only.",
+        "source_kind": "docx"
+      },
+      "id": "eed68a73-cedd-4926-87bd-98583043af9d",
+      "involved_subcap_ids": [
+        "P3C1.3.6",
+        "P4C2.1.3",
+        "P4C3.1.3",
+        "P4C4.1.3",
+        "P1C5.4.3",
+        "P1C5.3.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "85%",
+          "delta": null,
+          "kpi_label": "Fiserv Premier",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P3": 17,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Loan origination is manual/semi",
+      "verbatim_quote": "3 | Loan origination is manual/semi-automated. Dovenmuehle = servicing only. | nCino addresses origination gap. Complementary, not displacement."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "SFMC displacement = low risk, straightforward.",
+        "source_kind": "docx"
+      },
+      "id": "b9720b4d-0afa-4cfd-8fb7-0b07bcba5488",
+      "involved_subcap_ids": [
+        "P3C2.5.1",
+        "P2C3.5.1",
+        "P3C1.5.4",
+        "P4C1.3.1",
+        "P3C4.2.6",
+        "P4C3.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "85%",
+          "delta": null,
+          "kpi_label": "Fiserv Premier",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 17,
+        "P3": 48,
+        "P4": 35
+      },
+      "source_path": "(unknown)",
+      "title": "Marketo lightly utilized",
+      "verbatim_quote": "6 | Marketo lightly utilized. No case study, no JD mentions. Enterprise-grade but underused. | SFMC displacement = low risk, straightforward."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "NO CRM platform exists. Customer relationships managed via branch staff + Fiserv core.",
+        "source_kind": "docx"
+      },
+      "id": "24469fcb-3b30-4844-aefb-a81eeabff42d",
+      "involved_subcap_ids": [
+        "P4C2.4.4",
+        "P4C2.4.4",
+        "P4C2.7.4",
+        "P4C2.7.2",
+        "P4C1.5.4",
+        "P4C1.1.3",
+        "P4C1.3.5",
+        "P4C1.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "NO CRM platform exists",
+      "verbatim_quote": "1 | NO CRM platform exists. Customer relationships managed via branch staff + Fiserv core. | FSC = validated greenfield. Net-new, not displacement."
+    }
+  ]
+}

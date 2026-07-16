@@ -1,0 +1,259 @@
+{
+  "entity_display_id": "corporate-america-credit-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Multi-system workflow automation": "Manual hand-offs across 5 systems \u2192 Automated orchestration for top 10 cross-system workflows",
+        "P1C1 score": "1.18 \u2192 2.0+"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Quick Wins",
+      "metric": "P1C1 score: 1.18 \u2192 2.0+",
+      "name": "Quick Wins",
+      "phase": 1,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+0.82",
+          "metric": "P1C1 score: 1.18 \u2192 2.0+",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score: 1.18 \u2192 2.0+",
+            "peer": null,
+            "time": "0\u20136 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Digital Strategy & Vision Articulation Workshop"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.88",
+          "metric": "Multi-system workflow automation: Manual hand-offs across 5 systems \u2192 Automated orchestration for top 10 cross-system workflows",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Multi-system workflow automation: Manual hand-offs across 5 systems \u2192 Automated orchestration for top 10 cross-system workflows",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-12",
+          "title": "MuleSoft Anypoint \u2014 Cross-Vendor Orchestration Above NXTsoft OmniConnect"
+        }
+      ],
+      "target": "M2 \u2192 M2 in P1C1"
+    },
+    {
+      "customer_impact": {
+        "Engagement with non-participating CUs": "440 CUs with no structured outreach \u2192 Automated multi-touch journey program",
+        "Member-CU onboarding cycle time": "Manual email/phone process \u2192 Digital workflow with compliance checkpoints",
+        "P3C1 subcap scores": "2.54 \u2192 ~3.0 (approaching peer parity)",
+        "Portal personalization": "Static SSO portal, same for all 533 CUs \u2192 Tier-based personalized portal per member-CU PCC level"
+      },
+      "dependencies": [
+        "REC-01"
+      ],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Member-CU onboarding cycle time: Manual email/phone process \u2192 Digital workflow with compliance checkpoints",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud (FSC)",
+          "maturity_lift": "+1.88",
+          "metric": "Member-CU onboarding cycle time: Manual email/phone process \u2192 Digital workflow with compliance checkpoints",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Member-CU onboarding cycle time: Manual email/phone process \u2192 Digital workflow with compliance checkpoints",
+            "peer": null,
+            "time": "6-9 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Financial Services Cloud \u2014 Upgrade Sales Cloud to FSC for Member-CU Lifecycle Management"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.88",
+          "metric": "Engagement with non-participating CUs: 440 CUs with no structured outreach \u2192 Automated multi-touch journey program",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Engagement with non-participating CUs: 440 CUs with no structured outreach \u2192 Automated multi-touch journey program",
+            "peer": null,
+            "time": "3-6 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Marketing Cloud \u2014 B2B Member Acquisition Automation for 440 Non-Participating CUs"
+        },
+        {
+          "feature": "Salesforce Service Cloud",
+          "maturity_lift": "+0.46",
+          "metric": "P3C1 subcap scores: 2.54 \u2192 ~3.0 (approaching peer parity)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 subcap scores: 2.54 \u2192 ~3.0 (approaching peer parity)",
+            "peer": null,
+            "time": "4-6 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Service Cloud \u2014 Activate Omnichannel Member-CU Service Desk on Existing Salesforce Org"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": null,
+          "metric": "Portal personalization: Static SSO portal, same for all 533 CUs \u2192 Tier-based personalized portal per member-CU PCC level",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Portal personalization: Static SSO portal, same for all 533 CUs \u2192 Tier-based personalized portal per member-CU PCC level",
+            "peer": null,
+            "time": "4-8 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Experience Cloud \u2014 Modernize sso.corpam.org Member Portal"
+        },
+        {
+          "feature": "GRC Platform",
+          "maturity_lift": null,
+          "metric": "Audit finding closure tracking: Manual (4-firm, email-based) \u2192 100% of findings tracked in GRC with owner + deadline",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Audit finding closure tracking: Manual (4-firm, email-based) \u2192 100% of findings tracked in GRC with owner + deadline",
+            "peer": null,
+            "time": "4-6 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-10",
+          "title": "GRC Platform \u2014 Automate Audit Finding Closure and Governance Workflow"
+        }
+      ],
+      "target": "M3 \u2192 M3 in P3C1"
+    },
+    {
+      "customer_impact": {
+        "Member-CU analytics self-service": "None \u2014 analytics CACU-internal only \u2192 Member-CU-accessible dashboards",
+        "Service ticket auto-triage rate": "0% (all manual) \u2192 60-70% auto-classified",
+        "Unified member-CU profile completeness": "Fragmented: 3 systems, no unified ID \u2192 Single member-CU profile with account + payment + service data"
+      },
+      "dependencies": [
+        "REC-02",
+        "REC-04"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Member-CU analytics self-service: None \u2014 analytics CACU-internal only \u2192 Member-CU-accessible dashboards",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "CRM Analytics (Tableau)",
+          "maturity_lift": "+0.26",
+          "metric": "Member-CU analytics self-service: None \u2014 analytics CACU-internal only \u2192 Member-CU-accessible dashboards",
+          "outcomes": {
+            "effort": "S",
+            "metric": "Member-CU analytics self-service: None \u2014 analytics CACU-internal only \u2192 Member-CU-accessible dashboards",
+            "peer": null,
+            "time": "4-6 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-05",
+          "title": "CRM Analytics (Tableau) \u2014 Member-CU Self-Service Analytics Layer Above NXTsoft OmniLytics"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": null,
+          "metric": "Service ticket auto-triage rate: 0% (all manual) \u2192 60-70% auto-classified",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Service ticket auto-triage rate: 0% (all manual) \u2192 60-70% auto-classified",
+            "peer": null,
+            "time": "6-9 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Agentforce \u2014 Extend Identifee IDA AI Model Into Sales and Service Domains"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.88",
+          "metric": "Unified member-CU profile completeness: Fragmented: 3 systems, no unified ID \u2192 Single member-CU profile with account + payment + service data",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Unified member-CU profile completeness: Fragmented: 3 systems, no unified ID \u2192 Single member-CU profile with account + payment + service data",
+            "peer": null,
+            "time": "6-9 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-11",
+          "title": "Data Cloud \u2014 Unified Member-CU CDP Above NXTsoft + Aptys + VSoft"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Migration track coordination": "Email-based, siloed per track \u2192 Unified project channels with Salesforce notifications",
+        "P4C4 score maintenance": "3.60 (industry-leading) \u2192 Maintain \u22653.60 post-FSC/Service Cloud expansion"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Migration track coordination: Email-based, siloed per track \u2192 Unified project channels with Salesforce notifications",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Slack",
+          "maturity_lift": null,
+          "metric": "Migration track coordination: Email-based, siloed per track \u2192 Unified project channels with Salesforce notifications",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Migration track coordination: Email-based, siloed per track \u2192 Unified project channels with Salesforce notifications",
+            "peer": null,
+            "time": "1-2 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Slack \u2014 Unified Internal Collaboration for 5-Track Migration Coordination"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.88",
+          "metric": "P4C4 score maintenance: 3.60 (industry-leading) \u2192 Maintain \u22653.60 post-FSC/Service Cloud expansion",
+          "outcomes": {
+            "effort": "S",
+            "metric": "P4C4 score maintenance: 3.60 (industry-leading) \u2192 Maintain \u22653.60 post-FSC/Service Cloud expansion",
+            "peer": null,
+            "time": "2-3 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-09",
+          "title": "Salesforce Shield \u2014 \u00a7748 ISP Encryption Overlay on Expanded Salesforce Org"
+        }
+      ],
+      "target": "M4 \u2192 M5 in P4C4"
+    }
+  ],
+  "run_request_id": "DMA-RES-CACU-20260428-0001",
+  "total_duration_months": 16
+}

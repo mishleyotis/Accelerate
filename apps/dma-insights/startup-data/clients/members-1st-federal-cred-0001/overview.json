@@ -1,0 +1,1330 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 159,
+        "subcaps": 159,
+        "thin": 114
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 103
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 31
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 59
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "members-1st-federal-cred-0001",
+    "domain": null,
+    "hq": null,
+    "id": "237bf3fe-f843-43c2-a521-03bdae399f52",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Members 1st Federal Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:12.917037Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 9,
+    "current_count": 53,
+    "dated_count": 6,
+    "median_age_months": 11.9,
+    "oldest_published_date": "2020-07-01",
+    "stale_count": 4,
+    "stale_pct": 5.06,
+    "total": 79,
+    "undated_count": 7
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 4,
+      "NEGATIVE": 2,
+      "NEUTRAL": 1,
+      "POSITIVE": 72
+    },
+    "connectors": {
+      "Glassdoor": 3,
+      "Indeed": 5,
+      "LinkedIn": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 6,
+      "NEUTRAL": 60,
+      "POSITIVE": 13
+    },
+    "tiers": {
+      "T1": 39,
+      "T2": 24,
+      "T3": 6,
+      "T5": 2,
+      "T6": 8
+    },
+    "total_facts": 1356,
+    "total_items": 79
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 127000000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 8300000000.0,
+    "branches": 61,
+    "cagr": "12.1%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "1,001-5,000 (Indeed-confirmed); est ~1,300+ FT/PT historic",
+    "financial_highlights": {
+      "fiscal_year_end": "Dec 31",
+      "industry_context_q1_2025": "CU system avg net worth ratio 10.95%; CU system avg ROA 63bps for FY2024 (per NCUA Q4 2024 summary)",
+      "net_income": 127000000.0,
+      "sg06_3yr_trend_check": "PASS — assets, members, net income trends documented across Q1 2024 → Q3 2025",
+      "trajectory": {
+        "branches": 61,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1001,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Pavlakovich promoted to COO Feb 2025 (per E-019"
+          },
+          {
+            "fy": "FY2022",
+            "label": "SimpleNexus rebranded to nCino Mortgage Suite (acquired by…"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Pennsylvania (11 counties: Adams, Berks, Cumberland, Dauphin, Lancaster, Lebanon",
+        "headline": "$8.3B assets · FY2025",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            7000.0,
+            10000.0,
+            5000.0
+          ],
+          "total_assets": [
+            null,
+            null,
+            8.3
+          ]
+        },
+        "unit": "B"
+      },
+      "yoy_asset_growth_q1_2025": "6%"
+    },
+    "footprint": "Pennsylvania (11 counties: Adams, Berks, Cumberland, Dauphin, Lancaster, Lebanon",
+    "footprint_basis": "derived:geography",
+    "geography": "Pennsylvania (11 counties: Adams, Berks, Cumberland, Dauphin, Lancaster, Lebanon",
+    "headcount": 1001,
+    "hq": "5000 Marketplace Way, Mechanicsburg PA 17050 (administrative HQ Enola, PA)",
+    "hq_address": "5000 Marketplace Way, Mechanicsburg PA 17050 (administrative HQ Enola, PA)",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Michael Wilson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Garth Pricer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO (Chief Information Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Christine Pavlakovich",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO (Chief Operating Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Karen Roland",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CMO (Chief Marketing Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Stuart Bretz",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Revenue Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jeff Balestrini",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Consumer Lending Officer (CCLO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Per Members 1st leadership page",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director-at-Large (1 of 5)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Joseph Culos",
+        "recent_hire": true,
+        "tenure": null,
+        "tenure_months": 4,
+        "title": "SVP Retail (joined March 2026)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ryan Riley",
+        "recent_hire": true,
+        "tenure": null,
+        "tenure_months": 5,
+        "title": "SVP Marketing (joined Feb 2026)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Anita McAllister",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 216,
+        "title": "VP Data & Analytics (since 2008)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kelly Hogan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Manager, Cybersecurity Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Greg Lowe",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Data Architect"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sara Firestone",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Community Engagement & PR + ED Foundation"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Angela Wiley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Principal Project Manager (Enterprise PMO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Per ZoomInfo",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Infrastructure Engineering"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Members 1st Federal Credit Union",
+    "license_type": "Federal Credit Union",
+    "members": 615000,
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Members 1st Federal Credit Union is a credit union. It reports $8.3 billion in total assets. It is regulated by NCUA and employs approximately 1,001 people across 61 branches. Its overall digital maturity is assessed at 2.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 10000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "E behaviors via peer-rec rewards platform), and a third 144 Glassdoor reviews; HR responds publicly with structured rebuttals/acknowledgements — engagement maturity signal Positives: culture of WE, faM1ly, benefits, training, leadership CIO",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.7/5",
+          "signal": "PP lender in CU space during pandemic; SBA 7(a) participant Indeed Overall 3.7/5; Culture 3.4; Job Security 3.3; Mgmt 3.0; WorkLifeBalance 3.5; Comp 3.9; CEO approval 57.81%; Recommend friend 124y/64n (66%) Matthew Christen (Principal Proje",
+          "source": "Indeed"
+        },
+        {
+          "signal": "marketing experience and $60M philanthropy track record BBB complaint themes: auto-payment system errors, overdraft fee disputes, credit reporting disputes — typical service-failure individual cases (no systemic pattern) Complaint investiga",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium ($2B-$10B); approaching Large threshold; CEO publicly targeting $10B regulatory milestone",
+    "thought_leadership": [
+      {
+        "author": "Karen Roland",
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-045",
+        "excerpt": "CMO Karen Roland prior career: PSECU AVP Marketing & Communications 10+ years (one of M1FCU's locked peers); SECU NC Associate EVP Marketing/Communications/Outreach Roland recognized as Central Penn Business Journal Woma",
+        "title": "CMO Karen Roland prior career: Psecu AVP Marketing & Communications…",
+        "type": "article",
+        "url": "https://www.members1st.org/newsroom/articles/former-members-1st-federal-credit-union-associate-returns-home-to-take-on-a-new-leadership-role"
+      },
+      {
+        "author": "Michael Wilson",
+        "date": "2025-11-05",
+        "derived_from": "evidence_index",
+        "e_id": "E-004",
+        "excerpt": "Members 1st FCU is a customer AND investor in Zest AI (AI-powered lending/underwriting platform) — invested in oversubscribed round alongside SchoolsFirst, ORNL, Truliant, and Citi Ventures CEO Michael Wilson quoted: ins",
+        "title": "SchoolsFirst, ORNL, Truliant, and Citi Ventures CEO Michael Wilson…",
+        "type": "article",
+        "url": "https://pulse2.com/zest-ai-strategic-investment-raised-from-major-credit-unions-and-citi-in-oversubscribed-round/amp/"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-023",
+        "excerpt": "Matt Christen (Principal PM) and Jeff Bitner (Scrum Master) at M1FCU are volunteer co-facilitators of TCCP Agile Peer Learning Group — external thought leadership Bitner credentials: PSM 1, PSPO 1, SAFe Agilist; 15+ year",
+        "title": "Matt Christen (Principal PM) and Jeff Bitner (Scrum Master) at M1FCU…",
+        "type": "article",
+        "url": "https://www.tccp.org/agile-peer-learning-group/"
+      },
+      {
+        "author": null,
+        "date": "2026-02-26",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "Atrium webinar describes 'automating case management' as one of three Salesforce workstreams — Service Cloud likely tier-1 platform Workstream specifics: case management + incentives + knowledge access + mobile workflows",
+        "title": "Atrium webinar describes",
+        "type": "webinar",
+        "url": "https://atrium.ai/events/members-1st-financial-services-cloud-transformation/"
+      },
+      {
+        "author": "Angela Wiley",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-074",
+        "excerpt": "Christen + Bitner (M1FCU) co-facilitate Tech Council of Central PA Agile Peer Learning Group — formal Agile maturity + community-of-practice involvement Angela Wiley = Principal Project Manager (PMP+MBA) — Enterprise PMO",
+        "title": "Christen + Bitner (M1FCU) co-facilitate Tech Council of Central PA…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/technology-council-of-central-pennsylvania"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "https://www.members1st.org",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.795858+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Members 1st Federal Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peer set (locked in research Phase 0, immutable): PSECU ($8B PA, Corelation KeyStone core since Sept 2018), Citadel FCU ($6.16B PA), American Heritage FCU ($4.8B PA), Service CU NH ($5-6B, military SEG, DoD compliance). Peer scores derived from public signals and asset-size calibration. Peer evidence grade: PSECU B, Service CU NH B; Citadel and American Heritage C (limited public digital signals).",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Members 1st Federal Credit Union",
+    "scqa_md": "Members 1st Federal Credit Union is a $8.3B in assets credit union regulated by NCUA with 1,001 employees. A 12.1% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-005, E-012]. Zennify's assessment places overall digital maturity at 2.8/5. The deepest capability gap is Efficiency Metrics at 1.9/5 against a 2.8 peer median [E-001, E-009].\n\nNext is Champions Network at 2.1/5 against a 3.2 peer median [E-002]. Third is Innovation Labs/Functions at 2.3/5 against a 2.8 peer median [E-004]. Counter-signal: EA Framework & Governance already runs at 3.7/5 against a 2.8 peer median — a strength to build on, not rebuild. Leadership is in motion: Joseph Culos (SVP Retail (joined March 2026)) is newly in seat, and new executives set platform direction in their first quarters.\n\nThe question for Members 1st Federal Credit Union is whether to close Efficiency Metrics first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Members 1st Federal Credit Union should lead with Databricks (69/100 fit) against Board Engagement, then sequence Tableau behind it. Closing Efficiency Metrics to the peer median alone is worth 0.9 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Geographic expansion 8→11 counties + 3 senior C-suite hires in 12 months = growth-phase capacity strain…\".\n\nTiming favors acting inside the new leadership's first two quarters, before platform commitments lock."
+  },
+  "overall_score": 2.81,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/diagnostic_questions_p1_p2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.869420+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/diagnostic_questions_p3_p4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.871531+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/workbook_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.872314+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/peer_gap_analysis.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.873092+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/priority_ranking.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.873664+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/A5_peer_set.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.874235+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set_research.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.874884+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.875120+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/critic_log.csv",
+        "reason": "no fingerprint matched (best confidence 0.17); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.878903+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/distributional_checks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.879282+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/governance_index.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.879648+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.880029+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/scoring_quality_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.880499+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_tier_distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.881122+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/borrowed_sections.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.882043+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/in_scope_outof_scope_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.882677+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.883614+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.883965+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/tech_validation_report.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.884419+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/technographic_scan.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:12.884695+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 35
+    },
+    "stage_ms": {
+      "manifest": 22,
+      "parse": 8073,
+      "persist": 647
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/run_manifest_assessment.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/export_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=50 contradictions=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 438 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/06_recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'size_tier', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_Report_MFCU_20260428.docx count=15",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=24 subcaps=14 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 8 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/diagnostic_questions_p1_p2.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/diagnostic_questions_p3_p4.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/workbook_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/peer_gap_analysis.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/priority_ranking.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/A5_peer_set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set_research.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/critic_log.csv — no fingerprint matched (best confidence 0.17); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/distributional_checks.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/governance_index.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/scoring_quality_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_tier_distribution.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/borrowed_sections.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/in_scope_outof_scope_register.csv — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/tech_validation_report.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/technographic_scan.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 14",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:29/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/run_manifest_assessment.json",
+      "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "used variant issue register: 07_governance/export_issue_register.csv",
+      "governance_audit_logs: reasoning_chain=50 contradictions=0",
+      "caps_applied_log: 438 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 08_appendices/06_recommendations.json",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'size_tier', 'website'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_Report_MFCU_20260428.docx count=15",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=24 subcaps=14 replaced_docx_scqa=True",
+      "tech_stack_from_report_prose: 8 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 01_evidence/diagnostic_questions_p1_p2.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/diagnostic_questions_p3_p4.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/workbook_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/peer_gap_analysis.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/priority_ranking.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/A5_peer_set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set_research.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/critic_log.csv — no fingerprint matched (best confidence 0.17); 200 generic sections mined",
+      "INFO/pattern_gap: 07_governance/distributional_checks.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/governance_index.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 07_governance/scoring_quality_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_tier_distribution.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/borrowed_sections.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/in_scope_outof_scope_register.csv — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/tech_validation_report.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/technographic_scan.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "timeline_events_persisted: 14",
+      "catalogue_unresolved:29/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 12"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 159,
+      "peer_median": 2.95,
+      "pillar_id": "P1",
+      "score": 2.18,
+      "subcaps_scored": 159
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 3.01,
+      "pillar_id": "P2",
+      "score": 3.06,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.93,
+      "pillar_id": "P3",
+      "score": 2.7,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.84,
+      "pillar_id": "P4",
+      "score": 3.45,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-29",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:12.917037Z",
+    "created_at": "2026-07-02T23:10:12.917037Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "1abd716b-ab70-4db3-9baf-94fddc51fad2",
+    "overall_score": 2.81,
+    "request_id": "DMA-ASM-MFCU-20260429-0001",
+    "started_at": "2026-07-02T23:10:12.917037Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit = mature risk org, GRC tool unconfirmed — Three concurrent Risk & Compliance Officer roles (Marketing, Member Experience, Consumer Lending) at $132K-$214K each [E-018, E-036, E-037, E-061]. Pavlakovich's prior VP ERM role formal [E-065]. Required certifications: CRCM, NCCO, CMCP, CRC. RCSA + Issue Management + Risk Metrics + Change Management explicit.",
+      "evidence": [
+        "E-018",
+        "E-036",
+        "E-037",
+        "E-061"
+      ],
+      "magnitude": "$132K",
+      "name": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 2.56,
+      "so_what": "Prioritize Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C2",
+      "theme": "Operations",
+      "title": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit",
+      "what": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit = mature risk org, GRC tool unconfirmed — Three concurrent Risk & Compliance Officer roles (Marketing, Member Experience, Consumer Lending) at $132K-$214K each [E-018, E-036, E-037, E-061]. Pavlakovich's prior VP ERM role formal [E-065]. Required certifications: CRCM, NCCO, CMCP, CRC.",
+      "why": "The linked evidence records: Three concurrent RCO roles open in Enola HQ (April 2026): Member Experience, Marketing, Consumer Lending — federated/embedded RCO model Compensation $132K-$214K — significant compliance staffing investment across business lines"
+    },
+    {
+      "body": "MFA + biometrics + dedicated IdP subdomain + passkeys roadmap = mature cyber posture — MFA stack: SMS + voice + email OTP + TouchID/FaceID biometrics [E-076]. Dedicated sign-in subdomain (signin.members1st.org) suggests separate IdP (likely Salesforce Identity, Okta, or Auth0). Akamai Bot Manager + reCAPTCHA at edge [E-068]. Privacy program comprehensive: GLBA + CCPA + Biometric Privacy + COPPA + Plaid integration + Session Replay disclosure [E-075]",
+      "evidence": [
+        "E-076",
+        "E-068",
+        "E-075",
+        "E-067"
+      ],
+      "magnitude": null,
+      "name": "MFA + biometrics + dedicated IdP subdomain + passkeys",
+      "peer_median": 2.75,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 3.28,
+      "so_what": "Protect MFA + biometrics + dedicated IdP subdomain + passkeys as a proof point: use it to anchor the data and technology story while the true gaps close — Databricks is the platform surface that addresses it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "MFA + biometrics + dedicated IdP subdomain + passkeys",
+      "what": "MFA + biometrics + dedicated IdP subdomain + passkeys roadmap = mature cyber posture — MFA stack: SMS + voice + email OTP + TouchID/FaceID biometrics [E-076]. Dedicated sign-in subdomain (signin.members1st.org) suggests separate IdP (likely Salesforce Identity, Okta, or Auth0). Akamai Bot Manager + reCAPTCHA at edge [E-068].",
+      "why": "The linked evidence records: Dedicated sign-in subdomain: signin.members1st.org — separate identity provider isolated from main site (likely Salesforce Identity / Okta / Auth0 / custom IdP) MFA modalities supported: SMS text message, voice call, email — three-channel OTP delivery"
+    },
+    {
+      "body": "Modern data platform (M1-360) + IBM Cognos legacy = BI consolidation opportunity — M1-360 = Azure Databricks lakehouse + Microsoft Fabric overlay + Power BI [E-069]. McAllister VP D&A team of 11 since 2008 [E-063]. Azure DevOps adopted as 'first instance of true cloud CI/CD' [E-054]. IBM Cognos still in environment [E-068, LeadIQ scan]",
+      "evidence": [
+        "E-069",
+        "E-063",
+        "E-054",
+        "E-068"
+      ],
+      "magnitude": null,
+      "name": "Modern data platform",
+      "peer_median": 2.75,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 3.28,
+      "so_what": "Protect Modern data platform as a proof point: use it to anchor the data and technology story while the true gaps close — Databricks is the platform surface that addresses it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Modern data platform",
+      "what": "Modern data platform (M1-360) + IBM Cognos legacy = BI consolidation opportunity — M1-360 = Azure Databricks lakehouse + Microsoft Fabric overlay + Power BI. [E-069]. McAllister VP D&A team of 11 since 2008. [E-063]. Azure DevOps adopted as 'first instance of true cloud CI/CD' [E-054]. IBM Cognos still in environment [E-068, LeadIQ scan].",
+      "why": "The linked evidence records: M1-360 platform: Azure-hosted data lakehouse consolidating 20+ TB across 15+ disparate sources Architecture: Azure Databricks (lakehouse) + Microsoft Fabric (overlay analytics layer) + Power BI (visualization) + Azure DevOps (CI/CD)"
+    },
+    {
+      "body": "Geographic expansion 8→11 counties + 3 senior C-suite hires in 12 months = growth-phase capacity strain — Branch network expanded into Lehigh, Lycoming, Northampton counties (E-078). Pavlakovich COO (Feb 2025), Culos SVP Retail (Mar 2026), Balestrini CCLO (2025) — three senior moves in 12 months [E-019, E-012, E-079]",
+      "evidence": [
+        "E-078",
+        "E-019",
+        "E-012",
+        "E-079"
+      ],
+      "magnitude": "12 months",
+      "name": "Geographic expansion 8→11 counties + 3 senior C-suite hires",
+      "peer_median": 2.75,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.86,
+      "so_what": "Prioritize Geographic expansion 8→11 counties + 3 senior C-suite hires in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Geographic expansion 8→11 counties + 3 senior C-suite hires",
+      "what": "Geographic expansion 8→11 counties + 3 senior C-suite hires in 12 months = growth-phase capacity strain — Branch network expanded into Lehigh, Lycoming, Northampton counties (E-078). Pavlakovich COO (Feb 2025), Culos SVP Retail (Mar 2026), Balestrini CCLO (2025) — three senior moves in 12 months. [E-019, E-012, E-079].",
+      "why": "The linked evidence records: Geographic footprint expanded from 8 counties (Adams, Berks, Cumberland, Dauphin, Lancaster, Lebanon, Perry, York) to 11 counties (added Lehigh, Lycoming, Northampton) — confirms Wilson's 'significant expansion across Pennsylvania' strategic objective Lehigh +"
+    },
+    {
+      "body": "Three-pillar AI portfolio with no unified governance layer — Zest AI strategic investor Nov 2025 (E-064: AI underwriting + Zest Protect fraud + LuLu Pulse GenAI). Tagetik AI Pathfinder finalist 2025 (E-066: finance/CPM AI). Microsoft Fabric early adopter on M1-360 lakehouse with 89% ML run-time reduction (E-069, E-070). 30.4% lift / 3,634 cards / $27.9M card limit measured outcome. — P4C2 Analytics & AI: HIGH activity, MEDIUM governance maturity.",
+      "evidence": [
+        "E-064",
+        "E-066",
+        "E-069",
+        "E-070"
+      ],
+      "magnitude": "89%",
+      "name": "Three-pillar AI portfolio",
+      "peer_median": 2.75,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 3.28,
+      "so_what": "Protect Three-pillar AI portfolio as a proof point: use it to anchor the data and technology story while the true gaps close — Databricks is the platform surface that addresses it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Three-pillar AI portfolio",
+      "what": "Three-pillar AI portfolio with no unified governance layer — Zest AI strategic investor. Nov 2025 (E-064: AI underwriting + Zest Protect fraud + LuLu Pulse GenAI). Tagetik AI Pathfinder finalist 2025 (E-066: finance/CPM AI). Microsoft Fabric early adopter on M1-360 lakehouse with 89% ML run-time reduction (E-069, E-070).",
+      "why": "The linked evidence records: M1FCU strategic investor in Zest AI Nov 2025 round (with Citi Ventures, Truliant FCU, ORNL FCU, SchoolsFirst FCU) — institutional commitment to AI lending platform Zest AI scope at M1FCU: AI-Automated Underwriting + Fraud Detection (Zest Protect) + LuLu lending"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_UP(+0.5)",
+        "122 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Efficiency Metrics averages 1.9/5 over 167 scored subcaps; ceiling 2.5 reflects thin evidence density (45/167 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-010"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_UP(+0.5)",
+        "cap applied: EVIDENCE_CEILING(T=T5,2.0)",
+        "167 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "AI Ethics & Fairness averages 2.4/5 over 217 scored subcaps; ceiling 3.0 reflects thin evidence density (50/217 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-011"
+      ],
+      "modifiers": [
+        "cap applied: EVIDENCE_CEILING(T=T6,1.5)",
+        "cap applied: SINGLE_SOURCE(3.0)",
+        "137 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Labs/Functions averages 2.3/5 over 192 scored subcaps; ceiling 3.0 reflects thin evidence density (55/192 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: EVIDENCE_CEILING(T=T6,1.5)",
+        "130 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Champions Network averages 2.1/5 over 205 scored subcaps; ceiling 2.8 reflects thin evidence density (75/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.4,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-036"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: EVIDENCE_CEILING(T=T6,1.5)",
+        "108 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Budget Allocation & ROI averages 3.1/5 over 293 scored subcaps; ceiling 3.9 reflects thin evidence density (185/293 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.5,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: SINGLE_SOURCE(3.0)",
+        "170 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Developer Portal & Experience averages 2.8/5 over 291 scored subcaps; ceiling 3.5 reflects thin evidence density (121/291 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-051"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: EVIDENCE_CEILING(T=T6,1.5)",
+        "92 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Journey Friction Scoring averages 3.1/5 over 289 scored subcaps; ceiling 3.9 reflects thin evidence density (197/289 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.5,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-049"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: SINGLE_SOURCE(3.0)",
+        "130 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Streaming Event Processing averages 3.2/5 over 259 scored subcaps; ceiling 3.9 reflects thin evidence density (129/259 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.4,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-064"
+      ],
+      "modifiers": [
+        "cap applied: CROSS_PILLAR(P1C2<2.5,3.0)",
+        "cap applied: CROSS_PILLAR(P1C2<2.5,3.0); DISTRIBUTION_ADJ(-0.5)",
+        "20 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Workflow Design & Orchestration averages 2.7/5 over 146 scored subcaps; ceiling 3.7 reflects thin evidence density (126/146 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-061"
+      ],
+      "modifiers": [
+        "cap applied: CROSS_PILLAR(P1C2<2.5,3.0); DISTRIBUTION_ADJ(-0.5)",
+        "cap applied: DIFFERENTIATION_DOWN(-0.5); CROSS_PILLAR(P1C2<2.5,3.0); DIFFERENTIATION_POST_CROSS_PILLAR(",
+        "55 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Threat Intelligence averages 2.6/5 over 130 scored subcaps; ceiling 3.3 reflects thin evidence density (75/130 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.3,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-075"
+      ],
+      "modifiers": [
+        "cap applied: ISS-003(3.5); CROSS_PILLAR(P1C2<2.5,3.0)",
+        "cap applied: ISS-003(3.5); CROSS_PILLAR(P1C2<2.5,3.0); DISTRIBUTION_ADJ(-0.5)",
+        "5 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Monitoring Program averages 2.7/5 over 142 scored subcaps; ceiling 3.7 reflects thin evidence density (137/142 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.5,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-071"
+      ],
+      "modifiers": [
+        "cap applied: CROSS_PILLAR(P1C2<2.5,3.0)",
+        "cap applied: CROSS_PILLAR(P1C2<2.5,3.0); DISTRIBUTION_ADJ(-0.5)",
+        "75 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Performance Monitoring averages 2.8/5 over 145 scored subcaps; ceiling 3.6 reflects thin evidence density (70/145 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.5,
+      "ceiling": 4.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-071"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: SINGLE_SOURCE(3.0)",
+        "115 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Quality Framework & Dimensions averages 3.3/5 over 200 scored subcaps; ceiling 4.1 reflects thin evidence density (85/200 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.4,
+      "ceiling": 4.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-064"
+      ],
+      "modifiers": [
+        "cap applied: ISS-003(3.5)",
+        "cap applied: ISS-003(3.5); DIFFERENTIATION_DOWN(-0.5)",
+        "85 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Enterprise Reporting Platform averages 3.3/5 over 270 scored subcaps; ceiling 4.1 reflects thin evidence density (185/270 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.4,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: SINGLE_SOURCE(3.0)",
+        "65 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "EA Framework & Governance averages 3.7/5 over 235 scored subcaps; ceiling 4.5 reflects thin evidence density (170/235 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.4,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [
+        "cap applied: DIFFERENTIATION_DOWN(-0.5)",
+        "cap applied: SINGLE_SOURCE(3.0)",
+        "30 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Security Assessment averages 3.6/5 over 150 scored subcaps; ceiling 4.5 reflects thin evidence density (120/150 full-evidence cells); band ±0.4 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Joseph Culos joined as SVP Retail (March 2026) from First Commonwealth Bank where he led 750-person/127-branch division + 2 call centers + L&D (Mar 2026).",
+      "evidence": [
+        "E-012"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Joseph Culos joined 2 call centers + L&D (Mar 2026)",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.86/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Board Engagement — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Joseph Culos joined as SVP Retail (March 2026) from First Commonwealth Bank where he led 750-person/127-branch division + 2 call centers + L&D (Mar 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Joseph Culos joined 2 call centers + L&D"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Joseph Culos joined as SVP Retail (March 2026, E-012) + Balestrini CCLO + Pavlakovich COO Feb 2025 = three major executive moves in 12 months — accelerated leadership build (Mar 2026).",
+      "evidence": [
+        "E-079",
+        "E-012"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Joseph Culos joined Balestrini CCLO + Pavlakovich COO Feb…",
+      "metric": "major executive moves 12 months",
+      "peer_context": "Efficiency Metrics runs 1.86/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Board Engagement — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Joseph Culos joined as SVP Retail (March 2026, E-012) + Balestrini CCLO + Pavlakovich COO Feb 2025 = three major executive moves in 12 months — accelerated leadership build (Mar 2026). Window: 12-month window.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Joseph Culos joined Balestrini CCLO + Pavlakovich COO Feb…"
+      },
+      "window": "12-month window"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Ryan Riley (SVP Marketing) joined Feb 2026 with 20+ yrs higher-ed/nonprofit marketing experience and $60M philanthropy track record",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Ryan Riley (SVP Marketing) joined with 20+ yrs…",
+      "metric": "higher-ed/nonprofit marketing experience $60M",
+      "peer_context": "Efficiency Metrics runs 1.86/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Board Engagement — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Ryan Riley (SVP Marketing) joined Feb 2026 with 20+ yrs higher-ed/nonprofit marketing experience and $60M philanthropy track record. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-02-01",
+        "event": "Ryan Riley (SVP Marketing) joined with 20+ yrs…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "11-member Board with named officers: Colquhoun Chair, Kirssin First VC, Scheid Second VC, Fisher Treasurer, Langletz Secretary, Dandy Asst Secretary; 5 directors at large (Apr 2026).",
+      "evidence": [
+        "E-010"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "11-member Board with named officers: Colquhoun Chair…",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.86/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "11-member Board with named officers: Colquhoun Chair, Kirssin First VC, Scheid Second VC, Fisher Treasurer, Langletz Secretary, Dandy Asst Secretary; 5 directors at large (Apr 2026). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "11-member Board with named officers: Colquhoun Chair…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Efficiency Metrics scores 1.86/5 vs a typical 2.75 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-001",
+        "E-009",
+        "E-012",
+        "E-017"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Efficiency Metrics scores 1.86/5",
+      "metric": "Efficiency Metrics 1.86/5 vs peer 2.75",
+      "peer_context": "Efficiency Metrics runs 1.86/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Board Engagement — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C1",
+      "text": "Efficiency Metrics scores 1.86/5 vs a typical 2.75 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "entity_display_id": "amarillo-national-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P1C1 Digital Strategy & Vision",
+        "source_kind": "docx"
+      },
+      "id": "36c66690-9309-4b58-addb-14b8c6e8472c",
+      "involved_subcap_ids": [
+        "P1C2.4.3",
+        "P1C2.4.3",
+        "P1C2.4.3",
+        "P1C2.4.3",
+        "P1C3.4.2",
+        "P1C3.4.2",
+        "P1C3.4.2",
+        "P1C3.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "P1C1 Digital Strategy & Vision",
+      "verbatim_quote": "P1C1 Digital Strategy & Vision | 3.46 | M3 Standardized | 2.5 | +0.96 | \u00b10.4"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P1C2 Governance & Risk Appetite",
+        "source_kind": "docx"
+      },
+      "id": "7fdbea0b-eb61-44c5-a2bc-9e2317dfd7ea",
+      "involved_subcap_ids": [
+        "P3C2.4.2",
+        "P3C2.4.2",
+        "P3C2.4.2",
+        "P3C2.4.2",
+        "P3C4.1.2",
+        "P3C4.1.2",
+        "P3C4.4.2",
+        "P3C4.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "P1C2 Governance & Risk Appetite",
+      "verbatim_quote": "P1C2 Governance & Risk Appetite | 3.17 | M3 Standardized | 2.5 | +0.67 | \u00b10.37"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P1C3 Innovation Management & Funding",
+        "source_kind": "docx"
+      },
+      "id": "3232c40f-7652-4430-9273-99787edba7e5",
+      "involved_subcap_ids": [
+        "P1C2.4.3",
+        "P1C2.4.3",
+        "P1C2.4.3",
+        "P1C2.4.3",
+        "P1C3.4.2",
+        "P1C3.4.2",
+        "P1C3.4.2",
+        "P1C3.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "P1C3 Innovation Management & Funding",
+      "verbatim_quote": "P1C3 Innovation Management & Funding | 3.47 | M3 Standardized | 2.5 | +0.97 | \u00b10.33"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P1C4 Culture & Change Enablement",
+        "source_kind": "docx"
+      },
+      "id": "e415d74f-a994-46bd-aced-997cd2cec738",
+      "involved_subcap_ids": [
+        "P1C4.1.1",
+        "P1C3.3.3",
+        "P1C4.1.2",
+        "P2C4.5.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "73%",
+          "delta": null,
+          "kpi_label": "Glassdoor",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 75,
+        "P2": 25
+      },
+      "source_path": "(unknown)",
+      "title": "P1C4 Culture & Change Enablement",
+      "verbatim_quote": "P1C4 Culture & Change Enablement | 3.5 | M4 Optimized | 2.5 | +1.0 | \u00b10.39"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P1C5 ESG & Sustainable Finance",
+        "source_kind": "docx"
+      },
+      "id": "51276752-3459-4956-9bca-ec821ee0f3fd",
+      "involved_subcap_ids": [
+        "P4C1.4.3",
+        "P4C1.4.3",
+        "P4C1.4.3",
+        "P4C1.4.3",
+        "P4C2.4.2",
+        "P4C2.4.2",
+        "P4C2.4.2",
+        "P4C2.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "P1C5 ESG & Sustainable Finance",
+      "verbatim_quote": "P1C5 ESG & Sustainable Finance | 2.61 | M3 Standardized | 2.0 | +0.61 | \u00b10.5"
+    }
+  ]
+}

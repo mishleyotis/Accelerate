@@ -1,0 +1,264 @@
+{
+  "entity_display_id": "rockland-trust-company-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-040",
+          "E-042",
+          "E-044",
+          "E-046",
+          "E-049"
+        ],
+        "representative_quote": "Data & Analytics modernization: Snowflake optimization, CRM Analytics, Collibra governance.",
+        "source_kind": "docx"
+      },
+      "id": "d1b16328-43c4-4372-8a57-b302f81bfca5",
+      "involved_subcap_ids": [
+        "P4C2.4.14",
+        "P4C2.8.5",
+        "P4C2.5.8",
+        "P4C2.5.7",
+        "P4C1.5.4",
+        "P4C1.7.2",
+        "P4C1.8.7",
+        "P4C1.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Advanced Analytics Stack Emerging",
+      "verbatim_quote": "F-004 | Advanced Analytics Stack Emerging | Snowflake + Tableau + Power BI + SAS + Alteryx + Splunk + AWS Glue + Azure Synapse [E-040, E-042, E-044, E-046, E-049] | M3\u2013M4 P4C2; integration uncertain | Data & Analytics modernization: Snowflake optimization, CRM Analytics, Collibra governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-055",
+          "E-056"
+        ],
+        "representative_quote": "Feb 2025: Leif O'Leary (ex-CEO Intralinks), Dawn Perry, Aparna Ramesh",
+        "source_kind": "docx"
+      },
+      "id": "c9625845-50cf-46f7-b65d-6bce556158fd",
+      "involved_subcap_ids": [
+        "P1C3.6.1",
+        "P1C1.1.5",
+        "P1C1.7.3",
+        "P1C2.1.6",
+        "P1C2.6.4",
+        "P1C3.8.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Board Fintech Expertise Upgrade",
+      "verbatim_quote": "F-007 | Board Fintech Expertise Upgrade | Feb 2025: Leif O'Leary (ex-CEO Intralinks), Dawn Perry, Aparna Ramesh [E-055, E-056] | P1C1 governance M3+ | Board-level sponsorship. Fintech-literate governance supports innovation investment."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-050",
+          "E-051"
+        ],
+        "representative_quote": "Lee C. Powlus: tech, ops, data security, PM, knowledge mgmt",
+        "source_kind": "docx"
+      },
+      "id": "cd46f731-cf1f-4e54-b8fc-b9587e744324",
+      "involved_subcap_ids": [
+        "P1C1.3.1",
+        "P1C1.4.2",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C3.2.5",
+        "P1C3.3.1",
+        "P1C3.2.5",
+        "P1C3.2.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "CTOO Consolidation = Unified Strategy",
+      "verbatim_quote": "F-003 | CTOO Consolidation = Unified Strategy | Lee C. Powlus: tech, ops, data security, PM, knowledge mgmt [E-050, E-051] | P1C1 ceiling M3+; single transformation decision-maker | Single exec sponsor. Advisory-led deal. Multi-pillar SF+Data+Ops narrative."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-001",
+          "E-005",
+          "E-010",
+          "E-015",
+          "E-020",
+          "E-025"
+        ],
+        "representative_quote": "200+ technologies; SF CRM, MC, SC, nCino via Hubbl T1.",
+        "source_kind": "docx"
+      },
+      "id": "12f31980-fc82-44da-be54-5bf7e41482c0",
+      "involved_subcap_ids": [
+        "P2C2.2.10",
+        "P2C3.4.4",
+        "P1C2.1.7",
+        "P4C4.5.5",
+        "P2C2.4.5",
+        "P4C4.5.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 50,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Deep Salesforce Ecosystem with Configuration Debt",
+      "verbatim_quote": "F-001 | Deep Salesforce Ecosystem with Configuration Debt | 200+ technologies; SF CRM, MC, SC, nCino via Hubbl T1. 3,700+ fields, 161 flows, 52 workflows [E-001, E-005, E-010, E-015, E-020, E-025, E-030, E-035, E-039] | M3\u2013M4 ceiling P4C3; M2\u2013M3 security hygiene | SF Health Check: flow consolidation, field cleanup, security hardening. 60\u201390 day engagement."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-060",
+          "E-062",
+          "E-064",
+          "E-066",
+          "E-069"
+        ],
+        "representative_quote": "YourBanker AI, MANTL, Ada chatbot, biometric mobile, Pay wallets, Zelle.",
+        "source_kind": "docx"
+      },
+      "id": "fea2594c-b3df-45b4-8cfc-60a519952d50",
+      "involved_subcap_ids": [
+        "P2C1.4.3",
+        "P2C1.4.6",
+        "P2C1.2.8",
+        "P2C1.2.8",
+        "P2C4.6.4",
+        "P2C4.8.4",
+        "P2C4.8.4",
+        "P2C4.8.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Digital Channels with Maturity Gaps",
+      "verbatim_quote": "F-005 | Digital Channels with Maturity Gaps | YourBanker AI, MANTL, Ada chatbot, biometric mobile, Pay wallets, Zelle. No omnichannel evidence [E-060, E-062, E-064, E-066, E-069] | M3 digital delivery P2C2\u2013C3; M2 orchestration | Customer 360: unify on Service Cloud, MC journey orchestration, omnichannel routing."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-053",
+          "E-054"
+        ],
+        "representative_quote": "Acquisition July 2025 - 151 branches, $24.9B. Systems integration in progress",
+        "source_kind": "docx"
+      },
+      "id": "3323ce6a-941f-4a93-b481-fe33e334acbd",
+      "involved_subcap_ids": [
+        "P4C3.3.1",
+        "P2C1.4.6",
+        "P2C3.3.4",
+        "P2C4.1.3",
+        "P2C2.9.4",
+        "P1C1.8.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$24,900,000,000",
+          "delta": null,
+          "kpi_label": "Acquisition July branches",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "151",
+          "delta": null,
+          "kpi_label": "Branches",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 66,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Enterprise Bank Integration Window",
+      "verbatim_quote": "F-002 | Enterprise Bank Integration Window | Acquisition July 2025 - 151 branches, $24.9B. Systems integration in progress [E-053, E-054] | M2\u2013M3 ceiling P3C1; 12\u201318mo decision window | Post-merger integration: CRM unification, nCino expansion, data migration. Multi-workstream."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Executive urgency for cost optimization P3",
+        "source_kind": "docx"
+      },
+      "id": "9ab5a26a-2bfb-4972-b85f-fd8ed8ab7079",
+      "involved_subcap_ids": [
+        "P2C2.7.3",
+        "P1C1.6.5",
+        "P3C1.5.4",
+        "P4C2.4.10",
+        "P4C2.2.2",
+        "P2C3.5.7"
+      ],
+      "kpis": [],
+      "page_number": 3,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "NIM Compression Drives Efficiency",
+      "verbatim_quote": "F-006 | NIM Compression Drives Efficiency | Executive urgency for cost optimization P3 | Operational efficiency: SF automation, RPA integration, process mining, self-service expansion."
+    }
+  ]
+}

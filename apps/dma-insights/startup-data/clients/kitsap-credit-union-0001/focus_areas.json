@@ -1,0 +1,277 @@
+{
+  "entity_display_id": "kitsap-credit-union-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078"
+        ],
+        "representative_quote": "2026 priorities = centralized lending + automation + CRE/business growth",
+        "source_kind": "docx"
+      },
+      "id": "a35c1d4c-4d2a-4648-b299-0fb64a155878",
+      "involved_subcap_ids": [
+        "P3C1.2.3",
+        "P3C1.3.CU1",
+        "P3C1.2.5",
+        "P3C1.2.4",
+        "P3C4.5.1",
+        "P3C4.5.1",
+        "P3C4.2.1",
+        "P3C4.7.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "2026 priorities = centralized lending + automation\u2026",
+      "verbatim_quote": "F-004 | 2026 priorities = centralized lending + automation + CRE/business growth | Execution focus: fraud detection, income verification, refined credit scoring; centralize teams w/ modern tech [E-078] | Explicit modernization roadmap with budget | Sales Cloud (commercial pipeline) + Service Cloud/Agentforce (centralized servicing) + Einstein/Data Cloud (fraud/income)"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-058",
+          "E-069"
+        ],
+        "representative_quote": "First-mover AI/data \u2014 but governed orchestration sits beside, not on, the CRM",
+        "source_kind": "docx"
+      },
+      "id": "5414f849-27bf-47e9-852f-c8df51d3b602",
+      "involved_subcap_ids": [
+        "P4C2.6.6",
+        "P4C2.6.6",
+        "P4C2.6.6",
+        "P4C2.6.6",
+        "P4C3.2.1",
+        "P4C3.1.1",
+        "P4C3.1.1",
+        "P4C3.6.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "60%",
+          "delta": null,
+          "kpi_label": "LLM audit pilot",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "First-mover AI/data",
+      "verbatim_quote": "F-003 | First-mover AI/data \u2014 but governed orchestration sits beside, not on, the CRM | D8TAOPS equity + design partner (RCW 31.12.436, DFI 9/2025), private LLM, audit pilot +60%/-50% [E-058,E-069] | Strong data foundation, not unified to member 360/CRM | Data Cloud + Einstein + Agentforce operationalize AI on a unified 360"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-055",
+          "E-080",
+          "E-044"
+        ],
+        "representative_quote": "Fragmented best-of-breed stack, no unifying member 360",
+        "source_kind": "docx"
+      },
+      "id": "287ed5d8-4f2a-43b7-a1f7-8d1bf010b8cd",
+      "involved_subcap_ids": [
+        "P2C1.5.1",
+        "P2C1.5.1",
+        "P2C1.4.1",
+        "P2C1.5.1",
+        "P2C3.8.3",
+        "P2C3.3.4",
+        "P2C3.8.3",
+        "P2C3.4.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Fragmented best-of-breed stack, no unifying member 360",
+      "verbatim_quote": "F-002 | Fragmented best-of-breed stack, no unifying member 360 | Symitar core + FSC + Terafina + Zest + D8TAOPS + FirstClose + vendor PFM; per-account logins, NBA on roadmap [E-055,E-080,E-044] | No golden record / cross-sell engine | Data Cloud (member golden record) + MuleSoft (integration tier)"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078"
+        ],
+        "representative_quote": "$2.52B assets +8.7% (~1.6x industry 5.4%), $8.6M NI, $40M+ dividends, ~$800M/71K loan production",
+        "source_kind": "docx"
+      },
+      "id": "3d703b62-ff85-424e-aea6-c02ec7be50bb",
+      "involved_subcap_ids": [
+        "P1C2.2.4",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.5",
+        "P1C2.2.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$2,520,000,000",
+          "delta": null,
+          "kpi_label": "Assets",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "8.7%",
+          "delta": null,
+          "kpi_label": "B assets",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "5.4%",
+          "delta": null,
+          "kpi_label": "X industry",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "High-growth, well-capitalized, record year",
+      "verbatim_quote": "F-006 | High-growth, well-capitalized, record year | $2.52B assets +8.7% (~1.6x industry 5.4%), $8.6M NI, $40M+ dividends, ~$800M/71K loan production [E-078] | Capacity + mandate to invest in modernization | Investment appetite; clear economic buyers (CRO Powley, CDXO Crabtree)"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-044"
+        ],
+        "representative_quote": "SEG/field-of-membership marketing largely manual; AI-personalization/NBA on roadmap (Emma Gao)",
+        "source_kind": "docx"
+      },
+      "id": "d6c42bd4-0d95-4244-9d09-3dabe57133f0",
+      "involved_subcap_ids": [
+        "P2C1.5.7",
+        "P2C1.5.4",
+        "P2C1.5.5",
+        "P2C1.5.1",
+        "P2C1.5.2",
+        "P2C1.5.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Marketing automation + NBA white space",
+      "verbatim_quote": "F-005 | Marketing automation + NBA white space | SEG/field-of-membership marketing largely manual; AI-personalization/NBA on roadmap (Emma Gao) [E-044] | No journey orchestration / offers engine | Marketing Cloud + Einstein next-best-action"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-039"
+        ],
+        "representative_quote": "Dedicated Salesforce Admin + Developer; 'single pane of glass' front-line goal; FSC integrations",
+        "source_kind": "docx"
+      },
+      "id": "48767370-e364-44fa-bb35-6e58230d0f70",
+      "involved_subcap_ids": [
+        "P4C3.4.1",
+        "P4C3.4.8",
+        "P4C3.4.5",
+        "P4C3.4.4",
+        "P4C3.4.12",
+        "P4C3.4.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Salesforce FSC deployed",
+      "verbatim_quote": "F-001 | Salesforce FSC deployed & maturing | Dedicated Salesforce Admin + Developer; 'single pane of glass' front-line goal; FSC integrations [E-039,3A] | CRM foundation exists but not yet unifying systems of record | LAND-AND-EXPAND anchor \u2014 Service/Sales Cloud + Agentforce expansion, not net-new"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-083"
+        ],
+        "representative_quote": "Indeed 3.4/5, wellbeing 'Low', CEO approval 69.7%, recommend ~49%",
+        "source_kind": "docx"
+      },
+      "id": "21802c2f-9c41-49b7-b23b-6fa1ff413cd6",
+      "involved_subcap_ids": [
+        "P3C1.2.3",
+        "P3C1.3.CU1",
+        "P3C1.2.5",
+        "P3C1.2.4",
+        "P3C4.5.1",
+        "P3C4.5.1",
+        "P3C4.2.1",
+        "P3C4.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "69.7%",
+          "delta": null,
+          "kpi_label": "Low' CEO approval",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "49%",
+          "delta": null,
+          "kpi_label": "Recommend",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Soft employee wellbeing = adoption risk",
+      "verbatim_quote": "F-007 | Soft employee wellbeing = adoption risk | Indeed 3.4/5, wellbeing 'Low', CEO approval 69.7%, recommend ~49% [E-083] | Change-adoption risk for enterprise rollouts | Zennify enablement / change-management / adoption services"
+    }
+  ]
+}

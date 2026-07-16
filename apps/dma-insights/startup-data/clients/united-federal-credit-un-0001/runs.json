@@ -1,0 +1,21 @@
+{
+  "active_run_id": "6d9a4ae5-8ed1-4a66-b930-eee810fd0e3e",
+  "items": [
+    {
+      "assessment_date": "2026-06-04",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v5.5",
+      "completed_at": "2026-07-02T23:10:46.451796Z",
+      "created_at": "2026-07-02T23:10:46.451796Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "6d9a4ae5-8ed1-4a66-b930-eee810fd0e3e",
+      "overall_score": 2.5,
+      "request_id": "DMA-RES-UFCU-20260604-0001",
+      "started_at": "2026-07-02T23:10:46.451796Z",
+      "status": "ACTIVE",
+      "subcap_count": 707,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

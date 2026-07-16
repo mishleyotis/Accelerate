@@ -1,0 +1,180 @@
+{
+  "entity_display_id": "amarillo-national-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1",
+        "P1C2.4.3",
+        "P1C2.5.2",
+        "P1C2.5.5",
+        "P1C2.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P4C1",
+      "id": "10e6a00e-fc13-46aa-8286-a506432ad1fd",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "STR-P3C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-031",
+        "E-011",
+        "E-077"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Close the Data Management & Governance gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-011].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Management & Governance trails peers by 0.1",
+      "what_text": "Reference Data Management is one of Amarillo National Bank's least developed data and technology capabilities, scoring 1.8 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Amarillo National Bank's ability to deliver a stronger data and technology foundation [E-031].",
+      "why_text": "The assessment found: “**Tier 8 Peer benchmarking for P3**: (1) **First Financial Bankshares (FFIN, Abilene TX, $14.78B)** — NIM 3.67% (vs ANB 4.13% stronger), uses Gupy/Friedman/Zingfit/Drupal (different tech stack)” [E-077]. Data Management & Governance trails the peers by 0.1 points — a competitive maturity gap that compounds across the pillars it feeds.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C1.3.2",
+        "P2C1.2.7",
+        "P2C1.2.CU1",
+        "P2C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "STR-P2C1",
+      "id": "64276d35-350a-469c-b6c3-322c1b7ebd8f",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-060",
+        "E-064",
+        "E-054"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Extend Digital Channels into adjacent categories: a proven 3.0/5 operating pattern is the cheapest opportunity for lifting the weaker pillars around it [E-054].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Digital Channels: strength to extend",
+      "what_text": "Educational Content is one of Amarillo National Bank's developing customer experience capabilities, scoring 2.4 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Amarillo National Bank's ability to deliver a stronger, more personalised customer experience [E-064].",
+      "why_text": "The assessment found: “**Personalization & self-service features confirmed**: **NEW Spend Insights** (via MX MoneyDesktop — see what/when/where purchases happen), **NEW Card on File**” [E-060]. At 3.0/5 this is one of the institution's strongest categories relative to its cohort — a credibility anchor, not a deficit.",
+      "pillar": "P2",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P3C1.5.3",
+        "P3C2.1.4",
+        "P3C2.1.1",
+        "P3C2.2.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "STR-P3C2",
+      "id": "a7e5c24a-cb49-4fb1-9d8b-f9796ea0a96b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-078",
+        "E-077"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Adopt Operational Workflow & Risk as the reference story in executive conversations — it is the institution's demonstrated 3.2/5 proof point [E-077].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Operational Workflow & Risk: strength to extend",
+      "what_text": "Card Fraud Management is one of Amarillo National Bank's developing operations capabilities, scoring 2.3 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Amarillo National Bank's ability to deliver more efficient, dependable operations [E-078].",
+      "why_text": "The assessment found: “** Operational Risk & Fraud — RICH REINFORCEMENT**. Direct Wm. Ware (President) quote: **'Our partnership with Point Predictive reduces lending risk while improving our customers experience. Our goal” [E-071]. At 2.3 out of 5, Card Fraud Management sits 0.7 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 3.24 | vs Median: +0.84 | Trend: ↑",
+        "heading": "6.1. Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 3.21 | vs Median: +0.83 | Trend: →",
+        "heading": "6.2. Pillar 2: Customer Experience & Engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 3.39 | vs Median: +0.64 | Trend: ↑",
+        "heading": "6.3. Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 3.10 | vs Median: +0.72 | Trend: →",
+        "heading": "6.4. Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each recommendation includes institution-specific root cause analysis and expected score outcomes.\nRECOMMENDATION 1: Data Foundation Remediation — MDM + CDP + Governance\nAddresses Gap(s): GAP-01 | Score Impact: 2.55 → 2.95 (+0.40)"
+  },
+  "run_request_id": "DMA-ASM-ANB-20260420-0001"
+}

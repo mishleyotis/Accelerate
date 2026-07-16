@@ -1,0 +1,424 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "east-west-bank-0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: ACCELERATING | 4-Year Asset CAGR: ~13.2%"
+    ],
+    "metrics": {
+      "net_income": 1300000000.0,
+      "roa_2025": 1.7,
+      "roe_2025": 16.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US (CA",
+      "NY",
+      "MA",
+      "TX",
+      "WA",
+      "GA",
+      "NV) + Asia (HK",
+      "CN"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dominic Ng",
+        "recent_hire": false,
+        "tenure_months": 420,
+        "title": "Chairman & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Irene Oh",
+        "recent_hire": false,
+        "tenure_months": 36,
+        "title": "EVP & CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Rakesh Nambiar",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO (CXO-level)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Parker Shi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Matt Fearin",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "Global CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Douglas Krause",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Vice Chairman & Chief Corporate Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Basak Emirlioglu",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "MD, Chief Control Officer"
+      }
+    ],
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "East West Bank is a regional bank. It reports $80.4 billion in total assets and has operated since 1973. It is regulated by Federal Reserve Board (FRS) and employs approximately 3,861 people across 98 branches. Its overall digital maturity is assessed at 2.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Federal Reserve Board (FRS)",
+    "size_tier": "Mega",
+    "thought_leadership": [
+      {
+        "author": "Dominic Ng",
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-014",
+        "excerpt": "CEO Dominic Ng transformed bank from $600M savings & loan to $76B+ global commercial bank \u2014 long-tenured strategic visionary Ng served as Chair of 2023 APEC Business Advisory Council \u2014 global strategic perspective",
+        "title": "CEO Dominic Ng transformed bank",
+        "type": "article",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001069157/000117494725000556/ea0237505-def14a_eastwest.htm"
+      },
+      {
+        "author": null,
+        "date": "2025-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Worldpay partnership provides POS systems, smart terminals, omnichannel/eCommerce solutions, loyalty programs Russ Ellsworth (Head of Global Treasury & Payments) quoted as partnership sponsor \u2014 named innovation leader",
+        "title": "Worldpay partnership provides POS systems, smart terminals\u2026",
+        "type": "article",
+        "url": "https://fintech.global/2025/10/09/worldpay-teams-up-with-east-west-bank-to-enhance-commerce/"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-071",
+        "excerpt": "LinkedIn post: '2025 was a record-setting year...record performance across earnings, profitability and balance-sheet growth' \u2014 brand messaging tied to performance metrics LinkedIn post: CEO LA Times feature 'disciplined ",
+        "title": "CEO thought leadership active on",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/east-west-bank"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "No public evidence of dedicated innovation lab, Center of Excellence, or formal innovation function. Proxy searches: website, press releases, job postings, LinkedIn \u2014 none found CDO function appears to serve as de facto ",
+        "title": "No public evidence of dedicated innovation lab, Center of Excellence\u2026",
+        "type": "article",
+        "url": "https://www.eastwestbank.com"
+      }
+    ],
+    "ticker": "EWBC"
+  },
+  "issue_register": [
+    {
+      "id": "9061f87b-a433-4c5b-a03a-32ebf62e7bbd",
+      "issue_id": "ISS-GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Range-style references: 1 found"
+    },
+    {
+      "id": "110d047b-9edc-4880-a0a9-d5d1d87025d5",
+      "issue_id": "ISS-GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Citations: total=31 (\u226530: True), exec=3 (\u22655: False)"
+    },
+    {
+      "id": "945fb271-6bed-4f85-a0ae-f39fcea7cd01",
+      "issue_id": "ISS-GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "URL validity: 237/642 (37%) missing URLs \u2014 expected in PUBLIC mode with ceiling estimates"
+    },
+    {
+      "id": "f939b58d-05e3-46bc-b115-736c11aeecdc",
+      "issue_id": "ISS-GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Source attribution: 237/642 (37%) have NO_EVIDENCE \u2014 expected for ceiling estimate subcaps"
+    },
+    {
+      "id": "8bbee889-df02-45a8-b196-5ea91ee799f5",
+      "issue_id": "ISS-GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Critic log: No formal critic worksheet generated (Phase 4.5 was implicit in scoring loop). Recommend adding formal critic_log.csv in future assessments."
+    },
+    {
+      "id": "b44d9ba9-ad24-4a19-b1fe-7497c9b62b38",
+      "issue_id": "ISS-GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Report citations: 31 unique E-IDs (target \u226550, minimum \u226530)"
+    },
+    {
+      "id": "46eccade-dc34-415e-924c-6fc0df986bad",
+      "issue_id": "ISS-GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Peer integration: 0 total peer refs, 5 in exec summary"
+    },
+    {
+      "id": "1e21b81f-7362-4abf-9d99-eeebb6271293",
+      "issue_id": "ISS-GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Anti-generic: forbidden=0, generic_exec=38% (8/21 sentences)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Trend Classification: ACCELERATING | 4-Year Asset CAGR: ~13.2%. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.76,
+      "peer_name": "Zions Bancorporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.56,
+      "peer_name": "Western Alliance Bancorporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.44,
+      "peer_name": "Cullen-Frost Bankers",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 1.97,
+      "peer_name": "Cathay General Bancorp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-EWBC-20260401-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "rating: 4.79, reviews: 31000, note: Strong but UX complaints on new app transition",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 79,
+        "polarity": "neutral",
+        "source": "Mobile App Ios",
+        "themes": [],
+        "value": 4.79
+      },
+      {
+        "drilldown": "rating: 3.8, reviews: 749, recommend_pct: 71",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 8,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": "market_cap_B: 14.26, 1yr_high: 122.6, 1yr_low: 71.0",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Market",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "CRO Irene Oh (EVP) \u2014 promoted 2023 from CFO role, confirms dedicated risk leadership",
+      "date_precision": "year",
+      "e_id": "E-085",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-085"
+      ],
+      "id": "080136c9-0322-4dc1-b7ee-dcd084db6acc",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.eastwestbank.com",
+      "subcap_ids": [],
+      "title": "Oh (EVP) \u2014 promoted 2023"
+    },
+    {
+      "body": "App launched July 2020 with major refresh; last update July 2025",
+      "date_precision": "month",
+      "e_id": "E-058",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "b01751bc-3185-431f-a3ed-d768e023865c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://apps.apple.com/us/app/east-west-bank-mobile/id1517733259",
+      "subcap_ids": [],
+      "title": "App launched with major refresh"
+    },
+    {
+      "body": "2015 BSA/AML enforcement TERMINATED 2018 \u2014 resolved and closed",
+      "date_precision": "year",
+      "e_id": "E-079",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "94b0b519-5d59-47f8-826f-85dfe0c56149",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.eastwestbank.com",
+      "subcap_ids": [],
+      "title": "2015 BSA/AML enforcement Terminated 2018"
+    },
+    {
+      "body": "CEO Dominic Ng named as executive sponsor \u2014 transformed bank from $600M S&L to $76B+ global bank since 1991",
+      "date_precision": "year",
+      "e_id": "E-016",
+      "event_date": "1991-07-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "694c30ff-16f7-4ff9-91b1-66817e035124",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001069157/000117494725000556/ea0237505-def14a_eastwest.htm",
+      "subcap_ids": [],
+      "title": "CEO Dominic Ng named transformed bank"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "entity_display_id": "virtuity-financial-partn-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+        "Two Transamerica breaches": "24 months",
+        "agents multi": "-ticket only +2%",
+        "outcome": "0%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "outcome 0%",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "outcome 0%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome 0%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-001",
+          "title": "Salesforce CRM Foundation for VFP Agent Network"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-002",
+          "title": "Data Unification: WFG 365 \u2194 Salesforce Bridge via MuleSoft + Data Cloud"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "agents multi-ticket only +2%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "agents multi-ticket only +2%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "R-003",
+          "title": "Agent Performance Analytics: Tableau + CRM Analytics for VFP Agent Network"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+3.0",
+          "metric": "Two Transamerica breaches 24 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Two Transamerica breaches 24 months",
+            "peer": null,
+            "time": "24 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-004",
+          "title": "Security Posture Hardening: Salesforce Shield for Post-Breach Resilience"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Instagram for social": "-99%",
+        "Outcome": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+        "no supervision $": "50K",
+        "outcome $": "50K"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-005",
+          "title": "Virtuity University Modernization: Experience Cloud Agent Portal + myTrailhead"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "Instagram for social -99%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Instagram for social -99%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-006",
+          "title": "Marketing Automation: Salesforce Marketing Cloud for Agent & Client Engagement"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": null,
+          "metric": "no supervision $50K",
+          "outcomes": {
+            "effort": "L",
+            "metric": "no supervision $50K",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "R-007",
+          "title": "Agent Communication Platform: Telegram \u2192 Slack for Compliant Collaboration"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "outcome $50K",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome $50K",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-008",
+          "title": "Compliance & Risk Management: Salesforce GRC Platform for Regulatory Readiness"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Meanwhile": "50%",
+        "Outcome": "P1C1 Digital Strategy scores 1.63, P1C2 Governance 1"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Meanwhile 50%",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": null,
+          "metric": "Meanwhile 50%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Meanwhile 50%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "R-009",
+          "title": "AI-Powered Agent Assist: Agentforce for Insurance Service & Productivity"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+2.5",
+          "metric": "P1C1 Digital Strategy scores 1.63, P1C2 Governance 1",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 Digital Strategy scores 1.63, P1C2 Governance 1",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "R-010",
+          "title": "Digital Strategy Workshop: Zennify-Led Transformation Roadmap for VFP"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C1, P1C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-VFP-20260414-0001",
+  "total_duration_months": 12
+}

@@ -1,0 +1,881 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "ima-financial-group-inc-0001",
+  "financials": {
+    "lines": [
+      "IMA's growth trajectory since 2020 is among the most aggressive in the independent broker category. The combination of $3.25B in PE capital and an employee-ownership culture has produced a rare dual-engine growth model: acquisition pace of a PE-backed firm with the retention economics of an employee-owned firm. The 40%+ annual workforce CAGR directly drives the need for the FSC unification platform. [E-088, E-001, E-096]",
+      "IMA is a private company with no publicly available audited financials. All figures are derived from press releases, PE profiles, industry rankings, and analyst estimates. Trend: ACCELERATING \u2014 3+ consecutive years of above-industry premium growth with no confirmed slowdown. [E-088, E-001, E-096]",
+      "5-Year CAGR (2020-2025): Revenue ~40%+ | Workforce ~40%+ | States 7 to 23+ (~27% CAGR). Data basis: press releases + PE profiles (private company \u2014 no audited financials). [E-088, E-001, IMA Feb 2025 press release]"
+    ],
+    "metrics": {
+      "accelerating": "3+ consecutive years of above-industry pr",
+      "trajectory": {
+        "branches": 100,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 25,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Applied Epic Dashboards (Dec 2025): launched new\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "(Denver HQ rates highest, acquired offices vary"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Proxy P2C2.7.4 (Continuous Improvement): launched with\u2026"
+          },
+          {
+            "fy": "FY2022",
+            "label": "IMA launched Advanced Industries Practice (April 2022)"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "US (23+ states; clients in all 50 states; HQ Denver CO)",
+        "headline": "$8.0B net income \u00b7 FY2025",
+        "regulator": "FTC (GLBA Safeguards Rule) + State Insurance Depts (20+ states)",
+        "series": {
+          "net_income_m": [
+            2000.0,
+            4000.0,
+            5000.0,
+            6000.0,
+            8000.0,
+            8000.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US (23+ states",
+      "clients in all 50 states",
+      "HQ Denver CO)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Robert Cohen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman & CEO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Luke Proctor",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "John Hearn",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO & Atlantic Market President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Greg Boothroyd",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Matt Watkins",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Garrett Droege",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Innovation & Director, Digital Risk Practice"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Michelle Vercellino",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Operations & Insights (de facto CDO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Leigh",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Director, Application Architecture & Engineering"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Justin Jacobs",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Eric Pauly",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "General Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Leeann McKinney",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Retail Training"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "IMA Financial Group, Inc. operates as an integrated financial services holding company with a majority employee-owned structure \u2014 one of the defining characteristics that differentiates it from PE-only peers. The holding company architecture allows multiple specialised subsidiaries under a unified brand while preserving local identity in acquired firms. [E-001, E-002, E-003, E-INT-002]",
+    "primary_regulator": "FTC (GLBA Safeguards Rule) + State Insurance Depts (20+ states)",
+    "regulatory_standing": {
+      "as_of": null,
+      "e_id": "E-020",
+      "label": "Clean regulatory standing",
+      "note": "No enforcement actions found against IMA Financial Group in searches of NAIC, DOL, SEC, FINRA, DOJ, and state DOI databases. No data breach, no E&O class actions identified as of April 2026. NEGATIVE SEARCH confirmed."
+    },
+    "size_tier": "mega",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-029",
+        "excerpt": "IMA publishes Cyber Risk In Focus quarterly \u2014 systematic thought leadership on cyber governance indicating deep internal expertise Article details CVRM program components: vendor identification, attestations (NIST/AICPA/",
+        "title": "IMA publishes Cyber Risk",
+        "type": "article",
+        "url": "https://imacorp.com/insights/cyber-risk-in-focus-q2-2024"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "IMA careers: 'Repeatedly recognized for excellence of workplace culture.' 'IMA's mission to better the lives of employees and their communities has been recognized for years.' Women's Network+ program. Interview process ",
+        "title": "IMA careers: 'Repeatedly recognized for excellence of workplace\u2026",
+        "type": "article",
+        "url": "https://imacorp.com/careers"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "IMA hosts annual Employee Benefits Summit (Coors Field, May 2025). Adam Moret leads 10-person Whole Health consultant team \u2014 multi-year wellness strategies, financial wellbeing, mental health initiatives. LinkedIn Learni",
+        "title": "IMA hosts annual Employee Benefits Summit (Coors Field, May 2025)",
+        "type": "conference",
+        "url": "https://imacorp.com/benefits/eb25"
+      },
+      {
+        "author": null,
+        "date": "2024-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-056",
+        "excerpt": "IMA sustainability program confirmed: (1) Green Teams \u2014 expanded from 3 to 13 active locations (2023), 9 offices with e-waste recycling drives + Bike to Work events; (2) Sustainability Real Estate Plan \u2014 125,000+ sq ft L",
+        "title": "IMA sustainability program confirmed",
+        "type": "article",
+        "url": "https://imacorp.com/sustainability"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-064",
+        "excerpt": "IMA operates a comprehensive content hub with 6 series: Markets in Focus (quarterly industry reports), Risk in Focus, Workplace in Focus, HR Insights, Insurance Insights, Podcasts & Webinars. 2026 Pulse Report (gated \u2014 l",
+        "title": "IMA operates a comprehensive content hub Markets in Focus (quarterly\u2026",
+        "type": "podcast",
+        "url": "https://imacorp.com/insights"
+      },
+      {
+        "author": null,
+        "date": "2025-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-124",
+        "excerpt": "6 structured insight series: Markets In Focus (industry-segmented quarterly reports), Risk In Focus (risk management),",
+        "title": "6 structured insight series: Markets In Focus (industry-segmented\u2026",
+        "type": "article",
+        "url": "https://imacorp.com/series/markets-in-focus"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "08d0ffe2-7b7d-42c0-bc9c-860cbaf109b2",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "exports/ subdirectory has 3 CSVs; additional 6 CSVs in 03_appendices/ and 02_peers/. Total 9 CSVs across assessment directories."
+    },
+    {
+      "id": "0eae1276-1598-414a-b61f-f62f7ea68ed0",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Automated check used field name source_url; evidence_index.json uses field name url."
+    },
+    {
+      "id": "1f3b627b-bf6f-49cc-b2f8-36957d32f770",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Report cites 43 unique E-IDs. Governance target is \u226550 unique IDs. Gap: 7 E-IDs."
+    },
+    {
+      "id": "56b9a26f-caa3-400b-ad43-0f8c918e2772",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "export_scoring_detail.csv uses 8-column schema; governance expects 11-column spec including Rationale, Source_URLs, Proxy_Searched."
+    },
+    {
+      "id": "12e4c35b-22ee-4e84-9dc1-cbe1a3bf5278",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Regex match detected \"appoint a CDO\" and \"create a CoE\" in report. Further investigation shows these appear ONLY in Section 9 anti-generic disclaimer text \u2014 explicitly quoting forbidden phrases as examples of what not to write."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Eight issues identified during the Research Phase and confirmed in the Assessment Phase (Phase 3). ISS-001 is the only MATERIAL issue \u2014 discovered via a B5D proxy validation search (not captured in initial public evidence batches). This is the most consequential risk factor. All caps have been applied to final capability scores in Column D and Column I of the DMA Workbook.",
+    "trend_md": "This section establishes the historical context for IMA's digital maturity \u2014 the five-year financial arc and the chronological digital initiative timeline that defines where IMA stands today. Each Timeline entry is annotated with its assessment-layer maturity signal, connecting historical events directly to workbook scores."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 4.0,
+        "P1C4": 3.5,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 4.0,
+        "P4C1": 3.5,
+        "P4C2": 4.0,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.59,
+      "peer_name": "Lockton Companies",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.65,
+      "peer_name": "Acrisure",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.56,
+      "peer_name": "NFP Corp (Aon company)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.35,
+      "peer_name": "Higginbotham",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 2.5,
+        "P2C2": 2.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.21,
+      "peer_name": "Risk Strategies",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-IMA-20260416-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor overall 3.5-3.7/5 (201 reviews)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 201,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": "S usage Tech stack includes: Avaya, jQuery CDN, Salesforce, Indeed (job posting integration), Indio (client intake), WP Engine, Ensighten, Nginx; email format First.Last@imacorp.com Overall ~4.0/5 (role-specific) / 3.5-3.7 overall; 67% reco",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 4.0
+      },
+      {
+        "drilldown": "6% client retention is outcome signal only, not evidence of NPS measurement or VoC program",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 7,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "BTV Accelerator: $50K SAFE investment per startup + access to 12 super-regional broker partners, 13 carriers/wholesalers \u2014 annual cohort (now 6+ years, 2026 cohort announced)",
+      "date_precision": "year",
+      "e_id": "E-110",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-110"
+      ],
+      "id": "d9634ff0-de27-4d86-978c-508b2389cb93",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/brokertech-ventures-announces-34-million-brokertech-fund-301813257.html",
+      "subcap_ids": [],
+      "title": "BTV Accelerator: $50K SAFE investment per startup + access\u2026"
+    },
+    {
+      "body": "BTV 2026 new partners: Higginbotham and The Mahoney Group joined \u2014 IMA's BTV ecosystem expanding, now includes peer Higginbotham",
+      "date_precision": "year",
+      "e_id": "E-110",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-110"
+      ],
+      "id": "5b0fa299-5c8c-4b04-b04a-e3b37e0cef8a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/brokertech-ventures-announces-34-million-brokertech-fund-301813257.html",
+      "subcap_ids": [],
+      "title": "Higginbotham and The Mahoney Group joined"
+    },
+    {
+      "body": "5 IMA Financial Group Associates named to Risk & Insurance Magazine's 2026 Power Broker List (Feb 27, 2026) \u2014 professional talent recognition",
+      "date_precision": "day",
+      "e_id": "E-104",
+      "event_date": "2026-02-27",
+      "evidence_e_ids": [
+        "E-104"
+      ],
+      "id": "cc78b51c-3a66-4c3b-9647-07c835e2e9a8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://pitchbook.com/profiles/company/107046-01",
+      "subcap_ids": [],
+      "title": "5 IMA Financial Group Associates named to Risk & Insurance\u2026"
+    },
+    {
+      "body": "Most recent deal (PitchBook): Burlington Insurance Agency Buyout/LBO Jan 1, 2026 \u2014 continuous M&A program confirmed",
+      "date_precision": "day",
+      "e_id": "E-104",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-104"
+      ],
+      "id": "dd6e4441-827c-4644-9c1e-3fc72e7fd087",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://pitchbook.com/profiles/company/107046-01",
+      "subcap_ids": [],
+      "title": "Most recent deal (PitchBook): Burlington Insurance Agency\u2026"
+    },
+    {
+      "body": "Applied Epic Dashboards (Dec 2025): Applied Systems launched new BI/analytics capability embedded in Applied Epic. 'Democratizes access to the mountain of data in Applied Epic, transforming it into meaningful visualizations.' Admin Certification Program launched alongside. IMA as Applied customer benefits from this data capability.",
+      "date_precision": "month",
+      "e_id": "E-150",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-150"
+      ],
+      "id": "4b5d0bec-196c-4ef8-9ac6-41b861b87802",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.techtarget.com/searchcio/feature/CIO-uses-master-data-management-to-speed-digitalization",
+      "subcap_ids": [],
+      "title": "Applied Epic Dashboards (Dec 2025): launched new\u2026"
+    },
+    {
+      "body": "IMA Labs evaluated 350+ insurtechs including AI-native startups. BTV 2025 accelerator cohort includes AI companies. RiskStream AI Council launched 2025. Drake University AI project-based learning referenced (BTV article). Multi-channel AI ecosystem engagement.",
+      "date_precision": "year",
+      "e_id": "E-151",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-151"
+      ],
+      "id": "bb241018-22ca-469d-ae7e-74e7c226fdf9",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.brokertechventures.com/post/insurance-and-the-ai-revolution",
+      "subcap_ids": [],
+      "title": "RiskStream AI Council launched 2025"
+    },
+    {
+      "body": "Active Zennify-IMA FSC for IB implementation (Insurance Brokers track). Waterfall discovery model (8 \u00d7 3-week sprints). Discovery completed ~Jul 2025. Build phase underway.",
+      "date_precision": "month",
+      "e_id": "E-INT-002",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-INT-002"
+      ],
+      "id": "6f0fb8d4-4a56-4288-9a02-f696a0eabaf4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "INTERNAL://otter_ai_transcripts_2025",
+      "subcap_ids": [],
+      "title": "Discovery completed ~Jul 2025"
+    },
+    {
+      "body": "IMA hired Salesforce Manager (May 2025, remote, $150-160K) \u2014 dedicated Salesforce platform management at manager level",
+      "date_precision": "month",
+      "e_id": "E-092",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-092"
+      ],
+      "id": "f6dc454c-9925-43ed-8c10-e1eb504d86df",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://remotive.com/remote/jobs/all-others/salesforce-manager-1577886",
+      "subcap_ids": [],
+      "title": "IMA hired Salesforce Manager (May 2025, remote, $150-160K)\u2026"
+    },
+    {
+      "body": "Kacie Conroy named Chief Innovation Officer at BrokerTech Ventures \u2014 IMA's BTV partner has dedicated AI/innovation executive",
+      "date_precision": "publish_fallback",
+      "e_id": "E-031",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "9ccb1500-da7c-4f7c-a624-e53a176e0b8a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.brokertechventures.com/post/insurance-and-the-ai-revolution",
+      "subcap_ids": [],
+      "title": "IMA's BTV partner has dedicated AI/innovation executive"
+    },
+    {
+      "body": "Oregon page demonstrates IMA's consistent digital channel offering for acquired/rebranded partners (PS&F \u2192 IMA Oregon rebrand path)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-087",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-087"
+      ],
+      "id": "cfd5bc9b-979e-4e5c-ba2e-05a4e6811928",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://imacorp.com/oregon",
+      "subcap_ids": [],
+      "title": "Oregon page demonstrates IMA's consistent digital channel\u2026"
+    },
+    {
+      "body": "Avaya Infinity (2025) + AI roadmap: Avaya launched new AI-powered Infinity platform (April 2025) with GenAI, real-time transcription, sentiment analysis, call summarization \u2014 IMA as Avaya customer benefits from vendor AI roadmap",
+      "date_precision": "month",
+      "e_id": "E-135",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-135"
+      ],
+      "id": "ba94aff4-b0d1-4e6f-86f2-21e93f390d98",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://leadiq.com/c/ima-financial-group-inc/5a1d95ed2300005a00848b68",
+      "subcap_ids": [],
+      "title": "Avaya launched new AI-powered Infinity platform (April 2025)"
+    },
+    {
+      "body": "PROXY P2C3.3.3-3.7 (Video Banking, Smart Speakers, GenAI IVR): No video banking, smart speaker integration, or GenAI IVR confirmed for IMA. Avaya Infinity platform (launched April 2025) provides these capabilities on vendor roadmap. IMA's 'AI augments, not replaces' philosophy and TAG ROI gates suggest conservative deployment pace.",
+      "date_precision": "month",
+      "e_id": "E-138",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-138"
+      ],
+      "id": "ef5d65d6-24c2-4158-a9ce-8f27291a9a0c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "PROXY://multiple_sources",
+      "subcap_ids": [
+        "P2C3.3.3"
+      ],
+      "title": "Avaya Infinity platform (launched April 2025) provides\u2026"
+    },
+    {
+      "body": "PS&F/Oregon included PS&F rebranding Jan 2025 after 3+ year integration timeline (acquired Nov 2021, rebranded Jan 2025)",
+      "date_precision": "month",
+      "e_id": "E-087",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-087"
+      ],
+      "id": "fbf2200c-7bbf-4dd2-b4a3-7035dfe276b4",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://imacorp.com/oregon",
+      "subcap_ids": [],
+      "title": "PS&F/Oregon included PS&F rebranding Jan 2025"
+    },
+    {
+      "body": "#OneIMA integration identity: consistent cultural campaign used to align acquired firms \u2014 integration communication vehicle",
+      "date_precision": "publish_fallback",
+      "e_id": "E-116",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-116"
+      ],
+      "id": "8ee39378-9c66-4085-868f-4f7dd721ba0c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://imacorp.com/ima-psf-rebrand",
+      "subcap_ids": [],
+      "title": "OneIMA integration identity: consistent cultural campaign\u2026"
+    },
+    {
+      "body": "Droege completed MIT Professional Education (2024) \u2014 continuing AI/tech education at senior executive level",
+      "date_precision": "year",
+      "e_id": "E-099",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-099"
+      ],
+      "id": "e54776a6-323f-47d6-88de-14027c1fa0d2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://app.qwoted.com/sources/garrett-droege",
+      "subcap_ids": [],
+      "title": "Droege completed MIT Professional Education (2024)\u2026"
+    },
+    {
+      "body": "Garrett Droege = SVP, Director of Innovation AND Digital Risk Practice Leader. IMA maintains dedicated Digital Risk practice \u2014 specialized in cyber risk, blockchain insurance, technology E&O, digital asset risks. Named as 2024 Insurance Business America Hot 100.",
+      "date_precision": "year",
+      "e_id": "E-147",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-147"
+      ],
+      "id": "7eebb449-d84a-459d-a02c-467fee1ebc97",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://imacorp.com/industry/digital-risk",
+      "subcap_ids": [],
+      "title": "Insurance Business America Hot 100. Named as 2024"
+    },
+    {
+      "body": "NYC flagship office opened May 2024: 1155 Avenue of the Americas, 33rd floor, 10,000 sq ft \u2014 largest East Coast office, signals major geographic expansion investment",
+      "date_precision": "month",
+      "e_id": "E-096",
+      "event_date": "2024-05-01",
+      "evidence_e_ids": [
+        "E-096"
+      ],
+      "id": "0245bb97-1432-4dc5-be8d-6d235150c2d5",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://imacorp.com/ima-financial-group-opens-new-york-city-flagship-office-at-1155-avenue-of-the-americas",
+      "subcap_ids": [],
+      "title": "NYC flagship office opened"
+    },
+    {
+      "body": "Glassdoor ratings: Overall 3.7-4.0/5 (Denver HQ rates highest, acquired offices vary). Career opportunities: 4.4/5 (per Vibe). Compensation: 3.3/5 (below median). Work-life balance: 3.7/5. Culture & values: 3.6/5",
+      "date_precision": "publish_fallback",
+      "e_id": "E-114",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-114"
+      ],
+      "id": "ad90b698-a58a-413f-90ab-17c87b733dc2",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.glassdoor.com/Reviews/IMA-Financial-Group-Reviews-E32864.htm",
+      "subcap_ids": [],
+      "title": "(Denver HQ rates highest, acquired offices vary"
+    },
+    {
+      "body": "PROXY P2C2.7.4 (Continuous Improvement): DX program launched ~late 2023 with consultant assessment. TAG governance body for tech/AI proposals. POC-to-implementation cycle (run POC \u2192 evaluate \u2192 scale or retire). Droege: 'You need to run as many POCs as you possibly can to get a better sense of what is broken within your four walls' \u2014 formal continuous improvement cadence.",
+      "date_precision": "year",
+      "e_id": "E-139",
+      "event_date": "2023-10-15",
+      "evidence_e_ids": [
+        "E-139"
+      ],
+      "id": "d681b51f-b740-4315-b897-5af9dcc70401",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "PROXY://multiple_sources",
+      "subcap_ids": [
+        "P2C2.7.4"
+      ],
+      "title": "Proxy P2C2.7.4 (Continuous Improvement): launched with\u2026"
+    },
+    {
+      "body": "Highwing partnered with Ferro (data intake/insured engagement platform, Oct 2023) \u2014 expanding data ecosystem",
+      "date_precision": "month",
+      "e_id": "E-090",
+      "event_date": "2023-10-01",
+      "evidence_e_ids": [
+        "E-090"
+      ],
+      "id": "77c8bbc2-2676-449a-83c1-25b31e5588ba",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://imaselect.com/2020/11/ima-financial-group-spins-off-highwing-4m-fundraising-round/",
+      "subcap_ids": [],
+      "title": "Highwing partnered with Ferro (data intake/insured\u2026"
+    },
+    {
+      "body": "Post-breach remediation signals: Osano CCPA/CPRA consent management deployed July 2023; GLBA Safeguards Rule 9-element programme active; Privacy Notice updated July 2023. These may be partially responsive to the breach event.",
+      "date_precision": "month",
+      "e_id": "E-161",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-161"
+      ],
+      "id": "0dae2478-860a-4384-afe7-fe39ad61178c",
+      "kind": "product",
+      "signal": "negative",
+      "source_url": "https://law.justia.com/cases/federal/district-courts/kansas/ksdce/2:2023cv02223/147275/33/",
+      "subcap_ids": [],
+      "title": "Post-breach remediation signals: Osano CCPA/CPRA consent\u2026"
+    },
+    {
+      "body": "BTV outcomes through 2023: 200+ POCs/pilots with partner organizations, startups raised $250M+ collectively \u2014 validated innovation pipeline",
+      "date_precision": "year",
+      "e_id": "E-110",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-110"
+      ],
+      "id": "64a69e69-d3a5-4438-ad15-4d19d9791bfe",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/brokertech-ventures-announces-34-million-brokertech-fund-301813257.html",
+      "subcap_ids": [],
+      "title": "Startups raised $250M"
+    },
+    {
+      "body": "IMA Employee Benefits Summit: annual event (2023 = 'hit', 2024/2025 editions promoted on LinkedIn with early-bird registration). National client event with external keynote speakers.",
+      "date_precision": "year",
+      "e_id": "E-125",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-125"
+      ],
+      "id": "197892bd-5de4-49be-bc88-9425641b0489",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://imacorp.com/series/podcasts-and-webinars",
+      "subcap_ids": [],
+      "title": "IMA Employee Benefits Summit: annual event (2023 = 'hit'\u2026"
+    },
+    {
+      "body": "PROXY P2C3.6.7-6.8 (Transcription/Post-Call Automation): Avaya Experience Platform + Google Cloud partnership includes real-time voice transcription, call summarization (announced 2023). Post-call automation via Avaya's event-driven orchestration. No confirmed IMA-specific deployment.",
+      "date_precision": "year",
+      "e_id": "E-138",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-138"
+      ],
+      "id": "72151f9a-2b55-4902-aa17-d80be3af1891",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "PROXY://multiple_sources",
+      "subcap_ids": [
+        "P2C3.6.7"
+      ],
+      "title": "Google Cloud partnership includes real-time voice\u2026"
+    },
+    {
+      "body": "IMA formally launched Advanced Industries Practice (April 2022) focused on technology, blockchain, AI/ML risk clients \u2014 formal innovation practice structure",
+      "date_precision": "month",
+      "e_id": "E-117",
+      "event_date": "2022-04-01",
+      "evidence_e_ids": [
+        "E-117"
+      ],
+      "id": "f1d04956-0213-4292-a632-7f4bea7c98e7",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://newsdirect.com/news/ima-financial-group-introduces-advanced-industries-practice-867270600",
+      "subcap_ids": [],
+      "title": "IMA launched Advanced Industries Practice (April 2022)"
+    },
+    {
+      "body": "IMA partnered with The Institutes RiskStream Collaborative to unlock blockchain potential in risk management (March 2022 simultaneous with metaverse)",
+      "date_precision": "month",
+      "e_id": "E-117",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-117"
+      ],
+      "id": "351c3d7a-b959-4d17-a0d6-d86ab2b5f7e3",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://newsdirect.com/news/ima-financial-group-introduces-advanced-industries-practice-867270600",
+      "subcap_ids": [],
+      "title": "IMA partnered with The Institutes RiskStream Collaborative"
+    },
+    {
+      "body": "IMA Financial Group joined The Institutes RiskStream Collaborative (March 2022) to investigate blockchain in risk management and insurance \u2014 formal industry consortium membership",
+      "date_precision": "month",
+      "e_id": "E-111",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-111"
+      ],
+      "id": "48b13250-e7ec-4cb4-b3d8-3f95af39e6f8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.morningstar.com/news/business-wire/20260121154030/the-institutes-riskstream-collaborative-honors-24-companies-with-2025-innovator-award",
+      "subcap_ids": [],
+      "title": "IMA Financial Group joined The Institutes RiskStream\u2026"
+    }
+  ]
+}

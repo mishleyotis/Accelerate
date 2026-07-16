@@ -1,0 +1,1223 @@
+{
+  "entity_display_id": "haventree-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3",
+        "P1C1",
+        "P3C1",
+        "P4C3.6.1",
+        "P3C1.1.4",
+        "P1C1.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "eadda87e-5d4c-4093-afbb-6a61c8251802",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-008",
+        "E-015",
+        "E-097",
+        "E-081",
+        "E-082",
+        "E-006"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Cloud Architecture Modernization + Data Migration + API Strategy — top 3 of 12 Zennify solutions — HIGH [E-097].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Haventree 2.0 transformation programme is core strategic…",
+      "what_text": "EA Framework & Governance is one of Haventree Bank's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Haventree Bank's ability to deliver a stronger data and technology foundation [E-015].",
+      "why_text": "At 2.5 out of 5, EA Framework & Governance shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-008, E-015].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C2",
+        "P3C2",
+        "P4C2",
+        "P2C4.2.9",
+        "P2C4.12.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-066"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "87a12d4a-7de6-4b41-9282-35eabdecf67b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-066"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-041",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-095",
+        "E-041",
+        "E-017",
+        "E-011",
+        "E-002"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Audience Segmentation a near-term focus for Haventree Bank: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-017].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "DTC + Payments roadmap signals",
+      "what_text": "Audience Segmentation is one of Haventree Bank's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Haventree Bank's ability to deliver a stronger, more personalised customer experience [E-041].",
+      "why_text": "The assessment found: “`/deposits` route on haventreebank.com confirmed as 'dummy page' (Sept 2 2025) — text reads: 'This is a dummy page for the deposits route. The route name is: /deposits' — STRONG SIGNAL of DTC deposit” [E-095]. At 2.0 out of 5, Audience Segmentation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P3C3",
+        "P3C4",
+        "P3C3.1.3",
+        "P3C3.2.4",
+        "P3C2.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "ae34a955-410f-4ce5-a8aa-f97ac4e3b6aa",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-001",
+        "E-018",
+        "E-085",
+        "E-088",
+        "E-003",
+        "E-089",
+        "E-087"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Risk Identification & Assessment a near-term focus for Haventree Bank: a scoped investment here would lift it from 3.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-018].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Strong regulatory posture with zero Fintrac penalties…",
+      "what_text": "Risk Identification & Assessment is one of Haventree Bank's solid operations capabilities, scoring 3.5 out of 5 in Zennify's latest assessment, ahead of the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Haventree Bank's ability to deliver more efficient, dependable operations [E-001].",
+      "why_text": "At 3.5 out of 5, Risk Identification & Assessment shows a maturing capability within reach of best practice. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business [E-005, E-001].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C2",
+        "P4C1.2.1",
+        "P4C2.8.4",
+        "P1C2.1.6",
+        "P1C4.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "63522855-d118-472a-bd09-08f759e4fe24",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-093"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-091",
+        "E-093",
+        "E-003"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Salesforce Data Cloud + Snowflake Data Vault + MDM + Data Governance — high-value greenfield — MEDIUM-HIGH [E-093].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data and Analytics maturity is leading capability gap…",
+      "what_text": "Data Quality Framework & Dimensions is one of Haventree Bank's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Haventree Bank's ability to deliver a stronger data and technology foundation [E-091].",
+      "why_text": "At 2.5 out of 5, Data Quality Framework & Dimensions shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-097, E-091].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P2C3",
+        "P2C1.1.2",
+        "P1C4.1.4",
+        "P3C2.7.4",
+        "P1C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "dac65368-0433-4fbb-a0cb-9ba4b014e15a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-007",
+        "E-078",
+        "E-006"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Change Readiness Assessment a near-term focus for Haventree Bank: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-007].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Cultural and management ratings depress people/change…",
+      "what_text": "Change Readiness Assessment is one of Haventree Bank's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Haventree Bank's ability to deliver sharper strategic direction and stronger oversight [E-002].",
+      "why_text": "The assessment found: “Ontario Superior Court approved $1.5M class action settlement (July 2024): Haventree Bank automatically renewed mortgages without explicit consent at significantly higher rates — systemic service” [E-078]. At 2.0 out of 5, Change Readiness Assessment sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P1C2",
+        "P4C4.3.1",
+        "P1C2.1.6",
+        "P1C2.6.1",
+        "P4C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "05f289a3-39fa-47c3-833a-4b8fb8fc7e46",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-093"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-081",
+        "E-093",
+        "E-027",
+        "E-090",
+        "E-016",
+        "E-003",
+        "E-001"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Cybersecurity Strategy & Program a near-term focus for Haventree Bank: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-093].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Cybersecurity posture is strong",
+      "what_text": "Cybersecurity Strategy & Program is one of Haventree Bank's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, roughly in line with the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Haventree Bank's ability to deliver a stronger data and technology foundation [E-081].",
+      "why_text": "The assessment found: “OSFI B-13 applies to all FRFIs including Haventree — mandatory technology and cyber risk management framework requirement OSFI requires: Senior Management assign responsibility for tech/cyber risks” [E-027]. At 3.0 out of 5, Cybersecurity Strategy & Program shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C4",
+        "P4C3.6.1",
+        "P3C4.2.2",
+        "P1C1.5.5",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "cc3ca7f8-3172-4354-b637-605387cffca5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-016",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-029",
+        "E-090",
+        "E-092",
+        "E-008",
+        "E-006"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make EA Framework & Governance a near-term focus for Haventree Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-029].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Multi-cloud architecture (Azure + AWS) addresses OSFI cloud…",
+      "what_text": "EA Framework & Governance is one of Haventree Bank's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Haventree Bank's ability to deliver a stronger data and technology foundation [E-016].",
+      "why_text": "The assessment found: “OSFI B-10 (updated Feb 2024): mandatory TPRM lifecycle for ALL FRFIs including Haventree; risk-based approach to vendor criticality; mandatory BCP/DR provisions in all critical third-party contracts” [E-090]. At 2.5 out of 5, EA Framework & Governance shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C3",
+        "P2C4.2.9",
+        "P2C1.1.2",
+        "P2C2.1.2",
+        "P3C1.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "c691d777-b7e5-48ad-a2d6-a16833d7731d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-013",
+            "E-019",
+            "E-035",
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-013",
+        "E-035",
+        "E-072",
+        "E-078",
+        "E-019",
+        "E-074",
+        "E-073",
+        "E-025"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Service Cloud — Omnichannel Servicing transformation for DTC + broker workflows — addressable via salesforce [E-035].",
+      "source_rec_id": "REC-01",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Salesforce Service Cloud — Omnichannel Servicing transformation for DTC + broker workflows",
+      "what_text": "Class action settlement $1.5M (~3,340 GIC clients, 2015-2019) for auto-renewal without consent caps Onboarding and Omnichannel Servicing at level 3.0 (ISS-005). Current servicing is broker-only with no DTC channel; class action remediation used DocuSign but lacks unified case management. score 2.49 vs peer median 2.50 — at parity with peers but 2.0 maturity-levels behind digital benchmark Equitable (4.0). In Zennify's assessment Pre-Qualification Capabilities scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-013].",
+      "why_text": "The assessment found: “Budget 2025 commitment to advance open banking via Consumer-Driven Banking Act legislation and data-mobility right under PIPEDA Competition Bureau March 2026:” [E-019]. At 2.0 out of 5, Pre-Qualification Capabilities sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.2.9",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.7.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-066"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "e8d9c748-ce61-4dad-bafc-012323ede613",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-066"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-039",
+        "E-080",
+        "E-091",
+        "E-068",
+        "E-095",
+        "E-002"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Marketing Cloud + Personalization activation — Digital Marketing uplift for DTC — addressable via salesforce [E-091].",
+      "source_rec_id": "REC-02",
+      "theme": "Digital Channels",
+      "title": "Salesforce Marketing Cloud + Personalization activation — Digital Marketing uplift for DTC",
+      "what_text": "Digital Marketing scored 2.40 vs peer median 3.00 — largest negative gap (-0.60) in entity profile. Current state: iGoDigital + GA4 + Salesforce Marketing Cloud confirmed in stack but cross-channel orchestration limited. Privacy Statement documents 50+ vendor categories suggesting fragmented vendor ecosystem. Pre-DTC launch (/deposits dummy page Sep 2025) is critical window — limited B2C marketing posture must mature before consumer acquisition begins. In Zennify's assessment Audience Segmentation scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-080].",
+      "why_text": "At 2.0 out of 5, Audience Segmentation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-039, E-080].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C4.2.9",
+        "P3C1.1.4",
+        "P3C3.1.3",
+        "P2C2.1.7",
+        "P2C2.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "20506fec-ca35-4e28-80c2-f3c3554346bc",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-041",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-013",
+            "E-019",
+            "E-035",
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-013",
+        "E-035",
+        "E-041",
+        "E-072",
+        "E-078",
+        "E-095",
+        "E-019",
+        "E-074"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Financial Services Cloud — DTC Onboarding journey design + KYC automation — addressable via salesforce [E-035].",
+      "source_rec_id": "REC-03",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Salesforce Financial Services Cloud — DTC Onboarding journey design + KYC automation",
+      "what_text": "Onboarding is the #1-priority gap (priority score 4.45) — capped at level 3.0 by ISS-005 conduct issue. Director PM (Apr 2026) explicitly tasked with DTC + payments roadmap. /deposits dummy page Sep 2025 demonstrates pre-launch infrastructure. Without DTC-specific onboarding, fraud and KYC controls (currently broker-channel-only) will not extend to consumer acquisition. In Zennify's assessment Pre-Qualification Capabilities scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-013].",
+      "why_text": "The assessment found: “Budget 2025 commitment to advance open banking via Consumer-Driven Banking Act legislation and data-mobility right under PIPEDA Competition Bureau March 2026:” [E-019]. At 2.0 out of 5, Pre-Qualification Capabilities sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.8.1",
+        "P1C1.1.1",
+        "P3C4.2.5",
+        "P3C3.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "28e2321e-d2d1-4240-a41e-41037d1f23e7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-041",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-008",
+        "E-041",
+        "E-061",
+        "E-074",
+        "E-095",
+        "E-001",
+        "E-002",
+        "E-010"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Due Diligence a near-term focus for Haventree Bank: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-041].",
+      "source_rec_id": "REC-04",
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy Workshop — Haventree 2.0 milestone alignment + DTC operating model",
+      "what_text": "Digital Strategy scored 2.78 vs peer median 3.00 (-0.22 gap). 10 strategic objectives [SO-1..10] documented in research but no public OKR/measurement framework visible. Haventree 2.0 framing is enterprise-wide but operational sequencing across SO-1 (Temenos), SO-3 (DTC), SO-4 (Payments), SO-6 (Open Banking) requires orchestration to avoid concurrent-go-live risk. In Zennify's assessment Digital Due Diligence scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-008].",
+      "why_text": "The assessment found: “Consumer-Driven Banking Act (CDBA) — Bill C-15 tabled November 18, 2025: full implementation legislation for open banking in Canada, applies to all federally regulated financial institutions” [E-074]. At 2.0 out of 5, Digital Due Diligence sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C2",
+        "P4C1.2.1",
+        "P4C2.8.4",
+        "P4C3.6.1",
+        "P2C4.2.9"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "857d6940-020b-4d28-9801-be81628004ee",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-091",
+            "E-093",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-015",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-016",
+        "E-039",
+        "E-080",
+        "E-091",
+        "E-093",
+        "E-097",
+        "E-003"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Data Cloud + CRM Analytics — Data foundation + analytics modernization — addressable via salesforce [E-039].",
+      "source_rec_id": "REC-05",
+      "theme": "Data Management & Governance",
+      "title": "Salesforce Data Cloud + CRM Analytics — Data foundation + analytics modernization",
+      "what_text": "ISS-002: NO public Chief Data Officer. Data Governance Working Group exists at director level but no enterprise data catalog, MDM tool, or MLOps platform identified. Analytics & AI: descriptive only — Power BI + Tableau + Salesforce BI; OpenAI in stack but use case unclear. AI integration roadmap stated but not measurable. In Zennify's assessment Data Quality Framework & Dimensions scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-016].",
+      "why_text": "At 2.5 out of 5, Data Quality Framework & Dimensions shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-015, E-016].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.1",
+        "P3C3.1.3",
+        "P1C2.1.6",
+        "P2C2.9.1",
+        "P4C3.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "74f229f6-6e40-4c49-88cd-adc5d5941c09",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-008",
+        "E-016",
+        "E-029",
+        "E-074",
+        "E-083",
+        "E-092",
+        "E-006"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: MuleSoft Anypoint — API governance + Open Banking (Bill C-15) compliance — addressable via salesforce [E-016].",
+      "source_rec_id": "REC-06",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Anypoint — API governance + Open Banking (Bill C-15) compliance",
+      "what_text": "Temenos cloud-native SaaS is API-first by design — strategic accident-of-timing for Open Banking (Bill C-15 enacted Nov 2025). Director Integration & Application Architecture role indicates active integration governance need. Multi-cloud Azure+AWS requires API gateway abstraction. score 3.04 vs peer median 2.50 — leads peers, but Temenos utilization-conditional cap (ISS-003) holds at 3.5. In Zennify's assessment EA Framework & Governance scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-008].",
+      "why_text": "The assessment found: “Consumer-Driven Banking Act (CDBA) — Bill C-15 tabled November 18, 2025: full implementation legislation for open banking in Canada, applies to all federally regulated financial institutions” [E-074]. At 2.5 out of 5, EA Framework & Governance shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.1.4",
+        "P2C4.3.3",
+        "P2C3.8.3",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "43e77696-e035-4a5a-8f58-bd2913456cdb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-007",
+        "E-046",
+        "E-094",
+        "E-097",
+        "E-006"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Change Readiness Assessment a near-term focus for Haventree Bank: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-046].",
+      "source_rec_id": "REC-07",
+      "theme": "Culture & Change",
+      "title": "Cultural Health Programme — Retention during Haventree 2.0 transformation",
+      "what_text": "ISS-001 MATERIAL: Indeed culture rating 2.1/5 + CEO approval 16.15%. Culture & Change Management score 2.49 (capped at level 3.0). Risk: 227-employee workforce under transformation pressure (Haventree 2.0 SO-1 + DTC SO-3 + Payments SO-4) without retention programme = talent flight at most critical execution moment. CHRO Paula Fernandes CHRL recently appointed — remediation likely active but not publicly visible [E-007].",
+      "why_text": "At 2.0 out of 5, Change Readiness Assessment sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-002, E-007].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C4.3.1",
+        "P2C4.2.9",
+        "P3C3.1.3",
+        "P3C4.2.2",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "c46c506f-8495-4427-8995-f3cd8e6e647c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-093",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-081",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-027",
+        "E-081",
+        "E-090",
+        "E-093",
+        "E-097",
+        "E-080",
+        "E-003"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Shield + GRC Platform — OSFI B-13 + Privacy compliance modernization — addressable via salesforce [E-081].",
+      "source_rec_id": "REC-08",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Salesforce Shield + GRC Platform — OSFI B-13 + Privacy compliance modernization",
+      "what_text": "Cybersecurity score 3.52 (above peer median 3.00). Director Infrastructure Network & Security CISSP/CISM/CCSK; Microsoft Sentinel SIEM; Auth0 CIAM; OSFI B-13 documented. NO public-facing C-suite CISO is gap. Bill C-15 Open Banking + B-13 Cyber require enhanced monitoring + privacy controls. Privacy Statement enumerates 50+ vendor categories — TPRM scope is significant. In Zennify's assessment Cybersecurity Strategy & Program scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-016].",
+      "why_text": "The assessment found: “OSFI B-13 applies to all FRFIs including Haventree — mandatory technology and cyber risk management framework requirement OSFI requires: Senior Management assign responsibility for tech/cyber risks” [E-027]. At 3.0 out of 5, Cybersecurity Strategy & Program shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C4.2.9",
+        "P2C1.1.2",
+        "P1C2.9.RIA1",
+        "P1C2.7.RIA1",
+        "P2C4.7.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "40d56498-5a0d-4312-a0e8-015a5b123361",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-035"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-035",
+        "E-063",
+        "E-068",
+        "E-007"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Slack + Experience Cloud — Broker Channel deepening (Elite Loyalty modernization) — addressable via salesforce [E-068].",
+      "source_rec_id": "REC-10",
+      "theme": "CX & Personalization",
+      "title": "Slack + Experience Cloud — Broker Channel deepening (Elite Loyalty modernization)",
+      "what_text": "Elite Broker Loyalty Programme with Gold/Platinum/Diamond tiers + Digital Mastercard rewards is established. All-in-One Broker Portal for self-service. Diamond status testimonials. Personalization 2.57 vs peer median 2.00 — leads peers but ceiling room. Brokers are primary revenue channel through DTC launch — deepening retention is defensive moat. In Zennify's assessment Ethical AI in Personalization scores 2.0 out of 5, versus a typical 2.0 at comparable institutions [E-063].",
+      "why_text": "At 2.0 out of 5, Ethical AI in Personalization shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business [E-035, E-063].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-HAVENTREE-20260429-0001"
+}

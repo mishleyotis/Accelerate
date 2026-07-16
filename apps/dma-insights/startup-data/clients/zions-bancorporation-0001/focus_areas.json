@@ -1,0 +1,49 @@
+{
+  "entity_display_id": "zions-bancorporation-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-026",
+          "E-041",
+          "E-010",
+          "E-009",
+          "E-058",
+          "E-045"
+        ],
+        "representative_quote": "Zero persistence between sessions (E-026) prevents journey continuity.",
+        "source_kind": "heuristic"
+      },
+      "id": "1d8783ed-d4cc-4ada-9ac2-659581ecb909",
+      "involved_subcap_ids": [
+        "P2C3.1.2",
+        "P2C3.2.5",
+        "P2C3.2.6",
+        "P2C3.2.7",
+        "P2C3.2.IC1",
+        "P2C3.3.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

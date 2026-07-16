@@ -1,0 +1,129 @@
+{
+  "entity_display_id": "aafcu-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C2 score 1.71 \u2192 4.0 (peer median 2.75)",
+        "outcome $": "42M"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "outcome $42M",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Financial Services Cloud + Data Cloud + MuleSoft. Unify 4 data silos into member 360. MuleSoft API integratio",
+          "maturity_lift": "+1.47",
+          "metric": "outcome $42M",
+          "outcomes": {
+            "effort": "M",
+            "metric": "outcome $42M",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "CRM Modernization \u2014 Salesforce FSC + Data Cloud + MuleSoft"
+        },
+        {
+          "feature": "Salesforce Service Cloud + Genesys CX Cloud native connector. Every Genesys interaction populates Salesforce member reco",
+          "maturity_lift": "+2.29",
+          "metric": "P4C2 score 1.71 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.71 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Genesys\u2013Salesforce Integration: Service Cloud + Native CCaaS Connector"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2, P2C4"
+    },
+    {
+      "customer_impact": {
+        "assets $": "9.07B",
+        "merger will create $": "20B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "merger will create $20B",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Agentforce + Einstein AI. Phase 1: Einstein for Service (extend Genesys Agent Copilot to Salesforce AI). Phase 2: Einste",
+          "maturity_lift": "+1.73",
+          "metric": "merger will create $20B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "merger will create $20B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Agentforce + Einstein AI: Proprietary AI Platform from Vendor AI"
+        },
+        {
+          "feature": "MuleSoft API management + 1033 compliance architecture. Build 1033-compliant API layer as foundation for broader platfor",
+          "maturity_lift": "+1.73",
+          "metric": "assets $9.07B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "assets $9.07B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Open Banking API Architecture: MuleSoft 1033 Readiness"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Triggered": "65.7%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Triggered 65.7%",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Governance Advisory + Salesforce Shield. New CRO needs proven governance frameworks. Shield: field encryption, event mon",
+          "maturity_lift": "+1.73",
+          "metric": "Triggered 65.7%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Triggered 65.7%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Governance Advisory: CRO Framework Build-Out (90-Day Advisory Window)"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-AAFCU-20260501-0001",
+  "total_duration_months": 12
+}

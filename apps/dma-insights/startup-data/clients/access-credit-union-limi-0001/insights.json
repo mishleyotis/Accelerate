@@ -1,0 +1,262 @@
+{
+  "entity_display_id": "access-credit-union-limi-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C3",
+        "P2C4.1.1",
+        "P2C2.1.1",
+        "P3C1.3.CU2",
+        "P2C3.3.CU1",
+        "P1C1.3.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-084",
+        "E-085",
+        "E-066",
+        "E-070",
+        "E-083"
+      ],
+      "ic_id": "INS-REC-01",
+      "id": "83e8fe6f-38e5-436d-85e0-bd4cf3018f8d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-084",
+            "E-085",
+            "E-066",
+            "E-070",
+            "E-083"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-120",
+        "E-014",
+        "E-050"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Financial Services Cloud + Service Cloud: Member Service Modernization — addressable via salesforce [E-014].",
+      "source_rec_id": "REC-01",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Salesforce Financial Services Cloud + Service Cloud: Member Service Modernization",
+      "what_text": "Access Credit Union's 4-site Member Solutions Centre (MSC) operates without a unified member relationship platform. No single agent can see a member's complete product, service history, and interaction record across digital banking, lending, and investment accounts. Contact center agents across Gimli, Selkirk, Winkler, and Winnipeg operate in siloed views. scores level 1.73 (−0.27 vs peer) not primarily from low engagement — staff are engaged and community-focused — but from technological infrastructure absence. With Moosehorn branch closing June 19, 2026, and Emerson/Plum Coulee/720 St. Anne's closing October 21, 2026, the MSC must absorb the full daily member service volume of 4 branches without additional staffing (no job losses confirmed). Without Service Cloud, this is a service cliff. In Zennify's assessment Predictive Issue Detection scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-120].",
+      "why_text": "At 1.0 out of 5, Predictive Issue Detection sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-072, E-120].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C1",
+        "P4C2.1.1",
+        "P2C4.1.1",
+        "P2C1.6.2",
+        "P1C1.3.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-102"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "9c231b55-6c6e-4c11-9f24-bd2be1cc129e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-102"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-064",
+        "E-063",
+        "E-084",
+        "E-078",
+        "E-024",
+        "E-037",
+        "E-026",
+        "E-025"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for Access Credit Union Limited: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-084].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Salesforce Marketing Cloud + Data Cloud: Member Intelligence Platform",
+      "what_text": "Customer Data Foundation (CDP) is one of Access Credit Union Limited's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 1.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Access Credit Union Limited's ability to deliver a stronger, more personalised customer experience [E-063].",
+      "why_text": "At 1.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-064, E-063].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C2.1.1",
+        "P3C1.1.3",
+        "P2C2.6.7",
+        "P2C2.2.CL1",
+        "P4C2.9.CL1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-079",
+        "E-108",
+        "E-026",
+        "E-027",
+        "E-032"
+      ],
+      "ic_id": "INS-REC-06",
+      "id": "c67b75ea-d52a-4124-ae67-a657da487a11",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-079",
+            "E-108",
+            "E-026",
+            "E-027",
+            "E-032"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C2"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-007",
+        "E-014",
+        "E-013",
+        "E-015",
+        "E-034",
+        "E-037",
+        "E-041",
+        "E-066"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Eligibility Transparency a near-term focus for Access Credit Union Limited: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-013].",
+      "source_rec_id": "REC-06",
+      "theme": "Customer Journeys & Servicing",
+      "title": "nCino Loan Origination System: Digital Lending Transformation",
+      "what_text": "Member Onboarding scores level 1.10 against a peer median of level 2.0 — the largest category-versus-peer gap in the assessment (−0.90). With 87.5% loan-to-asset ratio, lending is Access Credit Union's primary revenue driver: a CA$12.4 billion loan book whose origination platform is either unknown or legacy. The IS-001 app quality cap (MATERIAL) constrains to a level 2.0 maximum regardless of investment, until the underlying member experience issue is resolved. 13-merger legacy LOS consolidation requires a modern, scalable platform that can serve as the single origination standard across all inherited branch networks. Direct peer evidence: Conexus Credit Union (SK, 130,000 members, 30 branches) selected nCino Commercial Banking + nCino IQ (AI-powered automated financial spreading). In Zennify's assessment Eligibility Transparency scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-014].",
+      "why_text": "At 1.0 out of 5, Eligibility Transparency sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-007, E-014].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Pillar 1 is Access Credit Union's closest-to-peer pillar — but the gap between strategic intent ( level 2.10, level 2.31) and execution capability ( level 1.09, level 1.10) defines the central strategic paradox of this institution. CEO Wiebe holds an explicit digital mandate. The governance board is technically credentialed. Yet the innovation infrastructure required to execute that mandate does not exist.",
+        "heading": "Pillar 1: Strategy, Governance & Culture  ·  Score M1.66 vs Peer Median M2.10  (Gap -0.44)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Pillar 2 is the most critical pillar in this assessment — both for scoring urgency and for Salesforce opportunity concentration. The weighted gap of −0.73 versus peer median is the largest of the four pillars. Three of four P2 categories score below peer median; Personalization scores level 1.00 — a complete zero for 208,000 member-owners. The branch consolidations that begin June 2026 will transfer physical member service volume to digital channels and the 4-site MSC, making every P2 gap an operational risk, not just a competitive positioning concern.",
+        "heading": "Pillar 2: Member Experience & Engagement  ·  Score M1.37 vs Peer Median M2.10  (Gap -0.73)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Pillar 3 is Access Credit Union's closest-to-peer pillar — the only one where the institution meets or marginally exceeds the sector benchmark (+0.07). This aggregate hides a critical internal contrast: Compliance at level 2.71 is the highest-scoring category in the entire assessment, powered by 13 merger integrations completed without a single DGCM or FINTRAC enforcement action; while Automation at level 1.35 sits below even the modest peer floor, reflecting complete absence of process automation despite the institution managing four categories of legacy system debt. The P3 story for Zennify is therefore two-sided: compliance strength is the conversation opener; automation and fraud analytics are the investment opportunity.",
+        "heading": "Pillar 3: Operations, Risk & Compliance  ·  Score M2.07 vs Peer Median M2.00  (Gap +0.07)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Pillar 4 represents Access Credit Union's most urgent platform investment gap. Three of four P4 categories score at or near level 1.00 — Data Governance and Analytics & AI are complete zeros (every capability level 1.00); Cybersecurity at level 1.37 reflects a coordinator-level security function managing enterprise-scale risk. Only Technology Architecture (level 2.02) reflects genuine modern-adjacent capability — AWS, Docker, microservices, DevOps, Dynatrace APM are all deployed and confirmed. The CIO mandate explicitly includes Business Intelligence and Data Analytics — yet these exist only as aspiration, not execution. The gap between CIO Froese's stated mandate and operational reality is 0.02 in versus level 1.00 in and. This is the 'integration-machine-without-data-depth' paradox identified in the assessment synthesis.",
+        "heading": "Pillar 4: Data, Analytics & Technology  ·  Score M1.34 vs Peer Median M1.90  (Gap -0.55)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Six recommendations derived from the gap prioritization analysis. Each follows the mandatory protocol: ROOT CAUSE (evidence-cited gaps) → SOLUTION (Zennify offering + implementation approach) → EXPECTED OUTCOMES (table with baseline, target, and business impact). All six recommendations are validated as NOT currently deployed at Access Credit Union — confirmed via Exa semantic search, LeadIQ tech stack analysis, and 120-item evidence sweep."
+  },
+  "run_request_id": "DMA-ASM-ACCU-20260504-0001"
+}

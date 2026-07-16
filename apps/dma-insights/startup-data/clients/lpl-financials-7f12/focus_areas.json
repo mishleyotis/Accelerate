@@ -1,0 +1,61 @@
+{
+  "entity_display_id": "lpl-financials-7f12",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] 5 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring.",
+        "source_kind": "heuristic"
+      },
+      "id": "4be0c31e-cb56-45ef-81c6-b9dcc9d65284",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.5.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 20 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] 4 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring.",
+        "source_kind": "heuristic"
+      },
+      "id": "76d6ee8b-8f72-4351-9423-cb24df9ef3f2",
+      "involved_subcap_ids": [
+        "P3C3.2.1",
+        "P3C3.2.2",
+        "P3C3.2.3",
+        "P3C3.2.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Operationalize process automation",
+      "verbatim_quote": "Address the 4 P3 capability gaps as one operations + automation programme \u2014 payments, lending ops, and core."
+    }
+  ]
+}

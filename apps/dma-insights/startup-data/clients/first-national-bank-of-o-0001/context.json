@@ -1,0 +1,804 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "first-national-bank-of-o-0001",
+  "financials": {
+    "lines": [
+      "Note: Asset CAGR 2021\u20132025 ~9.9%. CCB adds ~$2.2B assets + $2.8B trust AUM. FNBO moved from 16th to 9th-largest bank in Kansas City by deposit share. [E-001, E-002, E-003, financial_baseline.json]",
+      "Trajectory Classification: ACCELERATING. CCB acquisition (+$2.2B assets, +$2.8B trust AUM) represents a step-change in scale. Revenue CAGR (~13.6%) outpaces asset growth \u2014 improving operational leverage from BaaS/embedded finance. [E-001, E-002, E-003, financial_baseline.json]"
+    ],
+    "metrics": {
+      "asset_cagr_2021": "2025 ~9.9%. CCB adds ~$2.2B assets + $2.8B t",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 5000,
+        "events": [
+          {
+            "fy": "FY2022",
+            "label": "AmeriFirst Financial (POS/home improvement lending)"
+          }
+        ],
+        "fy": [
+          "FY2016",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "Omaha, NE / Midwest (9 states post-CCB)",
+        "headline": "$31.0B assets \u00b7 FY2024",
+        "regulator": "OCC / FDIC (Member FDIC)",
+        "series": {
+          "net_income_m": [
+            null,
+            1200.0,
+            1400.0,
+            1500.0,
+            1900.0
+          ],
+          "total_assets": [
+            0.03,
+            24.0,
+            30.0,
+            30.78,
+            31.0
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Omaha",
+      "NE / Midwest (9 states post-CCB)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Clark Lauritzen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHAIRMAN PRESIDENT"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Matt Spyers",
+        "recent_hire": false,
+        "tenure_months": 19,
+        "title": "promoted from CTO Dec 2024"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kurt Spieler",
+        "recent_hire": true,
+        "tenure_months": 0,
+        "title": "retired Jan 2026"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rusty Vanneman, CFA, CMT",
+        "recent_hire": true,
+        "tenure_months": 6,
+        "title": "joined Jan 2026"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tammy Trilli",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP COMMERCIAL PAYMENTS"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brett Worick",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP PARTNERSHIP LENDING"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Barry Benson",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "Nov 2022\u2013present"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stacey Cole",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP AGRIBUSINESS BANKING"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sammy Sufian",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "Feb 2022\u2013present"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Laura Nelson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP MARKETING"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Nationally chartered",
+    "narrative_md": "FNBO is a nationally chartered, FDIC-insured bank headquartered at 1601 Dodge Street, Omaha, Nebraska 68197 \u2014 a new headquarters as of 2025. Founded in 1857, FNBO is one of the longest-operating privately held banks in the United States, operating as a subsidiary of First National of Nebraska, Inc. (FNNI), a multi-generational family holding company led by Chairman and President Clark Lauritzen.",
+    "primary_regulator": "OCC / FDIC (Member FDIC)",
+    "size_tier": "mid-size",
+    "thought_leadership": [
+      {
+        "author": "Kurt Spieler",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-116",
+        "excerpt": "Cashology by FNBO: multi-channel financial wellness community (website, podcast, YouTube, Facebook Group); FNBO financial experts answer questions; Consumer Financial Trends annual study (2025 AI study); personal finance",
+        "title": "Cashology by FNBO: multi-channel financial wellness community\u2026",
+        "type": "podcast",
+        "url": "https://www.fnbo.com/insights/podcast/cashology"
+      },
+      {
+        "author": "Barry Benson",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "Barry Benson publishes ag trend analysis: record cattle prices, precision agriculture, inflation impacts; FNBO Vault podcast on ag banking; demonstrates systematic industry monitoring and thought leadership in ag segment",
+        "title": "Barry Benson publishes ag record cattle prices, precision\u2026",
+        "type": "podcast",
+        "url": "https://www.fnbo.com/insights/commercial-business/2025/three-key-agribusiness-trends"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-058",
+        "excerpt": "Butterfield: 'accountable for accelerating innovation throughout enterprise; identifying disruptive business model threats; establishment & creation of new business models and fintech engagement; responsible for leading ",
+        "title": "Butterfield: 'accountable for accelerating innovation throughout\u2026",
+        "type": "article",
+        "url": "https://board.fastcompany.com/profile/Marc-Butterfield-SVP-Innovation-Disruption-First-National-Bank-of-Omaha-FNBO/cf3d59c1-d7f9-4d0a-b4a3-4f0642345102"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "Marc Butterfield: ABA Innovation Committee + ABA Investment Committee; Tearsheet Product Council; speaking at CX BFSI West Exchange 2024 ('Applying Learnings from Disruptive Banking to Your Digital Platforms'); UNL Raike",
+        "title": "Marc Butterfield: ABA Innovation Committee + ABA Investment\u2026",
+        "type": "conference",
+        "url": "https://futuredigitalfinance.wbresearch.com/speakers/marc-butterfield"
+      },
+      {
+        "author": "Tammy Trilli",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-064",
+        "excerpt": "FNBO has a dedicated 'Innovation Insights' section on website \u2014 institutional commitment to innovation thought leadership; Tammy Trilli featured in PYMNTS eBook 'The Innovation Mindset: How to Achieve It in 2025'; GenAI ",
+        "title": "GenAI strategy focused on fraud prevention, payments, personalization",
+        "type": "article",
+        "url": "https://www.fnbo.com/insights/innovation"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-065",
+        "excerpt": "'Milli Bank is an amazing product incubated within FNBO's Innovation & Disruption team'; 'Brent Hanson is adding an Innovation Product Manager'; Marc Butterfield invites FNBO 'I&D team' congratulations; demonstrates form",
+        "title": "Marc Butterfield invites FNBO 'I&D team' congratulations",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/marc-butterfield-0263281_greenlight-announces-family-cash-card-the-activity-6932392302564843520-2QcP"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "982910a1-2f58-4813-905b-05006d18cfc6",
+      "issue_id": "GAP-1-P1C1.6.1",
+      "linked_subcap_ids": [
+        "P1C1.6.1"
+      ],
+      "opened_on": "2026-05-18",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). Private bank \u2014 no public disclosure of formal 3-5yr digital roadmap document. Strategy evidenced through actions (acquisitions, partnerships) not documented strategic plans. M2: strategy inferred from actions; no public formal planning artifact.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Digital KPI Framework"
+    },
+    {
+      "id": "cffcbe2e-7e36-48bf-82c7-f4cb87d689bc",
+      "issue_id": "GAP-2-P1C1.6.2",
+      "linked_subcap_ids": [
+        "P1C1.6.2"
+      ],
+      "opened_on": "2026-05-18",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). Private bank \u2014 no public disclosure of formal 3-5yr digital roadmap document. Strategy evidenced through actions (acquisitions, partnerships) not documented strategic plans. M2: strategy inferred from actions; no public formal planning artifact.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Business Outcome Linkage"
+    },
+    {
+      "id": "7fa3aad1-2dc2-4fc4-a39a-643645b34dab",
+      "issue_id": "GAP-3-P1C1.6.3",
+      "linked_subcap_ids": [
+        "P1C1.6.3"
+      ],
+      "opened_on": "2026-05-18",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). Private bank \u2014 no public disclosure of formal 3-5yr digital roadmap document. Strategy evidenced through actions (acquisitions, partnerships) not documented strategic plans. M2: strategy inferred from actions; no public formal planning artifact.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Customer Experience Metrics"
+    },
+    {
+      "id": "d07962e2-0911-4a4e-8889-3fdc49593bbe",
+      "issue_id": "GAP-4-P1C1.6.4",
+      "linked_subcap_ids": [
+        "P1C1.6.4"
+      ],
+      "opened_on": "2026-05-18",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). Private bank \u2014 no public disclosure of formal 3-5yr digital roadmap document. Strategy evidenced through actions (acquisitions, partnerships) not documented strategic plans. M2: strategy inferred from actions; no public formal planning artifact.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Adoption Metrics"
+    },
+    {
+      "id": "78476959-b8e9-47bc-b2ed-1b1c954a2b24",
+      "issue_id": "GAP-5-P1C1.6.5",
+      "linked_subcap_ids": [
+        "P1C1.6.5"
+      ],
+      "opened_on": "2026-05-18",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). Private bank \u2014 no public disclosure of formal 3-5yr digital roadmap document. Strategy evidenced through actions (acquisitions, partnerships) not documented strategic plans. M2: strategy inferred from actions; no public formal planning artifact.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Efficiency Metrics"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Six MATERIAL issues impose scoring caps across 9 categories. Severity caps: MATERIAL\u2192max 3.0; MINOR\u2192max 4.0. the other capabilities that build on it checked: no cascading caps triggered (all pillar category scores above 2.5 thresholds).",
+    "trend_md": "Most recent reported financials: $31.0B assets as of FY2024, within a series tracked FY2016 to FY2024. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.46,
+        "P1C2": 3.17,
+        "P1C3": 3.47,
+        "P1C4": 3.5,
+        "P2C1": 2.99,
+        "P2C2": 3.71,
+        "P2C3": 3.12,
+        "P2C4": 3.02,
+        "P3C1": 3.38,
+        "P3C2": 3.16,
+        "P3C3": 3.77,
+        "P3C4": 3.29,
+        "P4C1": 2.55,
+        "P4C2": 3.22,
+        "P4C3": 3.32,
+        "P4C4": 3.32
+      },
+      "overall_score": 3.28,
+      "peer_name": "Amarillo National Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.16,
+        "P1C2": 3.99,
+        "P1C3": 2.44,
+        "P1C4": 3.05,
+        "P2C1": 2.9,
+        "P2C2": 2.24,
+        "P2C3": 2.49,
+        "P2C4": 1.91,
+        "P3C1": 2.99,
+        "P3C2": 3.95,
+        "P3C3": 3.86,
+        "P3C4": 3.17,
+        "P4C1": 3.1,
+        "P4C2": 2.45,
+        "P4C3": 2.89,
+        "P4C4": 3.98
+      },
+      "overall_score": 3.04,
+      "peer_name": "Wintrust Financial Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.71,
+        "P1C2": 3.1,
+        "P1C3": 2.53,
+        "P1C4": 2.67,
+        "P1C5": 3.0,
+        "P2C1": 3.09,
+        "P2C2": 2.97,
+        "P2C3": 2.51,
+        "P2C4": 3.0,
+        "P3C1": 2.85,
+        "P3C2": 2.15,
+        "P3C3": 2.26,
+        "P3C4": 3.07,
+        "P4C1": 3.19,
+        "P4C2": 2.65,
+        "P4C3": 3.67,
+        "P4C4": 4.37
+      },
+      "overall_score": 2.93,
+      "peer_name": "Beacon Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.2,
+        "P1C2": 3.2,
+        "P1C3": 2.68,
+        "P1C4": 3.16,
+        "P1C5": 2.82,
+        "P2C1": 1.66,
+        "P2C2": 2.78,
+        "P2C3": 2.33,
+        "P2C4": 1.79,
+        "P3C1": 3.0,
+        "P3C2": 3.25,
+        "P3C3": 3.21,
+        "P3C4": 3.12,
+        "P4C1": 3.01,
+        "P4C2": 2.57,
+        "P4C3": 2.85,
+        "P4C4": 3.2
+      },
+      "overall_score": 2.81,
+      "peer_name": "American National Bank of Texas",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.3,
+        "P1C2": 2.5,
+        "P1C3": 3.33,
+        "P1C4": 3.25,
+        "P1C5": 2.5,
+        "P2C1": 2.75,
+        "P2C2": 2.5,
+        "P2C3": 2.63,
+        "P2C4": 2.0,
+        "P3C1": 2.33,
+        "P3C2": 2.83,
+        "P3C3": 2.5,
+        "P3C4": 2.67,
+        "P4C1": 2.25,
+        "P4C2": 3.0,
+        "P4C3": 2.83,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.73,
+      "peer_name": "Bank of Utah",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-FNBO-20260518-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "FNBO Indeed ratings: Overall 3.7/5; Culture & Values 3.6; Work-Life Balance 3.7; Compensation 3.8; Wellbeing: Above Average for happiness, satisfaction, inclusion, flexibility, trust, purpose; CEO approval 58.9%; recommend fr",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": "App Store reviews note friction for rural users with 2024 login change",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "nsfers; Zelle P2P; card controls (lock/unlock); Apple Store/Google Play apps",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "approved 27% more borrowers; 16% lower average APRs; CFPB no-action letter validated regulatory acceptance; demonstrates live production AI in underwriting",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": 27.0
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Verafin Agentic Sanctions Analyst + EDD Analyst live (The Banker). Enterprise AI platform gap confirmed",
+      "date_precision": "month",
+      "e_id": "E-131",
+      "event_date": "2026-05-01",
+      "evidence_e_ids": [
+        "E-131"
+      ],
+      "id": "6dfe752b-1dd0-4d3a-ac59-190f58110d5a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Verafin Agentic Sanctions Analyst + EDD Analyst live"
+    },
+    {
+      "body": "Director, AI Adoption & Workforce Enablement created (Hennigs). Agentforce champion named",
+      "date_precision": "month",
+      "e_id": "E-151",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-151"
+      ],
+      "id": "c405070f-bf02-459a-8de6-3abba723c7f9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Director, AI Adoption & Workforce Enablement created"
+    },
+    {
+      "body": "Pindrop Fraud Assist GenAI deployed (deepfake + IVR). Agentic AI fragmentation deepens",
+      "date_precision": "month",
+      "e_id": "E-130",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-130"
+      ],
+      "id": "101d9a02-f14e-461d-9de0-ec7d886bf2da",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Pindrop Fraud Assist GenAI deployed"
+    },
+    {
+      "body": "CCB acquisition closed \u2014 Country Club Bank division of FNBO. HIGHEST URGENCY Salesforce window",
+      "date_precision": "day",
+      "e_id": "E-002",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "a98e890a-851d-458f-967b-333caafa9d04",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CCB acquisition closed Country Club Bank division of FNBO"
+    },
+    {
+      "body": "FNBO Developer Circle launched \u2014 Salesforce Experience Hub. 3rd SFDC product confirmed",
+      "date_precision": "month",
+      "e_id": "E-156",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-156"
+      ],
+      "id": "4f9cf0b5-d237-427d-8fb6-5f6beb2b67b0",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "FNBO Developer Circle launched"
+    },
+    {
+      "body": "2026 integration window opens",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "878e7bcd-64d8-4d02-b671-88cb1c13c9ac",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CCB acquisition announced"
+    },
+    {
+      "body": "Expand to Kansas City (16th\u21929th by deposit share); add trust, capital markets, M&A advisory; second family-owned private bank \u2014 FSC + Marketing Cloud + MuleSoft + CoE \u2014 ALL tied to CCB integration. HIGHEST URGENCY Salesforce engagement window.",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-145"
+      ],
+      "id": "17e01e46-ed41-4d65-981d-d31d47730fbb",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CCB Financial Corporation / Country Club Bank"
+    },
+    {
+      "body": "GenAI governance framework needed",
+      "date_precision": "month",
+      "e_id": "E-155",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-155"
+      ],
+      "id": "197169f4-3b38-4989-8b05-c7721d5a71ce",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Cory Mann: GenAI in production at FNBO"
+    },
+    {
+      "body": "Agentforce opportunity \u2014 AI fragmentation begins",
+      "date_precision": "month",
+      "e_id": "E-131",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-131"
+      ],
+      "id": "e0738e1f-4a7b-4186-875b-f3e6e7732172",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Verafin Agentic AI announced"
+    },
+    {
+      "body": "Milli Bank closed \u2014 experiment rationalized. Focus shift to production platforms",
+      "date_precision": "day",
+      "e_id": "E-120",
+      "event_date": "2024-11-15",
+      "evidence_e_ids": [
+        "E-120"
+      ],
+      "id": "ff4f6927-f830-4d0f-aba4-d540720f7017",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Experiment rationalized"
+    },
+    {
+      "body": "Slice\u00ae by FNBO launched (AmeriFirst rebrand; 70% instant decisions). AI-driven POS lending",
+      "date_precision": "month",
+      "e_id": "E-102",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "4f39814c-5b22-4eba-bafa-cdacf68243b3",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Slice\u00ae by FNBO launched (AmeriFirst rebrand; 70% instant\u2026"
+    },
+    {
+      "body": "ACH REST APIs + webhooks \u2014 top-15 ACH processor. Developer Circle foundation",
+      "date_precision": "month",
+      "e_id": "E-157",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-157"
+      ],
+      "id": "b6a3ef76-d1f3-4745-846d-cdab45cca714",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "ACH REST APIs + webhooks"
+    },
+    {
+      "body": "CATCH Intelligence DG KickStart \u2014 10/10 CSAT. Data Cloud governance readiness",
+      "date_precision": "quarter",
+      "e_id": "E-154",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-154"
+      ],
+      "id": "5c4db28d-d6ac-4585-a0a0-9a9a51097e4c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Catch Intelligence DG KickStart"
+    },
+    {
+      "body": "Prove Pre-Fill deployed \u2014 device-based IDV. Fraud-resistant digital onboarding",
+      "date_precision": "quarter",
+      "e_id": "E-101",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "77467365-4fd2-4905-a5a2-0bf3f34211bc",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Prove Pre-Fill deployed"
+    },
+    {
+      "body": "Centime partnership \u2014 ACH + AP/AR automation. Commercial payments automation",
+      "date_precision": "month",
+      "e_id": "E-063",
+      "event_date": "2023-11-01",
+      "evidence_e_ids": [
+        "E-063"
+      ],
+      "id": "178493b1-88bc-47b9-ab21-815c81fd3c6d",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Centime partnership"
+    },
+    {
+      "body": "Mobile payments modernization",
+      "date_precision": "month",
+      "e_id": "E-025",
+      "event_date": "2023-08-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "5aff95b8-ee54-4b45-ac7c-ce63dddfce8d",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "FNBO + Visa digital wallet partnership"
+    },
+    {
+      "body": "Embedded finance strategy confirmed",
+      "date_precision": "month",
+      "e_id": "E-103",
+      "event_date": "2022-08-01",
+      "evidence_e_ids": [
+        "E-103"
+      ],
+      "id": "5c46d1ba-44f8-4ed0-bb49-d89496c5aaa7",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Bend by FNBO CaaS platform launched"
+    },
+    {
+      "body": "M&A capability acquisition",
+      "date_precision": "year",
+      "e_id": "E-102",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "5e933424-de2b-4683-a483-dd2f26c673f8",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AmeriFirst acquisition (POS/home improvement lending)"
+    },
+    {
+      "body": "Expand consumer lending into POS/home improvement; complement FNBO Direct digital lending \u2014 Rebranded as Slice\u00ae by FNBO Nov 2024 with AI-driven instant decisions (70%); nCino Consumer + Slice integration",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-120"
+      ],
+      "id": "0229aaee-a0ed-473c-bc06-6bb1931e24fe",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AmeriFirst Financial (POS/home improvement lending)"
+    },
+    {
+      "body": "CaaS foundation laid",
+      "date_precision": "month",
+      "e_id": "E-103",
+      "event_date": "2021-12-01",
+      "evidence_e_ids": [
+        "E-103",
+        "E-106"
+      ],
+      "id": "7efc49e5-9a64-4aca-9d9a-bdea167f4a55",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Upstart expansion + Marqeta partnership"
+    },
+    {
+      "body": "nCino deployment begins \u2014 Commercial/CRE credit origination. SFDC ecosystem entry \u2014 FSC/MuleSoft anchor",
+      "date_precision": "year",
+      "e_id": "E-091",
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "26486530-72bf-4e0c-ba0e-d338e39fd5ec",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "NCino deployment begins"
+    },
+    {
+      "body": "Upstart AI personal loans \u2014 76% instant approvals, NPS 83. First AI-native product",
+      "date_precision": "month",
+      "e_id": "E-106",
+      "event_date": "2019-11-01",
+      "evidence_e_ids": [
+        "E-106"
+      ],
+      "id": "de17f007-0109-4f23-9f08-485992167fa9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Upstart AI personal loans"
+    },
+    {
+      "body": "FNBO Direct launched \u2014 online savings/banking. Digital-first anchor; still active",
+      "date_precision": "year",
+      "e_id": "E-025",
+      "event_date": "2006-01-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "d93fc8ad-cc80-4a30-adfc-0b281b25ecfb",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "FNBO Direct launched"
+    }
+  ]
+}

@@ -1,0 +1,1064 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 152
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 225
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 112
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 72
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "mission-federal-credit-u-0001",
+    "domain": null,
+    "hq": null,
+    "id": "6570bff1-e8b4-4341-ac10-b53d5ebefb59",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Mission Federal Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:13.207457Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 17,
+    "current_count": 120,
+    "dated_count": 3,
+    "median_age_months": 6.6,
+    "oldest_published_date": "2023-10-01",
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 140,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "POSITIVE": 140
+    },
+    "connectors": {
+      "Explorium": 1,
+      "Glassdoor": 1,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 9,
+      "NEUTRAL": 113,
+      "POSITIVE": 18
+    },
+    "tiers": {
+      "T1": 1,
+      "T2": 52,
+      "T3": 78,
+      "T4": 9
+    },
+    "total_facts": 697,
+    "total_items": 140
+  },
+  "financial_trajectory": null,
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 6600000000.0,
+    "branches": 34,
+    "cagr": "7.2%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Financial Trajectory: ACCELERATING — Record net income, top 1% deposit growth, exceeded loan production and deposit goals, 9.1% asset growth year-over-year. This financial strength signals strong capacity for multi-year technology investment [E-015, Annual Report 2024].",
+        "Key Operational Metrics (2024 Annual Report):",
+        "• 78% of digital members accessed Digital Banking [Annual Report]",
+        "• Over 2.15 million transactions processed at branches [Annual Report]",
+        "• 105,453 members used Zelle — 34% year-over-year increase [Annual Report]",
+        "• 20,000 personalized member consultations delivered [Annual Report]",
+        "• 44,000+ members used SavvyMoney credit assistance tools [Annual Report]",
+        "• $1.9M in down payment grants disbursed [Annual Report]",
+        "• 4.8/5 member satisfaction score [E-065]",
+        "• 4.9/5 Apple App Store rating [Annual Report]"
+      ],
+      "zelle": "34% year-over-year increase [Annual Report"
+    },
+    "footprint": "San Diego County, California",
+    "footprint_basis": "derived:geography",
+    "geography": "San Diego County, California",
+    "headcount": 694,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Doug Wright",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Steve Hasbrooke",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Rob Miller",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Jojo Seva",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Vince Nowicki",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CLO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Neville Billimoria",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Marketing & Membership Growth"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Angelica Gamble-Wong",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Talent & Culture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jason Bowser",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Branch Network"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Mission Federal Credit Union",
+    "license_type": "Federal Credit Union",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Mission Federal Credit Union is a credit union. It reports $6.6 billion in total assets. It is regulated by NCUA (National Credit Union Administration) and employs approximately 694 people across 34 branches. Its overall digital maturity is assessed at 2.4 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (National Credit Union Administration)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.8,
+          "source": "App Store"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.8,
+          "source": "Google Play"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "content: employee stories, community events, ERG activities Glassdoor employee: 'award winning training department to assist in developing staff' 34-year employee: 'completed numerous in-person and online training classes and seminars durin",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "4.8/5",
+          "signal": "4.8/5 member satisfaction score tracked as KPI 4.9/5 Apple App Store rating (pre-redesign) Mission Fed received 'Best in Show' Innovative Marketing Award among credit unions (Jan 2026) Marketing innovation recognized at industry level No re",
+          "source": "App Store"
+        },
+        {
+          "rating": "4.8/5",
+          "signal": "in annual report — formal VOC metric App Store and Google Play review monitoring with structured response process — digital VOC channel 4.8/5 member satisfaction as primary service KPI (annual report) Over 2.15 million transactions processe",
+          "source": "Google Play"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-157",
+        "excerpt": "Three privacy policies published: CA Financial Privacy, CCPA/CPRA, Federal Privacy Modern encryption for Online and Mobile Banking (per IT security blog post)",
+        "title": "Three privacy policies published",
+        "type": "blog",
+        "url": "https://www.missionfed.com/privacy-policy"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "Website: missionfed.com with full product pages, online applications, blog/news, community pages Social media: Facebook, Instagram, Twitter/X, LinkedIn — active posting cadence",
+        "title": "Website: missionfed.com with full product pages, online applications…",
+        "type": "blog",
+        "url": "https://www.missionfed.com"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-058",
+        "excerpt": "News/Stories blog section with regular press releases and financial education articles Business Wire in tech stack for PR distribution",
+        "title": "News/Stories blog section with regular press releases and financial…",
+        "type": "blog",
+        "url": "https://www.missionfed.com/news-stories/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-046",
+        "excerpt": "Talent and Culture department (email: talentandculture@missionfed.com) — HR rebranded as culture function LinkedIn posts feature behind-the-scenes content: employee stories, community events, ERG activities",
+        "title": "Talent and Culture department (email: talentandculture@missionfed.com)",
+        "type": "linkedin-post",
+        "url": "https://www.glassdoor.com/Reviews/Mission-Federal-Credit-Union-Reviews-E366597.htm"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-110",
+        "excerpt": "LogicManager deployed as risk/compliance management platform — supports compliance monitoring workflows Annual security audit performed on internal systems (MFCU IT security blog post)",
+        "title": "LogicManager deployed as risk/compliance management platform",
+        "type": "blog",
+        "url": "N/A"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-158",
+        "excerpt": "Subscribed to security industry alerts for threat intelligence (per IT blog post) 23% card fraud reduction = effective threat detection and response",
+        "title": "Subscribed to security industry alerts for threat intelligence (per…",
+        "type": "blog",
+        "url": "N/A"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "missionfed.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.385916+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Mission Federal Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "DMA Assessment Report Synthesis",
+    "scqa_md": "Mission Federal Credit Union is a $6.6B in assets credit union regulated by NCUA (National Credit Union Administration) with 694 employees. A 7.2% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-014, E-015]. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is ESG Policy Framework at 1.8/5 against a 2.0 peer median [E-053, E-017].\n\nNext is AI Ethics & Fairness at 2.0/5 against a 2.8 peer median [E-023, E-024]. Third is Academic Partnerships at 2.2/5 against a 3.0 peer median [E-021, E-035]. The issue register adds Report references 2 E-IDs not in registry: ['', ''] (high severity). Counter-signal: Fraud Intelligence already runs at 2.7/5 against a 2.5 peer median — a strength to build on, not rebuild.\n\nThe roster shows no CDO — a named ownership gap for the capabilities below. The question for Mission Federal Credit Union is whether to close ESG Policy Framework first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Mission Federal Credit Union should lead with nCino (77/100 fit) against Dependency Management, then sequence Tableau behind it. Closing ESG Policy Framework to the peer median alone is worth 0.2 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.42,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/DMA_Assessment_Report_MFCU.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 71 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.440012+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/DMA_Client_Profile_Report_MFCU.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 54 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.440867+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 29 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.441779+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.442517+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.442831+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/report_validation_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.443217+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priorities_validated.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.443716+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 27
+    },
+    "stage_ms": {
+      "manifest": 12,
+      "parse": 10719,
+      "persist": 2190
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/qa_verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "institution_name backfilled from folder name",
+        "detail": "institution_name backfilled from folder name: 'Mission Federal Credit Union'",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'SV2'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 707 subcaps from DMA_Assessment_Workbook",
+        "detail": "xlsx fallback extracted 707 subcaps from DMA_Assessment_Workbook_MFCU.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:missing_required_columns:P1 Strategy & Culture",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:missing_required_columns:P2 Member Engagement",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:missing_required_columns:P3 Operations & Risk",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:missing_required_columns:P4 Data & Technology",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 2 candidate(s) rejected by taxonomy (e.g. 'Wire; Wire')",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 118 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Report_MFCU.docx leadership=8 focus_areas=9 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=49 subcaps=17 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 7 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/DMA_Assessment_Report_MFCU.md — no fingerprint matched (best confidence 0.00); 71 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/DMA_Client_Profile_Report_MFCU.md — no fingerprint matched (best confidence 0.00); 54 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 29 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/report_validation_results.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priorities_validated.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 6",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/qa_verdict.json",
+      "institution_name backfilled from folder name: 'Mission Federal Credit Union'",
+      "subvertical derived from report artifacts: 'SV2'",
+      "xlsx fallback extracted 707 subcaps from DMA_Assessment_Workbook_MFCU.xlsx",
+      "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_workbook)",
+      "research_workbook:missing_required_columns:P1 Strategy & Culture",
+      "research_workbook:missing_required_columns:P2 Member Engagement",
+      "research_workbook:missing_required_columns:P3 Operations & Risk",
+      "research_workbook:missing_required_columns:P4 Data & Technology",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "DEGRADED:techstack_noise_dropped: 2 candidate(s) rejected by taxonomy (e.g. 'Wire; Wire')",
+      "tech_stack_from_variant_source: 118 entries",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Report_MFCU.docx leadership=8 focus_areas=9 facts_extracted=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=49 subcaps=17 replaced_docx_scqa=True",
+      "used docx-extracted recommendations: 7 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 6",
+      "INFO/pattern_gap: 04_reports/DMA_Assessment_Report_MFCU.md — no fingerprint matched (best confidence 0.00); 71 generic sections mined",
+      "INFO/pattern_gap: 04_reports/DMA_Client_Profile_Report_MFCU.md — no fingerprint matched (best confidence 0.00); 54 generic sections mined",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 29 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/report_validation_results.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priorities_validated.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 4",
+      "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 6"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 2.69,
+      "pillar_id": "P1",
+      "score": 2.13,
+      "subcaps_scored": 173
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.57,
+      "pillar_id": "P2",
+      "score": 2.36,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.63,
+      "pillar_id": "P3",
+      "score": 2.6,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.58,
+      "pillar_id": "P4",
+      "score": 2.57,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-12",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:13.207457Z",
+    "created_at": "2026-07-02T23:11:13.207457Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "e1546c17-bbbd-4c97-94e3-96ed77dcea69",
+    "overall_score": null,
+    "request_id": "DMA-ASM-MFCU-20260412-0001",
+    "started_at": "2026-07-02T23:11:13.207457Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.8,
+        "source": "App Store"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.8,
+        "source": "Google Play"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Enhancing member services — Evidenced by 4.8/5 member satisfaction score, 20,000 personalized consultations in 2024, SavvyMoney credit assistance for 44,000+ members, Quick-Switch Direct Deposit, and Digital Member ID Card launch [E-065, Annual Report 2024].",
+      "evidence": [
+        "E-065",
+        "E-021",
+        "E-035",
+        "E-056"
+      ],
+      "magnitude": "0.2 pts below peer median",
+      "name": "Enhancing member services",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.3,
+      "so_what": "Prioritize Enhancing member services in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Enhancing member services",
+      "what": "Enhancing member services — Evidenced by 4.8/5 member satisfaction score, 20,000 personalized consultations in 2024, SavvyMoney credit assistance for 44,000+ members, Quick-Switch Direct Deposit, and Digital Member ID Card launch [E-065, Annual Report 2024].",
+      "why": "The linked evidence records: Online new member application available at missionfed.com/apps/joinnow/ 34,188 new accounts opened in 2024 (annual report) — volume metric tracked"
+    },
+    {
+      "body": "• CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics and process improvement\" and \"increasing efficiencies through the use of technology\" [E-020].",
+      "evidence": [
+        "E-020",
+        "E-127",
+        "E-027",
+        "E-123"
+      ],
+      "magnitude": null,
+      "name": "CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics…",
+      "peer_median": 2.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.48,
+      "so_what": "Protect CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics… as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics…",
+      "what": "• CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics and process improvement\" and \"increasing efficiencies through the use of technology\". [E-020].",
+      "why": "The linked evidence records: Top 5 California credit unions on Forbes Best-In-State list Top Workplaces USA designation 2024 with Culture Excellence awards"
+    },
+    {
+      "body": "• Record financial performance: $73.2M net income, $5.8B deposits, $4.6B loans, 34,188 new accounts in 2024 — financial capacity for multi-year technology investment [E-015].",
+      "evidence": [
+        "E-015",
+        "E-017",
+        "E-033",
+        "E-052"
+      ],
+      "magnitude": "$73.2M",
+      "name": "Record financial performance",
+      "peer_median": 2.0,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.79,
+      "so_what": "Prioritize Record financial performance in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Record financial performance",
+      "what": "• Record financial performance: $73.2M net income, $5.8B deposits, $4.6B loans, 34,188 new accounts in 2024 — financial capacity for multi-year technology investment [E-015].",
+      "why": "The linked evidence records: CEO Wright: 'Our vision is really around financial empowerment' Wright on shared vision: 'My job as a leader is to develop and establish a vision. But that vision should be a shared vision'"
+    },
+    {
+      "body": "Deepening community impact — Evidenced by $1.2M+ community giving, Juntos Avanzamos designation (first SD-based CU), Girl Scouts San Diego Official CU partnership (1,400 new accounts), San Diego Padres brand partnership, and SD Symphony 10-year naming deal [E-060, E-067, E-068].",
+      "evidence": [
+        "E-060",
+        "E-067",
+        "E-068",
+        "E-017"
+      ],
+      "magnitude": "$1.2M",
+      "name": "Deepening community impact — Evidenced by $1.2M+ community giving…",
+      "peer_median": 2.0,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.79,
+      "so_what": "Prioritize Deepening community impact — Evidenced by $1.2M+ community giving… in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Deepening community impact — Evidenced by $1.2M+ community giving…",
+      "what": "Deepening community impact — Evidenced by $1.2M+ community giving, Juntos Avanzamos designation (first SD-based CU), Girl Scouts San Diego Official CU partnership (1,400 new accounts), San Diego Padres brand partnership, and SD Symphony 10-year naming deal [E-060, E-067, E-068].",
+      "why": "The linked evidence records: HubSpot Marketing Hub deployed — email marketing, automation workflows, campaign management Google DoubleClick + PubMatic + Rubicon Project + Simpli.fi for programmatic advertising automation"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-020"
+      ],
+      "modifiers": [
+        "147 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Segment-Specific Journeys averages 2.2/5 over 167 scored subcaps; ceiling 2.7 reflects thin evidence density (20/167 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-024"
+      ],
+      "modifiers": [
+        "200 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "AI Ethics & Fairness averages 2.0/5 over 217 scored subcaps; ceiling 2.5 reflects thin evidence density (17/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-038"
+      ],
+      "modifiers": [
+        "182 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Academic Partnerships averages 2.2/5 over 192 scored subcaps; ceiling 2.7 reflects thin evidence density (10/192 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-048"
+      ],
+      "modifiers": [
+        "155 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "UAT Planning & Execution averages 2.3/5 over 205 scored subcaps; ceiling 2.9 reflects thin evidence density (50/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-017"
+      ],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Policy Framework averages 1.8/5 over 70 scored subcaps; ceiling 2.3 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-063"
+      ],
+      "modifiers": [
+        "283 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Competitive Marketing Intelligence averages 2.3/5 over 293 scored subcaps; ceiling 2.8 reflects thin evidence density (10/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Accessible Application Design averages 2.4/5 over 291 scored subcaps; ceiling 2.9 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-082"
+      ],
+      "modifiers": [
+        "259 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Assisted Service Channels averages 2.5/5 over 289 scored subcaps; ceiling 3.0 reflects thin evidence density (30/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-089"
+      ],
+      "modifiers": [
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "CLV-Based Segmentation averages 2.3/5 over 259 scored subcaps; ceiling 2.8 reflects thin evidence density (0/259 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "AI-Enhanced Automation averages 2.5/5 over 146 scored subcaps; ceiling 3.0 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-102"
+      ],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Fraud Intelligence averages 2.7/5 over 130 scored subcaps; ceiling 3.2 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-113"
+      ],
+      "modifiers": [
+        "137 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Complaint Management averages 2.6/5 over 142 scored subcaps; ceiling 3.1 reflects thin evidence density (5/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-114"
+      ],
+      "modifiers": [
+        "135 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Post-Incident Review averages 2.6/5 over 145 scored subcaps; ceiling 3.1 reflects thin evidence density (10/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.3,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-130"
+      ],
+      "modifiers": [],
+      "rationale": "Governed Federation of External Data Sources averages 2.5/5 over 200 scored subcaps; ceiling 3.5 reflects solid evidence density (200/200 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.3,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-137"
+      ],
+      "modifiers": [],
+      "rationale": "RAG Cost/Performance Governance averages 2.6/5 over 270 scored subcaps; ceiling 3.6 reflects solid evidence density (270/270 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-146"
+      ],
+      "modifiers": [
+        "215 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Runbooks for Data Pipelines averages 2.6/5 over 235 scored subcaps; ceiling 3.1 reflects thin evidence density (20/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-157"
+      ],
+      "modifiers": [
+        "145 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Application Security averages 2.7/5 over 150 scored subcaps; ceiling 3.2 reflects thin evidence density (5/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "regulatory",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Clean regulatory standing. No NCUA enforcement actions found (Batch 1 negative search) (Apr 2026).",
+      "evidence": [
+        "E-030"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Clean regulatory standing",
+      "metric": null,
+      "peer_context": "ESG Policy Framework runs 1.79/5 vs a 2.00 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Clean regulatory standing. No NCUA enforcement actions found (Batch 1 negative search) (Apr 2026). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Clean regulatory standing"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Hiring Enterprise Data & Analytics Data Architect ($120-140K) Analytics/BI stack: MicroStrategy, Power BI, Databricks, Azure Data Lake - models in use",
+      "evidence": [
+        "E-027"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Hiring Enterprise Data & Analytics Data Architect…",
+      "metric": "Analytics Data Architect $120",
+      "peer_context": "ESG Policy Framework runs 1.79/5 vs a 2.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Hiring Enterprise Data & Analytics Data Architect ($120-140K) Analytics/BI stack: MicroStrategy, Power BI, Databricks, Azure Data Lake - models in use. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Major digital banking platform redesign launched. Major digital banking platform redesign launched September 23, 2025 (Sep 2025).",
+      "evidence": [
+        "E-016"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Major digital banking platform redesign launched",
+      "metric": null,
+      "peer_context": "ESG Policy Framework runs 1.79/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Dependency Management — highest-fit surface at 77/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Major digital banking platform redesign launched. Major digital banking platform redesign launched September 23, 2025 (Sep 2025).",
+      "timeline": {
+        "date": "2025-09-23",
+        "event": "Major digital banking platform redesign launched"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "SDCCU and Cal Coast CU announced merger creating $13.5B entity in San Diego market (Apr 2025).",
+      "evidence": [
+        "E-022"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Sdccu and Cal Coast CU announced merger creating $13.5B…",
+      "metric": "announced merger creating $13.5B",
+      "peer_context": "ESG Policy Framework runs 1.79/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Dependency Management — highest-fit surface at 77/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "SDCCU and Cal Coast CU announced merger creating $13.5B entity in San Diego market (Apr 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-04-01",
+        "event": "Sdccu and Cal Coast CU announced merger creating $13.5B…"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "ESG Policy Framework scores 1.79/5 vs a typical 2.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-053",
+        "E-017",
+        "E-033",
+        "E-052"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "ESG Policy Framework scores 1.79/5",
+      "metric": "ESG Policy Framework 1.79/5 vs peer 2.00",
+      "peer_context": "ESG Policy Framework runs 1.79/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Dependency Management — highest-fit surface at 77/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "ESG Policy Framework scores 1.79/5 vs a typical 2.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

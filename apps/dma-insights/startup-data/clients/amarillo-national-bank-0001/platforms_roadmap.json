@@ -1,0 +1,263 @@
+{
+  "entity_display_id": "amarillo-national-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Data Foundation Remediation \u2014 MDM + CDP + Governance"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.01",
+          "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Onboarding Leadership Extension \u2014 FSC Lifecycle on MANTL Platform"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.01",
+          "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Unified Relationship Servicing on Data Cloud Foundation"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Omnichannel Servicing with Agentforce AI"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Customer Insight Foundation \u2014 MarTech & VOC Platform"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C1, P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Process Automation via API-Led Architecture"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "AI-Augmented Fraud & Risk Operations"
+        },
+        {
+          "feature": "Slack",
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Innovation Collaboration Hub \u2014 Slack Quick Win"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "Integration Platform Modernization \u2014 Shared with Rec 1"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.01",
+          "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-1",
+          "title": "launching without Data Cloud foundation yields partial outcomes and re-work risk."
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C1, P2C1"
+    },
+    {
+      "customer_impact": {
+        "Compliance Automation for $": "10B",
+        "Outcome": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-10",
+          "title": "Third-Party Risk Management Platform"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.01",
+          "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.99 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-11",
+          "title": "Salesforce Shield + AI Threat Detection"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+1.45",
+          "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 score 2.55 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-12",
+          "title": "Digital Culture Enablement \u2014 Slack + Experience Cloud"
+        },
+        {
+          "feature": null,
+          "maturity_lift": null,
+          "metric": "Compliance Automation for $10B",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Compliance Automation for $10B",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-13",
+          "title": "Compliance Automation for $10B CFPB Supervisory Threshold"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C1, P2C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ANB-20260420-0001",
+  "total_duration_months": 12
+}

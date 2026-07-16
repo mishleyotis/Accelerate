@@ -1,0 +1,765 @@
+{
+  "entity_display_id": "tristate-capital-holding-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4.8.4",
+        "P1C4",
+        "P1C4.1.4",
+        "P1C1.5.1",
+        "P1C3.4.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "a7a1159d-354c-43c5-9c3f-79e1106e2a9f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-054",
+        "E-056",
+        "E-055"
+      ],
+      "linked_subcap_id": "P1C4.8.4",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Customer-Centric Culture a near-term focus for TriState Capital Holdings, Inc.: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-055].",
+      "source_rec_id": "REC-01",
+      "theme": "Culture & Change",
+      "title": "Customer-Centric Culture",
+      "what_text": "Customer-Centric Culture is one of TriState Capital Holdings, Inc.'s least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E-056].",
+      "why_text": "The assessment found: “RJF acquisition = major organizational change event with integration planning and stakeholder management Key leadership retained post-acquisition (Getz, Fetterolf, Riddle) - change continuity” [E-054]. At 1.0 out of 5, Customer-Centric Culture sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C5.4.2",
+        "P1C5",
+        "P1C5.2.2",
+        "P1C1.5.1",
+        "P1C1.3.4",
+        "P1C5.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "9adcc8c7-de56-4f41-b5dc-071cd7d86fd9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-057"
+      ],
+      "linked_subcap_id": "P1C5.4.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make this capability a near-term focus for TriState Capital Holdings, Inc.: a scoped investment here would lift it from 1.5 toward the 2.6 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-057].",
+      "source_rec_id": "REC-02",
+      "theme": "ESG & Sustainability",
+      "title": "Strategy and governance capability",
+      "what_text": "This capability is one of TriState Capital Holdings, Inc.'s least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.6 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver sharper strategic direction and stronger oversight [E-057].",
+      "why_text": "At 1.5 out of 5, this capability sits 1.1 points below the 2.6 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-057].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C3.9.1",
+        "P2C3",
+        "P2C4.1.6",
+        "P1C1.5.1",
+        "P3C2.1.2"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "7eac23ac-dabd-4d38-8840-22718bd850d7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-073"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-074",
+        "E-075"
+      ],
+      "linked_subcap_id": "P2C3.9.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Vulnerable Customer Identification a near-term focus for TriState Capital Holdings, Inc.: a scoped investment here would lift it from 1.5 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": "REC-03",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Vulnerable Customer Identification",
+      "what_text": "Vulnerable Customer Identification is one of TriState Capital Holdings, Inc.'s least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver a stronger, more personalised customer experience [E-074].",
+      "why_text": "The assessment found: “Salesforce Service Cloud = case management, service console, knowledge base platform Salesforce CRM/Sales Cloud = relationship manager desktop with 360-degree customer view” [E-073]. At 1.5 out of 5, Vulnerable Customer Identification sits 1.2 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.4.1",
+        "P3C4",
+        "P2C4.1.6",
+        "P1C1.5.1",
+        "P3C4.4.2"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "98592d65-8f95-449f-9fd5-acae34ea6ec2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-090",
+        "E-092"
+      ],
+      "linked_subcap_id": "P3C4.4.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Crisis Framework a near-term focus for TriState Capital Holdings, Inc.: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-092].",
+      "source_rec_id": "REC-04",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Crisis Framework",
+      "what_text": "Crisis Framework is one of TriState Capital Holdings, Inc.'s least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver more efficient, dependable operations [E-090].",
+      "why_text": "The assessment found: “Azure cloud infrastructure = inherent DR capability (multi-region, geo-redundant storage options) Azure VMs + Azure Blob Storage + Azure Data Lake Storage = cloud-based compute and storage recovery” [E-091]. At 1.5 out of 5, Crisis Framework sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.7.1",
+        "P2C1",
+        "P2C4.1.6",
+        "P1C1.5.1",
+        "P3C1.5.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "f4221dd2-acf7-4960-87a8-e89815700adf",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-062",
+        "E-063",
+        "E-081"
+      ],
+      "linked_subcap_id": "P2C1.7.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Content Review & Approval a near-term focus for TriState Capital Holdings, Inc.: a scoped investment here would lift it from 1.5 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-063].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Content Review & Approval",
+      "what_text": "Content Review & Approval is one of TriState Capital Holdings, Inc.'s least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver a stronger, more personalised customer experience [E-062].",
+      "why_text": "The assessment found: “Bizagi BPM deployed for money movement automation — fully integrated, replacing email-driven manual process Stage gates in workflow for peer review, team lead approvals, call-back processes — ensures” [E-081]. At 1.5 out of 5, Content Review & Approval sits 1.4 points below the 2.9 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.6",
+        "P4C3.6.7",
+        "P2C2.1.2",
+        "P3C1.1.2",
+        "P2C1.4.6",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "ff6f263d-d224-491c-9801-d891323db346",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-073"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-081",
+        "E-076"
+      ],
+      "linked_subcap_id": "P2C4.1.6",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: CRITICAL: Existing SF customer = no greenfield risk. Immediate opportunities: FSC upgrade, Einstein AI overlay, Marketing Cloud (Pardot→Journey Builder), Agentforce for branchless service [E-076].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Deep Salesforce Ecosystem — 6+ Products in Production",
+      "what_text": "TSC runs Salesforce CRM, Sales Cloud, Service Cloud, Experience Cloud, Pardot (SFMC Account Engagement), Connect, Forms, and AppExchange — integrated with Bizagi BPM and Fiserv core. In Zennify's assessment Privacy-Preserving Analytics scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-073].",
+      "why_text": "The assessment found: “Bizagi BPM deployed for money movement automation — fully integrated, replacing email-driven manual process Stage gates in workflow for peer review, team lead approvals, call-back processes — ensures” [E-081]. The research report pins the maturity impact at: Strong CRM foundation across P2 (Customer Experience) and P3 (Automation). Salesforce-Bizagi integration indicates process maturity. scores 1.5/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4",
+        "P4C2.1.2",
+        "P4C3.6.7",
+        "P1C2.2.4",
+        "P1C3.8.3",
+        "P1C3.8.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "99f62e78-c942-4e3e-9d74-f0df410d0bc0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-047",
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-099",
+        "E-094",
+        "E-102",
+        "E-101",
+        "E-100",
+        "E-047",
+        "E-098"
+      ],
+      "linked_subcap_id": "P4C2.4",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Einstein AI + Agentforce deployment — TSC has the data platform and AI governance readiness. Zennify can accelerate from PoC to production AI on Salesforce platform [E-094].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "AI/GenAI Proof-of-Concept with RAG Architecture",
+      "what_text": "Model Serving & Continuous Monitoring is one of TriState Capital Holdings, Inc.'s least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver a stronger data and technology foundation [E-099].",
+      "why_text": "The assessment found: “TSC built a secure, scalable cloud data lake on Microsoft Azure enabling AI use cases (Azure AI Studio, vector-based RAG) Uses in-memory tokenization to anonymize sensitive data before feeding AI” [E-047]. The research report pins the maturity impact at: AI/ML emerging from level 2→level 3. Responsible AI approach (tokenization, retrieval-only, governance proposals) shows maturity beyond typical regional banks. averages 1.9/5 across its 16 scored capability (peer median ~ 2.7) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P3C4.6.2",
+        "P4C3.1.7",
+        "P4C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "63da97f1-56f6-4d41-afaa-266ebefdeb9e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-046",
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-066",
+        "E-060",
+        "E-046",
+        "E-069",
+        "E-068",
+        "E-067",
+        "E-070"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Unique B2B2C model where advisors are the primary customer interface. (Onboarding) and (Omnichannel) benefit from digital-first intermediary model. — Experience Cloud portal for 400+ intermediary network = massive SF opportunity. Partner Community + FSC + Einstein = advisor enablement platform [E-060].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "TSC's private banking (60%+ of loans) sources through 400+ financial…",
+      "what_text": "Pre-Qualification Capabilities is one of TriState Capital Holdings, Inc.'s developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver a stronger, more personalised customer experience [E-027].",
+      "why_text": "The assessment found: “Robust risk and collateral management technology system underpins SBL growth — proprietary technology for monitoring Median LTV <30% on private banking loans — systematic risk assessment” [E-066]. At 2.0 out of 5, Pre-Qualification Capabilities sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P4C3.6.7",
+        "P1C4.1.4",
+        "P1C4.8.3",
+        "P1C4.1.7",
+        "P1C4.7.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "a3e9dabe-360a-441a-b4c6-a3382e84eb3f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-117"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-046",
+        "E-074",
+        "E-029",
+        "E-056",
+        "E-054",
+        "E-117",
+        "E-070"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Change management consulting opportunity. Salesforce adoption depends on culture — Zennify's change management practice directly addresses this gap [E-046].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Employee Sentiment Gap Despite Strong Compensation",
+      "what_text": "Glassdoor 3.4/5, Indeed 3.2/5, Comparably D (2.5/5), eNPS Bottom 15%. Work-life balance (2.5-2.6) and post-RJF culture concerns. CEO Fetterolf approval Top 5% in Pittsburgh. Compensation rated 3.7-3.8 [E-044].",
+      "why_text": "The assessment found: “Raymond James completed acquisition June 1 2022 for $1.1B cash+stock Strategic and cultural fit between Raymond James and TriState reinforced during integration” [E-029]. The research report pins the maturity impact at: Culture & Change likely capped at level 2.5-level 3. Leadership credibility (CEO Top 5%) coexists with operational culture challenges. Post-acquisition integration stress. averages 1.7/5 across its 41 scored capability (peer median ~ 2.8) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P2C4.1.6",
+        "P1C4.1.4",
+        "P3C3.8.3",
+        "P1C1.5.4",
+        "P1C4.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "767f9534-4659-4150-92cb-896bcb9d5e52",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-117"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-094",
+        "E-115",
+        "E-114",
+        "E-026",
+        "E-117",
+        "E-040",
+        "E-028",
+        "E-043"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: (Digital Strategy) and (Architecture) benefit from strong technology leadership bench. CIO scope includes apps, infra, cloud, architecture, data, process automation [E-115].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "CIO of Year Finalist + Dedicated Technology Leadership",
+      "what_text": "CIO Dan Pavlick (2025 Pittsburgh Tech Council CIO of Year finalist), CTO Justin Sansonetti, SVP Data Management Mark Landi (since 2012), VP Enterprise Apps Darin Fabian, 2 named Data Architects. In Zennify's assessment Vision Communication scores 2.0 out of 5, versus a typical 3.1 at comparable institutions [E-094].",
+      "why_text": "The assessment found: “Raymond James invested approximately $1 billion in technology including AI in FY2025 RJF created new positions: Chief AI Officer and Head of AI Strategy” [E-040]. The research report pins the maturity impact at: CIO as executive sponsor for Salesforce platform expansion. Technology leadership maturity de-risks implementation. Named contacts for Zennify account team. averages 3.2/5 across its 33 scored capability (peer median ~ 3.1) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.2",
+        "P4C3.6.7",
+        "P1C2.2.4",
+        "P4C2.6.1",
+        "P4C1.3.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "e17634fe-0005-4cec-be47-94baefb7ff5a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-047",
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-094",
+        "E-096",
+        "E-047",
+        "E-095",
+        "E-097"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Salesforce Data Cloud integration point — connect Common Data Platform to SF CDP for unified customer intelligence. MuleSoft to replace Jitterbit as integration backbone [E-096].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Common Data Platform — Enterprise Data Lake on Azure",
+      "what_text": "TSC built a cloud-native 'Common Data Platform' on Azure Data Lake Gen2 with medallion architecture (bronze/silver/gold), Azure Data Factory (<1 day new source onboarding), and Azure Synapse for business user direct querying. In Zennify's assessment Data Governance Operating Model scores 2.0 out of 5, versus a typical 2.7 at comparable institutions [E-094].",
+      "why_text": "The assessment found: “TSC built a secure, scalable cloud data lake on Microsoft Azure enabling AI use cases (Azure AI Studio, vector-based RAG) Uses in-memory tokenization to anonymize sensitive data before feeding AI” [E-047]. The research report pins the maturity impact at: Data Management likely level 3-level 3.5 — formalized architecture with governance, lineage, and quality rigor. Positions TSC ahead of most regional bank peers. averages 2.3/5 across its 40 scored capability (peer median ~ 2.7) on the current assessment.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C1.1.2",
+        "P4C2.1.2",
+        "P4C3.6.7",
+        "P2C4.1.6",
+        "P3C1.1.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "2f00886e-ba50-411a-8fb2-a827be0da2ae",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-081",
+        "E-083",
+        "E-082",
+        "E-093"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Salesforce Flow + FSC can extend Bizagi patterns. Money movement workflow = FSC lending module use case. SLA dashboards → Service Cloud SLA tracking [E-082].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Bizagi BPM + Blue Prism RPA — Documented Automation Success",
+      "what_text": "Automation Governance Framework is one of TriState Capital Holdings, Inc.'s developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes TriState Capital Holdings, Inc.'s ability to deliver more efficient, dependable operations [E-083].",
+      "why_text": "The assessment found: “Bizagi BPM deployed for money movement automation — fully integrated, replacing email-driven manual process Stage gates in workflow for peer review, team lead approvals, call-back processes — ensures” [E-081]. The research report pins the maturity impact at: Automation level 3+ — formalized BPM with governance, compliance logging, and SLA monitoring. Not just tool deployment but process transformation. averages 2.3/5 across its 31 scored capability (peer median ~ 2.8) on the current assessment.",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-TSCP-20260413-0001"
+}

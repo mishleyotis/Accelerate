@@ -1,0 +1,462 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "kitsap-credit-union-0001",
+  "financials": {
+    "lines": [
+      "Trend classification: STABLE-STRONG \u2014 FY2025 industry CU asset growth 5.4% (NCUA); Kitsap +8.7% = ~1.6x industry. Asset CAGR (2018\u20132025): ~11.2%.",
+      "Net income series: FY2023 $9.08M \u2192 FY2024 $6.02M \u2192 FY2025 $8.61M [E-078]."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 14,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 325,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Eric Crabtree promoted leading digital strategy across all\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "KCU launched a refreshed 5-year strategic plan"
+          }
+        ],
+        "fy": [
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Western WA / Puget Sound",
+        "headline": "$6M net income \u00b7 FY2025",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            9.1,
+            6.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Western WA / Puget Sound"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kitsap CU",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Shawn Gilfedder",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Scott Lindley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Trevor Stuart",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Digital Innovation",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Pendergist AI",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Simon Powley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Revenue Officer"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "Kitsap Credit Union is a credit union. It reports $2.5 billion in total assets and has operated since 1934. It is regulated by NCUA and employs approximately 325 people across 14 branches. Its overall digital maturity is assessed at 2.6 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Productized digital-first tiering: Peak (digital 'summit', 3.30% APY w/ 12-txn+e-stmt+electronic-txn monthly qualification), Essential (core), Launch!",
+        "title": "Productized digital-first tiering: Peak (digital 'summit', 3.30% APY\u2026",
+        "type": "conference",
+        "url": "https://kitsapcu.org/personal/checking/new-account-experience/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-033",
+        "excerpt": "Multi-platform social presence + active content blog (employee highlights, youth-account education, community, financial wellness); SEO-indexed product/education pages Two America's Credit Unions Diamond Awards (Apr 2025",
+        "title": "VP Marketing Luke Peterson is",
+        "type": "blog",
+        "url": "https://kitsapcu.org/blog/follow-kitsap-credit-union-on-social-media/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "bee1dd53-f40c-479f-8d7b-b1afdfef029d",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Subcap weights sum to 100 per CATEGORY (authoritative Pillar toolkit; direct subcap->category aggregation), not per-capability=1.0 as auditor assumes"
+    },
+    {
+      "id": "ddf22c6f-b536-458f-816c-4ba5e51ac9ab",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Per-row single Tier column vs multiple cited E-IDs of differing tiers across all columns -> 752 'mismatches'"
+    },
+    {
+      "id": "ced200e3-3902-457c-9d1b-5e8aa91e6463",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "23 NO_EVIDENCE subcaps lack inline E-ID (absence documented)"
+    },
+    {
+      "id": "a16dc9f4-62a5-4f38-b1ce-ae170eae181f",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Rationale pairs >80% similarity (1246/939/864/756 by pillar)"
+    },
+    {
+      "id": "a416d077-6b52-4446-b7f2-f246d6efe3f8",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "reasoning_chain_log.json (Contract 8) absent; proof columns present and 95%+ complete"
+    },
+    {
+      "id": "2e66bfa7-384a-41fa-adb0-b9254ab8783d",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "No per-subcap counterclaim column; counter-analysis at capability level via critic pass"
+    },
+    {
+      "id": "d80ba351-2085-4054-bc62-0cfb4908822e",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "701 rationales do not explicitly address counter-evidence"
+    },
+    {
+      "id": "54d98cb2-3fbc-45ce-8a1d-d0c46a693ada",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "7 high-value E-IDs (E-078/E-081/E-083 etc.) cited in report/index not in workbook Evidence_IDs column"
+    },
+    {
+      "id": "4bc9ff72-99f1-4a6e-9340-eff2e1452819",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "8 evidence items cited by >15% of subcaps"
+    },
+    {
+      "id": "3dca6491-738d-40cf-95f4-1cc3e4174136",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "contradiction_log.csv was not emitted by Layer 1 (now generated in audit staging)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Most recent reported financials: $6M net income as of FY2025, within a series tracked FY2024 to FY2025. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.4,
+        "P1C3": 2.96,
+        "P1C4": 2.46,
+        "P1C5": 1.14,
+        "P2C1": 2.5,
+        "P2C2": 2.83,
+        "P2C3": 2.59,
+        "P2C4": 2.13,
+        "P3C1": 2.23,
+        "P3C2": 3.21,
+        "P3C3": 2.93,
+        "P3C4": 2.88,
+        "P4C1": 2.39,
+        "P4C2": 2.96,
+        "P4C3": 3.07,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.61,
+      "peer_name": "Sound Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-KCU-20260602-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "pillars: food security, housing, financial wellness Indeed 3.4/5 overall (culture 3.3, mgmt 3.1, work-life 3.5); CEO approval 69.7%; Kitsap filed a formal comment letter (3/20/2024) opposing the Fed's Reg II debit-interchange cap proposal \u2014",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.4
+      },
+      {
+        "drilldown": "68576); only routine member debt-collection and resolved BBB complaints \u2014 clean governance standing KCU migrated all branches from a legacy on-prem phone system to Microsoft Teams Phone / softphones / cloud, seeking integration with other a",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Shawn Walker appointed VP of Product Strategy (began Jan 2026), leading product portfolio strategy/development/growth across digital and traditional offerings, reporting to Simon Powley, Chief Revenue Officer (CRO)",
+      "date_precision": "month",
+      "e_id": "E-079",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "f8788d7d-e957-4724-97d5-270192f5c3c2",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://kitsapcu.org/about/newsroom/",
+      "subcap_ids": [],
+      "title": "Shawn Walker appointed VP of Product Strategy (began Jan\u2026"
+    },
+    {
+      "body": "Apr 2025: Eric Crabtree promoted to SVP/Chief Digital Experience Officer, leading digital strategy across all member touchpoints and overseeing the VP of Operations and VP of Digital Innovation; previously Chief Digital Strategist (20+ yrs Fortune 500/FTSE 100, Ashridge exec education)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-081",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "a6d8da93-4e3b-4fe3-a38b-23370114eaa3",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.cuinsight.com/press-release/kitsap-credit-union-announces-executive-leadership-expansion/",
+      "subcap_ids": [],
+      "title": "Eric Crabtree promoted leading digital strategy across all\u2026"
+    },
+    {
+      "body": "In 2024 KCU launched a refreshed 5-year strategic plan with a defined vision, led by the Board's Strategic Planning Committee",
+      "date_precision": "year",
+      "e_id": "E-016",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "fecbfe07-1359-4809-9199-ae10c290b546",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://kitsapcu.org/getmedia/02deb021-fd84-4301-b743-9a312e818bc5/91st-Annual-Report-2024.pdf",
+      "subcap_ids": [],
+      "title": "KCU launched a refreshed 5-year strategic plan"
+    }
+  ]
+}

@@ -1,0 +1,1046 @@
+{
+  "entity_display_id": "frost-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C2.5.5",
+        "P3C2",
+        "P3C2.6.1",
+        "P3C4.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "586234b5-c5b9-4ad8-a970-dd4855e6b563",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-136",
+        "E-082"
+      ],
+      "linked_subcap_id": "P3C2.5.5",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Proprietary platform moat but tech debt risk — Salesforce CRM 360 to augment (not replace) proprietary platform [E-082].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "In-house digital platform",
+      "what_text": "This capability was flagged in Zennify's assessment of Frost Bank as a operations capability where focused investment would strengthen digital maturity. It underpins the core processes that keep the institution running, so its current level directly shapes Frost Bank's ability to deliver more efficient, dependable operations [E-082].",
+      "why_text": "The assessment found: “Frost builds its own digital banking software in-house since ~2000. Jimmy Stead was part of original team that brought online banking to Frost. When customers complained about navigation, 'bank” [E-136]. Strengthening this capability matters because it shapes more efficient, dependable operations. It builds on the core processes that keep the institution running, so progress here lifts the wider business too.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.8.7",
+        "P4C2.1.2",
+        "P4C1.1.8",
+        "P1C4.4.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "26b33eb7-ecbf-4c06-87d9-a375a2dc7fc0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-116",
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-131",
+        "E-150",
+        "E-116"
+      ],
+      "linked_subcap_id": "P4C1.8.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong augmentation, no customer-facing AI — Einstein GPT / Data Cloud for predictive agent enablement [E-116].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Employee-first AI strategy",
+      "what_text": "Data Residency & Sovereignty Controls is one of Frost Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Frost Bank's ability to deliver a stronger data and technology foundation [E-150].",
+      "why_text": "The assessment found: “Jimmy Stead (Banking Dive Jan 2025): 'We've absolutely avoided fronting conversations with a customer using a bot. It's something I don't think we'll ever do.' LivePerson Copilot: auto-summarizes” [E-131]. At 1.5 out of 5, Data Residency & Sovereignty Controls sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.6.4",
+        "P1C2.6.2",
+        "P4C4.8.1",
+        "P3C2.2.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "964eca48-98b3-43b2-bd70-b882c6a26c10",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-141",
+        "E-106",
+        "E-028"
+      ],
+      "linked_subcap_id": "P4C4.6.4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Attack Surface Management a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-028].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "NIST CSF security program",
+      "what_text": "Attack Surface Management is one of Frost Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Frost Bank's ability to deliver a stronger data and technology foundation [E-106].",
+      "why_text": "The assessment found: “Program 'designed around NIST Cybersecurity Framework, regulatory guidance, and other industry standards.' Employs 'security by design' philosophy” [E-141]. At 1.5 out of 5, Attack Surface Management sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.2.1",
+        "P3C2.3.1",
+        "P3C1.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "7173b160-d4b4-416a-b9e9-fe57f2e3e7e9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-145",
+        "E-054",
+        "E-025"
+      ],
+      "linked_subcap_id": "P3C3.2.1",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Transaction Monitoring a near-term focus for Frost Bank: a scoped investment here would lift it from 3.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-025].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "Finzly FedNow+RTP go-live",
+      "what_text": "Transaction Monitoring is one of Frost Bank's solid operations capabilities, scoring 3.5 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Frost Bank's ability to deliver more efficient, dependable operations [E-054].",
+      "why_text": "The assessment found: “Phase 1 go-live July 23, 2025. Receive-only for FedNow + RTP instant payments. 24/7/365 availability. Eligible use cases: refunds, payroll disbursements, insurance payouts, P2P transfers. ~550 RTP” [E-145]. At 3.5 out of 5, Transaction Monitoring shows a maturing capability within reach of best practice. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.8.7",
+        "P4C3.6.4",
+        "P1C1.5.5",
+        "P1C1.5.2",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "06150660-e939-44fc-ab49-1447dcbea4ce",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-135",
+        "E-031"
+      ],
+      "linked_subcap_id": "P4C1.8.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Residency & Sovereignty Controls a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-031].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "KubeCon platform engineering",
+      "what_text": "Data Residency & Sovereignty Controls is one of Frost Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Frost Bank's ability to deliver a stronger data and technology foundation [E-031].",
+      "why_text": "The assessment found: “Presented at OpenShift Commons Gathering, KubeCon NA 2024, Salt Lake City, Nov 12 2024. Session: 'Lessons learned from rolling out OpenShift at Frost Bank.' Jason Moody = Capability Leader of” [E-135]. The research report pins the maturity impact at: Cloud migration strategy + DevOps maturity consulting. scores 1.5/5 against a peer median of 2.5 on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.8.7",
+        "P4C1.5.4",
+        "P1C2.5.1",
+        "P1C4.1.4",
+        "P1C2.5.5",
+        "P1C2.5.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "1e9d0414-495c-433e-8b43-ff2323acce07",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-128"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-128"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-10"
+        }
+      ],
+      "linked_e_ids": [
+        "E-128",
+        "E-153",
+        "E-093"
+      ],
+      "linked_subcap_id": "P4C1.8.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Residency & Sovereignty Controls a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-093].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data governance without CDO",
+      "what_text": "Data Residency & Sovereignty Controls is one of Frost Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Frost Bank's ability to deliver a stronger data and technology foundation [E-153].",
+      "why_text": "The assessment found: “Brandon Wiemers = Head of Data Governance. CDMP + CIMP + CDS certified. DAMA SA chapter president. Ex-USAA 12 years (Data Governance Lead). Sathish Kamireddy = SVP, Capability Leader Data & Analytics” [E-128]. At 1.5 out of 5, Data Residency & Sovereignty Controls sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.8.7",
+        "P1C4.1.4",
+        "P2C4.5.IB1",
+        "P3C1.3.4",
+        "P4C4.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "fc3b74e2-0969-48e8-84ab-285fcad2d5e2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-09"
+        }
+      ],
+      "linked_e_ids": [
+        "E-138",
+        "E-021",
+        "E-097"
+      ],
+      "linked_subcap_id": "P4C1.8.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Residency & Sovereignty Controls a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Tech talent gap + spending surge",
+      "what_text": "Data Residency & Sovereignty Controls is one of Frost Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Frost Bank's ability to deliver a stronger data and technology foundation [E-021].",
+      "why_text": "The assessment found: “AZ-900 + AZ-305 certifications in Windows Server job = Azure is primary cloud. Multi-cloud: OpenShift/AWS/Azure/GCP referenced in jobs. Cloud services expense is single largest/fastest-growing tech” [E-138]. At 1.5 out of 5, Data Residency & Sovereignty Controls sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P2C2",
+        "P2C3",
+        "P4C3.6.4",
+        "P2C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "29c3c290-2c93-4a2d-a73f-15668232c5c3",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-084",
+        "E-139",
+        "E-145",
+        "E-138"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Low-Code/No-Code Platform Strategy a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-139].",
+      "source_rec_id": "REC-01",
+      "theme": "Architecture & Cloud",
+      "title": "API-Led Payment & Integration Modernization",
+      "what_text": "MuleSoft Anypoint Platform expansion: (1) Payment API consolidation layer across FedNow, RTP, ACH, wires; (2) Core-to-cloud integration bus connecting on-premise platform to Azure/AWS services; (3) API catalog and governance for the 195+ technology ecosystem. Leverage existing MuleSoft developers as internal champions. connected unlock: ≥2.5 removes connected cap on Process Automation. Integration maturity also enables Onboarding and Omnichannel improvements. In Zennify's assessment Low-Code/No-Code Platform Strategy scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-084].",
+      "why_text": "The assessment found: “Phase 1 go-live July 23, 2025. Receive-only for FedNow + RTP instant payments. 24/7/365 availability. Eligible use cases: refunds, payroll disbursements, insurance payouts, P2P transfers. ~550 RTP” [E-145]. At 1.5 out of 5, Low-Code/No-Code Platform Strategy sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C4",
+        "P3C1",
+        "P4C2.1.2",
+        "P2C4.1.4",
+        "P2C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "eea176e8-a746-45ed-8e49-0153620a1279",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-131",
+        "E-058",
+        "E-041"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Segmentation & Tiers a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-041].",
+      "source_rec_id": "REC-02",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Omnichannel Agent Augmentation Platform",
+      "what_text": "Service Cloud as unified agent desktop replacing Zendesk, with Agentforce for AI-assisted case resolution (employee-facing only — no automated bots interact with customers). Integrates with existing LivePerson for conversation data and Salesforce CRM for customer 360 context. Phenom People (confirmed recruiting platform) can support agent onboarding workflows. connected unlock: improvement lifts Personalization (agent-assisted recommendations) and Process Automation (case workflow automation). In Zennify's assessment Service Segmentation & Tiers scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-058].",
+      "why_text": "The assessment found: “Jimmy Stead (Banking Dive Jan 2025): 'We've absolutely avoided fronting conversations with a customer using a bot. It's something I don't think we'll ever do.' LivePerson Copilot: auto-summarizes” [E-131]. At 1.5 out of 5, Service Segmentation & Tiers sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C2",
+        "P4C1.5.4",
+        "P4C2.1.2",
+        "P2C4.1.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "230354b5-4a38-40b3-a75f-f13d72353780",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-128"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-133"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-128",
+            "E-129",
+            "E-133"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-10"
+        }
+      ],
+      "linked_e_ids": [
+        "E-128",
+        "E-129",
+        "E-133"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-133].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Enterprise Data Strategy & Unified Data Platform",
+      "what_text": "Data Cloud as unified customer data platform: (1) Customer 360 profile consolidation from Salesforce CRM + Teradata DW + digital analytics (Snowplow/FullStory); (2) Data governance layer empowering Wiemers' team with catalog, lineage, and quality monitoring; (3) Activation layer feeding unified profiles to Marketing Cloud and Service Cloud. connected unlock: ≥2.5 removes connected cap on Personalization. Data foundation also enables Analytics & AI advancement. In Zennify's assessment Data Mesh Strategy & Domain Ownership scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-129].",
+      "why_text": "The assessment found: “Brandon Wiemers = Head of Data Governance. CDMP + CIMP + CDS certified. DAMA SA chapter president. Ex-USAA 12 years (Data Governance Lead). Sathish Kamireddy = SVP, Capability Leader Data & Analytics” [E-128]. At 1.5 out of 5, Data Mesh Strategy & Domain Ownership sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P2C3",
+        "P2C4",
+        "P4C2.1.2",
+        "P2C4.1.4",
+        "P2C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "7cd43c2b-6128-4cbe-9ebe-927e1991c69a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-116",
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-133"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-131",
+        "E-132",
+        "E-133",
+        "E-116"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-133].",
+      "source_rec_id": "REC-04",
+      "theme": "Analytics & AI",
+      "title": "AI/ML Enablement for Employee Productivity",
+      "what_text": "Agentforce for agent-facing AI (predictive case routing, knowledge article generation, real-time customer insight surfacing) + CRM Analytics (Tableau) to consolidate the 5+ BI tool landscape into a unified analytics platform. Position as extending the LivePerson Copilot model across the entire enterprise. connected unlock: improvement enables smarter Omnichannel servicing and Personalization (data-driven recommendations). In Zennify's assessment AI & ML Strategy & Governance scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-132].",
+      "why_text": "The assessment found: “Jimmy Stead (Banking Dive Jan 2025): 'We've absolutely avoided fronting conversations with a customer using a bot. It's something I don't think we'll ever do.' LivePerson Copilot: auto-summarizes” [E-131]. At 1.5 out of 5, AI & ML Strategy & Governance sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P4C2.1.2",
+        "P2C4.1.4",
+        "P3C1.1.2",
+        "P2C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "23642221-9443-47a6-a19d-b81a561be70f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-086",
+        "E-071",
+        "E-055"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Video Content Marketing a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-055].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Marketing Automation & Campaign Intelligence",
+      "what_text": "Marketing Cloud for journey orchestration, replacing MailChimp and upgrading from Audience Studio. Integrate with Data Cloud for unified audience segmentation. Enable CMO McGrain's team with campaign analytics and attribution across the confirmed digital advertising channels. connected unlock: improvement feeds Personalization with targeted segment data. In Zennify's assessment Video Content Marketing scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-071].",
+      "why_text": "The assessment found: “194 financial centers, 1766 ATMs (majority via branding/licensing with retailers). Correspondent for ~179 FIs (primarily TX banks) with check clearing, fund transfer, securities custody. TX-chartered” [E-086]. At 1.5 out of 5, Video Content Marketing sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C4",
+        "P3C3",
+        "P2C4.1.4",
+        "P3C1.1.2",
+        "P3C3.3.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "57fa08aa-e57d-424d-a6c2-94f1ea6b8daa",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-061",
+        "E-159"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Experience Measurement (NPS/CSAT) a near-term focus for Frost Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-159].",
+      "source_rec_id": "REC-06",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Customer 360 & Financial Services Lifecycle Management",
+      "what_text": "Financial Services Cloud as the unified relationship management platform: KYC/CDD automation for onboarding, lifecycle event triggers for proactive engagement, wealth management client views for the $51.4B trust book. Integrate with Blend for origination and Data Cloud for unified profiles. connected unlock: and improvement lifts overall P2 Score. FSC compliance features support Compliance. In Zennify's assessment Experience Measurement (NPS/CSAT) scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-061].",
+      "why_text": "At 1.0 out of 5, Experience Measurement (NPS/CSAT) sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-085, E-061].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C1",
+        "P4C1.5.4",
+        "P4C4.6.4",
+        "P2C4.1.4",
+        "P3C3.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "6a167498-5f62-4c6e-ac8d-3860e23d4ffb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-141",
+        "E-142",
+        "E-146"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Identity & Verifiable Credentials a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-146].",
+      "source_rec_id": "REC-07",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Security Posture Validation & GRC Modernization",
+      "what_text": "GRC Platform for automated risk assessment, policy management, and compliance monitoring. Shield for Salesforce platform encryption and audit logging. Positions Zennify as security validation partner (not remediation) — validates NIST CSF alignment and identifies zero trust advancement opportunities. connected unlock: ≥2.5 removes connected cap on Data Governance. In Zennify's assessment Digital Identity & Verifiable Credentials scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-142].",
+      "why_text": "The assessment found: “Program 'designed around NIST Cybersecurity Framework, regulatory guidance, and other industry standards.' Employs 'security by design' philosophy” [E-141]. At 1.5 out of 5, Digital Identity & Verifiable Credentials sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C2",
+        "P4C2.1.2",
+        "P4C3.6.4",
+        "P3C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "dc773e7c-cc0e-49e6-9e00-945b45caab53",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-135",
+        "E-138",
+        "E-137"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Low-Code/No-Code Platform Strategy a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-137].",
+      "source_rec_id": "REC-08",
+      "theme": "Architecture & Cloud",
+      "title": "Cloud Migration Strategy & Platform Engineering Acceleration",
+      "what_text": "Digital Strategy Workshop: 2-3 week engagement to define multi-cloud governance framework, workload placement strategy (Azure vs AWS vs on-premise), mainframe modernization roadmap, and platform engineering maturity model. Deliverable: actionable migration playbook aligned with Moody's platform engineering team. connected unlock: clarity enables automation decisions and AI infrastructure planning. In Zennify's assessment Low-Code/No-Code Platform Strategy scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-135].",
+      "why_text": "The assessment found: “AZ-900 + AZ-305 certifications in Windows Server job = Azure is primary cloud. Multi-cloud: OpenShift/AWS/Azure/GCP referenced in jobs. Cloud services expense is single largest/fastest-growing tech” [E-138]. At 1.5 out of 5, Low-Code/No-Code Platform Strategy sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P4C3.6.4",
+        "P2C4.1.4",
+        "P1C1.1.3",
+        "P1C4.1.4",
+        "P2C3.3.RIA1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "336bb2cd-d0b1-47a9-8f42-99cea083370a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-137",
+            "E-138"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-137",
+        "E-043",
+        "E-138"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Change Readiness Assessment a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-043].",
+      "source_rec_id": "REC-09",
+      "theme": "Culture & Change",
+      "title": "Digital Talent & Change Enablement Program",
+      "what_text": "Leads: compensation benchmarking, remote work policy expansion, university partnerships. Zennify advisory: Digital Strategy Workshop module on OCM framework, digital fluency roadmap, and change readiness assessment. Managed services provide interim staff augmentation for Salesforce/MuleSoft/cloud roles. connected unlock: improvement enables execution capacity for all other recommendations. In Zennify's assessment Change Readiness Assessment scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-137].",
+      "why_text": "The assessment found: “AZ-900 + AZ-305 certifications in Windows Server job = Azure is primary cloud. Multi-cloud: OpenShift/AWS/Azure/GCP referenced in jobs. Cloud services expense is single largest/fastest-growing tech” [E-138]. At 1.5 out of 5, Change Readiness Assessment sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P2C4",
+        "P3C2",
+        "P4C2.1.2",
+        "P4C3.6.4",
+        "P2C4.1.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "72467a89-88df-4734-94e2-df88ec3e559e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-128"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-128",
+            "E-129",
+            "E-133"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-133"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-133",
+        "E-129",
+        "E-128"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for Frost Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-129].",
+      "source_rec_id": "REC-10",
+      "theme": "Analytics & AI",
+      "title": "BI Consolidation on Unified Analytics Platform",
+      "what_text": "CRM Analytics (Tableau) as the enterprise analytics and visualization platform. Consolidates from 5+ BI tools to a unified platform with native Salesforce integration. Enables self-service analytics for business users (Relationship Managers, Financial Advisors) while maintaining centralized governance under Wiemers' team. connected unlock: improvement supports better Personalization analytics and Operational Risk insights. In Zennify's assessment AI & ML Strategy & Governance scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-133].",
+      "why_text": "The assessment found: “Brandon Wiemers = Head of Data Governance. CDMP + CIMP + CDS certified. DAMA SA chapter president. Ex-USAA 12 years (Data Governance Lead). Sathish Kamireddy = SVP, Capability Leader Data & Analytics” [E-128]. At 1.5 out of 5, AI & ML Strategy & Governance sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Strategy, Governance & Culture (P1) — Score 2.15",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Customer Experience & Channels (P2) — Score 1.94",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-FROST-20260323-0001"
+}

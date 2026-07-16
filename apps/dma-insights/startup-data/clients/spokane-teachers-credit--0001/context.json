@@ -1,0 +1,711 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Spokane Teachers Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": "Community First Bank merger event confirmed May 2025 via Vibe Prospecting events data",
+      "closed_on": null,
+      "details": "Community First Bank merger event confirmed May 2025 via Vibe Prospecting events data",
+      "e_id": "E-042",
+      "event_date": "2025-05-01",
+      "id": "0b1744f7-be9d-4c09-80d1-66d2adb47930",
+      "source_url": "https://www.linkedin.com/feed/update/urn:li:activity:7443367775328407552",
+      "status": null,
+      "target": "Community First Bank",
+      "title": "Community First Bank merger event confirmed via Vibe\u2026"
+    },
+    {
+      "acquirer": "Spokane Teachers Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "id": "286b534b-cc02-4891-859f-15d205c6072e",
+      "source_url": null,
+      "status": null,
+      "target": "Coulee Dam Federal Credit Union",
+      "title": "Coulee Dam Federal Credit Union"
+    },
+    {
+      "acquirer": "STCU",
+      "amount": "$550M",
+      "announced_on": null,
+      "body": "STCU acquired Community Bank ($550M assets, 10 branches in OR/WA) \u2014 agreement Aug 2024",
+      "closed_on": null,
+      "details": "STCU acquired Community Bank ($550M assets, 10 branches in OR/WA) \u2014 agreement Aug 2024",
+      "e_id": "E-003",
+      "event_date": "2024-08-01",
+      "id": "80e5ea50-0f80-4f5c-aae6-e730493eaf51",
+      "source_url": "https://stcu.org/here-for-good/about-stcu/news/stcu-announces-purchase-and-assumption-agreement-with-community-bank",
+      "status": null,
+      "target": "Community Bank",
+      "title": "STCU acquired Community Bank ($550M assets, 10 branches in\u2026"
+    },
+    {
+      "acquirer": "Spokane Teachers Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "id": "165572ce-8639-491f-ad49-b5c6fbc0d81e",
+      "source_url": null,
+      "status": null,
+      "target": "Wheatland Bank",
+      "title": "Wheatland Bank"
+    },
+    {
+      "acquirer": "Spokane Teachers Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "id": "491c708a-7e8c-44aa-a4bd-01f55f55d75b",
+      "source_url": null,
+      "status": null,
+      "target": "Horizon Credit Union",
+      "title": "Horizon Credit Union"
+    }
+  ],
+  "entity_display_id": "spokane-teachers-credit--0001",
+  "financials": {
+    "lines": [
+      "Classified as VARIABLE. $64.5M provision drove 90.2% income decline, but NWR remains healthy at 10.55% [E-034, E-011]."
+    ],
+    "metrics": {
+      "net_income": 4535368.0,
+      "roa": 0.0007,
+      "trajectory": {
+        "branches": 51,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1000,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "CEO Lindsey Myhre: 25yr tenure, integral to shaping\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "STCU acquired Community Bank ($550M assets, 10 branches in\u2026"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Here for Good Foundation launched 2023"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Eastern & Central WA, Northern ID, Eastern OR",
+        "headline": "$550M net income \u00b7 FY2025",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            5840.0,
+            680.0,
+            550.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Eastern & Central WA",
+      "Northern ID",
+      "Eastern OR"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lindsey Myhre",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO & President"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Nicole T.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO (C-Suite)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jody Gentemann",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Risk Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Greg Mitchell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "IT Application Admin Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tim Mewhinney",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Senior ETL Developer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Bogley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Business Intelligence Analyst"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cassandra Slagg",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Senior IT Portfolio Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ryan Timmons",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "IT GRC Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Scott Rabe",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Software Development Lead"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Richard Breitenberg",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Facilities & Support Services"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Debra Jackson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Contact Center Operations Manager"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "Field of membership: Washington state, North Idaho (Benewah, Bonner, Boundary, Kootenai, Latah, Lewis, Nez Perce, Shoshone counties), Eastern Oregon (Baker, Crook, Gilliam, Grant, Harney, Hood River, Malheur, Morrow, Sherman, Umatilla, Union, Wallowa, Wasco, Wheeler counties) [E-001]",
+    "primary_regulator": "NCUA",
+    "regulatory_standing": {
+      "as_of": "2025-12-01",
+      "e_id": "E-083",
+      "label": "Clean regulatory standing",
+      "note": "Absence of NCUA enforcement actions \u2014 positive compliance examination track record"
+    },
+    "size_tier": "Large ($5B-$10B)",
+    "thought_leadership": [
+      {
+        "author": "Greg Mitchell",
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-099",
+        "excerpt": "CONFIRMED UTILIZATION \u2014 Illumio: full case study, >90% enforcement, podcast interview with Greg Mitchell (Illumio blog Sep 2025) CONFIRMED UTILIZATION \u2014 Alkami: case study (digital banking platform since 2014), shared ro",
+        "title": "Illumio: full case study, >90% enforcement, podcast interview with\u2026",
+        "type": "podcast",
+        "url": "https://www.stcu.org"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "d845d48d-e36e-4c15-98ad-d6ba74b3b436",
+      "issue_id": "GAP-1-P1C1.1.1",
+      "linked_subcap_ids": [
+        "P1C1.1.1"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.5/5 \u2014 1.1 pts below the CU peer median (2.6/5). [EVIDENCE]: E-069, E-001, E-067, E-004 (T2/T3/T5). [MATURITY]: M2 \"Developing \u2014 basic, inconsistent\". [GAP TO NEXT]: For M1\u2192M2, STCU needs to establish basic capability with dedicated resources. [SO WHAT]: 'Digital Strategy Document' presents a Zennify opportunity for platform-led modernization.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Digital Strategy Document"
+    },
+    {
+      "id": "e823eea5-724b-477e-b3b7-9956a671bc94",
+      "issue_id": "GAP-2-P2C3.5.5",
+      "linked_subcap_ids": [
+        "P2C3.5.5"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.5/5 \u2014 1.4 pts below the CU peer median (2.9/5). [EVIDENCE]: E-068 (T5). [MATURITY]: M2 \"Developing \u2014 basic, inconsistent\". [CEILING]: Single tier-type (T5) cap 2.5; T5-only cap 2.0. [GAP TO NEXT]: For M2\u2192M3, STCU needs standardized processes and cross-functional integration. [SO WHAT]: 'Predictive Issue Detection' presents a Zennify opportunity for platform-led modernization.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Predictive Issue Detection"
+    },
+    {
+      "id": "c98c2c39-51ef-4e54-b5b3-67c8aeb80fd4",
+      "issue_id": "GAP-3-P2C3.5.6",
+      "linked_subcap_ids": [
+        "P2C3.5.6"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.5/5 \u2014 1.4 pts below the CU peer median (2.9/5). [EVIDENCE]: E-068 (T5). [MATURITY]: M2 \"Developing \u2014 basic, inconsistent\". [CEILING]: Single tier-type (T5) cap 2.5; T5-only cap 2.0. [GAP TO NEXT]: For M2\u2192M3, STCU needs standardized processes and cross-functional integration. [SO WHAT]: 'Proactive Service Recovery' presents a Zennify opportunity for platform-led modernization.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Proactive Service Recovery"
+    },
+    {
+      "id": "33497be9-22eb-45e5-ad2f-4aca7102558f",
+      "issue_id": "GAP-4-P2C3.6.2",
+      "linked_subcap_ids": [
+        "P2C3.6.2"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.5/5 \u2014 1.4 pts below the CU peer median (2.9/5). [EVIDENCE]: E-068 (T5). [MATURITY]: M2 \"Developing \u2014 basic, inconsistent\". [CEILING]: Single tier-type (T5) cap 2.5; T5-only cap 2.0. [GAP TO NEXT]: For M2\u2192M3, STCU needs standardized processes and cross-functional integration. [SO WHAT]: 'Knowledge Management' presents a Zennify opportunity for platform-led modernization.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Knowledge Management"
+    },
+    {
+      "id": "70417eb4-df9b-4c69-940b-0778d7125e24",
+      "issue_id": "GAP-5-P2C3.6.3",
+      "linked_subcap_ids": [
+        "P2C3.6.3"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.5/5 \u2014 1.4 pts below the CU peer median (2.9/5). [EVIDENCE]: E-068 (T5). [MATURITY]: M2 \"Developing \u2014 basic, inconsistent\". [CEILING]: Single tier-type (T5) cap 2.5; T5-only cap 2.0. [GAP TO NEXT]: For M2\u2192M3, STCU needs standardized processes and cross-functional integration. [SO WHAT]: 'AI Agent Assist' presents a Zennify opportunity for platform-led modernization.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI Agent Assist"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section is borrowed from the Client Profile Research Report (Section 5.1) with assessment scoring impacts added. Three issues were identified during public evidence research. None rise to CRITICAL severity. STCU maintains a clean regulatory record with no NCUA enforcement actions, no data breaches, and no litigation [E-035, E-098].",
+    "trend_md": "This section is borrowed from the Client Profile Research Report (Sections 3.2-3.4) with assessment-layer maturity signal annotations added to each milestone. Financial data establishes the investment context; the digital timeline traces capability evolution; sentiment data informs P2 scoring caps."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.2,
+        "P2C4": 2.8,
+        "P3C1": 2.8,
+        "P3C2": 2.8,
+        "P3C3": 2.8,
+        "P3C4": 2.8,
+        "P4C1": 2.8,
+        "P4C2": 2.8,
+        "P4C3": 3.0,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.92,
+      "peer_name": "OnPoint Community CU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.8,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.2,
+        "P1C5": 2.8,
+        "P2C1": 2.5,
+        "P2C2": 2.8,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 3.2,
+        "P4C2": 3.0,
+        "P4C3": 2.8,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.74,
+      "peer_name": "WSECU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.8,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.8,
+        "P2C4": 2.3,
+        "P3C1": 2.3,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.3,
+        "P4C2": 2.3,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.49,
+      "peer_name": "Gesa Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.3,
+        "P1C2": 2.3,
+        "P1C3": 2.3,
+        "P1C4": 2.8,
+        "P1C5": 2.8,
+        "P2C1": 2.3,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.3,
+        "P3C3": 2.3,
+        "P3C4": 2.3,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.3,
+        "P4C4": 2.3
+      },
+      "overall_score": 2.31,
+      "peer_name": "Numerica Credit Union",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-STCU-20260413-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "to Work recognition \u2014 national culture benchmark achieved Indeed 5.0/5.0 overall rating (Spokane) \u2014 culture, management, work-life balance, compensation all 5.0 Community Bank integration: all employees retained, rebranded branches staffed",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 5.0
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "NCUA established AI Compliance Plan and hired 3 AI officers (2025-2026) \u2014 regulatory framework supporting CU AI adoption",
+      "date_precision": "year",
+      "e_id": "E-092",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-092"
+      ],
+      "id": "cf0834ec-565b-450b-a86a-53a7392aa758",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.americanbanker.com/creditunions/news/how-credit-union-leaders-are-embracing-chatbots-ai-and-other-new-tech",
+      "subcap_ids": [],
+      "title": "NCUA established AI Compliance Plan"
+    },
+    {
+      "body": "CEO Lindsey Myhre: 25yr tenure, integral to shaping strategic direction, named CEO Jul 2025",
+      "date_precision": "month",
+      "e_id": "E-004",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "6a6163b8-e163-4431-a3d5-b76bd1b2fe40",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.stcu.org/here-for-good/about-stcu/leadership",
+      "subcap_ids": [],
+      "title": "CEO Lindsey Myhre: 25yr tenure, integral to shaping\u2026"
+    },
+    {
+      "body": null,
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [],
+      "id": "0dfa2abf-efd8-4805-be3c-3bd27ee76754",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Community Bank (Community Bancshares Inc.)"
+    },
+    {
+      "body": "Community First Bank merger event confirmed May 2025 via Vibe Prospecting events data",
+      "date_precision": "month",
+      "e_id": "E-042",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "0b1744f7-be9d-4c09-80d1-66d2adb47930",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/feed/update/urn:li:activity:7443367775328407552",
+      "subcap_ids": [],
+      "title": "Community First Bank merger event confirmed via Vibe\u2026"
+    },
+    {
+      "body": "Integration completed May 2025 \u2014 branches rebranded, same staff retained",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "7deaf197-02fb-4b01-be1a-a30fd8513756",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://stcu.org/here-for-good/about-stcu/news/stcu-announces-purchase-and-assumption-agreement-with-community-bank",
+      "subcap_ids": [],
+      "title": "Branches rebranded, same staff retained"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "286b534b-cc02-4891-859f-15d205c6072e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Coulee Dam Federal Credit Union"
+    },
+    {
+      "body": "STCU acquired Community Bank ($550M assets, 10 branches in OR/WA) \u2014 agreement Aug 2024",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "80e5ea50-0f80-4f5c-aae6-e730493eaf51",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://stcu.org/here-for-good/about-stcu/news/stcu-announces-purchase-and-assumption-agreement-with-community-bank",
+      "subcap_ids": [],
+      "title": "STCU acquired Community Bank ($550M assets, 10 branches in\u2026"
+    },
+    {
+      "body": "Member Preferred Money Market launched July 2024 \u2014 balances reached $680M by year-end",
+      "date_precision": "month",
+      "e_id": "E-001",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "efdb6c51-600d-4834-b820-da902836a4a6",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.stcu.org/media/Annual-reports/2024-STCU-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Balances reached $680M"
+    },
+    {
+      "body": "Member Preferred Money Market launched July 2024 \u2014 reached $680M balance by year-end, demonstrating rapid product-market fit",
+      "date_precision": "month",
+      "e_id": "E-046",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "7a4397e2-fa63-4072-95cb-3523cd24db12",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.stcu.org",
+      "subcap_ids": [],
+      "title": "Member Preferred Money Market launched"
+    },
+    {
+      "body": "CRO Brian Read joined early 2024, oversees 38 branches + business banking team",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2024-02-15",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "e448c068-e55d-4922-9a13-70a2b708555f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://stcu.org/here-for-good/about-stcu/news/stcu-invests-heavily-in-business-division",
+      "subcap_ids": [],
+      "title": "CRO Brian Read joined"
+    },
+    {
+      "body": "Here for Good Foundation launched 2023 \u2014 grants for education, arts & culture, economic development",
+      "date_precision": "year",
+      "e_id": "E-050",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-050"
+      ],
+      "id": "6fba001d-ca5e-4ce2-9061-0ea3a57383f6",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://stcu.org/here-for-good/about-stcu/careers/culture",
+      "subcap_ids": [],
+      "title": "Here for Good Foundation launched 2023"
+    },
+    {
+      "body": "Here for Good Foundation surpassed $1 million in donations (launched 2023) \u2014 philanthropic milestone achieved in <2 years",
+      "date_precision": "year",
+      "e_id": "E-066",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "540184e6-5eae-4fee-872e-1a0f560189fc",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.spokanejournal.com/articles/17402-ceo-change-branch-additions-headline-busy-year-for-stcu",
+      "subcap_ids": [],
+      "title": "Here for Good Foundation surpassed $1 million in donations"
+    },
+    {
+      "body": "American Banker: CEO Lindsey Myhre named among 15 Most Powerful Women in Credit Unions (2023)",
+      "date_precision": "year",
+      "e_id": "E-049",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "b9b13db1-845a-4e87-be77-fd96a13c8a99",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/stcu",
+      "subcap_ids": [],
+      "title": "American Banker: CEO Lindsey Myhre named among 15 Most\u2026"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [],
+      "id": "165572ce-8639-491f-ad49-b5c6fbc0d81e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Wheatland Bank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "491c708a-7e8c-44aa-a4bd-01f55f55d75b",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Horizon Credit Union"
+    },
+    {
+      "body": "27 new locations opened since 2020 \u2014 aggressive expansion",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "1897b8ba-5bfa-4342-89b9-eba288af84d0",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.spokesman.com/stories/2026/feb/13/27-new-branches-in-5-years-how-a-credit-union-made/",
+      "subcap_ids": [],
+      "title": "27 new locations opened since 2020"
+    },
+    {
+      "body": "27 new branches opened since 2020 + Community Bank integration + Coulee Dam FCU deal \u2014 demonstrates execution of complex, concurrent multi-year programs",
+      "date_precision": "year",
+      "e_id": "E-036",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "60669ab8-6769-40f0-9277-4a7d1d4af673",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.stcu.org",
+      "subcap_ids": [],
+      "title": "27 new branches opened since 2020"
+    },
+    {
+      "body": "Glia (which acquired Abe.ai) remains in STCU's current tech stack \u2014 indicates continued conversational AI capability",
+      "date_precision": "publish_fallback",
+      "e_id": "E-045",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "0db24c0b-cbd2-454b-98fb-ea9a5b5fc80a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://thefinancialbrand.com/news/artificial-intelligence-banking/conversational-ai-voice-banking-credit-union-chatbot-97773",
+      "subcap_ids": [],
+      "title": "Glia (which acquired Abe.ai) remains in STCU's current tech\u2026"
+    }
+  ]
+}

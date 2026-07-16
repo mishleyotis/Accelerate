@@ -1,0 +1,405 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Mission Federal Credit Union",
+      "amount": "$13.5B",
+      "announced_on": "2025-04-01",
+      "body": "SDCCU and Cal Coast CU announced merger creating $13.5B entity in San Diego market",
+      "closed_on": null,
+      "details": "SDCCU and Cal Coast CU announced merger creating $13.5B entity in San Diego market",
+      "e_id": "E-022",
+      "event_date": "2025-04-01",
+      "id": "8368d7e0-df56-4f93-a2d7-a7b289f74a22",
+      "source_url": "https://tyfone.com/news/breaking-news/san-diego-cus-strike-deal/",
+      "status": "announced",
+      "target": "Sdccu and Cal Coast CU announced",
+      "title": "Sdccu and Cal Coast CU announced merger creating $13.5B\u2026"
+    }
+  ],
+  "entity_display_id": "mission-federal-credit-u-0001",
+  "financials": {
+    "lines": [
+      "Financial Trajectory: ACCELERATING \u2014 Record net income, top 1% deposit growth, exceeded loan production and deposit goals, 9.1% asset growth year-over-year. This financial strength signals strong capacity for multi-year technology investment [E-015, Annual Report 2024].",
+      "Key Operational Metrics (2024 Annual Report):",
+      "\u2022 78% of digital members accessed Digital Banking [Annual Report]",
+      "\u2022 Over 2.15 million transactions processed at branches [Annual Report]",
+      "\u2022 105,453 members used Zelle \u2014 34% year-over-year increase [Annual Report]",
+      "\u2022 20,000 personalized member consultations delivered [Annual Report]",
+      "\u2022 44,000+ members used SavvyMoney credit assistance tools [Annual Report]",
+      "\u2022 $1.9M in down payment grants disbursed [Annual Report]",
+      "\u2022 4.8/5 member satisfaction score [E-065]",
+      "\u2022 4.9/5 Apple App Store rating [Annual Report]"
+    ],
+    "metrics": {
+      "zelle": "34% year-over-year increase [Annual Report"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "San Diego County",
+      "California"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Doug Wright",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Hasbrooke",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rob Miller",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jojo Seva",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Vince Nowicki",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CLO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Neville Billimoria",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Marketing & Membership Growth"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Angelica Gamble-Wong",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Talent & Culture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Bowser",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Branch Network"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Mission Federal Credit Union is a credit union. It reports $6.6 billion in total assets. It is regulated by NCUA (National Credit Union Administration) and employs approximately 694 people across 34 branches. Its overall digital maturity is assessed at 2.4 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (National Credit Union Administration)",
+    "regulatory_standing": {
+      "as_of": "2026-04-01",
+      "e_id": "E-030",
+      "label": "Clean regulatory standing",
+      "note": "No NCUA enforcement actions found (Batch 1 negative search)"
+    },
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-157",
+        "excerpt": "Three privacy policies published: CA Financial Privacy, CCPA/CPRA, Federal Privacy Modern encryption for Online and Mobile Banking (per IT security blog post)",
+        "title": "Three privacy policies published",
+        "type": "blog",
+        "url": "https://www.missionfed.com/privacy-policy"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "Website: missionfed.com with full product pages, online applications, blog/news, community pages Social media: Facebook, Instagram, Twitter/X, LinkedIn \u2014 active posting cadence",
+        "title": "Website: missionfed.com with full product pages, online applications\u2026",
+        "type": "blog",
+        "url": "https://www.missionfed.com"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-058",
+        "excerpt": "News/Stories blog section with regular press releases and financial education articles Business Wire in tech stack for PR distribution",
+        "title": "News/Stories blog section with regular press releases and financial\u2026",
+        "type": "blog",
+        "url": "https://www.missionfed.com/news-stories/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-046",
+        "excerpt": "Talent and Culture department (email: talentandculture@missionfed.com) \u2014 HR rebranded as culture function LinkedIn posts feature behind-the-scenes content: employee stories, community events, ERG activities",
+        "title": "Talent and Culture department (email: talentandculture@missionfed.com)",
+        "type": "linkedin-post",
+        "url": "https://www.glassdoor.com/Reviews/Mission-Federal-Credit-Union-Reviews-E366597.htm"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-110",
+        "excerpt": "LogicManager deployed as risk/compliance management platform \u2014 supports compliance monitoring workflows Annual security audit performed on internal systems (MFCU IT security blog post)",
+        "title": "LogicManager deployed as risk/compliance management platform",
+        "type": "blog",
+        "url": "N/A"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-158",
+        "excerpt": "Subscribed to security industry alerts for threat intelligence (per IT blog post) 23% card fraud reduction = effective threat detection and response",
+        "title": "Subscribed to security industry alerts for threat intelligence (per\u2026",
+        "type": "blog",
+        "url": "N/A"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "02b43a6e-05c0-4566-8a3d-315d87bc9db2",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Report references 2 E-IDs not in registry: ['E-139', 'E-140']"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "*[BORROWED from Client Profile Research Report Section 5, with assessment-layer scoring impact annotations]*",
+    "trend_md": "*[BORROWED from Client Profile Research Report Section 3, with assessment-layer maturity signal annotations]*"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.06,
+      "peer_name": "Star One Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.68,
+      "peer_name": "Patelco Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.41,
+      "peer_name": "San Diego County Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.38,
+      "peer_name": "Logix Federal Credit Union",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-MFCU-20260412-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "content: employee stories, community events, ERG activities Glassdoor employee: 'award winning training department to assist in developing staff' 34-year employee: 'completed numerous in-person and online training classes and seminars durin",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "4.8/5 member satisfaction score tracked as KPI 4.9/5 Apple App Store rating (pre-redesign) Mission Fed received 'Best in Show' Innovative Marketing Award among credit unions (Jan 2026) Marketing innovation recognized at industry level No re",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "App Store",
+        "themes": [],
+        "value": 4.8
+      },
+      {
+        "drilldown": "in annual report \u2014 formal VOC metric App Store and Google Play review monitoring with structured response process \u2014 digital VOC channel 4.8/5 member satisfaction as primary service KPI (annual report) Over 2.15 million transactions processe",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": 4.8
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Major digital banking platform redesign launched September 23, 2025",
+      "date_precision": "day",
+      "e_id": "E-016",
+      "event_date": "2025-09-23",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "d9a8b385-50c9-434b-a01e-86903272a77b",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.missionfed.com/upgrade/",
+      "subcap_ids": [],
+      "title": "Major digital banking platform redesign launched"
+    },
+    {
+      "body": "SDCCU and Cal Coast CU announced merger creating $13.5B entity in San Diego market",
+      "date_precision": "publish_fallback",
+      "e_id": "E-022",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "8368d7e0-df56-4f93-a2d7-a7b289f74a22",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://tyfone.com/news/breaking-news/san-diego-cus-strike-deal/",
+      "subcap_ids": [],
+      "title": "Sdccu and Cal Coast CU announced merger creating $13.5B\u2026"
+    },
+    {
+      "body": "$500,000 Community is Everything Fund launched Dec 2024 \u2014 structured community investment program",
+      "date_precision": "month",
+      "e_id": "E-056",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "60082c8f-2843-4a83-9a87-dc9407f8249a",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.missionfed.com/news-stories/mission-fed-invests-500000-into-san-diego-community-through-community-is-everything-fund/",
+      "subcap_ids": [],
+      "title": "$500,000 Community is"
+    },
+    {
+      "body": "34,188 new accounts opened in 2024 (annual report) \u2014 volume metric tracked",
+      "date_precision": "year",
+      "e_id": "E-065",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-065"
+      ],
+      "id": "1765651f-0286-46fb-8b00-bba366e62b5b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.missionfed.com/apps/joinnow/",
+      "subcap_ids": [],
+      "title": "Volume metric tracked"
+    }
+  ]
+}

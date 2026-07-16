@@ -1,0 +1,684 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Access Credit Union Limited",
+      "amount": null,
+      "announced_on": null,
+      "body": "Acquired Interlake Insurance subsidiary in 2024",
+      "closed_on": null,
+      "details": "Acquired Interlake Insurance subsidiary in 2024",
+      "e_id": "E-001",
+      "event_date": "2024-07-01",
+      "id": "ab7ab0a5-29c2-4c65-890b-27fb80add1e7",
+      "source_url": "https://www.accesscu.ca/media/1rreoasx/2024_annualreport_final_eversion.pdf",
+      "status": null,
+      "target": "Interlake Insurance",
+      "title": "Acquired Interlake Insurance subsidiary in 2024"
+    },
+    {
+      "acquirer": "Access",
+      "amount": null,
+      "announced_on": null,
+      "body": "July 1, 2022: legal merger of Access + Noventis + Sunova CUs (member vote Jan 27, 2022)",
+      "closed_on": "2022-07-01",
+      "details": "July 1, 2022: legal merger of Access + Noventis + Sunova CUs (member vote Jan 27, 2022)",
+      "e_id": "E-003",
+      "event_date": "2022-07-01",
+      "id": "976dc771-bcdc-4954-9a33-1bf78609e602",
+      "source_url": "https://en.wikipedia.org/wiki/Access_Credit_Union",
+      "status": "closed",
+      "target": "Noventis + Sunova CUs",
+      "title": "Legal merger of Access + Noventis + Sunova CUs (member vote\u2026"
+    },
+    {
+      "acquirer": "Access CU",
+      "amount": null,
+      "announced_on": null,
+      "body": "COMPLETE MERGER TIMELINE: Access CU incorporated 2009 \u2192 2021 merger with Crosstown Civic CU \u2192 July 1, 2022 merger with Noventis + Sunova \u2192 2023 mergers with Casera, Carpathia, Amaranth \u2192 2024 Interlake Insurance acquisition. SEVEN distinct M&A events in 4 years",
+      "closed_on": null,
+      "details": "COMPLETE MERGER TIMELINE: Access CU incorporated 2009 \u2192 2021 merger with Crosstown Civic CU \u2192 July 1, 2022 merger with Noventis + Sunova \u2192 2023 mergers with Casera, Carpathia, Amaranth \u2192 2024 Interlake Insurance acquisition. SEVEN distinct M&A events in 4 years",
+      "e_id": "E-018",
+      "event_date": "2022-07-01",
+      "id": "ad05a96b-ebc1-484b-985f-8cb5f1dc6b02",
+      "source_url": "https://www.accesscu.ca/en/news/casera-credit-union-members-approve-recommended-merger-with-access-credit-union",
+      "status": null,
+      "target": "Crosstown",
+      "title": "Access CU incorporated 2009 \u2192 2021 merger with Crosstown\u2026"
+    }
+  ],
+  "entity_display_id": "access-credit-union-limi-0001",
+  "financials": {
+    "lines": [
+      "3-Year Asset CAGR (2022\u20132025): 9.4% | Member CAGR: 7.0% | Net Income Growth (FY2024\u2013FY2025): +58.3%",
+      "Trend: ACCELERATING \u2014 M&A-driven scale-up 2022-2023; integration year 2024 (no new mergers); organic growth acceleration 2025. Loan/Asset ratio FY2025: 87.5% \u2014 concentrated lending portfolio.",
+      "National Ranking: Largest CU in Manitoba; 7th largest in Canada (excl. Quebec/Desjardins); [E-007]",
+      "Trend Classification: ACCELERATING \u2014 M&A-driven transformation 2022-2023 followed by organic growth acceleration 2024-2025. Net income growth of 58% in FY2025 signals operational leverage from integration completion.",
+      "* FY2021 and FY2023 are estimated figures. FY2021 pre-dates the transformative Noventis+Sunova merger. FY2023 post-merger estimate based on LinkedIn AGM disclosure. \u2020 FY2023 balance sheet assets are approximate \u2014 confirmed range CA$10.7-11.5B based on loan interest income growth rate analysis from FY2024 comparative statements. FY2024-FY2025: audited figures from Access CU Annual Reports.",
+      "3-Year CAGR (2022\u20132025): Assets +9.4%  |  Members +7.0%  |  Net Income trajectory: breakout growth in FY2025 post-integration"
+    ],
+    "metrics": {
+      "a-driven_transformation_2022": "2023 followed by organic growth acceleration",
+      "net_income": 76100000.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Manitoba",
+      "Canada (national digital via Hubert Financial)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Myrna Wiebe",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "President & CEO (Sept 2025)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Marlin Froese",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO / VP Digital Strategy"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brent Berzuk",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Darcy Jacobs",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief People & Culture Officer"
+      }
+    ],
+    "license_type": "Provincially chartered credit union",
+    "narrative_md": "Wiebe's strategic vision in her own words: \"Our vision has always been to be the best we can be for our members. What may change is how we get there \u2014 adapting processes, embracing collaboration, and finding new ways to support our members and staff.\" [Penticton Herald, Aug 2025]. On branch strategy: \"These changes are driven by lower in-branch traffic and the growing adoption of online and mobile banking.\" [Steinbach Online, Feb 2026].\n\nLegal Name: Access Credit Union Limited\n\nEstablished: 2009 (as Access CU; credit union heritage since 1939 via Altona CU)\n\nHeadquarters (Legal): Stanley Business Centre, Unit 2 23111 PTH 14, Stanley, MB R6P 0B1\n\nPrimary Markets:\n\n\u2022 Winnipeg Metropolitan Area\n\n\u2022 Southern Manitoba\n\n\u2022 Rural Manitoba\n\n\u2022 National (via Hubert Financial GIC platform)\n\nOwnership Structure: Member-owned cooperative. 208,000+ member-owners as at FY2025.\n\nBoard Structure: 12-member Board of Directors (2025). Chair: Curt Letkeman. Vice Chair: Robert Riddell. 5 standing committees: Audit, Risk, Governance, People & Culture, CEO Performance. [E-010, E-044]\n\nThe consolidated entity includes 8 wholly-owned subsidiaries arising from the 2022-2023 merger program. Sub-brands in operation: Hubert Financial (happysavings.ca) \u2014 national online GIC savings platform serving Canadians nationwide; Accelerate Financial \u2014 Manitoba-focused digital banking sub-brand.",
+    "primary_regulator": "Deposit Guarantee Corporation of Manitoba (DGCM)",
+    "size_tier": "TIER_3_LARGE",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-009",
+        "excerpt": "Davey CEO 2012-2025; grew assets from $1.5B (2012) to $13.5B+ (2025) \u2014 9x growth via 7-credit-union consolidation Board Chair Curt Letkeman quoted: 'transformed Access Credit Union but also fundamentally altered the cred",
+        "title": "Davey CEO 2012-2025; grew assets",
+        "type": "article",
+        "url": "https://www.accesscu.ca/en/news/access-credit-union-announces-retirement-of-president-and-ceo"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "CEO Wiebe explicit system-level governance roles: (1) CCUA Board; (2) CUCM Democratic Control Review Committee; (3) Chair Investment Committee TRAF Board (Teachers' Retirement Allowances Fund); (4) Winnipeg Women's Confe",
+        "title": "CEO Wiebe explicit system-level governance roles: (1) CCUA Board; (2)\u2026",
+        "type": "conference",
+        "url": "https://www.accesscu.ca/en/news/access-credit-union-appoints-myrna-wiebe-as-new-chief-executive-officer"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-082",
+        "excerpt": "Access CU has a dedicated blog at blog.accesscu.ca \u2014 content marketing channel; financial advice and community news content 'Uncomplicated Advice' brand for blog content \u2014 intentional plain-language positioning",
+        "title": "Access CU has a dedicated blog at blog.accesscu.ca \u2014 content\u2026",
+        "type": "blog",
+        "url": "https://blog.accesscu.ca"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-097",
+        "excerpt": "ACTIVE HIRING (2026): Security Readiness & Assurance Coordinator (Jan 2026 LinkedIn post from Access CU) \u2014 dedicated cybersecurity role investment; seniority = Coordinator level (not Architect = early maturity building)",
+        "title": "Active Hiring (2026): Security Readiness & Assurance Coordinator (Jan\u2026",
+        "type": "linkedin-post",
+        "url": "https://ca.linkedin.com/jobs/credit-unions-jobs"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "3401a0cc-0602-444d-87b9-c2e268a6e091",
+      "issue_id": "IS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "App quality below member expectations \u2014 NerdWallet CON for crashes + e-transfer failures; Surviscor not in top-7 CU digi"
+    },
+    {
+      "id": "173555cb-f3af-4321-915b-fc31b467976f",
+      "issue_id": "IS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Celero June 8 2022 supply-chain cyber incident \u2014 unauthorized access to Celero systems. Access was a Celero client. Reso"
+    },
+    {
+      "id": "39464762-623a-4c56-b6dc-cf7bc0e3f38a",
+      "issue_id": "IS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Bill C-12 (Royal Assent March 26 2026): 40\u00d7 AML AMPs. FATF Canada evaluation 2025-2026. Heightened compliance investment"
+    },
+    {
+      "id": "a67280f7-168e-4e6a-b0da-eab32fba2c3a",
+      "issue_id": "IS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "CMO departure Nov 2025 \u2014 Adam Monteith moved to Chief Corporate Affairs. Marketing leadership gap affecting P2C1 and P2C"
+    },
+    {
+      "id": "20d2988b-1b86-4893-9e27-4bac949b763f",
+      "issue_id": "IS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Branch consolidation execution risk 2026 \u2014 4 branches closing. Member service channel shift without confirmed digital ca"
+    },
+    {
+      "id": "3202b561-6abb-41f4-a07e-c45aab0840da",
+      "issue_id": "IS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "13-merger legacy system tech debt \u2014 multiple legacy LOS, databases, comms platforms. CIO self-described 'small I.S. depa"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Issues identified during research that directly constrain capability scores through the severity-to-maturity cap mechanism. All issues are sourced from public evidence. This section is enriched with assessment-layer scoring impact analysis beyond the research report.",
+    "trend_md": "This section is borrowed from the Layer 0 Client Profile Research Report (DMA-RES-ACCU-MB-20260504-0001, Section 3.2\u20133.3) per template instructions. Assessment-layer annotations are added in the 'Maturity Signal' column."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.94,
+        "P1C2": 2.89,
+        "P1C3": 2.4,
+        "P1C4": 2.38,
+        "P1C5": 1.86,
+        "P2C1": 1.89,
+        "P2C2": 2.4,
+        "P2C3": 2.81,
+        "P2C4": 1.37,
+        "P3C1": 2.39,
+        "P3C2": 2.38,
+        "P3C3": 2.86,
+        "P3C4": 2.41,
+        "P4C1": 1.88,
+        "P4C2": 1.88,
+        "P4C3": 2.45,
+        "P4C4": 2.98
+      },
+      "overall_score": 2.36,
+      "peer_name": "Hudson Valley Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.57,
+        "P1C2": 2.64,
+        "P1C3": 2.26,
+        "P1C4": 2.39,
+        "P1C5": 1.75,
+        "P2C1": 2.22,
+        "P2C2": 2.45,
+        "P2C3": 2.22,
+        "P2C4": 2.0,
+        "P3C1": 2.42,
+        "P3C2": 2.38,
+        "P3C3": 2.69,
+        "P3C4": 2.5,
+        "P4C1": 2.14,
+        "P4C2": 1.99,
+        "P4C3": 2.23,
+        "P4C4": 2.2
+      },
+      "overall_score": 2.3,
+      "peer_name": "APG Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.49,
+        "P1C2": 1.98,
+        "P1C3": 1.99,
+        "P1C4": 2.24,
+        "P1C5": 1.11,
+        "P2C1": 1.95,
+        "P2C2": 2.25,
+        "P2C3": 1.86,
+        "P2C4": 1.48,
+        "P3C1": 2.31,
+        "P3C2": 2.83,
+        "P3C3": 3.03,
+        "P3C4": 2.29,
+        "P4C1": 1.9,
+        "P4C2": 1.92,
+        "P4C3": 2.79,
+        "P4C4": 3.12
+      },
+      "overall_score": 2.21,
+      "peer_name": "Global Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.99,
+        "P1C2": 1.97,
+        "P1C3": 1.95,
+        "P1C4": 1.88,
+        "P2C1": 2.34,
+        "P2C2": 2.35,
+        "P2C3": 2.38,
+        "P2C4": 2.19,
+        "P3C1": 2.19,
+        "P3C2": 2.15,
+        "P3C3": 2.17,
+        "P3C4": 2.09,
+        "P4C1": 2.09,
+        "P4C2": 1.94,
+        "P4C3": 2.06,
+        "P4C4": 2.13
+      },
+      "overall_score": 2.12,
+      "peer_name": "Empower Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.4,
+        "P1C2": 2.48,
+        "P1C3": 2.04,
+        "P1C4": 2.04,
+        "P1C5": 1.88,
+        "P2C1": 2.45,
+        "P2C2": 2.21,
+        "P2C3": 1.78,
+        "P2C4": 1.29,
+        "P3C1": 2.49,
+        "P3C2": 1.21,
+        "P3C3": 2.35,
+        "P3C4": 2.0,
+        "P4C1": 1.82,
+        "P4C2": 1.95,
+        "P4C3": 1.58,
+        "P4C4": 1.93
+      },
+      "overall_score": 1.99,
+      "peer_name": "HAPO Community Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ACCU-20260504-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor: 3.8/5 overall; 71% would recommend; Compensation 3.7; Work-life balance 3.4; Culture/values 3.7; Career opportunities 3.6 \u2014 solid but not exceptional employer brand NEGATIVE employee themes: 'Slow to adopt new",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": "URS; (3) Online banking desktop/laptop; (4) Mobile app (iOS App Store + Google Play); (5) Telephone banking (legacy IVR); (6) MSC CHAT \u2014 6 distinct service MAJOR NEGATIVE SIGNAL \u2014 Multiple reviews documenting: crashes, inability to send e-t",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "gov.mb.ca/finance/cca/firb \u2014 secondary regulator listed on BBB Member complaints documented: 'There is NO customer service whatsoever",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Executive Management Team: Chief Officers in critical functions led by Board-appointed CEO",
+      "date_precision": "publish_fallback",
+      "e_id": "E-010",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "6cec751f-c264-4cde-b5a9-d8d92b795607",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/en/about/leadership",
+      "subcap_ids": [],
+      "title": "Executive Management Team: Chief Officers in critical\u2026"
+    },
+    {
+      "body": "August 2025: CEO transition \u2014 Larry Davey retirement; Myrna Wiebe appointed President & CEO",
+      "date_precision": "publish_fallback",
+      "e_id": "E-007",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "87cc0316-789d-41ed-aec9-e8483e36b1a6",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/media/j1uladxx/2025_annualreport_mar17_final.pdf",
+      "subcap_ids": [],
+      "title": "Myrna Wiebe appointed President & CEO"
+    },
+    {
+      "body": "Adam Monteith: DEPARTED as CMO November 2025 (per Exa signal) \u2014 transitioned to Chief Corporate Affairs Officer; current CMO role uncertain; Marketing Analyst hiring active (Jan 2026 LinkedIn post)",
+      "date_precision": "month",
+      "e_id": "E-076",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-076"
+      ],
+      "id": "0a48e073-c032-4343-8efd-7b75f1e0d283",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://leadiq.com/c/access-credit-union/5a1d7e15240000240057d438",
+      "subcap_ids": [],
+      "title": "Adam Monteith: Departed as CMO November 2025 (per Exa\u2026"
+    },
+    {
+      "body": "September 2025 charity golf raised $116,182.90 for Ronald McDonald House Charities Manitoba and Katie Cares",
+      "date_precision": "month",
+      "e_id": "E-007",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "61879f4f-06a1-45f1-92ac-78cb14f9ffc4",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.accesscu.ca/media/j1uladxx/2025_annualreport_mar17_final.pdf",
+      "subcap_ids": [],
+      "title": "September 2025 charity golf raised $116,182.90"
+    },
+    {
+      "body": "NEGATIVE PROXY: No AI/GenAI/ML strategy, no AI deployments, no model risk management framework, no AI agents confirmed at Access CU. CEO appointment statement (Aug 2025) cites 'advance innovative initiatives' but no AI-specific commitment",
+      "date_precision": "month",
+      "e_id": "E-109",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-109"
+      ],
+      "id": "6c0bc137-15c6-4fc8-9582-ec5ca4a7be08",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "web_search:Access+Credit+Union+AI+GenAI+machine+learning+artificial+intelligence+strategy+2024+2025",
+      "subcap_ids": [],
+      "title": "CEO appointment statement (Aug 2025) cites advance\u2026"
+    },
+    {
+      "body": "Nominations Committee promoted from sub-committee to full committee in 2025 \u2014 governance structure evolution",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "1d793a89-59b0-45af-ac96-182cf9c0a41a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.accesscu.ca/media/j1uladxx/2025_annualreport_mar17_final.pdf",
+      "subcap_ids": [],
+      "title": "Nominations Committee promoted governance structure\u2026"
+    },
+    {
+      "body": "FY2025 NEW digital features deployed: (1) CRA Direct Deposit \u2014 members select deposit account through online banking; (2) Debit Card Management \u2014 lock/block debit cards from app; (3) Aviso Wealth Investment Integration \u2014 view Aviso accounts within online and mobile banking \u2014 three named feature releases",
+      "date_precision": "year",
+      "e_id": "E-041",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "7516cdaf-b6bb-4e74-98cf-5f61e72b546d",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/media/j1uladxx/2025_annualreport_mar17_final.pdf",
+      "subcap_ids": [],
+      "title": "NEW digital features deployed"
+    },
+    {
+      "body": "Five-branch consolidation announced Feb 2025 \u2014 branch rationalization underway, creating operational transition risk during consolidation period",
+      "date_precision": "month",
+      "e_id": "E-099",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-099"
+      ],
+      "id": "cbbf23da-1e97-477b-a8be-bbfd9828a4f8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/en/about",
+      "subcap_ids": [],
+      "title": "Five-branch consolidation announced"
+    },
+    {
+      "body": "ACU acu.ca = Assiniboine Credit Union (DIFFERENT entity); merged with Caisse Financial Group + Westoba CU in 2024; $9.9B assets, 216,000 members. EXCLUDE from this assessment.",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "6377c584-eae8-49ca-a819-486d70098753",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.acu.ca/hubfs/2025%20New%20Site/Documents/Governance/2024/ACU_Annual-Impact-Report-2024-v7-FINAL_compressed.pdf",
+      "subcap_ids": [],
+      "title": "Merged with Caisse Financial Group + Westoba CU in 2024"
+    },
+    {
+      "body": "CRITICAL TECH TRANSITION: July 4, 2024 \u2014 CGI (TSX:GIB.A; NYSE:GIB) acquired Celero from CUCM + SaskCentral + Alberta Central. Acquisition includes core banking, digital banking, managed services, integration, AND security",
+      "date_precision": "publish_fallback",
+      "e_id": "E-028",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "42d59852-4622-4e1c-aa15-68ee26eed31a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.cucm.org/press-releases/credit-union-central-of-manitoba-saskcentral-and-alberta-central-announce-sale-of-celero-business-to-cgi",
+      "subcap_ids": [],
+      "title": "GIB) acquired Celero"
+    },
+    {
+      "body": "Acquired Interlake Insurance subsidiary in 2024",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "ab7ab0a5-29c2-4c65-890b-27fb80add1e7",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/media/1rreoasx/2024_annualreport_final_eversion.pdf",
+      "subcap_ids": [],
+      "title": "Acquired Interlake Insurance subsidiary in 2024"
+    },
+    {
+      "body": "DEDICATED ESG-CREDENTIALED DIRECTORS (2): (1) Catherine Burns \u2014 completed CPA Canada Sustainability and ESG Reporting Certification early 2024; CA, ICD.D, CUDA; B.Com Hons U Manitoba; Chair People & Culture Committee. (2) Marina R. James \u2014 holds national certificates in ESG, Climate Leadership AND Biodiversity Governance; MBA; ICD; CUDA; ex-Manitoba Hydro Board Chair; ex-Assiniboine CU Board",
+      "date_precision": "year",
+      "e_id": "E-043",
+      "event_date": "2024-02-15",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "aa2c5410-0624-41bc-8d50-8065461f6087",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/en/about/leadership",
+      "subcap_ids": [],
+      "title": "Dedicated ESG-CREDENTIALED Directors (2): (1) Catherine\u2026"
+    },
+    {
+      "body": "Merger degradation explicit: 'Switching to it when my credit union merged in to Access was uncomfortable, as my old app was much more streamlined and easy to use' \u2014 post-merger integration quality signal",
+      "date_precision": "publish_fallback",
+      "e_id": "E-065",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-065"
+      ],
+      "id": "73761701-cf6d-471e-97f4-306de27a2815",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://play.google.com/store/apps/details?id=com.celero.access",
+      "subcap_ids": [],
+      "title": "Merger degradation explicit: 'Switching to it"
+    },
+    {
+      "body": "July 1, 2022: legal merger of Access + Noventis + Sunova CUs (member vote Jan 27, 2022)",
+      "date_precision": "day",
+      "e_id": "E-003",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "976dc771-bcdc-4954-9a33-1bf78609e602",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Access_Credit_Union",
+      "subcap_ids": [],
+      "title": "Legal merger of Access + Noventis + Sunova CUs (member vote\u2026"
+    },
+    {
+      "body": "52-branch consolidation/rebranding planned to unfold throughout 2022 \u2014 physical brand integration completed Year 1",
+      "date_precision": "year",
+      "e_id": "E-020",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "be3d7e80-7ee9-4c7c-aa0a-10c0975a08e7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://chvnradio.com/articles/access-credit-union-merger-set-for-july-1",
+      "subcap_ids": [],
+      "title": "52-branch consolidation/rebranding planned physical brand\u2026"
+    },
+    {
+      "body": "COMPLETE MERGER TIMELINE: Access CU incorporated 2009 \u2192 2021 merger with Crosstown Civic CU \u2192 July 1, 2022 merger with Noventis + Sunova \u2192 2023 mergers with Casera, Carpathia, Amaranth \u2192 2024 Interlake Insurance acquisition. SEVEN distinct M&A events in 4 years",
+      "date_precision": "day",
+      "e_id": "E-018",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "ad05a96b-ebc1-484b-985f-8cb5f1dc6b02",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/en/news/casera-credit-union-members-approve-recommended-merger-with-access-credit-union",
+      "subcap_ids": [],
+      "title": "Access CU incorporated 2009 \u2192 2021 merger with Crosstown\u2026"
+    },
+    {
+      "body": "Access CU context: Access CU was a Celero client at time of incident (Celero Xpress deployed 2021); Access never disclosed specific involvement per public record",
+      "date_precision": "year",
+      "e_id": "E-086",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-086"
+      ],
+      "id": "93b70e0d-781e-4995-8d07-7b97638c0982",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.cbc.ca/news/canada/manitoba/credit-unions-cybersecurity-incident-1.6488872",
+      "subcap_ids": [],
+      "title": "Access CU context deployed"
+    },
+    {
+      "body": "CORE DIGITAL BANKING PLATFORM = Celero Xpress\u2122 built on ebankIT (Portuguese award-winning global digital banking software by Canadian SI Celero). Platform deployed ~2021 with 5 partner credit unions in a collaborative cooperative procurement model",
+      "date_precision": "year",
+      "e_id": "E-071",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "7ee13b54-ead0-41ea-87bf-2dd1a0356b67",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.accesscu.ca/en/news/access-cu-fulfills-commitment-for-better-member-experience-and-cyber-security",
+      "subcap_ids": [],
+      "title": "Platform deployed with 5 partner credit unions in a\u2026"
+    },
+    {
+      "body": "Jan 1, 2021: post-merger consolidated account package and service fee structure \u2014 but at launch member CUs still operated separate online banking and mobile apps ('continue to bank using your respective credit union website online banking and mobile app') \u2014 INTEGRATION DEBT",
+      "date_precision": "day",
+      "e_id": "E-016",
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "690f60de-56f2-4dcc-859f-af1e17c7d0d0",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.accesscu.ca/en/news/welcome-to-your-new-access-credit-union",
+      "subcap_ids": [],
+      "title": "Post-merger consolidated account package and service fee\u2026"
+    },
+    {
+      "body": "MANDATORY TECH SEARCH RESULT: Zero results on mulesoft.com case studies for Access CU \u2014 NO MuleSoft integration platform at Access CU. Coast Capital CU (Canadian peer since 2017) IS a named MuleSoft case study \u2014 material integration gap vs. peer",
+      "date_precision": "year",
+      "e_id": "E-102",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "d369e813-0f7f-45ec-be10-1770b8a88f63",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "web_search:site:appexchange.salesforce.com+site:mulesoft.com+site:tableau.com+Access+Credit+Union",
+      "subcap_ids": [],
+      "title": "Coast Capital CU (Canadian peer since 2017) IS a named\u2026"
+    }
+  ]
+}

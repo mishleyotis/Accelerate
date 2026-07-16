@@ -1,0 +1,88 @@
+{
+  "entity_display_id": "american-homes-4-rent-lp-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.5.IB1",
+        "P2C4",
+        "P3C3.1.3",
+        "P1C5.6.1",
+        "P1C2.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "17bae43c-603f-4f15-bc20-8678428236b8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-021",
+        "E-069",
+        "E-076",
+        "E-072",
+        "E-074",
+        "E-067",
+        "E-068"
+      ],
+      "linked_subcap_id": "P2C4.5.IB1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for American Homes 4 Rent, LP: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-069].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "These gaps affect assessment accuracy",
+      "what_text": "These gaps affect assessment accuracy and require internal discovery before scoring. They are presented as targeted discovery asks for the first Zennify engagement session. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes American Homes 4 Rent, LP's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too [E-066, E-021].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Category-by-category comparison: AMH vs INVH (primary benchmark), Progress, Tricon, FirstKey.",
+        "heading": "7.2 Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer/Resident Experience — Score 2.28 vs Peer Median 2.62 (Gap: -0.34)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — Score 2.81 vs Peer Median 2.56 (Gap: 0.25)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, AI & Technology — Score 3.31 vs Peer Median 2.69 (Gap: 0.62)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "AMH adopted the DAMA data governance framework and developed an internal '4Ward process' — this is governance methodology without a governance platform. The DG Analyst job (E-103) references a 'Data Governance Tool' without naming it — because it has not been selected. AMH is doing the hard analytical work (hiring, framework adoption) without the enabling technology. The result: four production AI models (Amy, BERT, VantageScore, revenue optimization) all ingesting fragmented resident data from isolated systems. No golden resident record means Amy AI cannot personalize based on maintenance history; BERT cannot correlate maintenance costs to resident churn signals; VantageScore cannot use full resident payment history for credit optimization.\n[SOLUTION]\nZennify Solution: Salesforce Data Cloud. Strategic alignment: DAMA + 4Ward data governance implementation + golden resident record. Confirmed absent: YES — validated across 220+ searches. Azure ADLS + Databricks + Azure Synapse for analytics. Data Cloud operates on top of and ingests from these — no replacement.\nEntry point for Zennify: Entry to the new DG Analyst team: 'Data Cloud is the enterprise-grade Data Governance Tool you're looking for. We'll map it to your 4Ward process — you bring the framework, we bring the platform.'\n[EXPECTED OUTCOMES]\nAMH's resident service failure is not a staffing problem — it is a platform architecture problem. NICE CXone routes inbound calls efficiently (3,300/day as of 2019 E-CXONE) but creates no case ID, no SLA clock, no omni-channel identity, and no closed-loop feedback. A resident who calls Monday, texts Tuesday, and submits a portal request Wednesday is treated as three unrelated contacts. Maintenance requests flow from NICE CXone → Yardi work orders → field technician with no unified tracking layer. The 9% resolution rate (E-064) is the outcome: most cases are never formally closed because no case management system exists to close them.\n[SOLUTION]\nZennify Solution: Salesforce Service Cloud + Field Service Lightning. Strategic alignment: CEO Bryan Smith's #1 2026 stated priority: communication platform expansion and resident retention. Confirmed absent: YES — validated across 220+ searches. NICE CXone (ACD + WFM confirmed 2019) + Yardi work orders. Service Cloud is COMPLEMENTARY — CXone handles call routing; Service Cloud handles case management, SLA, and omni-channel identity. No replacement required.\nEntry point for Zennify: COO Palmer's Q3 2025 Resident 360 statement is the engagement opener: 'We saw Lincoln Palmer name Resident 360 in your Q3 earnings call. Service Cloud + FSL is the platform that delivers Resident 360's ROI promise — and it works with your existing NICE CXone, not instead of it.'\n[EXPECTED OUTCOMES]\nMicrosoft Dynamics CRM was the right choice at AMH's founding in 2012 — it integrated with Azure and provided basic property management capabilities. In 2026, Dynamics lacks the native SFR capabilities AMH needs: no resident 360 view across lease lifecycle, no renewal automation, no native Amy AI integration for lead-to-lease handoff, and no data connection to the 4Platform microservices architecture. The Resident 360 program (COO Palmer, E-114) is being built ON TOP of a platform that cannot natively support it. Dynamics requires custom development for every capability Sales Cloud provides out of the box.\n[SOLUTION]\nZennify Solution: Salesforce Sales Cloud. Strategic alignment: COO Resident 360 program — unified resident lifecycle from prospect to renewal. Confirmed absent: YES — validated across 220+ searches. Microsoft Dynamics CRM (confirmed E-031). Sales Cloud replaces/migrates Dynamics for resident lifecycle management.\nEntry point for Zennify: CTO Irby is the technical champion. Entry: 'Your Resident 360 program needs a platform that was designed for resident lifecycle management, not adapted from an ERP. We can show you how we migrated a comparable SFR operator from Dynamics in 18 months without operational disruption.'\n[EXPECTED OUTCOMES]\nThree concurrent 2026 government actions target AMH's algorithmic and institutional practices. AMH's revenue optimization model (10-K E-082) is exactly the type of tool targeted by the DOJ algorithmic pricing action (E-071). The Senate Banking Committee request (E-024) requires AMH to demonstrate its practices — and the audit trail for that demonstration must exist NOW to cover historical records. Box Shield (confirmed deployed) governs document content; it does not provide field-level encryption of Salesforce platform data, event monitoring of pricing model inputs, or algorithmic decision audit trails. Salesforce Shield provides all three.\n[SOLUTION]\nZennify Solution: Salesforce Shield + Privacy Center. Strategic alignment: Regulatory navigation — Senate Banking + DOJ + Privacy compliance. Confirmed absent: YES — validated across 220+ searches. Box Shield deployed (document governance — DIFFERENT FUNCTION). Salesforce Shield = Salesforce PLATFORM audit trail, event monitoring, encryption. No conflict.\nEntry point for Zennify: Entry to CLO Sara Vogt-Lowell: 'The Senate Banking Committee is asking for records about your resident data practices. Shield gives you the audit trail before the next letter arrives — and it deploys alongside the platform investment you're already making.'\n[EXPECTED OUTCOMES]\nAmy AI was built as a standalone custom LLM integration — the right approach for a leasing assistant MVP. Amy 2.0 (full resident journey: applying, move-in, managing home E-114) requires enterprise-grade agent orchestration: multi-turn context, Salesforce Service Cloud integration for maintenance requests, Data Cloud for resident identity, and model governance for legal review. Building Amy 2.0 on the same custom architecture as Amy 1.0 would require: custom MCP server, custom agent governance, custom model registry, and custom Service Cloud integration — each a separate engineering project. The Director Application Architecture job (E-102) specifies MCP + Agentic AI as the architectural requirement, confirming AMH's architecture team already knows the destination.\n[SOLUTION]\nZennify Solution: Salesforce Agentforce. Strategic alignment: Amy 2.0 full resident journey — CEO 2026 AI expansion priority. Confirmed absent: YES — validated across 220+ searches. Amy AI custom LLM (production Q2 2025). Agentforce is the ENTERPRISE CONTROL PLANE for Amy 2.0 — not a replacement of Amy's current leasing function.\nEntry point for Zennify: Entry to CTO Irby: 'Your July 2024 architecture job spec said you need MCP-based agentic AI with vector databases. Agentforce is exactly that spec, production-ready. Your engineering team builds the Amy 2.0 resident journey; Agentforce is the control plane.'\n[EXPECTED OUTCOMES]\nAMH has no Chief Data Officer and no Chief Information and Digital Officer — while INVH has had a CIDO since approximately 2020. AMH's data governance work (DAMA model, 4Ward process, DG Analyst hiring) is being built from the bottom up without executive data sponsorship. CTO Irby owns technology but not data strategy as a distinct discipline. The board's 4/11 technology coverage (E-117) means technology and data governance decisions lack board-level advocacy. In the context of the Senate Banking Committee letter (E-024), this governance gap is not abstract — it is the specific organizational accountability structure that the committee's inquiry targets.\n[SOLUTION]\nZennify Solution: Zennify Digital Strategy Workshop. Strategic alignment: CDO/CIDO vacancy + governance gap + board technology coverage (4/11 members). Confirmed absent: YES — validated across 220+ searches. No CDO/CIDO role at AMH. DG Analyst team (Jun 2025 hires) building without executive data sponsor.\nEntry point for Zennify: Entry to CEO Smith or CFO Lau: 'Your peer INVH has a CIDO who built a PMO and 5-year technology plan that gives them structural governance advantage. We can compress that 4-year gap into a 5-day workshop — and deliver a CDO function design and Salesforce roadmap your board can present in response to the Senate Banking inquiry.'\n[EXPECTED OUTCOMES]\nAMH's new lease rate growth (4.2% Q3 2025 E-082) outpaces renewal rate growth (-0.3%) — a structural imbalance that reflects the absence of renewal journey automation. Each renewal is currently a manual event: a Yardi-triggered letter, a phone follow-up, or an Amy AI interaction. There is no segmented resident nurture program that identifies renewal risk 90 days early, delivers personalized offers based on resident history, or automates the renewal decision process. INVH's CIDO confirmed expanding EliseAI into renewals in 2025 — AMH has no equivalent renewal automation capability.\n[SOLUTION]\nZennify Solution: Salesforce Marketing Cloud Account Engagement (MCAE). Strategic alignment: Resident retention + renewal automation — CEO stated retention priority. Confirmed absent: YES — validated across 220+ searches. Amy AI (leasing-only — confirmed E-032). No marketing automation platform confirmed (E-057).\nEntry point for Zennify: Phase 2 entry, bundled with Sales Cloud: 'Your CEO said retention is the 2026 priority. MCAE is the tool that automates the renewal journey that closes the gap between your 4.2% new lease growth and -0.3% renewal rate.'\n[EXPECTED OUTCOMES]\nAMH's 4Platform microservices + Azure APIM + Kafka streaming is a technically sound integration architecture for point-to-point connections. The problem: every new Salesforce product ( through ) adds new integration requirements. Service Cloud → Yardi work orders, Sales Cloud → 4Platform resident events, Data Cloud → all three systems, Agentforce → all Salesforce products. Without an integration bus, each connection is a custom Kafka bridge — the same architecture pattern that already created the fragmentation AMH is solving. MuleSoft's pre-built Yardi connector eliminates the most complex custom bridge (Yardi ↔ Salesforce) from the very first deployment.\n[SOLUTION]\nZennify Solution: MuleSoft Anypoint Platform. Strategic alignment: Development program integration + Salesforce platform enablement. Confirmed absent: YES — validated across 220+ searches. Apache Kafka + Azure Event Hub (streaming) + Azure APIM (API management) confirmed. MuleSoft complements and formalizes — not replaces Kafka. Azure APIM = MuleSoft API Gateway layer.\nEntry point for Zennify: Entry to SVP Birrell (implementation lead): 'Every Salesforce product you deploy creates one new custom integration problem. MuleSoft solves them all once — and your Yardi connector is already built. We've done this for [reference SFR client].'\n[EXPECTED OUTCOMES]"
+  },
+  "run_request_id": "DMA-ASM-AMH-20260506-0001"
+}

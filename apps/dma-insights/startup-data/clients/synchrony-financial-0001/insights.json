@@ -1,0 +1,477 @@
+{
+  "entity_display_id": "synchrony-financial-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2.5.4",
+        "P2C4.3.6",
+        "P2C2.3.6",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "a22041eb-e5f2-4721-83e2-6557bc87ad27",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-019",
+            "E-023",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-023",
+            "E-097",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-019",
+            "E-023",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-023",
+        "E-019",
+        "E-146",
+        "E-142",
+        "E-141",
+        "E-018",
+        "E-024"
+      ],
+      "linked_subcap_id": "P4C2.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Existing customer — expand, don't land — Data Cloud + MuleSoft + Tableau = greenfield trio within existing footprint [E-019].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Salesforce Already Deployed (8 Products)",
+      "what_text": "Response Bias & Toxicity Mitigation is one of Synchrony Financial's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Synchrony Financial's ability to deliver a stronger data and technology foundation [E-023].",
+      "why_text": "At 1.5 out of 5, Response Bias & Toxicity Mitigation sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-097, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.2.3",
+        "P1C1.1.3",
+        "P1C3.9.2",
+        "P1C3.1.1",
+        "P1C3.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "9cd84c46-c292-4940-8a6d-bdd0fb52e48d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-070",
+        "E-148",
+        "E-019"
+      ],
+      "linked_subcap_id": "P1C4.2.3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strategic alignment with Agentforce narrative — Agentforce: Position as agentic commerce enabler alongside existing Visa/MC/Google work [E-019].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Agentic Commerce Vision",
+      "what_text": "Leadership Communication is one of Synchrony Financial's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Synchrony Financial's ability to deliver sharper strategic direction and stronger oversight [E-148].",
+      "why_text": "At 2.0 out of 5, Leadership Communication sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-070, E-148].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3.6.6",
+        "P4C2.4.8",
+        "P2C3.5.8",
+        "P3C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "ad3d1a51-0469-487c-aafc-2787dba13a9f",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-089",
+        "E-151"
+      ],
+      "linked_subcap_id": "P2C3.6.6",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Employee Experience Enablement a near-term focus for Synchrony Financial: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-089].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "J.D. Power / Trustpilot Service Gap",
+      "what_text": "Employee Experience Enablement is one of Synchrony Financial's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Synchrony Financial's ability to deliver a stronger, more personalised customer experience [E-089].",
+      "why_text": "The assessment found: “Appian low-code platform in operations/dev stack — citizen development capability with enterprise governance Microsoft Power Automate also in stack — additional low-code/RPA platform for workflow” [E-151]. The research report pins the maturity impact at: P2 cap at level 2-level 3 for service quality despite Sydney VA. scores 1.5/5 against a peer median of 3.5 on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.5.4",
+        "P4C3.2.3",
+        "P4C1.1.8",
+        "P4C2.1.7",
+        "P4C2.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "ef6c205b-439d-4368-952e-f34be43f9a33",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-018",
+            "E-019",
+            "E-023",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-023",
+            "E-097",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-023",
+        "E-019",
+        "E-146",
+        "E-142",
+        "E-141",
+        "E-018",
+        "E-024"
+      ],
+      "linked_subcap_id": "P4C2.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Integration and analytics layers are fragmented — MuleSoft + Tableau = immediate greenfield deals in existing Salesforce ecosystem [E-019].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "No MuleSoft / No Tableau / No iPaaS",
+      "what_text": "Response Bias & Toxicity Mitigation is one of Synchrony Financial's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Synchrony Financial's ability to deliver a stronger data and technology foundation [E-023].",
+      "why_text": "At 1.5 out of 5, Response Bias & Toxicity Mitigation sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-097, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.5.5",
+        "P4C2.5.4",
+        "P2C2.4.1",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "0c9b4a65-27ce-4a72-ac70-03b74eebe8c9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-023",
+            "E-097",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-023",
+            "E-097",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-082",
+        "E-040",
+        "E-097",
+        "E-023",
+        "E-019",
+        "E-146",
+        "E-142",
+        "E-141"
+      ],
+      "linked_subcap_id": "P4C2.5.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make AI Fairness & Explainability (XAI) a near-term focus for Synchrony Financial: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "PRISM Decisioning Platform",
+      "what_text": "AI Fairness & Explainability (XAI) is one of Synchrony Financial's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Synchrony Financial's ability to deliver a stronger data and technology foundation [E-040].",
+      "why_text": "The research report pins the maturity impact at: level 4 credit decisioning but cross-vertical unification gap. scores 1.5/5 against a peer median of 3.2 on the current assessment [E-082, E-040].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P3C1.2.4",
+        "P3C1.6.1",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "147c8811-7c59-47da-a037-520b0bdb7b3f",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-094",
+        "E-101",
+        "E-103",
+        "E-105",
+        "E-106",
+        "E-107",
+        "E-104",
+        "E-108"
+      ],
+      "linked_subcap_id": "P3C1.2.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Settlement Automation a near-term focus for Synchrony Financial: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-103].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Multi-Vendor RPA at Scale",
+      "what_text": "Settlement Automation is one of Synchrony Financial's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Synchrony Financial's ability to deliver more efficient, dependable operations [E-101].",
+      "why_text": "The research report pins the maturity impact at: level 3 automation but fragmented — no orchestration layer. scores 1.5/5 against a peer median of 3.0 on the current assessment [E-094, E-101].",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C2.5.5",
+        "P4C1.3.6",
+        "P1C2.8.3",
+        "P1C4.1.3",
+        "P1C2.5.2",
+        "P1C2.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "01630801-1f7c-412d-ad18-8914679848a0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-023",
+            "E-097",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-019",
+            "E-023",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-023",
+        "E-019",
+        "E-146",
+        "E-142",
+        "E-141",
+        "E-018",
+        "E-024"
+      ],
+      "linked_subcap_id": "P4C2.5.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make AI Fairness & Explainability (XAI) a near-term focus for Synchrony Financial: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-019].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "CDO-Led Data Governance",
+      "what_text": "AI Fairness & Explainability (XAI) is one of Synchrony Financial's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Synchrony Financial's ability to deliver a stronger data and technology foundation [E-023].",
+      "why_text": "The research report pins the maturity impact at: level 3-level 4 data governance maturity — sophisticated buyer. scores 1.5/5 against a peer median of 3.2 on the current assessment [E-097, E-023].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": null,
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-RES-SYF-20260325-0001"
+}

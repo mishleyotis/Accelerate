@@ -1,0 +1,1069 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 132
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 208
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 90
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 152
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "everbank-n-a-0001",
+    "domain": null,
+    "hq": null,
+    "id": "1d208275-bca0-4af9-b5c5-50cd22f63266",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "EverBank, N.A.",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:50.419970Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 11,
+    "current_count": 124,
+    "dated_count": 0,
+    "median_age_months": 6.4,
+    "oldest_published_date": "2016-05-01",
+    "stale_count": 1,
+    "stale_pct": 0.74,
+    "total": 136,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 1,
+      "NEGATIVE": 2,
+      "NEUTRAL": 23,
+      "POSITIVE": 110
+    },
+    "connectors": {
+      "Indeed": 2,
+      "LinkedIn": 9
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 12,
+      "NEUTRAL": 108,
+      "POSITIVE": 16
+    },
+    "tiers": {
+      "T1": 3,
+      "T2": 61,
+      "T3": 66,
+      "T4": 6
+    },
+    "total_facts": 733,
+    "total_items": 136
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 66300000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 45000000000.0,
+    "branches": "15",
+    "clay_synced_at": null,
+    "employees_approx": "{'range': '1001-5000', 'linkedin_profiles_q1_2026': 1558, 'us_locations': 24}",
+    "financial_highlights": {
+      "accelerating": "36.8B→$45B+ (Aug 2023–Dec 2025). Sterling $26",
+      "lines": [
+        "ACCELERATING: $36.8B→$45B+ (Aug 2023–Dec 2025). Sterling $261M, +$2B deposits [E-003,E-004]. GOBankingRates Gold 2025+2026 [E-069]. BauerFinancial 5-Star 69Q [E-001]."
+      ],
+      "net_income": 66300000.0
+    },
+    "footprint": "National (FL, CA, NY financial centers; digital nationwide)",
+    "footprint_basis": "derived:geography",
+    "founded": 1998,
+    "geography": "National (FL, CA, NY financial centers; digital nationwide)",
+    "headcount": 1558,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Greg Seibly",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "David DePillo",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lindsay Lawrence",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Stephen Sullivan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Pat Rusnak",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Milind Zodge",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CDAIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Ryan Ritz",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Cayla Elrod",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Colby Mangers",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Digital Innovation"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Andy Marsh",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Strategic Execution"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Joyce Kennedy",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP IT Chief of Staff"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Patrick McDade",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Fraud Risk Mgmt"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "EverBank, N.A.",
+    "license_type": "Nationally chartered bank",
+    "narrative_md": "EverBank, N.A. is a nationally chartered bank (OCC Charter #25290, FDIC #34775) headquartered at 301 W Bay St, Jacksonville, FL 32202 [E-001]. Acquired from TIAA in August 2023 by PE consortium (Stone Point, Warburg Pincus, Reverence, Sixth Street, Bayview) [E-003]. Converted from FSA to national bank charter simultaneously.",
+    "primary_regulator": "OCC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 1000000000.0,
+    "sentiment": {
+      "derived_from": "evidence_excerpts",
+      "sources": [
+        {
+          "signal": "alerts for accounts, transactions, debit card activity App Store reviews indicate mixed onboarding experience — some users report issues with CD funding and account setup One reviewer noted 'UI is horrible' with 'rendering problems' — sugge",
+          "source": "App Store"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mid-Large Regional ($30-50B)",
+    "thought_leadership": null,
+    "ticker": "HWC",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": null,
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "https://www.everbank.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.115839+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# EverBank, N.A. — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "SCQA Context",
+    "scqa_md": "EverBank, N.A. is a $45.0B in assets regional bank regulated by OCC, operating since 1998 with 1,558 employees. A trajectory the analyst classifies as accelerating gives it the balance sheet to fund transformation [E-087, E-099]. Zennify's assessment places overall digital maturity at 1.9/5. The deepest capability gap is Board ESG Oversight at 1.4/5 against a 2.4 peer median [E-013, E-017].\n\nNext is Value Realization Dashboards & Scorecards at 1.4/5 against a 2.6 peer median [E-008, E-009]. Third is Marketing Automation at 1.7/5 against a 2.8 peer median [E-043, E-044]. The issue register adds Chief BSA/AML Officer Iris Smith departed Oct 2025; no confirmed replacement (high severity). The issue register adds Windows 7 (EOL Jan 2020) still detected in production environment (high severity). The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for EverBank, N.A. is whether to close Board ESG Oversight first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. EverBank, N.A. should lead with Twilio (73/100 fit) against Vision Communication, then sequence Databricks behind it. Closing Board ESG Oversight to the peer median alone is worth 1.0 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 1.92,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/business_events.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.074512+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/employer_sentiment.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.074806+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/leadership.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.075414+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.075786+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/regulatory_issues.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.076060+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.076373+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/validation_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.076775+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/workforce_trends.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.076991+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/assessment_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.077743+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/research_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.077965+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.078490+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/assessment_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.079161+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.079494+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/research_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.080545+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/safeguard_gates.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.080879+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_peer_set.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.094583+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_leadership_inventory.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.095528+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/parameter_lock.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.096279+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_matrix.csv",
+        "reason": "no fingerprint matched (best confidence 0.40); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:50.096677+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 31
+    },
+    "stage_ms": {
+      "manifest": 37,
+      "parse": 5625,
+      "persist": 640
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +698 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 03_scoring_workbook/export_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 07_governance/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_baseline_json_filled",
+        "detail": "financial_baseline_json_filled: ['branches']",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/business_events.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/employer_sentiment.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/leadership.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/regulatory_issues.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/validation_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/workforce_trends.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/assessment_synthesis.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/research_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/assessment_analysis.json — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/research_analysis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/safeguard_gates.json — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_peer_set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_leadership_inventory.csv — no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/parameter_lock.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_matrix.csv — no fingerprint matched (best confidence 0.40); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 11",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +698 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "used variant issue register: 03_scoring_workbook/export_issue_register.csv",
+      "used variant recommendations source: 07_governance/recommendations.json",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'website'] leadership=0",
+      "financial_baseline_json_filled: ['branches']",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "insights_derived_from_category_gaps: 4",
+      "INFO/pattern_gap: 01_evidence/business_events.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/employer_sentiment.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/leadership.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/regulatory_issues.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/validation_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/workforce_trends.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 04_reports/assessment_synthesis.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 04_reports/research_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/assessment_analysis.json — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/research_analysis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/safeguard_gates.json — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_peer_set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_leadership_inventory.csv — no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/parameter_lock.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_matrix.csv — no fingerprint matched (best confidence 0.40); 8 generic sections mined",
+      "timeline_events_persisted: 11",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.57,
+      "pillar_id": "P1",
+      "score": 1.73,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.66,
+      "pillar_id": "P2",
+      "score": 1.77,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.61,
+      "pillar_id": "P3",
+      "score": 2.12,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.56,
+      "pillar_id": "P4",
+      "score": 2.04,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-13",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:50.419970Z",
+    "created_at": "2026-07-02T23:11:50.419970Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "c5d49618-333a-466d-b991-82cf0b20df21",
+    "overall_score": null,
+    "request_id": "DMA-ASM-EVER-20260413-0001",
+    "started_at": "2026-07-02T23:11:50.419970Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-001",
+        "E-002",
+        "E-003",
+        "E-004"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 2.8,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.88,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: EverBank selected Backbase Engagement Banking Platform for commercial and treasury digital transformation Colby Mangers SVP Head of Digital Innovation and Transformation leads digital strategy"
+    },
+    {
+      "body": "Board ESG Oversight is a priority capability gap in strategy and governance, scoring 1.39/5 against a peer median of 2.4. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "evidence": [
+        "E-013",
+        "E-017",
+        "E-019",
+        "E-034"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Board ESG Oversight",
+      "peer_median": 2.4,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.39,
+      "so_what": "Prioritize Board ESG Oversight in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Board ESG Oversight",
+      "what": "Board ESG Oversight is a priority capability gap in strategy and governance, scoring 1.39/5 against a peer median of 2.4. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "why": "The linked evidence records: CRA rating: Satisfactory (evaluation period 2021-2023, published Nov 2024) 70.3% of total loans originated inside assessment areas"
+    },
+    {
+      "body": "Value Realization Dashboards & Scorecards is a priority capability gap in strategy and governance, scoring 1.45/5 against a peer median of 2.65. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "evidence": [
+        "E-008",
+        "E-009",
+        "E-010",
+        "E-013"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "Value Realization Dashboards & Scorecards",
+      "peer_median": 2.65,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.45,
+      "so_what": "Prioritize Value Realization Dashboards & Scorecards in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C2",
+      "theme": "Strategy & governance",
+      "title": "Value Realization Dashboards & Scorecards",
+      "what": "Value Realization Dashboards & Scorecards is a priority capability gap in strategy and governance, scoring 1.45/5 against a peer median of 2.65. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "why": "The linked evidence records: VP Risk Officer Risk Governance & Reporting since 2013 (12+ years tenure) Leads board-level and management-level risk committee reporting"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-006"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 49 capability rows."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 3.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-013"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 63 capability rows."
+    },
+    "P1C3": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-023"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 56 capability rows."
+    },
+    "P1C4": {
+      "band": 0.4,
+      "ceiling": 3.2,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-034"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 61 capability rows."
+    },
+    "P1C5": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-013"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 44 capability rows."
+    },
+    "P2C1": {
+      "band": 0.4,
+      "ceiling": 2.9,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-043"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 75 capability rows."
+    },
+    "P2C2": {
+      "band": 0.4,
+      "ceiling": 2.8,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-055"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 77 capability rows."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 3.1,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-062"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 76 capability rows."
+    },
+    "P2C4": {
+      "band": 0.4,
+      "ceiling": 2.4,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-075"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 67 capability rows."
+    },
+    "P3C1": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-081"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 47 capability rows."
+    },
+    "P3C2": {
+      "band": 0.4,
+      "ceiling": 3.3,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-089"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 40 capability rows."
+    },
+    "P3C3": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-095"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 43 capability rows."
+    },
+    "P3C4": {
+      "band": 0.4,
+      "ceiling": 3.1,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-103"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 45 capability rows."
+    },
+    "P4C1": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-111"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 56 capability rows."
+    },
+    "P4C2": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-114"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 70 capability rows."
+    },
+    "P4C3": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-125"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 61 capability rows."
+    },
+    "P4C4": {
+      "band": 0.4,
+      "ceiling": 3.2,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-134"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 46 capability rows."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "regulatory",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "OCC consent order for mortgage servicing remediated — 91/95 items completed, order terminated, $1.6M borrower payments made (Apr 2026).",
+      "evidence": [
+        "E-087",
+        "E-097"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Order terminated $1.6M borrower payments made",
+      "metric": "completed order terminated $1.6M",
+      "peer_context": "Board ESG Oversight runs 1.39/5 vs a 2.40 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "OCC consent order for mortgage servicing remediated — 91/95 items completed, order terminated, $1.6M borrower payments made (Apr 2026). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "OCC consent order for mortgage servicing remediated 91/95…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Milind Zodge appointed Chief Data Officer (CDAIO) Jan 2026; served as Interim CDO Sep-Dec 2025 — 30yr experience (Feb 2026).",
+      "evidence": [
+        "E-107",
+        "E-112"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Milind Zodge appointed Chief Data Officer",
+      "metric": null,
+      "peer_context": "Board ESG Oversight runs 1.39/5 vs a 2.40 median at comparable institutions.",
+      "play": "Prioritize AI advisory + Einstein against the AI infrastructure build opportunity; entry point: EMERGING.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Milind Zodge appointed Chief Data Officer (CDAIO) Jan 2026; served as Interim CDO Sep-Dec 2025 — 30yr experience (Feb 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-02-01",
+        "event": "Milind Zodge appointed Chief Data Officer"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "COO Lindsay Lawrence publicly featured in BAI on smart hiring practices and change management Executive-level visibility on digital transformation signals active leadership sponsorship",
+      "evidence": [
+        "E-030"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "COO Lindsay Lawrence featured in BAI",
+      "metric": null,
+      "peer_context": "Board ESG Oversight runs 1.39/5 vs a 2.40 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "COO Lindsay Lawrence publicly featured in BAI on smart hiring practices and change management Executive-level visibility on digital transformation signals active leadership sponsorship. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Dondra Benjamin VP Commercial Operations Leader named Monitor Top 50 Women in Equipment Finance (Nov 2025)",
+      "evidence": [
+        "E-039"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Dondra Benjamin VP Commercial Operations Leader named…",
+      "metric": null,
+      "peer_context": "Board ESG Oversight runs 1.39/5 vs a 2.40 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Vision Communication — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Dondra Benjamin VP Commercial Operations Leader named Monitor Top 50 Women in Equipment Finance (Nov 2025)",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Dondra Benjamin VP Commercial Operations Leader named…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "$261M Sterling Bank & Trust acquisition completed April 2025; 25 locations rebranded (Apr 2025).",
+      "evidence": [
+        "E-003",
+        "E-102"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "$261M Sterling Bank & Trust acquisition completed April 2025",
+      "metric": "$261M",
+      "peer_context": "Board ESG Oversight runs 1.39/5 vs a 2.40 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Vision Communication — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "$261M Sterling Bank & Trust acquisition completed April 2025; 25 locations rebranded (Apr 2025).",
+      "timeline": {
+        "date": "2025-04-01",
+        "event": "$261M Sterling Bank & Trust acquisition completed"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Board ESG Oversight scores 1.39/5 vs a typical 2.40 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-013",
+        "E-017",
+        "E-019",
+        "E-034"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Board ESG Oversight scores 1.39/5 vs a typical 2.40 at…",
+      "metric": "Board ESG Oversight 1.39/5 vs peer 2.40",
+      "peer_context": "Board ESG Oversight runs 1.39/5 vs a 2.40 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Vision Communication — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "Board ESG Oversight scores 1.39/5 vs a typical 2.40 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

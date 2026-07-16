@@ -1,0 +1,86 @@
+{
+  "entity_display_id": "aafcu-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.1",
+        "P4C1.2.4",
+        "P4C2.5.1",
+        "P4C3.6.11",
+        "P2C4.1.6",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-144"
+      ],
+      "ic_id": "INS-REC-01",
+      "id": "8c8462dc-c637-4640-8977-deab94d14ce5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-144"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4.1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Salesforce platform detected in the stack",
+          "target_id": "salesforce"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-110",
+        "E-136",
+        "E-140",
+        "E-135",
+        "E-108",
+        "E-098",
+        "E-141",
+        "E-112"
+      ],
+      "linked_subcap_id": "P2C4.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Privacy-Preserving Analytics a near-term focus for AAFCU: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-140].",
+      "source_rec_id": "REC-01",
+      "theme": "CX & Personalization",
+      "title": "CRM Modernization — Salesforce FSC + Data Cloud + MuleSoft",
+      "what_text": "Oracle Siebel v22.1 on OCI PaaS confirmed (, Daniel Fernandez Davila AAFCU Data Analyst). Four data silos: SavvyMoney+ARCU+Siebel+Episys. No CDP. ceiling at level 2. $42M SavvyMoney ROI is the personalization ceiling without data unification. Salesforce Financial Services Cloud + Data Cloud + MuleSoft. Unify 4 data silos into member 360. MuleSoft API integration to Episys (core) + ARCU (warehouse) + SavvyMoney (credit signals). Einstein Next Best Action on unified member profile. In Zennify's assessment Privacy-Preserving Analytics scores 1.5 out of 5, versus a typical 3.3 at comparable institutions [E-136].",
+      "why_text": "At 1.5 out of 5, Privacy-Preserving Analytics sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-110, E-136].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-AAFCU-20260501-0001"
+}

@@ -1,0 +1,223 @@
+{
+  "entity_display_id": "bok-financial-corporatio-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "CDO David Poczynek holds dual title (CDO + Acting Dir Infrastructure & Ops) with IT audit/DR background \u2014 not data governance specialist.",
+        "source_kind": "docx"
+      },
+      "id": "43f32e59-3840-45e7-9867-378f201520fd",
+      "involved_subcap_ids": [
+        "P4C3.4.5",
+        "P4C1.5.4",
+        "P1C2.5.1",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P4C1.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P4": 50
+      },
+      "source_path": "CDO David Poczynek holds dual title (CDO + Acting Dir Infrastructure & Ops) with IT audit/DR background \u2014 not data governance specialist.",
+      "title": "CDO Has IT Infrastructure Background",
+      "verbatim_quote": "CDO Has IT Infrastructure Background | CDO David Poczynek holds dual title (CDO + Acting Dir Infrastructure & Ops) with IT audit/DR background \u2014 not data governance specialist. | Data governance advisory + Data Cloud implementation | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Customer data split across 4+ systems: Salesforce CRM + Dynamics CRM + Tealium CDP + Banno digital banking.",
+        "source_kind": "docx"
+      },
+      "id": "c1faf159-589b-4b51-a80b-d6d565e38539",
+      "involved_subcap_ids": [
+        "P2C3.4.1",
+        "P4C1.5.4",
+        "P2C4.1.1",
+        "P4C4.2.6",
+        "P2C1.4.6",
+        "P4C1.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P4": 50
+      },
+      "source_path": "Customer data split across 4+ systems: Salesforce CRM + Dynamics CRM + Tealium CDP + Banno digital banking. No golden record.",
+      "title": "Customer 360 Fragmented",
+      "verbatim_quote": "Customer 360 Fragmented | Customer data split across 4+ systems: Salesforce CRM + Dynamics CRM + Tealium CDP + Banno digital banking. No golden record. | Data Cloud \u2014 unified customer profile + MuleSoft integration | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Eloqua + Marketo for marketing automation.",
+        "source_kind": "docx"
+      },
+      "id": "58adb1a0-e3b7-4e7d-ae2d-dfa695c64375",
+      "involved_subcap_ids": [
+        "P3C1.4.1",
+        "P3C1.4.4",
+        "P3C1.2.4",
+        "P3C1.2.1",
+        "P3C2.2.1",
+        "P3C2.3.3",
+        "P3C2.3.4",
+        "P3C2.3.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "Salesforce + Dynamics CRM running simultaneously. Eloqua + Marketo for marketing automation. Massive consolidation opportunity.",
+      "title": "Dual CRM + Dual Marketing Automation",
+      "verbatim_quote": "Dual CRM + Dual Marketing Automation | Salesforce + Dynamics CRM running simultaneously. Eloqua + Marketo for marketing automation. Massive consolidation opportunity. | Sales Cloud + Marketing Cloud consolidation | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "heavily reliant on a single vendor",
+        "source_kind": "docx"
+      },
+      "id": "89ba183b-aec9-4ab0-9e12-a0ef783c0f7b",
+      "involved_subcap_ids": [
+        "P1C1.4.5",
+        "P1C2.3.2",
+        "P1C2.3.7",
+        "P1C2.3.4",
+        "P1C1.2.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "10-K discloses \"heavily reliant on a single vendor\" \u2014 SilverLake core on IBM Power Systems. Critical dependency.",
+      "title": "Jack Henry Single-Vendor Concentration",
+      "verbatim_quote": "Jack Henry Single-Vendor Concentration | 10-K discloses \"heavily reliant on a single vendor\" \u2014 SilverLake core on IBM Power Systems. Critical dependency. | MuleSoft for vendor diversification + API layer | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "No MuleSoft, Apigee, or ESB detected despite 200+ technologies.",
+        "source_kind": "docx"
+      },
+      "id": "9c26f46b-3ada-4337-b972-be52485d41e8",
+      "involved_subcap_ids": [
+        "P4C3.3.1",
+        "P2C3.1.7",
+        "P2C1.4.6",
+        "P2C3.1.8",
+        "P2C4.1.3",
+        "P2C3.1.10"
+      ],
+      "kpis": [
+        {
+          "current_value": "$52,000,000,000",
+          "delta": null,
+          "kpi_label": "Most likely for",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 81,
+        "P4": 19
+      },
+      "source_path": "No MuleSoft, Apigee, or ESB detected despite 200+ technologies. Point-to-point integrations likely.",
+      "title": "No Enterprise Integration Layer",
+      "verbatim_quote": "No Enterprise Integration Layer | No MuleSoft, Apigee, or ESB detected despite 200+ technologies. Point-to-point integrations likely. | MuleSoft iPaaS \u2014 GREENFIELD opportunity | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Sitecore XM Cloud, Tealium CDP, Optimizely all deployed \u2014 but zero evidence of banking-journey personalization activation.",
+        "source_kind": "docx"
+      },
+      "id": "bdf4d630-2099-49b8-ac7a-11de4ba29a28",
+      "involved_subcap_ids": [
+        "P4C1.5.3",
+        "P2C4.2.5",
+        "P2C4.2.3",
+        "P2C4.2.7",
+        "P2C4.4.7",
+        "P2C4.4.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 82,
+        "P4": 18
+      },
+      "source_path": "Sitecore XM Cloud, Tealium CDP, Optimizely all deployed \u2014 but zero evidence of banking-journey personalization activation.",
+      "title": "Personalization Tools PRESENT but INACTIVE",
+      "verbatim_quote": "Personalization Tools PRESENT but INACTIVE | Sitecore XM Cloud, Tealium CDP, Optimizely all deployed \u2014 but zero evidence of banking-journey personalization activation. | Einstein AI activation + Data Cloud segmentation | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "AI appears only as risk vocabulary in 10-K.",
+        "source_kind": "docx"
+      },
+      "id": "50adc786-0bd5-441e-9799-1d9c6d8fa647",
+      "involved_subcap_ids": [
+        "P4C2.1.2",
+        "P4C2.4.4",
+        "P4C2.4.1",
+        "P4C2.6.3",
+        "P4C1.4.2",
+        "P4C1.1.4",
+        "P4C1.6.1",
+        "P4C1.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "No AI deployments across any domain \u2014 CX, operations, fraud, or decisioning. AI appears only as risk vocabulary in 10-K.",
+      "title": "Zero AI/ML in Production",
+      "verbatim_quote": "Zero AI/ML in Production | No AI deployments across any domain \u2014 CX, operations, fraud, or decisioning. AI appears only as risk vocabulary in 10-K. | Einstein AI + Data Cloud \u2014 greenfield AI opportunity | \ud83d\udcb0\ud83d\udcb0\ud83d\udcb0\ud83d\udcb0"
+    }
+  ]
+}

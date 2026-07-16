@@ -1,0 +1,36 @@
+{
+  "entity_display_id": "odlum-brown-limited-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Strategic Objectives Map \u2014 2025 Active Priorities",
+        "source_kind": "docx"
+      },
+      "id": "a1a8d626-e86f-4fcd-b7ae-791ceecf87f2",
+      "involved_subcap_ids": [
+        "P1C3.5.3",
+        "P1C3.5.3",
+        "P1C3.3.5",
+        "P1C3.5.1",
+        "P1C1.1.1",
+        "P1C1.1.1",
+        "P1C1.1.4",
+        "P1C1.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Strategic Objectives Map \u2014 2025 Active Priorities",
+      "verbatim_quote": "Strategic Objectives Map \u2014 2025 Active Priorities"
+    }
+  ]
+}

@@ -1,0 +1,1401 @@
+{
+  "entity_display_id": "bank-ozk-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C4.2.3",
+        "P3C4.2.4",
+        "P3C3.1.4",
+        "P3C4.1.4",
+        "P4C3.3.3"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "288b6fb8-c6c0-4551-bc11-c8f0a11f97de",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P3C4.2.3",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make BCP Plan Development a near-term focus for Bank OZK: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-04",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Establish Integrated Business Continuity and Disaster Recovery Program",
+      "what_text": "Subcaps (BCP Plan Development) and (Plan Maintenance) score 1.0; evidence indicates OZK maintains basic BC plans but without comprehensive site/system prioritization, recovery time objectives (RTOs), or coordinated testing across all business functions and critical third-party dependencies. Shield provides audit trails and compliance controls for BC/DR documentation; Slack enables real-time crisis communication and coordinated response across 500+ employees and third-party incident management. Upgrades from fragmented plans (level 1) to coordinated, tested BC program (level 2-level 3). In Zennify's assessment BCP Plan Development scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-023].",
+      "why_text": "scores 1.0/5 against a peer median of 2.5 on the latest assessment; this recommendation targets 2 capabilities [E-052, E-023].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.2.10",
+        "P3C4.8.3",
+        "P1C2.3.4",
+        "P3C2.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "84bd3ac0-e81b-461c-9f9f-d59d64cb2c16",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-028"
+      ],
+      "linked_subcap_id": "P4C2.2.10",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make BI Validation Evidence Pack Automation a near-term focus for Bank OZK: a scoped investment here would lift it from 2.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-028].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "RESG Concentration Risk",
+      "what_text": "RESG Concentration Risk: Real Estate Specialties Group declining from peak to approximately 62% of portfolio, with goal of ~50%. Diversification into CIB group (launched ~18 months ago) and other commercial segments creates new digital capability requirements across customer onboarding, analytics, and risk management. In Zennify's assessment BI Validation Evidence Pack Automation scores 2.0 out of 5, versus a typical 2.3 at comparable institutions [E-028].",
+      "why_text": "At 2.0 out of 5, BI Validation Evidence Pack Automation sits 0.3 points below the 2.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-028].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.3.3",
+        "P2C4.7.6",
+        "P1C2.3.5",
+        "P1C4.1.4",
+        "P1C3.9.4",
+        "P1C3.4.7"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "0c168a42-b055-4e2f-90de-73a47d48532e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-052",
+        "E-023"
+      ],
+      "linked_subcap_id": "P4C3.3.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Real-Time API Development a near-term focus for Bank OZK: a scoped investment here would lift it from 2.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-023].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "OZK Labs as Innovation Engine",
+      "what_text": "OZK Labs as Innovation Engine: Founded in 2012 and acquired via C1 Financial in 2016, OZK Labs employs ~40 staff in St. Petersburg, FL building custom digital banking products including the Bank IQ BaaS platform. While this positions the bank ahead of most regional peers in innovation culture, the custom-build approach creates integration and governance challenges that Zennify’s Salesforce-native solutions can address. In Zennify's assessment Real-Time API Development scores 2.0 out of 5, versus a typical 2.0 at comparable institutions [E-052].",
+      "why_text": "At 2.0 out of 5, Real-Time API Development shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-002, E-052].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.1.7",
+        "P3C3.1.4",
+        "P1C2.3.5",
+        "P1C4.1.4",
+        "P1C2.5.5",
+        "P1C2.5.2"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "10a7e58f-d9e3-4385-a5ef-39209b39102f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C1.1.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Data Management & Governance discovery conversation — the finding is documented in the client's research report [E-034].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Governance Gap",
+      "what_text": "Data Governance Gap: No Chief Data Officer identified. Active hiring of 10+ data governance roles at VP/EVP level in Dallas, TX suggests a framework under development rather than mature. This is a critical gap for a bank approaching $50B in assets where regulatory expectations for data management are significantly higher. In Zennify's assessment Federated Community of Practice (CoP) + Domain Onboarding Playbooks scores 1.0 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "At 1.0 out of 5, Federated Community of Practice (CoP) + Domain Onboarding Playbooks sits 1.3 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P4C1.1.7",
+        "P4C3.3.3",
+        "P4C4.2.4",
+        "P1C1.1.4",
+        "P1C2.3.5"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "647a319e-5018-4f79-8ab3-66797825dc08",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Operational Workflow & Risk discovery conversation — the finding is documented in the client's research report [E-034].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "MetricStream GRC Implementation",
+      "what_text": "MetricStream GRC Implementation: Bank OZK went live on MetricStream in 2023, now supporting 100+ users for RCSA, issue management, and internal audit integration. Deputy CRO Arindam Majumdar won the 2024 GRC Visionary Award. This represents strong operational risk management maturity but highlights that GRC is ahead of other enterprise capabilities like data governance and cybersecurity. In Zennify's assessment Law Enforcement Coordination scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-023].",
+      "why_text": "At 2.0 out of 5, Law Enforcement Coordination sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.10",
+        "P4C4.2.4",
+        "P1C2.6.1",
+        "P4C4.1.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "e5a98dc4-77d6-49f7-b525-e506fc4f2143",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C2.2.10",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make BI Validation Evidence Pack Automation a near-term focus for Bank OZK: a scoped investment here would lift it from 2.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Cybersecurity Visibility Gap",
+      "what_text": "Cybersecurity Visibility Gap: No CISO publicly identified, no SOC details, and online security describes basic authentication controls. The 10-K acknowledges AI and cybersecurity risks but specific program details are absent from public evidence. For a bank of this size, this represents a significant area where Zennify can drive value through Security Cloud and related offerings. In Zennify's assessment BI Validation Evidence Pack Automation scores 2.0 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "At 2.0 out of 5, BI Validation Evidence Pack Automation sits 0.3 points below the 2.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.7",
+        "P2C4.7.6",
+        "P1C1.1.4",
+        "P1C2.3.5"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "a9f2070f-6855-4a73-87f5-654dc730354a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C1.1.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Data Strategy & Roadmap a near-term focus for Bank OZK: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-01",
+      "theme": "Data Management & Governance",
+      "title": "Establish Enterprise Data Governance Operating Model for Bank OZK",
+      "what_text": "Bank OZK lacks systematic data governance structure; subcaps (Data Strategy) and (Governance Model) score 1.5 due to limited public governance framework documentation and no evidence of formal data stewardship roles. Salesforce Data Cloud provides unified data platform with built-in governance, data quality framework, and golden record management—enabling Bank OZK to move from ad-hoc data silos (level 1) to standardized, governed data practices (level 2-level 3). In Zennify's assessment Enterprise Data Strategy & Roadmap scores 2.5 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "scores 2.5/5 against a peer median of 2.2 on the latest assessment; this recommendation targets 2 capabilities [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C2.2.10",
+        "P4C3.3.3",
+        "P3C3.8.4",
+        "P1C2.5.3"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "09021d6d-3e41-4436-80bb-598b0fa2a58c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C1.2.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Automated Data Quality Monitoring a near-term focus for Bank OZK: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Implement Automated Data Quality Monitoring and Observability Platform",
+      "what_text": "Subcaps (Automated Data Quality Monitoring) and (Data Observability Platform) score 1.5; OZK currently uses manual, siloed data quality checks in core system (Fiserv). No enterprise-wide DQ observability means data issues propagate downstream. Combine Data Cloud's automated quality rules engine with Tableau's real-time monitoring dashboards. Enables shift from reactive data quality (level 1) to proactive, automated monitoring (level 2-level 3). In Zennify's assessment Automated Data Quality Monitoring scores 2.5 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "scores 2.5/5 against a peer median of 2.2 on the latest assessment; this recommendation targets 2 capabilities [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.4.2",
+        "P4C1.1.7",
+        "P4C2.2.10",
+        "P4C3.3.3",
+        "P2C4.7.6",
+        "P3C3.1.4"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "62099fb3-49c9-47ec-88b5-e62cde60b295",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C1.4.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Deploy Master Data Management (MDM) Golden Record Solution for Customer 360 — addressable via salesforce [E-034].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Deploy Master Data Management (MDM) Golden Record Solution for Customer 360",
+      "what_text": "Capability (Identity Resolution & Unified Customer Profile) scores 1.5; evidence shows OZK maintains separate customer records across retail, commercial, and wealth platforms without single customer view. Limits cross-sell, regulatory reporting accuracy, and customer experience. Data Cloud MDM capabilities combined with MuleSoft real-time integration create unified, deduplicated customer master record. Enables movement from fragmented customer views (level 1) to enterprise unified profile (level 2-level 3). In Zennify's assessment Identity Resolution & Unified Customer Profile scores 2.5 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "At 2.5 out of 5, Identity Resolution & Unified Customer Profile shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4.1.1",
+        "P4C3.3.3",
+        "P3C4.1.4",
+        "P1C5.6.1",
+        "P1C2.3.7",
+        "P4C4.8.1"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "8d0edc68-6d0b-4e23-ae5f-b3ec999f33af",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P3C4.1.1",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Develop Comprehensive Third-Party Risk Management and Vendor Resilience Program — addressable via salesforce [E-034].",
+      "source_rec_id": "REC-05",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Develop Comprehensive Third-Party Risk Management and Vendor Resilience Program",
+      "what_text": "Capability (Risk Identification & Assessment) scores 1.5; OZK depends on 800+ third-party vendors (core, payments, cloud, outsourcing) with limited centralized TPRM. No evidence of systematic resilience assessment or contractual recovery requirements for critical vendors. Shield provides risk assessment and monitoring framework; MuleSoft enables rapid vendor failover and API rerouting. Together they support transition from reactive vendor risk (level 1) to proactive resilience management (level 2-level 3). In Zennify's assessment Resilience Strategy scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-023].",
+      "why_text": "At 2.0 out of 5, Resilience Strategy sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.5.1",
+        "P2C4.7.6",
+        "P3C1.2.5",
+        "P1C4.1.4",
+        "P1C4.5.2",
+        "P1C4.5.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "09d60e43-e6ed-4f4d-b78c-777af57f3517",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-041",
+        "E-042",
+        "E-052"
+      ],
+      "linked_subcap_id": "P1C4.5.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-06"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Role-Based Training a near-term focus for Bank OZK: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-052].",
+      "source_rec_id": "REC-06",
+      "theme": "Culture & Change",
+      "title": "Launch Structured Digital Skills Development Program for Frontline and Back-Office Staff",
+      "what_text": "Capability (Role-Based Training) scores 2.5; OZK has fragmented, role-specific training but no enterprise digital skills curriculum or learning management system. Evidence shows only 40% of staff have completed digital literacy training despite $2M annual training budget. Slack enables peer learning and rapid knowledge sharing; Salesforce Platform can host custom digital skills curriculum and micro-credentialing. Enables shift from episodic training (level 2) to continuous learning culture (level 3). In Zennify's assessment Role-Based Training scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-042].",
+      "why_text": "At 2.5 out of 5, Role-Based Training shows a developing capability still short of the peer standard. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business [E-041, E-042].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.3.1",
+        "P1C4.3.4",
+        "P1C4.3.3"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "fb535906-569a-4ab6-88f6-6a5b9205f94a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P1C4.3.1",
+      "platforms": [
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-07"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Champions Program a near-term focus for Bank OZK: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-07",
+      "theme": "Culture & Change",
+      "title": "Establish Digital Champions Network to Drive Organizational Change and Adoption",
+      "what_text": "Capability (Champions Program) scores 2.5; OZK has ad-hoc change champions but no formal program structure, recognition, or career path. Limits grassroots adoption of digital initiatives across 3,500+ employees in 80+ locations. Slack channels enable lightweight champion network coordination; Experience Cloud portal provides champions with tools, resources, and recognition. Moves from informal champions (level 2) to structured advocacy program (level 3). In Zennify's assessment Champions Program scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-023].",
+      "why_text": "At 2.5 out of 5, Champions Program shows a developing capability still short of the peer standard. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3.4.1",
+        "P2C4.7.6",
+        "P2C1.1.6",
+        "P2C2.1.1",
+        "P1C1.6.3",
+        "P3C3.2.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-12",
+      "id": "ff66ce28-6151-4fad-96f2-f003afcf1a99",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-016"
+      ],
+      "linked_subcap_id": "P2C3.4.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-12"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Customer Context Visibility (360) a near-term focus for Bank OZK: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-016].",
+      "source_rec_id": "REC-12",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Build Unified Omnichannel Customer Experience Platform on Salesforce",
+      "what_text": "Capability (Customer Context Visibility 360) scores 2.5; customer journey is fragmented across mobile app, website, branch, call center, and ATM networks. No unified customer context. Leads to repeated questions, poor experience, and operational inefficiency. Service Cloud unifies customer interactions; Data Cloud provides 360-degree customer view; Marketing Cloud personalizes engagement. Consolidates fragmented channels (level 1-level 2) into seamless omnichannel experience (level 3). In Zennify's assessment Customer Context Visibility (360) scores 2.5 out of 5, versus a typical 2.0 at comparable institutions [E-016].",
+      "why_text": "At 2.5 out of 5, Customer Context Visibility (360) shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business [E-048, E-016].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.2",
+        "P4C2.2.10",
+        "P2C2.1.1",
+        "P3C3.1.4",
+        "P1C2.3.5",
+        "P2C4.8.5"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-13",
+      "id": "a6667563-fb27-4de9-9a82-5e287ca16636",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C2.1.2",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [
+        "REC-13"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for Bank OZK: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-13",
+      "theme": "Analytics & AI",
+      "title": "Establish AI/ML Governance Framework and Prioritized Use Case Roadmap",
+      "what_text": "Capability (AI & ML Strategy & Governance) scores 2.5; OZK has launched 3 AI pilots (loan decisioning, fraud detection, chatbot) but no enterprise governance, risk framework, or prioritized pipeline. Risk of inconsistent model performance, regulatory violations, and scattered ROI. Einstein provides managed ML platform with built-in fairness/bias controls; Shield enables audit trails and compliance documentation. Enables transition from ad-hoc AI pilots (level 1) to governed, enterprise AI practice (level 3). In Zennify's assessment AI & ML Strategy & Governance scores 2.5 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "At 2.5 out of 5, AI & ML Strategy & Governance shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.2.10",
+        "P2C1.1.6",
+        "P1C4.1.4",
+        "P4C1.1.6"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "c5807a0d-146a-4075-bb2a-82677bc5a6c2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P4C2.2.2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-08"
+      ],
+      "severity": "low",
+      "so_what_text": "Recommended move: Enable Data-Driven Decision Culture through Self-Service Analytics and Insights — addressable via tableau [E-034].",
+      "source_rec_id": "REC-08",
+      "theme": "Analytics & AI",
+      "title": "Enable Data-Driven Decision Culture through Self-Service Analytics and Insights",
+      "what_text": "Subcaps (Self-Service BI & Analytics) and (Embedded Analytics) score 2.5; OZK has Tableau but adoption is limited to 200+ business analysts. Frontline managers lack access to KPIs and customer insights. Perception is 'data is hard to get.' Tableau's interactive dashboards + Einstein's natural language queries enable non-technical users to explore data. Shifts mindset from 'data is IT's job' (level 1) to 'data is everyone's resource' (level 2-level 3). In Zennify's assessment Self-Service BI & Analytics scores 3.0 out of 5, versus a typical 2.3 at comparable institutions [E-023].",
+      "why_text": "scores 3.0/5 against a peer median of 2.2 on the latest assessment; this recommendation targets 2 capabilities [E-052, E-023].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C3.2.2",
+        "P4C3.3.3",
+        "P2C4.7.6",
+        "P1C1.5.5",
+        "P4C3.4.2",
+        "P4C3.2.7"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "f15dbd9a-816f-46c9-acf6-eb41523dfefe",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-023",
+        "E-052"
+      ],
+      "linked_subcap_id": "P4C3.2.2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-09"
+      ],
+      "severity": "low",
+      "so_what_text": "Make Legacy Modernization Strategy a near-term focus for Bank OZK: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-052].",
+      "source_rec_id": "REC-09",
+      "theme": "Architecture & Cloud",
+      "title": "Evaluate Cloud-Native Modernization Path for Core Banking System",
+      "what_text": "Capability (Legacy Modernization Strategy) scores 2.5; OZK's Fiserv Premier core (2021 deployment) is still deployed on-premises. No clear path to cloud-native architecture limits agility, scalability, and ecosystem openness. Evidence shows plans discussed but no formal strategy. MuleSoft enables API-first integration layer; Salesforce Financial Services Cloud (on public cloud) can serve retail/wealth; Platform enables custom micro-services. Supports gradual migration from on-premises monolith (level 2) to cloud-native ecosystem (level 3-level 4). In Zennify's assessment Legacy Modernization Strategy scores 3.0 out of 5, versus a typical 2.0 at comparable institutions [E-023].",
+      "why_text": "At 3.0 out of 5, Legacy Modernization Strategy shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-002, E-023].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P3C1.2.4",
+        "P4C3.3.3",
+        "P2C4.7.6",
+        "P3C1.2.5",
+        "P3C1.2.2",
+        "P2C4.2.2"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "df6ce6f4-bf81-426e-9c94-8ff89420f234",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P3C1.2.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-10"
+      ],
+      "severity": "low",
+      "so_what_text": "Recommended move: Implement Real-Time and Near-Real-Time Payment Processing Infrastructure — addressable via salesforce [E-034].",
+      "source_rec_id": "REC-10",
+      "theme": "Core Automation",
+      "title": "Implement Real-Time and Near-Real-Time Payment Processing Infrastructure",
+      "what_text": "Capability (Settlement Automation) scores 2.5; OZK's payment processing is T+1 for ACH, T+0 for some wire but fragmented. No clear FedNow (instant payments) or RTP network strategy. Lost competitive advantage vs. peers offering instant payments. MuleSoft's event-driven integration enables real-time payment workflows; Marketing Cloud sends instant payment notifications. Enables transition from T+1 processing (level 2) to real-time/T+0 (level 3). In Zennify's assessment Settlement Automation scores 3.0 out of 5, versus a typical 2.5 at comparable institutions [E-023].",
+      "why_text": "At 3.0 out of 5, Settlement Automation shows a maturing capability within reach of best practice. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P3C1.4.2",
+        "P4C2.2.10",
+        "P2C4.7.6",
+        "P3C1.2.5",
+        "P3C1.3.7",
+        "P3C1.4.1"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-11",
+      "id": "4665a60e-0956-4e0a-bff2-e20d8032d6bb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "linked_subcap_id": "P3C1.4.2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-11"
+      ],
+      "severity": "low",
+      "so_what_text": "Make Intelligent Data Extraction a near-term focus for Bank OZK: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-11",
+      "theme": "Core Automation",
+      "title": "Deploy Intelligent Document Processing for Loan Origination and Account Opening",
+      "what_text": "Capability (Intelligent Data Extraction) scores 2.5; OZK manually extracts data from loan applications, mortgage docs, and tax returns. No OCR or AI-powered document understanding. Loan processing turnaround is 7-10 days (peer average: 2-3 days). Salesforce Platform + Einstein can automate document ingestion, key field extraction, and validation. Reduces manual data entry by 90%; cuts loan processing time from 7-10 days to 1-2 days. Moves from manual process (level 1) to intelligent automation (level 3). In Zennify's assessment Intelligent Data Extraction scores 3.0 out of 5, versus a typical 2.5 at comparable institutions [E-023].",
+      "why_text": "At 3.0 out of 5, Intelligent Data Extraction shows a maturing capability within reach of best practice. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business [E-052, E-023].",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-RES-OZK-20260306-0001"
+}

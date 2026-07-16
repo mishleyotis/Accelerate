@@ -1,0 +1,1091 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 167,
+        "subcaps": 167,
+        "thin": 126
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 217
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 105
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 158
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "apg-federal-credit-union-0001",
+    "domain": null,
+    "hq": null,
+    "id": "54572556-1ee9-4f36-a780-08bbf3d17e4f",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "APG Federal Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:23.324594Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 12,
+    "current_count": 75,
+    "dated_count": 8,
+    "median_age_months": 15.1,
+    "oldest_published_date": "2018-12-01",
+    "stale_count": 17,
+    "stale_pct": 15.18,
+    "total": 112,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 6,
+      "NEGATIVE": 5,
+      "NEUTRAL": 15,
+      "POSITIVE": 86
+    },
+    "connectors": {
+      "Clay": 1,
+      "Glassdoor": 2,
+      "Indeed": 3,
+      "LinkedIn": 23
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 13,
+      "NEUTRAL": 74,
+      "POSITIVE": 25
+    },
+    "tiers": {
+      "T1": 2,
+      "T2": 92,
+      "T3": 18
+    },
+    "total_facts": 436,
+    "total_items": 112
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 25500000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 2608500000.0,
+    "branches": 19,
+    "cagr": "4.8%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "net_income": 25500000.0,
+      "trajectory": {
+        "branches": 19,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": null,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Workday Confirmed at Apgfcu (echoloc.ai 2026): Workday…"
+          },
+          {
+            "fy": "FY2025",
+            "label": "Current 2026 Board (post David Gilbert death Oct 2025)…"
+          }
+        ],
+        "fy": [
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Suitland, MD",
+        "headline": "$10.0B net income · FY2026",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            1.0,
+            10000.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Suitland, MD",
+    "footprint_basis": "derived:geography",
+    "founded": 1938,
+    "geography": "Suitland, MD",
+    "headcount": null,
+    "hq": "1321 Pulaski Highway, Edgewood, MD 21040",
+    "hq_address": "1321 Pulaski Highway, Edgewood, MD 21040",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Becky Smith",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President / CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kevin Stehl",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Experience Officer (CXO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Teshia Davis",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief People Officer / SVP HR"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jo Anna Shuba",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Marketing & Business Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Scott Weaver",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Wayne Beall",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Steve Stakias",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP IT Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Faisal Shahzad",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP IT Infrastructure"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Marco Miranda",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Security & Fraud"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Beth Bavis",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Business Banking"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "APG Federal Credit Union",
+    "license_type": "Federal Credit Union",
+    "members": 183768,
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "APG Federal Credit Union is a credit union. It reports $2.6 billion in total assets and has operated since 1938. It is regulated by NCUA and serves approximately 183,768 members through 19 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 40,
+          "scale": 5,
+          "score": 3.5,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.5/5",
+          "signal": "Infrastructure at APGFCU since June 2022 (3.5+ year tenure) Glassdoor: 3.5/5 overall rating from 40+ reviews; 57% would recommend; comp/benefits 3.9/5; work-life 3.2/5; culture 3.4/5; career opps 3.1/5; 62% positive business outlook Employe",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "Operations, Member Loan Center, IT, Home Loan Center — Indeed APGFCU reviews: training department called excellent; 'opportunities for advancement are plentiful'; benefits considered top differentiator APGFCU operates 19 physical branches —",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-092",
+        "excerpt": "Indeed ratings for APGFCU: Overall 3.5/5; Culture & Values 3.5/5; Job Security & Advancement 3.5/5; Management 3.0/5; Work-Life Balance 4.0/5; Compensation & Benefits 4.5/5. Interview: Easy difficulty, Average experience",
+        "title": "Indeed ratings for APGFCU: Overall 3.5/5",
+        "type": "article",
+        "url": "https://www.indeed.com/cmp/Apg-Federal-Credit-Union"
+      },
+      {
+        "author": null,
+        "date": "2023-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-089",
+        "excerpt": "APGFCU uses Kadince (both Community Module + Marketing Module) — a credit-union-specific marketing compliance and project management platform. Since 2020, all marketing materials (flyers, posters, social media posts, vid",
+        "title": "Apgfcu uses Kadince (both Community Module + Marketing Module) — a…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/pulse/how-kadince-helped-apg-federal-credit-union-go-from-averaging-"
+      },
+      {
+        "author": null,
+        "date": "2023-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-065",
+        "excerpt": "APGFCU launched a Virtual Branch Team (Virtual Teller Center) in 2023, providing high-tech services to improve member experience. New service delivery model introduced as 'new chapter for employee empowerment' — digital ",
+        "title": "Apgfcu launched a Virtual Branch Team (Virtual Teller Center)",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/apgfcu_on-wednesday-apg-federal-credit-union-had-activity-7453093885993598977-9cWv"
+      },
+      {
+        "author": "Kevin Stehl",
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-111",
+        "excerpt": "Kevin Stehl (CXO) LinkedIn activity signals: Actively promotes 'Q1-2025 CU Peer Benchmark Dashboard' — a credit union benchmarking analytics tool ('See how your CU stacks up against peers; Spot hidden performance gaps; U",
+        "title": "Kevin Stehl (CXO) LinkedIn activity signals: promotes Q1-2025 CU Peer…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/in/kevinstehl/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "apgfcu.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.763256+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# APG Federal Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "DMA Assessment Report Synthesis",
+    "scqa_md": "APG Federal Credit Union is a $2.6B in assets credit union regulated by NCUA, operating since 1938. A 4.8% multi-year growth rate gives it the balance sheet to fund transformation [E-002, E-003]. Zennify's assessment places overall digital maturity at 2.3/5. The deepest capability gap is Materiality Assessment at 1.8/5 against a 2.2 peer median [E-001, E-020]. Next is Real-Time Decisioning at 2.0/5 against a 2.8 peer median [E-010, E-025].\n\nThird is AI & Machine Learning at 2.0/5 against a 2.8 peer median [E-011, E-037]. The issue register adds found in Section 6 P1 pillar deep dive. Governance spec requires explicit enumeration of all referenced IDs. (high severity). The issue register adds 383/707 subcaps (54.2%) have caps_applied flags set.\n\nDC-04 threshold is 30%…. The roster shows no CISO — a named ownership gap for the capabilities below. The question for APG Federal Credit Union is whether to close Materiality Assessment first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. APG Federal Credit Union should lead with nCino (74/100 fit) against Salesforce Platform Center of Excellence, then sequence Tableau behind it. Closing Materiality Assessment to the peer median alone is worth 0.5 maturity points, and the capabilities that depend on it compound the gain.\n\nThe analyst's own priority framing: \"GREENFIELD CRM — No Salesforce Deployed — Zero CRM across 183,768 members & 19 branches; confirmed across 6 tech sources (Datanyze, echoloc.ai, Explorium, Clay, web stack scan…\"."
+  },
+  "overall_score": 2.32,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A2_subcap_coverage_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:22.856380+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A9_insight_card_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:22.874131+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:22.875254+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:22.880121+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:22.880944+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 2,
+      "INFO": 18
+    },
+    "stage_ms": {
+      "manifest": 8,
+      "parse": 9534,
+      "persist": 7950
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'Credit Union Medium'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 707 subcaps from APGFCU_DMA_Scoring_Work",
+        "detail": "xlsx fallback extracted 707 subcaps from APGFCU_DMA_Scoring_Workbook.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/gov_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 3 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=APGFCU_Client_Profile_Research_Report.docx count=10",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=26 subcaps=22 replaced_docx_scqa=False",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 10 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A2_subcap_coverage_map.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A9_insight_card_register.csv — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 29",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:21/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'Credit Union Medium'",
+      "xlsx fallback extracted 707 subcaps from APGFCU_DMA_Scoring_Workbook.xlsx",
+      "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_workbook)",
+      "used variant issue register: 07_governance/gov_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=0 contradictions=2",
+      "caps_applied_log: 3 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "firmographics_leadership_merged_from_docx: source=APGFCU_Client_Profile_Research_Report.docx count=10",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=26 subcaps=22 replaced_docx_scqa=False",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "tech_stack_from_report_prose: 10 vendors mentioned",
+      "insights_from_client_profile_findings: 6",
+      "INFO/pattern_gap: 02_research_workbook/A2_subcap_coverage_map.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A9_insight_card_register.csv — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "timeline_events_persisted: 29",
+      "catalogue_unresolved:21/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 6",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 167,
+      "peer_median": 2.73,
+      "pillar_id": "P1",
+      "score": 2.43,
+      "subcaps_scored": 167
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.88,
+      "pillar_id": "P2",
+      "score": 2.23,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.75,
+      "pillar_id": "P3",
+      "score": 2.5,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.74,
+      "pillar_id": "P4",
+      "score": 2.13,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-04",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:23.324594Z",
+    "created_at": "2026-07-02T23:10:23.324594Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "04f5b048-4881-4175-a64c-b86e7d2c62da",
+    "overall_score": null,
+    "request_id": "DMA-RES-APGFCU-20260504-0001",
+    "started_at": "2026-07-02T23:10:23.324594Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 40,
+        "scale": 5,
+        "score": 3.5,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "GREENFIELD CRM — No Salesforce Deployed — Zero CRM across 183,768 members & 19 branches; confirmed across 6 tech sources (Datanyze, echoloc.ai, Explorium, Clay, web stack scan, job postings) [E-085, E-108] — P2C3.6.1=M1.5 (unified agent desktop absent); P2C3.4.1=M2.0 (no 360 member view); P2C3.5.x=M1.5 (no case management) — Salesforce FSC: Primary platform opportunity with zero displacement cost. New CEO (<18 months) = open procurement cycle.",
+      "evidence": [
+        "E-085",
+        "E-108",
+        "E-001",
+        "E-002"
+      ],
+      "magnitude": "18 months",
+      "name": "GREENFIELD CRM",
+      "peer_median": 2.75,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 2.21,
+      "so_what": "Prioritize GREENFIELD CRM in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "GREENFIELD CRM",
+      "what": "GREENFIELD CRM — No Salesforce Deployed — Zero CRM across 183,768 members & 19 branches; confirmed across 6 tech sources (Datanyze, echoloc.ai, Explorium, Clay, web stack scan, job postings). [E-085, E-108] — P2C3.6.1=M1.5 (unified agent desktop absent); P2C3.4.1=M2.0 (no 360 member view); P2C3.5.x=M1.5 (no case management) — Salesforce FSC.",
+      "why": "The linked evidence records: APGFCU CONFIRMED TECH STACK (multi-source validation):"
+    },
+    {
+      "body": "Baltimore City Expansion: Digital-First, Now Physical — Baltimore City/County grew 13K→26K+ members (+100%) 2021–2024 via digital-first FOM expansion [E-099]. First Baltimore City physical branch (Canton, The Can Company) announced April 2026, opening early 2027. — P1C1.3.1=M3.0 (geographic expansion strategy); P1C5.1.1=M3.0 (community impact hub) — Marketing Cloud + FSC: New branch = new member acquisition funnels. Canton branch = CEO's 'community hub' model.",
+      "evidence": [
+        "E-099",
+        "E-064",
+        "E-028",
+        "E-051"
+      ],
+      "magnitude": "+100%",
+      "name": "Baltimore City Expansion",
+      "peer_median": 2.25,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.75,
+      "so_what": "Prioritize Baltimore City Expansion in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Baltimore City Expansion",
+      "what": "Baltimore City Expansion: Digital-First, Now Physical — Baltimore City/County grew 13K→26K+ members (+100%). 2021–2024 via digital-first FOM expansion [E-099]. First Baltimore City physical branch (Canton, The Can Company) announced April 2026, opening early 2027.",
+      "why": "The linked evidence records: 2024 KEY TECHNOLOGY UPGRADES: (1) Cloud-based phone system implemented 2024 — reduced call handling and wait times. (2) New credit and debit card processor 2024 — enhanced fraud monitoring + more robust credit card rewards program."
+    },
+    {
+      "body": "No Marketing Automation: 183K Members, Periodic Newsletter — Kadince manages 1,000+ projects/yr [E-091] but is a project tool — not automation. No email automation platform found in any of 6 tech sources. — P2C1.5.1=M1.5 (marketing automation); P2C1.4.4=M1.5 (lead management); P2C1.3.1=M2.0 (digital content) — Marketing Cloud: VP Jo Anna Shuba (Apr 2025, 30+ yrs, prior credit card portfolio) is the immediate champion.",
+      "evidence": [
+        "E-091",
+        "E-093",
+        "E-087",
+        "E-088"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "No Marketing Automation",
+      "peer_median": 2.75,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.99,
+      "so_what": "Prioritize No Marketing Automation in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "No Marketing Automation",
+      "what": "No Marketing Automation: 183K Members, Periodic Newsletter — Kadince manages 1,000+ projects/yr. [E-091] but is a project tool — not automation. No email automation platform found in any of 6 tech sources.",
+      "why": "The linked evidence records: Datanyze detects multiple LMS platforms on APGFCU website/systems: eLogic eSSential (credit-union-specific compliance training LMS), Kallidus (enterprise LMS), LinkedIn Learning (Lynda Business) — suggests layered employee development approach."
+    },
+    {
+      "body": "AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU — CXO Stehl: MIT Sloan AI cert, ran data/analytics + AI governance + 65+ dashboards at SECU [E-037, E-063]. CEO Smith: doubled digital budget, BBJ Faces to Watch 2026. Both came from SECU. — P1C3.8.1=M3.0 (AI leadership signal); P4C2.1.1=M3.0 (analytics strategy elevated on Stehl hire) — Agentforce + Einstein + Data Cloud: Stehl is the primary champion for ALL Salesforce AI products.",
+      "evidence": [
+        "E-037",
+        "E-063",
+        "E-068",
+        "E-054"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU",
+      "peer_median": 2.25,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.75,
+      "so_what": "Prioritize AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU",
+      "what": "AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU — CXO Stehl: MIT Sloan AI cert, ran data/analytics + AI governance + 65+ dashboards at SECU [E-037, E-063]. CEO Smith: doubled digital budget, BBJ Faces to Watch 2026. Both came from SECU. P1C3.8.1=M3.0 (AI leadership signal).",
+      "why": "The linked evidence records: Kevin Stehl (CXO since July 2025): two decades leadership at SECU MD, Capital One, ING Direct. Holds executive education certificates in ARTIFICIAL INTELLIGENCE and STRATEGIC MANAGEMENT from MIT Sloan and Wharton. Advises several early-stage fintech companies."
+    },
+    {
+      "body": "Scienaptic AI Live: APGFCU Proved AI in Production — Deployed November 2025. 90% manual underwriting automation [E-101]. Fair lending monitoring under AVP John Golding [E-105]. Chief Consumer Lending Officer Robyn Mannone quoted in press release [E-068]",
+      "evidence": [
+        "E-101",
+        "E-105",
+        "E-068",
+        "E-083"
+      ],
+      "magnitude": "90%",
+      "name": "Scienaptic AI Live",
+      "peer_median": 2.75,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.99,
+      "so_what": "Prioritize Scienaptic AI Live in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Scienaptic AI Live",
+      "what": "Scienaptic AI Live. APGFCU Proved AI in Production — Deployed November 2025. 90% manual underwriting automation. [E-101]. Fair lending monitoring under AVP. John Golding [E-105]. Chief Consumer Lending Officer Robyn Mannone quoted in press release [E-068].",
+      "why": "The linked evidence records: APGFCU Application System Analyst / Digital Banking Product Owner: 'Designed and implemented an automated loan underwriting process that decreased manual underwriting volume by 90%.'"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-051"
+      ],
+      "modifiers": [
+        "122 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Vision Communication averages 2.6/5 over 167 scored subcaps; ceiling 3.2 reflects thin evidence density (45/167 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "132 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Salesforce Platform Center of Excellence averages 2.6/5 over 217 scored subcaps; ceiling 3.3 reflects thin evidence density (85/217 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-063"
+      ],
+      "modifiers": [
+        "162 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Lab/Center averages 2.2/5 over 192 scored subcaps; ceiling 2.8 reflects thin evidence density (30/192 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "160 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Metrics averages 2.4/5 over 205 scored subcaps; ceiling 3.0 reflects thin evidence density (45/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-077"
+      ],
+      "modifiers": [
+        "40 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "Materiality Assessment averages 1.8/5 over 40 scored subcaps; ceiling 2.2 reflects thin evidence density (0/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-090"
+      ],
+      "modifiers": [
+        "268 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Predictive Analytics averages 2.2/5 over 293 scored subcaps; ceiling 2.7 reflects thin evidence density (25/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-101"
+      ],
+      "modifiers": [
+        "276 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Embedded Finance Delivery averages 2.4/5 over 291 scored subcaps; ceiling 3.0 reflects thin evidence density (15/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "264 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Agent Desktop averages 2.2/5 over 289 scored subcaps; ceiling 2.8 reflects thin evidence density (25/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "244 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Real-Time Decisioning averages 2.0/5 over 259 scored subcaps; ceiling 2.5 reflects thin evidence density (15/259 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-108"
+      ],
+      "modifiers": [
+        "126 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Self-Service & Low-Code Automation averages 2.4/5 over 146 scored subcaps; ceiling 3.0 reflects thin evidence density (20/146 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-098"
+      ],
+      "modifiers": [
+        "115 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Reporting & Analytics averages 2.4/5 over 130 scored subcaps; ceiling 2.9 reflects thin evidence density (15/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [
+        "137 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Due Diligence averages 2.7/5 over 142 scored subcaps; ceiling 3.2 reflects thin evidence density (5/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-102"
+      ],
+      "modifiers": [
+        "135 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Performance Monitoring averages 2.5/5 over 145 scored subcaps; ceiling 3.0 reflects thin evidence density (10/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-108"
+      ],
+      "modifiers": [
+        "195 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Enterprise Data Catalog & Discovery averages 2.1/5 over 200 scored subcaps; ceiling 2.7 reflects thin evidence density (5/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-011"
+      ],
+      "modifiers": [
+        "255 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "AI & Machine Learning averages 2.0/5 over 270 scored subcaps; ceiling 2.5 reflects thin evidence density (15/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-046"
+      ],
+      "modifiers": [
+        "210 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Blockchain & Distributed Ledger averages 2.2/5 over 235 scored subcaps; ceiling 2.8 reflects thin evidence density (25/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-100"
+      ],
+      "modifiers": [
+        "130 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Security Operations & Incident Response averages 2.2/5 over 150 scored subcaps; ceiling 2.8 reflects thin evidence density (20/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Becky Smith named to Baltimore Business Journal Faces to Watch 2026 list. Key quote from context: 'APGFCU will double its investment in digital in 2025.' — strongest public signal of innovation funding commitment (P1C3.5) (Jul 2026).",
+      "evidence": [
+        "E-064"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Becky Smith named to Baltimore Business Journal Faces",
+      "metric": null,
+      "peer_context": "Materiality Assessment runs 1.75/5 vs a 2.25 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Salesforce Platform Center of Excellence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Becky Smith named to Baltimore Business Journal Faces to Watch 2026 list. Key quote from context: 'APGFCU will double its investment in digital in 2025.'. Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "Becky Smith named to Baltimore Business Journal Faces"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "WORKDAY CONFIRMED at APGFCU (echoloc.ai 2026): Workday deployed for HR and Finance functions. This is a major enterprise ERP. Significance: (1) Workday HR overlaps with Salesforce Talent Intelligence (less relevant pitch for FSC). (2) Workday Finance provides general ledger and budgeting. (3) Workday + Corelation + Q2 (Jul 2026).",
+      "evidence": [
+        "E-112"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Workday Confirmed at Apgfcu (echoloc.ai 2026): Workday…",
+      "metric": null,
+      "peer_context": "Materiality Assessment runs 1.75/5 vs a 2.25 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "WORKDAY CONFIRMED at APGFCU (echoloc.ai 2026): Workday deployed for HR and Finance functions. This is a major enterprise ERP. Window: closes ~Q1 2028.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "Workday Confirmed at Apgfcu (echoloc.ai 2026): Workday…"
+      },
+      "window": "closes ~Q1 2028"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Kevin Stehl (CXO) LinkedIn activity signals: Actively promotes 'Q1-2025 CU Peer Benchmark Dashboard' — a credit union benchmarking analytics tool ('See how your CU stacks up against peers; Spot hidden performance gaps; Understand loyalty signals'). Named a 'Top AI Marketing Leader' in Callan Consulting's 2026 State of AI Report (Jul 2026).",
+      "evidence": [
+        "E-111"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Kevin Stehl (CXO) LinkedIn activity signals: promotes…",
+      "metric": null,
+      "peer_context": "Materiality Assessment runs 1.75/5 vs a 2.25 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Salesforce Platform Center of Excellence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Kevin Stehl (CXO) LinkedIn activity signals: Actively promotes 'Q1-2025 CU Peer Benchmark Dashboard' — a credit union benchmarking analytics tool ('See how your CU stacks up against peers; Spot hidden performance gaps. Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "Named a 'Top AI Marketing Leader' in Callan Consulting's…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "M&A integration framing for Members First of Maryland FCU (merged Aug-Sep 2025, member conversion Mar 31 2026): APGFCU described as 'blending of shared values' and 'member-first philosophy.' Merger framed as cultural alignment (shared co-op values). 7-month integration runway. No formal named CM methodology (Kotter/ADKAR) disclosed publicly (Mar 2026).",
+      "evidence": [
+        "E-071"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "M&A integration framing for Members First of Maryland FCU…",
+      "metric": null,
+      "peer_context": "Materiality Assessment runs 1.75/5 vs a 2.25 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Salesforce Platform Center of Excellence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "M&A integration framing for Members First of Maryland FCU (merged Aug-Sep 2025, member conversion Mar 31 2026): APGFCU described as 'blending of shared values' and 'member-first philosophy.'. Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-03-31",
+        "event": "M&A integration framing for Members First of Maryland FCU…"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "CONFIRMED INFRASTRUCTURE DETAILS (Tavily Research): Systems Engineer II job posting (July 2025) requires Azure/AWS cloud services, Microsoft 365, Linux, VMware/ESXi, firewalls, VDI, scripting (PowerShell, Python), automation. Emphasis on 'hybrid-cloud infrastructure and DevOps-style automation.'",
+      "evidence": [
+        "E-110"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Confirmed Infrastructure Details (Tavily Research): Systems…",
+      "metric": null,
+      "peer_context": "Materiality Assessment runs 1.75/5 vs a 2.25 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CONFIRMED INFRASTRUCTURE DETAILS (Tavily Research): Systems Engineer II job posting (July 2025) requires Azure/AWS cloud services, Microsoft 365, Linux, VMware/ESXi, firewalls, VDI, scripting (PowerShell, Python). Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Materiality Assessment scores 1.75/5 vs a typical 2.25 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-001",
+        "E-020",
+        "E-052",
+        "E-057"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Materiality Assessment scores 1.75/5",
+      "metric": "Materiality Assessment 1.75/5 vs peer 2.25",
+      "peer_context": "Materiality Assessment runs 1.75/5 vs a 2.25 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Salesforce Platform Center of Excellence — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "Materiality Assessment scores 1.75/5 vs a typical 2.25 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

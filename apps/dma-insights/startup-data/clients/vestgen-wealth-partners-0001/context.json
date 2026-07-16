@@ -1,0 +1,940 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Vestgen Wealth Partners",
+      "amount": null,
+      "announced_on": null,
+      "body": "INFERENCE \u2014 ACQUIRED-PRACTICE INTEGRATION COMPLEXITY: Senior Ops Associate posting language acknowledges acquired practices may have Black Diamond, Addepar, Redtail (alternative CRM systems). VestGen's standard is FSC (E-098) + Orion (E-073) but acquired practices need migration. P4C3.3 Integration Architecture + P4C1.3 Data Architecture Modeling at M2-M3 with active acquisition migration playbook.",
+      "closed_on": null,
+      "details": "INFERENCE \u2014 ACQUIRED-PRACTICE INTEGRATION COMPLEXITY: Senior Ops Associate posting language acknowledges acquired practices may have Black Diamond, Addepar, Redtail (alternative CRM systems). VestGen's standard is FSC (E-098) + Orion (E-073) but acquired practices need migration. P4C3.3 Integration Architecture + P4C1.3 Data Architecture Modeling at M2-M3 with active acquisition migration playbook.",
+      "e_id": "E-101",
+      "event_date": "2026-04-01",
+      "id": "77652eda-48e3-498a-87db-b3b6d227e34e",
+      "source_url": "https://bebee.com/us/jobs/senior-operations-associate-vestgen-wealth-partners-chicago-il--theirstack-646871789",
+      "status": "integrating",
+      "target": "PRACTICE Integration Complexity",
+      "title": "ACQUIRED-PRACTICE Integration Complexity"
+    },
+    {
+      "acquirer": "Vestgen Wealth Partners",
+      "amount": null,
+      "announced_on": null,
+      "body": "Acquired-practice CRM/portfolio system inheritance (E-101): Redtail (alternative CRM), Black Diamond + Addepar (alternative portfolio accounting). Each acquisition requires data migration to canonical FSC + Orion stack. Data Quality + MDM stress-tested by acquisition cadence.",
+      "closed_on": null,
+      "details": "Acquired-practice CRM/portfolio system inheritance (E-101): Redtail (alternative CRM), Black Diamond + Addepar (alternative portfolio accounting). Each acquisition requires data migration to canonical FSC + Orion stack. Data Quality + MDM stress-tested by acquisition cadence.",
+      "e_id": "E-111",
+      "event_date": "2026-04-01",
+      "id": "76cb7c29-dbfd-4c0a-851a-a508f3267f9f",
+      "source_url": "(SYNTHESIS_OF_E-098_E-099_E-101_E-092)",
+      "status": null,
+      "target": "CRM",
+      "title": "Acquired-practice CRM/portfolio system inheritance: Redtail\u2026"
+    }
+  ],
+  "entity_display_id": "vestgen-wealth-partners-0001",
+  "financials": {
+    "lines": [
+      "VestGen is the fastest-growing RIA aggregator in its peer cohort. AUM trajectory is classified as ACCELERATING \u2014 approximately 92% growth in the 12 months from March 2025 to February 2026. Entity is only 16 months old (Dec 2024 founding); a full 3-year CAGR is not calculable.",
+      "AUM Trajectory (Available Data Points):",
+      "AUM trajectory classified as ACCELERATING. ~92% growth in 12 months (Mar 2025 \u2192 Feb 2026). Entity is 16 months old \u2014 full 3-year CAGR not calculable. Growth driven by M&A acquisitions (12+ practices), organic appreciation, and service line expansion. CAGR baseline will be available from Mar 2027 (36-month window)."
+    ],
+    "metrics": {
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 19,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": null,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "The segment strategy gets a dedicated leader at director\u2026"
+          }
+        ],
+        "fy": [
+          "FY2017",
+          "FY2022",
+          "FY2025",
+          "FY2028"
+        ],
+        "geography": "US Multi-State (HQ: Illinois; footprint: 17+ states; clients: 35 states)",
+        "headline": "$3.5B assets \u00b7 FY2025 \u00b7 -0.3% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            2.9,
+            null,
+            1500.0,
+            100.0
+          ],
+          "total_assets": [
+            null,
+            3.5,
+            3.47,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        3500000000.0,
+        3470310102.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2022,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          3500000000.0,
+          3470310102.0
+        ]
+      }
+    ],
+    "years": [
+      2022,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "17+ states"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ferian Nickelson's",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "William Blair",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Information Security",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Josh Gerry",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Hanavan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ferian Nickelson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Fairport Wealth",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tom Ericson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Compliance Officer"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "VestGen Wealth Partners operates as a multi-entity holding structure. The parent entity (VestGen Wealth Partners Holdings LLC) was incorporated in September 2024; the public RIA platform (VestGen Advisors LLC) launched December 2024. All five affiliated entities are covered by the Privacy Policy (March 31, 2026) and Form ADV annual filing. [E-097, E-081]\n\n4 Material Changes Disclosed in March 2026 Form ADV:\n\n(1) Headquarters address updated to 1 N Franklin St, Suite 1850, Chicago IL 60606 [E-081]\n\n(2) Item 14: VGA discontinued use of LPL Financial as custodial product provider; no longer receives economic benefits from LPL [E-081, E-094]\n\n(3) Item 14: Limited pilot program with lead generation platform (SmartVestor Pro \u2014 Dave Ramsey) disclosed [E-066, E-081]\n\n(4) Item 5: Material cash AND equity compensation for advisors transitioning their practices to VGA \u2014 formal M&A economics [E-081]",
+    "primary_regulator": "SEC",
+    "size_tier": "Mid-Market RIA ($1B\u2013$15B AUM)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "ONE VestGen Conference (May 20-22, 2025, Peninsula Hotel Chicago) \u2014 'Three-Day Conference Focused on Strategy, Growth, and Continuing Education' for 50+ multi-generational advisors + Advisory Board + leading investment m",
+        "title": "ONE VestGen Conference (May 20-22, 2025, Peninsula Hotel Chicago)\u2026",
+        "type": "conference",
+        "url": "https://vestgen.com/vestgen-wealth-partners-hosts-inaugural-one-vestgen-conference-in-chicago/"
+      },
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "Cerulli 2024 data quoted by Gerry: 105,887 advisors plan to retire (37.4% headcount, 41.4% total assets) over decade; 30% of independent RIA advisors UNSURE of retirement plans. Gerry positioning: VestGen targets $100M-$",
+        "title": "Cerulli 2024 data quoted by Gerry30% of independent RIA advisors\u2026",
+        "type": "article",
+        "url": "https://www.investmentnews.com/ria-news/seeking-success-from-succession-with-vestgen-ceo-josh-gerry/260464"
+      },
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-030",
+        "excerpt": "ONE VestGen Conference (May 20-22, 2025) agenda explicitly covered: 'integration of advanced technology and AI into their practices and marketing and communications strategies' \u2014 AI strategy elevated to firm-level confer",
+        "title": "ONE VestGen Conference (May 20-22, 2025) agenda covered strategies'\u2026",
+        "type": "conference",
+        "url": "https://vestgen.com/one-vestgen-conference-fostered-advisor-relationships-and-best-practices-at-vestgen-wealth-partners-inaugural-event/"
+      },
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-039",
+        "excerpt": "Gerry strategic thesis (verbatim): 'At that specific size, you have a successful business. These advisors know they are good at what they do... What they also realize is that to get to the next level, there would be quit",
+        "title": "Gerry strategic thesis (verbatim): '",
+        "type": "article",
+        "url": "https://www.investmentnews.com/ria-news/seeking-success-from-succession-with-vestgen-ceo-josh-gerry/260464"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-047",
+        "excerpt": "Annual ONE VestGen Conference (May 20-22, 2025 inaugural; 'first time we'll all be together in one place to celebrate everything we've accomplished in just five months') = de-facto strategy-refresh + Advisory Board engag",
+        "title": "Annual ONE VestGen Conference (May 20-22, 2025 inaugural; ' 'll be in\u2026",
+        "type": "conference",
+        "url": "https://vestgen.com/vestgen-wealth-partners-hosts-inaugural-one-vestgen-conference-in-chicago/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-059",
+        "excerpt": "VestGen LinkedIn activity (per Exa scrape \u2014 multiple posts visible 7423092837854007296, 7420201146767814657, 7420586429858189312, 7387488..., 7382429626301845507, 7358474441682522113) \u2014 active corporate communications ch",
+        "title": "Topics include M&A announcements",
+        "type": "linkedin-post",
+        "url": "https://linkedin.com/company/vestgen-wealth-partners"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "9e4107a8-8819-4bb7-8513-793fe2ec4713",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "run_manifest.json stores research run ID (DMA-RES-VESTGEN-20260428-0001) rather than assessment run ID"
+    },
+    {
+      "id": "c31bd326-141e-4e86-98f6-aebb4ac55b08",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Overall score 2.42 flagged as exceeding 1 decimal precision"
+    },
+    {
+      "id": "bbf5a8e6-3371-4e20-a1c8-39fcb81950d2",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "P2 pillar has exactly 40% of subcaps at score M1.5"
+    },
+    {
+      "id": "c97404ca-4a87-4eaf-b916-039b25cdf6e7",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "32 subcaps scored HIGH confidence with score below 2.5"
+    },
+    {
+      "id": "1f8df7b0-a51c-45d3-be6e-20737b0a0bb5",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Initial PV-01 check showed 69.8% proof structure completeness"
+    },
+    {
+      "id": "5200c724-19ad-47b3-841d-0a8d45b2e51a",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Initial PV-03 check showed 56% epistemic hedging"
+    },
+    {
+      "id": "a79b7741-4c8d-4a72-af45-4c897737e4e2",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Initial RC-14 showed REC-03/04/06 with 0 E-IDs"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Value declined from $3.5B (2022) to $3.5B (2025) \u2014 -0.3% CAGR. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.12,
+        "P1C2": 3.19,
+        "P1C3": 2.66,
+        "P1C4": 2.72,
+        "P1C5": 2.7,
+        "P2C1": 2.59,
+        "P2C2": 2.34,
+        "P2C3": 2.72,
+        "P2C4": 2.48,
+        "P3C1": 3.13,
+        "P3C2": 3.13,
+        "P3C3": 3.13,
+        "P3C4": 3.14,
+        "P4C1": 2.85,
+        "P4C2": 2.61,
+        "P4C3": 2.72,
+        "P4C4": 3.15
+      },
+      "overall_score": 2.85,
+      "peer_name": "Commerce Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.46,
+        "P1C2": 3.51,
+        "P1C3": 2.34,
+        "P1C4": 3.51,
+        "P1C5": 3.0,
+        "P2C1": 1.98,
+        "P2C2": 1.49,
+        "P2C3": 2.5,
+        "P2C4": 2.48,
+        "P3C1": 2.4,
+        "P3C2": 3.52,
+        "P3C3": 3.98,
+        "P3C4": 3.43,
+        "P4C1": 1.99,
+        "P4C2": 1.98,
+        "P4C3": 3.52,
+        "P4C4": 4.05
+      },
+      "overall_score": 2.83,
+      "peer_name": "Odlum Brown Limited",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.27,
+        "P1C3": 2.73,
+        "P1C4": 2.35,
+        "P1C5": 2.27,
+        "P2C1": 1.8,
+        "P2C2": 2.39,
+        "P2C3": 2.27,
+        "P2C4": 2.16,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.19,
+        "P3C4": 2.45,
+        "P4C1": 2.09,
+        "P4C2": 2.65,
+        "P4C3": 2.74,
+        "P4C4": 2.35
+      },
+      "overall_score": 2.36,
+      "peer_name": "Interactive Brokers Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.78,
+        "P1C2": 2.18,
+        "P1C3": 2.32,
+        "P1C4": 2.32,
+        "P1C5": 2.14,
+        "P2C1": 1.65,
+        "P2C2": 1.34,
+        "P2C3": 2.18,
+        "P2C4": 1.82,
+        "P3C1": 2.34,
+        "P3C2": 3.0,
+        "P3C3": 2.95,
+        "P3C4": 2.0,
+        "P4C1": 2.23,
+        "P4C2": 2.7,
+        "P4C3": 3.14,
+        "P4C4": 2.78
+      },
+      "overall_score": 2.35,
+      "peer_name": "Fisher Investments",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.75,
+        "P1C2": 2.73,
+        "P1C3": 2.01,
+        "P1C4": 2.5,
+        "P1C5": 1.17,
+        "P2C1": 2.15,
+        "P2C2": 2.6,
+        "P2C3": 2.49,
+        "P2C4": 1.99,
+        "P3C1": 2.29,
+        "P3C2": 2.6,
+        "P3C3": 2.89,
+        "P3C4": 2.03,
+        "P4C1": 2.0,
+        "P4C2": 1.28,
+        "P4C3": 3.24,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.31,
+      "peer_name": "Pentegra Retirement Services",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-VESTGEN-20260428-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "cadence; topics include M&A announcements + Direct VestGen Glassdoor search returned NO results for the parent VestGen Wealth Partners brand",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Indeed search 'VestGen Wealth Partners' Chicago IL = NO active job postings (Apr 2026 query)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Louis MO office, heritage practice) is **BBB Accredited since 5/8/2015** \u2014 pre-acquisition accreditation maintained through M&A integration ( Community & Social Proof + Complaint Management baseline)",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Technology function exists internally but no Chief Technology Officer or equivalent C-suite head named in any public press release through April 2026 \u2014 gap suggests Technology reports to COO Ferian Nickelson or operates without dedicated C-level sponsor.",
+      "date_precision": "month",
+      "e_id": "E-023",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "536d2619-f439-4c00-ac83-8862d4dc32a4",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/team/",
+      "subcap_ids": [],
+      "title": "Gap suggests"
+    },
+    {
+      "body": "INFERENCE \u2014 REDUNDANCY: TWO competing financial planning systems (eMoney + MoneyGuidePro) suggest acquired-practice technology preservation rather than rationalized stack. Same with potential dual broker-dealer dual systems (PCS + WEG). P3C1 Automation Strategy implication: redundant tools fragment workflows, prevent STP.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-090",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-090"
+      ],
+      "id": "14366f14-1cb3-4186-b7bd-cc9e232d18ec",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/client-login/",
+      "subcap_ids": [],
+      "title": "REDUNDANCY: suggest acquired-practice technology\u2026"
+    },
+    {
+      "body": "VestGen Senior Operations Associate posting (Chicago, hybrid, 4 days ago via LinkedIn) \u2014 'Acquisition & Integration Support... Support integration efforts for newly acquired firms or advisors, including account transitions, data migration, and operational alignment.' Plus: 'Design and implement scalable digital onboarding processes, including collaboration tools, automation workflows, and training materials, to accelerate advisor integration and improve speed-to-revenue metrics.'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-101",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "6dd9c1b8-dc5d-4531-9825-37919a1c6794",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://bebee.com/us/jobs/senior-operations-associate-vestgen-wealth-partners-chicago-il--theirstack-646871789",
+      "subcap_ids": [],
+      "title": "Support integration efforts for newly acquired firms or\u2026"
+    },
+    {
+      "body": "Posting mentions OPTIONAL familiarity with EXTENDED tech stack: 'Knowledge of custodial platforms (e.g., Schwab, Pershing) and record-keepers (e.g. **Empower**, Voya) is a strong plus' (Empower = retirement plan record-keeper, Voya = retirement provider) + 'Familiarity with CRMs (e.g., Salesforce, **Redtail**), portfolio accounting systems (e.g., Orion, **Black Diamond, Addepar**), and financial planning tools.' = ALTERNATIVE systems mentioned suggest acquired-practice tech-stack inheritance scenarios.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-101",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "f6ceb187-1e0c-4164-acba-9af870da6d00",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://bebee.com/us/jobs/senior-operations-associate-vestgen-wealth-partners-chicago-il--theirstack-646871789",
+      "subcap_ids": [],
+      "title": "Alternative systems mentioned suggest acquired-practice\u2026"
+    },
+    {
+      "body": "INFERENCE \u2014 ACQUIRED-PRACTICE INTEGRATION COMPLEXITY: Senior Ops Associate posting language acknowledges acquired practices may have Black Diamond, Addepar, Redtail (alternative CRM systems). VestGen's standard is FSC (E-098) + Orion (E-073) but acquired practices need migration. P4C3.3 Integration Architecture + P4C1.3 Data Architecture Modeling at M2-M3 with active acquisition migration playbook.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-101",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-101",
+        "E-098",
+        "E-073"
+      ],
+      "id": "77652eda-48e3-498a-87db-b3b6d227e34e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://bebee.com/us/jobs/senior-operations-associate-vestgen-wealth-partners-chicago-il--theirstack-646871789",
+      "subcap_ids": [
+        "P4C3.3",
+        "P4C1.3"
+      ],
+      "title": "ACQUIRED-PRACTICE Integration Complexity"
+    },
+    {
+      "body": "Acquired-practice CRM/portfolio system inheritance (E-101): Redtail (alternative CRM), Black Diamond + Addepar (alternative portfolio accounting). Each acquisition requires data migration to canonical FSC + Orion stack. Data Quality + MDM stress-tested by acquisition cadence.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-111",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-111",
+        "E-101"
+      ],
+      "id": "76cb7c29-dbfd-4c0a-851a-a508f3267f9f",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "(SYNTHESIS_OF_E-098_E-099_E-101_E-092)",
+      "subcap_ids": [],
+      "title": "Acquired-practice CRM/portfolio system inheritance: Redtail\u2026"
+    },
+    {
+      "body": "Note: Greg Gessert (Chief Growth Officer) joined from LPL Financial where he led inorganic acquisition strategy. VestGen executive depth includes LPL alumni \u2014 LPL departure is operational/economic decision, not relationship breakdown.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-094",
+      "event_date": "2026-03-31",
+      "evidence_e_ids": [
+        "E-094"
+      ],
+      "id": "f91cdcc9-8423-46d5-a450-46a3ea25a2c7",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://vestgen.com/wp-content/uploads/2026/04/Combined-2A-Wrap-2026-annual.pdf",
+      "subcap_ids": [],
+      "title": "Note: Greg Gessert (Chief Growth Officer) joined from LPL\u2026"
+    },
+    {
+      "body": "Same quote: 'My responsibilities include client & advisor onboarding, integration efforts for newly acquired firms, supporting product rollouts, technology platform integrations, driving tech adoption.' \u2014 Confirms M&A integration tech workstream + adoption focus.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-025",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "7dbf834c-2454-4dad-bc87-39f002a77254",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/devongutierrez",
+      "subcap_ids": [],
+      "title": "Same quote: 'My responsibilities include client & advisor\u2026"
+    },
+    {
+      "body": "Multi-custodian environment confirmed: Pershing + Schwab + LPL \u2014 each acquired practice may bring its own custodial relationship; integration burden quantified at the custodian/CRM/compliance layer.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-025",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "c1146297-0062-4141-99d1-9908414df705",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/devongutierrez",
+      "subcap_ids": [],
+      "title": "Multi-custodian environment confirmed"
+    },
+    {
+      "body": "Cultural brand cornerstone: 'empathy, integrity, and transparency are the cornerstones of every client relationship.' Each acquired practice maintains its own micro-brand under VestGen umbrella = federated brand architecture (P2C1.1.3, P2C1.1.6).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-068",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "0c5a613c-9391-4410-9960-53b12609bdc1",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/glenellyn/",
+      "subcap_ids": [
+        "P2C1.1.3",
+        "P2C1.1.6"
+      ],
+      "title": "Each acquired practice maintains its own micro"
+    },
+    {
+      "body": "Nov 2025: VestGen Athlete launched as service line for athletes; partnered with Athlete Collective; led by Cole Dow (former football player).",
+      "date_precision": "month",
+      "e_id": "E-009",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "10d7aeab-004f-4cd6-876d-4ed89be8d7d3",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://vestgen.com/introducing-vestgen-athlete/",
+      "subcap_ids": [],
+      "title": "Nov 2025: VestGen Athlete launched as service line for\u2026"
+    },
+    {
+      "body": "Cole Dow (former football player) appointed Director \u2014 alternative-to-CDO illustration: the segment strategy gets a dedicated leader at director level rather than a cross-firm CDO function.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-040",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "e2196da8-4704-48fb-9dfb-dec023e707f5",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/introducing-vestgen-athlete/",
+      "subcap_ids": [],
+      "title": "The segment strategy gets a dedicated leader at director\u2026"
+    },
+    {
+      "body": "VestGen Athlete (Nov 2025): dedicated service line \u2014 bespoke financial planning for collegiate (NIL) and professional athletes. Cole Dow (former football player) appointed Director. Innovation pilot translated into production = P1C3.4.2 (Production Transition).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-055",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-055"
+      ],
+      "id": "953b554b-f8bc-482a-8dcc-35d290917230",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/introducing-vestgen-athlete/",
+      "subcap_ids": [
+        "P1C3.4.2"
+      ],
+      "title": "Cole Dow (former football player) appointed Director"
+    },
+    {
+      "body": "VestGen Retirement Services (Oct 2025) \u2014 third proprietary service line launched 10 months post-firm-launch. RPAG (Retirement Plan Advisory Group) named as platform partner = retirement-specific tech stack. Innovation through partnership ecosystem (P1C3.6.1).",
+      "date_precision": "month",
+      "e_id": "E-057",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "2db90904-9e61-49d5-b063-98abf6a7a7b4",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://vestgen.com/vestgen-launches-retirement-services/",
+      "subcap_ids": [
+        "P1C3.6.1"
+      ],
+      "title": "VestGen Retirement Services (Oct 2025) launched 10 months\u2026"
+    },
+    {
+      "body": "Oct 2025: VestGen launched Retirement Plan Advice Division via acquisition of former Osaic team led by Bob Greulich, adding $662M in client assets.",
+      "date_precision": "month",
+      "e_id": "E-008",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "c0ff2734-6d74-4306-9a04-d13aaf9447b6",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.wealthmanagement.com/ria-news/-7b-vestgen-launches-retirement-division-via-acquisition",
+      "subcap_ids": [],
+      "title": "VestGen launched Retirement Plan Advice Division"
+    },
+    {
+      "body": "Office-by-office decision (only Inverness office is SmartVestor Pro confirmed publicly): implies decentralized marketing channel ownership across acquired practices (P2C1.7.6 Brand Governance ALTERNATIVE \u2014 federation rather than centralization).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-066",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "859b3528-e76e-4b24-abf0-7d15628d7d6c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/inverness-downersgrove/",
+      "subcap_ids": [
+        "P2C1.7.6"
+      ],
+      "title": "Office-by-office decision is"
+    },
+    {
+      "body": "Aug 2025: Robert 'Bob' Hostetter appointed first Chief INVESTMENT Officer (CFA, CAIA), reporting to CEO. Note: Investment role, NOT Technology \u2014 VestGen still has no announced CTO/CIO-IT/CDO.",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "e6fe59bb-d74e-4c67-8880-51e87ab1ae87",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/vestgen-wealth-partners-adds-25-year-industry-veteran-as-chief-investment-officer/",
+      "subcap_ids": [],
+      "title": "Robert 'Bob' Hostetter appointed first Chief Investment\u2026"
+    },
+    {
+      "body": "RECENCY GAP: Privacy statement last updated January 2021 (5+ years old). Material refresh likely required given (a) 6 acquisitions integrating new client populations, (b) new VestGen-branded entities (VGIP, Retirement, Athlete) launched 2025, (c) state privacy law expansion (CPRA 2023, Texas/Utah/Colorado 2024-2025).",
+      "date_precision": "year",
+      "e_id": "E-044",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "2ece5fdc-9cdd-4703-b1c3-972a279bd347",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.vestgenim.com/disclosures-privacy/",
+      "subcap_ids": [],
+      "title": "New VestGen-branded entities (VGIP, Retirement, Athlete)\u2026"
+    },
+    {
+      "body": "Matt LaLonde (Director, VestGen Insurance Partners, Jul 2025) \u2014 formal insurance/risk product line launched as new service line. Innovation through service-line expansion (P1C3 relevance).",
+      "date_precision": "month",
+      "e_id": "E-051",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "f204266f-5d4a-46df-9c89-3730d82e50ae",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://vestgen.com/vestgen-continues-expansion-of-leadership-team-with-appointment-of-national-head-of-advisors-director-of-insurance/",
+      "subcap_ids": [],
+      "title": "Matt LaLonde (Director, VestGen Insurance Partners, Jul\u2026"
+    },
+    {
+      "body": "VestGen Insurance Partners (Jul 2025) launched as second proprietary service line after VGIM TAMP. Matt LaLonde appointed Director. Insurance brokerage providing risk-management products complementary to wealth advisory.",
+      "date_precision": "month",
+      "e_id": "E-056",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "cda59de4-bd1f-4055-9a3b-fb2bb90d2d09",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://vestgen.com/vestgen-launches-insurance-partners/",
+      "subcap_ids": [],
+      "title": "VestGen Insurance Partners (Jul 2025) launched as second\u2026"
+    },
+    {
+      "body": "RPAG vendor selection demonstrates structured Tier-1 fintech partner evaluation cadence \u2014 multiple vendors selected in 2025 (RPAG, ISS proxy, Athlete Collective, Schwab/Pershing/LPL custody) = 4-6 named partner additions in 12 months.",
+      "date_precision": "year",
+      "e_id": "E-057",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "7724c4fb-a7e0-40fd-ad86-6ba1c304b346",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/vestgen-launches-retirement-services/",
+      "subcap_ids": [],
+      "title": "RPAG vendor selection demonstrates structured Tier-1\u2026"
+    },
+    {
+      "body": "Jul 2025: Rob Bondiman appointed first National Head of Advisors; Matt LaLonde appointed first Director of Insurance / Principal of VestGen Insurance Partners (VGIP).",
+      "date_precision": "month",
+      "e_id": "E-007",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "0daa803b-7cae-4e9a-9ba7-766e84d5fad4",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/vestgen-continues-expansion-of-leadership-team-with-appointment-of-national-head-of-advisors-director-of-insurance/",
+      "subcap_ids": [],
+      "title": "Rob Bondiman appointed first National Head of Advisors"
+    },
+    {
+      "body": "Salesforce launched **Agentforce for Financial Services** May 2025 (Inc.com): integrated directly into Salesforce Financial Services Cloud, marketed for 'insurers, banks and wealth management companies looking to offload administrative work.' Pre-built customizable agent templates for client meeting prep, loan recommendations, service requests, claims, financial plan analysis.",
+      "date_precision": "month",
+      "e_id": "E-103",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-103"
+      ],
+      "id": "83049cf3-55ef-4cd2-ae9a-f965d25425c8",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.inc.com/joshua-sukoff/salesforce-launches-agentforce-for-financial-services/91192541",
+      "subcap_ids": [],
+      "title": "Salesforce launched Agentforce"
+    },
+    {
+      "body": "**Timothy Woods, Chief Legal & Compliance Officer** at VestGen (joined Feb 28, 2025). Education: B.A. Michigan State University, MBA, J.D. (and Cleveland State University reference). Based: Greater Chicago Area.",
+      "date_precision": "day",
+      "e_id": "E-086",
+      "event_date": "2025-02-28",
+      "evidence_e_ids": [
+        "E-086"
+      ],
+      "id": "f3abbf45-b9a5-40ef-adbb-bdf46588bf93",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/team/timothy-woods/",
+      "subcap_ids": [],
+      "title": "Timothy Woods, Chief Legal & Compliance Officer at VestGen\u2026"
+    },
+    {
+      "body": "VestGen launched Dec 2024 with 10 advisory practices managing $5.3B; founder/CEO Josh Gerry; targets practices managing $100M-$500M.",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "1ade83a1-2ceb-4442-943e-7ac170839169",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/vestgen-wealth-partners-launches-with-10-advisory-practices-and-5-3-billion-in-assets-under-management-302320590.html",
+      "subcap_ids": [],
+      "title": "VestGen launched with 10 advisory practices managing $5.3B"
+    },
+    {
+      "body": "M&A cadence: 6 distinct closed transactions in 10 months (Dec 2024 \u2192 Oct 2025) \u2014 repeatable closing process. Origins span LPL/Commonwealth, Cambridge, Raymond James, World Equity Group, Osaic \u2014 confirms broad-target strategic synergy identification across BD/IBD source firms.",
+      "date_precision": "month",
+      "e_id": "E-043",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "4fb3f7fc-748d-4f41-a621-b51cf6796609",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://vestgen.com/vestgen-wealth-partners-welcomes-six-advisory-practices-representing-1-5-billion-in-client-assets/",
+      "subcap_ids": [],
+      "title": "M&A cadence: 6 distinct closed transactions in 10 months\u2026"
+    },
+    {
+      "body": "ALTERNATIVE FRAMING (per R12-VESTGEN): VestGen below Glassdoor reporting threshold given (a) recent launch Dec 2024, (b) 115 employees absorbed across 6 acquired practices (not centrally hired), (c) employees primarily on-board via predecessor brand identities (Hanlon, Wealth Management Group). Glassdoor opacity = data point about brand-consolidation timeline, not culture quality.",
+      "date_precision": "month",
+      "e_id": "E-060",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-060"
+      ],
+      "id": "3baf5ffb-be10-40cf-8fea-aae3b06bc9c1",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.glassdoor.com/",
+      "subcap_ids": [],
+      "title": "115 employees absorbed across 6 acquired practices (not\u2026"
+    },
+    {
+      "body": "Salesforce Data Cloud + Snowflake Zero Copy Federation (announced 2024, GA 2025) enables bidirectional data sharing without ETL \u2014 Salesforce reads Snowflake natively, Snowflake reads Salesforce natively. Eliminates data duplication and ETL pipeline maintenance overhead.",
+      "date_precision": "year",
+      "e_id": "E-107",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-107"
+      ],
+      "id": "41d1617b-3bb6-4f7e-ae67-797954f5f0f9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.snowflake.com/en/why-snowflake/partners/technology-partners/microsoft/",
+      "subcap_ids": [],
+      "title": "Salesforce reads Snowflake"
+    },
+    {
+      "body": "Mike Simon \u2014 VestGen Advisory Board member with stated experience in 'financial systems including trading platforms.' Likely associated with SIMON Markets (structured-products fintech, spun out of Goldman Sachs 2018, acquired by iCapital 2022) given the name match and trading-platform reference; if confirmed, this represents direct fintech executive perspective on advisory board.",
+      "date_precision": "year",
+      "e_id": "E-031",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "e4ea6fd7-8b8a-43a2-8ff1-3dc5974f5b05",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/michael-simon-21806268",
+      "subcap_ids": [],
+      "title": "Likely associated with Simon Markets (structured-products\u2026"
+    }
+  ]
+}

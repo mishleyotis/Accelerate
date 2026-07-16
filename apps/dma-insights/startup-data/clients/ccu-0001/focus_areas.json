@@ -1,0 +1,623 @@
+{
+  "entity_display_id": "ccu-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-173"
+        ],
+        "representative_quote": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days \u2192 1 hour",
+        "source_kind": "docx"
+      },
+      "id": "05d9b88c-bdde-43b8-9cab-fbcc1763fb4d",
+      "involved_subcap_ids": [
+        "P4C1.8.1",
+        "P4C1.8.6",
+        "P4C1.7.1",
+        "P4C1.8.8",
+        "P4C2.4.5",
+        "P4C2.4.12",
+        "P4C2.4.6",
+        "P4C2.4.9"
+      ],
+      "kpis": [
+        {
+          "current_value": "6 days",
+          "delta": null,
+          "kpi_label": "Mortgage",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year\u2026",
+      "verbatim_quote": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days \u2192 1 hour [E-173]. Creatio is Phase 1 \u2014 FSC is Phase 2 (nCino integration + FSI-native data models + AI)."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-173",
+          "E-194"
+        ],
+        "representative_quote": "BCU (Baxter Credit Union, $6.1B, Vernon Hills IL \u2014 CCU's direct IL competitor) has deployed Salesforce FSC + Agentforce: 82% digital resolution rate, 97% member engagement rate, 27% improvement in case handle time.",
+        "source_kind": "docx"
+      },
+      "id": "824a215c-ab56-4fc5-ac14-be9bf7a734af",
+      "involved_subcap_ids": [
+        "P2C2.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,100,000,000",
+          "delta": null,
+          "kpi_label": "Baxter Credit Union",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "97%",
+          "delta": null,
+          "kpi_label": "Digital resolution rate",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "27%",
+          "delta": null,
+          "kpi_label": "Member engagement rate",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "FSC is Upgrade, Not",
+      "verbatim_quote": "F-002 | Creatio CRM Incumbent \u2014 FSC is Upgrade, Not Greenfield | 45K cases/yr; 6d\u21921hr mortgage; 3 admins/200K members; No-Code award [E-173] | P2C2.1 at M2.5\u2013M3; lacks FSI-native capabilities | FSC UPGRADE: Phase 1 = Creatio (consolidation). Phase 2 = FSC (nCino + AI + NCUA-native). Pitch as evolution, not replacement."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Five strategic imperatives confirmed from public evidence, ranked by Salesforce platform relevance",
+        "source_kind": "docx"
+      },
+      "id": "b98d3c96-d120-475b-9f38-33381a3e8a72",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P4C2.2.10",
+        "P1C1.5.2",
+        "P4C3.5.8",
+        "P4C3.5.2",
+        "P2C1.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P4": 50
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Five strategic imperatives confirmed from public evidence\u2026",
+      "verbatim_quote": "Five strategic imperatives confirmed from public evidence, ranked by Salesforce platform relevance:"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-195"
+        ],
+        "representative_quote": "KCT Credit Union branches joining CCU network early 2026 per CEO",
+        "source_kind": "docx"
+      },
+      "id": "a3fcd29d-9938-4802-b365-9024c80a0080",
+      "involved_subcap_ids": [
+        "P2C3.3.4",
+        "P2C2.4.2",
+        "P4C4.3.1",
+        "P1C1.2.1",
+        "P1C1.4.3",
+        "P2C2.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 50,
+        "P4": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "KCT Credit Union branches joining CCU network early 2026 per CEO [E-195]\u2026",
+      "verbatim_quote": "KCT Credit Union branches joining CCU network early 2026 per CEO [E-195]. 4 mergers in 5 years; 20+ platforms; no iPaaS. MuleSoft is the architectural response \u2014 KCT integration is the active pain point."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-033"
+        ],
+        "representative_quote": "Lumin Digital launched August 19 2025 with enhanced search, Face ID, digital account opening.",
+        "source_kind": "docx"
+      },
+      "id": "ef6ca080-57b8-447b-976d-b71baea87a57",
+      "involved_subcap_ids": [
+        "P1C1.8.1",
+        "P1C1.1.1",
+        "P2C2.5.6",
+        "P3C2.4.1",
+        "P1C1.6.1",
+        "P1C2.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 66,
+        "P2": 17,
+        "P3": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Lumin Digital launched August 19 2025 with enhanced search, Face ID\u2026",
+      "verbatim_quote": "Lumin Digital launched August 19 2025 with enhanced search, Face ID, digital account opening [E-033]. CEO: 'Transformed members' digital experience.' Cloud-native API-first architecture generates rich member behavioural data for Data Cloud activation."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-073"
+        ],
+        "representative_quote": "Marketo Engage Confirmed \u2014 SFMC Journey Builder Upgrade",
+        "source_kind": "docx"
+      },
+      "id": "a27f35ef-62bf-40c4-9b41-f93106b3571f",
+      "involved_subcap_ids": [
+        "P2C1.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Marketo Engage Confirmed",
+      "verbatim_quote": "F-005 | Marketo Engage Confirmed \u2014 SFMC Journey Builder Upgrade | DNS CSP header confirmed [E-073]. No lifecycle orchestration across lending or DBS events | P2C1.4 at M2.0\u2013M2.5; campaign execution, no journey orchestration | SFMC: Journey Builder connects nCino lending events + Creatio CRM + Lumin DBS behavioural data."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-159",
+          "E-170"
+        ],
+        "representative_quote": "No CDP \u2014 Salesforce Data Cloud Greenfield",
+        "source_kind": "docx"
+      },
+      "id": "0b6c8a64-61fd-488e-9f02-ebd3becdf3e3",
+      "involved_subcap_ids": [
+        "P4C1.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Member data across 6+ systems",
+      "verbatim_quote": "F-004 | No CDP \u2014 Salesforce Data Cloud Greenfield | Member data across 6+ systems; no unified profile; 278K members [E-159, E-170] | P4C1.4 at M2.0; no real-time member profile | DATA CLOUD: Pure greenfield; zero incumbent CDP. Unifies Creatio + Finastra + Lumin + Marketo + nCino in real time."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-043"
+        ],
+        "representative_quote": "FSC ANCHOR: nCino IS Salesforce infrastructure. FSC provides member relationship layer. Zennify nCino practice is the engagement entry point.",
+        "source_kind": "docx"
+      },
+      "id": "bfd36105-ad56-46ce-bbae-ce0b21f7f809",
+      "involved_subcap_ids": [
+        "P2C4.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "NCino Salesforce-Native LOS",
+      "verbatim_quote": "F-001 | nCino Salesforce-Native LOS \u2014 Active Implementation | nCino implementing now [E-043]. Integration Gateway: Finastra Phoenix + 50+ FSI solutions | P2C4.3 ceiling: M2.5\u2192M3.5 on go-live | FSC ANCHOR: nCino IS Salesforce infrastructure. FSC provides member relationship layer. Zennify nCino practice is the engagement entry point."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-097",
+          "E-200"
+        ],
+        "representative_quote": "Post-Merger Fragmentation \u2014 MuleSoft Immediate Need",
+        "source_kind": "docx"
+      },
+      "id": "b0c3e760-61fc-4c41-a33f-f15bd3473a8c",
+      "involved_subcap_ids": [
+        "P4C3.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Post-Merger Fragmentation",
+      "verbatim_quote": "F-007 | Post-Merger Fragmentation \u2014 MuleSoft Immediate Need | 4 mergers in 5 years; 20+ platforms; no iPaaS; KCT active 2026 [E-097, E-200] | P4C3.3 at M1.5\u2013M2; point-to-point integrations only | MULESOFT: KCT integration is live pain today. Rapid win opportunity \u2014 delivers proof of value before broader Salesforce platform pitch."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Priority 1 \u2014 AI-Ready Data Foundation",
+        "source_kind": "docx"
+      },
+      "id": "c46f2abb-30a9-4b33-890d-aaafc549d64d",
+      "involved_subcap_ids": [
+        "P2C4.1.1",
+        "P1C1.4.2",
+        "P4C3.4.9",
+        "P4C1.1.4",
+        "P4C1.5.4",
+        "P1C3.8.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P4": 50
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Priority 1 \u2014 AI-Ready Data Foundation",
+      "verbatim_quote": "Priority 1 \u2014 AI-Ready Data Foundation"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Priority 2 \u2014 Commercial Lending Modernisation via nCino",
+        "source_kind": "docx"
+      },
+      "id": "965df0eb-cf29-4686-9c8d-a5c506dc3707",
+      "involved_subcap_ids": [
+        "P1C1.4.2",
+        "P1C5.4.BK1",
+        "P1C2.9.BK1",
+        "P3C3.3.1",
+        "P2C1.7.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$4,300,000,000",
+          "delta": null,
+          "kpi_label": "CCU's",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 60,
+        "P2": 20,
+        "P3": 20
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Priority 2 \u2014 Commercial Lending Modernisation via nCino",
+      "verbatim_quote": "Priority 2 \u2014 Commercial Lending Modernisation via nCino"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Priority 3 \u2014 Digital Member Experience",
+        "source_kind": "docx"
+      },
+      "id": "42405bd5-2a2d-46bc-a1c4-63766e1f84df",
+      "involved_subcap_ids": [
+        "P2C4.5.2",
+        "P2C4.5.1",
+        "P2C4.7.6",
+        "P2C4.5.1",
+        "P2C1.3.5",
+        "P2C1.3.4",
+        "P2C1.3.3",
+        "P2C1.3.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Priority 3 \u2014 Digital Member Experience",
+      "verbatim_quote": "Priority 3 \u2014 Digital Member Experience"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Priority 4 \u2014 Member Data Unification via Creatio CRM",
+        "source_kind": "docx"
+      },
+      "id": "095dff06-639c-47aa-81cb-934b7834d80f",
+      "involved_subcap_ids": [
+        "P4C1.8.1",
+        "P4C1.8.6",
+        "P4C1.7.1",
+        "P4C1.8.8",
+        "P4C2.4.5",
+        "P4C2.4.12",
+        "P4C2.4.6",
+        "P4C2.4.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Priority 4 \u2014 Member Data Unification via Creatio CRM",
+      "verbatim_quote": "Priority 4 \u2014 Member Data Unification via Creatio CRM"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Priority 5 \u2014 Inorganic Growth via Merger Integration",
+        "source_kind": "docx"
+      },
+      "id": "f09f7978-9089-4ba2-b718-e0a8aba8f107",
+      "involved_subcap_ids": [
+        "P1C1.4.2",
+        "P1C4.10.2",
+        "P1C1.8.2",
+        "P2C2.9.4",
+        "P1C5.5.3",
+        "P2C1.4.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P2": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Priority 5 \u2014 Inorganic Growth via Merger Integration",
+      "verbatim_quote": "Priority 5 \u2014 Inorganic Growth via Merger Integration"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-159",
+          "E-168"
+        ],
+        "representative_quote": "Snowflake EDW under active construction ('making data AI-ready').",
+        "source_kind": "docx"
+      },
+      "id": "3c651582-cf10-4a33-87ba-8b34a2d9d38e",
+      "involved_subcap_ids": [
+        "P4C1.8.1",
+        "P4C1.8.6",
+        "P4C1.7.1",
+        "P4C1.8.8",
+        "P4C2.4.5",
+        "P4C2.4.12",
+        "P4C2.4.6",
+        "P4C2.4.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Snowflake EDW under active construction ('making data AI-ready' [E-159])\u2026",
+      "verbatim_quote": "Snowflake EDW under active construction ('making data AI-ready' [E-159]). Databricks ML provisioned, pre-production [E-168]. 2025 intern: 'starting our journey to AI in Domo.' Zero production ML models deployed. Einstein + Agentforce is the enterprise AI execution layer this data investment needs."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-191",
+          "E-194"
+        ],
+        "representative_quote": "BCU (Baxter Credit Union, $6.1B, Vernon Hills IL \u2014 CCU's direct IL competitor) has deployed Salesforce FSC + Agentforce: 82% digital resolution rate, 97% member engagement rate, 27% improvement in case handle time.",
+        "source_kind": "docx"
+      },
+      "id": "d19fdb71-a16e-4692-8841-c6deb1e70a99",
+      "involved_subcap_ids": [
+        "P2C3.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,100,000,000",
+          "delta": null,
+          "kpi_label": "Baxter Credit Union",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "97%",
+          "delta": null,
+          "kpi_label": "Digital resolution rate",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "27%",
+          "delta": null,
+          "kpi_label": "Member engagement rate",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Talkdesk CCaaS",
+      "verbatim_quote": "F-006 | Talkdesk CCaaS \u2014 Service Cloud CTI Additive | Admin Cert 2022; 3yr+ mature deployment [E-191]. AppExchange CTI connector available | P2C3.2 at M2.5; no unified agent desktop or AI assist | SERVICE CLOUD: Talkdesk not displaced \u2014 augmented. CTI connector adds unified desktop, Einstein assist, SLA automation."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-168",
+          "E-194"
+        ],
+        "representative_quote": "BCU (Baxter Credit Union, $6.1B, Vernon Hills IL \u2014 CCU's direct IL competitor) has deployed Salesforce FSC + Agentforce: 82% digital resolution rate, 97% member engagement rate, 27% improvement in case handle time.",
+        "source_kind": "docx"
+      },
+      "id": "6fe836da-1e19-4646-a761-e85289f63be5",
+      "involved_subcap_ids": [
+        "P4C2.4",
+        "P4C2.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "82%",
+          "delta": null,
+          "kpi_label": "BCU achieved",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$6,100,000,000",
+          "delta": null,
+          "kpi_label": "Baxter Credit Union",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "97%",
+          "delta": null,
+          "kpi_label": "Digital resolution rate",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Zero Production AI",
+      "verbatim_quote": "F-003 | Zero Production AI \u2014 Einstein + Agentforce Greenfield | 2025 intern: 'starting our AI journey in Domo.' Databricks pre-production [E-168] | P4C2.4/P4C2.7 at M1.5\u2013M2; platform ready, execution absent | AGENTFORCE: BCU achieved 82% digital resolution. CCU has no comparable capability. Greenfield Agentforce opportunity \u2014 zero competition."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-043"
+        ],
+        "representative_quote": "nCino (Salesforce-native commercial LOS) actively implementing.",
+        "source_kind": "docx"
+      },
+      "id": "d79f4210-d2e2-4a76-80e7-e9cca0096300",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P4C3.4.5",
+        "P4C3.4.2",
+        "P1C1.8.2",
+        "P1C4.10.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 60,
+        "P4": 40
+      },
+      "source_path": "docx:strategic_section",
+      "title": "nCino (Salesforce-native commercial LOS) actively implementing [E-043]\u2026",
+      "verbatim_quote": "nCino (Salesforce-native commercial LOS) actively implementing [E-043]. CCU has already chosen Salesforce infrastructure \u2014 the question is how far the platform expands. nCino Integration Gateway connects Finastra Phoenix + 50+ FSI integrations."
+    }
+  ]
+}

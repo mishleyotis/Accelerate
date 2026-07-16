@@ -1,0 +1,824 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Exchange Bank",
+      "amount": "$375K",
+      "announced_on": null,
+      "body": "2019: Acquired CA trust/wealth unit of American Trust & Savings Bank (Iowa) for $375K (~$80M managed assets)",
+      "closed_on": null,
+      "details": "2019: Acquired CA trust/wealth unit of American Trust & Savings Bank (Iowa) for $375K (~$80M managed assets)",
+      "e_id": "E-017",
+      "event_date": "2019-02-01",
+      "id": "bf20ab7a-645b-4b89-a0bf-328b902caf15",
+      "source_url": "https://www.pressdemocrat.com/article/business/exchange-bank-of-santa-rosa-expanding-wealth-management-business-with-anoth/",
+      "status": null,
+      "target": "CA",
+      "title": "Acquired CA trust/wealth unit of American Trust & Savings\u2026"
+    }
+  ],
+  "entity_display_id": "exchange-bank-0001",
+  "financials": {
+    "lines": [
+      "Trend: STABLE with selective growth. Q3 2025: +76% YoY NI, +17% NII. Tech spend $14.24M (12.4% of revenue). [E-001, E-086]"
+    ],
+    "metrics": {
+      "net_income": 29970000.0,
+      "ni_growth_yoy": 0.256,
+      "nii_growth_yoy": 0.116,
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 358,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "CFO Radmilovic joined Burbank Housing board"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "North Bay CA",
+        "headline": "$115M assets \u00b7 FY2025",
+        "regulator": "FDIC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            0.01,
+            0.11,
+            0.11
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        14240000.0,
+        110450000.0,
+        114790000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2022,
+          2024,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          14240000.0,
+          110450000.0,
+          114790000.0
+        ]
+      }
+    ],
+    "years": [
+      2022,
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "North Bay CA"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Troy J. Sanderson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO/President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Charlotte Radmilovic",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO/SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Shari DeMaris",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO/EVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Greg Rober",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO/EVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Bender",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CBO/SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ali Spitzer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CCO/SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lisa Ganame",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Treasurer/FP&A"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Holly Hawkins",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kerri Howard",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BSA/OFAC Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Hana Camilleri",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BSA/AML Specialist"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nelson Rivas",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BSA Investigator"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Morgan Steele CRCM",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Sr. Compliance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Erin Williams",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "AVP Compliance QC"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joshua Chernin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Compliance Analyst"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carolyn Fulton",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Credit Compliance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Khamfone Sisavath",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Internal Auditor II"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rebekah Tyrrell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Ops Risk Analyst"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Greg Rober EVP",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO/de facto CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Doug Taylor",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Network Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Emily Sullivan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Trust Security"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "Legal Name: Exchange Bank (OTC: EXSR)\n\nFounded: 1890 \u2014 134 years of continuous operation in Sonoma County, California\n\nFDIC Certificate: #507068 | Routing: 121101985\n\nHeadquarters: 545 Fourth Street, Santa Rosa, CA 95401\n\nOwnership: Doyle Trust holds 50.44% of common stock. Dividends fund SRJC scholarships ($105M+ since 1948 to 150,000+ students). [E-001]",
+    "primary_regulator": "FDIC",
+    "size_tier": "Large",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "PROXY: CEO Sanderson articulates strategy publicly (press interviews, earnings context) but no formal public strategy document or stakeholder communication plan found CEO communicates dual-channel strategy to media: digi",
+        "title": "CEO Sanderson articulates strategy",
+        "type": "article",
+        "url": "https://www.pressdemocrat.com/2026/02/17/exchange-bank-petaluma-marin-branches-q4-2025/"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-108",
+        "excerpt": "CONFIRMED GAP: No CDP (Salesforce Data Cloud, Segment, Tealium, mParticle, Adobe AEP) in 129-technology stack Data sources exist but siloed: Fiserv Premier (core), Q2 (digital), NICE CXone (contact center), GA (web), Pen",
+        "title": "No CDP (Salesforce Data Cloud, Segment, Tealium, mParticle, Adobe\u2026",
+        "type": "article",
+        "url": "https://www.exchangebank.com"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-074",
+        "excerpt": "CONFIRMED GAP: No AI/GenAI chatbot, virtual assistant, or ML deployment found across web, app, tech stack, job postings, or LinkedIn activity Fiserv AppMarket offers BankAssist AI (LLM-powered virtual assistant) \u2014 availa",
+        "title": "AI/GenAI chatbot, virtual assistant, or ML deployment found across\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.exchangebank.com"
+      }
+    ],
+    "ticker": "EXSR (OTC)"
+  },
+  "issue_register": [
+    {
+      "id": "c1e08987-0f61-440a-bf08-5774d564ff16",
+      "issue_id": "GAP-1-P1C2.7.CU1",
+      "linked_subcap_ids": [
+        "P1C2.7.CU1"
+      ],
+      "opened_on": "2026-03-31",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). No evidence mapped to subcap P1C2.7.BK1. Subvertical-specific variant not applicable to Exchange Bank's SV1 Regional Banks classification. Score defaults to M1 Foundational (1.0). [VALIDATE: Confirm N/A status during internal discovery.]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: NCUA Governance"
+    },
+    {
+      "id": "dff22120-3831-44ca-b6dc-d1f64d2cfaa2",
+      "issue_id": "GAP-2-P1C2.9.RB1",
+      "linked_subcap_ids": [
+        "P1C2.9.RB1"
+      ],
+      "opened_on": "2026-03-31",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). No evidence mapped to subcap P1C2.9.BK1. Subvertical-specific variant not applicable to Exchange Bank's SV1 Regional Banks classification. Score defaults to M1 Foundational (1.0). [VALIDATE: Confirm N/A status during internal discovery.]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Fair Lending Governance"
+    },
+    {
+      "id": "295e8f05-2042-4020-81cc-6e8e42d4213c",
+      "issue_id": "GAP-3-P1C3.8.1",
+      "linked_subcap_ids": [
+        "P1C3.8.1"
+      ],
+      "opened_on": "2026-03-31",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [ERS: 1.50] [FACT] [E-051:F2] CIO Rober lists 'AI-driven technologies' + 'informed on AI-driven technologies' on LinkedIn \u2014 personal awareness without [E-051:F3] Tech stack shows no AI/ML platforms detected (no AWS SageMaker, no Google Vertex, no Azure ML) [E-074:F2] Fiserv AppMarket offers BankAssist AI (LLM-powered virtual assistant) \u2014 available",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: GenAI Strategy"
+    },
+    {
+      "id": "6bde913f-74ef-4cc0-bafd-20356ad85271",
+      "issue_id": "GAP-4-P1C3.8.2",
+      "linked_subcap_ids": [
+        "P1C3.8.2"
+      ],
+      "opened_on": "2026-03-31",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [ERS: 1.50] [FACT] [E-051:F2] CIO Rober lists 'AI-driven technologies' + 'informed on AI-driven technologies' on LinkedIn \u2014 personal awareness without [E-051:F3] Tech stack shows no AI/ML platforms detected (no AWS SageMaker, no Google Vertex, no Azure ML) [E-074:F2] Fiserv AppMarket offers BankAssist AI (LLM-powered virtual assistant) \u2014 available",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI Use Case Pipeline"
+    },
+    {
+      "id": "c5cba231-ee63-46df-bf09-b7a19fec99e3",
+      "issue_id": "GAP-5-P1C3.8.3",
+      "linked_subcap_ids": [
+        "P1C3.8.3"
+      ],
+      "opened_on": "2026-03-31",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [ERS: 1.50] [FACT] [E-051:F2] CIO Rober lists 'AI-driven technologies' + 'informed on AI-driven technologies' on LinkedIn \u2014 personal awareness without [E-051:F3] Tech stack shows no AI/ML platforms detected (no AWS SageMaker, no Google Vertex, no Azure ML) [E-074:F2] Fiserv AppMarket offers BankAssist AI (LLM-powered virtual assistant) \u2014 available",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI Governance for Innovation"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Value grew from $14.2M (2022) to $114.8M (2025) \u2014 100.5% CAGR. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 3.03,
+        "P1C3": 2.05,
+        "P1C4": 2.46,
+        "P1C5": 2.68,
+        "P2C1": 2.43,
+        "P2C2": 2.02,
+        "P2C3": 2.52,
+        "P2C4": 2.68,
+        "P3C1": 2.81,
+        "P3C2": 2.63,
+        "P3C3": 3.07,
+        "P3C4": 2.84,
+        "P4C1": 2.21,
+        "P4C2": 2.09,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.55,
+      "peer_name": "CalPrivate Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.76,
+        "P1C2": 2.79,
+        "P1C3": 2.58,
+        "P1C4": 2.52,
+        "P1C5": 2.57,
+        "P2C1": 2.32,
+        "P2C2": 2.54,
+        "P2C3": 2.13,
+        "P2C4": 2.42,
+        "P3C1": 2.36,
+        "P3C2": 2.23,
+        "P3C3": 2.18,
+        "P3C4": 2.14,
+        "P4C1": 2.21,
+        "P4C2": 2.15,
+        "P4C3": 2.49,
+        "P4C4": 2.53
+      },
+      "overall_score": 2.41,
+      "peer_name": "Synchrony Financial",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.45,
+        "P1C2": 2.31,
+        "P1C3": 2.26,
+        "P1C4": 2.09,
+        "P1C5": 2.71,
+        "P2C1": 2.13,
+        "P2C2": 2.19,
+        "P2C3": 2.22,
+        "P2C4": 2.3,
+        "P3C1": 2.26,
+        "P3C2": 2.58,
+        "P3C3": 2.34,
+        "P3C4": 2.19,
+        "P4C1": 2.88,
+        "P4C2": 2.28,
+        "P4C3": 2.72,
+        "P4C4": 2.75
+      },
+      "overall_score": 2.39,
+      "peer_name": "Regions Business Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.47,
+        "P1C3": 1.93,
+        "P1C4": 1.87,
+        "P1C5": 1.61,
+        "P2C1": 2.39,
+        "P2C2": 2.37,
+        "P2C3": 2.0,
+        "P2C4": 1.93,
+        "P3C1": 2.09,
+        "P3C2": 2.63,
+        "P3C3": 2.52,
+        "P3C4": 2.55,
+        "P4C1": 2.28,
+        "P4C2": 2.37,
+        "P4C3": 2.5,
+        "P4C4": 3.07
+      },
+      "overall_score": 2.29,
+      "peer_name": "Texas Capital Bancshares, Inc. / Texas Capital Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 3.86,
+        "P1C3": 2.03,
+        "P1C4": 2.66,
+        "P1C5": 1.71,
+        "P2C1": 1.6,
+        "P2C2": 2.15,
+        "P2C3": 2.07,
+        "P2C4": 1.61,
+        "P3C1": 1.98,
+        "P3C2": 2.37,
+        "P3C3": 3.0,
+        "P3C4": 2.28,
+        "P4C1": 1.58,
+        "P4C2": 1.56,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.27,
+      "peer_name": "1st Security Bank of Washington",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-EXCH-20260331-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "overall: 3.5, reviews: 56, culture_values: 3.9",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 5,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 0.55
+      },
+      {
+        "drilldown": "overall: 5.0, ceo_approval: 0.5381, recommend_friend: 0.566",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 0.5381
+      },
+      {
+        "drilldown": "combined_rating: 4.6, review_count: 670, specific_pain_points: ['Bill pay: floating decimal causes expensive errors, not all info visible on screen', 'Zelle: constant failures, 30-50 tries per payment', 'Mobile deposit:",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 6,
+        "polarity": "neutral",
+        "source": "Mobile App",
+        "themes": [],
+        "value": 4.6
+      },
+      {
+        "drilldown": "recommend: 0.82, reviews: 27",
+        "evidence_e_id": null,
+        "kind": "social",
+        "max": null,
+        "n": 82,
+        "polarity": "neutral",
+        "source": "Facebook",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "rating: 4.5, highlights: No monthly fee checking, low overdraft ($32), ATM reimbursement",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Smartasset",
+        "themes": [],
+        "value": 4.5
+      },
+      {
+        "drilldown": "A (DepositAccounts)",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Health",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Named Newsweek's 2026 Best Regional Bank in America \u2014 award reason includes 'service excellence, outreach, and innovation'",
+      "date_precision": "year",
+      "e_id": "E-071",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "dd4ffb32-6576-4fa4-8d83-21d5b620f04b",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/feed/update/urn:li:activity:7412190920193978368",
+      "subcap_ids": [],
+      "title": "Award reason includes service excellence, outreach, and\u2026"
+    },
+    {
+      "body": "Jamie Hidalgo celebrated 5 years at Exchange Bank (March 2026 post) \u2014 joined March 2021",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "96d8bb24-4fb6-4e67-9b90-96a89d937f4d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.facebook.com/ExchangeBankSoCo/",
+      "subcap_ids": [],
+      "title": "Jamie Hidalgo celebrated at Exchange Bank (March 2026 post)"
+    },
+    {
+      "body": "2 new branches opened Dec 2025: Petaluma West (redesigned) + Marin County",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "9e53dfc8-341c-4dff-9450-183ec0fed754",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.pressdemocrat.com/2026/02/17/exchange-bank-petaluma-marin-branches-q4-2025/",
+      "subcap_ids": [],
+      "title": "Petaluma West redesigned"
+    },
+    {
+      "body": "Antonio Salas Laureano Marketing Data Analyst (hired Aug 2025) = data analytics capability being built",
+      "date_precision": "month",
+      "e_id": "E-078",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "42b6217f-6a89-4222-8925-49833e85397c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com/personal",
+      "subcap_ids": [],
+      "title": "Antonio Salas Laureano Marketing Data Analyst hired Aug 2025"
+    },
+    {
+      "body": "Newsweek named it one of America's best regional banks (2025)",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "05fe47af-415e-4b55-9dc7-bae1d4aaf584",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.pressdemocrat.com/2026/02/17/exchange-bank-petaluma-marin-branches-q4-2025/",
+      "subcap_ids": [],
+      "title": "Newsweek named it"
+    },
+    {
+      "body": "Promoted to SVP 2025 = expanding scope and recognition of risk function",
+      "date_precision": "year",
+      "e_id": "E-033",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "2f5e66cf-1ae1-4e1f-acd9-9884e535a05f",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.facebook.com/ExchangeBankSoCo/",
+      "subcap_ids": [],
+      "title": "Promoted to SVP 2025"
+    },
+    {
+      "body": "Lisa Ganame promoted to Treasurer (June 2025). Leads 'finance-related data analytics and budgeting functions'",
+      "date_precision": "month",
+      "e_id": "E-138",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-138"
+      ],
+      "id": "91f87711-91b2-419d-b5a2-019991bc6745",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.businesswire.com/news/home/20250617154819/en/Exchange-Bank-Promotes-Lisa-Ganame-to-Treasurer",
+      "subcap_ids": [],
+      "title": "Lisa Ganame promoted to Treasurer (June 2025"
+    },
+    {
+      "body": "Bailey Williams: Electronic Banking Specialist since May 2024 \u2014 both hired in 2024, new team build-out",
+      "date_precision": "month",
+      "e_id": "E-118",
+      "event_date": "2024-05-01",
+      "evidence_e_ids": [
+        "E-118"
+      ],
+      "id": "29ca365c-ff9e-4ac2-82cc-8e1b5517e09c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/in/heather-brewer-9689b523/",
+      "subcap_ids": [],
+      "title": "Bailey Williams: Electronic Banking Specialist since May\u2026"
+    },
+    {
+      "body": "4 employees appointed to Sonoma County nonprofit boards in Feb 2024: CFO Radmilovic (Burbank Housing), Sturdevant (PEF), and 2 others",
+      "date_precision": "month",
+      "e_id": "E-058",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "d924f2b9-fa74-49c7-b183-505b9c8ede83",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com/news-room/press-release-exchange-bank-employees-deliver-community-support-through-nonprofit-board-membership",
+      "subcap_ids": [],
+      "title": "4 employees appointed to Sonoma County nonprofit boards"
+    },
+    {
+      "body": "CFO Radmilovic joined Burbank Housing board \u2014 nonprofit building affordable housing in fire recovery areas",
+      "date_precision": "publish_fallback",
+      "e_id": "E-058",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "e0a9267a-2063-49e2-b90f-bded6c0d8110",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com/news-room/press-release-exchange-bank-employees-deliver-community-support-through-nonprofit-board-membership",
+      "subcap_ids": [],
+      "title": "CFO Radmilovic joined Burbank Housing board"
+    },
+    {
+      "body": "DeMaris transitioned CFO\u2192COO = operations focus. Charlotte Radmilovic took over as SVP CFO May 2023",
+      "date_precision": "month",
+      "e_id": "E-032",
+      "event_date": "2023-05-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "b2841c5e-5519-4af7-b9f4-2d6409bbe389",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com/about/our-people",
+      "subcap_ids": [],
+      "title": "Charlotte Radmilovic took as SVP CFO"
+    },
+    {
+      "body": "New management team signal: 5 of 12 executives joined 2021-2025 (Sanderson, DeMaris, Rober, Radmilovic, Hawkins, Bender)",
+      "date_precision": "year",
+      "e_id": "E-034",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "f3739300-4971-4139-9dea-cda37b1ac0c7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://simplywall.st/stocks/us/banks/otc-exsr/exchange-bank-santa-rosa-ca/management",
+      "subcap_ids": [],
+      "title": "New management team signal: 5 of 12 executives joined\u2026"
+    },
+    {
+      "body": "$383M PPP loans deployed during COVID-19 pandemic (2020) \u2014 simultaneous wildfire + pandemic response",
+      "date_precision": "year",
+      "e_id": "E-131",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-131"
+      ],
+      "id": "b62be23b-ffe9-4928-a5f2-d5ee9acb8e15",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://lbbonline.com/news/barrettsf-and-exchange-bank-speak-directly-to-community-battered-by-sonoma-county-wildfires-2",
+      "subcap_ids": [],
+      "title": "$383M PPP loans deployed during COVID-19 pandemic (2020)"
+    },
+    {
+      "body": "Gregory S. Steele: Retired Technology Executive appointed 2020, chairs Governance/Nominating, on Audit + Tech Committees",
+      "date_precision": "year",
+      "e_id": "E-009",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "2be96fe7-08e7-4a0b-b936-9f4ebd2491d6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com/uploads/financial-reports/2022-Shareholder-Info.pdf",
+      "subcap_ids": [],
+      "title": "Gregory S. Steele: Retired Technology Executive appointed\u2026"
+    },
+    {
+      "body": "Digital banking: Q2 Holdings / Banno (vendor-managed, migrated 2019)",
+      "date_precision": "year",
+      "e_id": "E-154",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-154"
+      ],
+      "id": "e24392e8-1724-47c6-a05d-c3d22e90ef26",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com",
+      "subcap_ids": [],
+      "title": "Digital banking: Q2 Holdings / Banno (vendor-managed\u2026"
+    },
+    {
+      "body": "2019: Acquired CA trust/wealth unit of American Trust & Savings Bank (Iowa) for $375K (~$80M managed assets)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2019-02-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "bf20ab7a-645b-4b89-a0bf-328b902caf15",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.pressdemocrat.com/article/business/exchange-bank-of-santa-rosa-expanding-wealth-management-business-with-anoth/",
+      "subcap_ids": [],
+      "title": "Acquired CA trust/wealth unit of American Trust & Savings\u2026"
+    },
+    {
+      "body": "2014 Windsor branch opened as first 'Branch of the Future'",
+      "date_precision": "year",
+      "e_id": "E-020",
+      "event_date": "2014-07-01",
+      "evidence_e_ids": [
+        "E-020",
+        "E-052"
+      ],
+      "id": "6309a1f3-5420-436f-b357-bb527c1fdabe",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.exchangebank.com/about",
+      "subcap_ids": [],
+      "title": "2014 Windsor branch opened as first 'Branch of the Future"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "entity_display_id": "wsfs-financial-corporati-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C2.2.4",
+        "P2C4.4.4",
+        "P1C1.3.WM1",
+        "P2C4.5.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-004",
+      "id": "51f54934-c8d4-4f3f-9e16-3a29146724c3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-092",
+        "E-088",
+        "E-087",
+        "E-025",
+        "E-104",
+        "E-101"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Deploy Salesforce Data Cloud to Enable CEO Levenson's Cross-Sell Mandate Across $97.4B Wealth + $9.9B Commercial — addressable via salesforce [E-088].",
+      "source_rec_id": "REC-004",
+      "theme": "Data Management & Governance",
+      "title": "Deploy Salesforce Data Cloud to Enable CEO Levenson's Cross-Sell Mandate Across $97.4B Wealth + $9.9B Commercial",
+      "what_text": "WSFS's commercial data resides in three disconnected silos: nCino LOS, Salesforce CRM, and treasury management. Wealth data was successfully unified via Wealth Access (7 systems → 1 platform, December 2025). The Wealth Access case study (February 2026) confirms this unification is live and enabling cross-selling. CEO Levenson's Q4 2025 cross-sell mandate requires commercial bankers to identify commercial clients with wealth needs and wealth advisors to see commercial relationships. This is currently architecturally impossible. Data Management scores level 1.93 — the lowest category in the assessment — and this directly triggers a connected cap on Analytics (capped at level 3.0). In Zennify's assessment Metadata Management & Data Catalog scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-092].",
+      "why_text": "The assessment found: “Nick Ferrante (VP Enterprise Data Manager, Dec 2022): 'Lead the vision, strategy, and execution of enterprise-wide data initiatives that transform information into a competitive advantage' — de-facto” [E-087]. At 1.0 out of 5, Metadata Management & Data Catalog sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "WSFS entered 2025-2026 with its most technology-forward executive slate in the institution's 190-year history. FY2025 Annual Report articulates AI and predictive modeling as Objective SO-1, commercial loan growth as SO-2, and efficiency improvement as SO-5 [E-059]. CTO Rene Gonzales joined March 5, 2026 with a documented cloud migration track record at Cenlar FSB [E-093]. Enterprise Architect Mark Staszewski (November 2024) is building the Salesforce Well-Architected CoE from scratch using Portfolio Management, Design Patterns, and Capability Maturity Model methodologies [E-094]. CIO Allan Matyger (May 2025) carries the technology modernization mandate. These are (Digital Strategy) positive signals — but scored at level 2.36 because \"AI and Salesforce build-out\" remain stated intent rather than deployed capability. The CDO role, vacant since February 2025, continues to limit and governance velocity [E-025].\n Governance & Risk (level 2.61) is WSFS's strongest category. OCC Safety and Soundness examination shows no enforcement actions in the public record. Credit ratings are investment-grade across three agencies (Moody's Baa2, Kroll A-, Morningstar DBRS A(low)) [E-002]. WSFS maintains 22 concentration limits all within board-approved thresholds, and the ERM program tracks 100 key risk indicators with quarterly board reviews [E-043]. Culture & Change Enablement (level 2.29) reflects the Gallup Exceptional Workplace 8 consecutive years and Forbes Best Banks 2025 recognition — but the -0.96 peer gap reveals that strong culture has not yet translated into digital change execution velocity at the platform level.",
+        "heading": "P1 — What We See",
+        "linked_e_ids": [
+          "E-002",
+          "E-025",
+          "E-043",
+          "E-059",
+          "E-093",
+          "E-094"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "P2 is WSFS's weakest pillar at level 1.86 — and it carries 20% of the overall CL score weight. The single largest gap in the entire assessment is Onboarding & Fulfillment at level 1.84 vs peer median level 3.25 (-1.41). This reflects the end-to-end manual nature of WSFS's commercial origination journey: financial spreading in Excel [E-066], credit memo generation manually [E-067], and no FSC-based RM pipeline. Jack Henry Banno confirms basic digital banking [E-056], and Terafina confirms consumer account opening [E-056], but the commercial origination journey has no equivalent. Atlantic Union Bankshares (AUB), WSFS's primary peer benchmark, has nCino commercial LOS with Copado automated deployment + Salesforce CRM integrated — the commercial origination journey is digital end-to-end.\n Omnichannel Servicing & Support (level 1.86) reflects the FSC absence directly. The Salesforce Admin job posting (August 2025, confirmed via Dice connector) lists Financial Services Cloud as \"a plus\" [E-009, E-NEW-003]. This is the most direct possible signal that WSFS aspires to FSC but has not purchased it. Relationship managers operate in Sales+Service Cloud without the household data model, commercial lending actions, or RM pipeline management that FSC provides. Personalization & Proactive Engagement (level 1.89) is connected capped by Data Governance (level 1.93 < 2.5 threshold): WSFS cannot deliver advanced commercial analytics because it lacks the unified commercial data layer. A connected cap was applied per the assessment methodology.",
+        "heading": "P2 — What We See",
+        "linked_e_ids": [
+          "E-009",
+          "E-056",
+          "E-066",
+          "E-067"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "P3 carries 35% of the overall CL score — it is the most financially material pillar in this assessment. The -0.83 P3 gap alone contributes 0.29 of the 0.79 total peer gap. Two MATERIAL issues directly cap and at level 2.0, creating a hard ceiling regardless of other positive evidence. Core Process Automation (level 2.03): financial spreading confirmed as manual via Power Platform / Senior Automation Engineer job posting analysis [E-066]. The nCino Analyst Digital Partner, which became generally available November 2025 and delivers 60-70% credit analyst effort reduction, has not been deployed at WSFS despite 9 years of nCino ownership [E-067]. The agentic credit memo tool from Moody's (May 2026, AWS Marketplace) reduces a 2-week manual process to 5-10 minutes [E-NEW-002] — WSFS is eligible but has not engaged.\n Compliance, Supervision & Surveillance (level 2.15) is the relative bright spot in P3. Kate McGlinchey (SVP CCO, April 2025) joined with a comprehensive compliance program redesign mandate [E-074]. CRA rated Satisfactory (most recent examination) [E-039]. WSFS is named as an OCC REACh participant alongside Wells Fargo, Webster Bank, WaFd, Valley National, and Zions [E-078] — a community reinvestment commitment at institutional scale. No pending enforcement actions found in public record. Business Resilience (level 2.12) benefits from the 25-year CISO tenure of Robert Eastwood, a multi-year enterprise security strategy, and Splunk SIEM confirmed deployment [E-071, E-097]. SR 26-02 (April 2026) creates new model risk governance requirements for WSFS's credit model suite; the NIST AI RMF governs Agentforce as agentic AI [E-102].",
+        "heading": "P3 — What We See",
+        "linked_e_ids": [
+          "E-039",
+          "E-066",
+          "E-067",
+          "E-071",
+          "E-074",
+          "E-078",
+          "E-097",
+          "E-102"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "P4 contains WSFS's only above-level 2.3 category: Information Security & Cybersecurity at level 2.48. Robert Eastwood, 25-year CISO with 20 years at WSFS specifically, maintains a multi-year enterprise security strategy [E-097]. Splunk SIEM is confirmed deployed [E-071]. FFIEC CAT was sunset August 31, 2025, and WSFS is transitioning to NIST CSF 2.0 per OCC direction [E-098]. Technology Architecture (level 2.31) benefits from the active Salesforce build-out [E-028], AWS infrastructure [E-040], and Jack Henry D1/Banno API-ready digital banking [E-056]. Enterprise Architect Staszewski's CoE methodology (Well-Architected Framework, Portfolio Management, Design Patterns) [E-094] will be the architectural foundation for all future platform decisions.\n Data Management & Governance (level 1.93) is the lowest-scoring category in the assessment. CDO role vacant since February 2025 (level 3 cap applied) [E-025]. Commercial data fragmented across nCino, Salesforce, and treasury management [E-092]. connected dependency: < level 2.5 threshold triggers a cap on Analytics at level 3.0 — meaning analytics capabilities are blocked until data governance is strengthened. Wealth data is now unified (Wealth Access, 7 systems → 1, Dec 2025) [E-088], but this explicitly surfaces the commercial data gap by contrast. Nick Ferrante (VP Enterprise Data Manager) carries an AI/ML enablement mandate [E-087] without C-suite authority. Analytics & AI Enablement (level 1.97): Agentforce confirmed at NewLane Finance [E-058]; Krishna Chaitanya holds Agentforce Specialist certification (August 2025) [E-090]; ARS 2025 confirms \"evaluating AI models\" [E-059]. The certification and subsidiary pilot represent readiness, not deployment. SR 26-02 (April 2026) covers traditional quantitative models; NIST AI RMF governs Agentforce as agentic AI [E-102].",
+        "heading": "P4 — What We See",
+        "linked_e_ids": [
+          "E-025",
+          "E-028",
+          "E-040",
+          "E-056",
+          "E-058",
+          "E-059",
+          "E-071",
+          "E-087",
+          "E-088",
+          "E-090",
+          "E-092",
+          "E-094",
+          "E-097",
+          "E-098",
+          "E-102"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All five recommendations have been validated as confirmed-absent from WSFS's current technology stack through: (1) evidence corpus E-IDs, (2) Exa connector search (April-May 2026), (3) Dice/BuiltIn job posting analysis (August 2025 WSFS Salesforce Admin job still lists FSC as \"a plus\"). No investment amounts are included per R6 protocol. Each recommendation follows the format: [ROOT CAUSE with E-IDs] → [SOLUTION with Zennify offering] → [EXPECTED OUTCOMES table].\n — Deploy Moody's CreditLens + nCino Automated Spreading on WSFS's $9.9B Commercial Portfolio [ZENNIFY]\nStrategic Objectives: SO-2: C&I loan growth | SO-5: Efficiency ratio toward low-60s\nPrimary Buyer: Frank McGrane, EVP Chief Credit Officer (hired July 2025) — inherited manual spreading on $9.9B book\nUrgency: Q3 2026 — McGrane is in month 10 of his tenure; optimal platform decision window"
+  },
+  "run_request_id": "DMA-ASM-WSFS-20260519-0001"
+}

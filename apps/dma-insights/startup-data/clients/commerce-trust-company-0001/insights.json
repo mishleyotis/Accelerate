@@ -1,0 +1,900 @@
+{
+  "entity_display_id": "commerce-trust-company-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C2.3.1",
+        "P2C2",
+        "P1C1.5.1",
+        "P2C2.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "ca8bf3e9-285f-44e9-8324-f7e1464f9387",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-032",
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-034",
+        "E-031",
+        "E-032"
+      ],
+      "linked_subcap_id": "P2C2.3.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Digital Identity Verification (IDV) a near-term focus for Commerce Trust Company: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-032].",
+      "source_rec_id": "REC-01",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Digital Identity Verification (IDV)",
+      "what_text": "Digital Identity Verification (IDV) is one of Commerce Trust Company's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger, more personalised customer experience [E-031].",
+      "why_text": "The assessment found: “No Commerce-specific CFPB/Zelle enforcement found; CFPB/state Zelle suits targeted BofA, Chase, Wells (Zelle owner-banks), not Commerce (absence-as-evidence on acquisition/fulfillment integrity)” [E-034]. At 1.5 out of 5, Digital Identity Verification (IDV) sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.3",
+        "P2C2.1.1",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "b5fd30bc-e289-4481-a1f2-b4e98b13bb22",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-036",
+        "E-037",
+        "E-038"
+      ],
+      "linked_subcap_id": "P2C4.1.3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: FSC is already mature in wealth but the footprint is fragmented across three orgs post-acquisition; consolidation, not greenfield. — Salesforce FSC 3-org consolidation into Quest — the active, CEO/COO-mandated LAND engagement; Zennify's FSC-formation pedigree directly applies [E-038].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Three wealth Salesforce orgs anchored by a mature FSC org",
+      "what_text": "Three SF orgs — Quest FSC (Unlimited, 436/450, since 2018, HNW advisors), CFA Service Cloud (69/78), FineMark Sales+Service+Shield+Marketing Cloud (297/375); 903 seats / 89% occupancy [INT-002]; separate commercial Service Cloud 'Insight 360'. In Zennify's assessment External Data Integration scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-037].",
+      "why_text": "The assessment found: “Commerce documents service inquiries in a 'Salesforce case management system (Insight 360)' — Salesforce Service Cloud IS deployed for commercial/treasury/merchant servicing” [E-036]. At 2.0 out of 5, External Data Integration sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C4",
+        "P3C1.1.1",
+        "P2C4.5.IB1",
+        "P2C2.2.RIA1",
+        "P3C2.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "08086347-3b0c-4427-a514-82217cbedc00",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-033",
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-032",
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-031",
+        "E-038",
+        "E-034",
+        "E-032",
+        "E-030",
+        "E-033"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Eligibility Transparency a near-term focus for Commerce Trust Company: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-038].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Manual middle-office account opening / onboarding gap in Quest",
+      "what_text": "Eligibility Transparency is one of Commerce Trust Company's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger, more personalised customer experience [E-031].",
+      "why_text": "The assessment found: “No Commerce-specific CFPB/Zelle enforcement found; CFPB/state Zelle suits targeted BofA, Chase, Wells (Zelle owner-banks), not Commerce (absence-as-evidence on acquisition/fulfillment integrity)” [E-034]. The research report pins the maturity impact at: Caps / maturity; clearest near-term efficiency gap in the front office. averages 2.3/5 across its 57 scored capability (peer median ~ 3.0) on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.7",
+        "P4C1.1.1",
+        "P4C2.1.1",
+        "P2C4.1.3",
+        "P2C4.2.5",
+        "P2C4.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "1da9c6e7-6006-40c3-918a-5d48d5817613",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-04"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-033",
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-030",
+        "E-033",
+        "E-058",
+        "E-038",
+        "E-050",
+        "E-049"
+      ],
+      "linked_subcap_id": "P4C2.4.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Personalization-at-scale gap; duplicate marketing spend across overlapping platforms. — Marketing Cloud consolidation + Data Cloud + Agentforce/Einstein next-best-action (EXPAND) — genuine gap (no CDP deployed) [E-033].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Fragmented martech with no unified personalization / CDP",
+      "what_text": "Generative AI Strategy & Use Cases is one of Commerce Trust Company's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger data and technology foundation [E-030].",
+      "why_text": "The assessment found: “Commerce Bancshares names 'the impacts of artificial intelligence and other technological developments' as a formal risk factor in FY2026 SEC filings — AI is on the board/management agenda” [E-050]. At 2.0 out of 5, Generative AI Strategy & Use Cases sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.7",
+        "P4C1.1.1",
+        "P4C2.6.1",
+        "P4C2.6.2",
+        "P4C3.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "1381731d-0499-4f61-85cf-fedd82cd0d65",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-04"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-037",
+        "E-050",
+        "E-049"
+      ],
+      "linked_subcap_id": "P4C2.4.7",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong, maturing data foundation; wealth/distribution data (TDW) is the lagging pillar. — Salesforce Data Cloud zero-copy federation with Databricks Lakehouse (EXPAND); aligns to Zennify's active Databricks practice [E-037].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Teradata to Databricks modernization in flight = Data Cloud runway",
+      "what_text": "3-pillar Teradata->Databricks migration; core-banking pillar ~60 days, Trust Data Warehouse next year [INT-006]; Databricks Lakehouse on Azure confirmed publicly; wealth data partly manual today. In Zennify's assessment Generative AI Strategy & Use Cases scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-048].",
+      "why_text": "The assessment found: “Commerce Bancshares names 'the impacts of artificial intelligence and other technological developments' as a formal risk factor in FY2026 SEC filings — AI is on the board/management agenda” [E-050]. At 2.0 out of 5, Generative AI Strategy & Use Cases sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.1",
+        "P2C2.1.1",
+        "P4C2.1.2",
+        "P4C1.1.8",
+        "P4C2.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "5e534b70-0571-4928-8ae8-57846919c207",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-049",
+        "E-036",
+        "E-050",
+        "E-047"
+      ],
+      "linked_subcap_id": "P4C2.1.1",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Servicing automation and GenAI are net-new; existing models are batch/analytical, not operationalized for real-time advisor NBA. — Agentforce + Einstein (EXPAND) to operationalize existing models and add servicing automation — genuine gap [E-036].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Analytical AI is real; customer-facing / generative AI is absent",
+      "what_text": "Enterprise Analytics Strategy is one of Commerce Trust Company's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger data and technology foundation [E-049].",
+      "why_text": "The assessment found: “Commerce Bancshares names 'the impacts of artificial intelligence and other technological developments' as a formal risk factor in FY2026 SEC filings — AI is on the board/management agenda” [E-050]. At 2.0 out of 5, Enterprise Analytics Strategy sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.1",
+        "P4C4.3.3",
+        "P4C4.1.2",
+        "P2C3.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "82521c0c-73e0-4577-a82d-d7f0a24bbcbb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-057",
+        "E-052",
+        "E-053"
+      ],
+      "linked_subcap_id": "P4C3.6.1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Integration window drives urgency and temporary data/process fragmentation; a FineMark SF parallel-run dependency follows the FIS cutover. — Position as the migration partner for the consolidation within the FIS-gated timeline (LAND) — speed + Hubbl scan = differentiation [E-053].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "FineMark integration is a time-boxed catalyst",
+      "what_text": "CI/CD Pipeline & Automation is one of Commerce Trust Company's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger data and technology foundation [E-052].",
+      "why_text": "The assessment found: “FineMark Holdings (OTCQX:FNBT), parent of FineMark National Bank & Trust — nationally chartered commercial bank & trust co, founded 2007 in Fort Myers FL; 13 offices across FL/AZ/SC” [E-057]. At 2.0 out of 5, CI/CD Pipeline & Automation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.7.1",
+        "P4C3.6.1",
+        "P4C4.3.1",
+        "P1C2.1.8",
+        "P4C4.8.1",
+        "P4C4.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "5cc8bad1-a98d-4f93-9f14-129587011213",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-05"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-017",
+        "E-027",
+        "E-044",
+        "E-052",
+        "E-048",
+        "E-020",
+        "E-021",
+        "E-023"
+      ],
+      "linked_subcap_id": "P1C3.7.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: High readiness and low technical-integration risk for a Salesforce expansion. — De-risked FSC + Data Cloud rollout (ENABLER); strengthens the consolidation business case [E-044].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Strong governance, security and architecture = low integration risk",
+      "what_text": "Core Vendor Roadmap Alignment is one of Commerce Trust Company's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Commerce Trust Company's ability to deliver sharper strategic direction and stronger oversight [E-017].",
+      "why_text": "The assessment found: “No Commerce Bank/Bancshares-specific data breach, major outage, or enforcement action surfaced across targeted Tier-10 searches — consistent with Moody's a2 BCA and clean supervisory posture” [E-027]. At 2.0 out of 5, Core Vendor Roadmap Alignment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.2.4",
+        "P2C4",
+        "P4C2.1.1",
+        "P1C1.5.1",
+        "P2C4.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "94f16d55-0d3a-4661-8096-a548ed5bf6ea",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-038",
+        "E-008"
+      ],
+      "linked_subcap_id": "P2C4.2.4",
+      "platforms": [
+        "ncino",
+        "tableau",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Personalized Pricing a near-term focus for Commerce Trust Company: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-008].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Personalized Pricing",
+      "what_text": "Personalized Pricing is one of Commerce Trust Company's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger, more personalised customer experience [E-038].",
+      "why_text": "The assessment found: “Formal 'Data Strategy & Business Enablement Analyst' role: optimize data assets/external data ecosystem, build data-driven culture & data literacy, enforce data-quality standards, and MONITOR” [E-037]. At 2.0 out of 5, Personalized Pricing sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.5.7",
+        "P2C1",
+        "P4C2.1.1",
+        "P1C1.5.1",
+        "P4C2.4.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "4f2a2d4d-fa5f-4295-a1e8-4d04114782d0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-033"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-031",
+            "E-032",
+            "E-033"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-030",
+        "E-031",
+        "E-032",
+        "E-033"
+      ],
+      "linked_subcap_id": "P2C1.5.7",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make GenAI Content Generation a near-term focus for Commerce Trust Company: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-032].",
+      "source_rec_id": "REC-03",
+      "theme": "Digital Channels",
+      "title": "GenAI Content Generation",
+      "what_text": "GenAI Content Generation is one of Commerce Trust Company's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger, more personalised customer experience [E-031].",
+      "why_text": "The assessment found: “Marketing Specialist req lists 'Salesforce CRM' as preferred — Salesforce CRM IS in use at Commerce (refines B1 'HubSpot-not-Salesforce' to a fragmented-stack picture)” [E-030]. At 2.0 out of 5, GenAI Content Generation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.7",
+        "P4C2",
+        "P4C2.1.1",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "b38e06be-fdbc-4c2f-81b5-af55974876df",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-048",
+            "E-049",
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-050",
+        "E-047",
+        "E-048",
+        "E-049",
+        "E-051"
+      ],
+      "linked_subcap_id": "P4C2.4.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Generative AI Strategy & Use Cases a near-term focus for Commerce Trust Company: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-048].",
+      "source_rec_id": "REC-04",
+      "theme": "Analytics & AI",
+      "title": "Generative AI Strategy & Use Cases",
+      "what_text": "Generative AI Strategy & Use Cases is one of Commerce Trust Company's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Commerce Trust Company's ability to deliver a stronger data and technology foundation [E-047].",
+      "why_text": "The assessment found: “Commerce Bancshares names 'the impacts of artificial intelligence and other technological developments' as a formal risk factor in FY2026 SEC filings — AI is on the board/management agenda” [E-050]. At 2.0 out of 5, Generative AI Strategy & Use Cases sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.7.1",
+        "P1C3",
+        "P1C1.5.1",
+        "P1C2.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "b2292176-4a0d-457e-bb1e-5c7f9af7909e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-017",
+            "E-020",
+            "E-021",
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-021",
+        "E-023",
+        "E-022",
+        "E-026",
+        "E-028",
+        "E-027",
+        "E-017"
+      ],
+      "linked_subcap_id": "P1C3.7.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Core Vendor Roadmap Alignment a near-term focus for Commerce Trust Company: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": "REC-05",
+      "theme": "Innovation & Investment",
+      "title": "Core Vendor Roadmap Alignment",
+      "what_text": "Core Vendor Roadmap Alignment is one of Commerce Trust Company's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Commerce Trust Company's ability to deliver sharper strategic direction and stronger oversight [E-020].",
+      "why_text": "The assessment found: “No Commerce Bank/Bancshares-specific data breach, major outage, or enforcement action surfaced across targeted Tier-10 searches — consistent with Moody's a2 BCA and clean supervisory posture” [E-027]. At 2.0 out of 5, Core Vendor Roadmap Alignment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-CTC-20260602-0001"
+}

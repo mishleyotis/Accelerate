@@ -1,0 +1,21 @@
+{
+  "active_run_id": "97f87a7e-6ba0-40a7-907e-9c4516382055",
+  "items": [
+    {
+      "assessment_date": "2026-05-11",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v2.4",
+      "completed_at": "2026-07-02T23:11:46.488109Z",
+      "created_at": "2026-07-02T23:11:46.488109Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "97f87a7e-6ba0-40a7-907e-9c4516382055",
+      "overall_score": 3.008746355685131,
+      "request_id": "DMA-ASM-PMTCAN-20260511-0001",
+      "started_at": "2026-07-02T23:11:46.488109Z",
+      "status": "ACTIVE",
+      "subcap_count": 686,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

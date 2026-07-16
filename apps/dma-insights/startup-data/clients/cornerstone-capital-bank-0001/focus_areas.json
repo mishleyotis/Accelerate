@@ -1,0 +1,75 @@
+{
+  "entity_display_id": "cornerstone-capital-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-071",
+          "E-062",
+          "E-023",
+          "E-072"
+        ],
+        "representative_quote": "Nickesh P. IT Security Engineer (3+ years) confirmed; Snyk DevSecOps scanning +",
+        "source_kind": "heuristic"
+      },
+      "id": "eae6456b-aa56-4899-b63e-22c9be420875",
+      "involved_subcap_ids": [
+        "P4C4.1.2",
+        "P4C4.2.2",
+        "P4C4.2.4",
+        "P4C4.2.6",
+        "P4C4.3.2",
+        "P4C4.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 13 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-023",
+          "E-065",
+          "E-009",
+          "E-017",
+          "E-060",
+          "E-021"
+        ],
+        "representative_quote": "CRA Satisfactory rating (most recent FRB exam); Community Lending Division launched Feb 2024 for underserved communities (E-023)",
+        "source_kind": "heuristic"
+      },
+      "id": "c2483601-ab8b-4013-8c79-15d7b2fe1933",
+      "involved_subcap_ids": [
+        "P1C5.1.2",
+        "P1C5.1.4",
+        "P1C5.2.2",
+        "P1C5.2.4",
+        "P1C1.1.2",
+        "P1C1.1.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 11 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

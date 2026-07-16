@@ -1,0 +1,21 @@
+{
+  "active_run_id": "3ec87239-86cd-4c65-98c6-f418a32320e5",
+  "items": [
+    {
+      "assessment_date": "2026-03-11",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:10:01.962835Z",
+      "created_at": "2026-07-02T23:10:01.962835Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "hybrid",
+      "id": "3ec87239-86cd-4c65-98c6-f418a32320e5",
+      "overall_score": 1.913141993957704,
+      "request_id": "DMA-RES-RTC-20260311-0001",
+      "started_at": "2026-07-02T23:10:01.962835Z",
+      "status": "ACTIVE",
+      "subcap_count": 662,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

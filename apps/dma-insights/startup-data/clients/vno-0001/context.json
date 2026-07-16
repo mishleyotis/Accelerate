@@ -1,0 +1,956 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "VNO",
+      "amount": "$218M",
+      "announced_on": null,
+      "body": "Premium Manhattan asset; PENN District expansion \u2014 Premium Manhattan asset; PENN District expansion",
+      "closed_on": null,
+      "details": "Premium Manhattan asset; PENN District expansion \u2014 Premium Manhattan asset; PENN District expansion",
+      "e_id": "E-061",
+      "event_date": "2025-01-01",
+      "id": "12dcd2f1-5dce-4e37-ba44-882853313553",
+      "source_url": null,
+      "status": null,
+      "target": "Fifth Avenue",
+      "title": "Acquired 623 Fifth Avenue office condominium: $218M + $35M A-Note"
+    }
+  ],
+  "entity_display_id": "vno-0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: RECOVERING \u2014 Revenue 2024 trough ($1.59B) reversed to $1.80B in 2025; Q1 2026 beats estimates by 7.4%; Citadel 350 Park validates premium NYC office thesis.",
+      "5-Year Trend: RECOVERING: 2024 trough ($1.59B revenue, maturity defaults) reversed by accelerating leasing velocity, strategic dispositions, and Citadel 350 Park validation."
+    ],
+    "metrics": {
+      "recovering": "2024 trough ($1.59B revenue, maturity defaul",
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 3145,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Lauren Moss (SVP) is Chief Sustainability Officer \u2014 named\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "IBS \u2192 Vornado migration: 'About 18 years ago a portion of\u2026"
+          }
+        ],
+        "fy": [
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "United States (NYC primary; Chicago + SF secondary)",
+        "headline": "$1.8B assets \u00b7 FY2025 \u00b7 +13.2% CAGR",
+        "regulator": "SEC (NYSE-listed public company)",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            1.59,
+            1.8
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        1590000000.0,
+        1800000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2024,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          1590000000.0,
+          1800000000.0
+        ]
+      }
+    ],
+    "years": [
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (NYC primary",
+      "Chicago + SF secondary)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Robert Entin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Glen Weiss",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Interview Nov",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Best Practices",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Interview Sign",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Corp Counsel",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lead Trustee",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Roth",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "This section provides comprehensive organizational context for Vornado Realty Trust. All financial data covers a minimum 5-year trend window. Every claim cites evidence IDs.",
+    "primary_regulator": "SEC (NYSE-listed public company)",
+    "size_tier": "Large-Cap",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-080",
+        "excerpt": "10-K (T1): 'A risk management process for third-party service providers, suppliers, and vendors' \u2014 TPRM for vendors explicitly documented in cybersecurity program Ground rent litigation (PENN 1): 'New York court vacated ",
+        "title": "Active litigation crisis managed",
+        "type": "conference",
+        "url": "https://www.stocktitan.net/sec-filings/VNO/10-k-vornado-realty-trust-files-annual-report-05a51c885d73.html"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-102",
+        "excerpt": "10-K 2025 (T1): 'We have begun the use of AI capabilities with the goal of creating additional efficiencies' \u2014 AI operationally active; not hypothetical VendorPM interview: 'Over the past 10-15 years, with the rise of sm",
+        "title": "We have begun the use of AI capabilities with the goal of creating\u2026",
+        "type": "article",
+        "url": "https://www.sec.gov/Archives/edgar/data/0000899689/000089968926000009/vno-20251231.htm"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-065",
+        "excerpt": "'News and Issuance Alerts provided by Q4 Inc.' \u2014 Q4 platform confirmed as IR communications automation tool for investor outreach Dedicated investor relations website (investors.vno.com) with: quarterly earnings, SEC fil",
+        "title": "News and Issuance Alerts provided by Q4 Inc.' \u2014 Q4 platform confirmed\u2026",
+        "type": "article",
+        "url": "https://investors.vno.com/home/default.aspx"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-044",
+        "excerpt": "'He frequently serves in an advisory capacity with a number of proptech startups' \u2014 multiple startup advisory roles confirmed at CIO level 'He has authored many articles and frequently serves as an expert source on real ",
+        "title": "'He frequently serves in an advisory capacity with a number of\u2026",
+        "type": "article",
+        "url": "https://www.vno.com/governance/executive-management"
+      },
+      {
+        "author": "Robert Entin",
+        "date": "2025-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-001",
+        "excerpt": "CIO Robert Entin participated in public webinar titled 'The Digital Imperative for Real Estate Development in 2025' \u2014 documents Vornado's active digital transformation journey and leadership commitment to technology stra",
+        "title": "CIO Robert Entin participated documents Vornado's active digital\u2026",
+        "type": "webinar",
+        "url": "https://www.northspyre.com/blog/webinar-recap-northspyre-vornado-realty-trust-explore-the-digital-imperative-for-cre-dev"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-053",
+        "excerpt": "VTS confirmed Vornado client since at least 2011 (Wharton conference 2015) \u2014 leasing pipeline management on VTS since early adoption VTS capabilities deployed: 'centralize leasing activity, analytics, and marketing onto ",
+        "title": "VTS confirmed Vornado client",
+        "type": "conference",
+        "url": "https://realestate.wharton.upenn.edu/calendar/2015-fall-members-meeting/?speaker=23"
+      }
+    ],
+    "ticker": "VNO"
+  },
+  "issue_register": [
+    {
+      "id": "5f3a928a-3185-41a5-a118-6d158237e79d",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Overall score computation method difference: weighted sum (correct, P2:30% sub-vertical) gives 2.30; governance auditor uses simple mean-of-means giving 2.36. Delta 0.060 within \u00b10.10 tolerance documented in schema_contract_v6.md."
+    },
+    {
+      "id": "1918c0ac-c3be-4c6b-b7af-3b4aaefa39e0",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "167 subcaps have rationale column without explicit E-ID references. Root cause: schema drift \u2014 export_scoring_detail.csv Rationale column format differs from governance auditor's expected full-text rationale."
+    },
+    {
+      "id": "ce74be6d-02d2-4bc9-a329-cbca089588e1",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "359 duplicate rationale text pairs. Root cause: identical formula-derived rationale template across scoring detail rows. Rationale diversity requires per-subcap unique synthesis."
+    },
+    {
+      "id": "3242255f-52e6-4621-8b40-8cf31e4df1e8",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Rationale homogeneity: 1,007-4,997 pairs >80% similarity across pillars. Same root cause as SI-12."
+    },
+    {
+      "id": "e23551cb-3c1c-417b-bd95-0e184f1b6808",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Month range notation ('Months 1-12') flagged as overprescriptive in roadmap. Governance auditor prefers phase-named ranges without absolute month counts."
+    },
+    {
+      "id": "2ddc747e-4197-4e09-8cf0-1785c09c31b2",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "0.0% substantive counterclaims (need \u226590%). Sample: P2C3 counter (VTS=CRM) rebutted [E-049,E-088]; P3C2 counter (one-time event) rebutted (14yr SDNY timeline [E-072]); P4C2 counter (SSRS still works) rebutted (SSRS EOL [E-089]). All 10 chains address the adversarial position."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Five active issues were identified and scored. Each receives a severity classification (S3/S2/S1) determining the maximum maturity score for affected capability. In all five cases, VNO is the victim or a commercial owner navigating normal financing cycles \u2014 not a regulatory enforcement target. No SEC, EPA, or OFAC actions against VNO entity exist.",
+    "trend_md": "Vornado's digital evolution spans two decades under CIO Robert Entin \u2014 an extraordinary 18-year tenure that is itself a competitive differentiator. The timeline maps 22 milestones from CIO arrival (2005) through Q1 2026 earnings, each annotated with maturity impact. The overarching pattern: strong investment in infrastructure (EIP 2009, Box 2019, Northspyre 2025) and ESG alongside a persistent gap in client-facing digital capabilities. VTS was deployed in 2011 as a leasing pipeline \u2014 not a CRM \u2014 and remains unchanged in that role 15 years later.\nASSESSMENT NOTE: The Solomon timeline (arrested Dec 2024; convicted April 2026 [E-072]) triggered this assessment's most significant cap: fraud management subcaps capped at level 2.0 (S3 active enforcement). Zennify Shield + Compliance Workflows creates documented remediation evidence before the August 4, 2026 sentencing \u2014 potentially enabling a cap lift from level 2 \u2192 level 3."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.45,
+        "P1C2": 4.0,
+        "P1C3": 3.11,
+        "P1C4": 3.51,
+        "P1C5": 2.93,
+        "P2C1": 3.39,
+        "P2C2": 2.86,
+        "P2C3": 2.61,
+        "P2C4": 2.04,
+        "P3C1": 3.67,
+        "P3C2": 3.62,
+        "P3C3": 3.9,
+        "P3C4": 3.69,
+        "P4C1": 3.31,
+        "P4C2": 3.31,
+        "P4C3": 3.06,
+        "P4C4": 3.53
+      },
+      "overall_score": 3.29,
+      "peer_name": "Elliott Investment Management L.P.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.5,
+        "P1C4": 2.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 1.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 4.0,
+        "P4C3": 4.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "American Homes 4 Rent, LP",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.37,
+        "P1C2": 2.5,
+        "P1C3": 1.51,
+        "P1C4": 3.34,
+        "P1C5": 2.93,
+        "P2C1": 2.44,
+        "P2C2": 2.4,
+        "P2C3": 1.67,
+        "P2C4": 2.47,
+        "P3C1": 3.0,
+        "P3C2": 2.0,
+        "P3C3": 3.0,
+        "P3C4": 2.0,
+        "P4C1": 1.42,
+        "P4C2": 1.6,
+        "P4C3": 1.69,
+        "P4C4": 1.5
+      },
+      "overall_score": 2.17,
+      "peer_name": "CI Segall Bryant & Hamill, LLC",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.15,
+        "P1C2": 2.47,
+        "P1C3": 1.76,
+        "P1C4": 1.95,
+        "P2C1": 2.03,
+        "P2C2": 2.07,
+        "P2C3": 1.84,
+        "P2C4": 1.64,
+        "P3C1": 2.08,
+        "P3C2": 2.38,
+        "P3C3": 2.6,
+        "P3C4": 2.43,
+        "P4C1": 1.64,
+        "P4C2": 1.72,
+        "P4C3": 1.96,
+        "P4C4": 2.62
+      },
+      "overall_score": 2.08,
+      "peer_name": "Chemung Canal Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.16,
+        "P1C3": 2.47,
+        "P1C4": 1.89,
+        "P1C5": 2.5,
+        "P2C1": 1.25,
+        "P2C2": 1.79,
+        "P2C3": 1.8,
+        "P2C4": 1.33,
+        "P3C1": 2.48,
+        "P3C2": 2.12,
+        "P3C3": 2.8,
+        "P3C4": 1.67,
+        "P4C1": 1.2,
+        "P4C2": 1.7,
+        "P4C3": 2.12,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.98,
+      "peer_name": "CI Financials",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-VNO-20260512-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Category",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee (Glassdoor)",
+        "themes": [],
+        "value": 4.1
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee (Indeed NYC)",
+        "themes": [],
+        "value": 4.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Media \u2014 Positive",
+        "themes": [],
+        "value": 7.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Media \u2014 Negative",
+        "themes": [],
+        "value": 6.6
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Overall Tone",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Box AI is in Vornado's deployed tech stack \u2014 Box is named a 'Leader in 2026 Gartner Magic Quadrant for Document Management'; Vornado customer since pre-2019 \u2014 AI product infrastructure available to Vornado for deployment",
+      "date_precision": "year",
+      "e_id": "E-102",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "0126c2ee-0f9a-4da8-92c6-33264fa9209f",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000899689/000089968926000009/vno-20251231.htm",
+      "subcap_ids": [],
+      "title": "Box is named a 'Leader in 2026 Gartner Magic Quadrant for\u2026"
+    },
+    {
+      "body": "3 East 54th Street acquired for $141M Jan 2026 \u2014 multiple use options being assessed (hotel/office/residential) \u2014 M&A evaluation capability evidenced",
+      "date_precision": "month",
+      "e_id": "E-011",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "485f810d-bc11-4754-b88f-acd7b3f93e2d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/sec-filings/VNO/10-k-vornado-realty-trust-files-annual-report-05a51c885d73.html",
+      "subcap_ids": [],
+      "title": "M&A evaluation capability evidenced"
+    },
+    {
+      "body": "Marquee development anchor; validates premium NYC office thesis \u2014 Marquee development anchor; validates premium NYC office thesis",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "0904b2cd-cde8-427d-bc9b-46e1b84685a6",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Citadel JV: 350 Park Avenue (1.85M SF tower); $900M put option structure"
+    },
+    {
+      "body": "Lauren Moss (SVP) is Chief Sustainability Officer \u2014 named leadership confirmed",
+      "date_precision": "publish_fallback",
+      "e_id": "E-013",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-013"
+      ],
+      "id": "c0f910fb-c540-43b5-b361-a768e4451947",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/899689/000089968925000012/vnosustainability2024rep.htm",
+      "subcap_ids": [],
+      "title": "Lauren Moss (SVP) is Chief Sustainability Officer \u2014 named\u2026"
+    },
+    {
+      "body": "Portfolio rationalization; focus on Class A premium assets \u2014 Portfolio rationalization; focus on Class A premium assets",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "55a41147-96f4-4aa6-9c09-fcd5e13e0331",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Sold: 666 Fifth Ave interests, 512 West 22nd St, 49 West 57th St"
+    },
+    {
+      "body": "Premium Manhattan asset; PENN District expansion \u2014 Premium Manhattan asset; PENN District expansion",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "12dcd2f1-5dce-4e37-ba44-882853313553",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Acquired 623 Fifth Avenue office condominium: $218M + $35M A-Note"
+    },
+    {
+      "body": "Strategic disposition; balance sheet strength; lease complexity reduced \u2014 Strategic disposition; balance sheet strength; lease complexity reduced",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "e3c93f89-802e-46be-9238-7ae29e6fdd29",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "770 Broadway: 70-year NYU master lease ($935M prepaid, $803M GAAP gain)"
+    },
+    {
+      "body": "IBS \u2192 Vornado migration: 'About 18 years ago a portion of the IBS organization joined Vornado, and thus began my journey as a CIO' \u2014 completed application portfolio rationalization; legacy IBS system replaced with best-of-breed SaaS stack (P4C3.2.5)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-103",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-103"
+      ],
+      "id": "bcb19901-9b8d-4cd7-8c91-0891e8c0dc77",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.vts.com/blog/vornado-realty-trust-cio-robert-entins-best-practices-for-evaluating-new-commercial-real-estate-software",
+      "subcap_ids": [
+        "P4C3.2.5"
+      ],
+      "title": "IBS \u2192 Vornado migration: 'About 18 years ago a portion of\u2026"
+    },
+    {
+      "body": "ZoomInfo org chart: 'Vice President, Security Engineering' and 'Vice President, Applications & Security' are named VP-level security roles at VNO \u2014 dedicated security leadership below CIO level (P4C4.1.5)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-110",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-110"
+      ],
+      "id": "52fc7dd1-613c-4cb1-a864-8496798f2b2a",
+      "kind": "leadership",
+      "signal": "negative",
+      "source_url": "https://www.vts.com/blog/vornado-realty-trust-cio-robert-entins-best-practices-for-evaluating-new-commercial-real-estate-software",
+      "subcap_ids": [
+        "P4C4.1.5"
+      ],
+      "title": "ZoomInfo org chart: 'Vice President, Security Engineering'\u2026"
+    },
+    {
+      "body": "Sustainability Report 2024 references 'Building Decarbonization Tool' as deployed instrument \u2014 purpose-built technology for operational sustainability management",
+      "date_precision": "year",
+      "e_id": "E-043",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "cfb41984-8b16-475e-bcfa-b219dc71632d",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.vno.com/sustainability/policies",
+      "subcap_ids": [],
+      "title": "Sustainability Report 2024 references 'Building\u2026"
+    },
+    {
+      "body": "NYC office leases in 2024: 2.65M SF signed at avg $104/SF starting rent; 18 premium deals >$100/SF totaling 1.36M SF \u2014 leasing funnel performance data",
+      "date_precision": "year",
+      "e_id": "E-050",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-050"
+      ],
+      "id": "2d766865-03b0-4398-a6ef-f206c523c969",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://matrixbcg.com/blogs/marketing-strategy/vno",
+      "subcap_ids": [],
+      "title": "NYC office leases in 2024: 2.65M SF signed at avg $104/SF"
+    },
+    {
+      "body": "JLL Experience Management appointed at THE MART for WorkLife Meetings (21,000 SF conference center, June 2023) \u2014 third-party experience management partnership scaled to Chicago",
+      "date_precision": "month",
+      "e_id": "E-057",
+      "event_date": "2023-06-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "79053442-8ed4-458f-99ac-92ccff38ab30",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.jll.com/en-us/newsroom/vornado-realty-trust-taps-jll-xm-for-chicago-building",
+      "subcap_ids": [],
+      "title": "JLL Experience Management appointed at THE MART"
+    },
+    {
+      "body": "CIO Robert Entin named PropTech Power 30 by Commercial Observer in 2022 and 2023 \u2014 confirms active engagement with the PropTech landscape and peer benchmarking through industry recognition",
+      "date_precision": "year",
+      "e_id": "E-010",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "d1589bd1-4863-4d3e-9bde-ef651e869516",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/posts/vornado-realty-trust_robert-entin-activity-7128771034828173312-bunN",
+      "subcap_ids": [],
+      "title": "CIO Robert Entin named PropTech Power"
+    },
+    {
+      "body": "DigitalOcean Droplets deployed 2020 \u2014 cloud compute infrastructure for application hosting (P4C1.3.5)",
+      "date_precision": "year",
+      "e_id": "E-089",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-089"
+      ],
+      "id": "0ac839ec-0009-41f5-b3c8-e251b6768e18",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.appsruntheworld.com/customers-database/customers/view/vornado-realty-trust-united-states",
+      "subcap_ids": [
+        "P4C1.3.5"
+      ],
+      "title": "DigitalOcean Droplets deployed cloud compute infrastructure\u2026"
+    },
+    {
+      "body": "DigitalOcean Droplets deployed for Application Hosting (2020) \u2014 cloud infrastructure confirmed",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "570fa05d-ef2c-4aa7-8db9-239b05285ad8",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.appsruntheworld.com/customers-database/customers/view/vornado-realty-trust-united-states",
+      "subcap_ids": [],
+      "title": "Cloud infrastructure confirmed"
+    },
+    {
+      "body": "DigitalOcean Droplets deployed 2020 (AppsRunTheWorld T3): 'Application Hosting and Computing Services' \u2014 cloud IaaS compute in production since 2020 (P4C3.4.1)",
+      "date_precision": "year",
+      "e_id": "E-105",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-105"
+      ],
+      "id": "0140182f-2016-48b8-beec-d1b1ed9ea8ac",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.appsruntheworld.com/customers-database/customers/view/vornado-realty-trust-united-states",
+      "subcap_ids": [
+        "P4C3.4.1"
+      ],
+      "title": "DigitalOcean Droplets deployed since 2020"
+    },
+    {
+      "body": "Cisco Webex Meetings deployed for conferencing (2019) \u2014 collaboration infrastructure",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "aba18847-51a8-45bd-9366-4fc5cb8a4827",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.appsruntheworld.com/customers-database/customers/view/vornado-realty-trust-united-states",
+      "subcap_ids": [],
+      "title": "Cisco Webex Meetings deployed for conferencing (2019)"
+    },
+    {
+      "body": "Cisco Webex Meetings deployed (2019, T3): enterprise collaboration with E2E encryption \u2014 network security controls for communications (P4C4.3.5)",
+      "date_precision": "year",
+      "e_id": "E-115",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-115"
+      ],
+      "id": "27a82ec7-ad1b-4525-97f0-45304030d153",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000899689/000089968926000009/vno-20251231.htm",
+      "subcap_ids": [
+        "P4C4.3.5"
+      ],
+      "title": "Cisco Webex Meetings deployed"
+    },
+    {
+      "body": "Historical M&A: Charles E. Smith merged into JBG Smith (2017), Urban Edge spin-off (2015) \u2014 demonstrated major transaction integration capability",
+      "date_precision": "year",
+      "e_id": "E-011",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "37e38fb6-758b-4cf7-8dad-6265e92ac402",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/sec-filings/VNO/10-k-vornado-realty-trust-files-annual-report-05a51c885d73.html",
+      "subcap_ids": [],
+      "title": "Historical M&A: merged into JBG Smith (2017), Urban Edge\u2026"
+    },
+    {
+      "body": "In-house IT depth; build-vs-buy capability established \u2014 In-house IT depth; build-vs-buy capability established",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2013-01-01",
+      "evidence_e_ids": [
+        "E-086"
+      ],
+      "id": "3e1e3e8e-97b9-4cd5-80aa-6609e1b10d4e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Portion of IBS organization joins Vornado; IBS legacy system retired over following years"
+    },
+    {
+      "body": "Microsoft BI (SSRS, SSAS, SSIS, SQL Server Reporting) deployed for Analytics and BI (2010) \u2014 long-standing analytics infrastructure",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2010-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "ae26189d-6a71-40a5-8e8b-cfc492af5596",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.appsruntheworld.com/customers-database/customers/view/vornado-realty-trust-united-states",
+      "subcap_ids": [],
+      "title": "Microsoft BI (SSRS, SSAS, SSIS, SQL Server Reporting)\u2026"
+    },
+    {
+      "body": "Microsoft BI stack confirmed: SSRS (SQL Server Reporting Services), SSAS (SQL Server Analysis Services), SSIS (SQL Server Integration Services), SQL Server Reporting deployed 2010 \u2014 enterprise analytics warehouse architecture in production (P4C2.6.1, P4C4C2.6.2)",
+      "date_precision": "year",
+      "e_id": "E-089",
+      "event_date": "2010-07-01",
+      "evidence_e_ids": [
+        "E-089"
+      ],
+      "id": "e9b5245e-4604-41db-a1f8-29497403fd3f",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.appsruntheworld.com/customers-database/customers/view/vornado-realty-trust-united-states",
+      "subcap_ids": [
+        "P4C2.6.1"
+      ],
+      "title": "Microsoft BI stack confirmed"
+    },
+    {
+      "body": "Microsoft BI (SSRS, SSAS, SSIS) deployed since 2010 \u2014 enterprise reporting platform with analytical modeling (SSAS = data warehouse/OLAP cube) and ETL (SSIS) confirmed (P4C2.6.1)",
+      "date_precision": "year",
+      "e_id": "E-094",
+      "event_date": "2010-07-01",
+      "evidence_e_ids": [
+        "E-094"
+      ],
+      "id": "1e7f85a7-1c22-4893-a20c-23c00ec26db7",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.vts.com/blog/vornado-realty-trust-cio-robert-entins-best-practices-for-evaluating-new-commercial-real-estate-software",
+      "subcap_ids": [
+        "P4C2.6.1"
+      ],
+      "title": "Microsoft BI (SSRS, SSAS, SSIS) deployed since 2010"
+    },
+    {
+      "body": "Energy Information Portal (EIP): launched 2009; 'collecting pulse output readings from 3,000 submeters; displays consumption to tenants and building operators in graph and table format in real-time' \u2014 proprietary energy intelligence platform",
+      "date_precision": "year",
+      "e_id": "E-046",
+      "event_date": "2009-07-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "e41efff2-08dc-46df-9d36-0647a994347b",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.vno.com/sustainability/programs",
+      "subcap_ids": [],
+      "title": "Energy Information Portal (EIP): launched"
+    },
+    {
+      "body": "Robert Entin promoted from SVP (2005) to EVP (2013) \u2014 technology leadership escalation over 11 years, long institutional tenure",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2005-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "dca95d00-c277-4190-ae61-4abf051967b8",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.vno.com/governance/executive-management",
+      "subcap_ids": [],
+      "title": "Robert Entin promoted from SVP (2005)"
+    },
+    {
+      "body": "Technology vendor becomes strategic partner \u2192 eventual internalization \u2014 Technology vendor becomes strategic partner \u2192 eventual internalization",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2002-01-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "da257c14-98a4-4068-b61f-48cab2a720ef",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "VNO becomes investor in IBS 10.0i platform development"
+    },
+    {
+      "body": "IBS-Vornado timeline: Vornado client since 1997 (Mendik), investor since 2002, portion of IBS joined Vornado in 2013 \u2014 documented technology integration transition over 16 years",
+      "date_precision": "year",
+      "e_id": "E-044",
+      "event_date": "1997-07-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "c5344df4-f507-4f72-a220-f5df486218d8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.vno.com/governance/executive-management",
+      "subcap_ids": [],
+      "title": "IBS-Vornado timeline: Vornado client since 1997 (Mendik)\u2026"
+    },
+    {
+      "body": "IBS-to-Vornado: 16-year managed vendor transition (client 1997 \u2192 investor 2002 \u2192 CIO 2006 \u2192 IBS joined Vornado 2013) \u2014 documented vendor exit and knowledge transfer (P3C4.8.3)",
+      "date_precision": "year",
+      "e_id": "E-079",
+      "event_date": "1997-07-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "9bcfc504-5a50-4c53-9a30-883eee2adb3a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.vts.com/blog/vornado-realty-trust-cio-robert-entins-best-practices-for-evaluating-new-commercial-real-estate-software",
+      "subcap_ids": [
+        "P3C4.8.3"
+      ],
+      "title": "IBS joined Vornado 2013"
+    },
+    {
+      "body": "Established CIO relationship; 26-year technology partnership \u2014 Established CIO relationship; 26-year technology partnership",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "1997-01-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "c7ef0e0d-2659-4a04-8cf4-99a1cb44e287",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Client: VNO acquires Mendik Company; IBS property management system follows"
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "entity_display_id": "ci-segall-bryant-hamill--0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078"
+        ],
+        "representative_quote": "new strategic direction in November 2019",
+        "source_kind": "docx"
+      },
+      "id": "b94262f2-387c-4e44-b759-2d8f26b769fd",
+      "involved_subcap_ids": [
+        "P4C3.6.1",
+        "P4C2.4.14",
+        "P1C5.2.3",
+        "P3C4.6.2",
+        "P2C4.6.5",
+        "P2C4.6.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 13,
+        "P2": 35,
+        "P3": 17,
+        "P4": 35
+      },
+      "source_path": "docx:strategic_section",
+      "title": "CI Financial embarked on a \"new strategic direction in November 2019\" (E-078\u2026",
+      "verbatim_quote": "CI Financial embarked on a \"new strategic direction in November 2019\" (E-078, CI Financial acquisition press release) organized around three priorities that continue to govern subsidiary technology investments:"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "SBH\u2019s strategic direction is shaped by two layers: (1) parent-company mandates from CI Financial/Corient, and (2) firm-level business objectives defined within the active Zennify engagement.",
+        "source_kind": "docx"
+      },
+      "id": "7f6c5ffc-7764-42f2-b05e-f9c9674b7c64",
+      "involved_subcap_ids": [
+        "P4C2.6.3",
+        "P4C1.5.2",
+        "P1C1.8.2",
+        "P1C5.4.1",
+        "P1C5.4.2",
+        "P1C5.3.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 62,
+        "P4": 38
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SBH\u2019s strategic direction is shaped by two layers: (1) parent-company mandates from CI\u2026",
+      "verbatim_quote": "SBH\u2019s strategic direction is shaped by two layers: (1) parent-company mandates from CI Financial/Corient, and (2) firm-level business objectives defined within the active Zennify engagement. Understanding both layers is critical for framing DMA recommendations."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078"
+        ],
+        "representative_quote": "SO1 \u2014 Modernizing its asset management: Standardizing technology platforms across CI\u2019s acquired RIAs.",
+        "source_kind": "docx"
+      },
+      "id": "fa569169-50ce-49a8-86db-db3288d3fcb7",
+      "involved_subcap_ids": [
+        "P4C3.4.1",
+        "P1C2.1.7",
+        "P3C3.8.3",
+        "P1C2.9.AM1",
+        "P4C3.6.1",
+        "P4C2.2.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 30,
+        "P3": 17,
+        "P4": 53
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO1 \u2014 Modernizing its asset management: Standardizing technology platforms across CI\u2019s acquired\u2026",
+      "verbatim_quote": "SO1 \u2014 Modernizing its asset management: Standardizing technology platforms across CI\u2019s acquired RIAs. The FSC migration is a direct expression of this objective \u2014 aligning SBH\u2019s Salesforce org with Corient\u2019s FSC architecture. (E-078, INT-001:F4)"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078"
+        ],
+        "representative_quote": "SO2 \u2014 Expanding its wealth management: Growing the U.S. wealth management footprint through 14+ acquisitions since 2020.",
+        "source_kind": "docx"
+      },
+      "id": "d51703b3-3893-4fb0-8221-16ed3103e98c",
+      "involved_subcap_ids": [
+        "P1C1.3.AM1",
+        "P4C2.9.AM1",
+        "P4C1.9.AM1",
+        "P4C3.8.AM1",
+        "P2C3.4.RIA1",
+        "P2C4.5.RIA1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$224,000,000,000",
+          "delta": null,
+          "kpi_label": "Manages",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P4": 50
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO2 \u2014 Expanding its wealth management: Growing the U.S\u2026",
+      "verbatim_quote": "SO2 \u2014 Expanding its wealth management: Growing the U.S. wealth management footprint through 14+ acquisitions since 2020. SBH was the largest by asset size. The Corient platform now manages $224B in aggregate client assets. (E-078, INT-005)"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078"
+        ],
+        "representative_quote": "SO3 \u2014 Globalizing the company: CI Financial operates across Canada, U.S., and Australia.",
+        "source_kind": "docx"
+      },
+      "id": "ee3963d9-26d2-46c2-b83e-4d140dc9fb3b",
+      "involved_subcap_ids": [
+        "P4C2.8.2",
+        "P4C3.6.1",
+        "P4C2.4.14",
+        "P1C5.2.3",
+        "P3C4.6.2",
+        "P2C4.6.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 13,
+        "P2": 17,
+        "P3": 17,
+        "P4": 53
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO3 \u2014 Globalizing the company: CI Financial operates across Canada, U.S., and Australia\u2026",
+      "verbatim_quote": "SO3 \u2014 Globalizing the company: CI Financial operates across Canada, U.S., and Australia. The Mubadala take-private brings Abu Dhabi sovereign capital and global institutional relationships. (E-078)"
+    }
+  ]
+}

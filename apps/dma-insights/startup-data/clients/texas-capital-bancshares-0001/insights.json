@@ -1,0 +1,808 @@
+{
+  "entity_display_id": "texas-capital-bancshares-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.3",
+        "P4C3.4.12",
+        "P1C2.3.5",
+        "P4C3.3.1",
+        "P4C3.3.4",
+        "P4C3.3.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "F-004",
+      "id": "aa103272-019e-423d-bf07-74eaefbf97a0",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-195",
+            "E-198"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-007"
+        },
+        {
+          "e_ids": [
+            "E-198",
+            "E-201",
+            "E-202",
+            "E-204"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-198"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-198",
+        "E-204",
+        "E-202",
+        "E-212",
+        "E-201",
+        "E-195",
+        "E-205",
+        "E-196"
+      ],
+      "linked_subcap_id": "P4C3.3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: MULESOFT ANYPOINT PLATFORM — TCB's Banking-as-a-Service ambition (embedded banking API, Modern Treasury partnership) creates MuleSoft's strongest entry point. API governance + 150+ connector library covers TCB's entire fintech partner ecosystem [E-202].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Fragmented API Ecosystem — MuleSoft Anypoint Governance Gap",
+      "what_text": "Confirmed API ecosystem without governance layer: API product page (embedded banking API), Modern Treasury REST API (TCB as bank partner, confirmed), Bloomberg BVAL integration, Oracle EPM, Workday HR, Initio cloud-native API, BankNow Treasury Platform. Fee income from Treasury Solutions growing 23% YoY for 4th consecutive quarter — each new product = new API endpoint. In Zennify's assessment Integration Architecture & API scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-204].",
+      "why_text": "Integration Architecture level 2-level 3; API proliferation without governance creates technical debt proportional to fee income product growth [E-198, E-204].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P4C2.2.4",
+        "P2C4.2.6",
+        "P1C1.4.1",
+        "P2C1.3.7",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "F-005",
+      "id": "edecd278-1f31-4ac6-a756-175aa1f2e982",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-100"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-171"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-100",
+        "E-171",
+        "E-124",
+        "E-145",
+        "E-133",
+        "E-131",
+        "E-125",
+        "E-126"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: SALES CLOUD + FINANCIAL SERVICES CLOUD (FSC) — Zennify's founding vertical. Salesforce CRM PO hire = active internal budget item. FSC's Relationship Groups + Action Plans + Referral Management directly address TCB's 6-brand unification need [E-171].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Salesforce CRM Active Hire + Multi-Brand Fragmentation",
+      "what_text": "Salesforce CRM Product Owner active hire confirmed (Batch 2 evidence). 6 distinct business brands (TCB Commercial, Bask Bank, Consumer Bank, Private Bank, Investment Banking, ETF & Funds) each with distinct client relationships and no unified CRM layer. Holmes' 'full-service financial services firm' vision requires cross-sell analytics across all brands. [Batch 2 evidence]. In Zennify's assessment Lead Capture & Management scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-100].",
+      "why_text": "The assessment found: “Multi-quarter acquisition campaign structure (sophisticated): Mar 1-May 31 2026 = 15,000 AAdvantage Bonus Miles ($50K min daily balance for 180/210 days); Dec 1 2025-Feb 28 2026 = 10,000 miles” [E-125]. At 1.5 out of 5, Lead Capture & Management sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C1.5.2",
+        "P2C4.2.6",
+        "P1C1.5.5",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "4a638f2e-7e6a-4e8f-bbc9-aa9545ebc434",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-176",
+            "E-178",
+            "E-179",
+            "E-181"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-001"
+        },
+        {
+          "e_ids": [
+            "E-184",
+            "E-193"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-002"
+        },
+        {
+          "e_ids": [
+            "E-184",
+            "E-193"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-178",
+        "E-100",
+        "E-184",
+        "E-193",
+        "E-179",
+        "E-176",
+        "E-181",
+        "E-183"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Quality Management a near-term focus for Texas Capital Bancshares, Inc. / Texas Capital Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-184].",
+      "source_rec_id": "REC-01",
+      "theme": "Data Management & Governance",
+      "title": "Salesforce Data Cloud — Displace Bespoke CDP Before Vendor Lock-In",
+      "what_text": "Data Quality Management is one of Texas Capital Bancshares, Inc. / Texas Capital Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Texas Capital Bancshares, Inc. / Texas Capital Bank's ability to deliver a stronger data and technology foundation [E-100].",
+      "why_text": "At 1.5 out of 5, Data Quality Management sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-178, E-100].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.6",
+        "P3C3",
+        "P2C2",
+        "P4C2.2.4",
+        "P3C3.8.2",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "af956617-b0e6-4a28-878e-9e1df9b133bd",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-180",
+            "E-182",
+            "E-187",
+            "E-193"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-002"
+        },
+        {
+          "e_ids": [
+            "E-180",
+            "E-182",
+            "E-187",
+            "E-193"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        },
+        {
+          "e_ids": [
+            "E-152",
+            "E-158",
+            "E-159",
+            "E-163"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-180",
+        "E-182",
+        "E-187",
+        "E-193",
+        "E-163",
+        "E-152",
+        "E-158",
+        "E-159"
+      ],
+      "linked_subcap_id": "P3C3.6",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Regulatory Exam Management a near-term focus for Texas Capital Bancshares, Inc. / Texas Capital Bank: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-187].",
+      "source_rec_id": "REC-02",
+      "theme": "Compliance & Surveillance",
+      "title": "Einstein Agentforce + Trust Layer — SR 11-7-Compliant AI Agent Framework for Active Build",
+      "what_text": "Einstein Agentforce + Einstein Trust Layer connected unlock: CT-001a cap removal unlocks Compliance Tech AI capability from level 2.5 to level 3.5. improvement (2.483 → 3.0) removes CP-003 connected cap on, unlocking from level 3 ceiling toward level 3.5. In Zennify's assessment Regulatory Exam Management scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-182].",
+      "why_text": "At 2.5 out of 5, Regulatory Exam Management sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-180, E-182].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C3.4.12",
+        "P3C1.7.1",
+        "P1C2.3.5",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "f6c01145-4423-4ac8-b05b-2a74e69e8c0c",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-198",
+            "E-201",
+            "E-202",
+            "E-204"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-004"
+        },
+        {
+          "e_ids": [
+            "E-171"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-005"
+        },
+        {
+          "e_ids": [
+            "E-198"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-198",
+        "E-171",
+        "E-202",
+        "E-203",
+        "E-160",
+        "E-204",
+        "E-212",
+        "E-201"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: MuleSoft Anypoint Platform — API Governance for Treasury Fee Income Engine — addressable via salesforce [E-202].",
+      "source_rec_id": "REC-03",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Anypoint Platform — API Governance for Treasury Fee Income Engine",
+      "what_text": "MuleSoft Anypoint Platform connected unlock: improvement unlocks automation subcaps — MuleSoft governs the process automation APIs that underpin Initio onboarding and BankNow treasury workflows. In Zennify's assessment Cloud Strategy & Infrastructure scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-171].",
+      "why_text": "At 1.5 out of 5, Cloud Strategy & Infrastructure sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-198, E-171].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.3.4",
+        "P4C1.5.2",
+        "P4C2.2.4",
+        "P2C4.2.6",
+        "P3C3.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "6918ce17-1a08-4e25-a7c6-931fd88d45af",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-176",
+            "E-177",
+            "E-179",
+            "E-181"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-001"
+        },
+        {
+          "e_ids": [
+            "E-177",
+            "E-184"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-002"
+        },
+        {
+          "e_ids": [
+            "E-177",
+            "E-184"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-184",
+        "E-189",
+        "E-160",
+        "E-179",
+        "E-176",
+        "E-181",
+        "E-183",
+        "E-177"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Industries CRM Analytics + Tableau — Migrate Power BI COE to Unified BI+CRM Layer — addressable via salesforce [E-160].",
+      "source_rec_id": "REC-05",
+      "theme": "Data Management & Governance",
+      "title": "Salesforce Industries CRM Analytics + Tableau — Migrate Power BI COE to Unified BI+CRM Layer",
+      "what_text": "Salesforce Industries CRM Analytics + Tableau connected unlock: None direct — but Tableau Catalog metadata governance complements BCBS 239 compliance ( data governance, Jodie Helfer) and reduces evidence gap for data catalog capability. In Zennify's assessment Data Quality Management scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-189].",
+      "why_text": "At 1.5 out of 5, Data Quality Management sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-184, E-189].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P2C2",
+        "P2C4.2.6",
+        "P2C2.4.3",
+        "P3C3.8.2",
+        "P1C4.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "25b300cf-5aa6-47f1-87dd-076a05e16bf5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-198"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-004"
+        },
+        {
+          "e_ids": [
+            "E-152",
+            "E-158",
+            "E-159",
+            "E-163"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-007"
+        },
+        {
+          "e_ids": [
+            "E-152",
+            "E-158",
+            "E-159",
+            "E-163"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-163",
+        "E-159",
+        "E-164",
+        "E-198",
+        "E-152",
+        "E-158",
+        "E-170",
+        "E-161"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Service Cloud + FSC Action Plans — Unify Fraud & Compliance Case Management — addressable via salesforce [E-164].",
+      "source_rec_id": "REC-06",
+      "theme": "Compliance & Surveillance",
+      "title": "Service Cloud + FSC Action Plans — Unify Fraud & Compliance Case Management",
+      "what_text": "Service Cloud + FSC Action Plans connected unlock: improvement (2.48 → 3.0) removes CP-003 connected cap. CP-003 was constraining Digital Banking Products at level 3.0 ceiling. With CP-003 removed, subcaps can advance toward level 3.5 in subsequent assessment. In Zennify's assessment Regulatory Reporting scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-159].",
+      "why_text": "At 1.5 out of 5, Regulatory Reporting sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-163, E-159].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C3",
+        "P4C1.5.2",
+        "P2C4.2.6",
+        "P3C4.1.3",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "F-001",
+      "id": "2f35df9b-0578-4940-800e-8c3531a4f7f8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-177"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-002"
+        },
+        {
+          "e_ids": [
+            "E-177"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        },
+        {
+          "e_ids": [
+            "E-176",
+            "E-178",
+            "E-179",
+            "E-181"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-178",
+        "E-179",
+        "E-176",
+        "E-181",
+        "E-183",
+        "E-177",
+        "E-186",
+        "E-185"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "SALESFORCE DATA CLOUD — Zennify must engage before CDP vendor deepens implementation. Data Cloud natively integrates with Snowflake (confirmed), AWS (confirmed), and existing Salesforce Customer 360 footprint. Identity Resolution across 6 brands is a Data Cloud architectural differentiator over bespoke CDP builds [E-176].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "CDP Implementation Active — Zennify Data Cloud Entry Point",
+      "what_text": "CDP partner selected; CDP Product Owner active hire confirmed (first-party + third-party audience activation, lookalike modeling, real-time personalization across 6 TCB brands: TCB Commercial, Bask Bank, Consumer Bank, Private Bank, Investment Banking, ETF & Funds Management). In Zennify's assessment Data Quality Management scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-179].",
+      "why_text": "Data Strategy level 3-level 4 ceiling available; Personalization level 3 ceiling — multi-brand CDP implementation is the highest-value data maturity unlock available [E-178, E-179].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C2.4",
+        "P4C2.2.4",
+        "P1C2.3.5",
+        "P1C3.8.2",
+        "P1C3.8.3",
+        "P4C2.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "F-002",
+      "id": "d404bb1a-3199-4916-b122-4d2dac0de8e4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-177"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-001"
+        },
+        {
+          "e_ids": [
+            "E-177",
+            "E-180",
+            "E-182",
+            "E-184"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        },
+        {
+          "e_ids": [
+            "E-184",
+            "E-193"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-180",
+        "E-193",
+        "E-188",
+        "E-177",
+        "E-187",
+        "E-182",
+        "E-194",
+        "E-184"
+      ],
+      "linked_subcap_id": "P4C2.4",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: EINSTEIN AGENTFORCE + EINSTEIN TRUST LAYER — Zennify positions Agentforce as the FFIEC/SR 11-7-compliant AI agent layer. TCB's fragmented AWS/LangChain build lacks an enterprise governance framework. Texas AI Governance Act creates a compliance urgency opportunity for Zennify's conversation [E-188].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "AI Agent Stack Active Build — Agentforce Governance Gap",
+      "what_text": "AI PM active hire $107-140K: requires AWS Bedrock, LangChain, LangGraph, Agentic AI, Model Context Protocol (MCP), Copilot Studio, Strand frameworks, Guardrails (Mar 2026,). Head of AI Kanwarjeet Hora (Executive Director) leads. Saravanan Kuppan certified AWS Bedrock + Claude. Texas Responsible AI Governance Act (Jan 1, 2026) mandates transparency + impact assessment for high-risk AI in credit decisions. In Zennify's assessment AI & Machine Learning scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-193].",
+      "why_text": "GenAI Implementation level 3-level 4 available if governed; SR 11-7 model risk management obligation applies to all production AI/GenAI models [E-180, E-193].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C2.2",
+        "P4C2.2.4",
+        "P2C4.2.6",
+        "P4C1.1.8",
+        "P4C2.2.2",
+        "P4C2.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "F-003",
+      "id": "0dd27956-f84e-40ac-b0a6-ca1f60db05dc",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-177"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-001"
+        },
+        {
+          "e_ids": [
+            "E-177",
+            "E-180",
+            "E-182",
+            "E-184"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-002"
+        },
+        {
+          "e_ids": [
+            "E-184",
+            "E-193"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-184",
+        "E-180",
+        "E-193",
+        "E-188",
+        "E-177",
+        "E-187",
+        "E-182",
+        "E-194"
+      ],
+      "linked_subcap_id": "P4C2.2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: SALESFORCE INDUSTRIES CRM ANALYTICS + TABLEAU — Zennify's migration path from Power BI to Tableau CRM is a defined play. Robert Lau is the direct economic buyer. At 1.2K users + 30K executions, this is a significant ACV opportunity [E-193].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Enterprise Power BI COE Migration Window — CRM Analytics Play",
+      "what_text": "Enterprise Power BI COE: 100+ dashboards, 1,200+ end users, 30,000+ monthly executions, 126 executive KPIs tracked. 30+ member data analytics team. Robert Lau (Executive Director, Head of BI + Corporate Technology) confirmed with 37-year career.. Bryan Sparks (Product Director, Data Analytics) on migration planning. In Zennify's assessment Intelligence/Analytics & Reporting scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-180].",
+      "why_text": "BI and Analytics Maturity level 3; 30K monthly executions at this scale signals rationalization pressure vs. cost-per-use growth [E-184, E-180].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P4C4",
+        "P4C4.6.3",
+        "P3C3.8.2",
+        "P3C4.1.3",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "F-007",
+      "id": "a8a3afa0-8725-47e7-8b9f-0a349b4a0545",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-195",
+            "E-198"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-004"
+        },
+        {
+          "e_ids": [
+            "E-152",
+            "E-158",
+            "E-159",
+            "E-163"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-198"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-163",
+        "E-164",
+        "E-195",
+        "E-198",
+        "E-152",
+        "E-158",
+        "E-159",
+        "E-170"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "SALESFORCE SHIELD + INDUSTRIES COMPLIANCE CLOUD — CISO Russ M. and CCO Vivek Misra are separate economic buyers for different Zennify products. Shield for AI audit trails and event monitoring; Industries Compliance Cloud for BSA/AML/OFAC workflow automation. Both conversations should run in parallel [E-195].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "CCO + CISO Mandates — Compliance + Security Tech Buyers",
+      "what_text": "Vivek Misra (CCO MD, Jul 2022): explicit 'technology' mandate — designing 'best in class compliance programs, policies and technology'. BSA Officer hire: 'manages critical technology and vendor relationships for the Program.' CISO Russ M. (since Aug 2023, C|CISO, 2025 DallasCISO ORBIE Large Corporate Finalist). Archer GRC (TPRM/RCSA/KRIs/Loss Data) confirmed via Ed Zoss MD. SailPoint IdentityIQ confirmed. In Zennify's assessment Regulatory Reporting scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-164].",
+      "why_text": "At 1.5 out of 5, Regulatory Reporting sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-163, E-164].",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "TCB sits below peer median across all four pillars, with the notable exception of Cybersecurity (+0.07 above peer median). The narrowest gap is P4 Data/Technology (−0.20), making it this area where Zennify's recommendations will produce the fastest measurable improvement. The widest gap is P1 Strategy/Culture (−0.76), where internal evidence (eNPS, change management programs) is required for accurate assessment rather than additional technology investment.",
+        "heading": "7.2  Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All six recommendations follow the MANDATORY ANTI-GENERIC RECOMMENDATION PROTOCOL: (1) Specific E-IDs confirm the gap exists; (2) Proxy searches exhausted for net-new validation; (3) Maps to a named Zennify solution from the 12-solution catalog; (4) Each includes peer deployment validation showing comparable institutions have deployed the solution. No investment amounts, cost estimates, or ROI projections appear anywhere in this section."
+  },
+  "run_request_id": "DMA-ASM-TCB-20260511-0001"
+}

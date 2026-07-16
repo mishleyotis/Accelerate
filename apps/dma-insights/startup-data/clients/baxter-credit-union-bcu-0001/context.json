@@ -1,0 +1,458 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "baxter-credit-union-bcu-0001",
+  "financials": {
+    "lines": [
+      "BCU has grown from approximately $5.8 billion (2023) to $6.24 billion in total assets by Q3 2025 [E-005, E-007:F1], maintaining steady expansion in a challenging rate environment. Member count surpassed 364,000, driven by the SEG acquisition pipeline of 1.2 million eligible members through employer partnerships [E-038:F1]. Net worth ratio at 10.16% provides a comfortable capital buffer well above NCUA requirements [E-007:F3]. CDO Guglani has described a strategic shift from \"lending-focused\" to \"deposit and digital-first\" [E-016:F3], indicating that BCU's investment thesis is moving toward platform capability \u2014 a signal that aligns directly with Salesforce ecosystem expansion and creates receptivity for Data Cloud and MuleSoft conversations."
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Vernon Hills",
+      "IL (HQ)",
+      "56 branches in IL",
+      "SC",
+      "NC",
+      "TX",
+      "PR"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "John Sahagian",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP / Chief Data Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Bhavna Guglani",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Digital Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Scott Zulpo",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP / Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Stephenie Southard",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Keith Parris",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Contact Center Ops & Technology"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jill Sammons",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Marketing, Well-Being & Wealth"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mike Valentine",
+        "recent_hire": false,
+        "tenure_months": 384,
+        "title": "CEO (since 1994)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul Martin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Tech Committee Chair"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "Baxter Credit Union (BCU) is a $6.24 billion federally insured credit union headquartered in Vernon Hills, Illinois, serving 364,000+ members across all 50 states and Puerto Rico through a distinctive employer-endorsed (SEG) model with partners including Target, HCA Healthcare, GEICO, and UnitedHealth Group [E-001, E-002, E-038]. BCU has made one of the deepest Salesforce commitments in the credit union sector \u2014 9 products deployed including Agentforce, Financial Services Cloud, and Marketing Cloud \u2014 and operates 5 AI systems in production [E-006, E-046]. CDO John Sahagian describes BCU as taking \"exciting first steps to become an agentic enterprise\" [E-046:F4], signaling strategic alignment with Salesforce's platform direction. This research identified three confirmed-absent Zennify-priority platforms (Data Cloud, MuleSoft, CRM Analytics) that address gaps BCU's own leadership has articulated publicly.",
+    "primary_regulator": "NCUA",
+    "size_tier": "Large",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2024-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-072",
+        "excerpt": "BCU worked with Silverline (Salesforce partner) to build COVID Knowledge article repository + Einstein-powered Chatbot: fulfill requests, chat with rep, or schedule callback Sahagian: 'within 30 days of functionality, fi",
+        "title": "15% flowed to live agent",
+        "type": "article",
+        "url": "https://silverlinecrm.com/blog/financial-services/how-salesforce-extends-beyond-crm-for-banks-and-credit-unions/"
+      },
+      {
+        "author": "Stephenie Southard",
+        "date": "2024-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-024",
+        "excerpt": "CISO Stephenie Southard: SVP/CISO, 25+ years IT/security, deep expertise in physical/logical governance, risk management, acquisitions, incident response; worked in government, education, non-profit, financial sectors Fe",
+        "title": "CISO Stephenie Southard: SVP/CISO, 25+ years IT/security, deep\u2026",
+        "type": "podcast",
+        "url": "https://thecuberesearch.com/credit-union-cybersecurity-strategies-cyber-resilience/"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "Computerworld Best Places to Work in IT 2026 \u2014 5th time on the list (confirmed via Vibe events + LinkedIn post Dec 2025)",
+        "title": "Computerworld Best Places to Work in IT 2026 \u2014 5th time on the list\u2026",
+        "type": "linkedin-post",
+        "url": "https://vibeprospecting.explorium.ai"
+      },
+      {
+        "author": null,
+        "date": "2025-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "BCU commissioned Adrenaline network analytics for 3-year branch expansion roadmap \u2014 data-driven location planning Zeke Hellenbrand (Sr Dir Retail Branch Ops): 'helps plan from budgetary and capital perspective with roadm",
+        "title": "BCU commissioned Adrenaline network analytics for 3-year branch\u2026",
+        "type": "article",
+        "url": "https://www.adrenalinex.com/work/a-seg-based-credit-union-explores-network-expansion-opportunities/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-025",
+        "excerpt": "BCU Security Department monitors daily activities, industry trends, best practices; publishes podcasts (Too Good To Be True, Cybersecurity & Financial Wellness)",
+        "title": "BCU Security Department monitors daily activities, industry trends\u2026",
+        "type": "podcast",
+        "url": "https://www.bcu.org/resources/communication/security"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "BCU presenting 'AI Operating Model: From Strategy to Execution' at CULytics Summit 2026 \u2014 confirms active AI strategy",
+        "title": "BCU presenting 'AI Operating Model: From Strategy to Execution' at\u2026",
+        "type": "conference",
+        "url": "https://www.linkedin.com/posts/culytics_culyticssummit2026-creditunions-aiincreditunions-activity-7425282117661511682-BeEJ"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "62a2ebcf-8ebd-4bca-9205-361a5d367e0f",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "baf6aa6a-ccdf-4b31-8796-c018c1102be6",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "c9137433-c6b2-4229-a5c5-2261a6eee6ca",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "16d3f6ed-2f79-47ca-8fcc-fc6381d174db",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "4e0875e7-0709-48f6-9725-fa99655619b5",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "BCU has grown from approximately $5.8 billion (2023) to $6.24 billion in total assets by Q3 2025, maintaining steady expansion in a challenging rate environment.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.85,
+        "P1C2": 2.36,
+        "P1C3": 2.31,
+        "P1C4": 2.15,
+        "P2C1": 3.11,
+        "P2C2": 2.87,
+        "P2C3": 3.06,
+        "P2C4": 3.22,
+        "P3C1": 2.71,
+        "P3C2": 2.56,
+        "P3C3": 2.69,
+        "P3C4": 2.81,
+        "P4C1": 3.34,
+        "P4C2": 3.28,
+        "P4C3": 3.67,
+        "P4C4": 3.57
+      },
+      "overall_score": 2.85,
+      "peer_name": "Members 1st Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.28,
+        "P1C2": 3.26,
+        "P1C3": 2.96,
+        "P1C4": 3.09,
+        "P1C5": 3.28,
+        "P2C1": 3.3,
+        "P2C2": 2.99,
+        "P2C3": 3.14,
+        "P2C4": 3.27,
+        "P3C1": 1.87,
+        "P3C2": 2.5,
+        "P3C3": 2.72,
+        "P3C4": 2.5,
+        "P4C1": 2.99,
+        "P4C2": 2.02,
+        "P4C3": 2.21,
+        "P4C4": 1.82
+      },
+      "overall_score": 2.78,
+      "peer_name": "iQ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-BCU-20260330-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "T to NIST CSF 2.0 \u2014 modern cybersecurity framework adoption Indeed overall rating: 2.8/5",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 2.8
+      },
+      {
+        "drilldown": "from infrastructure management to innovation via cloud NPS 78.62, nearly double that of large national banks >75% members use digital banking platform Tech stack includes Salesforce CRM, Sales Cloud, Service Cloud, Marketing Cloud, Experien",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 78,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "can't afford set-it-and-forget-it with infosec solutions' Trustpilot reviews (25 reviews): complaints about false fraud flags on legitimate purchases, account access difficulties, recurring authorized payment blocks, aggressive fraud detect",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 25,
+        "polarity": "negative",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "of Q3 2025 364,451 members, 772 employees as of Q3 2025 BBB Accredited since 2012, state chartered federally insured, Vernon Hills IL Over $6B in assets, 360,000+ members, serves Fortune 100 workplaces across US and PR CUSO: Life",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "l-to-branch handoff capability BCU ($6.24B assets) is below CFPB $10B supervisory threshold \u2014 complaints referred to NCUA",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Additional fintech ecosystem: Life.Money.You selected Paperwork fintech platform (Mar 2023); BCU Wealth Advisors partnered with CUNA Mutual Group (Apr 2023)",
+      "date_precision": "month",
+      "e_id": "E-026",
+      "event_date": "2023-04-01",
+      "evidence_e_ids": [
+        "E-026"
+      ],
+      "id": "adc500ad-fa78-46b9-9e39-85719b9ac9a9",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://tracxn.com/d/companies/bcu/__U-p-4V-_g8K4a_cgpmv4t-jKuWBH8EZGNTbU8mdVOhI",
+      "subcap_ids": [],
+      "title": "BCU Wealth Advisors partnered with CUNA Mutual Group (Apr\u2026"
+    },
+    {
+      "body": "AviaryAI CEO Blesson Abraham: former BCU employee (5 years in leadership), founded SavvyIntel (acquired by TruStage/CUNA Mutual 2017)",
+      "date_precision": "year",
+      "e_id": "E-017",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "97dbdc98-0ee1-41b9-b0a7-740190a47c07",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.bcu.org/resources/news-and-events/2025/bcu-aviaryai-partner-to-revolutionize-member-services-through-ai-following-hurricane-relief-outreach",
+      "subcap_ids": [],
+      "title": "AviaryAI CEO Blesson Abraham: former BCU employee (5 years\u2026"
+    },
+    {
+      "body": "BCU member intelligence team deployed 2016: 2 analysts + 1 data tech manager. One analyst uses Power BI for visualization standardization; one is data scientist for advanced models.",
+      "date_precision": "year",
+      "e_id": "E-061",
+      "event_date": "2016-07-01",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "9042a651-02af-40b0-a996-f1ace5a493f6",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://creditunions.com/features/2-lessons-from-a-3-billion-data-powerhouse/",
+      "subcap_ids": [],
+      "title": "BCU member intelligence team deployed"
+    },
+    {
+      "body": "BCU uses Jack Henry Symitar Core since 1999, cloud-migrated, renewed partnership 2025",
+      "date_precision": "year",
+      "e_id": "E-004",
+      "event_date": "1999-07-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "d47604bb-a7ab-4721-a2f5-d641f0c51b12",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/bcu-strengthens-jack-henry-relationship-to-support-growth-goals-302422299.html",
+      "subcap_ids": [],
+      "title": "BCU uses Jack Henry Symitar Core"
+    }
+  ]
+}

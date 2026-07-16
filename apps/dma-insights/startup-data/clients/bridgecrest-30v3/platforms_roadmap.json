@@ -1,0 +1,129 @@
+{
+  "entity_display_id": "bridgecrest-30v3",
+  "phases": [
+    {
+      "customer_impact": {
+        "Customer satisfaction": "1.4/5 \u2192 2.5/5",
+        "Data quality score": "Unknown \u2192 85%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Customer satisfaction: 1.4/5 \u2192 2.5/5",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Service Cloud Implementation + CRM Analytics",
+          "maturity_lift": "+1.66",
+          "metric": "Customer satisfaction: 1.4/5 \u2192 2.5/5",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Customer satisfaction: 1.4/5 \u2192 2.5/5",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Customer Experience Transformation"
+        },
+        {
+          "feature": "Data Cloud Implementation + CRM Analytics",
+          "maturity_lift": "+1.66",
+          "metric": "Data quality score: Unknown \u2192 85%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Data quality score: Unknown \u2192 85%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Data Governance & Analytics Foundation"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "API-connected systems": "Unknown \u2192 80%",
+        "Security maturity": "M2.5 \u2192 M3.5"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Security maturity: M2.5 \u2192 M3.5",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Shield Implementation + GRC",
+          "maturity_lift": null,
+          "metric": "Security maturity: M2.5 \u2192 M3.5",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Security maturity: M2.5 \u2192 M3.5",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Compliance & Security Enhancement"
+        },
+        {
+          "feature": "MuleSoft Implementation",
+          "maturity_lift": "+1.66",
+          "metric": "API-connected systems: Unknown \u2192 80%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "API-connected systems: Unknown \u2192 80%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "API-First Integration & Legacy Modernization"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Governance score": "2.75 \u2192 3.0+"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Governance score: 2.75 \u2192 3.0+",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+0.25",
+          "metric": "Governance score: 2.75 \u2192 3.0+",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Governance score: 2.75 \u2192 3.0+",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Digital Strategy & Governance Framework"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-BCREST-20260330-V3",
+  "total_duration_months": 12
+}

@@ -1,0 +1,127 @@
+{
+  "entity_display_id": "oneaz-credit-union-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.32",
+          "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Migrate from Dynamics CRM to Salesforce Financial Services Cloud"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.32",
+          "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Implement Enterprise Integration Platform for Backbase-Core-CRM Orchestration"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.32",
+          "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Formalize Data Governance Framework and Evaluate CDP Integration"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.32",
+          "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Scale Process Automation on Salesforce Flow (Complement UiPath RPA)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.32",
+          "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.68 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Backbase Digital Transformation Governance & Vendor Integration Strategy"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ONEAZ-20260313-0001",
+  "total_duration_months": 12
+}

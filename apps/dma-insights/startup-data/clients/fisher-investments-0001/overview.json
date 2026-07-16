@@ -1,0 +1,1082 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 138
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 209
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 106
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 158
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "fisher-investments-0001",
+    "domain": null,
+    "hq": null,
+    "id": "7b7d84a7-8bfd-40f6-a8ad-f86fe7073f0c",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Fisher Investments",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RIA",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:12:01.132564Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 7,
+    "current_count": 93,
+    "dated_count": 1,
+    "median_age_months": 11.5,
+    "oldest_published_date": "2019-02-01",
+    "stale_count": 4,
+    "stale_pct": 3.81,
+    "total": 105,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 5,
+      "NEGATIVE": 5,
+      "NEUTRAL": 19,
+      "POSITIVE": 76
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 1,
+      "NEUTRAL": 95,
+      "POSITIVE": 9
+    },
+    "tiers": {
+      "T1": 8,
+      "T2": 25,
+      "T3": 34,
+      "T5": 38
+    },
+    "total_facts": 337,
+    "total_items": 105
+  },
+  "financial_trajectory": {
+    "cagr": "-33.9%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2021,
+      2022
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        357.0,
+        236.0
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 386000000000.0,
+    "branches": 16,
+    "cagr": "19.4%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "6300",
+    "financial_highlights": {
+      "lines": [
+        "Fisher manages $386B in assets under management as of December 2025 (SEC Form ADV, T1, current), serving 195,000 clients worldwide through 6,300 employees across 16 offices in 8 countries (Fisher Corporate Website, T5, current). The five-year CAGR of 19.4% reflects accelerating growth, driven by organic acquisition and market appreciation. The Advent/ADIA transaction at $12.75B enterprise value (Advent Press Release, T2, current) implies a valuation multiple of approximately 3.3% of AUM — a premium for a private RIA.",
+        "5-Year CAGR: 19.4% | Trend: ACCELERATING | Valuation: $12.75B (Jan 2025)"
+      ],
+      "series": {
+        "2021": 357000000000.0,
+        "2022": 236000000000.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 16,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 6300,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022"
+        ],
+        "geography": "US (primary), 8 countries globally",
+        "headline": "$236.0B assets · FY2022 · -33.9% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            357.0,
+            236.0
+          ]
+        },
+        "unit": "B"
+      },
+      "year_cagr": "19.4% | Trend: ACCELERATING | Valuation: $12"
+    },
+    "footprint": "US (primary), 8 countries globally",
+    "footprint_basis": "derived:geography",
+    "geography": "US (primary), 8 countries globally",
+    "headcount": 6300,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Damian Ornani",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Steve Triplett",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Fisher Investments",
+    "license_type": "SEC-registered",
+    "narrative_md": "Fisher Investments is the largest independent fee-only RIA in the US with $386B AUM and 19.4% five-year CAGR (SEC Form ADV, T1, current; Citywire, T3, current). Despite this scale, the firm’s client experience remains anchored in a human-led model: no proprietary client portal, manual onboarding, and a content-only mobile app (Fisher Website, T5, current; App Store, T5, current). The Jan 2025 Advent/ADIA minority stake at $12.75B valuation, earmarked for “global growth and technology capabilities,” creates an 18–24 month transformation window (Advent Press, T2, current). Salesforce FSC and SFMC are already deployed — positioning Zennify for optimization and expansion rather than greenfield implementation.",
+    "primary_regulator": "SEC",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.4,
+          "source": "Comparably"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "in Texas Average IC manages ~190 households (unverified Glassdoor claim) Azure Synapse, Azure Data Factory, Azure Data Lake Storage, Power BI confirmed Databricks + Microsoft Purview for data platform Fisher's AI stance: measured/cautious —",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.4/5",
+          "signal": "and fund transfers Customer Service score 3.4/5 (Comparably) Customer Satisfaction score 51 (Comparably) Fisher Market Insights app available on iOS and Android — free App provides market analysis, videos, podcasts — NOT account management ",
+          "source": "Comparably"
+        },
+        {
+          "signal": "AWS and Azure cloud infrastructure referenced in tech roles BBB Accredited since March 2014 TTS (Technology, Transformation & Security) department exists Digital Workplace team supports digital transformation and infrastructure Damian Ornan",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mega (>$100B AUM)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-075",
+        "excerpt": "iCIMS ATS integrated with Yello event management for campus recruiting Text-message interview scheduling — uptick in TA efficiency and response rates",
+        "title": "ICIMS ATS integrated with Yello event management for campus…",
+        "type": "article",
+        "url": "https://resources.ripplematch.com/fisher-investments-2025-campus-forward-award-winner"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-094",
+        "excerpt": "Interview requires experience with Agile (Scrum/Kanban) frameworks DevOps + CI/CD processes required — hands-on Azure cloud deployment",
+        "title": "Interview requires experience with Agile (Scrum/Kanban) frameworks…",
+        "type": "article",
+        "url": "https://www.interviewquery.com/interview-guides/fisher-investments-software-engineer"
+      },
+      {
+        "author": null,
+        "date": "2019-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-007",
+        "excerpt": "Ken Fisher inappropriate comments at Tiburon conference Oct 2019, lost ~$3.9B AUM from institutional clients Multiple pension funds (Iowa, Boston, Michigan) pulled mandates",
+        "title": "Multiple pension funds (Iowa, Boston, Michigan) pulled mandates",
+        "type": "conference",
+        "url": "https://www.nytimes.com/2019/10/09/business/ken-fisher-comments.html"
+      },
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-039",
+        "excerpt": "Fisher's AI stance: measured/cautious — 'AI hype' perspective, long-term patience Recognize ML for cost-cutting and efficiency but skeptical about investment alpha from AI",
+        "title": "Fisher's AI stance: measured/cautious",
+        "type": "article",
+        "url": "https://www.fisherinvestments.com/en-us/insights/market-commentary/putting-mondays-airelated-volatility-in-perspective"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-104",
+        "excerpt": "Fisher Market Insights app on iOS/Android — articles, videos, podcasts App is content/educational focused — NOT account management or transactional",
+        "title": "Fisher Market Insights app on iOS/Android",
+        "type": "podcast",
+        "url": "https://apps.apple.com/us/app/fisher-market-insights/id1169932255"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-091",
+        "excerpt": "Financial Planning Services team elevates client experience through personalized plans Client Programs: Forecast Seminars, Client Forums, Roundtables, Webinars, Video Conferences",
+        "title": "Financial Planning Services team elevates client experience",
+        "type": "webinar",
+        "url": "https://www.fishercareers.com/financial-planning-services-elevates-our-client-experience"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$386B",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "fisherinvestments.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:34.850531+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Fisher Investments — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Fisher was benchmarked against 5 locked peers within the SV5 (RIA/BD) sub-vertical, selected for AUM proximity, business model overlap, and PE transformation stage: Creative Planning ($390B AUM, E-002), Edelman Financial Engines ($308B AUM, hybrid digital-human), Hightower Advisors ($324B AUM, integrated platform strategy), Mariner Wealth Advisors ($550B AUM, acquisition-led growth), and Mercer Advisors ($90B+ AUM, technology-led differentiation with published AI playbook — E-060, E-066).\nMercer Advisors, despite smaller AUM, sets the technology benchmark with a dedicated CTDO, proprietary platform, and published AI integration playbook. Edelman leads in hybrid digital-human service delivery. Fisher's cloud-native backend likely matches or exceeds most peers in infrastructure maturity, but the client experience gap is the widest in the peer set.",
+    "page_number": null,
+    "scqa_heading": "DMA Assessment Report — Synthesis",
+    "scqa_md": "Fisher Investments is a $386.0B in assets wealth & advisory firm regulated by SEC with 6,300 employees. A 19.4% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-059, E-079]. Zennify's assessment places overall digital maturity at 2.3/5. The deepest capability gap is Account Activation & Fulfillment at 1.3/5 against a 3.5 peer median [E-018, E-033]. Next is Brand Governance at 1.6/5 against a 3.5 peer median [E-002, E-017]. Third is CLV-Based Segmentation at 1.8/5 against a 3.0 peer median [E-019, E-021].\n\nThe issue register adds Report has 7 peer references (threshold: 10). Peers concentrated in Section 4. Executive summary has 0 peer name references… (high severity). The issue register adds Report has 23 unique E-ID citations (threshold: 30). Executive summary adequate (9 E-IDs) but pillar sections under-cite T2 evidence. (high severity).\n\nCounter-signal: Key Risk Indicators already runs at 3.0/5 against a 3.0 peer median — a strength to build on, not rebuild. The roster shows no CTO / CIO — a named ownership gap for the capabilities below. The question for Fisher Investments is whether to close Account Activation & Fulfillment first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Fisher Investments should lead with nCino (81/100 fit) against BaaS API Management, then sequence Tableau behind it. Closing Account Activation & Fulfillment to the peer median alone is worth 2.2 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Salesforce Footprint Already Established — SF Financial Services Cloud + SFMC Journey Builder confirmed via multiple job postings and tech stack references […\"."
+  },
+  "overall_score": 2.31,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.091526+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass2_llm_checks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.092170+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.092396+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_error_log.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.092744+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Coverage_Matrix.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.093348+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.094039+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:01.094650+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 6,
+      "INFO": 19
+    },
+    "stage_ms": {
+      "manifest": 41,
+      "parse": 3358,
+      "persist": 358
+    },
+    "structured": [
+      {
+        "code": "used variant scoring CSV location",
+        "detail": "used variant scoring CSV location: 08_appendices/export_scoring_detail.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=709 contradictions=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_scores_Creative_Planning.json",
+        "detail": "peer_scores_Creative_Planning.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_Edelman_Financial_Engines.json",
+        "detail": "peer_scores_Edelman_Financial_Engines.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_Hightower_Advisors.json",
+        "detail": "peer_scores_Hightower_Advisors.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_Mariner_Wealth_Advisors.json",
+        "detail": "peer_scores_Mariner_Wealth_Advisors.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_Mercer_Advisors.json",
+        "detail": "peer_scores_Mercer_Advisors.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "used variant research_handoff",
+        "detail": "used variant research_handoff: 01_evidence/research_handoff_Fisher_Investments.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_Report_Fisher_Investments_20260310.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=13 subcaps=9 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 16 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 6 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:employees_approx,primary_regulator,total_assets",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass2_llm_checks.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 5",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/709 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "used variant scoring CSV location: 08_appendices/export_scoring_detail.csv",
+      "governance_audit_logs: reasoning_chain=709 contradictions=0",
+      "peer_scores_Creative_Planning.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_Edelman_Financial_Engines.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_Hightower_Advisors.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_Mariner_Wealth_Advisors.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_Mercer_Advisors.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "used variant research_handoff: 01_evidence/research_handoff_Fisher_Investments.json",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_Report_Fisher_Investments_20260310.docx count=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=13 subcaps=9 replaced_docx_scqa=True",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "peer_benchmarks_filled: 16 categories",
+      "tech_stack_from_report_prose: 6 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:employees_approx,primary_regulator,total_assets",
+      "insights_from_client_profile_findings: 4",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass2_llm_checks.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/report_analysis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "timeline_events_persisted: 5",
+      "catalogue_unresolved:14/709 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 3.21,
+      "pillar_id": "P1",
+      "score": 2.36,
+      "subcaps_scored": 172
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 3.38,
+      "pillar_id": "P2",
+      "score": 1.74,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 3.0,
+      "pillar_id": "P3",
+      "score": 2.57,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 3.29,
+      "pillar_id": "P4",
+      "score": 2.72,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-10",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:12:01.132564Z",
+    "created_at": "2026-07-02T23:12:01.132564Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "4c3089a6-84f5-4588-9929-df3de9691663",
+    "overall_score": 2.31,
+    "request_id": "DMA-ASM-FISH-20260310-0001",
+    "started_at": "2026-07-02T23:12:01.132564Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.4,
+        "source": "Comparably"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Salesforce Footprint Already Established — SF Financial Services Cloud + SFMC Journey Builder confirmed via multiple job postings and tech stack references [E-009,... — Platform foundation exists — question is depth of adoption and integration matur — Upsell/optimization play, not greenfield. FSC health check, SFMC optimization, Data Cloud integratio.",
+      "evidence": [
+        "E-009",
+        "E-018",
+        "E-033",
+        "E-034"
+      ],
+      "magnitude": "2.2 pts below peer median",
+      "name": "Salesforce Footprint Already Established",
+      "peer_median": 3.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.34,
+      "so_what": "Prioritize Salesforce Footprint Already Established in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Salesforce Footprint Already Established",
+      "what": "Salesforce Footprint Already Established — SF Financial Services Cloud + SFMC Journey Builder confirmed via multiple job postings and tech stack references [E-009,... Platform foundation exists — question is depth of adoption and integration matur — Upsell/optimization play, not greenfield. FSC health check, SFMC optimization, Data Cloud integratio.",
+      "why": "The linked evidence records: Salesforce Marketing Cloud confirmed via job postings AWS and Azure cloud infrastructure referenced in tech roles"
+    },
+    {
+      "body": "Culture-Innovation Tension — Glassdoor 3.7/5 (64% recommend), high IC turnover (15-18mo avg), micromanagement concerns, BUT Training MVP 8 consecutiv... — P1C4 Culture & Talent constrained to L2.5-3.0 — investment in L&D not translatin — Change management consulting. Digital adoption platform needs (WalkMe/Pendo). User experience resear.",
+      "evidence": [
+        "E-007",
+        "E-013",
+        "E-041",
+        "E-042"
+      ],
+      "magnitude": "64%",
+      "name": "Culture-Innovation Tension",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 2.14,
+      "so_what": "Culture-Innovation Tension — Glassdoor 3.7/5 (64% recommend), high IC turnover (15-18mo avg), micromanagement concerns, BUT Training MVP 8 consecutiv... — P1C4 Culture & Talent constrained to L2.5-3.0 — investment in L&D not translatin — Change management consulting.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Culture-Innovation Tension",
+      "what": "Digital adoption platform needs (WalkMe/Pendo). User experience resear.",
+      "why": "The linked evidence records: Ken Fisher inappropriate comments at Tiburon conference Oct 2019, lost ~$3.9B AUM from institutional clients Multiple pension funds (Iowa, Boston, Michigan) pulled mandates"
+    },
+    {
+      "body": "ESG Framework with Institutional Scale — $26.1B ESG AUM, 25+ ESG strategies, 6 ESG Specialists, quarterly engagement + proxy voting reports, Scope 1+2 targets [E... — P1C5 likely L3.0-3.5 — formalized ESG program above peer median for private RIAs — Net Zero Cloud / ESG data integration opportunity. Sustainability reporting automation.",
+      "evidence": [
+        "E-018",
+        "E-033",
+        "E-034",
+        "E-047"
+      ],
+      "magnitude": "$26.1B",
+      "name": "ESG Framework",
+      "peer_median": 3.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.34,
+      "so_what": "Prioritize ESG Framework in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "ESG Framework",
+      "what": "ESG Framework with Institutional Scale — $26.1B ESG AUM, 25+ ESG strategies, 6 ESG Specialists, quarterly engagement + proxy voting reports, Scope 1+2 targets [E... — P1C5 likely L3.0-3.5 — formalized ESG program above peer median for private RIAs — Net Zero Cloud / ESG data integration opportunity. Sustainability reporting automation.",
+      "why": "The linked evidence records: 5-step onboarding: consultation → Letter of Agreement → service team intro → account setup → implementation Operations specialists coordinate onboarding paperwork and fund transfers"
+    },
+    {
+      "body": "Human-Led Service Model in Digital-First Industry — No proprietary client portal. Account access redirected to custodian (Schwab/Fidelity). Onboarding is 5-step manual proc... — P2C2-P2C4 constrained to L2.0-2.5 — deliberate high-touch model but creates digi — Client Experience Cloud / Salesforce Experience Cloud opportunity. Digital onboarding + client porta.",
+      "evidence": [
+        "E-018",
+        "E-033",
+        "E-034",
+        "E-047"
+      ],
+      "magnitude": "2.2 pts below peer median",
+      "name": "Human-Led Service Model in Digital-First Industry",
+      "peer_median": 3.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.34,
+      "so_what": "Prioritize Human-Led Service Model in Digital-First Industry in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Human-Led Service Model in Digital-First Industry",
+      "what": "Human-Led Service Model in Digital-First Industry — No proprietary client portal. Account access redirected to custodian (Schwab/Fidelity). Onboarding is 5-step manual proc... — P2C2-P2C4 constrained to L2.0-2.5 — deliberate high-touch model but creates digi — Client Experience Cloud / Salesforce Experience Cloud opportunity.",
+      "why": "The linked evidence records: 5-step onboarding: consultation → Letter of Agreement → service team intro → account setup → implementation Operations specialists coordinate onboarding paperwork and fund transfers"
+    },
+    {
+      "body": "Bifurcated Technology Maturity — Modern cloud-native backend (Azure AKS, Databricks, Snowflake, microservices) coexists with Glassdoor-reported 'ancient... — P3/P4 ceiling of L3.0-3.5 — strong infrastructure investment undermined by uneve — Salesforce FSC optimization + data integration services to bridge legacy/modern gap. Platform consol.",
+      "evidence": [
+        "E-038",
+        "E-044",
+        "E-054",
+        "E-070"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Bifurcated Technology Maturity",
+      "peer_median": 3.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.23,
+      "so_what": "Prioritize Bifurcated Technology Maturity in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Bifurcated Technology Maturity",
+      "what": "Bifurcated Technology Maturity — Modern cloud-native backend (Azure AKS, Databricks, Snowflake, microservices) coexists with Glassdoor-reported 'ancient... — P3/P4 ceiling of L3.0-3.5 — strong infrastructure investment undermined by uneve — Salesforce FSC optimization + data integration services to bridge legacy/modern gap. Platform consol.",
+      "why": "The linked evidence records: Azure Synapse, Azure Data Factory, Azure Data Lake Storage, Power BI confirmed Databricks + Microsoft Purview for data platform"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-004"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "cap M2 applied: T5-only cap 2.0",
+        "111 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Vision Communication averages 2.8/5 over 166 scored subcaps; ceiling 2.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-083"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "cap M2 applied: T5-only cap 2.0",
+        "187 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Board Cyber Oversight averages 2.2/5 over 217 scored subcaps; ceiling 2.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-004"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "cap M2 applied: T5-only cap 2.0",
+        "165 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Pilot & Experimentation averages 2.3/5 over 190 scored subcaps; ceiling 2.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-075"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "165 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Champion Recognition averages 2.3/5 over 205 scored subcaps; ceiling 2.9 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "50 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "community investment averages 2.1/5 over 70 scored subcaps; ceiling 2.8 reflects thin evidence density (20/70 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "cap M2 applied: T5-only cap 2.0",
+        "239 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Brand Governance averages 1.6/5 over 289 scored subcaps; ceiling 2.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "cap M2 applied: T5-only cap 2.0",
+        "271 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Account Activation & Fulfillment averages 1.3/5 over 291 scored subcaps; ceiling 1.9 reflects the binding cap (cap M2 applied: T5-only cap 2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "cap M2 applied: T5-only cap 2.0",
+        "264 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Journey Friction Scoring averages 2.2/5 over 289 scored subcaps; ceiling 2.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "cap M2 applied: T5-only cap 2.0",
+        "238 of 263 subcaps on thin evidence"
+      ],
+      "rationale": "CLV-Based Segmentation averages 1.8/5 over 263 scored subcaps; ceiling 2.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-078"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "126 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Investment & Prioritization averages 2.3/5 over 146 scored subcaps; ceiling 2.9 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-105"
+      ],
+      "modifiers": [
+        "cap M2 applied: T5-only cap 2.0",
+        "125 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Key Risk Indicators averages 3.0/5 over 130 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: T5-only cap 2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-059"
+      ],
+      "modifiers": [
+        "133 of 148 subcaps on thin evidence"
+      ],
+      "rationale": "Policy Attestation averages 2.9/5 over 148 scored subcaps; ceiling 3.5 reflects thin evidence density (15/148 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-083"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "125 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Resilience Reporting averages 2.0/5 over 145 scored subcaps; ceiling 2.6 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "197 of 202 subcaps on thin evidence"
+      ],
+      "rationale": "Privacy-Enhancing Technologies (PETs) averages 2.2/5 over 202 scored subcaps; ceiling 2.7 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "265 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Analytics Data Platform averages 2.7/5 over 270 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-078"
+      ],
+      "modifiers": [
+        "cap M3 applied: Single-source cap 3.0",
+        "205 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Cost Anomaly Detection & Guardrails averages 3.1/5 over 235 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: Single-source cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-105"
+      ],
+      "modifiers": [
+        "cap M2 applied: T5-only cap 2.0",
+        "120 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Identity Governance & Administration averages 2.8/5 over 150 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: T5-only cap 2.0); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Ralph Haberli appointed CEO Nov 2025. Ralph Haberli appointed CEO Nov 2025 after PE owners halted sale efforts",
+      "evidence": [
+        "E-081"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Ralph Haberli appointed CEO",
+      "metric": null,
+      "peer_context": "Account Activation & Fulfillment runs 1.34/5 vs a 3.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Ralph Haberli appointed CEO Nov 2025. Ralph Haberli appointed CEO Nov 2025 after PE owners halted sale efforts. Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Ralph Haberli appointed CEO Nov 2025"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Michael Liersch appointed Chief Planning Officer Aug 2025 — financial planning/advice focus",
+      "evidence": [
+        "E-081"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Michael Liersch appointed Chief Planning Officer Aug 2025…",
+      "metric": null,
+      "peer_context": "Account Activation & Fulfillment runs 1.34/5 vs a 3.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Michael Liersch appointed Chief Planning Officer Aug 2025 — financial planning/advice focus. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2025-08-01",
+        "event": "Michael Liersch appointed Chief Planning Officer Aug 2025…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Salesforce Marketing Cloud confirmed via job postings AWS and Azure cloud infrastructure referenced in tech roles",
+      "evidence": [
+        "E-009"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Salesforce Marketing Cloud confirmed via job postings AWS…",
+      "metric": null,
+      "peer_context": "Account Activation & Fulfillment runs 1.34/5 vs a 3.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Salesforce Marketing Cloud confirmed via job postings AWS and Azure cloud infrastructure referenced in tech roles. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "$3B minority common stock investment at $12.75B valuation — completed Jan 7 2025 (Jan 2025).",
+      "evidence": [
+        "E-023"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "$3B minority common stock investment at $12.75B valuation",
+      "metric": "$3B",
+      "peer_context": "Account Activation & Fulfillment runs 1.34/5 vs a 3.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against BaaS API Management — highest-fit surface at 81/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "$3B minority common stock investment at $12.75B valuation — completed Jan 7 2025 (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-07",
+        "event": "$3B minority common stock investment at $12.75B valuation"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Account Activation & Fulfillment scores 1.34/5 vs a typical 3.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-018",
+        "E-033",
+        "E-034",
+        "E-047"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Account Activation & Fulfillment scores 1.34/5",
+      "metric": "Account Activation & Fulfillment 1.34/5 vs peer 3.50",
+      "peer_context": "Account Activation & Fulfillment runs 1.34/5 vs a 3.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against BaaS API Management — highest-fit surface at 81/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C2",
+      "text": "Account Activation & Fulfillment scores 1.34/5 vs a typical 3.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

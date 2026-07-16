@@ -1,0 +1,447 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "frost-bank-0001",
+  "financials": {
+    "lines": [
+      "Frost exhibits stable organic growth with a 5-year asset CAGR of 5.1% and deposit CAGR of 4.1% [E-002]. Net income peaked at $592M in 2023 before compressing to $516M in 2024 due to NIM pressure. The efficiency ratio improved from 58.7% (2020) to 55.8% (2024), though Q4 2024 showed a slight reversion. CET1 capital at 13.3% provides substantial headroom above well-capitalized minimums. Non-interest expense has grown at 5.7% annually, with technology spending accelerating to 14-15% year-over-year growth driven by cloud services [E-085, E-138]."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 194,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 5059,
+        "events": [],
+        "fy": [
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "Texas (7 metros)",
+        "headline": "$516M net income \u00b7 FY2024",
+        "regulator": "TX DOB + Federal Reserve + FDIC",
+        "series": {
+          "net_income_m": [
+            592.0,
+            516.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        592.0,
+        516.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2023,
+          2024
+        ],
+        "metric": "net_income_m",
+        "unit": "usd_m",
+        "values": [
+          592.0,
+          516.0
+        ]
+      }
+    ],
+    "years": [
+      2023,
+      2024
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Texas (7 metros)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Phil Green",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Bill Perotti",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dan Geddes",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Blair McGrain",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Capability Leader",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Data Warehouse",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carol Severyn",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Cullen/Frost Bankers, Inc. (NYSE: CFR) is a Texas-based financial holding company incorporated in 1977, with banking roots dating to 1868 [E-001]. Its primary subsidiary, Frost Bank, is a Texas state-chartered commercial bank headquartered at 111 W. Houston Street, San Antonio, TX 78205. The bank is publicly traded, FDIC-insured, and a member of the Federal Reserve System. Frost operates exclusively within Texas across seven major metropolitan areas.",
+    "primary_regulator": "TX DOB + Federal Reserve + FDIC",
+    "size_tier": "Large Regional",
+    "thought_leadership": null,
+    "ticker": "NYSE: CFR"
+  },
+  "issue_register": [
+    {
+      "id": "e0d4ec96-0cf9-4364-be42-bb18a2e27dea",
+      "issue_id": "ISS-0001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Report has 22 unique E-IDs (target \u226530). Exec: 10. All 4 pillars + 10 recs cite evidence. Prose integration vs inline."
+    },
+    {
+      "id": "98ac94e9-6750-4005-a432-ef9e2ee06077",
+      "issue_id": "ISS-0002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Missing URLs: 20/222 (9.0%) \u2014 mostly ceiling estimates"
+    },
+    {
+      "id": "a0f9afd7-025b-476f-90a0-6740440f8e3c",
+      "issue_id": "ISS-0003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P1C2=2.24<2.5 but 6 P3 subcaps >3.0"
+    },
+    {
+      "id": "d049dab7-dbff-459d-9276-ba0672488a20",
+      "issue_id": "ISS-0004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Counterclaim quality: 0% (<75%)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Net income m declined from $592.0M (2023) to $516.0M (2024) \u2014 -12.8% CAGR. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 2.3,
+        "P1C3": 2.26,
+        "P1C4": 2.21,
+        "P1C5": 2.25,
+        "P2C1": 2.19,
+        "P2C2": 2.03,
+        "P2C3": 2.13,
+        "P2C4": 2.04,
+        "P3C1": 2.56,
+        "P3C2": 2.67,
+        "P3C3": 2.34,
+        "P3C4": 1.53,
+        "P4C1": 1.75,
+        "P4C2": 2.19,
+        "P4C3": 2.34,
+        "P4C4": 1.83
+      },
+      "overall_score": 2.2,
+      "peer_name": "Bank OZK",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.56,
+        "P1C2": 1.94,
+        "P1C3": 1.68,
+        "P1C4": 2.49,
+        "P1C5": 1.93,
+        "P2C1": 1.94,
+        "P2C2": 1.94,
+        "P2C3": 1.9,
+        "P2C4": 1.74,
+        "P3C1": 2.0,
+        "P3C2": 3.0,
+        "P3C3": 4.0,
+        "P3C4": 3.0,
+        "P4C1": 1.8,
+        "P4C2": 1.75,
+        "P4C3": 1.88,
+        "P4C4": 1.92
+      },
+      "overall_score": 2.2,
+      "peer_name": "East West Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 2.64,
+        "P1C3": 1.63,
+        "P1C4": 1.56,
+        "P2C1": 1.98,
+        "P2C2": 2.12,
+        "P2C3": 1.6,
+        "P2C4": 1.43,
+        "P3C1": 1.76,
+        "P3C2": 2.87,
+        "P3C3": 3.4,
+        "P3C4": 2.72,
+        "P4C1": 1.59,
+        "P4C2": 1.68,
+        "P4C3": 2.0,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.18,
+      "peer_name": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.17,
+        "P1C2": 2.34,
+        "P1C3": 2.34,
+        "P1C4": 1.71,
+        "P1C5": 1.86,
+        "P2C1": 1.95,
+        "P2C2": 2.39,
+        "P2C3": 1.93,
+        "P2C4": 2.02,
+        "P3C1": 2.27,
+        "P3C2": 2.21,
+        "P3C3": 2.45,
+        "P3C4": 1.95,
+        "P4C1": 2.31,
+        "P4C2": 2.04,
+        "P4C3": 1.98,
+        "P4C4": 1.98
+      },
+      "overall_score": 2.17,
+      "peer_name": "TriState Capital Holdings, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.23,
+        "P1C2": 2.41,
+        "P1C3": 1.86,
+        "P1C4": 2.09,
+        "P2C1": 2.27,
+        "P2C2": 2.08,
+        "P2C3": 1.97,
+        "P2C4": 2.11,
+        "P3C1": 2.19,
+        "P3C2": 2.27,
+        "P3C3": 2.17,
+        "P3C4": 2.1,
+        "P4C1": 1.81,
+        "P4C2": 2.49,
+        "P4C3": 2.19,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.16,
+      "peer_name": "Fulton Bank, National Association",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-FROST-20260323-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor: 4.2/5 work-life balance, 4.5/5 culture & values, 4.0/5 career opportunities",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.2
+      },
+      {
+        "drilldown": "Power + Coalition Greenwich awards = NPS/CSAT equivalent measurement in place",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "BBB complaint responses show structured investigation: specific dates, call transcript review, transaction details, written findings",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "imary) + Federal Reserve Board + FDIC (deposit insurance) + CFPB (consumer protection) + SEC (public company) + FINRA (brokerage) FinCEN BSA/AML: CRA lending: $309.1M community development lending, $232M SBA portfolio, $184.2M community sec",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Disruption from competitor M&A driving new relationships \u2014 twice as many from acquired banks in Q4 vs prior quarters",
+      "date_precision": "publish_fallback",
+      "e_id": "E-021",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "21155372-b3b5-46b4-83bf-c6e49d271aa9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://app.newsedge.moodysanalytics.com/articles/202601291400AIERA___TRANSRPT_2857319",
+      "subcap_ids": [],
+      "title": "Disruption from competitor M&A driving new relationships"
+    },
+    {
+      "body": "M&A disruption is a growth OPPORTUNITY for Frost: picking up 2x new relationships from acquired competitor banks in Q4 2025",
+      "date_precision": "quarter",
+      "e_id": "E-033",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "bde48691-8edb-43af-aa2a-0baaf61f0f8a",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://app.newsedge.moodysanalytics.com/articles/202601291400AIERA___TRANSRPT_2857319",
+      "subcap_ids": [],
+      "title": "M&A disruption is a growth Opportunity for Frost: picking\u2026"
+    },
+    {
+      "body": "CFO succession: Jerry Salinas (38 years at Frost, since 1986) retired end of 2024. Dan Geddes (27-year Frost commercial banker, led Houston expansion) appointed CFO Jan 2025",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "e3923f5a-c642-45cb-911f-bb6396d8e1eb",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000039263/000003926324000051/a3q24formxex991xretirement.htm",
+      "subcap_ids": [],
+      "title": "Dan Geddes (27-year Frost commercial banker, led Houston\u2026"
+    },
+    {
+      "body": "Matt Henson (21 years in Frost accounting) appointed Chief Accounting Officer Jan 2025. Multiple planned, orderly transitions.",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "483ddeb5-7022-49f7-800b-7adfc666d8bb",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000039263/000003926324000051/a3q24formxex991xretirement.htm",
+      "subcap_ids": [],
+      "title": "Matt Henson (21 years in Frost accounting) appointed Chief\u2026"
+    },
+    {
+      "body": "Linda Albornoz = CIO (Sr. EVP), joined Nov 2020 from Charles Schwab, American Express, Accenture. Reports to Jimmy Stead.",
+      "date_precision": "month",
+      "e_id": "E-137",
+      "event_date": "2020-11-01",
+      "evidence_e_ids": [
+        "E-137"
+      ],
+      "id": "be9e637e-30cc-4793-907c-bf4421d3825f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.comparably.com/companies/frost-bank/executive-team",
+      "subcap_ids": [],
+      "title": "Linda Albornoz = CIO (Sr. EVP) joined Nov 2020"
+    },
+    {
+      "body": "Contreras hired as CISO ~18 months after incident (Sept 2019). His breach-response experience at [24]7.ai may have been a factor.",
+      "date_precision": "month",
+      "e_id": "E-143",
+      "event_date": "2019-09-01",
+      "evidence_e_ids": [
+        "E-143"
+      ],
+      "id": "3e82e0ab-69a4-4d26-8dd4-7ef0bbb30c2c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://securityaffairs.com/70468/data-breach/frost-bank-security-breach.html",
+      "subcap_ids": [],
+      "title": "Contreras hired as CISO"
+    }
+  ]
+}

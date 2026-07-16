@@ -1,0 +1,88 @@
+{
+  "entity_display_id": "chemung-canal-trust-comp-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.7.1",
+        "P4C2.2.2",
+        "P2C4.2.9",
+        "P3C1.4.3",
+        "P1C1.5.4",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "8b673506-2c51-4cab-8e97-8ac1a7335880",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-103",
+        "E-107",
+        "E-106",
+        "E-108",
+        "E-110",
+        "E-105"
+      ],
+      "linked_subcap_id": "P4C1.7.1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Data Stewardship Program a near-term focus for Chemung Canal Trust Company: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-106].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Implications for Zennify Engagement Timing: SO-01 (GoBanking 2025 upgrade) creates the most immediate technology decisio",
+      "what_text": "Implications for Zennify Engagement Timing: SO-01 (GoBanking 2025 upgrade) creates the most immediate technology decision window. Procurement conversations for adjacent platforms — CRM, marketing automation, data analytics — are most receptive during an active core platform upgrade cycle. SO-03 (RPA/AI strategy) signals C-suite buy-in for technology investment. SO-06 and SO-07 (WMG record + C&I milestone) confirm the business cases for Salesforce FSC Wealth and Commercial modules respectively. In Zennify's assessment Data Stewardship Program scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-107].",
+      "why_text": "The assessment found: “'Robotic Process Automation and Artificial Intelligence' listed as named core corporate strategy (investor presentations, annual letter)” [E-103]. At 1.0 out of 5, Data Stewardship Program sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "CCTC's position relative to each peer by pillar — based on locked peer scores from Phase 2 (68 scored data points: 4 peers × 17 categories).",
+        "heading": "7.2 Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience (P2) — Score 1.91 vs Peer Median 2.13 (Gap −0.22)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 2.39 vs Peer Median 2.56 (Gap −0.17)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 1.92 vs Peer Median 2.00 (Gap −0.08)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Note: Per Zennify DMA Framework Rule R6, no investment amounts, cost estimates, or ROI projections appear in any recommendation. Engagement sizing is handled separately by the Zennify sales and solutions team."
+  },
+  "run_request_id": "DMA-ASM-CCTRUST-20260429-0001"
+}

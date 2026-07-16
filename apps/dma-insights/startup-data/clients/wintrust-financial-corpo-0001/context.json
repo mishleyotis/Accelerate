@@ -1,0 +1,589 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Wintrust Financial Corporation",
+      "amount": "$8B",
+      "announced_on": null,
+      "body": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B AUM). Aug 2024 completed Macatawa Bank merger.",
+      "closed_on": "2024-08-01",
+      "details": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B AUM). Aug 2024 completed Macatawa Bank merger.",
+      "e_id": "E-011",
+      "event_date": "2024-08-01",
+      "id": "bbe20f26-d904-4d19-9efa-df7a67f91291",
+      "source_url": "https://en.wikipedia.org/wiki/Wintrust_Financial",
+      "status": "closed",
+      "target": "Rothschild & Co",
+      "title": "Aug 2024 completed Macatawa Bank merger"
+    },
+    {
+      "acquirer": "Wintrust Financial Corporation",
+      "amount": "$8B",
+      "announced_on": null,
+      "body": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B AUM). Aug 2024 completed Macatawa Bank merger.",
+      "closed_on": "2022-07-01",
+      "details": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B AUM). Aug 2024 completed Macatawa Bank merger.",
+      "e_id": "E-011",
+      "event_date": "2022-07-01",
+      "id": "2fb9179a-82c7-4fbe-8e83-c115b5bbbe50",
+      "source_url": "https://en.wikipedia.org/wiki/Wintrust_Financial",
+      "status": "closed",
+      "target": "Rothschild & Co",
+      "title": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B\u2026"
+    }
+  ],
+  "entity_display_id": "wintrust-financial-corpo-0001",
+  "financials": {
+    "metrics": {
+      "total_assets": "$71.1B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "IL",
+      "WI",
+      "IN",
+      "MI",
+      "FL"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Mike Ryan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Sean Seeling",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Damon Farthing",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul Carlisle",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Wendy Schenker",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Previously EVP",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tim Crane",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chief Marketing",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "Wintrust Financial Corporation is a regional bank. It reports $71.1 billion in total assets. It is regulated by Federal Reserve. Its overall digital maturity is assessed at 3.0 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Federal Reserve",
+    "size_tier": "Mega (>$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-012",
+        "excerpt": "CAO Banking Strategies previously served as 'Program Director for Digital Transformation' and led Special Initiatives Dept launching new business lines. Hashtags: #fintech #1033 #baas #ai #data #analytics",
+        "title": "CAO Banking Strategies served as 'Program Director for Digital\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/in/groomssarah/"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-041",
+        "excerpt": "Latest LinkedIn post: community mural project with Aunt Martha's Health & Wellness \u2014 community engagement focus, 134 likes, 3 comments, 53 days since posted LinkedIn social media activity focused on community impact rath",
+        "title": "Latest LinkedIn post: community mural project with Aunt Martha's\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/feed/update/urn:li:activity:7424874171991728130"
+      }
+    ],
+    "ticker": "WTFC"
+  },
+  "issue_register": [
+    {
+      "id": "056f19e3-8415-43ad-bb11-371b83da6785",
+      "issue_id": "GAP-1-P2C2.8.4",
+      "linked_subcap_ids": [
+        "P2C2.8.4"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.5/5 \u2014 2.0 pts below the RB peer median (3.5/5). [EVIDENCE]: E-023:F1, E-027:F1, E-027:F3 provide 7 items for Developer Portal & Experience. [MATURITY]: Maps to M1.5 based on evidence tier and capability assessment. [GAP]: L2.5 ceiling with \u00b10.3 uncertainty. [SO WHAT]: For Wintrust, this subcapability represents a development area requiring investment.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Developer Portal & Experience"
+    },
+    {
+      "id": "4b5c3788-9886-4b5e-a46b-00f4d8d1daf2",
+      "issue_id": "GAP-2-P2C4.2.2",
+      "linked_subcap_ids": [
+        "P2C4.2.2"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.5/5 \u2014 1.5 pts below the RB peer median (3.0/5). [EVIDENCE]: E-027:F1, E-054:F1, E-054:F3 provide 8 items for Real-Time Decisioning. [MATURITY]: Maps to M1.5 based on evidence tier and capability assessment. [GAP]: L2.0 ceiling with \u00b10.7 uncertainty. [SO WHAT]: For Wintrust, this subcapability represents a development area requiring investment.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Real-Time Decisioning"
+    },
+    {
+      "id": "b9946f2a-4a64-496a-b970-f84098ecccca",
+      "issue_id": "GAP-3-P2C4.2.3",
+      "linked_subcap_ids": [
+        "P2C4.2.3"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.5/5 \u2014 1.5 pts below the RB peer median (3.0/5). [EVIDENCE]: E-027:F1, E-054:F1, E-054:F3 provide 8 items for Contextual Personalization. [MATURITY]: Maps to M1.5 based on evidence tier and capability assessment. [GAP]: L2.0 ceiling with \u00b10.7 uncertainty. [SO WHAT]: For Wintrust, this subcapability represents a development area requiring investment.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Contextual Personalization"
+    },
+    {
+      "id": "8f76bf9d-c13a-4899-8f26-82a9b9e44d15",
+      "issue_id": "GAP-4-P2C4.2.6",
+      "linked_subcap_ids": [
+        "P2C4.2.6"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.5/5 \u2014 1.5 pts below the RB peer median (3.0/5). [EVIDENCE]: E-027:F1, E-054:F1, E-054:F3 provide 8 items for AI-Generated Financial Insights. [MATURITY]: Maps to M1.5 based on evidence tier and capability assessment. [GAP]: L2.0 ceiling with \u00b10.7 uncertainty. [SO WHAT]: For Wintrust, this subcapability represents a development area requiring investment.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI-Generated Financial Insights"
+    },
+    {
+      "id": "a4486244-27a1-4602-a178-0b59e92b4e27",
+      "issue_id": "GAP-5-P2C4.2.8",
+      "linked_subcap_ids": [
+        "P2C4.2.8"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.5/5 \u2014 1.5 pts below the RB peer median (3.0/5). [EVIDENCE]: E-027:F1, E-054:F1, E-054:F3 provide 8 items for Consent-Based Personalization Tiers. [MATURITY]: Maps to M1.5 based on evidence tier and capability assessment. [GAP]: L2.0 ceiling with \u00b10.7 uncertainty. [SO WHAT]: For Wintrust, this subcapability represents a development area requiring investment.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Consent-Based Personalization Tiers"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Latest available financials show total assets of $71.1B.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.18,
+      "peer_name": "Old National Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.5,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 3.5,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.15,
+      "peer_name": "Webster Financial",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.12,
+      "peer_name": "Associated Banc-Corp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.0,
+        "P1C4": 3.5,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.03,
+      "peer_name": "Cullen/Frost Bankers",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.0,
+      "peer_name": "Commerce Bancshares",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-WTFC-20260408-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "rated 1.8 stars on Google Play \u2014 severe usability issues Glassdoor 3.4/5 overall (420 reviews), 56% positive business outlook Recurring employee complaints: outdated technology, archaic software, poor implementation of applications, old sch",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 420,
+        "polarity": "negative",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 1.8
+      },
+      {
+        "drilldown": "Hashtags: #fintech #1033 #baas #ai #data #analytics Indeed reviews: outdated technology, low pay, fragmented org structure, but good community culture LinkedIn 5,286 employees, Financial Services industry, Public Company, Rosemont IL Board-",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Indeed",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      },
+      {
+        "drilldown": "(no chatbot platform), Indeed jobs (no AI/chatbot roles), App Store review analysis (no chatbot mentioned), website contact page (no chat widget)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "problems iBB business banking app rated 1.8 stars on Google Play \u2014 severe usability issues Glassdoor 3.4/5 overall (420 reviews), 56% positive business outlook Recurring employee complaints: outdated technology, archaic software, poor imple",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 420,
+        "polarity": "negative",
+        "source": "Google Play",
+        "themes": [],
+        "value": 1.8
+      },
+      {
+        "drilldown": "or all-day customer service \u2014 service channel gaps exist BBB complaints center on CD auto-renewal rates (transparency), mortgage servicing (escrow analysis disputes), and insurance premium financing \u2014 typical community banking issues, not s",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "CIO SUCCESSION CONFIRMED: Mike Ryan promoted from SVP Deputy CIO \u2192 EVP Chief Information Officer. Replaces Tony Buttrick who transitioned to advisor/retired. Previous experience: SVP Director Business Line IS - Banking, VP IT, Software Analyst. Skills include M&A, Strategic Planning, Vendor Mgmt, Off-shore Team Mgmt, .NET, C#, COBOL, SQL Server, DB2, Web Services, VoIP, VMware.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-068",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "836d4f65-0966-455d-a966-2b03e7f6b41d",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://vibeprospecting.explorium.ai",
+      "subcap_ids": [],
+      "title": "Mike Ryan promoted from SVP Deputy CIO \u2192 EVP Chief\u2026"
+    },
+    {
+      "body": "Laura Kohl (CIO, Morningstar) appointed to board Oct 2025 \u2014 extensive global business and technology expertise, leads global technology strategy",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "9793ab79-c9e8-4576-b08c-d6aec6fd58fd",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://ir.wintrust.com/investor-news-events/press-releases/news-details/2025/Wintrust-Financial-Corporation-Appoints-Two-Members-to-Board-of-Directors/default.aspx",
+      "subcap_ids": [],
+      "title": "Laura Kohl (CIO, Morningstar) appointed"
+    },
+    {
+      "body": "David Richter (MD, GCM Grosvenor) also appointed \u2014 Investment Committee Chair for Absolute Return Strategies",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "0562b067-f048-4a0c-90ce-636b9c8071db",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://ir.wintrust.com/investor-news-events/press-releases/news-details/2025/Wintrust-Financial-Corporation-Appoints-Two-Members-to-Board-of-Directors/default.aspx",
+      "subcap_ids": [],
+      "title": "David Richter (MD, GCM Grosvenor) appointed Investment\u2026"
+    },
+    {
+      "body": "Macatawa system conversion completed Apr 25, 2025 (E-058). New teller system with virtual document creation. Website migrated to Wintrust platform.",
+      "date_precision": "day",
+      "e_id": "E-067",
+      "event_date": "2025-04-25",
+      "evidence_e_ids": [
+        "E-067",
+        "E-058"
+      ],
+      "id": "5237bd11-0544-416b-b3e6-d32f03d034b5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://vibeprospecting.explorium.ai",
+      "subcap_ids": [],
+      "title": "Macatawa system conversion completed"
+    },
+    {
+      "body": "Strategy: retain acquired bank identities rather than rebranding \u2014 'A Wintrust Community Bank' tagline",
+      "date_precision": "publish_fallback",
+      "e_id": "E-011",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "87d6f8da-6873-485a-b48c-31e1ce0f3966",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Wintrust_Financial",
+      "subcap_ids": [],
+      "title": "Strategy: retain acquired bank identities rather than\u2026"
+    },
+    {
+      "body": "Thomas Postma (former Macatawa Chairman) appointed to Board Aug 2024 \u2014 post-acquisition governance integration.",
+      "date_precision": "month",
+      "e_id": "E-061",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "cf30a518-7053-4ab7-bafc-36ef325d0567",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://s26.q4cdn.com/937684793/files/doc_financials/2025/sr/Proxy-Statement.pdf",
+      "subcap_ids": [],
+      "title": "Thomas Postma (former Macatawa Chairman) appointed to Board\u2026"
+    },
+    {
+      "body": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B AUM). Aug 2024 completed Macatawa Bank merger.",
+      "date_precision": "month",
+      "e_id": "E-011",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "bbe20f26-d904-4d19-9efa-df7a67f91291",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Wintrust_Financial",
+      "subcap_ids": [],
+      "title": "Aug 2024 completed Macatawa Bank merger"
+    },
+    {
+      "body": "Explorium event search with Wintrust website keyword filter returned Macatawa Bank Corporation (subsidiary, acquired 2024) as entity with recent events (new partnerships, hiring, awards). Confirms post-acquisition subsidiary is actively integrating.",
+      "date_precision": "year",
+      "e_id": "E-067",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-067"
+      ],
+      "id": "23dac3c8-de4f-4107-b192-2047e6d99ee0",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://vibeprospecting.explorium.ai",
+      "subcap_ids": [],
+      "title": "Explorium event search with Wintrust website keyword filter\u2026"
+    },
+    {
+      "body": "2023 CSR: Wintrust Digital Lending (WDL) launched Aug 2023 \u2014 online portal for small business loan applications",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2023-08-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "e12d7a33-87a2-41b3-81bd-990b88a38b09",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.wintrust.com/lp/2020/diversity-inclusion.html",
+      "subcap_ids": [],
+      "title": "Wintrust Digital Lending (WDL) launched Aug 2023 \u2014 online\u2026"
+    },
+    {
+      "body": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B AUM). Aug 2024 completed Macatawa Bank merger.",
+      "date_precision": "year",
+      "e_id": "E-011",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "2fb9179a-82c7-4fbe-8e83-c115b5bbbe50",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Wintrust_Financial",
+      "subcap_ids": [],
+      "title": "2022 acquired US asset mgmt arm of Rothschild & Co (~$8B\u2026"
+    },
+    {
+      "body": "Consumer digital banking: mobile self-enrollment available (no computer needed). NCR Digital First Platform deployed 2020. Zelle, mobile deposit, bill pay, PFM, biometric auth, card controls.",
+      "date_precision": "year",
+      "e_id": "E-051",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "d53f47bf-6f51-44b7-a43e-9dc95fff6516",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.wintrust.com/lp/2022/digital.html",
+      "subcap_ids": [],
+      "title": "NCR Digital First Platform deployed 2020"
+    },
+    {
+      "body": "Feb 2019 consent order + civil money penalty for internal control deficiencies (unsafe/unsound practices)",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2019-02-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "c22ae762-0a8a-4dda-8abd-c8bd23298560",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20190228a.htm",
+      "subcap_ids": [],
+      "title": "Feb 2019 consent order + civil money penalty for internal\u2026"
+    }
+  ]
+}

@@ -1,0 +1,500 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "American National Bank of Texas",
+      "amount": null,
+      "announced_on": null,
+      "body": "Rockwall County entry \u2014 key Dallas-adjacent market now one of ANBTX's highest-density areas",
+      "closed_on": null,
+      "details": "Rockwall County entry \u2014 key Dallas-adjacent market now one of ANBTX's highest-density areas",
+      "e_id": "E-002",
+      "event_date": "2002-01-01",
+      "id": "733ab5d0-6018-4b47-b916-01ac1bf7b30d",
+      "source_url": null,
+      "status": null,
+      "target": "Jefferson Heritage Bank",
+      "title": "Jefferson Heritage Bank"
+    },
+    {
+      "acquirer": "American National Bank of Texas",
+      "amount": "$650M",
+      "announced_on": null,
+      "body": "East Texas market entry; brought combined assets to ~$650M; expanded presence in Van Zandt County",
+      "closed_on": null,
+      "details": "East Texas market entry; brought combined assets to ~$650M; expanded presence in Van Zandt County",
+      "e_id": "E-002",
+      "event_date": "1999-01-01",
+      "id": "6ad01ff5-8e3d-4e88-afd9-43602a204ec7",
+      "source_url": null,
+      "status": null,
+      "target": "The Bank of Van Zandt",
+      "title": "The Bank of Van Zandt"
+    }
+  ],
+  "entity_display_id": "american-national-bank-o-0001",
+  "financials": {
+    "lines": [
+      "ANBTX reported $5.5 billion in total assets as of September 30, 2025, ranking it 19th among all banks headquartered in Texas by asset size \u2014 a milestone that places it firmly within the mid-tier community bank segment ($5\u201310B) while positioning it well ahead of its early-2000s scale of approximately $2 billion. The bank operates 28+ banking centers across eight Texas counties (Collin, Dallas, Hunt, Johnson, Kaufman, Rockwall, Tarrant, and Van Zandt), supplemented by two specialized loan production offices serving the South Dallas and Frisco markets. [E-020, E-010]",
+      "The bank's asset base has compounded at approximately 8.9% CAGR since 1999 (when the Bank of Van Zandt acquisition brought assets to approximately $650 million), reflecting a strategy of disciplined acquisition activity through 2018 followed by sustained organic growth. Post-2018 organic CAGR is estimated at approximately 3.5% annually \u2014 consistent with a community bank deepening its North Texas market penetration rather than expanding geographically. Revenue is estimated at approximately $240 million on a net interest margin-driven model typical of community banking institutions in this asset range. [E-020]",
+      "Workforce scale stands at approximately 750\u2013760 employees based on the most recent technographic intelligence, consistent with a banking institution of this asset size. ANBTX's 16-time recognition as a Top Workplaces DFW honoree by The Dallas Morning News (2009, 2011\u20132025, 16 total) \u2014 including its most recent recognition in the large company category in 2025 \u2014 signals sustained employee engagement metrics that reduce talent acquisition costs and support customer-facing service quality. [E-016, E-038]",
+      "Two strategic subsidiaries extend ANBTX's revenue diversification beyond core banking: ANBTX Insurance Services Inc. (operating as Sleeper, Sewell & Company, acquired 2006) provides personal insurance, commercial insurance, group and individual health coverage, and risk management services through a Dallas-based office; and ANBTX Wealth Management offers asset management, financial planning, investment advisory, and trust and estate planning services, leveraging an Ameriprise Financial platform integration implemented in 2022. [E-020, E-035]",
+      "ANBTX's asset trajectory over 26 years reflects a consistent compounding of acquisition-led and organic growth. From approximately $650 million at year-end 1999 (post-Bank of Van Zandt acquisition) to $5.5 billion as of September 2025, the bank has grown at an estimated 8.9% compound annual growth rate (CAGR) \u2014 a rate that places it among the more consistent growers in the Texas community banking sector. The post-2018 period, during which ANBTX completed its last acquisition (G-6 Corporation / First State Bank in Mesquite), marks a deliberate shift to organic growth and technology-led scale expansion. [E-020]",
+      "Post-2018 organic asset CAGR is estimated at approximately 3.5% annually, consistent with disciplined net interest margin management in a competitive Texas banking market. Revenue is estimated at approximately $240 million \u2014 reflecting a classic community banking model where net interest income from loans and deposits constitutes the primary revenue stream, supplemented by fee income from treasury management, wealth management, insurance services, and mortgage origination. The January 2026 addition of seven commercial banking associates \u2014 under Chief Strategy Officer Steve White's C&I diversification mandate \u2014 signals that the loan book expansion strategy is accelerating into 2026. [E-002, E-016]",
+      "Financial trend classification: STABLE-GROWING. ANBTX has delivered consistent year-over-year asset growth without material contraction periods. Its 19th-largest Texas bank ranking as of September 2025 represents a gain from prior-year positions, confirming continued relative growth within the Texas banking sector. As the bank approaches the $7\u20138B range over the next 3\u20135 years, the $10B regulatory threshold \u2014 at which CFPB direct supervision, enhanced Durbin Amendment provisions, and full DFAST stress testing apply \u2014 will become a strategic planning driver that meaningfully increases technology and compliance investment requirements. [E-020, E-010]"
+    ],
+    "metrics": {
+      "post": "2018 organic CAGR is estimated at approximat",
+      "trajectory": {
+        "branches": 28,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 750,
+        "events": [
+          {
+            "fy": "FY2018",
+            "label": "G-6 Corporation / First State Bank"
+          }
+        ],
+        "fy": [
+          "FY2018",
+          "FY2025"
+        ],
+        "geography": "North Texas (Dallas-Fort Worth Metropolitan Area + East Texas)",
+        "headline": "$5.5B net income \u00b7 FY2025",
+        "regulator": "OCC",
+        "series": {
+          "net_income_m": [
+            4000.0,
+            5500.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "North Texas (Dallas-Fort Worth Metropolitan Area + East Texas)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Senior Leadership",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": null
+      }
+    ],
+    "license_type": "National Bank",
+    "narrative_md": "Comprehensive organizational context. Every claim is linked to evidence IDs. Financial data is sourced from the most recent available Statement of Condition, OCC regulatory filings, and technographic intelligence sources.\n\nAmerican National Bank of Texas (ANBTX) traces its origins to November 22, 1875, when Waters, Bivins & Corley Bank opened in Terrell, Texas \u2014 making it one of the oldest independently operated financial institutions in the state. The bank has operated continuously under federal charter since July 1, 1981, when the current commercial bank charter (OCC Charter No. 17043) was established. The institution's current legal name was adopted in 1995, when it transitioned from American National Bank of Terrell \u2014 its identity since 1903 \u2014 to reflect its expanded North Texas footprint. [E-010, E-020]\n\nANBTX is independently owned and privately held, a structural characteristic that has defined its strategy across multiple leadership generations. Robert A. Hulsey has served as President & Chief Executive Officer since 1989 \u2014 a 37-year tenure that has presided over the bank's growth from a sub-$200M community institution to a $5.5B North Texas banking enterprise. Hulsey's long tenure signals continuity, deep local market knowledge, and a deliberate resistance to acquisition by larger regional or national banks \u2014 a governance stance reinforced by ANBTX's consistent independence messaging: 'Your Bank for Life,' 'EmpoweringPossible,' and 'Making communities stronger by making businesses stronger.' [E-020, E-035]\n\nThe board of directors reflects ANBTX's dual mandate of community heritage and forward-looking innovation. The 2023 appointment of Dennis Cail (co-founder and CEO of Zirtue, an AI-first relationship-based lending fintech) and Suzanne Cruz-Sewell (Assistant Vice President of Business Diversity at DFW International Airport) signals deliberate infusion of AI competency and diversity strategy at the highest governance level. Robert Messer (SEVP & CFO) serves concurrently as Chairman of the Risk Management Association (RMA) Community Bank Council and as a board member \u2014 providing ANBTX direct access to industry-leading risk management intelligence and peer benchmarking. [E-035, E-015]\n\nANBTX is supervised by the Office of the Comptroller of the Currency (OCC) as a federally chartered national bank, subject to OCC examination cycles of 12\u201318 months. The bank is a member of the Federal Deposit Insurance Corporation (FDIC) with all deposits backed by the full faith and credit of the U.S. Government. ANBTX's federal charter, combined with its OCC supervisory relationship, means its compliance obligations span the full FFIEC examination framework \u2014 including IT, cybersecurity, BSA/AML, consumer protection, and third-party risk management. [E-010]",
+    "primary_regulator": "OCC",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "Knowledge Center: 150+ financial education articles (budgeting, saving, retirement, mortgage, business) with calculators \u2014 digital financial wellness platform Homebuyer seminars (instructor-led, free, multiple locations)",
+        "title": "Knowledge Center: 150+ financial education articles (budgeting\u2026",
+        "type": "article",
+        "url": "https://knowledge.anbtx.com/"
+      },
+      {
+        "author": null,
+        "date": "2024-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-041",
+        "excerpt": "SRM previously engaged for vendor contract optimization (debit card portfolio) AND M&A assistance \u2014 multi-year innovation advisory partnership SRM engagement in Jan 2026 webinar (Jack Yang) demonstrates ongoing strategic",
+        "title": "SRM engaged for vendor contract optimization (debit card portfolio)",
+        "type": "webinar",
+        "url": "https://srmcorp.com/american-national-bank-of-texas-entrusts-srm-with-business-capability-maturity-assessment-technology-strategy-roadmap/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "Jack Yang (CTO) addressed AI/automation as part of technology strategy at SRM Perspectives Live (Jan 2026) \u2014 AI in CTO's strategic agenda Gail Mason (CDO) published about 'The Reprompt Threat: Is Your AI Agent an Informa",
+        "title": "Jack Yang (CTO) addressed AI/automation",
+        "type": "article",
+        "url": "https://srmcorp.com/technology-as-a-catalyst-for-growth-in-community-banking/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-115",
+        "excerpt": "Jack Yang CTO, SRM Perspectives Live (Jan 2026): 'technology is no longer a back-office function; it is a strategic catalyst' \u2014 technology strategy explicitly linked to business growth Jack Yang: 'thoughtful architecture",
+        "title": "It is a strategic catalyst' \u2014 technology strategy explicitly linked\u2026",
+        "type": "article",
+        "url": "https://srmcorp.com/technology-as-a-catalyst-for-growth-in-community-banking/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-001",
+        "excerpt": "Jack Yang (CTO ANBTX) stated: 'technology is no longer a back-office function; it is a strategic catalyst' at SRM Perspectives Live webinar (Jan 2026) ANBTX framing technology leadership as tightly connected to business ",
+        "title": "Jack Yang (CTO ANBTX) stated",
+        "type": "webinar",
+        "url": "https://srmcorp.com/technology-as-a-catalyst-for-growth-in-community-banking/"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-025",
+        "excerpt": "Gail Mason (CDO, CGEIT): published LinkedIn post titled 'The Reprompt Threat: Is Your AI Agent an Information Security Liability?' (2026) \u2014 active engagement with AI security and governance risks CGEIT (Certified in Gove",
+        "title": "Your AI Agent Is an Information Security Liability",
+        "type": "linkedin-post",
+        "url": "https://linkedin.com/in/gailgodwinmason"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "2509114f-c6ef-43e6-bcde-c6907268f8c7",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-12",
+      "rationale": "Only 5 unique score values used across 698 subcapabilities: [1.5, 2.0, 2.5, 3.0, 3.5]. The 0.5-step grid constrains expression but the distribution is acceptable for a PUBLIC-mode assessment.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Only 5 unique score values used across 698 subcapabilities: [1.5, 2.0, 2.5, 3.0, 3.5]. The 0.5-step grid constrains expression but the distribution is acceptable for a PUBLIC-mode assessment."
+    },
+    {
+      "id": "b7bcef3f-e5c7-4c2c-b9fd-7fab235bbd2a",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-12",
+      "rationale": "Caps_Applied column uses prose descriptions ('Evidence ceiling 3.0 (T1-tier evidence)', 'Keyword cap: open bank') rather than explicit ISS-001/ISS-002 identifiers. 45 capped subcaps are correctly capped but the issue ID linking is by prose inference not explicit tag.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Caps_Applied column uses prose descriptions ('Evidence ceiling 3.0 (T1-tier evidence)', 'Keyword cap: open bank') rather than explicit ISS-001/ISS-002 identifiers. 45 capped subcaps are correctly capped but the issue ID linking is by prose inference not explicit tag."
+    },
+    {
+      "id": "d5a3db6d-6eb7-4ed7-ab7e-0f9fcf1ff266",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-12",
+      "rationale": "Executive summary uses aggregate language ('peer median', '+0.32 above peer group') rather than naming individual peers (SBSI, VBTX, FFIN, Stellar). All 4 peers appear within the first 4,000 chars of the assessment methodology section (char 10,919). Total peer refs: 26.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Executive summary uses aggregate language ('peer median', '+0.32 above peer group') rather than naming individual peers (SBSI, VBTX, FFIN, Stellar). All 4 peers appear within the first 4,000 chars of the assessment methodology section (char 10,919). Total peer refs: 26."
+    },
+    {
+      "id": "87225481-d83a-4b2b-a94e-6990214c419b",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-05-12",
+      "rationale": "83% of HIGH-confidence rows have exactly 1 evidence item. Per skill specification, 'single T1 \u226424mo = HIGH alone' \u2014 meaning single-source HIGH is architecturally valid. 161 of the single-source HIGH rows have T1 evidence.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "83% of HIGH-confidence rows have exactly 1 evidence item. Per skill specification, 'single T1 \u226424mo = HIGH alone' \u2014 meaning single-source HIGH is architecturally valid. 161 of the single-source HIGH rows have T1 evidence."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Issues documented in this section flow directly from the Layer 0 Client Profile Research into Layer 1 scoring caps. Each issue is classified by severity, status, capability impact, and cap value. The Issue Timeline shows when each issue emerged and its current trajectory.",
+    "trend_md": "Most recent reported financials: $5.5B net income as of FY2025, within a series tracked FY2018 to FY2025. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.71,
+        "P1C2": 3.1,
+        "P1C3": 2.53,
+        "P1C4": 2.67,
+        "P1C5": 3.0,
+        "P2C1": 3.09,
+        "P2C2": 2.97,
+        "P2C3": 2.51,
+        "P2C4": 3.0,
+        "P3C1": 2.85,
+        "P3C2": 2.15,
+        "P3C3": 2.26,
+        "P3C4": 3.07,
+        "P4C1": 3.19,
+        "P4C2": 2.65,
+        "P4C3": 3.67,
+        "P4C4": 4.37
+      },
+      "overall_score": 2.93,
+      "peer_name": "Beacon Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.3,
+        "P1C2": 2.5,
+        "P1C3": 3.33,
+        "P1C4": 3.25,
+        "P1C5": 2.5,
+        "P2C1": 2.75,
+        "P2C2": 2.5,
+        "P2C3": 2.63,
+        "P2C4": 2.0,
+        "P3C1": 2.33,
+        "P3C2": 2.83,
+        "P3C3": 2.5,
+        "P3C4": 2.67,
+        "P4C1": 2.25,
+        "P4C2": 3.0,
+        "P4C3": 2.83,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.73,
+      "peer_name": "Bank of Utah",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.79,
+        "P1C2": 2.78,
+        "P1C3": 2.78,
+        "P1C4": 2.77,
+        "P1C5": 2.25,
+        "P2C1": 2.77,
+        "P2C2": 2.75,
+        "P2C3": 2.77,
+        "P2C4": 2.76,
+        "P3C1": 2.77,
+        "P3C2": 2.77,
+        "P3C3": 2.76,
+        "P3C4": 2.78,
+        "P4C1": 2.76,
+        "P4C2": 2.75,
+        "P4C3": 2.78,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.71,
+      "peer_name": "Cornerstone Capital Bank, SSB",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.88,
+        "P1C2": 3.0,
+        "P1C3": 2.19,
+        "P1C4": 2.35,
+        "P1C5": 3.11,
+        "P2C1": 3.02,
+        "P2C2": 2.49,
+        "P2C3": 1.77,
+        "P2C4": 2.59,
+        "P3C1": 2.99,
+        "P3C2": 3.0,
+        "P3C3": 2.98,
+        "P3C4": 2.43,
+        "P4C1": 3.04,
+        "P4C2": 2.46,
+        "P4C3": 2.24,
+        "P4C4": 2.25
+      },
+      "overall_score": 2.63,
+      "peer_name": "SouthState Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.65,
+        "P1C2": 3.14,
+        "P1C3": 2.37,
+        "P1C4": 2.82,
+        "P1C5": 3.44,
+        "P2C1": 2.33,
+        "P2C2": 2.56,
+        "P2C3": 1.9,
+        "P2C4": 2.13,
+        "P3C1": 2.4,
+        "P3C2": 2.46,
+        "P3C3": 2.76,
+        "P3C4": 2.53,
+        "P4C1": 2.88,
+        "P4C2": 2.3,
+        "P4C3": 2.73,
+        "P4C4": 2.73
+      },
+      "overall_score": 2.6,
+      "peer_name": "Amalgamated Financial Corp / Amalgamated Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-ANBTX-20260512-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "5) \u2014 employee survey-based CX proxy with annual measurement Indeed: CEO approval 90.48%, recommend to friend 62.5%, overall 3.5/5, work-life balance 3.7/5 \u2014 measurable workforce experience metrics SRM delivered: (1) Capability Maturity Asse",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.5
+      },
+      {
+        "drilldown": "get your personalized recommendations.' Mobile app iOS (App Store ID 860053826) and Android (Google Play com.fi8217.godough) \u2014 dual-platform mobile presence Mobile app features: account balances, transaction history, account alerts, transfe",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "ions.' Mobile app iOS (App Store ID 860053826) and Android (Google Play com.fi8217.godough) \u2014 dual-platform mobile presence Mobile app features: account balances, transaction history, account alerts, transfers, bill pay \u2014 core digital banki",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "90.48%; recommend to friend 40/24 (63% recommend) \u2014 NPS-proxy at employee/customer ANBTX Live ITMs deployed: Interactive Teller Machines enabling check balances, transfers, withdrawals, deposits \u2014 enhanced ATM self-service Video Banker Assi",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "East Dallas suburban expansion into Mesquite \u2014 most recent acquisition; organic growth strategy followed",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "5c4b2f88-0890-4959-a39f-27092f535e5e",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "G-6 Corporation / First State Bank"
+    },
+    {
+      "body": "Tarrant County (Fort Worth) market entry; ANBTX's largest acquisition by geography \u2014 opened western market",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2008-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "8681c75b-58b3-427c-a51e-3ca49783d8eb",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Bryant-Irvin Bancshares / Citizens National Bank"
+    },
+    {
+      "body": "Direct Dallas County presence; brought total to 28 locations milestone; elevated ANBTX to significant DFW competitor",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2008-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "c64a1e39-f47b-41f0-95ee-40fed9ad59d5",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Dallas National Bank / DNB Bancshares"
+    },
+    {
+      "body": "Revenue diversification; established ANBTX Insurance Services Inc. (personal, commercial, health insurance)",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2006-01-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "2ceac679-ce0a-4c45-9ed1-98b403a525ce",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Sleeper, Sewell & Company"
+    },
+    {
+      "body": "Rural East Texas coverage extension into Hunt, Kaufman, and Rockwall counties",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2002-01-01",
+      "evidence_e_ids": [],
+      "id": "234b4780-d9e8-4c4f-b585-f661da0d1870",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Benchmark Bank (5 branches)"
+    },
+    {
+      "body": "Rockwall County entry \u2014 key Dallas-adjacent market now one of ANBTX's highest-density areas",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2002-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "733ab5d0-6018-4b47-b916-01ac1bf7b30d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Jefferson Heritage Bank"
+    },
+    {
+      "body": "Eastern Dallas suburbs; positioned ANBTX in the growing Rowlett/Garland corridor",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2002-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "40077e77-fb30-45e0-85cf-7b72465b993e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Union Planters Bank (Rowlett TX)"
+    },
+    {
+      "body": "East Texas market entry; brought combined assets to ~$650M; expanded presence in Van Zandt County",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "1999-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "6ad01ff5-8e3d-4e88-afd9-43602a204ec7",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "The Bank of Van Zandt"
+    }
+  ]
+}

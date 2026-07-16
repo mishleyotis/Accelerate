@@ -1,0 +1,517 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "BECU",
+      "amount": null,
+      "announced_on": null,
+      "body": "BECU acquired EarnUp's AI Advisor technology assets",
+      "closed_on": null,
+      "details": "BECU acquired EarnUp's AI Advisor technology assets",
+      "e_id": "E-018",
+      "event_date": "2025-07-01",
+      "id": "9cc01e58-77b7-4d15-aeeb-c5fc43b4a8fa",
+      "source_url": "https://www.stocktitan.net/news/KEY/earn-up-announces-sale-of-ai-advisor-platform-to-ksghk55676ao.html",
+      "status": null,
+      "target": "EarnUp",
+      "title": "BECU acquired EarnUp's AI Advisor technology assets"
+    }
+  ],
+  "entity_display_id": "boeing-employees-credit--0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: DECLINING. BECU's net income declined from $207M (2024) to an estimated $173M (2025), making it the only top-5 US credit union to report lower earnings year-over-year. Total assets remain stable at $29.4B. The SAFE Credit Union merger, announced November 2025, will create a combined entity exceeding $33B in assets with 2M+ members \u2014 a strategic response to margin compression and the need for scale. Jefferies LLC serves as financial advisor. The merger is expected to close in early 2027 pending regulatory approval. [E-002, E-003, E-051]"
+    ],
+    "metrics": {
+      "net_income": 173000000.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Washington state (primary)",
+      "OR",
+      "ID",
+      "SC (secondary)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "VP/CDO Data",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": null
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chief Digital",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": null
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "Boeing Employees Credit Union (BECU) is a member-owned, not-for-profit financial cooperative organized under Washington state law. Founded in 1935 by 18 Boeing employees as Fellowship Credit Union, BECU has grown to become the 4th largest credit union in the United States and the largest in Washington state. Headquartered at 12770 Gateway Drive, Tukwila, WA 98168, BECU operates as a cooperative where each of its 1.6 million members holds equal ownership. The institution is governed by a volunteer Board of Directors elected by members. [E-001, E-002, E-003]",
+    "primary_regulator": "NCUA",
+    "regulatory_standing": {
+      "as_of": "2026-03-01",
+      "e_id": "E-034",
+      "label": "Clean regulatory standing",
+      "note": "No NCUA enforcement actions found against BECU (negative search confirmed)"
+    },
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2024-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-108",
+        "excerpt": "Murphy discussed Zero Trust architecture on CISO Stories Podcast \u2014 confirms Zero Trust implementation at BECU Azure Active Directory in tech stack (BuiltWith) \u2014 cloud IAM platform in use",
+        "title": "Zero Trust implementation at BECU Azure Active Directory in tech\u2026",
+        "type": "podcast",
+        "url": "https://www.scworld.com/podcast-segment/13450-identity-security-navigating-the-new-normal-with-dr-sean-murphy-sean-murphy-csp-201"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-063",
+        "excerpt": "BECU blog publishes regular content on financial wellness, CEO perspectives, product updates Financial education content: articles, seminars, webinars, Financial Reality Fairs, videos & tutorials",
+        "title": "BECU blog publishes regular content on financial wellness, CEO\u2026",
+        "type": "webinar",
+        "url": "https://www.becu.org/members-matter/about-membership/becu-partnerships/university-of-washington"
+      },
+      {
+        "author": null,
+        "date": "2024-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-025",
+        "excerpt": "Sean Murphy, CISO and SVP at BECU, presented webinar on building culture of security through awareness training and human risk management (Oct 2024) CISO Murphy holds PhD and CCISO certification, has been BECU CISO since",
+        "title": "Sean Murphy, CISO and SVP at BECU, presented webinar",
+        "type": "webinar",
+        "url": "https://www.bankinfosecurity.com/security-awareness-programs-computer-based-training-c-493"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "dfd5b764-cd46-49e6-abba-3ccf81d47be6",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Missing governance contract files (caps_applied_log.csv, contradiction_log.csv, reasoning_chain_log.json) \u2014 non-blocking"
+    },
+    {
+      "id": "a3161fa6-ca5c-4be7-8511-f0b8d5ef7e94",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "M3 concentration at 62% \u2014 typical for PUBLIC evidence mode (T2/T3 ceiling 3.0-3.5). Critic pass would refine."
+    },
+    {
+      "id": "338626d4-e268-4a68-8cbf-3f5f254c0f1c",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "32% of substantive paragraphs could benefit from additional BECU-specific data references"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Severity-Capped Capability Impact Analysis\nISS-001 (CFPB +172%): Caps Omnichannel Service and Compliance at level 3. Without cap, raw scores would be 2.8-3.0. The 0.4-0.6 point reduction represents the gap between structural capability (channels exist, programs exist) and outcome quality (complaints rising, resolution low). [E-069]\nISS-003 (Glassdoor 3.1): Caps all Culture subcaps at level 3. This is the single most impactful cap in the assessment, affecting 41 subcaps. Despite formal structures (ERGs, VP DEI, BILD initiative, agile VPs), the 43% recommend rate indicates execution has not matched intent. [E-046, E-050]\nISS-005 (SAFE merger + no iPaaS): Caps Integration Architecture and Resilience at level 3. The absence of an integration platform is not merely a missing tool \u2014 it represents an architectural gap that will multiply with every system the SAFE merger brings. [E-051, E-103]",
+    "trend_md": "Trend Classification: DECLINING. Trajectory classified DECLINING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.4,
+        "P1C2": 2.61,
+        "P1C3": 3.17,
+        "P1C4": 2.14,
+        "P1C5": 2.28,
+        "P2C1": 2.31,
+        "P2C2": 2.63,
+        "P2C3": 2.46,
+        "P2C4": 2.67,
+        "P3C1": 2.19,
+        "P3C2": 2.79,
+        "P3C3": 2.94,
+        "P3C4": 2.25,
+        "P4C1": 2.76,
+        "P4C2": 2.6,
+        "P4C3": 2.71,
+        "P4C4": 2.81
+      },
+      "overall_score": 2.63,
+      "peer_name": "Kitsap Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.4,
+        "P1C3": 2.96,
+        "P1C4": 2.46,
+        "P1C5": 1.14,
+        "P2C1": 2.5,
+        "P2C2": 2.83,
+        "P2C3": 2.59,
+        "P2C4": 2.13,
+        "P3C1": 2.23,
+        "P3C2": 3.21,
+        "P3C3": 2.93,
+        "P3C4": 2.88,
+        "P4C1": 2.39,
+        "P4C2": 2.96,
+        "P4C3": 3.07,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.61,
+      "peer_name": "Sound Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-BECU-20260325-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 340,
+        "polarity": "negative",
+        "source": "Glassdoor",
+        "themes": [
+          "IT layoffs, bureaucracy, antiquated systems, change management"
+        ],
+        "trend": "DECLINING (12mo)",
+        "value": 3.1
+      },
+      {
+        "drilldown": "P1C5.5 neutral",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 340,
+        "polarity": "neutral",
+        "source": "Glassdoor DEI",
+        "themes": [
+          "Average for financial services"
+        ],
+        "trend": "STABLE",
+        "value": 3.5
+      },
+      {
+        "drilldown": "P1C4.8 moderate",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 100.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Comparably Diversity",
+        "themes": [
+          "Manager, leadership rated highest by diverse employees"
+        ],
+        "trend": "POSITIVE",
+        "value": 76.0
+      },
+      {
+        "drilldown": "P2C3, P3C3 cap M3",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CFPB Complaints",
+        "themes": [
+          "Cards, payments, loan denials",
+          "7x avg lender rate"
+        ],
+        "trend": "+172.3% YoY",
+        "value": null
+      },
+      {
+        "drilldown": "P2C3.5 cap M3",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "PissedConsumer Phone",
+        "themes": [
+          "Cards, info requests, payments",
+          "avg 8 min call"
+        ],
+        "trend": "NEGATIVE",
+        "value": 14.0
+      },
+      {
+        "drilldown": "P2C3.2 positive",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "iOS App Store",
+        "themes": [
+          "Ease of use, budgeting, no-fee",
+          "biometrics issues"
+        ],
+        "trend": "POSITIVE",
+        "value": null
+      },
+      {
+        "drilldown": "P2C3.2 moderate",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [
+          "Praised budgeting",
+          "transaction lag, balance display"
+        ],
+        "trend": "NEUTRAL",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Bankrate/NerdWallet",
+        "themes": [
+          "Highly rated mobile app across review sites"
+        ],
+        "trend": "POSITIVE",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "BECU acquired EarnUp's AI Advisor technology assets",
+      "date_precision": "publish_fallback",
+      "e_id": "E-018",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "9cc01e58-77b7-4d15-aeeb-c5fc43b4a8fa",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/news/KEY/earn-up-announces-sale-of-ai-advisor-platform-to-ksghk55676ao.html",
+      "subcap_ids": [],
+      "title": "BECU acquired EarnUp's AI Advisor technology assets"
+    },
+    {
+      "body": "Opened 2 new NFCs in 2024 (Ballinger, Gig Harbor); 3 more in 2025 (Tacoma, White Center, Spokane South Hill)",
+      "date_precision": "year",
+      "e_id": "E-017",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "0551cfe0-4e56-47df-90eb-47c39092eb6b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://newsroom.becu.org/2025-04-29-BECUs-2024-Annual-Report-Growing-its-Commitment-to-Serving-Members-and-Communities",
+      "subcap_ids": [],
+      "title": "Opened 2 new NFCs in 2024 (Ballinger, Gig Harbor)"
+    },
+    {
+      "body": "Named American Banker '23 People Who Will Matter in Banking in 2023'",
+      "date_precision": "year",
+      "e_id": "E-030",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "6e6cfb83-7684-496e-b809-57c3c7692d75",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://newsroom.becu.org/Beverly-Anderson",
+      "subcap_ids": [],
+      "title": "Named American Banker '23 People Who Will Matter in Banking\u2026"
+    },
+    {
+      "body": "Raquel Karls EVP Chief People Officer (joined 2023); prior CPO at REI Co-op and Outerwall",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "166101c5-256c-4586-a503-68be78bff41a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.becu.org/about-us/governance",
+      "subcap_ids": [],
+      "title": "Raquel Karls EVP Chief People Officer joined"
+    },
+    {
+      "body": "Opened new NFCs in Monroe WA and Seattle Columbia City in 2023",
+      "date_precision": "year",
+      "e_id": "E-028",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "bc74a7dc-badd-4cfc-8e11-2420e0f491a8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://gowestassociation.org/2024/05/01/becus-2023-annual-report-financial-stability-empowers-members-and-communities/",
+      "subcap_ids": [],
+      "title": "Opened new NFCs in Monroe WA and Seattle Columbia City in\u2026"
+    },
+    {
+      "body": "EarnUp AI acquisition ($undisclosed) represents innovation scaling: technology acquired from evaluated fintech",
+      "date_precision": "publish_fallback",
+      "e_id": "E-043",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "000710b2-a6b2-4495-af90-bd7d1b3e01cb",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.cbinsights.com/investor/becu-fintech-incubator",
+      "subcap_ids": [],
+      "title": "EarnUp AI acquisition ($undisclosed) represents innovation\u2026"
+    },
+    {
+      "body": "Vendor relationships include: Delphix (DataOps), LPL Financial (investments), GreenPath (financial wellness), CO-OP (ATM/shared branching), EarnUp (AI \u2014 now acquired)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-035",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "ef3a1f62-c616-4295-9f32-a4e997a35244",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.delphix.com/customers/becu",
+      "subcap_ids": [],
+      "title": "Vendor relationships include Delphix (DataOps), LPL\u2026"
+    },
+    {
+      "body": "Partnered with Impacti since 2021 for GHG Inventory reports (Scope 1, 2, and relevant Scope 3)",
+      "date_precision": "year",
+      "e_id": "E-052",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-052"
+      ],
+      "id": "14c31e9e-ce8b-4918-8283-90e9b1a9404f",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://impacti.solutions/blog/becu-credit-union-powering-sustainable-success",
+      "subcap_ids": [],
+      "title": "Partnered with Impacti since 2021 for GHG Inventory reports\u2026"
+    }
+  ]
+}

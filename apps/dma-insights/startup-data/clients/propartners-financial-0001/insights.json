@@ -1,0 +1,408 @@
+{
+  "entity_display_id": "propartners-financial-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4",
+        "P2C4.1.1",
+        "P2C1.4.6",
+        "P3C1.8.RIA2",
+        "P2C3.3.CIB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "ebc2cf01-eff1-42e8-b73b-656fb51ce6a2",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-001",
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-033",
+        "E-004"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for ProPartners Financial: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-004].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Zero CRM in a 200+ client ecosystem",
+      "what_text": "Customer Data Foundation (CDP) is one of ProPartners Financial's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes ProPartners Financial's ability to deliver a stronger, more personalised customer experience [E-033].",
+      "why_text": "The research report pins the maturity impact at: Personalization ceiling capped at level 1-level 2. averages 1.5/5 across its 51 scored capability (peer median ~ 2.5) on the current assessment [E-001, E-033].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P4C2.4.7",
+        "P3C1.8.CL4",
+        "P1C1.1.1",
+        "P1C2.1.4",
+        "P1C4.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-016",
+        "E-017",
+        "E-018",
+        "E-022",
+        "E-004"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "ccd86920-92db-44af-915a-155c6f02e1e5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-016",
+            "E-017",
+            "E-018",
+            "E-022",
+            "E-004"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-009",
+        "E-023",
+        "E-008",
+        "E-021",
+        "E-024",
+        "E-006",
+        "E-014",
+        "E-019"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Digital Strategy Document a near-term focus for ProPartners Financial: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-023].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital transformation just initiated",
+      "what_text": "Digital Strategy Document is one of ProPartners Financial's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes ProPartners Financial's ability to deliver sharper strategic direction and stronger oversight [E-009].",
+      "why_text": "The assessment found: “PPF website has 3 primary segments: Ag Retailers, Cooperatives, Manufacturers — clear segment strategy PPF digital platform: automated approvals, integrated loan servicing, real-time reporting. 92%” [E-006]. The research report pins the maturity impact at: Strategy transitioning level 1→level 2. averages 1.8/5 across its 34 scored capability (peer median ~ 3.0) on the current assessment.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P3C1",
+        "P4C2",
+        "P4C2.4.7",
+        "P3C1.8.CL4",
+        "P3C1.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "a848b0dd-3ac0-4507-88de-5b54b26f9173",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-018",
+        "E-001",
+        "E-006",
+        "E-031",
+        "E-016",
+        "E-012",
+        "E-019",
+        "E-017"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Commercial Credit Pre-Qualification a near-term focus for ProPartners Financial: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-001].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Strong lending automation, weak everything else",
+      "what_text": "Commercial Credit Pre-Qualification is one of ProPartners Financial's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes ProPartners Financial's ability to deliver a stronger, more personalised customer experience [E-018].",
+      "why_text": "The assessment found: “PPF website has 3 primary segments: Ag Retailers, Cooperatives, Manufacturers — clear segment strategy PPF digital platform: automated approvals, integrated loan servicing, real-time reporting. 92%” [E-006]. The research report pins the maturity impact at: Onboarding level 3+, but / at level 1-level 2. averages 2.0/5 across its 60 scored capability (peer median ~ 3.0) on the current assessment.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.1",
+        "P3C3.8.3",
+        "P4C3.8.FC1",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "1f6496dd-ed12-4a07-a2b6-37f7bd8b2703",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-006",
+        "E-002",
+        "E-004",
+        "E-005",
+        "E-001",
+        "E-040",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Integration Strategy a near-term focus for ProPartners Financial: a scoped investment here would lift it from 1.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-004].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Technology operations fully outsourced",
+      "what_text": "Enterprise Integration Strategy is one of ProPartners Financial's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes ProPartners Financial's ability to deliver a stronger data and technology foundation [E-002].",
+      "why_text": "The assessment found: “PPF website has 3 primary segments: Ag Retailers, Cooperatives, Manufacturers — clear segment strategy PPF digital platform: automated approvals, integrated loan servicing, real-time reporting. 92%” [E-006]. The research report pins the maturity impact at: Architecture heavily dependent on vendor; ceiling level 2. averages 1.8/5 across its 47 scored capability (peer median ~ 3.5) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P3C4.6.2",
+        "P1C2.1.4",
+        "P1C2.4.1",
+        "P1C2.7.FC1",
+        "P4C2.5.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "92085204-8903-40a1-9231-acd67a4490c9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-023",
+        "E-009",
+        "E-025",
+        "E-002",
+        "E-026",
+        "E-011"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Governance Charter a near-term focus for ProPartners Financial: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-009].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "Governance gap under FCA scrutiny",
+      "what_text": "Digital Governance Charter is one of ProPartners Financial's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes ProPartners Financial's ability to deliver sharper strategic direction and stronger oversight [E-023].",
+      "why_text": "The research report pins the maturity impact at: Governance ceiling capped at level 2. averages 1.4/5 across its 45 scored capability (peer median ~ 3.0) on the current assessment [E-010, E-023].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture (P1) — Score 1.45 vs Median 2.70 (-1.25)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience (P2) — Score 1.66 vs Median 2.75 (-1.09)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 1.52 vs Median 2.75 (-1.23). Weight: 35%",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 1.45 vs Median 2.88 (-1.43)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASS-PPFIN-20260317-0001"
+}

@@ -1,0 +1,263 @@
+{
+  "entity_display_id": "global-federal-credit-un-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Cloud-First Since 2019: Hybrid DC, self-healing DR, cost savings realized.",
+        "source_kind": "docx"
+      },
+      "id": "bf393559-3878-4d79-87d4-af14957ea62a",
+      "involved_subcap_ids": [
+        "P4C3.4.7",
+        "P4C3.4.1",
+        "P4C3.4.6",
+        "P4C2.8.6",
+        "P4C3.4.12",
+        "P4C3.4.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Cost savings realized",
+      "verbatim_quote": "F-006 | Cloud-First Since 2019: Hybrid DC, self-healing DR, cost savings realized. | Hyperforce compatible, reduces SF platform migration risk."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "MuleSoft Anypoint 300M txn/yr, Tableau analytics, 5-year Salesforce relationship.",
+        "source_kind": "docx"
+      },
+      "id": "b6b707af-d213-43f9-84cd-da82191aaece",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P2C1.4.6",
+        "P2C3.4.4",
+        "P3C3.6.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "78",
+          "delta": null,
+          "kpi_label": "Branches",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 25,
+        "P2": 50,
+        "P3": 25
+      },
+      "source_path": "(unknown)",
+      "title": "Deep Salesforce Ecosystem Already In-House",
+      "verbatim_quote": "F-001 | Deep Salesforce Ecosystem Already In-House: MuleSoft Anypoint 300M txn/yr, Tableau analytics, 5-year Salesforce relationship. No CRM/FSC confirmed. | Highest-probability revenue: extend existing SF infrastructure to member-facing CRM."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Enterprise-Grade Security: SVP Vanzant (ex-FBI), F5 8-product suite, Palo Alto SIEM/SOAR, CISSP-certified Director.",
+        "source_kind": "docx"
+      },
+      "id": "7ea25ddc-d19f-4430-a8a8-a1474bcc3c93",
+      "involved_subcap_ids": [
+        "P4C4.6.3",
+        "P4C2.2.1",
+        "P4C4.5.3",
+        "P4C1.3.1",
+        "P4C1.8.3",
+        "P3C4.6.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "Enterprise-Grade Security: SVP Vanzant (ex-FBI), F5\u2026",
+      "verbatim_quote": "F-002 | Enterprise-Grade Security: SVP Vanzant (ex-FBI), F5 8-product suite, Palo Alto SIEM/SOAR, CISSP-certified Director. | Security maturity de-risks data platform investment proposals."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "FFNW Integration Window: $228.7M acquisition, Nov 2025 system conversion.",
+        "source_kind": "docx"
+      },
+      "id": "3d857142-0721-4d24-af99-08b77ad3d919",
+      "involved_subcap_ids": [
+        "P2C1.6.6",
+        "P2C1.4.6",
+        "P2C2.9.4",
+        "P4C3.3.1",
+        "P2C4.1.3",
+        "P1C1.8.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "10%",
+          "delta": null,
+          "kpi_label": "Engagement increase",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "50%",
+          "delta": null,
+          "kpi_label": "Organic search increase",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$228,700,000",
+          "delta": null,
+          "kpi_label": "assets FFNW acquisition",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 66,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "FFNW Integration Window: $228.7M acquisition, Nov 2025\u2026",
+      "verbatim_quote": "F-007 | FFNW Integration Window: $228.7M acquisition, Nov 2025 system conversion. | MuleSoft M&A accelerators + FSC unified member view."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Member Experience Disconnect: Yelp 1.7/5, no chatbot, 2FA friction, mobile app 2.68/5.",
+        "source_kind": "docx"
+      },
+      "id": "31540d34-1e8b-4336-afe3-70e07659d4bd",
+      "involved_subcap_ids": [
+        "P2C4.3.5",
+        "P2C4.6.2",
+        "P2C4.5.5",
+        "P2C4.8.5",
+        "P2C3.9.2",
+        "P2C3.3.2",
+        "P2C3.4.2",
+        "P2C3.2.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "78",
+          "delta": null,
+          "kpi_label": "Branches",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Member Experience Disconnect: Yelp 1.7/5, no chatbot, 2FA\u2026",
+      "verbatim_quote": "F-005 | Member Experience Disconnect: Yelp 1.7/5, no chatbot, 2FA friction, mobile app 2.68/5. | Service Cloud + Einstein Bots + Experience Cloud opportunity."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Digital leadership at Director level only.",
+        "source_kind": "docx"
+      },
+      "id": "c778afc6-bd1a-4066-baf5-639104ed259a",
+      "involved_subcap_ids": [
+        "P4C4.5.3",
+        "P4C2.4.13",
+        "P1C4.2.3",
+        "P2C1.3.4",
+        "P2C4.3.2",
+        "P4C2.5.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "No CDO/CTO/CIO",
+      "verbatim_quote": "F-004 | No CDO/CTO/CIO: Digital leadership at Director level only. | Risk (no exec sponsor) + opportunity (advisory on CDO/CTO model)."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "AI/Automation Proven but Fragmented: 62K hours saved, $250K robotics value, RPA vendor unknown, unified programme planned.",
+        "source_kind": "docx"
+      },
+      "id": "39ac014f-e7f5-407d-b637-76144f984c40",
+      "involved_subcap_ids": [
+        "P3C1.6.1",
+        "P4C1.5.4",
+        "P3C4.2.4",
+        "P1C2.3.2",
+        "P3C4.2.3",
+        "P3C4.5.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$250,000",
+          "delta": null,
+          "kpi_label": "K hours saved",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 66,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "RPA vendor unknown, unified programme planned",
+      "verbatim_quote": "F-003 | AI/Automation Proven but Fragmented: 62K hours saved, $250K robotics value, RPA vendor unknown, unified programme planned. | MuleSoft Composer/RPA + Einstein AI consolidation opportunity."
+    }
+  ]
+}

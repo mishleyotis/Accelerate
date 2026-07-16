@@ -1,0 +1,494 @@
+{
+  "entity_display_id": "first-national-bank-of-o-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4.7.3",
+        "P1C1.8.2",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-006",
+      "id": "97aadcf1-2557-4588-83c7-f67e7cede532",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-161",
+        "E-039"
+      ],
+      "linked_subcap_id": "P1C4.7.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Compensation Alignment a near-term focus for First National Bank of Omaha: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-161].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Five explicitly confirmed FNBO strategic priorities in 2025–2026. These are the lens through which every Zennify solutio",
+      "what_text": "Compensation Alignment is one of First National Bank of Omaha's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes First National Bank of Omaha's ability to deliver sharper strategic direction and stronger oversight [E-161].",
+      "why_text": "The assessment found: “Laura Nelson held VP Agile Technology Strategic Alignment role at FNBO 2016-2017: 'enterprise-wide transformation towards TEAM-based agile delivery'; 'oversee all technology investments for the” [E-039]. At 2.0 out of 5, Compensation Alignment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C1.6.1",
+        "P2C4.7.6",
+        "P1C4.1.6",
+        "P1C2.1.7",
+        "P2C1.8.7",
+        "P2C2.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "17eebdd1-9219-4fc9-a4d2-50d5c7e6b686",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-043",
+        "E-109",
+        "E-092"
+      ],
+      "linked_subcap_id": "P1C1.6.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-092].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"CORRECTED - PRIOR FINDING REVERSED: Salesforce IS deployed at FNBO (confirmed via job postings Apr 2025). Sr. Salesforce Developer posted Apr 30 2025: \"COMS squad seeking Senior Developer for Salesforce and AWS for Customer Care; development primarily focused \". In Zennify's assessment Digital KPI Framework scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-109].",
+      "why_text": "The client's own stated priority — \"Five explicitly confirmed FNBO strategic priorities in 2025–2026. These are the lens through which every Zennify solution must be framed.\" — needs the Databricks capability that is currently absent. scores 2.0/5 on the current assessment [E-043, E-109].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.7.6",
+        "P2C2.3.3",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "921b8d7a-7eda-4d40-bdcb-6d5a2e5f9864",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "XS-DATABRICKS"
+        }
+      ],
+      "linked_e_ids": [
+        "E-092",
+        "E-156",
+        "E-091"
+      ],
+      "linked_subcap_id": "P2C4.7.6",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Commercial bankers lack 360° relationship view. Cross-sell between Ag/CRE/Healthcare is siloed. — Salesforce FSC — upgrade within existing licensing. Target: Spyers (CIO), Kobjerowski (EVP CCO) [E-156].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Three Salesforce Products, No FSC",
+      "what_text": "Community & Social Proof is one of First National Bank of Omaha's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes First National Bank of Omaha's ability to deliver a stronger, more personalised customer experience [E-092].",
+      "why_text": "The assessment found: “CRITICAL VALIDATION - nCino DEPLOYED at FNBO (confirmed). Job description: 'focused on driving continuous improvement and technological innovation through the nCino platform'; 'provide support to the” [E-091]. At 2.0 out of 5, Community & Social Proof sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.4",
+        "P2C3.3.4",
+        "P1C4.8.6",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "419058f2-b9c8-4bec-b125-ebbf42ac0324",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-095",
+        "E-087",
+        "E-145"
+      ],
+      "linked_subcap_id": "P4C3.6.4",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Platform decisions being made NOW. CCB legacy systems need migration path. — All SFDC solutions: CCB integration is the engagement trigger. Target: Lauritzen (President), Spyers (CIO) [E-145].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "CCB Systems Integration = 2026 Window",
+      "what_text": "Cutover & Decommission Management is one of First National Bank of Omaha's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, roughly in line with the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First National Bank of Omaha's ability to deliver a stronger data and technology foundation [E-087].",
+      "why_text": "At 3.0 out of 5, Cutover & Decommission Management shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-095, E-087].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.8.7",
+        "P4C2.5.5",
+        "P3C1.5.5",
+        "P3C3.5.4",
+        "P1C3.8.3",
+        "P4C2.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "0abbad66-22e7-4d69-8470-8594c3ea437c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-131",
+        "E-130",
+        "E-097",
+        "E-146",
+        "E-106"
+      ],
+      "linked_subcap_id": "P4C1.8.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Model governance gaps. BSA/AML Model Governance Committee manages 5 tools independently. — Agentforce: orchestration above vendor AI. Champion: Megan Hennigs (Dir AI Adoption, Jan 2026) [E-130].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Five Vendor AI, No Enterprise Platform",
+      "what_text": "Data Residency & Sovereignty Controls is one of First National Bank of Omaha's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First National Bank of Omaha's ability to deliver a stronger data and technology foundation [E-131].",
+      "why_text": "The assessment found: “Zeta Marketing Platform deployed at FNBO: 'restructured operations to streamline marketing execution, integrate data with creative assets, real-time personalized cardholder engagement'; 'hundreds of” [E-097]. At 2.0 out of 5, Data Residency & Sovereignty Controls sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2.4.FC1",
+        "P2C2",
+        "P2C1.1.FC1",
+        "P4C2.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "8d7461c6-6960-4b13-acbb-c277afaee486",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-093",
+        "E-057"
+      ],
+      "linked_subcap_id": "P2C2.4.FC1",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Competitively vulnerable as FCSAmerica digitizes Ag origination with nCino. — nCino Ag module: highest-urgency upsell. Champion: Barry Benson (SVP Agribusiness) [E-057].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Ag Digital LOS Gap at #3 National Rank",
+      "what_text": "#3 US ag lender (2026). nCino deployed for Commercial/CRE/Consumer. Ag digital loan portal NOT confirmed. FCSAmerica has full Ag nCino.. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes First National Bank of Omaha's ability to deliver a stronger, more personalised customer experience [E-093].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too [E-091, E-093].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.7.3",
+        "P4C1.8.6",
+        "P4C2.5.5",
+        "P4C3.6.4",
+        "P1C2.6.4",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "4eb83be7-1960-4063-b56a-1b16aced12dd",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-154",
+        "E-160",
+        "E-114"
+      ],
+      "linked_subcap_id": "P1C4.7.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Cory Mann (Mar 2025): \"stable data foundation\" required for GenAI. Fragmentation is the bottleneck. — Data Cloud: governance foundations ready. Gap = unified customer data across nCino, COMS, Zeta, Developer Circle [E-114].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Governance Ready — CDP Fragmented",
+      "what_text": "Compensation Alignment is one of First National Bank of Omaha's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes First National Bank of Omaha's ability to deliver sharper strategic direction and stronger oversight [E-160].",
+      "why_text": "At 2.0 out of 5, Compensation Alignment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-154, E-160].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.6.1",
+        "P1C3.6.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "2c6d5ef9-02f0-4fbb-8354-e64e9ea44751",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-018",
+        "E-063",
+        "E-103"
+      ],
+      "linked_subcap_id": "P1C3.6.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Culture primed for enterprise platform partnerships — demands KPI evidence + risk management. — Zennify positioning: lead with FNBO-specific outcomes, reference HTLF deployment, align to Trilli's KPI framework [E-103].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Partnership-First DNA = SFDC Receptivity",
+      "what_text": "Trilli (Jan 2025): \"Many of the businesses we operate today have come from partnerships — so that's at our core.\" Active partnerships with Marqeta, Centime, Greenlight, MGM, Prove.. In Zennify's assessment Fintech Partnership Strategy scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-063].",
+      "why_text": "The assessment found: “Tammy Trilli SVP Commercial Payments: partnership-first digital strategy; innovation through fintech partnerships as core model; KPI alignment with partners; 'can't chase shiny penny'; agriculture” [E-018]. At 3.0 out of 5, Fintech Partnership Strategy shows a maturing capability within reach of best practice. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P1C2.6.2",
+        "P4C4.8.1",
+        "P3C4.4.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "76648f26-2284-4324-bea6-6daa9debeff9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-129",
+        "E-080",
+        "E-149"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Zero Trust Identity Verification a near-term focus for First National Bank of Omaha: a scoped investment here would lift it from 3.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-149].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "CISO Jeffrey Weeks: M4 Security Framework",
+      "what_text": "Zero Trust Identity Verification is one of First National Bank of Omaha's solid data and technology capabilities, scoring 3.5 out of 5 in Zennify's latest assessment, ahead of the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First National Bank of Omaha's ability to deliver a stronger data and technology foundation [E-080].",
+      "why_text": "The research report pins the maturity impact at: ceiling = level 4. Any SFDC deployment requires Weeks security review. averages 3.6/5 across its 30 scored capability (peer median ~ 3.0) on the current assessment [E-129, E-080].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture — 2.67 vs. Median 3.00 (Gap: -0.33)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience & Engagement — 2.87 vs. Median 3.00 (Gap: -0.13)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — 3.52 vs. Median 3.00 (Gap: +0.52)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Technology & Security — 3.30 vs. Median 3.00 (Gap: +0.30)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "6 recommendations. Each follows: ROOT CAUSE (with E-IDs) → SOLUTION (Zennify offering) → EXPECTED OUTCOMES (metrics without investment amounts). All passed: anti-generic check, specificity test, R6 compliance, forbidden phrases = 0."
+  },
+  "run_request_id": "DMA-RES-FNBO-20260518-0001"
+}

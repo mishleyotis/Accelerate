@@ -1,0 +1,144 @@
+{
+  "entity_display_id": "odlum-brown-limited-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+        "advisor": "2024 advisor"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "advisor 2024 advisor",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud (FSC)",
+          "maturity_lift": "+2.51",
+          "metric": "advisor 2024 advisor",
+          "outcomes": {
+            "effort": "L",
+            "metric": "advisor 2024 advisor",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Deploy Salesforce Financial Services Cloud \u2014 Convert CRM Investment into Advisor Competitive Advantage"
+        },
+        {
+          "feature": "MuleSoft Anypoint + Broadridge Wealth API Connector",
+          "maturity_lift": "+1.6",
+          "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Deploy MuleSoft + Broadridge Wealth API Connector \u2014 Eliminate the Manual Re-Entry Gap"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C1"
+    },
+    {
+      "customer_impact": {
+        "Odlum Brown manages $": "28B",
+        "Outcome": "P2C1 score 1.98 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C1 score 1.98 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+2.02",
+          "metric": "P2C1 score 1.98 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.98 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Deploy Experience Cloud \u2014 Build the Mobile-First Advisor-Client Portal Before the Portal Retool Diverges"
+        },
+        {
+          "feature": "Salesforce Data Cloud",
+          "maturity_lift": "+2.51",
+          "metric": "Odlum Brown manages $28B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Odlum Brown manages $28B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy Salesforce Data Cloud \u2014 Unify the Four-System Data Architecture"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.6",
+          "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Deploy Salesforce Marketing Cloud \u2014 Activate 7 Dormant Content Channels Behind Andrea Linger's Growth Mandate"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.6",
+          "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 2.40 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Deploy Agentforce \u2014 Answer the Advisor AI Demand Signal Before Competitors Do"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ODLB-20260527-0001",
+  "total_duration_months": 12
+}

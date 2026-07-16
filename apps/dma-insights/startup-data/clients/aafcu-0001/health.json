@@ -1,0 +1,1482 @@
+{
+  "alerts": [
+    {
+      "age_days": 1,
+      "body": "15 subcaps in P1C1 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "6153c748-0667-43f3-80c3-114508a9dab5",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.8.4",
+        "P1C1.8.4",
+        "P1C1.8.4",
+        "P1C1.8.4",
+        "P1C1.8.4",
+        "P1C1.8.3",
+        "P1C1.8.3",
+        "P1C1.8.3",
+        "P1C1.8.3",
+        "P1C1.8.3",
+        "P1C1.8.2",
+        "P1C1.8.2",
+        "P1C1.8.2",
+        "P1C1.8.2",
+        "P1C1.8.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 15 subcaps in P1C1",
+      "waive_note": null
+    }
+  ],
+  "audit_logs": null,
+  "caps_applied": [
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C1.8.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C1.8.1",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C1.8.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C1.8.2",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C1.8.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C1.8.3",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C1.8.4",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C1.8.4",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.8.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.8.1",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.8.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.8.2",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.8.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.8.3",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.8.4",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.8.4",
+      "trigger_condition": "FOM-structural N/A (NCUA charter restriction)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C4.6.4",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C4.6.4",
+      "trigger_condition": "CROSS-PILLAR: P4C1<2.5\u2192P2C4 cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C4.7.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C4.7.2",
+      "trigger_condition": "CROSS-PILLAR: P4C1<2.5\u2192P2C4 cap 3.0",
+      "trigger_evidence": []
+    }
+  ],
+  "entity_display_id": "aafcu-0001",
+  "evidence_age": [
+    {
+      "e_id": "E-076",
+      "freshness_band": "stale",
+      "published_date": "1993-07-01",
+      "recency_months": 394,
+      "source_name": "NCUA Legal Opinions \u2014 FCU Delegation Frameworks (regulatory baseline applicable to AAFCU)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-077",
+      "freshness_band": "stale",
+      "published_date": "2000-12-01",
+      "recency_months": 305,
+      "source_name": "AMERICAN AIRLINES EMPLOYEES FCU v. MARTIN (Texas Supreme Court 2000) \u2014 formal Deposit Agreement governance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-083",
+      "freshness_band": "stale",
+      "published_date": "2007-02-01",
+      "recency_months": 231,
+      "source_name": "AAFCU Co-op Financial Services 2007 partnership \u2014 CO-OP CUSO ATM/debit",
+      "tier": 1
+    },
+    {
+      "e_id": "E-080",
+      "freshness_band": "stale",
+      "published_date": "2010-04-01",
+      "recency_months": 193,
+      "source_name": "Credit Union Times 2010 \u2014 AAFCU New Web Site (design thinking with stakeholder studies)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-079",
+      "freshness_band": "stale",
+      "published_date": "2011-03-01",
+      "recency_months": 182,
+      "source_name": "Credit Union Times 2011 \u2014 CUAcce$$ Deposit launch (Brad Aspgren as SVP Tech & Innovation)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-039",
+      "freshness_band": "stale",
+      "published_date": "2012-03-01",
+      "recency_months": 170,
+      "source_name": "PRNewswire \u2014 Symitar selection (historical Brad Aspgren context)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-027",
+      "freshness_band": "stale",
+      "published_date": "2013-11-01",
+      "recency_months": 150,
+      "source_name": "American Banker / PRNewswire / Jack Henry \u2014 AAFCU Symitar core selection + conversion",
+      "tier": 1
+    },
+    {
+      "e_id": "E-093",
+      "freshness_band": "stale",
+      "published_date": "2013-11-01",
+      "recency_months": 150,
+      "source_name": "Jack Henry/Symitar Press Release Nov 2013 \u2014 AAFCU successful core conversion (CEO Angie Owens quotes on change management)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-081",
+      "freshness_band": "stale",
+      "published_date": "2015-11-01",
+      "recency_months": 126,
+      "source_name": "SavvyMoney Partnership Case Study \u2014 AAFCU was SavvyMoney's FIRST FI partner",
+      "tier": 2
+    },
+    {
+      "e_id": "E-024",
+      "freshness_band": "stale",
+      "published_date": "2017-06-01",
+      "recency_months": 107,
+      "source_name": "USACreditUnions.com \u2014 AAFCU Board of Directors registry (2017 vintage data)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-022",
+      "freshness_band": "stale",
+      "published_date": "2020-08-01",
+      "recency_months": 69,
+      "source_name": "CUInsight \u2014 Gail Enda named CEO press release",
+      "tier": 2
+    },
+    {
+      "e_id": "E-023",
+      "freshness_band": "stale",
+      "published_date": "2020-08-01",
+      "recency_months": 69,
+      "source_name": "American Banker \u2014 Insider named next CEO of AAFCU",
+      "tier": 2
+    },
+    {
+      "e_id": "E-030",
+      "freshness_band": "stale",
+      "published_date": "2022-04-01",
+      "recency_months": 49,
+      "source_name": "AA Newsroom \u2014 AAFCU + Cadet Academy student loan partnership announcement (Apr 2022)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-131",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "web_search AAFCU RDC 2011 pioneer + Popmoney + Member app inventory \u2014 historical onboarding capability",
+      "tier": 2
+    },
+    {
+      "e_id": "E-152",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "PRNewswire/Jack Henry: AAFCU Episys selection (2012) + completion (2013) \u2014 enterprise-wide automation, in-house, IVR/online banking integrated, concurrent multi-system conversion",
+      "tier": 2
+    },
+    {
+      "e_id": "E-033",
+      "freshness_band": "dated",
+      "published_date": "2023-08-01",
+      "recency_months": 33,
+      "source_name": "AAFCU 2023 Scholarship Recipients blog post",
+      "tier": 2
+    },
+    {
+      "e_id": "E-137",
+      "freshness_band": "dated",
+      "published_date": "2023-08-01",
+      "recency_months": 33,
+      "source_name": "CFS Insight case study: AAFCU ARCU data warehouse + John Reed Business Intelligence Manager",
+      "tier": 2
+    },
+    {
+      "e_id": "E-068",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 26,
+      "source_name": "Weiss Ratings \u2014 AAFCU Excellent capitalization + asset quality",
+      "tier": 2
+    },
+    {
+      "e_id": "E-002",
+      "freshness_band": "dated",
+      "published_date": "2024-04-01",
+      "recency_months": 25,
+      "source_name": "AAFCU 2023 Audited Financial Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-019",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 24,
+      "source_name": "ICE Mortgage Technology \u2014 Delta Community Case Study",
+      "tier": 3
+    },
+    {
+      "e_id": "E-007",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 23,
+      "source_name": "AAFCU LinkedIn Company Page",
+      "tier": 3
+    },
+    {
+      "e_id": "E-010",
+      "freshness_band": "aging",
+      "published_date": "2024-08-01",
+      "recency_months": 21,
+      "source_name": "Credit Unions Online \u2014 AAFCU Q1 2024 Financial Performance Report",
+      "tier": 2
+    },
+    {
+      "e_id": "E-029",
+      "freshness_band": "aging",
+      "published_date": "2024-08-01",
+      "recency_months": 21,
+      "source_name": "American Airlines Newsroom \u2014 Cadet Academy enhanced program (Aug 2024)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-088",
+      "freshness_band": "aging",
+      "published_date": "2024-08-01",
+      "recency_months": 21,
+      "source_name": "AAFCU Scholarship Program \u2014 11 students \u00d7 $5,000/yr \u00d7 'more than a decade'",
+      "tier": 1
+    },
+    {
+      "e_id": "E-054",
+      "freshness_band": "aging",
+      "published_date": "2024-09-01",
+      "recency_months": 20,
+      "source_name": "NCUA Call Report quarterly cadence + AAFCU RBC ratio (Q1 2024)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-082",
+      "freshness_band": "aging",
+      "published_date": "2024-10-01",
+      "recency_months": 19,
+      "source_name": "Q2 CU Build 2024 \u2014 AAFCU alum (Hickey, former AAFCU Manager of Application Development) leads major CU industry hackathon",
+      "tier": 2
+    },
+    {
+      "e_id": "E-136",
+      "freshness_band": "aging",
+      "published_date": "2024-10-01",
+      "recency_months": 19,
+      "source_name": "SavvyMoney + AAFCU case study \u2014 $42M deposit growth, 231K digital users, SavvyMoney Offers Engine personalization",
+      "tier": 1
+    },
+    {
+      "e_id": "E-150",
+      "freshness_band": "aging",
+      "published_date": "2024-12-01",
+      "recency_months": 17,
+      "source_name": "web_fetch annual reports: NCUA periodic examination confirmed, complex credit union status, capital adequacy framework",
+      "tier": 1
+    },
+    {
+      "e_id": "E-017",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 16,
+      "source_name": "Delta Community CU Insights January 2025",
+      "tier": 2
+    },
+    {
+      "e_id": "E-020",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 16,
+      "source_name": "Financial Brand \u2014 Three Credit Union CEOs Detail Digital Strategies for 2025 (PenFed)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-056",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 16,
+      "source_name": "Jesse Davis RocketReach \u2014 IT Governance and Risk Program Manager at AAFCU",
+      "tier": 2
+    },
+    {
+      "e_id": "E-015",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 14,
+      "source_name": "Wings Credit Union 2024 Annual Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-095",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 14,
+      "source_name": "Finopotamus \u2014 Velera CEO Chuck Fagan on AI + fintech ecosystem (AAFCU is Velera client via PSCU)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-001",
+      "freshness_band": "aging",
+      "published_date": "2025-04-01",
+      "recency_months": 13,
+      "source_name": "AAFCU 2024 Audited Financial Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-009",
+      "freshness_band": "aging",
+      "published_date": "2025-04-01",
+      "recency_months": 13,
+      "source_name": "American Airlines Credit Union iOS App Store Page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-016",
+      "freshness_band": "aging",
+      "published_date": "2025-04-01",
+      "recency_months": 13,
+      "source_name": "Wings + Ent Credit Union Merger Milestone Announcement",
+      "tier": 2
+    },
+    {
+      "e_id": "E-038",
+      "freshness_band": "aging",
+      "published_date": "2025-04-01",
+      "recency_months": 13,
+      "source_name": "AAFCU Annual Reports \u2014 2024 & 2023 audited (financial KPIs)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-053",
+      "freshness_band": "aging",
+      "published_date": "2025-04-01",
+      "recency_months": 13,
+      "source_name": "AAFCU Apple App Store listing (mobile app history + feature documentation)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-004",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 12,
+      "source_name": "AAFCU About Us page",
+      "tier": 2
+    },
+    {
+      "e_id": "E-035",
+      "freshness_band": "current",
+      "published_date": "2025-07-01",
+      "recency_months": 10,
+      "source_name": "Wallethub \u2014 AAFCU Member Reviews",
+      "tier": 3
+    },
+    {
+      "e_id": "E-050",
+      "freshness_band": "current",
+      "published_date": "2025-07-01",
+      "recency_months": 10,
+      "source_name": "Wallethub member sentiment + Bankrate review (composite)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-061",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 9,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AACU Legal-Compliance",
+      "tier": 2
+    },
+    {
+      "e_id": "E-078",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 9,
+      "source_name": "AAFCU Blog \u2014 'The future of banking is fintech' (Anthony Fletcher VP Payments quoted on innovation)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-006",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 8,
+      "source_name": "ncuso.org / advratings AAFCU Profile (Sep 2025 NCUA data)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-058",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 8,
+      "source_name": "RocketReach \u2014 VP Enterprise Solutions and Security at AAFCU (CISO equivalent)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-062",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 8,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AACU Fraud (fraud analytics function)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-065",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 8,
+      "source_name": "AAFCU Job Posting \u2014 Team Lead, AACU Check & Item Processing (Reg CC compliance)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-073",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 8,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AACU Fraud (FULL TEXT \u2014 emerging risk identification + behavior modeling)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-063",
+      "freshness_band": "current",
+      "published_date": "2025-10-01",
+      "recency_months": 7,
+      "source_name": "AAFCU Job Posting \u2014 Manager, AACU Payments Strategy and Growth",
+      "tier": 2
+    },
+    {
+      "e_id": "E-074",
+      "freshness_band": "current",
+      "published_date": "2025-10-01",
+      "recency_months": 7,
+      "source_name": "AAFCU Job Posting \u2014 Manager, AA Credit Union Payments Products and Risk (Monarch modeling, vendor mgmt, CARE platform, budget)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-064",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 6,
+      "source_name": "AAFCU Job Posting \u2014 Specialist, AACU Payments Servicing (Visa DPS, First Data, PSCU stack)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-005",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 5,
+      "source_name": "LeadIQ + RocketReach AAFCU Profile",
+      "tier": 4
+    },
+    {
+      "e_id": "E-026",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 5,
+      "source_name": "AAFCU President's Corner \u2014 Gail Enda message",
+      "tier": 2
+    },
+    {
+      "e_id": "E-031",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 5,
+      "source_name": "AA Cadet Academy About page \u2014 AAFCU partnership terms",
+      "tier": 2
+    },
+    {
+      "e_id": "E-037",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 5,
+      "source_name": "CEO Advisory Group + LEK Consulting \u2014 CU M&A landscape (industry context)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-060",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 5,
+      "source_name": "AAFCU Job Posting \u2014 Analyst/Senior Analyst, AACU Information Security",
+      "tier": 2
+    },
+    {
+      "e_id": "E-066",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 5,
+      "source_name": "AAFCU Online Privacy Policy \u2014 vendor inventory + data classification practices",
+      "tier": 1
+    },
+    {
+      "e_id": "E-155",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 4,
+      "source_name": "Exa: John Woodling (CISSP/GSEC/GMON Sr InfoSec) \u2014 full security tech stack: EDR, CASB, DLP, next-gen AV, vulnerability management, data encryption, data access governance",
+      "tier": 2
+    },
+    {
+      "e_id": "E-156",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 4,
+      "source_name": "Exa: Greg Shockey (CISSP/CEH/CCNA), Mark Hayes (CISSP/SCCM/PCI), Sarah Hrabal (CISSP former InfoSec Manager), Kenley Reusch (CISSP InfoSec Analyst)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-021",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "Creatio \u2014 Ent Credit Union AI/Agentic CRM Case Study",
+      "tier": 3
+    },
+    {
+      "e_id": "E-028",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "LeadIQ \u2014 AAFCU Tech Stack Profile (T3 inferred from web tech detection)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-055",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "Aaron Young LinkedIn \u2014 VP Operations Risk at AAFCU",
+      "tier": 2
+    },
+    {
+      "e_id": "E-110",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "Exa semantic search: AAFCU named marketing personnel + CRM platform discovery",
+      "tier": 2
+    },
+    {
+      "e_id": "E-111",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "Exa semantic search round 2: deeper marketing team + CEO Gail Enda 5-yr SVP Marketing background + Brenda Tristan launched cent$ Magazine",
+      "tier": 2
+    },
+    {
+      "e_id": "E-003",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Gail Enda LinkedIn Profile",
+      "tier": 3
+    },
+    {
+      "e_id": "E-008",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NCUA Enforcement Database Search",
+      "tier": 1
+    },
+    {
+      "e_id": "E-011",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Glassdoor \u2014 AA Credit Union Reviews",
+      "tier": 3
+    },
+    {
+      "e_id": "E-012",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed \u2014 AAFCU Reviews (Dallas-Fort Worth)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-013",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "BBB AAFCU Profile",
+      "tier": 3
+    },
+    {
+      "e_id": "E-014",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Wings Credit Union About Us",
+      "tier": 2
+    },
+    {
+      "e_id": "E-018",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Apps Run The World \u2014 Delta Community CU Technographics",
+      "tier": 3
+    },
+    {
+      "e_id": "E-025",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU About Us \u2014 current self-description (digital + community)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-032",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Cadet Apply page \u2014 segment-specific landing page",
+      "tier": 2
+    },
+    {
+      "e_id": "E-034",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed Employer Page \u2014 AAFCU dossier + ratings",
+      "tier": 3
+    },
+    {
+      "e_id": "E-036",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Membership page \u2014 bonus dividends + benefits",
+      "tier": 2
+    },
+    {
+      "e_id": "E-040",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AA Credit Union Data Analytics (Business)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-041",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Manager, AACU IT Cloud Services",
+      "tier": 2
+    },
+    {
+      "e_id": "E-042",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Systems Implementation Analyst, AA Credit Union Business Technology",
+      "tier": 2
+    },
+    {
+      "e_id": "E-043",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Systems Analyst, AA Credit Union Application Support (Tier 3 escalation, 140+ apps)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-044",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AA Credit Union Payments Products and Risk (Payments & Digital Strategy team)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-045",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Specialist, AA Credit Union Product Origination",
+      "tier": 2
+    },
+    {
+      "e_id": "E-046",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AACU Membership and Growth",
+      "tier": 2
+    },
+    {
+      "e_id": "E-047",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Job Posting \u2014 Analyst, AACU Technology Service Desk + Telecom Engineer (combined)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-048",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Mobile App Bundle Detection \u2014 AAFCU Q2 Digital Banking Platform",
+      "tier": 2
+    },
+    {
+      "e_id": "E-049",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Banking + Online Banking pages \u2014 channel + feature inventory",
+      "tier": 2
+    },
+    {
+      "e_id": "E-051",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE SEARCH BUNDLE \u2014 AI/ML, AAFCU-specific innovation lab, fintech accelerator",
+      "tier": 4
+    },
+    {
+      "e_id": "E-052",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "INTERNAL ALTERNATIVES MAP (composite \u2014 anti-'no' documentation per plan Step 5)",
+      "tier": 4
+    },
+    {
+      "e_id": "E-057",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "TheOrg.com \u2014 AAFCU Org Chart (Brad Aspgren active SVP, SVP Tech named role)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-059",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "America's Credit Unions Compliance & Risk Council \u2014 Faith Anderson AAFCU member",
+      "tier": 1
+    },
+    {
+      "e_id": "E-067",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Why-Credit-Union page \u2014 vision + values + FOM definition",
+      "tier": 2
+    },
+    {
+      "e_id": "E-069",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "FFIEC IT Examination Handbook \u2014 InfoSec governance baseline (regulatory expectation)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-070",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Accio.com \u2014 AAFCU Strategic Sourcing + Compliance & Risk Council reference",
+      "tier": 4
+    },
+    {
+      "e_id": "E-071",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE SEARCH \u2014 AAFCU Salesforce CRM, AI Governance Council, Public Risk Appetite",
+      "tier": 4
+    },
+    {
+      "e_id": "E-072",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "INTERNAL ALTERNATIVES MAP \u2014 P1C2 Governance (anti-'no' documentation per plan Step 5)",
+      "tier": 4
+    },
+    {
+      "e_id": "E-075",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "FEC.gov \u2014 AAFCU Political Action Committee (registered #C00432989)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-084",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Anthony Fletcher LinkedIn + ZoomInfo + The Org \u2014 VP Payments & Digital Strategy with CUDE certification",
+      "tier": 2
+    },
+    {
+      "e_id": "E-085",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed Company Data \u2014 AAFCU Wellbeing Index (Trust/Belonging/Inclusion/Learning HIGH)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-086",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed AAFCU Employee Reviews (74 reviews) \u2014 culture, internal mobility, no-layoff history",
+      "tier": 2
+    },
+    {
+      "e_id": "E-087",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU LinkedIn Aviation Week internal celebration + employee engagement",
+      "tier": 2
+    },
+    {
+      "e_id": "E-089",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Financial Hardship Assistance \u2014 internal Financial Wellness Department + disaster relief loans",
+      "tier": 1
+    },
+    {
+      "e_id": "E-090",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "LeadIQ \u2014 AAFCU COVID-19 Community Relief Fund + community engagement signal",
+      "tier": 3
+    },
+    {
+      "e_id": "E-091",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE SEARCH \u2014 AAFCU Climate Risk, ESG Strategy, Sustainability Report, TCFD, Net-Zero",
+      "tier": 4
+    },
+    {
+      "e_id": "E-092",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "INTERNAL ALTERNATIVES MAP \u2014 P1C3 + P1C4 + P1C5 (anti-'no' documentation)",
+      "tier": 4
+    },
+    {
+      "e_id": "E-094",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Cadet Loan Apply page \u2014 Cadet Financial Advocates + Personalized Wellness Program",
+      "tier": 1
+    },
+    {
+      "e_id": "E-096",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "INTERNAL ALTERNATIVES MAP v2 \u2014 Final P1C3+P1C4+P1C5 thin subcaps anti-'no' documentation",
+      "tier": 4
+    },
+    {
+      "e_id": "E-097",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Current Offers Page \u2014 90th Anniversary Sweepstakes + Multi-Campaign Inventory",
+      "tier": 1
+    },
+    {
+      "e_id": "E-098",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Welcome New Member Page \u2014 formal welcome journey + Wellness Check-Up + email opt-in",
+      "tier": 1
+    },
+    {
+      "e_id": "E-099",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Financial Wellness Page + Cvent Webinar Inventory + LinkedIn educational posts",
+      "tier": 1
+    },
+    {
+      "e_id": "E-100",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Social Media Footprint \u2014 Facebook 315 / Instagram 1,880 / LinkedIn 4,542 / YouTube channel + Indeed sentiment",
+      "tier": 2
+    },
+    {
+      "e_id": "E-101",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU AA Employees Page \u2014 SEG-Based Marketing + Loan Discount Stack",
+      "tier": 1
+    },
+    {
+      "e_id": "E-102",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU CUDL AutoSMART + Datatrac Award + Auto Loan Promotional Stack",
+      "tier": 1
+    },
+    {
+      "e_id": "E-103",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Mobile App Release Cadence + Member Application + CIP Compliance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-104",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "AAFCU Live Chat + Virtual Assistant + Member Advocates \u2014 speed-to-lead infrastructure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-105",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE SEARCH + INTERNAL ALTERNATIVES \u2014 P2C1 thin areas (GenAI, Predictive Analytics, A/B Testing, Affiliate, Cookie-less, BaaS API)",
+      "tier": 4
+    },
+    {
+      "e_id": "E-106",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Final Proxy Escalation \u2014 P2C1 thin areas: Paid Search, Affiliate, Developer API, Localization, Sales Process Config",
+      "tier": 4
+    },
+    {
+      "e_id": "E-107",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch direct: AAFCU Current Offers Page Q2 2026 90th Anniversary Campaign + GTM Tracking + Affiliate URLs",
+      "tier": 1
+    },
+    {
+      "e_id": "E-108",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch direct: AAFCU 90th Anniversary Sweepstakes \u2014 Marketing Department NAMED + Formstack + 20 Entry Pathways",
+      "tier": 1
+    },
+    {
+      "e_id": "E-109",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch direct: AAFCU Member Referral Program with REFER25 Code + Credit Union Coordinators Ambassador Program",
+      "tier": 1
+    },
+    {
+      "e_id": "E-112",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Clay:find-and-enrich-contacts-at-company \u2014 DEEP MARKETING TEAM (9 named roles + 30-year tenures)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-113",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "LunarCrush:Creator_Posts \u2014 Active Instagram marketing with multi-city Car Sale events Apr 2026",
+      "tier": 2
+    },
+    {
+      "e_id": "E-114",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "places_search Google Places: AAFCU branch coverage with Google Business Profiles + UGC reviews",
+      "tier": 2
+    },
+    {
+      "e_id": "E-115",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Tavily multi-endpoint plan-limit block \u2014 negative connector observation",
+      "tier": 4
+    },
+    {
+      "e_id": "E-116",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Vibe Prospecting credits exhausted \u2014 negative connector observation",
+      "tier": 4
+    },
+    {
+      "e_id": "E-117",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed:search_jobs \u2014 confirmed AAFCU does NOT post Marketing roles on Indeed (uses jobs.aa.com platform)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-118",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch: AAFCU Mobile & Online Banking page \u2014 full self-service feature inventory",
+      "tier": 1
+    },
+    {
+      "e_id": "E-119",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch: AAFCU Contact Us page \u2014 Member Advocacy Center (MAC) full channel matrix + extension routing",
+      "tier": 1
+    },
+    {
+      "e_id": "E-120",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch: AAFCU Home Loans page \u2014 mortgage digital journey + Members on the Move program",
+      "tier": 1
+    },
+    {
+      "e_id": "E-121",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa semantic search: AAFCU operations + service leadership + Genesys Cloud CCaaS confirmation",
+      "tier": 2
+    },
+    {
+      "e_id": "E-122",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Clay:find-and-enrich-contacts-at-company \u2014 Operations/Service leadership team confirmed",
+      "tier": 2
+    },
+    {
+      "e_id": "E-123",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_search: AAFCU Digital Wallets + App Store reviews + mobile deposit + accessibility",
+      "tier": 1
+    },
+    {
+      "e_id": "E-124",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_search: AAFCU MeridianLink LoansPQ LOS + DocuSign + digital decisioning + credit bureau",
+      "tier": 2
+    },
+    {
+      "e_id": "E-125",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa + BBB: AAFCU complaint volume (48/3yr, 21/12mo), EFT Agreement error resolution SLAs, member satisfaction",
+      "tier": 2
+    },
+    {
+      "e_id": "E-126",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_search + web_fetch: AAFCU KYC/onboarding + eligibility transparency + CIP compliance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-127",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE PROXY SEARCH \u2014 P2C2 thin areas: BaaS API, Open Banking 1033, video banking, white-label platform",
+      "tier": 4
+    },
+    {
+      "e_id": "E-128",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE PROXY SEARCH \u2014 P2C3 thin areas: AI agent assist, knowledge mgmt, case intake automation, vulnerable customer EW",
+      "tier": 4
+    },
+    {
+      "e_id": "E-129",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed employer data: AAFCU interview experience EXCELLENT + salary satisfaction + VoC",
+      "tier": 3
+    },
+    {
+      "e_id": "E-130",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "LunarCrush Instagram \u2014 omnichannel event marketing confirms branch-digital integration",
+      "tier": 2
+    },
+    {
+      "e_id": "E-132",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Final Proxy Escalation P2C2+P2C3 \u2014 BSA/AML/OFAC, accessibility, shared branching, member philosophy, multilingual, voice banking",
+      "tier": 4
+    },
+    {
+      "e_id": "E-133",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch: AAFCU Financial Wellness page \u2014 SavvyMoney suite + Navigator + Budget & Spending Hub + DocuSign Wellness Agreement",
+      "tier": 1
+    },
+    {
+      "e_id": "E-134",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch: AAFCU Flagship Financial Group page \u2014 12 named LPL Financial Advisors, hybrid human-AI advice model",
+      "tier": 1
+    },
+    {
+      "e_id": "E-135",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_fetch: AAFCU Member Stories page \u2014 11+ named testimonials demonstrating lifecycle personalization",
+      "tier": 1
+    },
+    {
+      "e_id": "E-138",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Clay analytics + product team: Razi Mohammad Sr BI/Data Analytics, Luc Mpangaje Power BI Developer, Elidia Suchomel VP Product Performance Growth, Deanna Bublik Manager Product Origination",
+      "tier": 2
+    },
+    {
+      "e_id": "E-139",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa: Elidia Suchomel VP Product Performance Growth + Jamie Fatheree Financial Wellness Manager + Beverly Boldt ARCU/analytics",
+      "tier": 2
+    },
+    {
+      "e_id": "E-140",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "web_search: Connection Points loyalty program full details + Timely Payment discount behavior-based rewards + Bonus Dividend",
+      "tier": 1
+    },
+    {
+      "e_id": "E-141",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "LunarCrush Instagram + Indeed employer wellness data \u2014 personalization signals",
+      "tier": 2
+    },
+    {
+      "e_id": "E-142",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Indeed + web search: AAFCU Checking Offer + SavvyMoney score simulator + Optimizely A/B testing \u2014 personalization analytics",
+      "tier": 1
+    },
+    {
+      "e_id": "E-143",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE PROXY ESCALATION P2C4 \u2014 thin areas: CDP/unified profile, life event detection, predictive analytics, streaming processing, AI personalization governance",
+      "tier": 4
+    },
+    {
+      "e_id": "E-144",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Final Proxy Escalation P2C4 \u2014 SavvyMoney as NBA engine, Optimizely personalization, cross-product bundles, My Toolkit, VoC/reviews",
+      "tier": 3
+    },
+    {
+      "e_id": "E-145",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa: Mark Reed SVP Technology (CISSP, 20yr InfoSec), Russell Keith Director IT (CISSP/CCSP, multi-data-center, Plano DR), Ken Canson Manager Enterprise Infrastructure",
+      "tier": 2
+    },
+    {
+      "e_id": "E-146",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa + Clay: Aaron Young VP Operations Risk (JD), Selma S. Chief Risk Officer (Jan 2026 NEW CRO role), Brian Kilian NAFCU NCCO Compliance Officer",
+      "tier": 2
+    },
+    {
+      "e_id": "E-147",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa: Eboni Thomas Senior GRC Auditor (PCI DSS + GLBA + NIST, 100% audit-ready, zero findings, AWS SaaS + AI platforms) + RCSA process (June Whisenhunt)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-148",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Exa: Christy Haley (former AAFCU Payments Risk Mgr) \u2014 card fraud operations, ATM concessions, payments risk governance, industry intelligence sharing",
+      "tier": 3
+    },
+    {
+      "e_id": "E-149",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Clay: Full technology/security/ops/compliance team map \u2014 John Woodling Sr InfoSec Analyst, Eric Rehnquist VCP8/CCNA Systems Engineer, Russell Keith Director IT, Gary Lindsey VP IS (39 yrs tenure)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-151",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NEGATIVE PROXY P3 \u2014 thin areas: STP monitoring, reconciliation automation, batch processing, crisis comms, fourth-party risk, emerging threat monitoring",
+      "tier": 4
+    },
+    {
+      "e_id": "E-153",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Final Proxy Escalation P3 \u2014 NCUA regulatory mandates for complex CUs, Episys automation capabilities, compliance frameworks, vendor risk baseline",
+      "tier": 4
+    },
+    {
+      "e_id": "E-154",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NCUA Complex CU mandatory programs: IT Examination, TPRM, BCP/DR, BSA/AML, Fair Lending, UDAAP \u2014 regulatory mandates applicable to AAFCU as $9B complex federally chartered CU",
+      "tier": 3
+    },
+    {
+      "e_id": "E-157",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Clay: Application Developer Joshua Bauer, Financial & BI Analyst Joe Espinosa, Daniel Fernandez Davila (Oracle Siebel) + Programmer Brian Chambers \u2014 software development + analytics intelligence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-158",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Prior tech stack consolidated: Snowflake, Dynatrace, Cloudflare, AWS SaaS, VMware (VCP8), Cisco (CCNA), Google Analytics, Delivra, Cvent, iConnect2Invest \u2014 P4C3+P4C1+P4C2 evidence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-159",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Comprehensive proxy escalation P4C1+P4C2 \u2014 data governance, analytics AI strategy, data quality, model risk management, advanced analytics capabilities",
+      "tier": 4
+    },
+    {
+      "e_id": "E-160",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Comprehensive proxy escalation P4C3+P4C4 \u2014 technology architecture, cloud strategy, DevOps, security controls, zero trust, SOC, vendor security",
+      "tier": 4
+    },
+    {
+      "e_id": "E-161",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "NCUA IT Examination Handbook + FFIEC guidelines: mandatory tech architecture, data governance, analytics, cloud, and security standards for complex $9B FCU \u2014 regulatory baseline for all P4 categories",
+      "tier": 3
+    },
+    {
+      "e_id": "E-162",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Targeted proxy P4C1/P4C2 advanced subcaps \u2014 data mesh, MLOps, model risk, AI agents, search: AAFCU ceiling analysis based on tech stack + team capabilities",
+      "tier": 4
+    }
+  ],
+  "narrative": null,
+  "qa_verdict_l1": {
+    "governance_skill_version": null,
+    "recommendation": null,
+    "verdict": "PASS",
+    "verdict_basis": null
+  },
+  "qa_verdict_l2": {
+    "governance_skill_version": null,
+    "recommendation": null,
+    "verdict": "PASS_WITH_NOTES",
+    "verdict_basis": null
+  },
+  "run_request_id": "DMA-ASM-AAFCU-20260501-0001",
+  "safeguard_gates": [],
+  "thin_evidence_subcap_ids": [
+    "P1C1.8.2",
+    "P1C1.8.3",
+    "P1C1.8.4"
+  ]
+}

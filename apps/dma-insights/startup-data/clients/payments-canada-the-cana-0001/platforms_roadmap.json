@@ -1,0 +1,53 @@
+{
+  "entity_display_id": "payments-canada-the-cana-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P3C2 Operational Risk & Fraud scores 3.04 (-0",
+        "cloud infrastructure tracked": "12.5%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P3C2 Operational Risk & Fraud scores 3.04 (-0",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+0.94",
+          "metric": "P3C2 Operational Risk & Fraud scores 3.04 (-0",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P3C2 Operational Risk & Fraud scores 3.04 (-0",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R6",
+          "title": "."
+        },
+        {
+          "feature": "Tableau",
+          "maturity_lift": "+0.98",
+          "metric": "cloud infrastructure tracked 12.5%",
+          "outcomes": {
+            "effort": "S",
+            "metric": "cloud infrastructure tracked 12.5%",
+            "peer": null,
+            "time": "0\u20136 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-07",
+          "title": ")."
+        }
+      ],
+      "target": "M3 \u2192 M4 in P3C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-PMTCAN-20260511-0001",
+  "total_duration_months": 4
+}

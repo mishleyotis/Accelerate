@@ -1,0 +1,163 @@
+{
+  "entity_display_id": "alliant-insurance-servic-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "NPS points": "-40%",
+        "Outcome": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+        "engine directly supports": "21.9%",
+        "enterprise": "-wide over 36 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "CRM Analytics",
+          "maturity_lift": "+1.75",
+          "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-05",
+          "title": "Analytics Consolidation (CRM Analytics / Tableau)"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.75",
+          "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Enterprise Integration Platform (MuleSoft Anypoint)"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.75",
+          "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Enterprise Data Governance Platform (Salesforce Data Cloud)"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+1.75",
+          "metric": "NPS points -40%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "NPS points -40%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Client Experience Transformation (Service Cloud + Einstein)"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.63",
+          "metric": "P2C3 score 2.37 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.37 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "AI Governance & GenAI Enablement (Agentforce + Shield)"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.75",
+          "metric": "engine directly supports 21.9%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "engine directly supports 21.9%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Cross-Sell Intelligence Engine (Data Cloud + Einstein Next Best Action)"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.75",
+          "metric": "enterprise-wide over 36 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "enterprise-wide over 36 months",
+            "peer": null,
+            "time": "18-36 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Salesforce Platform Expansion (Employee Benefits \u2192 Enterprise-Wide)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [
+        "REC-01",
+        "REC-03"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+1.75",
+          "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.25 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Unified Client Portal (Salesforce Experience Cloud)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-RES-ALLI-20260331-0001",
+  "total_duration_months": 8
+}

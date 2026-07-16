@@ -1,0 +1,129 @@
+{
+  "entity_display_id": "payments-canada-the-cana-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C2",
+        "P4C2.5.3",
+        "P4C3.6.3",
+        "P2C2.3.7",
+        "P3C2.7.2",
+        "P2C2.3.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-R6",
+      "id": "f64801d6-d16c-4677-b93e-170f2221efef",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-234"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-234",
+        "E-235",
+        "E-236"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Loss Data Collection a near-term focus for Payments Canada (The Canadian Payments Association): a scoped investment here would lift it from 2.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-236].",
+      "source_rec_id": "R6",
+      "theme": "Operational Workflow & Risk",
+      "title": "Loss Data Collection",
+      "what_text": "Operational Risk & Fraud scores 3.04 (-0.46). RTR Central Fraud Analytics deploys 4 ML services at launch generating fraud alerts without a case management layer — every alert becomes a manual email chain. Finance Minister Champagne's National Anti-Fraud Strategy announcement at SUMMIT 2026 positions Payments Canada as Canada's national fraud intelligence hub. BoC IS-004: fraud tolerance levels must be formalized before RTR launch [, T1]. Service Cloud for RTR fraud case management; Agentforce for AI-assisted fraud triage; Tableau Einstein for member-facing fraud intelligence dashboards; MuleSoft integration to IBM/CGI RTR fraud infrastructure (from. In Zennify's assessment Loss Data Collection scores 2.5 out of 5, versus a typical 3.5 at comparable institutions [E-235].",
+      "why_text": "At 2.5 out of 5, Loss Data Collection sits 1.0 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-234, E-235].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P4C2.5.3",
+        "P3C1.1.3",
+        "P1C1.5.1",
+        "P1C5.1.2",
+        "P1C2.7.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "9804fc00-db79-42c7-9572-8aebd175e360",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-234"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R6"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-234"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Materiality Assessment a near-term focus for Payments Canada (The Canadian Payments Association): a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-234].",
+      "source_rec_id": "REC-07",
+      "theme": "ESG & Sustainability",
+      "title": "Materiality Assessment",
+      "what_text": "ESG scores 3.41 (+0.41 above peer median). 20+ ESG KPIs tracked manually. CFO Logue is executive owner. Scope 3 = 512.4 tCO2e across 5 categories. TCFD-aligned reporting creates annual reporting burden. GCP cloud infrastructure tracked at 12.5% of Scope 3 provides a structured data source for Net Zero Cloud ingestion. Net Zero Cloud for ESG data consolidation, GHG tracking automation, and TCFD report generation; Tableau for Board-level ESG KPI dashboard with Scope 1/2/3 trajectory modelling. In Zennify's assessment Materiality Assessment scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-234].",
+      "why_text": "At 3.0 out of 5, Materiality Assessment shows a maturing capability within reach of best practice. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business [E-234].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": null,
+    "recommendations_md": "All 8 recommendations are triple-validated: (1) E-IDs confirm the gap exists, (2) Technology confirmed absent from 40 validated signals + web search, (3) Maps to named Zennify Salesforce solution. No investment amounts or ROI projections per R6."
+  },
+  "run_request_id": "DMA-ASM-PMTCAN-20260511-0001"
+}

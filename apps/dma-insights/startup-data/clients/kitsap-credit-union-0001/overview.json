@@ -1,0 +1,1147 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 188,
+        "subcaps": 188,
+        "thin": 188
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 233
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "kitsap-credit-union-0001",
+    "domain": null,
+    "hq": null,
+    "id": "5184b4e3-5cb7-416a-a517-5c12a8484833",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Kitsap Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:20.908563Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 69,
+    "undated_count": 69
+  },
+  "evidence_summary": {
+    "claims": {
+      "CEILING_ESTIMATE": 1,
+      "EVIDENCE": 1,
+      "FACT": 67
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 8,
+      "NEUTRAL": 49,
+      "POSITIVE": 12
+    },
+    "tiers": {
+      "T1": 8,
+      "T2": 38,
+      "T3": 22,
+      "T4": 1
+    },
+    "total_facts": 11,
+    "total_items": 69
+  },
+  "financial_trajectory": {
+    "cagr": "11.2%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Trend classification: STABLE-STRONG — FY2025 industry CU asset growth 5.4% (NCUA); Kitsap +8.7% = ~1.6x industry. Asset CAGR (2018–2025): ~11.2%.",
+    "highlights": [],
+    "series": {},
+    "trend": "STABLE",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 2520000000.0,
+    "branches": 14,
+    "cagr": "11.2%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Trend classification: STABLE-STRONG — FY2025 industry CU asset growth 5.4% (NCUA); Kitsap +8.7% = ~1.6x industry. Asset CAGR (2018–2025): ~11.2%.",
+        "Net income series: FY2023 $9.08M → FY2024 $6.02M → FY2025 $8.61M [E-078]."
+      ],
+      "trajectory": {
+        "branches": 14,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 325,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Eric Crabtree promoted leading digital strategy across all…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "KCU launched a refreshed 5-year strategic plan"
+          }
+        ],
+        "fy": [
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Western WA / Puget Sound",
+        "headline": "$6M net income · FY2025",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            9.1,
+            6.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Western WA / Puget Sound",
+    "footprint_basis": "derived:geography",
+    "founded": 1934,
+    "geography": "Western WA / Puget Sound",
+    "headcount": 325,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Kitsap CU",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Shawn Gilfedder",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Scott Lindley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Trevor Stuart",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Digital Innovation",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Pendergist AI",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Simon Powley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Revenue Officer"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Kitsap Credit Union",
+    "license_type": "Credit union (NCUA-regulated)",
+    "members": 163285,
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Kitsap Credit Union is a credit union. It reports $2.5 billion in total assets and has operated since 1934. It is regulated by NCUA and employs approximately 325 people across 14 branches. Its overall digital maturity is assessed at 2.6 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.4,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.4/5",
+          "signal": "pillars: food security, housing, financial wellness Indeed 3.4/5 overall (culture 3.3, mgmt 3.1, work-life 3.5); CEO approval 69.7%; Kitsap filed a formal comment letter (3/20/2024) opposing the Fed's Reg II debit-interchange cap proposal —",
+          "source": "Indeed"
+        },
+        {
+          "signal": "68576); only routine member debt-collection and resolved BBB complaints — clean governance standing KCU migrated all branches from a legacy on-prem phone system to Microsoft Teams Phone / softphones / cloud, seeking integration with other a",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Productized digital-first tiering: Peak (digital 'summit', 3.30% APY w/ 12-txn+e-stmt+electronic-txn monthly qualification), Essential (core), Launch!",
+        "title": "Productized digital-first tiering: Peak (digital 'summit', 3.30% APY…",
+        "type": "conference",
+        "url": "https://kitsapcu.org/personal/checking/new-account-experience/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-033",
+        "excerpt": "Multi-platform social presence + active content blog (employee highlights, youth-account education, community, financial wellness); SEO-indexed product/education pages Two America's Credit Unions Diamond Awards (Apr 2025",
+        "title": "VP Marketing Luke Peterson is",
+        "type": "blog",
+        "url": "https://kitsapcu.org/blog/follow-kitsap-credit-union-on-social-media/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "kitsapcu.org",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v5.5",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.280572+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Kitsap Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Kitsap Credit Union is a $2.5B in assets credit union regulated by NCUA, operating since 1934 with 325 employees. A 11.2% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-078, E-016]. Zennify's assessment places overall digital maturity at 2.6/5. The deepest capability gap is Champions Program at 2.1/5 against a 2.6 peer median [E-083]. Next is Reconciliation Automation at 2.2/5 against a 3.0 peer median [E-069, E-076].\n\nThird is Third-Party Risk Framework at 2.2/5 against a 2.7 peer median [E-054]. The issue register adds capability weights sum to 100 per CATEGORY (authoritative Pillar toolkit; direct capability->category aggregation)… (critical severity). The issue register adds Per-row single Tier column vs multiple cited E-IDs of differing tiers across all columns -> 752 'mismatches' (critical severity). Counter-signal: Technology Strategy already runs at 3.4/5 against a 2.6 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Kitsap Credit Union is whether to close Champions Program first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Kitsap Credit Union should lead with Tableau (68/100 fit) against Risk Appetite & Framework, then sequence nCino behind it. Closing Champions Program to the peer median alone is worth 0.5 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Soft employee wellbeing = adoption risk — Indeed 3.4/5, wellbeing 'Low', CEO approval 69.7%, recommend ~49% [E-083] — Change-adoption risk for enterprise rollouts…\"."
+  },
+  "overall_score": 2.61,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P1_proxy_ledger.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.874071+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P2C3C4_proxy_ledger.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.874943+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P2_proxy_ledger.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.875830+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P3_proxy_ledger.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.876649+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P4C1C2_proxy_ledger.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.877349+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P4C3C4_proxy_ledger.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.877954+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/technographic_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.878467+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/technographics_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.878732+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/gap_priority.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.879371+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/scoring_rollup.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.880015+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_overall.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.880467+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.880963+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.881160+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L1_phase8_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.881326+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L1_report_validation_GATE_P7.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.881575+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_governance_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.882099+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_governance_pass1_disposition.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.882436+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_governance_pass2_llm_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.882693+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_governance_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.882860+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:20.883074+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 0,
+      "INFO": 35
+    },
+    "stage_ms": {
+      "manifest": 6,
+      "parse": 5439,
+      "persist": 1564
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/L1_phase8_qa_verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+68 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/L2_governance_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: KCU_Explorium_TechStack.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_Report_Kitsap_Credit_Union_20260602.docx leadership=0 focus_areas=7 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_derived_from_scores",
+        "detail": "scqa_derived_from_scores",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P1_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P2C3C4_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P2_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P3_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P4C1C2_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P4C3C4_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/technographic_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/technographics_results.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/gap_priority.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/scoring_rollup.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_overall.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L1_phase8_patch_block.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L1_report_validation_GATE_P7.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_governance_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_governance_pass1_disposition.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_governance_pass2_llm_results.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_governance_patch_block.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:CU",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 2",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 10",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/L1_phase8_qa_verdict.json",
+      "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "INFO/evidence_facts_merged_from_json_twin: +68 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "used variant issue register: 07_governance/L2_governance_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+      "used variant tech stack xlsx: KCU_Explorium_TechStack.xlsx",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_Report_Kitsap_Credit_Union_20260602.docx leadership=0 focus_areas=7 facts_extracted=0",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "scqa_derived_from_scores",
+      "insights_from_client_profile_findings: 3",
+      "INFO/pattern_gap: 01_evidence/P1_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P2C3C4_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P2_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P3_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P4C1C2_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P4C3C4_proxy_ledger.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/technographic_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/technographics_results.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/gap_priority.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/scoring_rollup.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_overall.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L1_phase8_patch_block.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L1_report_validation_GATE_P7.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_governance_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_governance_pass1_disposition.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_governance_pass2_llm_results.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_governance_patch_block.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "subvertical_inferred_from_name:CU",
+      "timeline_events_persisted: 2",
+      "insight_cards_persisted: 10"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 188,
+      "peer_median": 2.58,
+      "pillar_id": "P1",
+      "score": 2.72,
+      "subcaps_scored": 188
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.88,
+      "pillar_id": "P2",
+      "score": 2.51,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.93,
+      "pillar_id": "P3",
+      "score": 2.53,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.62,
+      "pillar_id": "P4",
+      "score": 2.7,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-06-02",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v5.5",
+    "completed_at": "2026-07-02T23:11:20.908563Z",
+    "created_at": "2026-07-02T23:11:20.908563Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "38dcb916-f9bb-4478-aa58-4adcc159d003",
+    "overall_score": null,
+    "request_id": "DMA-ASM-KCU-20260602-0001",
+    "started_at": "2026-07-02T23:11:20.908563Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.4,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Soft employee wellbeing = adoption risk — Indeed 3.4/5, wellbeing 'Low', CEO approval 69.7%, recommend ~49% [E-083] — Change-adoption risk for enterprise rollouts — Zennify enablement / change-management / adoption services.",
+      "evidence": [
+        "E-083",
+        "E-054",
+        "E-024",
+        "E-051"
+      ],
+      "magnitude": "69.7%",
+      "name": "Soft employee wellbeing = adoption risk",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 2.22,
+      "so_what": "Soft employee wellbeing = adoption risk — Indeed 3.4/5, wellbeing 'Low', CEO approval 69.7%, recommend ~49%.",
+      "subcap_id": "P3C1",
+      "theme": "Operations",
+      "title": "Soft employee wellbeing = adoption risk",
+      "what": "[E-083] — Change-adoption risk for enterprise rollouts — Zennify enablement / change-management / adoption services.",
+      "why": "The linked evidence records: Indeed: overall 3.4/5 (culture 3.3, management 3.1, work-life 3.5, comp/benefits 3.4); CEO approval 69.7%; recommend-a-friend ~49% (46 yes/48 no); wellbeing profile 'Low' (happiness/energy/purpose/flexibility Low; appreciation/support/trust/belonging below average)"
+    },
+    {
+      "body": "Fragmented best-of-breed stack, no unifying member 360 — Symitar core + FSC + Terafina + Zest + D8TAOPS + FirstClose + vendor PFM; per-account logins, NBA on roadmap [E-055,E-080,E-044] — No golden record / cross-sell engine — Data Cloud (member golden record) + MuleSoft (integration tier)",
+      "evidence": [
+        "E-055",
+        "E-080",
+        "E-044",
+        "E-027"
+      ],
+      "magnitude": "0.2 pts below peer median",
+      "name": "Fragmented best-of-breed stack",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.29,
+      "so_what": "Prioritize Fragmented best-of-breed stack in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Fragmented best-of-breed stack",
+      "what": "Fragmented best-of-breed stack, no unifying member 360 — Symitar core + FSC + Terafina + Zest + D8TAOPS +. FirstClose + vendor PFM; per-account logins, NBA on roadmap. [E-055,E-080,E-044] — No golden record / cross-sell engine — Data Cloud (member golden record) +. MuleSoft (integration tier).",
+      "why": "The linked evidence records: Kitsap (equity + design partner) deploys D8TAOPS D8:APPS on the D8:STACK framework providing collect (batch+streaming), discover/classify/catalog with searchable context and lineage, clean/validate/transform to trusted features, orchestration, observability, governed"
+    },
+    {
+      "body": "First-mover AI/data — but governed orchestration sits beside, not on, the CRM — D8TAOPS equity + design partner (RCW 31.12.436, DFI 9/2025), private LLM, audit pilot +60%/-50% [E-058,E-069] — Strong data foundation, not unified to member 360/CRM — Data Cloud + Einstein + Agentforce operationalize AI on a unified 360.",
+      "evidence": [
+        "E-058",
+        "E-069",
+        "E-019",
+        "E-020"
+      ],
+      "magnitude": "+60%",
+      "name": "First-mover AI/data",
+      "peer_median": 2.6,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.6,
+      "so_what": "Protect First-mover AI/data as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "First-mover AI/data",
+      "what": "First-mover AI/data — but governed orchestration sits beside, not on, the CRM — D8TAOPS equity + design partner (RCW 31.12.436, DFI 9/2025), private LLM, audit pilot +60%/-50%. [E-058,E-069] — Strong data foundation, not unified to member 360/CRM — Data Cloud + Einstein + Agentforce operationalize AI on a unified 360.",
+      "why": "The linked evidence records: Kitsap's equity investment + design partnership in D8TAOPS, plus Zest AI, private LLM, KIT GenAI bot and My Insights, constitute a deployed analytics/AI strategy explicitly aimed at real-time data tools, intelligent systems and member-facing enhancements Owned at C-level"
+    },
+    {
+      "body": "High-growth, well-capitalized, record year — $2.52B assets +8.7% (~1.6x industry 5.4%), $8.6M NI, $40M+ dividends, ~$800M/71K loan production [E-078] — Capacity + mandate to invest in modernization — Investment appetite; clear economic buyers (CRO Powley, CDXO Crabtree)",
+      "evidence": [
+        "E-078",
+        "E-083",
+        "E-027",
+        "E-022"
+      ],
+      "magnitude": "$2.52B",
+      "name": "High-growth, well-capitalized, record year",
+      "peer_median": 2.6,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 2.14,
+      "so_what": "Prioritize High-growth, well-capitalized, record year in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "High-growth, well-capitalized, record year",
+      "what": "High-growth, well-capitalized, record year — $2.52B assets +8.7% (~1.6x industry 5.4%), $8.6M NI, $40M+ dividends, ~$800M/71K loan production [E-078] — Capacity + mandate to invest in modernization — Investment appetite; clear economic buyers (CRO Powley, CDXO Crabtree).",
+      "why": "The linked evidence records: FY2025 record: total assets surpassed $2.52B (+8.7%, exceeding budget and internal targets); net loans +7.7% to $1.96B; deposits +9.0% to $2.24B; net income $8,614,585; $40M+ dividends returned to members; ~$800M loan production across 71,000 applications (strongest"
+    },
+    {
+      "body": "Salesforce FSC deployed & maturing — Dedicated Salesforce Admin + Developer; 'single pane of glass' front-line goal; FSC integrations [E-039,3A] — CRM foundation exists but not yet unifying systems of record — LAND-AND-EXPAND anchor — Service/Sales Cloud + Agentforce expansion, not net-new.",
+      "evidence": [
+        "E-039",
+        "E-083",
+        "E-027",
+        "E-022"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "Salesforce FSC deployed & maturing",
+      "peer_median": 2.6,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 2.14,
+      "so_what": "Prioritize Salesforce FSC deployed & maturing in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Salesforce FSC deployed & maturing",
+      "what": "Salesforce FSC deployed & maturing — Dedicated Salesforce Admin + Developer; 'single pane of glass' front-line goal; FSC integrations. [E-039,3A] — CRM foundation exists but not yet unifying systems of record — LAND-AND-EXPAND anchor — Service/Sales Cloud + Agentforce expansion, not net-new.",
+      "why": "The linked evidence records: KIT is Kitsap's virtual-assistant chatbot 'powered by generative AI' (under 'Let's Chat'), a deployed conversational-AI servicing channel Live Chat available via Online Banking Mon-Fri 9am-5pm (business-hours limit); secure messaging via Support/Messages 24/7 async"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-079"
+      ],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; staleness -0.3",
+        "167 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Technology Strategy averages 3.4/5 over 167 scored subcaps; ceiling 3.9 reflects thin evidence density (0/167 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; staleness -0.3",
+        "221 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "AI Ethics & Fairness averages 2.6/5 over 221 scored subcaps; ceiling 3.1 reflects thin evidence density (0/221 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; within-cap differentiation (lowest within-capability ERS)",
+        "192 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Dedicated Innovation Budget averages 3.2/5 over 192 scored subcaps; ceiling 3.7 reflects thin evidence density (0/192 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-083"
+      ],
+      "modifiers": [
+        "cap applied: ev-mod -0.0; neg-ev -0.2",
+        "cap applied: ev-mod -0.0; staleness -0.3; neg-ev -0.2",
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Champions Program averages 2.1/5 over 205 scored subcaps; ceiling 2.6 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.12",
+        "126 of 126 subcaps on thin evidence"
+      ],
+      "rationale": "Partner ESG Assessment averages 2.3/5 over 126 scored subcaps; ceiling 2.8 reflects thin evidence density (0/126 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.12",
+        "293 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Marketing Automation Platform averages 2.3/5 over 293 scored subcaps; ceiling 2.8 reflects thin evidence density (0/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-080"
+      ],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; within-cap differentiation (lowest within-capability ERS)",
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Abandonment Recovery averages 2.6/5 over 291 scored subcaps; ceiling 3.1 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0; neg-ev -0.2",
+        "cap applied: ev-mod -0.0; neg-ev -0.2; within-cap differentiation (lowest within-capability E",
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Workforce Management averages 2.5/5 over 289 scored subcaps; ceiling 3.0 reflects thin evidence density (0/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; within-cap differentiation (lowest within-capability ERS)",
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Household Coordination averages 2.7/5 over 259 scored subcaps; ceiling 3.2 reflects thin evidence density (0/259 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0; staleness -0.3",
+        "cap applied: ev-mod -0.12; staleness -0.3",
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Reconciliation Automation averages 2.2/5 over 146 scored subcaps; ceiling 2.7 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; staleness -0.3",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Fraud Model Governance averages 2.8/5 over 130 scored subcaps; ceiling 3.3 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.12",
+        "cap applied: ev-mod -0.12; within-cap differentiation (lowest within-capability ERS)",
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Report Production averages 2.9/5 over 142 scored subcaps; ceiling 3.4 reflects thin evidence density (0/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.17",
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Risk Framework averages 2.2/5 over 145 scored subcaps; ceiling 2.8 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; within-cap differentiation (lowest within-capability ERS)",
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "AI/BI Enablement Training + Governance averages 2.8/5 over 200 scored subcaps; ceiling 3.3 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ev-mod -0.0",
+        "cap applied: ev-mod -0.0; within-cap differentiation (lowest within-capability ERS)",
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Data Synchronization (CDC-to-Serving) Architecture averages 2.6/5 over 270 scored subcaps; ceiling 3.1 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-069"
+      ],
+      "modifiers": [
+        "cap applied: ev-mod -0.12",
+        "cap applied: ev-mod -0.12; within-cap differentiation (lowest within-capability ERS)",
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Application Portfolio Management averages 2.7/5 over 235 scored subcaps; ceiling 3.2 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-077"
+      ],
+      "modifiers": [
+        "cap applied: ev-mod -0.12",
+        "cap applied: ev-mod -0.12; within-cap differentiation (lowest within-capability ERS)",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Application Security averages 2.8/5 over 150 scored subcaps; ceiling 3.3 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Shawn Walker appointed VP of Product Strategy (began Jan 2026), leading product portfolio strategy/development/growth across digital and traditional offerings, reporting to Simon Powley, Chief Revenue Officer (CRO)",
+      "evidence": [
+        "E-079"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Shawn Walker appointed VP of Product Strategy",
+      "metric": null,
+      "peer_context": "Champions Program runs 2.14/5 vs a 2.60 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Shawn Walker appointed VP of Product Strategy (began Jan 2026), leading product portfolio strategy/development/growth across digital and traditional offerings, reporting to Simon Powley, Chief Revenue Officer (CRO). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Shawn Walker appointed VP of Product Strategy"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "issue_register",
+      "detail": "Subcap weights sum to 100 per CATEGORY (authoritative Pillar toolkit; direct subcap->category aggregation), not per-capability=1.0 as auditor assumes",
+      "evidence": [
+        "E-023",
+        "E-027"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Subcap weights sum",
+      "metric": null,
+      "peer_context": "Champions Program runs 2.14/5 vs a 2.60 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Subcap weights sum to 100 per CATEGORY (authoritative Pillar toolkit; direct subcap->category aggregation), not per-capability=1.0 as auditor assumes. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Champions Program scores 2.14/5 vs a typical 2.60 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-083",
+        "E-027",
+        "E-022"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Champions Program scores 2.14/5 vs a typical 2.60 at…",
+      "metric": "Champions Program 2.14/5 vs peer 2.60",
+      "peer_context": "Champions Program runs 2.14/5 vs a 2.60 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Risk Appetite & Framework — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C4",
+      "text": "Champions Program scores 2.14/5 vs a typical 2.60 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

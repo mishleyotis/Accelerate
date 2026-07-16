@@ -1,0 +1,178 @@
+{
+  "entity_display_id": "spokane-teachers-credit--0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.5.1",
+        "P1C1.8.2",
+        "P1C1.5.4",
+        "P4C3.2.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "5aac138b-42ab-41e5-a059-e3d7c75ffb0f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-011",
+        "E-089",
+        "E-004"
+      ],
+      "linked_subcap_id": "P4C1.5.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Enterprise Data Catalog & Discovery a near-term focus for Spokane Teachers Credit Union: a scoped investment here would lift it from 2.0 toward the 2.6 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-004].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "STCU’s strategic direction under CEO Lindsey Myhre centers on geographic expansion, technology modernization, and deepen",
+      "what_text": "Enterprise Data Catalog & Discovery is one of Spokane Teachers Credit Union's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.6 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Spokane Teachers Credit Union's ability to deliver a stronger data and technology foundation [E-089].",
+      "why_text": "At 2.0 out of 5, Enterprise Data Catalog & Discovery sits 0.6 points below the 2.6 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-011, E-089].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C2.2.4",
+        "P3C2.8.2",
+        "P4C2.2.10"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "15f631f7-7714-4106-8726-d28a688ff0dd",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-021",
+        "E-031",
+        "E-013"
+      ],
+      "linked_subcap_id": "P1C2.2.4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Emerging Risk Identification a near-term focus for Spokane Teachers Credit Union: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "Seven findings emerged from 99 public evidence items",
+      "what_text": "Emerging Risk Identification is one of Spokane Teachers Credit Union's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Spokane Teachers Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-020].",
+      "why_text": "The assessment found: “STCU has a Chief Risk Officer (CRO) — Brian Scott, C-Suite level, since Oct 2023 CRO previously SVP of Finance Risk (Apr-Oct 2023), VP Accounting & Finance (2019-2023), Director (2015-2019)” [E-013]. At 2.5 out of 5, Emerging Risk Identification shows a developing capability still short of the peer standard. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2.9.IC1",
+        "P1C2",
+        "P2C1.3.AM1",
+        "P1C2.9.FC1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "d5de65bc-4d46-4aa9-922e-fa334bced173",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-035",
+        "E-024",
+        "E-021",
+        "E-014",
+        "E-030",
+        "E-017",
+        "E-022",
+        "E-029"
+      ],
+      "linked_subcap_id": "P1C2.9.IC1",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Spokane Teachers Credit Union: invest to move it toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the improvement reaches well beyond this single capability [E-021].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "This research was conducted in Public evidence mode",
+      "what_text": "This research was conducted in PUBLIC evidence mode. The following gaps represent priority areas for internal discovery. It underpins the planning and oversight the rest of the business relies on, so its current level directly shapes Spokane Teachers Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-024].",
+      "why_text": "The assessment found: “NCUA-insured, Charter #68203 — subject to federal regulatory examination framework WA DFI state-regulated — dual regulatory oversight (federal + state)” [E-035]. Strengthening this capability matters because it shapes sharper strategic direction and stronger oversight. It builds on the planning and oversight the rest of the business relies on, so progress here lifts the wider business too.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "STCU's positioning against peers reveals a clear pattern: infrastructure security leadership paired with member experience underinvestment (P2). This asymmetry creates both a competitive vulnerability (peers are investing in member-facing platforms STCU lacks) and a strategic opportunity (the security foundation de-risks accelerated digital transformation).",
+        "heading": "Strategic positioning matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/customer experience — Score 2.27 vs median 2.61 (-0.34)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, risk & compliance — Score 2.44 vs median 2.48 (-0.04)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, analytics & technology — Score 2.57 vs median 2.56 (0.01)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Ten recommendations map to ten Zennify solutions from the 12-solution catalog. Each recommendation follows the ROOT CAUSE → SOLUTION → EXPECTED OUTCOMES structure with evidence traceability. Every root cause is validated through three layers: (1) research evidence with E-IDs, (2) Explorium technographics confirming STCU does NOT have the recommended solution, and (3) Explorium technographics confirming named peers have already deployed it. Recommendations focus on capability outcomes and maturity advancement — financial projections are addressed in scoping conversations.\n: Digital strategy workshop — CEO first-year agenda alignment [ZENNIFY]\nPriority: 🟠 HIGH (7.15) | Categories: | Gap: -0.62 | Current: 2.28 → Peer: 2.90\n[ROOT CAUSE]\nSTCU allocates $13.4M annually to computer operations (a 12.6% YoY increase [E-047]) without a formalized digital strategy document to guide investment priorities. CEO Lindsey Myhre, named in July 2025 after 25 years at STCU including service as CFO/EVP [E-004], has publicly stated she is \"not afraid of new technologies, embracing the change\" [E-039], but this technology openness lacks a strategic framework. The 2024 annual report links NWR management to \"investing in new technologies, competitive products, and geographical expansion\" [E-011], yet four active M&A integrations (Horizon CU, Wheatland Bank, Community Bank $550M, Coulee Dam FCU pending [E-003]) compete for these investment dollars without a prioritization mechanism. The MuleSoft + TIBCO co-existence in STCU's tech stack [Explorium confirmed] is a symptom of uncoordinated technology decisions — two integration platforms serving overlapping purposes without a consolidation roadmap.\n[SOLUTION]\nDigital Strategy Workshop: Digital Strategy Workshop: A 2-3 month Zennify engagement producing a digital transformation roadmap that prioritizes Salesforce platform deepening, M&A integration sequencing, and legacy pipeline modernization. Direct CEO-level engagement during Myhre's first-year agenda-setting window. The workshop produces a published strategy document that rationalizes the $13.4M tech spend, establishes platform governance principles, and creates a sequenced investment plan for the remaining 9 recommendations.\nconnected unlock: strategy unlocks (architecture rationalization), (data platform modernization), (omnichannel integration)\n[EXPECTED OUTCOMES]\nEvidence: [E-011, E-004, E-039, E-088]\n: Financial Services Cloud — unified member relationship management [ZENNIFY]\nPriority: 🟠 HIGH (6.85/6.65/6.25) | Categories:,, | Gap: -0.83 | Current: 2.17 → Peer: 3.00\n[ROOT CAUSE]\nSTCU uses basic Salesforce CRM [Explorium tech_sales confirmed] without Financial Services Cloud (FSC). Explorium technographics confirm FSC is absent from every STCU tech category — no KYC/CDD automation, no household relationship modeling, no compliance-aware lifecycle management. This gap is competitively critical because Gesa Credit Union, STCU's direct Washington state competitor at $5.6B in assets, has already deployed Salesforce FSC [Explorium confirmed]. STCU serves 309,396 members across 51 branches with member data fragmented across Temenos core banking, basic Salesforce CRM, Alkami digital banking, and ibi WebFOCUS analytics [E-005, Explorium]. The Community Bank acquisition (May 2025, $550M [E-003]) brought additional members from a separate core system requiring migration — a process FSC's relationship management and data model are specifically designed to handle. The commercial banking division, a strategic priority since 2016 [E-002], requires relationship-level tracking that basic CRM cannot provide for commercial lending, treasury services, and investment advisory.\n[SOLUTION]\nFinancial Services Cloud: Financial Services Cloud: A license upgrade on STCU's existing Salesforce CRM instance — not a new platform deployment — that adds compliance-aware member lifecycle management, KYC/CDD automation for regulatory requirements, household relationship modeling for cross-sell optimization, and commercial banking relationship tracking. The existing Salesforce CRM data migrates directly into FSC's extended data model. Integration with Temenos core banking via MuleSoft (already deployed) provides real-time account data within the FSC member view.\nconnected unlock: FSC unlocks (digital onboarding with KYC), (unified omnichannel view), (lifecycle personalization), (compliance automation)\n[EXPECTED OUTCOMES]\nEvidence: [E-005, E-003, E-002, E-065]\n: Marketing Cloud — replace Mailchimp with enterprise marketing automation [ZENNIFY]\nPriority: 🟠 HIGH (6.30/6.65) | Categories:, | Gap: -0.75 | Current: 2.30 → Peer: 3.05\n[ROOT CAUSE]\nSTCU's marketing technology stack consists of Mailchimp + Mailgun for email, Google Ads + Facebook Pixel for digital advertising, and Bonzo for basic marketing automation [E-059, E-063, Explorium tech_marketing confirmed]. This is a small-business-grade stack for a $5.84B institution. Explorium technographics confirm that both WSECU and Gesa Credit Union have deployed Salesforce Marketing Cloud — making STCU the only large Washington state credit union still relying on Mailchimp for enterprise marketing. The TDWI award-winning Conversation Engine [E-088] achieves 13-19% member engagement success but runs on batch WebFOCUS data feeds processed overnight by a single ETL developer [E-089] — it cannot deliver real-time behavioral triggers, journey branching, or AI-optimized send timing. The MMA product launch ($680M in deposits within 6 months [E-040]) succeeded through product innovation and community trust rather than marketing automation — demonstrating that Marketing Cloud would amplify an already effective marketing strategy rather than building one from scratch.\n[SOLUTION]\nMarketing Cloud: Marketing Cloud: Replaces Mailchimp/Mailgun with enterprise marketing automation including journey orchestration, behavioral triggers, A/B testing, AI-powered send time optimization, and dynamic content personalization. Integrates with FSC for member lifecycle journey triggers and Data Cloud for unified member profiles. Modernizes the Conversation Engine from batch WebFOCUS feeds to real-time journey-driven personalization while preserving the data-driven culture that earned the TDWI award.\nconnected unlock: Marketing Cloud unlocks (digital acquisition), (journey personalization), (marketing analytics integration)\n[EXPECTED OUTCOMES]\nEvidence: [E-059, E-088, E-040, E-063]\n: Data Cloud — unified member data platform replacing legacy ETL [ZENNIFY]\nPriority: 🟠 HIGH (6.10/6.55) | Categories:, | Gap: -0.67 | Current: 2.38 → Peer: 3.05\n[ROOT CAUSE]\nSTCU's data infrastructure is the institution's most fragile critical capability. A single Senior ETL Developer (Tim Mewhinney, 9-year tenure [E-089]) maintains the Informatica Data Quality + ibi WebFOCUS + SQL Server pipeline that feeds 220 reports to 600+ employees and powers the Conversation Engine [E-088, ibi case study]. Explorium confirms Informatica Data Quality in the tech stack but reveals no data catalog (no Alation), no modern data platform (no Snowflake, no Databricks), and no customer data platform (no Data Cloud, no CDP). WSECU has invested in Snowflake + Alation data catalog with a 7-person data team (Coalesce case study), and OnPoint runs Databricks + Azure Synapse [Explorium confirmed]. STCU has one ETL developer where WSECU has seven data professionals. The key-person risk is existential: if Mewhinney departs, the 220-report portfolio and the Conversation Engine pipeline have no documented successor.\n[SOLUTION]\nData Cloud: Data Cloud: Provides a unified member data model with automated data quality, master data management, and CDP functionality. Replaces the fragile Informatica/WebFOCUS/SQL Server pipeline with a managed platform that eliminates key-person dependency. Activates unified member profiles for Marketing Cloud personalization and CRM Analytics insights. Data governance policies built into the platform address the absence of a formal data governance framework.\nconnected unlock: Data Cloud unlocks (analytics on unified data), (personalization with complete member profiles), (governed data management)\n[EXPECTED OUTCOMES]\nEvidence: [E-089, E-091, E-088, E-033]\n: MuleSoft Anypoint deepening — M&A integration accelerator [ZENNIFY]\nPriority: 🟠 HIGH (5.80/6.15) | Categories:, | Gap: -0.58 | Current: 2.37 → Peer: 2.95\n[ROOT CAUSE]\nMuleSoft is deployed in STCU's platform stack [Explorium tech_platform_and_storage confirmed], but Explorium also reveals TIBCO co-existing in the same stack — indicating incomplete platform migration and fragmented integration governance. Four acquisitions since 2020 (Horizon CU, Wheatland Bank, Community Bank $550M, Coulee Dam FCU pending [E-003]) have introduced separate core systems: Community Bank ran Finastra/FIS rather than Temenos [E-053]. Each acquisition adds point-to-point integrations without API lifecycle management. The application portfolio spans Temenos + Salesforce CRM + Alkami + WebFOCUS + Guardian Analytics + Freshservice + LogicManager — an ecosystem requiring governed integration that currently lacks Anypoint Platform governance, API cataloging, or reusable integration patterns.\n[SOLUTION]\nMuleSoft Anypoint: MuleSoft Anypoint deepening: Establishes API lifecycle management, governance policies, and reusable M&A integration patterns on STCU's existing MuleSoft deployment. Consolidates MuleSoft + TIBCO into a single integration platform. Creates pre-built API connectors for core-to-core migration (Temenos ↔ Finastra/FIS) and member data consolidation. Builds a repeatable M&A integration playbook for Coulee Dam FCU (pending) and future acquisitions.\nconnected unlock: MuleSoft unlocks (cross-system process automation), (enterprise architecture), (third-party management)\n[EXPECTED OUTCOMES]\nEvidence: [E-005, E-003, E-093, E-072]\n: CRM Analytics + Tableau modernization — replace WebFOCUS pipeline [ZENNIFY]\nPriority: 🟠 HIGH (6.55) | Categories: | Gap: -0.63 | Current: 2.47 → Peer: 3.10\n[ROOT CAUSE]\nSTCU operates a dual BI environment: ibi WebFOCUS is the PRIMARY BI tool (220 reports, 600+ users, 15 analysts, Rozalind Kitt BI Manager [ibi case study]) while Tableau Desktop + Tableau Online serve as a secondary platform [Explorium tech_bi_and_analytics confirmed]. This dual-platform environment creates reporting inconsistency, governance overhead, and skills fragmentation. Explorium confirms no Einstein, no CRM Analytics, and no Agentforce in STCU's stack. AI/ML is deployed in security (Palo Alto Cortex XDR + Wildfire) and fraud (Guardian Analytics ML [E-073]) but not in any member-facing or credit-risk-predictive capacity. The $64.5M provision for credit losses [E-034] creates specific demand for predictive credit risk analytics that the current WebFOCUS reporting environment cannot provide. Numerica CU (smaller at $3.5B) has deployed Apache Spark + TensorFlow [Explorium], and WSECU has Snowflake + Power BI + Tableau [Explorium].\n[SOLUTION]\nCRM Analytics (Tableau): CRM Analytics (Tableau): Consolidates the dual WebFOCUS + Tableau BI environment into a unified Salesforce-native analytics platform. CRM Analytics provides embedded dashboards within FSC for frontline staff, while Tableau becomes the enterprise analytics standard (replacing the 220 WebFOCUS reports). Einstein Discovery adds predictive credit risk modeling to address the $64.5M provision driver, and Einstein AI provides next-best-action recommendations for member-facing staff.\nconnected unlock: Analytics modernization unlocks (AI-enabled analytics), (credit risk dashboards), (strategy KPI monitoring)\n[EXPECTED OUTCOMES]\nEvidence: [E-091, E-088, E-089, E-034]\n: Agentforce — member-facing AI for digital self-service [ZENNIFY]\nPriority: 🟠 HIGH (6.85) | Categories: | Gap: -1.01 | Current: 1.99 → Peer: 3.00\n[ROOT CAUSE]\nSTCU has zero member-facing AI capabilities. Explorium confirms no chatbot, no virtual assistant, and no automated FAQ resolution in any technology category. OnPoint Community CU has deployed the Ada chatbot [Explorium confirmed], establishing a peer benchmark for AI-enabled member service. STCU participated in the Abe.ai conversational AI pilot in 2018 alongside other credit unions [E-045] but never deployed to production — representing a stalled AI initiative. CEO Myhre has stated she is \"not afraid of new technologies\" [E-039], and the Freshservice deployment with Freddy AI Copilot (Freshworks case study Aug 2025) proves STCU can successfully adopt AI — achieving 82.8% first contact resolution and 100% employee satisfaction internally. The gap is specifically in extending AI from internal ITSM to member-facing interactions. NCUA hired 3 AI officers in 2025-2026 [E-092], signaling regulatory readiness for responsible AI adoption in credit unions.\n[SOLUTION]\nAgentforce: Agentforce: Deploys AI-powered member service agents for automated FAQ resolution, account inquiry handling, loan status updates, and appointment scheduling. Builds on the Freddy AI Copilot familiarity established through Freshservice — STCU staff are already comfortable with AI-assisted workflows. Integrates with FSC for compliance-aware member interactions and Service Cloud for seamless human escalation when AI confidence is low.\nconnected unlock: Agentforce unlocks (self-service digital channel), (automated member service processes), (AI-enabled member interactions)\n[EXPECTED OUTCOMES]\nEvidence: [E-039, E-045, E-092, E-067]\n: Service Cloud — unified omnichannel for 51 branches + digital [ZENNIFY]\nPriority: 🟠 HIGH (6.85/6.15) | Categories:, | Gap: -0.87 | Current: 2.13 → Peer: 3.00\n[ROOT CAUSE]\nSTCU operates five separate customer-facing systems without a unified orchestration layer: Freshdesk for customer support, Freshservice with Freddy AI Copilot for internal ITSM (Freshworks case study Aug 2025, 82.8% FCR, 100% employee satisfaction), Mitel MiContact Center for telephony, Glia for digital engagement, and Qualtrics Research Core + Site Intercept for CX measurement [Explorium tech_customer_management + tech_communications confirmed]. Separate personal and business mobile apps further fragment the experience. Each member interaction requires agents to switch between systems depending on channel — there is no unified agent desktop providing complete member history. Numerica CU uses Genesys PureCloud for unified contact center [Explorium], and both WSECU and OnPoint score 3.0+ on omnichannel service. With 38.6M online logins in 2024 [E-001] and 51 physical branches [E-008], the volume of multi-channel interactions demands unified orchestration.\n[SOLUTION]\nService Cloud: Service Cloud: Unifies all customer-facing channels into a single agent desktop with complete member history from FSC, omnichannel case routing (phone, email, chat, branch, digital), and AI-powered case prioritization via Agentforce. Replaces the fragmented Freshdesk + Mitel + Glia approach with a Salesforce-native service platform that integrates with FSC for relationship context and MuleSoft for real-time data from Temenos core banking.\nconnected unlock: Service Cloud unlocks (unified omnichannel), (case-driven automation), (fraud case management)\n[EXPECTED OUTCOMES]\nEvidence: [E-067, E-008, E-071, E-041]\n: Shield — CRM data protection for regulated member data [ZENNIFY]\nPriority: 🟡 MEDIUM (5.00) | Categories: | Gap: +0.03 | Current: 2.53 → Peer: 2.50\n[ROOT CAUSE]\nSTCU has the most comprehensive security technology stack among all five institutions assessed — Illumio >90% Zero Trust microsegmentation, Palo Alto Networks full stack (VM-Series + Cortex XDR + Wildfire + PAN-OS + Panorama), IBM QRadar SIEM, Proofpoint email security, Qualys vulnerability management, Veracode application security, Thycotic privileged access management, and Trend Micro endpoint protection [E-096, E-097, E-098, Explorium tech_it_security — 20 security tools confirmed]. However, Explorium confirms no Salesforce Shield in the tech stack. As FSC, Marketing Cloud, Data Cloud, and other Salesforce products are deployed ( through ), member PII stored in Salesforce grows exponentially. GLBA compliance requires data-at-rest encryption and access controls for financial institution member data — Shield provides this at the Salesforce application layer where infrastructure security tools (Illumio, Palo Alto) cannot reach.\n[SOLUTION]\nSalesforce Shield: Salesforce Shield: Platform encryption (data-at-rest for member PII fields), Event Monitoring (real-time audit trail for compliance), and Field Audit Trail (regulatory change tracking). Essential companion to FSC and Data Cloud deployments for GLBA and NCUA compliance. Extends STCU's industry-leading security posture from the infrastructure layer into the Salesforce application layer, maintaining the cybersecurity competitive advantage as the CRM footprint expands.\nconnected unlock: Shield unlocks (application security), (governance for CRM data), (compliance audit trail)\n[EXPECTED OUTCOMES]\nEvidence: [E-096, E-097, E-098, E-035]\n: Experience Cloud — member self-service portal modernization [ZENNIFY]\nPriority: 🟠 HIGH (6.25/6.85) | Categories:, | Gap: -0.85 | Current: 2.15 → Peer: 3.00\n[ROOT CAUSE]\nSTCU's digital membership application uses a JavaScript-only platform without progressive enhancement for accessibility [E-065]. The application attracted 199,858 membership page visits in 2024 [E-001], but conversion rates are unknown because the onboarding platform is disconnected from CRM analytics. Community Bank acquisition members required a separate first-time login migration process documented on stcu.org [E-053]. The Alkami platform handles digital banking (transactions, bill pay, mobile deposit) but not the broader member engagement journey — there is no authenticated member portal for service requests, document upload, community forums, or financial wellness content beyond the banking app. Explorium confirms no Experience Cloud in STCU's tech stack. All peers score 3.0 on account opening/onboarding, suggesting STCU's JavaScript-only approach is a generation behind industry practice.\n[SOLUTION]\nExperience Cloud: Experience Cloud: Provides an authenticated member portal for digital onboarding (replacing JavaScript-only application), document management, service request submission, community forums, and financial wellness content. Integrates with FSC for relationship data, Service Cloud for case creation, and Marketing Cloud for engagement tracking. The portal bridges the gap between 'digital banking' (Alkami handles transactions) and 'member engagement' (currently no platform serves this need).\nconnected unlock: Experience Cloud unlocks (digital onboarding), (self-service channel), (digital engagement)\n[EXPECTED OUTCOMES]\nEvidence: [E-065, E-061, E-044, E-066]"
+  },
+  "run_request_id": "DMA-ASM-STCU-20260413-0001"
+}

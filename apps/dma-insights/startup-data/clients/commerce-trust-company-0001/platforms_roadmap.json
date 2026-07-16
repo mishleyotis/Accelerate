@@ -1,0 +1,112 @@
+{
+  "entity_display_id": "commerce-trust-company-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 2.59 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 2.59 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Databricks \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+1.41",
+          "metric": "P2C1 score 2.59 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.59 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-03",
+          "title": "Strengthen P2C1: GenAI Content Generation"
+        },
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+1.39",
+          "metric": "P4C2 score 2.61 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.61 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-04",
+          "title": "Strengthen P4C2: Generative AI Strategy & Use Cases"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.34",
+          "metric": "P1C3 score 2.66 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C3 score 2.66 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-05",
+          "title": "Strengthen P1C3: Core Vendor Roadmap Alignment"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C1, P4C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.34 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Strategic",
+      "metric": "P2C2 score 2.34 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "nCino",
+      "recommendations": [
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.66",
+          "metric": "P2C2 score 2.34 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 2.34 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-01",
+          "title": "Strengthen P2C2: Digital Identity Verification (IDV)"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.52",
+          "metric": "P2C4 score 2.48 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.48 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-02",
+          "title": "Strengthen P2C4: Recommendations & Decisioning"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2, P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CTC-20260602-0001",
+  "total_duration_months": 12
+}

@@ -1,0 +1,143 @@
+{
+  "entity_display_id": "sunflower-bank-n-a-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4.2.2",
+        "P4C3.4.2",
+        "P1C1.8.2",
+        "P1C2.7.WM1",
+        "P3C4.4.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "4f0d2608-6d39-4636-a1bc-5289a65f5378",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "XS-DATABRICKS"
+        }
+      ],
+      "linked_e_ids": [
+        "E-012",
+        "E-018",
+        "E-032",
+        "E-037",
+        "E-036"
+      ],
+      "linked_subcap_id": "P1C4.2.2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Leader Role Modeling a near-term focus for Sunflower Bank, N.A.: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-032].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "All findings aligned to 6 strategic objectives from SEC filings and earnings calls. SO-1 (Post-Merger Integration) at HI",
+      "what_text": "Leader Role Modeling is one of Sunflower Bank, N.A.'s least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Sunflower Bank, N.A.'s ability to deliver sharper strategic direction and stronger oversight [E-018].",
+      "why_text": "The assessment found: “Overall rating 2.4/5 (140+ reviews); Culture/Values 2.1/5; Management 2.1/5; Work-life balance 2.4/5; Compensation 2.8/5 All wellbeing scores rated LOW: happiness, stress-free, satisfaction” [E-012]. At 1.5 out of 5, Leader Role Modeling sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.2",
+        "P4C1.2.1",
+        "P4C2.1.1",
+        "P4C3.4.2",
+        "P4C4.1.1",
+        "P3C3.1.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "dee28c9c-d074-4491-811b-7ade5d5d214f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-024",
+        "E-032",
+        "E-051"
+      ],
+      "linked_subcap_id": "P2C4.1.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-032].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"Zero cybersecurity, data governance, compliance analyst, IT developer, AI/ML, or personalization roles found on Indeed (searched Dallas TX + remote) Only 2 total job postings: 1 Project Manager Enterprise ($115-125K) and 1 Mortgage Loan Originator — confirms m\". In Zennify's assessment Behavioral Data Capture scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-024].",
+      "why_text": "The client's own stated priority — \"All findings aligned to 6 strategic objectives from SEC filings and earnings calls. SO-1 (Post-Merger Integration) at HIGHEST priority.\" — needs the Databricks capability that is currently absent. scores 1.0/5 on the current assessment [E-037, E-024].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "4.1 P1: Strategy, Governance & Culture (M2.03 | Weight: 25% | Peer Median: M2.40 | Gap: -0.37)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "4.2 P2: Customer & Channel (M1.81 | Weight: 30% | Peer Median: M2.30 | Gap: -0.49)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "4.3 P3: Operations, Risk & Compliance (M2.09 | Weight: 20% | Peer Median: M2.50 | Gap: -0.41)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "4.4 P4: Data, Analytics & Technology (M1.75 | Weight: 25% | Peer Median: M2.40 | Gap: -0.65)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All 8 recommendations are validated as NET-NEW Salesforce products against Explorium technographics (116 technologies scanned April 10, 2026). Current Salesforce footprint: basic CRM + Quip only. Per Zennify scope boundary: technology implementation is IN-SCOPE; hiring, organizational changes, and non-Salesforce vendor decisions are [CLIENT] responsibility. No investment amounts or cost estimates are included per assessment protocol."
+  },
+  "run_request_id": "DMA-ASM-SNFB-20260410-0001"
+}

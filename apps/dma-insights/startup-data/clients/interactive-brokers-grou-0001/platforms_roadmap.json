@@ -1,0 +1,67 @@
+{
+  "entity_display_id": "interactive-brokers-grou-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.2",
+          "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "R1",
+          "title": ") and personalized MCAE journeys ("
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.2",
+          "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R2",
+          "title": ") from real-time account signals. This makes Data Cloud the architectural prerequisite for R1 and R2 to reach their full score potential \u2014 and it can be deployed on AWS Hyperforce, aligning with IBKR's confirmed AWS infrastructure."
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.2",
+          "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.80 \u2192 4.0 (peer median 3.23)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "R3",
+          "title": "), provides the behavioral signals that make MCAE journeys predictive rather than generic."
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    }
+  ],
+  "run_request_id": "DMA-SCORE-IBKR-20260514-0001",
+  "total_duration_months": 4
+}

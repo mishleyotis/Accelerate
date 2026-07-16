@@ -1,0 +1,300 @@
+{
+  "entity_display_id": "fisher-investments-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "$12.75B Valuation + Advent Capital = Digital Acceleration",
+        "source_kind": "docx"
+      },
+      "id": "5e566099-fa10-4ad0-8d42-5297367a6c01",
+      "involved_subcap_ids": [
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C2.4.13",
+        "P3C1.1.4",
+        "P1C5.2.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$12,750,000,000",
+          "delta": null,
+          "kpi_label": "Acquired minority stake",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$12,750,000,000",
+          "delta": null,
+          "kpi_label": "Valuation",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 13,
+        "P3": 17,
+        "P4": 70
+      },
+      "source_path": "(unknown)",
+      "title": "$12.75B Valuation + Advent Capital = Digital Acceleration",
+      "verbatim_quote": "F-003 | $12.75B Valuation + Advent Capital = Digital Acceleration | Jan 2025: Advent International + ADIA acquired minority stake at $12.75B. Investment earmarked for 'global growth and te... | Strong signal of imminent digital investment acceleration \u2014 PE backing typically | Timing is critical \u2014 PE-backed transformation creates budget + urgency for Salesforce/cloud implemen"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "AI Governance Program Manager role exists (reports to VP Enterprise Risk Operations), AI risk assessments conducted, yet...",
+        "source_kind": "docx"
+      },
+      "id": "71ccadbb-aae2-4175-8ede-74b4a5c54dfe",
+      "involved_subcap_ids": [
+        "P1C3.8.3",
+        "P4C2.1.2",
+        "P1C2.1.8",
+        "P4C1.1.8",
+        "P1C1.5.4",
+        "P4C1.5.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$386,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$12,750,000,000",
+          "delta": null,
+          "kpi_label": "Digital strategy implied",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "AI Governance Without AI Products",
+      "verbatim_quote": "F-002 | AI Governance Without AI Products | AI Governance Program Manager role exists (reports to VP Enterprise Risk Operations), AI risk assessments conducted, yet... | P1C2 governance ahead of P4C4 AI deployment \u2014 governance-first approach unusual | AI readiness consulting: governance foundation exists, needs deployment strategy. Einstein AI / Agen"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Modern cloud-native backend (Azure AKS, Databricks, Snowflake, microservices) coexists with Glassdoor-reported 'ancient ...",
+        "source_kind": "docx"
+      },
+      "id": "354a5c39-3a78-46c6-b9c8-72c8d2d5e64b",
+      "involved_subcap_ids": [
+        "P4C1.8.5",
+        "P4C1.3.4",
+        "P4C1.5.5",
+        "P4C1.8.8",
+        "P4C2.6.6",
+        "P4C2.2.6",
+        "P4C2.5.8",
+        "P4C2.6.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "$386,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": 3,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Bifurcated Technology Maturity",
+      "verbatim_quote": "F-001 | Bifurcated Technology Maturity | Modern cloud-native backend (Azure AKS, Databricks, Snowflake, microservices) coexists with Glassdoor-reported 'ancient ... | P3/P4 ceiling of L3.0-3.5 \u2014 strong infrastructure investment undermined by uneve | Salesforce FSC optimization + data integration services to bridge legacy/modern gap. Platform consol"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Glassdoor 3.7/5 (64% recommend), high IC turnover (15-18mo avg), micromanagement concerns, BUT Training MVP 8 consecutiv...",
+        "source_kind": "docx"
+      },
+      "id": "316cc65c-21b1-4c70-a111-c2177cb5c82d",
+      "involved_subcap_ids": [
+        "P1C5.2.2",
+        "P1C5.1.1",
+        "P1C5.3.1",
+        "P1C5.3.3",
+        "P1C2.6.4",
+        "P1C2.8.4",
+        "P1C2.4.5",
+        "P1C2.3.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "$386,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Culture-Innovation Tension",
+      "verbatim_quote": "F-007 | Culture-Innovation Tension | Glassdoor 3.7/5 (64% recommend), high IC turnover (15-18mo avg), micromanagement concerns, BUT Training MVP 8 consecutiv... | P1C4 Culture & Talent constrained to L2.5-3.0 \u2014 investment in L&D not translatin | Change management consulting. Digital adoption platform needs (WalkMe/Pendo). User experience resear"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "$26.1B ESG AUM, 25+ ESG strategies, 6 ESG Specialists, quarterly engagement + proxy voting reports, Scope 1+2 targets [E...",
+        "source_kind": "docx"
+      },
+      "id": "08c44a18-0040-48fc-8ea4-577730dc8fbf",
+      "involved_subcap_ids": [
+        "P1C5.1.1",
+        "P1C5.2.4",
+        "P1C5.1.2",
+        "P2C4.6.RIA2",
+        "P1C3.4.1",
+        "P3C3.8.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$26,100,000,000",
+          "delta": null,
+          "kpi_label": "Institutional Scale",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 65,
+        "P2": 15,
+        "P3": 20
+      },
+      "source_path": "(unknown)",
+      "title": "ESG Framework with Institutional Scale",
+      "verbatim_quote": "F-005 | ESG Framework with Institutional Scale | $26.1B ESG AUM, 25+ ESG strategies, 6 ESG Specialists, quarterly engagement + proxy voting reports, Scope 1+2 targets [E... | P1C5 likely L3.0-3.5 \u2014 formalized ESG program above peer median for private RIAs | Net Zero Cloud / ESG data integration opportunity. Sustainability reporting automation."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Human-Led Service Model in Digital-First Industry",
+        "source_kind": "docx"
+      },
+      "id": "11132724-f438-4fca-b8a9-a573b2034906",
+      "involved_subcap_ids": [
+        "P2C2.5.5",
+        "P2C2.8.1",
+        "P2C2.5.5",
+        "P2C2.6.5",
+        "P2C1.7.6",
+        "P2C1.7.6",
+        "P2C1.8.5",
+        "P2C1.1.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$386,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Human-Led Service Model in Digital-First Industry",
+      "verbatim_quote": "F-004 | Human-Led Service Model in Digital-First Industry | No proprietary client portal. Account access redirected to custodian (Schwab/Fidelity). Onboarding is 5-step manual proc... | P2C2-P2C4 constrained to L2.0-2.5 \u2014 deliberate high-touch model but creates digi | Client Experience Cloud / Salesforce Experience Cloud opportunity. Digital onboarding + client porta"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-009"
+        ],
+        "representative_quote": "SF Financial Services Cloud + SFMC Journey Builder confirmed via multiple job postings and tech stack references",
+        "source_kind": "docx"
+      },
+      "id": "e6ef6f55-6403-462b-8da1-b26733c06dec",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C1.5.5",
+        "P2C4.4.4",
+        "P2C4.8.4",
+        "P4C3.4.1",
+        "P1C3.4.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$386,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$12,750,000,000",
+          "delta": null,
+          "kpi_label": "Digital strategy implied",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 33,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Salesforce Footprint Established",
+      "verbatim_quote": "F-006 | Salesforce Footprint Already Established | SF Financial Services Cloud + SFMC Journey Builder confirmed via multiple job postings and tech stack references [E-009,... | Platform foundation exists \u2014 question is depth of adoption and integration matur | Upsell/optimization play, not greenfield. FSC health check, SFMC optimization, Data Cloud integratio"
+    }
+  ]
+}

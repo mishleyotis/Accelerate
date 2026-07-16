@@ -1,0 +1,21 @@
+{
+  "active_run_id": "d8017aad-3d0e-41b1-82de-c4029812bc08",
+  "items": [
+    {
+      "assessment_date": null,
+      "assessment_date_source": null,
+      "ccg_catalog_version": "v2.4",
+      "completed_at": "2026-07-02T23:12:03.385977Z",
+      "created_at": "2026-07-02T23:12:03.385977Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "d8017aad-3d0e-41b1-82de-c4029812bc08",
+      "overall_score": 2.3494920174165457,
+      "request_id": "DMA-SCORE-IBKR-20260514-0001",
+      "started_at": "2026-07-02T23:12:03.385977Z",
+      "status": "ACTIVE",
+      "subcap_count": 689,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

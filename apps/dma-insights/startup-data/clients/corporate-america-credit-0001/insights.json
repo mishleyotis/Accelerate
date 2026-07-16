@@ -1,0 +1,1231 @@
+{
+  "entity_display_id": "corporate-america-credit-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C1.8.RIA2",
+        "P3C1",
+        "P2C3.3.RIA1",
+        "P4C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "f7b0f25b-4e23-4a54-9053-8d21af05fef2",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-108",
+            "E-109",
+            "E-110",
+            "E-115"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-11"
+        }
+      ],
+      "linked_e_ids": [
+        "E-115",
+        "E-129",
+        "E-108",
+        "E-109",
+        "E-110",
+        "E-132",
+        "E-111",
+        "E-112"
+      ],
+      "linked_subcap_id": "P3C1.8.RIA2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Corporate America Credit Union: invest to move it toward best practice. Because it underpins the core processes that keep the institution running, the improvement reaches well beyond this single capability [E-108].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Zennify relevance",
+      "what_text": "Sales hook for AE: client already runs a tiered, relationship-based pricing program at member-CU level — proves appetite for advisory work on customer-tier strategy and lifetime-value programs. This is not an early-maturity client; this is a sophisticated B2B model with recurring revenue mechanics [E-129].",
+      "why_text": "Strengthening this capability matters because it shapes more efficient, dependable operations. It builds on the core processes that keep the institution running, so progress here lifts the wider business too [E-115, E-129].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.1.3",
+        "P1C3.1.4",
+        "P1C3.1.3",
+        "P1C1.3.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "691028b1-c840-4bc1-a171-41fb3f140118",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-025",
+            "E-027",
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        },
+        {
+          "e_ids": [
+            "E-025",
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-10"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-028",
+        "E-030",
+        "E-027",
+        "E-036",
+        "E-033",
+        "E-043",
+        "E-048"
+      ],
+      "linked_subcap_id": "P1C1.1.3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Digital Strategy & Vision discovery conversation — the finding is documented in the client's research report [E-030].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Maturity implication",
+      "what_text": "Strategy Refresh Cadence is one of Corporate America Credit Union's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Corporate America Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-028].",
+      "why_text": "The assessment found: “CACU's 4 wholly-owned CUSO subsidiaries identified: SmartSource Solutions LLC, Corporate Financial Solutions Inc, CU Compliance Group Inc, Corporate Investment Services Inc — formal multi-entity” [E-025]. At 1.0 out of 5, Strategy Refresh Cadence sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C2",
+        "P3C4.1.2",
+        "P1C1.1.3",
+        "P1C2.4.4",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "4eecee56-c5bd-46ef-a2fa-ff2c2804f29e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-025",
+            "E-027",
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        },
+        {
+          "e_ids": [
+            "E-025",
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-10"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-028",
+        "E-030",
+        "E-027",
+        "E-036",
+        "E-033",
+        "E-043",
+        "E-048"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Strategy Refresh Cadence a near-term focus for Corporate America Credit Union: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-030].",
+      "source_rec_id": "REC-01",
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy & Vision Articulation Workshop",
+      "what_text": "CACU scores 1.18 on (Digital Strategy & Vision) vs peer median 2.80, and 1.54 on (Governance & Risk Appetite) vs peer median 3.30 — the two largest category gaps in the assessment (−1.62 and −1.76 respectively). The primary driver is not operational absence but IC-010 inverse-TPRM positioning: as the trusted wholesale third-party for 533 member CUs, CACU deliberately keeps detailed public governance artifacts sparse for security reasons. However, the ABSENCE of a documented digital strategy creates two tangible risks: (1) the <2.5 connected cap suppresses 81 P3 capability scores — removing it restores P3 to ~3.4, closing the majority of CACU's peer gap in one move; (2) member CUs evaluating CACU as a technology partner have no publicly accessible transformation narrative to anchor their trust. In Zennify's assessment Strategy Refresh Cadence scores 1.0 out of 5, versus a typical 2.8 at comparable institutions [E-028].",
+      "why_text": "The assessment found: “CACU's 4 wholly-owned CUSO subsidiaries identified: SmartSource Solutions LLC, Corporate Financial Solutions Inc, CU Compliance Group Inc, Corporate Investment Services Inc — formal multi-entity” [E-025]. At 1.0 out of 5, Strategy Refresh Cadence sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P3C3",
+        "P2C4.3.CU1",
+        "P2C1.2.3",
+        "P3C1.1.2",
+        "P3C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-062"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "6955f3cd-d3b5-4602-8a13-3a4d102da0df",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-062"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-217"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-217"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-217",
+        "E-130",
+        "E-131",
+        "E-053",
+        "E-056",
+        "E-071",
+        "E-060",
+        "E-066"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Financial Services Cloud — Upgrade Sales Cloud to FSC for Member-CU Lifecycle Management — addressable via salesforce [E-131].",
+      "source_rec_id": "REC-02",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Financial Services Cloud — Upgrade Sales Cloud to FSC for Member-CU Lifecycle Management",
+      "what_text": "(Onboarding & Fulfillment) scores 1.74 vs peer median 3.10 (−1.36). Despite having Salesforce Sales Cloud since 2023, member-CU onboarding remains largely email/phone-driven. The sso.corpam.org portal provides access but not lifecycle orchestration — there is no KYC/CDD automation, no onboarding workflow, no compliance-aware digital onboarding specific to NCUA Part 704 wholesale membership requirements. (Compliance, Supervision & Surveillance) at 2.60 vs peer median 3.70 (−1.10) reflects the same gap: §748 ISP and NCUA Part 704 compliance is operationally sound but not systematically embedded in member-facing workflows. ⚡ Platform Note: CACU has Salesforce Sales Cloud (2023, E-NEW-SF-001). FSC is an upgrade path within the existing Salesforce org — no new vendor relationship required. In Zennify's assessment Data Pre-Population scores 1.5 out of 5, versus a typical 3.1 at comparable institutions [E-130].",
+      "why_text": "At 1.5 out of 5, Data Pre-Population sits 1.6 points below the 3.1 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-217, E-130].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.3.CU1",
+        "P3C1.1.2",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-062"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "4606a99f-498d-4736-8252-26607b4c725e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-062"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-059",
+        "E-053",
+        "E-066",
+        "E-069",
+        "E-070",
+        "E-054",
+        "E-061"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Marketing Cloud — B2B Member Acquisition Automation for 440 Non-Participating CUs — addressable via salesforce [E-053].",
+      "source_rec_id": "REC-03",
+      "theme": "Digital Channels",
+      "title": "Marketing Cloud — B2B Member Acquisition Automation for 440 Non-Participating CUs",
+      "what_text": "(Digital Marketing & Acquisition) scores 1.94 vs peer median 3.10 (−1.16). CACU's current outbound marketing infrastructure is limited to: LinkedIn presence (704 followers), a static event calendar on corpam.org, and email blasts. There is no behavioral segmentation, no journey automation, and no digital acquisition funnel for the 440 non-participating member CUs that CEO Pritts identified as the primary PCC growth pool (SO-1). The existing Salesforce Sales Cloud org (E-NEW-SF-001) has no Marketing Cloud connected — the two systems are licensed separately. In Zennify's assessment Paid Search (SEM) scores 1.0 out of 5, versus a typical 3.1 at comparable institutions [E-059].",
+      "why_text": "At 1.0 out of 5, Paid Search (SEM) sits 2.1 points below the 3.1 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-052, E-059].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P3C1",
+        "P4C2.7.1",
+        "P2C4.3.CU1",
+        "P2C1.2.3",
+        "P2C2.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "df57950e-d9a4-4f54-a3c7-c0c0c81d857a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-217"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-052",
+            "E-087",
+            "E-217"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-217",
+        "E-052",
+        "E-077",
+        "E-100",
+        "E-099",
+        "E-078",
+        "E-088",
+        "E-087"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Service Cloud — Activate Omnichannel Member-CU Service Desk on Existing Salesforce Org — addressable via salesforce [E-077].",
+      "source_rec_id": "REC-04",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Service Cloud — Activate Omnichannel Member-CU Service Desk on Existing Salesforce Org",
+      "what_text": "(Omnichannel Servicing & Support) scores 2.05 vs peer median 3.20 (−1.15). The 533 member CUs today interact with CACU primarily through the SSO portal, telephone, and email. There is no unified case management system, no shared service ticket tracking, and no service-level dashboard for member CUs to monitor their requests. (Core Process Automation) at 2.54 vs peer median 3.60 (−1.06) reflects the absence of workflow automation: payment exception handling, wire inquiries, and compliance questions are manually routed across CACU's 5-track operational migration [IC-004]. ⚡ Platform Note: CACU has Salesforce Sales Cloud (2023). Service Cloud = same Salesforce org, activated license. No new platform procurement. In Zennify's assessment Digital Messaging & Chat scores 1.5 out of 5, versus a typical 3.2 at comparable institutions [E-052].",
+      "why_text": "At 1.5 out of 5, Digital Messaging & Chat sits 1.7 points below the 3.2 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-217, E-052].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.7.1",
+        "P2C4.3.CU1",
+        "P2C1.2.3",
+        "P3C2.2.3",
+        "P3C1.3.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "2d2b77a7-8e18-46fb-9734-143f674753e2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-176"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-165"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-11"
+        },
+        {
+          "e_ids": [
+            "E-165"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-12"
+        }
+      ],
+      "linked_e_ids": [
+        "E-165",
+        "E-168",
+        "E-172",
+        "E-176",
+        "E-171",
+        "E-156",
+        "E-158",
+        "E-159"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: CRM Analytics (Tableau) — Member-CU Self-Service Analytics Layer Above NXTsoft OmniLytics — addressable via tableau [E-168].",
+      "source_rec_id": "REC-05",
+      "theme": "Analytics & AI",
+      "title": "CRM Analytics (Tableau) — Member-CU Self-Service Analytics Layer Above NXTsoft OmniLytics",
+      "what_text": "(Analytics & AI Enablement) scores 3.30 vs peer median 2.80 (+0.50) — CACU's strongest relative position. However, this strength is CACU-internal: NXTsoft OmniLytics produces quantitative analytics for CACU's own ALM, CECL, and risk functions. Member CUs do not have self-service access to analytics about their own account activity, payment volumes, or liquidity position. The gap is not in CACU's internal analytics but in EXTENDING analytics as a member-CU-facing product, which is the next competitive differentiation layer. In Zennify's assessment Assistive AI Agent scores 2.5 out of 5, versus a typical 2.8 at comparable institutions [E-165].",
+      "why_text": "The assessment found: “Q4 FCR (Financial Concentration Report) metrics published quarterly per Corporate CUOnline 5310 — formal multi-dimensional concentration analytics: investment portfolio composition” [E-171]. At 2.5 out of 5, Assistive AI Agent sits 0.3 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C2.7.1",
+        "P2C4.3.CU1",
+        "P2C2.2.3",
+        "P3C1.1.2",
+        "P3C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "ec8ed3b7-13db-46d4-bf4b-06c80936947a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-108",
+            "E-109",
+            "E-110",
+            "E-115"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-176"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-108",
+            "E-128"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-128",
+        "E-176",
+        "E-115",
+        "E-129",
+        "E-108",
+        "E-109",
+        "E-110",
+        "E-132"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automation Governance Framework a near-term focus for Corporate America Credit Union: a scoped investment here would lift it from 2.5 toward the 3.6 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-115].",
+      "source_rec_id": "REC-06",
+      "theme": "Core Automation",
+      "title": "Agentforce — Extend Identifee IDA AI Model Into Sales and Service Domains",
+      "what_text": "CACU launched Identifee IDA in September 2024 — the first corporate CU with a production AI chatbot, scoped specifically to Nacha Operating Rules & Guidelines. This is a proven AI deployment that demonstrates CACU's ability to execute GenAI. However, IDA's scope is intentionally narrow: it answers Nacha compliance questions. The AI capability exists but is NOT deployed for: (a) member-CU sales prospecting and PCC tier analysis; (b) service ticket triage within the Salesforce org; (c) operations queue management (payment exceptions, wire queries). at 2.54 vs peer median 3.60 reflects this automation gap. ⚡ Platform Note: Identifee IDA is in production (Sept 2024) — CACU's first corporate-CU GenAI/RAG chatbot. Agentforce extends IDA into new domains on the existing Salesforce org. NOT duplicating IDA. In Zennify's assessment Automation Governance Framework scores 2.5 out of 5, versus a typical 3.6 at comparable institutions [E-176].",
+      "why_text": "At 2.5 out of 5, Automation Governance Framework sits 1.1 points below the 3.6 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-128, E-176].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2.7.1",
+        "P4C3.7.1",
+        "P2C4.3.CU1",
+        "P2C1.2.3",
+        "P2C2.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "226de7ad-ef21-4118-a30d-36d3f750bffe",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-217"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-052",
+            "E-087",
+            "E-217"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-217",
+        "E-052",
+        "E-084",
+        "E-085",
+        "E-086",
+        "E-087",
+        "E-093",
+        "E-096"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Member Financial Wellness a near-term focus for Corporate America Credit Union: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-084].",
+      "source_rec_id": "REC-07",
+      "theme": "CX & Personalization",
+      "title": "Experience Cloud — Modernize sso.corpam.org Member Portal",
+      "what_text": "The existing sso.corpam.org portal serves as the primary self-service interface for 533 member credit unions — providing SSO access to CACU's payment, imaging, and banking services. However, it is a custom-built portal without: (a) CRM data integration (member-CU interactions are not unified with Salesforce); (b) self-service case submission (Service Cloud dependency, ); (c) personalized content delivery based on member-CU service utilization tier; (d) embedded analytics access (CRM Analytics dependency, ). (Personalization) at 2.68 vs peer median 2.80 (−0.12) would move materially once the portal delivers personalized content by PCC tier. ⚡ Platform Note: sso.corpam.org is a custom SSO portal confirmed in production. This is a MODERNIZATION/MIGRATION, not a greenfield build. Existing portal functionality migrates to Experience Cloud. In Zennify's assessment Member Financial Wellness scores 2.0 out of 5, versus a typical 2.8 at comparable institutions [E-052].",
+      "why_text": "At 2.0 out of 5, Member Financial Wellness sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-217, E-052].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P4C3.7.1",
+        "P2C4.3.CU1",
+        "P1C4.2.4",
+        "P1C4.8.3",
+        "P4C2.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "b521eb53-4e2d-4f38-a7da-33ae1cf0d65c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-128",
+        "E-108",
+        "E-178",
+        "E-028",
+        "E-030",
+        "E-037",
+        "E-034",
+        "E-044"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Cross-Functional Integration Planning a near-term focus for Corporate America Credit Union: a scoped investment here would lift it from 1.0 toward the 2.4 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-178].",
+      "source_rec_id": "REC-08",
+      "theme": "Culture & Change",
+      "title": "Slack — Unified Internal Collaboration for 5-Track Migration Coordination",
+      "what_text": "(Culture & Change Enablement) scores 1.17 vs peer median 2.40 (−1.23). CACU is simultaneously managing 5 operational migration tracks per IC-004: (1) Aptys payments migration (Dec 2024), (2) VSoft core upgrade, (3) Identifee IDA expansion, (4) FedNow/RTP ecosystem growth, (5) NXTsoft OmniConnect integration layer. With ~40-50 employees, coordinating these tracks across a small team without a dedicated collaboration platform creates change-management risk. The current Microsoft Azure stack suggests email and potentially MS Teams, but no collaboration tool specifically tuned for project-based Salesforce/fintech delivery is confirmed. In Zennify's assessment Cross-Functional Integration Planning scores 1.0 out of 5, versus a typical 2.4 at comparable institutions [E-128].",
+      "why_text": "The assessment found: “CACU selected Aptys Solutions (Dec 2024) as full payments platform covering ACH origination, Wire transfer, and Cash management — single-vendor STP architecture replacing legacy systems for 533” [E-108]. At 1.0 out of 5, Cross-Functional Integration Planning sits 1.4 points below the 2.4 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C4.3.1",
+        "P2C4.3.CU1",
+        "P2C2.2.3",
+        "P3C3.1.4",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "5dfd4d6b-ff03-472f-affa-2c7c8815a6d3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-131",
+            "E-160"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-10"
+        },
+        {
+          "e_ids": [
+            "E-183",
+            "E-184"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-11"
+        }
+      ],
+      "linked_e_ids": [
+        "E-131",
+        "E-160",
+        "E-218",
+        "E-183",
+        "E-184",
+        "E-185",
+        "E-186",
+        "E-190"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Shield — §748 ISP Encryption Overlay on Expanded Salesforce Org — addressable via salesforce [E-218].",
+      "source_rec_id": "REC-09",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Salesforce Shield — §748 ISP Encryption Overlay on Expanded Salesforce Org",
+      "what_text": "CACU already demonstrates strong cybersecurity posture: 89% NIST CSF (87/98 subcategories), ISE Core Plus, §748 ISP compliance. (Cybersecurity) at 3.60 is the strongest category, +0.20 vs peer median. However, as the Salesforce org expands to hold member-CU PII (FSC:, Service Cloud case data:, Marketing Cloud contact records: ), the §748 ISP encryption obligations apply to Salesforce data at rest. Current encryption controls (Imperva WAF, Azure DRaaS encryption) do NOT cover Salesforce field-level data. Shield adds: (a) Platform Encryption for Salesforce fields containing PII; (b) Event Monitoring for compliance audit trail; (c) Field Audit Trail for §748 data retention. Deploy Salesforce Shield — Platform Encryption + Event Monitoring — on the expanded CACU Salesforce org after FSC and Service Cloud are operational ( + ). In Zennify's assessment Identity Governance & Administration scores 3.5 out of 5, versus a typical 3.4 at comparable institutions [E-160].",
+      "why_text": "The assessment found: “Multi-vendor automation portfolio documented across Services menu: Aptys (ACH/Wire/Cash), VSoft Arya (digital banking), VSoft OnView SSO (identity orchestration), NXTsoft Omnilytics (CECL), AFS” [E-131]. At 3.5 out of 5, Identity Governance & Administration shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P3C1.1.2",
+        "P3C3.1.4",
+        "P1C2.4.4",
+        "P1C2.2.6",
+        "P1C2.2.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "1d4ec872-ef21-4332-bb64-84aa77ea7c4c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-025",
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-025",
+            "E-028",
+            "E-030"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-131",
+        "E-160",
+        "E-028",
+        "E-026",
+        "E-025",
+        "E-038",
+        "E-030",
+        "E-031"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Model Monitoring a near-term focus for Corporate America Credit Union: a scoped investment here would lift it from 1.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-028].",
+      "source_rec_id": "REC-10",
+      "theme": "Governance & Risk",
+      "title": "GRC Platform — Automate Audit Finding Closure and Governance Workflow",
+      "what_text": "(Governance & Risk Appetite) at 1.54 vs peer median 3.30 (−1.76) is the #1 priority gap. Despite a CLEAN regulatory record (no NCUA enforcement, consent orders, LUAs, or CMPs), CACU's governance infrastructure relies on a manual 4-firm audit structure (Doeren Mayhew + CRI + Forvis Mazars + ePay Advisors) with no dedicated GRC platform for systematic finding closure, remediation tracking, or risk appetite quantification. In Zennify's assessment Model Monitoring scores 1.0 out of 5, versus a typical 3.3 at comparable institutions [E-160].",
+      "why_text": "The assessment found: “Multi-vendor automation portfolio documented across Services menu: Aptys (ACH/Wire/Cash), VSoft Arya (digital banking), VSoft OnView SSO (identity orchestration), NXTsoft Omnilytics (CECL), AFS” [E-131]. At 1.0 out of 5, Model Monitoring sits 2.3 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C1",
+        "P2C4",
+        "P4C1.2.1",
+        "P4C2.7.1",
+        "P4C3.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-11",
+      "id": "026105e8-cee6-4938-aba0-354537c655ad",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-165"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-164",
+        "E-165",
+        "E-173",
+        "E-219",
+        "E-108",
+        "E-183",
+        "E-184",
+        "E-187"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Quantum Computing Readiness a near-term focus for Corporate America Credit Union: a scoped investment here would lift it from 3.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-173].",
+      "source_rec_id": "REC-11",
+      "theme": "Architecture & Cloud",
+      "title": "Data Cloud — Unified Member-CU CDP Above NXTsoft + Aptys + VSoft",
+      "what_text": "CACU's data infrastructure is operationally strong: VSoft Wings/Vantage core, NXTsoft OmniConnect/OmniData/OmniLytics, Aptys Solutions. (Data Management & Governance) at 3.37 is +0.47 above peer median. However, the data is siloed across three operational systems: VSoft (core banking/account data), Aptys (payment transaction data), and NXTsoft (API events and analytics). There is no unified member-CU identity layer that connects a member CU's core account activity, payment behavior, and service engagement history into a single profile. (Personalization) at 2.68 is constrained by this fragmentation — you cannot personalize without a unified 360-degree member-CU profile. In Zennify's assessment Quantum Computing Readiness scores 3.0 out of 5, versus a typical 3.3 at comparable institutions [E-165].",
+      "why_text": "At 3.0 out of 5, Quantum Computing Readiness sits 0.3 points below the 3.3 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-164, E-165].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C3.7.1",
+        "P2C4.3.CU1",
+        "P3C1.1.2",
+        "P3C1.3.1",
+        "P4C3.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-12",
+      "id": "0b5b27fd-601a-4b64-854b-361b2e32cc99",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-108",
+            "E-109",
+            "E-110",
+            "E-115"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-165"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-108",
+            "E-109",
+            "E-110",
+            "E-115"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-165",
+        "E-108",
+        "E-128",
+        "E-115",
+        "E-129",
+        "E-109",
+        "E-110",
+        "E-132"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: MuleSoft Anypoint — Cross-Vendor Orchestration Above NXTsoft OmniConnect — addressable via salesforce [E-128].",
+      "source_rec_id": "REC-12",
+      "theme": "Core Automation",
+      "title": "MuleSoft Anypoint — Cross-Vendor Orchestration Above NXTsoft OmniConnect",
+      "what_text": "CACU is executing 5 concurrent technology migrations per IC-004: Aptys payments (Dec 2024), VSoft core upgrade, Identifee IDA, FedNow/RTP ecosystem expansion, and NXTsoft integration layer changes. Each migration introduces new API connections; NXTsoft OmniConnect manages current point-to-point APIs but lacks enterprise-grade workflow orchestration for MULTI-SYSTEM processes. (Core Process Automation) at 2.54 vs peer median 3.60 (−1.06) reflects the absence of cross-system workflow automation: a payment exception involves VSoft (core), Aptys (payment), NXTsoft (event notification), and the Salesforce org (case creation, ) — four systems that today require manual hand-offs between each step. ⚡ Platform Note: NXTsoft OmniConnect is confirmed for current API integration. In Zennify's assessment Automation Governance Framework scores 2.5 out of 5, versus a typical 3.6 at comparable institutions [E-108].",
+      "why_text": "At 2.5 out of 5, Automation Governance Framework sits 1.1 points below the 3.6 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-165, E-108].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "What We See — P1\n (Digital Strategy & Vision, 1.18) is the lowest-scoring category in the assessment. Searches across corpam.org, NCUA filings, LinkedIn, and industry press surfaced no formally published digital transformation roadmap [E-025, E-028, E-030]. This is not evidence of strategic absence: CEO Pete Pritts publicly articulated investment in payments and technology (SO-1, SO-2), the 1% PCC model demonstrates strategic execution [E-005], and a Salesforce Sales Cloud platform was adopted in 2023 with a dedicated admin hire requiring Admin + Sales Cloud certifications [E-NEW-SF-001, confirmed via CFO Rachel Dodson and Mallory Wear LinkedIn posts]. Rather, reflects deliberate inverse-TPRM posture [IC-010]: as the trusted wholesale third-party for 533 member CUs, CACU keeps strategic plans internal.\n (Governance & Risk Appetite, 1.54) scores 1.76 points below peer median (3.30). CACU engages four external audit firms—Doeren Mayhew, CRI, Forvis Mazars, and ePay Advisors [E-160]—demonstrating governance investment. The 89% NIST CSF score (87/98 subcategories) [E-160] and §748 ISP compliance [E-131] confirm operational controls. However, no dedicated GRC platform was found for systematic finding closure tracking or risk appetite quantification. (Innovation, 1.72) shows the highest P1 evidence density: Identifee IDA (Sept 2024) [E-156] as first corporate-CU AI chatbot, Aptys co-investment (Dec 2024) [E-108], and VSoft AI-Ready Core whitepaper (Jun 2025) [E-187] confirm innovation execution.\nWhy It Matters — P1\nP1 is the structural keystone of this assessment. At 1.41 (level 1), <2.5 triggers a connected cap on 81 P3 capability, artificially suppressing P3 from its true operational score of approximately 3.0–3.3 down to 2.58. This single mechanism accounts for a disproportionate share of CACU’s vs-peer gap. Resolving via Digital Strategy Workshop and GRC Platform is the highest-leverage action in the assessment—it closes the P1 gap AND simultaneously releases P3 to near peer parity. For the 440 non-participating member CUs evaluating CACU as a technology partner (SO-1), the absence of a published digital strategy creates ambiguity that a formal roadmap would resolve at zero technology cost.,, and form the P1 remediation stack.",
+        "heading": "6.1 Pillar 1: Strategy, Governance & Culture — Score 1.41 (M1) | Peer Median ~2.15",
+        "linked_e_ids": [
+          "E-005",
+          "E-025",
+          "E-028",
+          "E-030",
+          "E-108",
+          "E-131",
+          "E-156",
+          "E-160",
+          "E-187"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "What We See — P2\n (Digital Marketing & Acquisition, 1.94) reflects limited digital marketing infrastructure. CACU’s member acquisition channels are LinkedIn (704 followers [E-059]), a static education calendar on corpam.org [E-052], and direct email. There is no confirmed marketing automation platform, behavioral segmentation, or digital attribution system. The 70+ credit unions at 1% PCC tier [E-005] and the broader 533-member CU network [E-130] represent CACU’s relationship base, yet a systematic digital acquisition engine targeting the 440 non-participating CUs does not yet exist. The Salesforce Sales Cloud adoption confirmed in 2023 [E-NEW-SF-001] provides the CRM foundation from which a Marketing Cloud activation would operate.\n (Onboarding & Fulfillment, 1.74) is the largest P2 gap (−1.36 vs peer median 3.10). The sso.corpam.org portal [E-217] provides access to CACU services via SSO, but the new member-CU onboarding pathway—Part 704 membership, wire setup, ACH enrollment, RTP/FedNow activation—requires manual coordination. The Salesforce Sales Cloud adopted in 2023 [E-NEW-SF-001] has not been upgraded to FSC, which includes Part-704-aware compliance workflows [E-130]. Member CU wire setup [E-114] and RTP/FedNow activation [E-010] are part of the onboarding journey that currently lacks digital orchestration. (Omnichannel Servicing, 2.05) reflects the same gap: service requests are handled via email and phone with no unified case management. (Personalization, 2.68) is the relative P2 strength, near peer median (2.80)—the 1% PCC tiered model implicitly personalizes service benefits, but not yet through the portal interface.\nWhy It Matters — P2\nP2 is the revenue-generation pillar for SO-1. With 440 of 533 member CUs not at 1% PCC tier, P2 gaps directly constrain CACU’s ability to activate its largest growth pool. An untracked, non-personalized email-driven outreach model cannot efficiently engage 440 CUs at scale—and each CU that joins a peer’s managed-experience program (Alloya, Corporate One) is a relationship CACU may not recover. The Salesforce platform activation opportunity ( FSC + Marketing Cloud + Service Cloud + Experience Cloud) addresses all four P2 categories using the existing 2023 Salesforce org, significantly reducing procurement complexity and time-to-value. P2 is the highest-weighted pillar (30%) and directly addresses SO-1, SO-3, and SO-5.",
+        "heading": "6.2 Pillar 2: Member/Customer Experience — Score 2.10 (M2) | Peer Median ~2.60",
+        "linked_e_ids": [
+          "E-005",
+          "E-010",
+          "E-052",
+          "E-059",
+          "E-114",
+          "E-130",
+          "E-217"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "What We See — P3\nP3’s 2.58 score is structurally suppressed by the <2.5 connected cap, which applies an level 3.3 ceiling to 81 P3 capability. CACU’s genuine P3 operational score is approximately 3.0–3.3. (Core Process Automation, 2.54) reflects strong STP capability: CACU was the first corporate CU on the RTP network (Dec 2019 [E-007]), an early FedNow adopter (2024 [E-010]), and completed the Aptys ACH/wire/cash consolidation migration (Dec 2024 [E-157]). The gap to peer median (3.60) reflects the 5-track simultaneous migration [IC-004] creating transitional complexity, and the absence of cross-system orchestration above NXTsoft OmniConnect [E-165].\n (Compliance, 2.60) is operationally strong: NCUA Part 704 compliance [E-130], §748 ISP [E-131], FFIEC ACET certification [E-160], and 72-hour cyber incident notification compliance (1.833.CYBERCU, Sept 2023 [E-185]) demonstrate a comprehensive compliance infrastructure. CACU’s CLEAN regulatory record—zero enforcement actions, consent orders, LUAs, or CMPs—is a differentiating compliance posture relative to peers. The gap to peers (3.70) reflects compliance digitization (transaction monitoring automation, workflow tools) rather than compliance effectiveness. (Resilience, 2.60) is anchored by industry-leading infrastructure: three operational datacenters [E-166], Azure DRaaS with tested failover [E-178], and ISE Core Plus certification [E-131].\nWhy It Matters — P3\nP3 is where CACU’s operational investments should translate most directly into maturity scores—and the connected cap reveals that addressing P1 is the unlock mechanism for P3. Once reaches ≥2.5 ( + ), P3 advances to approximately 3.4 without additional P3-specific technology investment. For the RTP/FedNow ecosystem growth agenda (SO-4), process automation is the operational bottleneck: as CACU onboards more member CUs to instant payment rails, exception-handling load will grow non-linearly without MuleSoft orchestration. GRC Platform directly addresses and compliance digitization. MuleSoft addresses automation scalability above OmniConnect.",
+        "heading": "6.3 Pillar 3: Operations, Risk & Compliance — Score 2.58 (M3 Threshold) | Peer Median ~3.10",
+        "linked_e_ids": [
+          "E-007",
+          "E-010",
+          "E-130",
+          "E-131",
+          "E-157",
+          "E-160",
+          "E-165",
+          "E-166",
+          "E-178",
+          "E-185"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "What We See — P4\nP4 is CACU’s strongest pillar and the assessment’s most evidence-rich area (170 of 327 evidence items). (Cybersecurity, 3.60) is the single highest-scoring category in the entire assessment. The 89% NIST CSF compliance score (87/98 subcategories, confirmed in 2025 DDR) [E-160], ISE Core Plus certification [E-131], §748 ISP compliance, ThreatAdvice cyber awareness training [E-218], AFS TrueChecks real-time fraud detection [E-218], and 1.833.CYBERCU 72-hour incident notification compliance [E-185] collectively position CACU at or near the frontier for a $4.6B corporate CU.\n (Technology Architecture, 3.46) reflects a mature, multi-vendor hybrid architecture: VSoft Wings/Vantage core [E-164], NXTsoft OmniConnect API layer [E-165], Aptys ISO 20022-certified payment hub [E-196], Pidgin RTP/FedNow connector [E-009], three operational datacenters [E-166], and Azure DRaaS [E-178]. The Apr 2025 VSoft API-first modernization [E-187] signals a cloud-ready architectural reset in progress. (Analytics & AI, 3.30—highest above-peer score at +0.50) is anchored by Identifee IDA [E-156]: the first production GenAI/RAG chatbot in the corporate CU sector (Sept 2024). NXTsoft OmniLytics provides ALM, CECL, and risk analytics [E-165]. The current strength is CACU-internal; the next differentiation layer is member-CU-facing analytics and Agentforce AI extension.\nWhy It Matters — P4\nP4 is CACU’s competitive moat and the foundation for the entire Salesforce platform activation strategy. The existing 2023 Salesforce Sales Cloud org, combined with Azure infrastructure [E-178], NXTsoft OmniConnect APIs [E-165], and the Identifee IDA proof point [E-156], means CACU does not need to build from scratch—it needs to activate. cybersecurity leadership (3.60) must be protected as the Salesforce org expands: Shield provides the §748 ISP encryption layer for the growing PII surface. PAT-01 (Aptys parity: 4 of 5 peers are also Aptys partners per IC-003) means payments infrastructure is no longer a differentiator—the next competitive moat must be built on the AI/data/CX layer that P4 currently enables but P2 has not yet delivered.",
+        "heading": "6.4 Pillar 4: Data, Analytics & Technology — Score 3.43 (M3+) | Peer Median ~3.00",
+        "linked_e_ids": [
+          "E-009",
+          "E-131",
+          "E-156",
+          "E-160",
+          "E-164",
+          "E-165",
+          "E-166",
+          "E-178",
+          "E-185",
+          "E-187",
+          "E-196",
+          "E-218"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All 12 recommendations follow the mandatory protocol: (1) E-IDs confirm the gap exists, (2) proxy searches are exhausted, (3) each maps to a named Zennify solution from the 12-solution catalog, (4) no investment amounts, ROI projections, or specific timelines are included per Hard Rule R6. Technology duplication check: 3 recommendations are platform activations on the confirmed 2023 Salesforce Sales Cloud org; 1 is a portal migration; 1 is conditional; 7 are greenfield.\n: Digital Strategy & Vision Articulation Workshop [ZENNIFY]\n[ROOT CAUSE]\nCACU scores 1.18 on (Digital Strategy & Vision) vs peer median 2.80, and 1.54 on (Governance & Risk Appetite) vs peer median 3.30 — the two largest category gaps in the assessment (−1.62 and −1.76 respectively). The primary driver is not operational absence but IC-010 inverse-TPRM positioning: as the trusted wholesale third-party for 533 member CUs, CACU deliberately keeps detailed public governance artifacts sparse for security reasons. However, the ABSENCE of a documented digital strategy creates two tangible risks: (1) the <2.5 connected cap suppresses 81 P3 capability scores — removing it restores P3 to ~3.4, closing the majority of CACU's peer gap in one move; (2) member CUs evaluating CACU as a technology partner have no publicly accessible transformation narrative to anchor their trust. The existing Salesforce Sales Cloud adoption (2023, E-NEW-SF-001) has not been articulated in any strategic roadmap.\n[SOLUTION]\nA Zennify-facilitated Digital Strategy Workshop produces: (a) a formal digital maturity roadmap anchored to CACU's 5 Strategic Objectives and existing technology investments; (b) a governance framework that can be selectively published to member CUs to demonstrate strategic intent without exposing internal controls; (c) a stakeholder-ready narrative framing the 2023 Salesforce adoption, Aptys joint-ownership, and Identifee IDA as components of a coherent digital transformation. The deliverable also triggers the connected cap reversal, restoring ~81 P3 capability scores. No new technology is required — this is a consulting engagement.\nImplementation approach: 2-day onsite facilitation with C-suite (CEO Pritts, CSO Howle, CINO Coffey, CTO Eagen); structured around CACU's 5 SOs; output includes 12-month roadmap and governance charter\n[EXPECTED OUTCOMES]\nconnected unlocks: P3 +0.82 (connected cap reversal) | GRC Platform requires governance charter as prerequisite\n: Financial Services Cloud — Upgrade Sales Cloud to FSC for Member-CU Lifecycle Management [ZENNIFY]\n[ROOT CAUSE]\n (Onboarding & Fulfillment) scores 1.74 vs peer median 3.10 (−1.36). Despite having Salesforce Sales Cloud since 2023, member-CU onboarding remains largely email/phone-driven. The sso.corpam.org portal provides access but not lifecycle orchestration — there is no KYC/CDD automation, no onboarding workflow, no compliance-aware digital onboarding specific to NCUA Part 704 wholesale membership requirements. (Compliance, Supervision & Surveillance) at 2.60 vs peer median 3.70 (−1.10) reflects the same gap: §748 ISP [E-131] and NCUA Part 704 [E-130] compliance is operationally sound but not systematically embedded in member-facing workflows.\n⚡ Platform Note: CACU has Salesforce Sales Cloud (2023, E-NEW-SF-001). FSC is an upgrade path within the existing Salesforce org — no new vendor relationship required.\n[SOLUTION]\nUpgrade the existing Salesforce Sales Cloud org to Financial Services Cloud — a purpose-built CRM for financial services institutions with: (a) Part-704-aware member-CU onboarding workflows with built-in compliance checkpoints; (b) KYC/CDD automation aligned to NCUA regulatory requirements; (c) member-CU relationship lifecycle tracking (PCC tier, service utilization, engagement history); (d) compliance audit trail for §748 ISP obligations. This is an org-level upgrade, not a new deployment — the existing Salesforce environment, user accounts, and API integrations carry forward.\nImplementation approach: Zennify FSC upgrade engagement; 6-9 months; leverages existing Sales Cloud org; integrates with NXTsoft OmniConnect [E-165] for data feeds\n[EXPECTED OUTCOMES]\nconnected unlocks: Shield becomes applicable once FSC expands the PII surface | Agentforce can extend FSC case management into AI-triage\n: Marketing Cloud — B2B Member Acquisition Automation for 440 Non-Participating CUs [ZENNIFY]\n[ROOT CAUSE]\n (Digital Marketing & Acquisition) scores 1.94 vs peer median 3.10 (−1.16). CACU's current outbound marketing infrastructure is limited to: LinkedIn presence (704 followers [E-059]), a static event calendar on corpam.org [E-052], and email blasts. There is no behavioral segmentation, no journey automation, and no digital acquisition funnel for the 440 non-participating member CUs that CEO Pritts identified as the primary PCC growth pool (SO-1). The existing Salesforce Sales Cloud org (E-NEW-SF-001) has no Marketing Cloud connected — the two systems are licensed separately.\n[SOLUTION]\nConnect Salesforce Marketing Cloud to the existing Salesforce org to deliver: (a) behavioral segmentation of the 533 member CUs by service utilization, PCC tier, and engagement frequency; (b) automated multi-touch journey campaigns targeting the 440 non-participating CUs with tailored RTP/FedNow adoption content; (c) AI-powered send-time optimization and A/B testing; (d) engagement attribution connecting marketing touchpoints to PCC tier upgrades. This leverages the existing Salesforce ecosystem without a new vendor relationship.\nImplementation approach: Marketing Cloud connect to existing Sales Cloud org; 3-6 months; data integration via NXTsoft OmniData for segmentation signals\n[EXPECTED OUTCOMES]\nconnected unlocks: Experience Cloud serves as the landing/portal destination for Marketing Cloud campaigns\n: Service Cloud — Activate Omnichannel Member-CU Service Desk on Existing Salesforce Org [ZENNIFY]\n[ROOT CAUSE]\n (Omnichannel Servicing & Support) scores 2.05 vs peer median 3.20 (−1.15). The 533 member CUs today interact with CACU primarily through the SSO portal [E-217], telephone, and email. There is no unified case management system, no shared service ticket tracking, and no service-level dashboard for member CUs to monitor their requests. (Core Process Automation) at 2.54 vs peer median 3.60 (−1.06) reflects the absence of workflow automation: payment exception handling, wire inquiries, and compliance questions are manually routed across CACU's 5-track operational migration [IC-004].\n⚡ Platform Note: CACU has Salesforce Sales Cloud (2023). Service Cloud = same Salesforce org, activated license. No new platform procurement.\n[SOLUTION]\nActivate Salesforce Service Cloud on the existing CACU org to deliver: (a) unified case management across all 533 member CUs with shared service-request visibility; (b) automated case routing by inquiry type (payment exceptions → operations; compliance questions → BSA team; technology issues → IT); (c) self-service case submission integrated with sso.corpam.org; (d) agent-facing unified desktop with full member-CU relationship context from the FSC org ( dependency). Service Cloud activation on an existing org takes weeks, not months.\nImplementation approach: Service Cloud license activation + Zennify configuration; 4-6 months for full deployment; Case routing rules aligned to CACU's operational structure\n[EXPECTED OUTCOMES]\nconnected unlocks: Agentforce extends Service Cloud with AI-triage | Experience Cloud provides the member-CU-facing self-service portal front-end\n: CRM Analytics (Tableau) — Member-CU Self-Service Analytics Layer Above NXTsoft OmniLytics [ZENNIFY]\n[ROOT CAUSE]\n (Analytics & AI Enablement) scores 3.30 vs peer median 2.80 (+0.50) — CACU's strongest relative position. However, this strength is CACU-internal: NXTsoft OmniLytics produces quantitative analytics for CACU's own ALM, CECL, and risk functions. Member CUs do not have self-service access to analytics about their own account activity, payment volumes, or liquidity position. The gap is not in CACU's internal analytics but in EXTENDING analytics as a member-CU-facing product, which is the next competitive differentiation layer.\n[SOLUTION]\nDeploy Salesforce CRM Analytics (Tableau) as a member-CU-facing analytics product connected to NXTsoft OmniLytics data feeds — NOT replacing OmniLytics, but providing: (a) member-CU dashboards for their own payment volumes, liquidity ratios, and CECL position accessible via the Experience Cloud portal; (b) Salesforce-embedded analytics within the FSC org for CACU relationship managers; (c) predictive analytics for member-CU PCC upgrade likelihood (input to Marketing Cloud targeting). CRM Analytics licenses into the existing Salesforce org.\nImplementation approach: CRM Analytics + Tableau license activation; data connector to NXTsoft OmniData/OmniLytics; 4-6 months; embedded in Experience Cloud portal\n[EXPECTED OUTCOMES]\nconnected unlocks: Data Cloud feeds CRM Analytics with unified data | Experience Cloud is the delivery portal\n: Agentforce — Extend Identifee IDA AI Model Into Sales and Service Domains [ZENNIFY]\n[ROOT CAUSE]\nCACU launched Identifee IDA in September 2024 [E-128] — the first corporate CU with a production AI chatbot, scoped specifically to Nacha Operating Rules & Guidelines. This is a proven AI deployment that demonstrates CACU's ability to execute GenAI. However, IDA's scope is intentionally narrow: it answers Nacha compliance questions. The AI capability exists but is NOT deployed for: (a) member-CU sales prospecting and PCC tier analysis; (b) service ticket triage within the Salesforce org; (c) operations queue management (payment exceptions, wire queries). at 2.54 vs peer median 3.60 reflects this automation gap.\n⚡ Platform Note: Identifee IDA is in production (Sept 2024) — CACU's first corporate-CU GenAI/RAG chatbot. Agentforce extends IDA into new domains on the existing Salesforce org. NOT duplicating IDA.\n[SOLUTION]\nDeploy Salesforce Agentforce agents within the existing CACU Salesforce org to: (a) a Sales Agent that surfaces non-participating member CU engagement signals and suggests outreach actions to CACU relationship managers; (b) a Service Agent that auto-triages incoming cases in Service Cloud by inquiry type, routing and drafting initial responses; (c) an Operations Agent that monitors payment exception queues and surfaces resolution suggestions. These agents are ADDITIVE to Identifee IDA — they operate in different domains (Nacha compliance vs CRM/service vs operations) and would be positioned to member CUs as 'CACU's AI ecosystem expanding beyond payments.'\nImplementation approach: Agentforce configuration on existing Salesforce org; requires Service Cloud and FSC as prerequisites; 6-9 months; Zennify AI practice leads\n[EXPECTED OUTCOMES]\nconnected unlocks: Extends Service Cloud value | Enhances FSC relationship management\n: Experience Cloud — Modernize sso.corpam.org Member Portal [ZENNIFY]\n[ROOT CAUSE]\nThe existing sso.corpam.org portal [E-217] serves as the primary self-service interface for 533 member credit unions — providing SSO access to CACU's payment, imaging, and banking services. However, it is a custom-built portal without: (a) CRM data integration (member-CU interactions are not unified with Salesforce); (b) self-service case submission (Service Cloud dependency, ); (c) personalized content delivery based on member-CU service utilization tier; (d) embedded analytics access (CRM Analytics dependency, ). (Personalization) at 2.68 vs peer median 2.80 (−0.12) would move materially once the portal delivers personalized content by PCC tier.\n⚡ Platform Note: sso.corpam.org is a custom SSO portal confirmed in production [E-217]. This is a MODERNIZATION/MIGRATION, not a greenfield build. Existing portal functionality migrates to Experience Cloud.\n[SOLUTION]\nMigrate sso.corpam.org to Salesforce Experience Cloud — not a rebuild from scratch, but a platform migration that: (a) preserves all existing SSO and service-access functionality; (b) connects the portal natively to the Salesforce CRM org (FSC, Service Cloud, Agentforce); (c) enables personalized landing pages by member-CU PCC tier, service utilization, and onboarding stage; (d) serves as the front-end for self-service case submission, analytics dashboards, and AI-assisted guidance. The Kentico CMS content can be migrated or federated into Experience Cloud.\nImplementation approach: Experience Cloud site build + SSO migration; 4-8 months; Zennify Experience Cloud practice; preserves member-CU user accounts and service access patterns\n[EXPECTED OUTCOMES]\nconnected unlocks: Portal front-end for Service Cloud, CRM Analytics, Agentforce | Marketing Cloud campaigns land on personalized portal pages\n: Slack — Unified Internal Collaboration for 5-Track Migration Coordination [ZENNIFY]\n[ROOT CAUSE]\n (Culture & Change Enablement) scores 1.17 vs peer median 2.40 (−1.23). CACU is simultaneously managing 5 operational migration tracks per IC-004: (1) Aptys payments migration (Dec 2024), (2) VSoft core upgrade, (3) Identifee IDA expansion, (4) FedNow/RTP ecosystem growth, (5) NXTsoft OmniConnect integration layer. With ~40-50 employees, coordinating these tracks across a small team without a dedicated collaboration platform creates change-management risk. The current Microsoft Azure stack [E-178] suggests email and potentially MS Teams, but no collaboration tool specifically tuned for project-based Salesforce/fintech delivery is confirmed.\n[SOLUTION]\nDeploy Slack as CACU's primary internal collaboration and workflow platform, with: (a) Salesforce-native integration connecting CRM cases, Agentforce alerts, and CRM Analytics notifications directly to Slack channels; (b) project channels per migration track (Aptys, VSoft, FedNow, IDA-Agentforce, Experience Cloud); (c) automated Salesforce workflow notifications (case updates, PCC tier changes, payment alerts) surfaced in Slack; (d) searchable institutional knowledge base for compliance Q&A (complementary to member-facing IDA). The Salesforce-Slack integration is built-in to all Salesforce tiers.\nImplementation approach: Slack workspace setup + Salesforce integration; 1-2 months; Zennify configuration; no complex data migration\n[EXPECTED OUTCOMES]\nconnected unlocks: Slack provides the operational communication layer for all T1-T3 Salesforce activations\n: Salesforce Shield — §748 ISP Encryption Overlay on Expanded Salesforce Org [ZENNIFY]\n[ROOT CAUSE]\nCACU already demonstrates strong cybersecurity posture: 89% NIST CSF (87/98 subcategories) [E-160], ISE Core Plus [E-131], §748 ISP compliance. (Cybersecurity) at 3.60 is the strongest category, +0.20 vs peer median. However, as the Salesforce org expands to hold member-CU PII (FSC:, Service Cloud case data:, Marketing Cloud contact records: ), the §748 ISP encryption obligations apply to Salesforce data at rest. Current encryption controls (Imperva WAF, Azure DRaaS encryption) do NOT cover Salesforce field-level data. Shield adds: (a) Platform Encryption for Salesforce fields containing PII; (b) Event Monitoring for compliance audit trail; (c) Field Audit Trail for §748 data retention.\n[SOLUTION]\nDeploy Salesforce Shield — Platform Encryption + Event Monitoring — on the expanded CACU Salesforce org after FSC and Service Cloud are operational ( + ). Shield is a Salesforce add-on that does not require infrastructure changes. It extends CACU's existing §748 ISP [E-131] data protection controls into the Salesforce platform layer, ensuring that member-CU PII in CRM records is encrypted at rest with CACU-managed keys.\nImplementation approach: Shield license activation; Zennify security practice configuration; 2-3 months; prerequisite: FSC + Service Cloud\n[EXPECTED OUTCOMES]\nconnected unlocks: Protects score from deteriorating as PII surface expands\n: GRC Platform — Automate Audit Finding Closure and Governance Workflow [ZENNIFY]\n[ROOT CAUSE]\n (Governance & Risk Appetite) at 1.54 vs peer median 3.30 (−1.76) is the #1 priority gap. Despite a CLEAN regulatory record (no NCUA enforcement, consent orders, LUAs, or CMPs), CACU's governance infrastructure relies on a manual 4-firm audit structure (Doeren Mayhew + CRI + Forvis Mazars + ePay Advisors [E-160]) with no dedicated GRC platform for systematic finding closure, remediation tracking, or risk appetite quantification. (Business Resilience & Third-Party Management) at 2.60 vs peer median 3.40 (−0.80) reflects the same infrastructure gap: CACU IS the third-party risk subject for 533 member CUs but lacks a formal TPRM platform to manage its own vendor risk and demonstrate due diligence beyond the annual DD packet [E-160].\n[SOLUTION]\nDeploy a Salesforce-native GRC Platform within the existing CACU Salesforce org to: (a) convert audit findings from all 4 firms into tracked, owner-assigned GRC cases with closure deadlines; (b) automate risk appetite threshold monitoring and board-reportable risk registers; (c) manage CACU's own vendor/TPRM inventory (Aptys, NXTsoft, VSoft, Pidgin, ThreatAdvice, etc.) with annual review workflows; (d) produce board-ready governance dashboards for the quarterly board reporting cycle. Deployed on the existing Salesforce org — no separate GRC system required.\nImplementation approach: Salesforce GRC (Risk Management) configuration; Zennify compliance practice; 4-6 months; integrates with existing Salesforce org\n[EXPECTED OUTCOMES]\nconnected unlocks: Primary enabler of ≥2.5 → unlocks connected cap reversal on 81 P3 subcaps (combined with )\n: Data Cloud — Unified Member-CU CDP Above NXTsoft + Aptys + VSoft [ZENNIFY]\n[ROOT CAUSE]\nCACU's data infrastructure is operationally strong: VSoft Wings/Vantage core [E-164], NXTsoft OmniConnect/OmniData/OmniLytics [E-165], Aptys Solutions [E-108]. (Data Management & Governance) at 3.37 is +0.47 above peer median. However, the data is siloed across three operational systems: VSoft (core banking/account data), Aptys (payment transaction data), and NXTsoft (API events and analytics). There is no unified member-CU identity layer that connects a member CU's core account activity, payment behavior, and service engagement history into a single profile. (Personalization) at 2.68 is constrained by this fragmentation — you cannot personalize without a unified 360-degree member-CU profile.\n[SOLUTION]\nDeploy Salesforce Data Cloud as a CDP overlay connecting NXTsoft OmniData, Aptys payment data, and VSoft account data — NOT replacing any existing system, but creating a unified member-CU identity resolution layer that: (a) resolves the same credit union's identity across all three data systems using the VSoft Vantage universal CIF as the primary identity anchor; (b) surfaces real-time member-CU payment activity and liquidity signals into the Salesforce FSC org; (c) activates behavioral segments for Marketing Cloud campaigns without manual data extraction; (d) provides the data foundation for Agentforce agents to surface context-aware recommendations.\nImplementation approach: Data Cloud provisioning + data connectors to NXTsoft/VSoft/Aptys APIs; 6-9 months; requires NXTsoft OmniConnect APIs for data ingestion (existing integration layer)\n[EXPECTED OUTCOMES]\nconnected unlocks: Feeds CRM Analytics with unified data | Enables Marketing Cloud real-time segmentation | Context layer for Agentforce\n: MuleSoft Anypoint — Cross-Vendor Orchestration Above NXTsoft OmniConnect [ZENNIFY]\n[ROOT CAUSE]\nCACU is executing 5 concurrent technology migrations per IC-004: Aptys payments (Dec 2024), VSoft core upgrade, Identifee IDA, FedNow/RTP ecosystem expansion, and NXTsoft integration layer changes. Each migration introduces new API connections; NXTsoft OmniConnect [E-165] manages current point-to-point APIs but lacks enterprise-grade workflow orchestration for MULTI-SYSTEM processes. (Core Process Automation) at 2.54 vs peer median 3.60 (−1.06) reflects the absence of cross-system workflow automation: a payment exception involves VSoft (core), Aptys (payment), NXTsoft (event notification), and the Salesforce org (case creation, ) — four systems that today require manual hand-offs between each step.\n⚡ Platform Note: NXTsoft OmniConnect is confirmed for current API integration [E-165]. MuleSoft operates at a higher orchestration layer — managing multi-system workflows, NOT replacing OmniConnect point-to-point integrations.\n[SOLUTION]\nDeploy MuleSoft Anypoint as the enterprise integration and orchestration layer ABOVE NXTsoft OmniConnect, handling: (a) multi-system orchestration for payment exception workflows (VSoft → Aptys → NXTsoft → Salesforce Service Cloud); (b) ISO 20022 message transformation for FedNow/RTP rails [E-114]; (c) standardized API gateway for the 5-track migration — each new system connects to MuleSoft once, not to every other system (n-to-1 vs n-to-n); (d) real-time data streaming to Data Cloud from VSoft and Aptys. OmniConnect continues handling its existing CACU↔member-CU API calls — MuleSoft operates at the CACU-internal orchestration layer.\nImplementation approach: MuleSoft Anypoint Platform; Zennify integration practice; 6-12 months for full orchestration layer; prioritize payment exception workflow in month 1-3\n[EXPECTED OUTCOMES]\nconnected unlocks: Enables Data Cloud real-time data streaming | Provides integration backbone for Service Cloud payment exception workflows"
+  },
+  "run_request_id": "DMA-RES-CACU-20260428-0001"
+}

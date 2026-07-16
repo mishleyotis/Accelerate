@@ -1,0 +1,687 @@
+{
+  "entity_display_id": "townebank-insurance-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2.4.16",
+        "P4C3.1.2",
+        "P1C1.4.4",
+        "P1C5.2.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-002",
+      "id": "fed1a9d7-0d5d-4ce5-8344-3b7183dfd508",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-022",
+        "E-047",
+        "E-043"
+      ],
+      "linked_subcap_id": "P4C2.4.16",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Speech-to-Text & Conversation Intelligence a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-043].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Zennify Relevance: Capital from Towne Vacations sale creates investment headroom; Towne Insurance technology platform in",
+      "what_text": "Speech-to-Text & Conversation Intelligence is one of TowneBank Insurance's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger data and technology foundation [E-047].",
+      "why_text": "The assessment found: “FDIC awarded TowneBank 'Outstanding' CRA rating (6th consecutive) — highest possible rating; community reinvestment excellence confirmed $193.8M equity investments + $13.6M charitable donations =” [E-022]. At 1.5 out of 5, Speech-to-Text & Conversation Intelligence sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C5.3.3",
+        "P1C4.1.4",
+        "P1C2.2.3",
+        "P1C3.4.1",
+        "P2C2.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-008",
+      "id": "de4c7439-515c-42ed-bafe-304eb6d070c9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-016",
+            "E-076"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-076",
+        "E-059"
+      ],
+      "linked_subcap_id": "P1C5.3.3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make this capability a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.2 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "Zennify Relevance: CIO appointment (Jan 21, 2026) = decision-maker window open NOW; engage during strategy formation pha",
+      "what_text": "This capability is one of TowneBank Insurance's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.2 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes TowneBank Insurance's ability to deliver sharper strategic direction and stronger oversight [E-076].",
+      "why_text": "The assessment found: “TowneBank appointed Varun Chandhok as Senior EVP & CIO effective February 2026; responsible for advancing technology strategy and expanding technical capabilities Chandhok brings enterprise” [E-016]. At 1.5 out of 5, this capability sits 1.7 points below the 3.2 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.3.2",
+        "P2C1.4.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "d57e661b-e314-4af5-85a9-0a58064c9a15",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-001",
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-013",
+        "E-016"
+      ],
+      "linked_subcap_id": "P2C4.3.2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Proactive Opportunity Identification a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 3.0 toward the 3.4 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-013].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "\"We will continue to seek new opportunities in the marketplace that have the potential to…",
+      "what_text": "Proactive Opportunity Identification is one of TowneBank Insurance's solid customer experience capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, below the 3.4 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger, more personalised customer experience [E-001].",
+      "why_text": "The assessment found: “TowneBank appointed Varun Chandhok as Senior EVP & CIO effective February 2026; responsible for advancing technology strategy and expanding technical capabilities Chandhok brings enterprise” [E-016]. At 3.0 out of 5, Proactive Opportunity Identification sits 0.4 points below the 3.4 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.2.4",
+        "P1C3.4.1",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-003",
+      "id": "ccecc7db-b7e5-4ce1-935c-c6d22b92d5d4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-055",
+        "E-027"
+      ],
+      "linked_subcap_id": "P2C4.2.4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Personalized Pricing a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.4 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Zennify Relevance: Salesforce FSC enables Towne Insurance to scale acquired agencies without proportionally scaling head",
+      "what_text": "Personalized Pricing is one of TowneBank Insurance's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.4 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger, more personalised customer experience [E-055].",
+      "why_text": "The assessment found: “Applied Epic serves as Towne Insurance's primary system of record — it includes embedded CRM capabilities (pipeline management, activity tracking, renewal management) but is NOT a purpose-built CRM” [E-044]. At 1.5 out of 5, Personalized Pricing sits 1.9 points below the 3.4 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4.4.4",
+        "P2C1.4.8",
+        "P1C3.4.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-004",
+      "id": "b534b27e-a72f-4828-bbe2-1cbf6fe026da",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-038",
+        "E-033",
+        "E-022"
+      ],
+      "linked_subcap_id": "P3C4.4.4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Post-Incident Review a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 2.5 toward the 3.1 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Capital redeployment post-Towne Vacations sale ($250M, Apr 2026)",
+      "what_text": "Post-Incident Review is one of TowneBank Insurance's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.1 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes TowneBank Insurance's ability to deliver more efficient, dependable operations [E-033].",
+      "why_text": "The assessment found: “Insurance segment software expense 2025: $2.982M; 2024: $2.897M; 2023: $2.336M — 3-year CAGR ~13% = accelerating technology investment in insurance division Insurance segment 2025: $22.148M net” [E-038]. At 2.5 out of 5, Post-Incident Review sits 0.6 points below the 3.1 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.8.4",
+        "P1C3.7.2",
+        "P4C2.1.1",
+        "P2C4.4.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-005",
+      "id": "4fc2f76f-2970-4f60-97b1-79dd09b327a9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-095",
+        "E-058"
+      ],
+      "linked_subcap_id": "P4C2.8.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Vector Index Lifecycle Operations a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-058].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Zennify Relevance: Towne Insurance is an active Applied AI early adopter but lacks the enterprise orchestration layer",
+      "what_text": "Vector Index Lifecycle Operations is one of TowneBank Insurance's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger data and technology foundation [E-095].",
+      "why_text": "The assessment found: “Applied AI features confirmed LIVE in Applied Epic (not roadmap): document data extraction AI, payment matching AI, coverage gap identification AI Applied AI inherits Epic user permissions” [E-019]. At 1.5 out of 5, Vector Index Lifecycle Operations sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.5.4",
+        "P1C4.3.4",
+        "P1C4.3.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-006",
+      "id": "8cda3f31-cf64-4130-8f9a-935633f6259a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-016",
+            "E-076"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-076",
+        "E-016",
+        "E-001"
+      ],
+      "linked_subcap_id": "P1C1.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI/ML Strategy a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 2.5 toward the 3.2 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-001].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Varun TowneBank press release Feb 2026 is exceptionally well-equipped to further advance…",
+      "what_text": "AI/ML Strategy is one of TowneBank Insurance's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.2 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes TowneBank Insurance's ability to deliver sharper strategic direction and stronger oversight [E-076].",
+      "why_text": "The assessment found: “TowneBank appointed Varun Chandhok as Senior EVP & CIO effective February 2026; responsible for advancing technology strategy and expanding technical capabilities Chandhok brings enterprise” [E-016]. At 2.5 out of 5, AI/ML Strategy sits 0.7 points below the 3.2 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.3.2",
+        "P1C1.3.IC2",
+        "P2C1.4.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-007",
+      "id": "042c2a1b-e662-4459-b4ed-052c5e6442e0",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-069",
+        "E-038"
+      ],
+      "linked_subcap_id": "P2C4.3.2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Proactive Opportunity Identification a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 3.0 toward the 3.4 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "\"Management continues to pursue opportunities to grow insurance revenues both organically…",
+      "what_text": "Proactive Opportunity Identification is one of TowneBank Insurance's solid customer experience capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, below the 3.4 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger, more personalised customer experience [E-010].",
+      "why_text": "The assessment found: “Insurance segment software expense 2025: $2.982M; 2024: $2.897M; 2023: $2.336M — 3-year CAGR ~13% = accelerating technology investment in insurance division Insurance segment 2025: $22.148M net” [E-038]. At 3.0 out of 5, Proactive Opportunity Identification sits 0.4 points below the 3.4 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.8.4",
+        "P1C3.8.3",
+        "P4C2.1.2",
+        "P4C2.4.10"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-009",
+      "id": "84fafdda-7aa2-45e4-9056-89f1336fc712",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-079",
+        "E-058",
+        "E-019"
+      ],
+      "linked_subcap_id": "P4C2.8.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Vector Index Lifecycle Operations a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-058].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Applied is uniquely positioned to deliver practical, powerful, and safe AI for the…",
+      "what_text": "Vector Index Lifecycle Operations is one of TowneBank Insurance's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger data and technology foundation [E-079].",
+      "why_text": "The assessment found: “Applied AI features confirmed LIVE in Applied Epic (not roadmap): document data extraction AI, payment matching AI, coverage gap identification AI Applied AI inherits Epic user permissions” [E-019]. At 1.5 out of 5, Vector Index Lifecycle Operations sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.8.4",
+        "P1C1.3.IC2",
+        "P1C1.3.IC1",
+        "P1C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-010",
+      "id": "a7c50198-cc4b-4f20-84f5-dcd4319b21b4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-058"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-058",
+        "E-073"
+      ],
+      "linked_subcap_id": "P4C2.8.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Vector Index Lifecycle Operations a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-073].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Applied Insurance AI deployment (live Oct 2025)",
+      "what_text": "Vector Index Lifecycle Operations is one of TowneBank Insurance's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger data and technology foundation [E-058].",
+      "why_text": "The assessment found: “Applied AI features confirmed LIVE in Applied Epic (not roadmap): document data extraction AI, payment matching AI, coverage gap identification AI Applied AI inherits Epic user permissions” [E-019]. At 1.5 out of 5, Vector Index Lifecycle Operations sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.5",
+        "P2C1.1.RB1",
+        "P2C1.1.CU2",
+        "P1C2.7.IC1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-011",
+      "id": "d6f21fa0-b6d6-4ed0-97dd-f85be7b76d56",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-088",
+        "E-009",
+        "E-086"
+      ],
+      "linked_subcap_id": "P4C3.6.5",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Pipeline Test Automation a near-term focus for TowneBank Insurance: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-086].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Dogwood State Bank integration + I-85 Carolinas expansion",
+      "what_text": "Data Pipeline Test Automation is one of TowneBank Insurance's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TowneBank Insurance's ability to deliver a stronger data and technology foundation [E-009].",
+      "why_text": "At 1.5 out of 5, Data Pipeline Test Automation sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-088, E-009].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.3.IC2",
+        "P1C1",
+        "P1C1.3.IC1",
+        "P3C4.7.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-012",
+      "id": "7308181b-e2cf-4c1b-9920-2805d772ed71",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-069",
+        "E-034"
+      ],
+      "linked_subcap_id": "P1C1.3.IC2",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for TowneBank Insurance: invest to move it toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the improvement reaches well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Organic growth + selective M&A in insurance",
+      "what_text": "This capability was flagged in Zennify's assessment of TowneBank Insurance as a strategy and governance capability where focused investment would strengthen digital maturity. It underpins the planning and oversight the rest of the business relies on, so its current level directly shapes TowneBank Insurance's ability to deliver sharper strategic direction and stronger oversight [E-069].",
+      "why_text": "Strengthening this capability matters because it shapes sharper strategic direction and stronger oversight. It builds on the planning and oversight the rest of the business relies on, so progress here lifts the wider business too [E-042, E-069].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Towne Insurance position relative to peers, organized by where the agency leads, sits at parity, or trails the peer set:",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience (P2) — Score 2.81 vs Median 3.1 (-0.29)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 2.56 vs Median 2.8 (-0.24)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 2.27 vs Median 2.6 (-0.33)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All six recommendations follow the mandatory protocol: ROOT CAUSE with E-IDs, then SOLUTION with named Zennify offering, then EXPECTED OUTCOMES with measurable metrics. Each recommendation has been validated via independent technographic searches (Exa, April-May 2026) confirming the proposed technology is absent at Towne Insurance."
+  },
+  "run_request_id": "DMA-RES-TBNK-20260514-0001"
+}

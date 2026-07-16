@@ -1,0 +1,410 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "haventree-bank-0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: ACCELERATING | 3-Year CAGR: ~10.4%",
+      "Narrative: Haventree demonstrates accelerating asset growth with strong capitalization (CET1 18.2% vs 7.0% OSFI floor). NHA MBS approval (Sept 2025) creates funding tailwind. Retained earnings of $169M support Haventree 2.0 transformation investment.",
+      "Evidence: E-003, E-061, E-088, E-096"
+    ],
+    "metrics": {
+      "tier_1_2_pct": 33.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Canada (Ontario HQ)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tech Team",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": null
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Federally regulated financial institution (OSFI, Canada)",
+    "narrative_md": "Haventree Bank is a lending institution. It reports $3.7 billion in total assets. It is regulated by OSFI (Office of the Superintendent of Financial Institutions and employs approximately 227 people. Its overall digital maturity is assessed at 2.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OSFI (Office of the Superintendent of Financial Institutions)",
+    "size_tier": "Small ($1B-$5B assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-060",
+        "excerpt": "LinkedIn: 17,102 followers with +12.9% growth in the past year \u2014 healthy social media presence in financial services segment 227 employees (+16.3% YoY) \u2014 employer brand growth signal aligning with talent marketing",
+        "title": "17,102 followers with +12.9% growth in the past year \u2014 healthy social\u2026",
+        "type": "linkedin-post",
+        "url": "https://ca.linkedin.com/company/haventree-bank"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-067",
+        "excerpt": "Haventree Bank Instagram (@haventreebank): active Reels content in addition to static posts \u2014 video/short-form content marketing confirmed Instagram post: 'We are currently at the Monarch Advisor Conference for the first",
+        "title": "Haventree Bank Instagram (@haventreebank): active Reels content in\u2026",
+        "type": "conference",
+        "url": "https://www.instagram.com/haventreebank/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "c441e5ab-c59e-4c48-ac7e-25f0259fffc8",
+      "issue_id": "# No issues \u2014 al",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Trend Classification: ACCELERATING | 3-Year CAGR: ~10.4%. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.5,
+        "P1C2": 4.0,
+        "P1C3": 4.0,
+        "P1C4": 3.5,
+        "P1C5": 3.5,
+        "P2C1": 4.5,
+        "P2C2": 4.5,
+        "P2C3": 4.0,
+        "P2C4": 4.0,
+        "P3C1": 4.0,
+        "P3C2": 4.0,
+        "P3C3": 4.0,
+        "P3C4": 4.0,
+        "P4C1": 4.0,
+        "P4C2": 4.0,
+        "P4C3": 4.5,
+        "P4C4": 4.0
+      },
+      "overall_score": 4.06,
+      "peer_name": "Equitable Bank (EQ Bank \u2014 Digital Benchmark)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.0,
+      "peer_name": "Home Trust Company",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.56,
+      "peer_name": "B2B Bank (Laurentian Bank subsidiary)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.56,
+      "peer_name": "MCAP Financial Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.15,
+      "peer_name": "Wealth One Bank of Canada",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-HAVENTREE-20260429-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "place) \u2014 technology-native competitors Haventree must track Trustpilot rating: 4.1/5 from 239 reviews \u2014 above-average external customer satisfaction for alt-mortgage lender Positive reviews: quick phone responses, responsive email, fee waiv",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 239,
+        "polarity": "neutral",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": 4.1
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Joel Cote joined as COO March 2026 \u2014 very new hire",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "e08d9160-d452-44e9-a719-1a726e8ced73",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/haventree-bank",
+      "subcap_ids": [],
+      "title": "Joel Cote joined very new hire"
+    },
+    {
+      "body": "Joel Cote: Chief Operating Officer (March 2026 About-Us update) \u2014 succeeded John Bourassa (COO Oct 2022 - early 2026)",
+      "date_precision": "month",
+      "e_id": "E-097",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-097"
+      ],
+      "id": "a701fc62-de59-4f27-9fdc-b852b7d74861",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.haventreebank.com/about-us/",
+      "subcap_ids": [],
+      "title": "Joel Cote: Chief Operating Officer (March 2026 About-Us\u2026"
+    },
+    {
+      "body": "September 25, 2025: Haventree Bank CEO Glowinsky + CFO Farooqi opened Toronto Stock Exchange market to celebrate CMHC approval for NHA MBS and Canada Mortgage Bond programs",
+      "date_precision": "day",
+      "e_id": "E-061",
+      "event_date": "2025-09-25",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "193d45ad-32fe-4e07-848b-52e198f88f5d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.newsfilecorp.com/release/267961/Haventree-Bank-Opens-the-Market",
+      "subcap_ids": [],
+      "title": "Haventree Bank CEO Glowinsky + CFO Farooqi opened Toronto\u2026"
+    },
+    {
+      "body": "September 25, 2025: Haventree Bank opened the market at TSX (Toronto Stock Exchange) celebrating CMHC approval to participate in NHA MBS and Canada Mortgage Bond programs \u2014 major strategic milestone",
+      "date_precision": "day",
+      "e_id": "E-096",
+      "event_date": "2025-09-25",
+      "evidence_e_ids": [
+        "E-096"
+      ],
+      "id": "2b9b90bd-74ad-4d0a-9ba5-283f656f8991",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.newsfilecorp.com/release/267961/Haventree-Bank-Opens-the-Market",
+      "subcap_ids": [],
+      "title": "Haventree Bank opened the market"
+    },
+    {
+      "body": "Tarun Shashank Sanagapalli Senior Cyber Security Engineer joined July 2025",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "b34a786c-81c6-4001-825a-04f1b5435e9e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/haventree-bank",
+      "subcap_ids": [],
+      "title": "Tarun Shashank Sanagapalli Senior Cyber Security Engineer\u2026"
+    },
+    {
+      "body": "CMP Brokers on Lenders 2025: Haventree Bank named as a WINNER \u2014 top broker satisfaction in the Alternative lending category",
+      "date_precision": "year",
+      "e_id": "E-062",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "1ff913c3-60ae-42d9-bf2c-d8b36bf996cb",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.mpamag.com/ca/news/general/brokers-on-lenders-2025-the-results-are-in/549886",
+      "subcap_ids": [],
+      "title": "CMP Brokers on Lenders 2025: Haventree Bank named as a\u2026"
+    },
+    {
+      "body": "Sara Azadeh Business Data Analyst joined Dec 2024",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "74a96f61-6252-437a-8603-e7828641a3b6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/haventree-bank",
+      "subcap_ids": [],
+      "title": "Sara Azadeh Business Data Analyst joined"
+    },
+    {
+      "body": "OSFI launched new Supervisory Framework February 2024, effective April 1 2024 \u2014 major regulatory change requiring Haventree exam readiness update",
+      "date_precision": "day",
+      "e_id": "E-030",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "904af403-c75d-467e-8274-8997b48cf459",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.osfi-bsif.gc.ca/en/about-osfi/reports-publications/osfis-annual-risk-outlook-fiscal-year-2023-2024",
+      "subcap_ids": [],
+      "title": "OSFI launched new Supervisory Framework"
+    },
+    {
+      "body": "Vikrant Verma VP Software Engineering joined April 2024",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "c4993c79-6986-43e5-a517-65f07248d672",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/haventree-bank",
+      "subcap_ids": [],
+      "title": "Vikrant Verma VP Software Engineering joined"
+    },
+    {
+      "body": "IT maturity pre-2023: 'infrastructure management vs DevOps' \u2014 technical operating model transformation from infra-focused to DevOps-first [now VP SE hired Apr 2024]",
+      "date_precision": "month",
+      "e_id": "E-032",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "5c1ec0f3-2520-4df0-8c75-726395a10f1d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.freestonegroup.ca/haventree-case-study",
+      "subcap_ids": [],
+      "title": "IT maturity pre-2023: 'infrastructure management vs DevOps'"
+    },
+    {
+      "body": "Chief Privacy Officer role formally appointed \u2014 dedicated privacy governance function confirmed. Contact email: privacyofficer@haventreebank.com",
+      "date_precision": "publish_fallback",
+      "e_id": "E-025",
+      "event_date": "2024-02-29",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "302f746e-6441-4bcd-8446-5e44265b1f68",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.haventreebank.com/en-CA/privacy-statement",
+      "subcap_ids": [],
+      "title": "Chief Privacy Officer role formally appointed confirmed"
+    },
+    {
+      "body": "Fern Glowinsky appointed President and CEO effective February 27, 2023 \u2014 board-level appointment",
+      "date_precision": "day",
+      "e_id": "E-011",
+      "event_date": "2023-02-27",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "0b44c2bd-37a9-430b-aac3-96f9ac435584",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.newswire.ca/news-releases/haventree-bank-welcomes-new-president-and-ceo-fern-glowinsky-879699839.html",
+      "subcap_ids": [],
+      "title": "Fern Glowinsky appointed President and CEO"
+    }
+  ]
+}

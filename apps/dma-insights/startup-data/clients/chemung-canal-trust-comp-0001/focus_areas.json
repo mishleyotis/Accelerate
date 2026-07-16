@@ -1,0 +1,111 @@
+{
+  "entity_display_id": "chemung-canal-trust-comp-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-103",
+          "E-104",
+          "E-107",
+          "E-001",
+          "E-105",
+          "E-048"
+        ],
+        "representative_quote": "No enterprise data catalog (Collibra, Alation, Atlan)",
+        "source_kind": "heuristic"
+      },
+      "id": "f445a3dd-6d11-4684-a0ac-8d73c9f5cc78",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.5.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 6 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-055",
+          "E-036",
+          "E-060",
+          "E-041",
+          "E-042",
+          "E-046"
+        ],
+        "representative_quote": "This subcapability is Insurance-Conditional and not applicable to Chemung Canal Trust Company as a community bank with no insurance subsidiary.",
+        "source_kind": "heuristic"
+      },
+      "id": "612692d5-e58f-4052-b6c0-d397f252e3a2",
+      "involved_subcap_ids": [
+        "P2C3.2.IC1",
+        "P2C3.3.6",
+        "P2C3.6.6",
+        "P2C4.2.9",
+        "P2C4.3.1",
+        "P2C4.3.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 14 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-059",
+          "E-055",
+          "E-001",
+          "E-022",
+          "E-051",
+          "E-064"
+        ],
+        "representative_quote": "[EVIDENCE] Quantified RPA outcome (7,200 hrs/yr) suggests structured experimentation; no innovation pipeline visible (cites E-059, E-055, E-001).",
+        "source_kind": "heuristic"
+      },
+      "id": "f88acef3-265c-4697-bcb4-596450213a3d",
+      "involved_subcap_ids": [
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C3.2.5",
+        "P1C3.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

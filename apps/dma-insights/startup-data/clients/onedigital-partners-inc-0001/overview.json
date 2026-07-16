@@ -1,0 +1,1306 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 157,
+        "subcaps": 157,
+        "thin": 28
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 228,
+        "subcaps": 228,
+        "thin": 70
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 116,
+        "subcaps": 116,
+        "thin": 9
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 89
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "onedigital-partners-inc-0001",
+    "domain": null,
+    "hq": null,
+    "id": "7ce6c114-8e97-4742-b500-47e130d18bc0",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "OneDigital Partners, Inc.",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "IB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:56.500340Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 3,
+    "current_count": 33,
+    "dated_count": 1,
+    "median_age_months": 12.1,
+    "oldest_published_date": "2019-07-01",
+    "stale_count": 3,
+    "stale_pct": 1.33,
+    "total": 225,
+    "undated_count": 185
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 1,
+      "EVIDENCE": 185,
+      "NEGATIVE": 2,
+      "NEUTRAL": 5,
+      "POSITIVE": 32
+    },
+    "connectors": {
+      "Clay": 2,
+      "Glassdoor": 5,
+      "Indeed": 1,
+      "LinkedIn": 15
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 13,
+      "NEUTRAL": 169,
+      "POSITIVE": 43
+    },
+    "tiers": {
+      "T1": 86,
+      "T2": 76,
+      "T3": 63
+    },
+    "total_facts": 1484,
+    "total_items": 225
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 151.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 151000000000.0,
+    "cagr": "18%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "total_assets": "$151.0B"
+    },
+    "footprint": "US National",
+    "footprint_basis": "derived:geography",
+    "founded": 2000,
+    "geography": "US National",
+    "headcount": 4671,
+    "hq": "Atlanta, GA",
+    "hq_address": null,
+    "hq_basis": "nlp:evidence+narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Adam Bruckman",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Marcia Callejamatsko",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Camry Blaising",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Operations"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Anita Sindhwani",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Business Solutions / CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sara Lamberto",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Platform Solutions R&W"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kiyoshi 'Yoshi' Kidd",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRM privileges owner"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Phil Gilreath",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "PEO Product Owner"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Heather Gould",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "PEO peer to Anita"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jason Westenskow",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Sr Dir Data Analytics & Integrations"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "OneDigital",
+    "license_type": "State-licensed insurer",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "OneDigital Partners, Inc. is an insurance broker. It reports $151.0 billion in total assets and has operated since 2000. It is regulated by State Insurance Department (NAIC) and employs approximately 4,671 people. Its overall digital maturity is assessed at 3.1 out of 5 across the DMA capability framework.",
+    "primary_regulator": "State Insurance Department (NAIC)",
+    "regulator_basis": "inferred:subvertical",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 4000000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.1,
+          "source": "Employee"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.1",
+          "signal": "glassdoor_rating: 3.1, glassdoor_reviews_count: 959, glassdoor_rating_trend_yoy: -6%",
+          "source": "Employee"
+        },
+        {
+          "signal": "Deeper B2B sentiment (case studies, NPS) deferred to B2 P2 customer experience pillar deep-dive",
+          "source": "Customer"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mega",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-087",
+        "excerpt": "Kristen Eskew, VP of Diversity, Equity, Inclusion & Belonging at OneDigital, named a 2025 DEI Award Winner by OnConferences — Tier-1 external recognition of dedicated DEI&B executive leadership; establishes named account",
+        "title": "Kristen Eskew, VP of Diversity, Equity, Inclusion & Belonging at…",
+        "type": "conference",
+        "url": "https://www.onconferences.com/25-dei-winners"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-218",
+        "excerpt": "🎯 AI/ML STRATEGY + GOVERNANCE FRAMEWORK (P4C2.1.2) — Vinay Gidwaney CPO on ThoughtSpot Data Chief Podcast Ep129 (Jan 28, 2026): 'AI IS TALENT AND YOU HAVE TO TREAT AI IN THE SAME WAY THAT YOU TREAT THE TALENT WITHIN YOUR",
+        "title": "🎯 AI/ML Strategy + Governance Framework (P4C2.1.2) — Vinay Gidwaney…",
+        "type": "podcast",
+        "url": "https://www.thoughtspot.com/data-chief/ep129/how-one-digital-Is-reframing-ai-agents-as-coworkers"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-093",
+        "excerpt": "'Fierce Advocates of Health, Success and Financial Security' = consistent brand tagline across website, LinkedIn (62,515 followers), press releases, and investor communications — customer-advocacy identity operationalize",
+        "title": "Fierce Advocates of Health, Success and Financial Security'…",
+        "type": "article",
+        "url": "https://www.onedigital.com/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-114",
+        "excerpt": "Allyson Smith = SVP Marketing (promoted Jun 22 2023 from VP Marketing, 8-year OneDigital veteran, started as Director of Field Marketing); reports up through COO Bill Carew (now President per Jan 22 2026 press release) =",
+        "title": "Allyson Smith = SVP Marketing promoted Jun 22 2023",
+        "type": "article",
+        "url": "https://www.onedigital.com/blog/onedigital-promotes-allyson-smith-to-senior-vice-president-of-marketing/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-116",
+        "excerpt": "The Great Recalibration 2026 = flagship content-marketing campaign with MULTIPLE VARIANTS: (a) Employer Advisory Session webinar (launch.onedigital.com/federal-policy-updates-for-employers); (b) 'Strategic Solutions for ",
+        "title": "The Great Recalibration 2026 = flagship content-marketing campaign…",
+        "type": "webinar",
+        "url": "https://www.onedigital.com/en-US/articles/the-great-recalibration-2026-imperatives-for-nonprofits-associations--education-leaders/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-122",
+        "excerpt": "Summit26 = annual flagship Marketing + Sales event held in Dallas TX (2026 edition); Summit25 was held in Atlanta for 25th anniversary celebration per Mike Sullivan quote; scale evidenced by Briana Davis LinkedIn post '1",
+        "title": "Agenda includes Employee Benefits",
+        "type": "conference",
+        "url": "https://www.chamberrva.com/onedigitals-onward-the-great-recalibration-is-here/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "onedigital.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.848446+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# OneDigital Partners, Inc. — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "OneDigital Partners, Inc. is a $151.0B in assets insurance broker regulated by State Insurance Department (NAIC), operating since 2000 with 4,671 employees. A 18.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-043, E-083]. Zennify's assessment places overall digital maturity at 3.1/5. The deepest capability gap is Privileged Access & Secret/Key Lifecycle Management at 2.0/5 against a 3.1 peer median [E-012]. Next is Producer/Advisor Channel Strategy at 2.8/5 against a 3.2 peer median [E-030, E-025].\n\nThird is Policy Binding & Download at 3.0/5 against a 3.1 peer median [E-133, E-137]. The issue register adds 1 of 12,191 fields (0.008%) has complianceGroup classification — regulatory defensibility gap especially post-breach (critical severity). The issue register adds Salesforce Process Builder retirement deadline Dec 31 2025 — 133 legacy PBs documented in Hubbl scan (high severity). Counter-signal: Change Methodology already runs at 3.4/5 against a 2.8 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below. The question for OneDigital Partners, Inc.\n\nis whether to close Privileged Access & Secret/Key Lifecycle Management first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. OneDigital Partners, Inc. should lead with nCino (58/100 fit) against Producer/Advisor Channel Strategy, then sequence Twilio behind it. Closing Privileged Access & Secret/Key Lifecycle Management to the peer median alone is worth 1.1 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"🎯 Einstein POC underwhelming → 'trying other AI solutions' urgency — Claud notes Oct 22 2024: 'Einstein AI demo underwhelming…\"."
+  },
+  "overall_score": 3.13,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-1/ib1_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.411245+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-2/ib2_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.411770+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-3/ib3_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.412169+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-4/ib4_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.412520+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-5/ib5_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.412803+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-6/ib_6_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.413081+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-7/ib_7_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.413294+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_raw/IB-8/ib_8_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.413501+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/kb_sources_sv7.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.414174+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/proxy_findings.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.414795+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/regulatory_coverage_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.415195+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.415626+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/diagnostic_questions.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.422806+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/populate_workbook_stats.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.423739+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/validate_workbook_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.442166+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/cross_pillar_caps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.442409+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/subcap_caps_derived.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.443270+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/DMA_Recommendations_OneDigital_2026-04-18.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.443849+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_medians.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.444442+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.444878+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.445507+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/preliminary_issues.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.445926+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A1_tier_distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.447058+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A3_evidence_linkage.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.451175+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_absent_evidence.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.460845+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_qa_validation.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.461213+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:56.461435+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 38
+    },
+    "stage_ms": {
+      "manifest": 18,
+      "parse": 22072,
+      "persist": 5668
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'INSURANCE_BROKERAGES'",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_index.json",
+        "detail": "evidence_index.json: 6 validation errors for EvidenceRow\nsubcap_mappings.0\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.1.1', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.1\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.1.2', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.2\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.2.1', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.3\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.2.2', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.4\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.5.1', 'confidence': 'medium'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.5\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.7.2', 'confidence': 'medium'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['founded', 'legal_name'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_OneDigital_2026-04-18.docx count=9",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 12 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 5 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 2 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-1/ib1_summary.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-2/ib2_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-3/ib3_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-4/ib4_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-5/ib5_summary.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-6/ib_6_summary.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-7/ib_7_summary.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_raw/IB-8/ib_8_summary.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/kb_sources_sv7.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/proxy_findings.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/regulatory_coverage_map.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/populate_workbook_stats.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/validate_workbook_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/cross_pillar_caps.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/subcap_caps_derived.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/DMA_Recommendations_OneDigital_2026-04-18.csv — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_medians.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/preliminary_issues.csv — no fingerprint matched (best confidence 0.20); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A1_tier_distribution.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A3_evidence_linkage.csv — no fingerprint matched (best confidence 0.00); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_absent_evidence.csv — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_qa_validation.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.md — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 44",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:27/701 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 10",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'INSURANCE_BROKERAGES'",
+      "evidence_index.json: 6 validation errors for EvidenceRow\nsubcap_mappings.0\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.1.1', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.1\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.1.2', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.2\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.2.1', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.3\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.2.2', 'confidence': 'high'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.4\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.5.1', 'confidence': 'medium'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\nsubcap_mappings.5\n  Input should be a valid string [type=string_type, input_value={'subcap_id': 'P4C3.7.2', 'confidence': 'medium'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "firmographics_from_entity_profile_json: fields=['founded', 'legal_name'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_OneDigital_2026-04-18.docx count=9",
+      "used docx-extracted recommendations: 12 rec(s) from Assessment_Report.docx §9",
+      "tech_stack_from_report_prose: 5 vendors mentioned",
+      "sentiment_from_csv: 2 sources",
+      "insights_from_client_profile_findings: 10",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-1/ib1_summary.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-2/ib2_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-3/ib3_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-4/ib4_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-5/ib5_summary.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-6/ib_6_summary.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-7/ib_7_summary.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_raw/IB-8/ib_8_summary.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/kb_sources_sv7.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/proxy_findings.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/regulatory_coverage_map.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/populate_workbook_stats.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/validate_workbook_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/cross_pillar_caps.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/subcap_caps_derived.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 04_reports/DMA_Recommendations_OneDigital_2026-04-18.csv — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_medians.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/preliminary_issues.csv — no fingerprint matched (best confidence 0.20); 9 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A1_tier_distribution.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A3_evidence_linkage.csv — no fingerprint matched (best confidence 0.00); 200 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_absent_evidence.csv — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_qa_validation.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: README.md — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "timeline_events_persisted: 44",
+      "catalogue_unresolved:27/701 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 10"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 157,
+      "peer_median": 3.08,
+      "pillar_id": "P1",
+      "score": 3.2,
+      "subcaps_scored": 157
+    },
+    {
+      "peer_benchmarked": 228,
+      "peer_median": 2.93,
+      "pillar_id": "P2",
+      "score": 3.09,
+      "subcaps_scored": 228
+    },
+    {
+      "peer_benchmarked": 116,
+      "peer_median": 3.13,
+      "pillar_id": "P3",
+      "score": 3.3,
+      "subcaps_scored": 116
+    },
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 2.94,
+      "pillar_id": "P4",
+      "score": 2.91,
+      "subcaps_scored": 173
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-17",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:56.500340Z",
+    "created_at": "2026-07-02T23:09:56.500340Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "028e5d67-35d9-4dea-ae71-7bfc828a3b09",
+    "overall_score": null,
+    "request_id": "DMA-RES-ONED-20260417-0001",
+    "started_at": "2026-07-02T23:09:56.500340Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": null,
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.1,
+        "source": "Employee"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "🎯 Einstein POC underwhelming → 'trying other AI solutions' urgency — Claud notes Oct 22 2024 [E-298 F1]: 'Einstein AI demo underwhelming, we built free with OOB features' + 'people trying to find other solutions for AI' — Time-sensitive Einstein GPT/Trust Layer + Agentforce pitch before competitive AI vendor displaces Salesforce — Einstein Suite expansion ($2-5M ARR): Activity Capture + Conversation Insights + Pipeline Inspection + Einstein Service Agent + MCP/Data.",
+      "evidence": [
+        "E-298",
+        "E-012",
+        "E-022",
+        "E-029"
+      ],
+      "magnitude": "$2",
+      "name": "🎯 Einstein POC underwhelming → 'trying other AI solutions",
+      "peer_median": 3.1,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.97,
+      "so_what": "Prioritize 🎯 Einstein POC underwhelming → 'trying other AI solutions in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "🎯 Einstein POC underwhelming → 'trying other AI solutions",
+      "what": "🎯 Einstein POC underwhelming → 'trying other AI solutions' urgency — Claud notes Oct 22 2024 [E-298 F1]: 'Einstein AI demo underwhelming, we built free with OOB features' + 'people trying to find other solutions for AI' — Time-sensitive Einstein GPT/Trust Layer + Agentforce pitch before competitive AI vendor displaces Salesforce — Einstein Suite expansion",
+      "why": "The linked evidence records: CONFIRMED: OneDigital uses Salesforce as CRM platform. Breach via compromised Drift (chat agent) integration. Data breach: 28,414 individuals affected. Breach window Aug 12-18 2025. Detected Dec 22 2025. Notified clients ~April 8 2026."
+    },
+    {
+      "body": "🎯🎯 10 acquisitions/year + 300+ historical = M3-M4 M&A integration playbook at scale — Claud notes Mar 11 2025 [E-293 F1]: 'every acquisition requires data migration... 10 avg/year' + IB-4 OD#### folders (Bukaty 124 reports, Huntington 106, TFA 103, ARP 46) — Each acquisition = data-migration engagement + MDM extension.",
+      "evidence": [
+        "E-293",
+        "E-012"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "🎯🎯 10 acquisitions/year + 300+ historical = M3-M4 M&A",
+      "peer_median": 3.1,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.97,
+      "so_what": "🎯🎯 10 acquisitions/year + 300+ historical = M3-M4 M&A integration playbook at scale — Claud notes Mar 11 2025 [E-293 F1]: 'every acquisition requires data migration... 10 avg/year' +.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "🎯🎯 10 acquisitions/year + 300+ historical = M3-M4 M&A",
+      "what": "IB-4 OD#### folders (Bukaty 124 reports, Huntington 106, TFA 103, ARP 46) — Each acquisition = data-migration engagement + MDM extension.",
+      "why": "The linked evidence records: CONFIRMED: OneDigital uses Salesforce as CRM platform. Breach via compromised Drift (chat agent) integration. Data breach: 28,414 individuals affected. Breach window Aug 12-18 2025. Detected Dec 22 2025. Notified clients ~April 8 2026."
+    },
+    {
+      "body": "🚨 Post-Drift breach (Aug-Sep 2025) → Active Shield/Security Tools conversation — Salesforce Drift breach named OneDigital [E-237] + consultant notes Sept 9 2025 QBR 'drift incident - shield/security tools' [E-295] — Active $3-5M Data Cloud + Shield Platform Encryption + Privacy Center ARR opportunity with regulatory mandate urgency — Trusted Services: Shield PE + Security Center + Privacy Center + Event Monitoring — POST-BREACH MODERNIZATION.",
+      "evidence": [
+        "E-237",
+        "E-295",
+        "E-012"
+      ],
+      "magnitude": "$3",
+      "name": "🚨 Post-Drift breach",
+      "peer_median": 3.1,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.97,
+      "so_what": "Prioritize 🚨 Post-Drift breach in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "🚨 Post-Drift breach",
+      "what": "🚨 Post-Drift breach (Aug-Sep 2025) → Active Shield/Security Tools conversation — Salesforce Drift breach named OneDigital [E-237] + consultant notes Sept 9 2025 QBR 'drift incident - shield/security tools' [E-295] — Active $3-5M Data Cloud + Shield Platform Encryption + Privacy Center ARR opportunity with regulatory mandate urgency — Trusted Services: Shield",
+      "why": "The linked evidence records: CONFIRMED: OneDigital uses Salesforce as CRM platform. Breach via compromised Drift (chat agent) integration. Data breach: 28,414 individuals affected. Breach window Aug 12-18 2025. Detected Dec 22 2025. Notified clients ~April 8 2026."
+    },
+    {
+      "body": "🚨🚨 Data Governance CRITICAL: 1 of 12,191 fields classified (0.008%) — Hubbl field inventory [E-277]: 12,191 custom/standard fields, only ONE has complianceGroup tagged = M1-M2 classification readiness gap — Data Cloud + Privacy Center + Shield Field-Level Encryption is technical prerequisite for regulatory defensibility post-breach — Data Cloud + Privacy Center + field classification services + MDM uplift with Reltio integration.",
+      "evidence": [
+        "E-277",
+        "E-012",
+        "E-022",
+        "E-029"
+      ],
+      "magnitude": "0.008%",
+      "name": "🚨🚨 Data Governance CRITICAL",
+      "peer_median": 3.1,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.97,
+      "so_what": "Prioritize 🚨🚨 Data Governance CRITICAL in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "🚨🚨 Data Governance CRITICAL",
+      "what": "🚨🚨 Data Governance CRITICAL: 1 of 12,191 fields classified (0.008%) — Hubbl field inventory [E-277]: 12,191 custom/standard fields, only ONE has complianceGroup tagged = M1-M2 classification readiness gap — Data Cloud + Privacy Center + Shield Field-Level Encryption is technical prerequisite for regulatory defensibility post-breach — Data Cloud + Privacy",
+      "why": "The linked evidence records: CONFIRMED: OneDigital uses Salesforce as CRM platform. Breach via compromised Drift (chat agent) integration. Data breach: 28,414 individuals affected. Breach window Aug 12-18 2025. Detected Dec 22 2025. Notified clients ~April 8 2026."
+    },
+    {
+      "body": "🎯🎯 15,531 Well-Architected issues (9,700 P1, 56% low-effort) = $2.6-7.2M tractable services roadmap — Hubbl Diagnostics scan 2025-08-29 [E-286]: 62% P1 issues, Custom Code 7,926 + Data Model 3,988 + Reports 2,407 — 4-phase modernization: Quick wins ($200-400K) → Security ($400-800K) → Legacy ($1-3M) → Data Governance ($1-3M) — Managed Services + Copado DevOps expansion + Hubbl tooling recurring ARR + Einstein Discovery code review.",
+      "evidence": [
+        "E-286",
+        "E-012"
+      ],
+      "magnitude": "56%",
+      "name": "🎯🎯 15",
+      "peer_median": 3.1,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.97,
+      "so_what": "Prioritize 🎯🎯 15 in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "🎯🎯 15",
+      "what": "🎯🎯 15,531 Well-Architected issues (9,700 P1, 56% low-effort) = $2.6-7.2M tractable services roadmap — Hubbl Diagnostics scan 2025-08-29.",
+      "why": "The linked evidence records: CONFIRMED: OneDigital uses Salesforce as CRM platform. Breach via compromised Drift (chat agent) integration. Data breach: 28,414 individuals affected. Breach window Aug 12-18 2025. Detected Dec 22 2025. Notified clients ~April 8 2026."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.5,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-034"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Critic: no T1/T2 cap 2.5",
+        "cap applied: Evidence ceiling 3.0",
+        "66 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Producer/Advisor Channel Strategy averages 2.8/5 over 166 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Critic: no T1/T2 cap 2.5); band ±0.5 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-048"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Critic: no T1/T2 cap 2.5",
+        "cap applied: Evidence ceiling 3.0",
+        "30 of 216 subcaps on thin evidence"
+      ],
+      "rationale": "Producer Licensing Governance averages 3.3/5 over 216 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Critic: no T1/T2 cap 2.5); band ±0.4 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.3,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-067"
+      ],
+      "modifiers": [
+        "5 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Labs/Functions averages 3.3/5 over 190 scored subcaps; ceiling 4.3 reflects thin evidence density (185/190 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.4,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-089"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "35 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Methodology averages 3.4/5 over 205 scored subcaps; ceiling 4.3 reflects thin evidence density (170/205 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.5,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-120"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "116 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Producer Lead Distribution averages 3.1/5 over 287 scored subcaps; ceiling 3.9 reflects thin evidence density (171/287 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.5,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-132"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "115 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Policy Binding & Download averages 3.0/5 over 287 scored subcaps; ceiling 3.8 reflects thin evidence density (172/287 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-152"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "61 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "AI Claims Estimation averages 3.1/5 over 286 scored subcaps; ceiling 4.0 reflects thin evidence density (225/286 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.4,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-157"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "50 of 256 subcaps on thin evidence"
+      ],
+      "rationale": "Coverage Gap Analysis averages 3.2/5 over 256 scored subcaps; ceiling 4.2 reflects thin evidence density (206/256 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-172"
+      ],
+      "modifiers": [
+        "cap M3 applied: MATERIAL: PEO sprint 5/7 red flag (I-007) cap 3.0",
+        "5 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Commission Reconciliation averages 3.4/5 over 143 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: MATERIAL: PEO sprint 5/7 red flag (I-007) cap 3.0); band ±0.3 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.3,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-181"
+      ],
+      "modifiers": [
+        "12 of 132 subcaps on thin evidence"
+      ],
+      "rationale": "Premium Fraud Detection averages 3.4/5 over 132 scored subcaps; ceiling 4.3 reflects thin evidence density (120/132 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.3,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-186"
+      ],
+      "modifiers": [
+        "15 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "UDAAP Compliance averages 3.4/5 over 140 scored subcaps; ceiling 4.3 reflects thin evidence density (125/140 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.3,
+      "ceiling": 4.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-195"
+      ],
+      "modifiers": [
+        "5 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "DR Testing averages 3.4/5 over 145 scored subcaps; ceiling 4.4 reflects thin evidence density (140/145 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.4,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-206"
+      ],
+      "modifiers": [
+        "cap M2 applied: CRITICAL: 1/12,191 fields classified (I-003) cap 2.0",
+        "cap applied: Evidence ceiling 3.0",
+        "35 of 201 subcaps on thin evidence"
+      ],
+      "rationale": "Agencies & Brokerages: Carrier Relationship, Commission & Policy Data Normalization averages 3.2/5 over 201 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: CRITICAL: 1/12,191 fields classified (I-003) cap 2.0); band ±0.4 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-215"
+      ],
+      "modifiers": [
+        "cap M3 applied: MATERIAL: PB Dec 2025 deadline overdue (I-002) cap 3.0",
+        "20 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Sentiment Analysis & Voice of Customer averages 3.4/5 over 270 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: MATERIAL: PB Dec 2025 deadline overdue (I-002) cap 3.0); band ±0.3 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "cap applied: Differentiation adjustment −0.1",
+        "cap applied: Evidence ceiling 1.5",
+        "236 of 236 subcaps on thin evidence"
+      ],
+      "rationale": "Agencies & Brokerages: Agency Management System (AMS) Integration averages 2.9/5 over 236 scored subcaps; ceiling 3.4 reflects thin evidence density (0/236 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-012"
+      ],
+      "modifiers": [
+        "cap M2 applied: Breach <12mo → P4C4 cap 2.0 (Drift Aug-Sep 2025, I-001)",
+        "cap M2 applied: Breach <12mo → P4C4 cap 2.0 (Drift Aug-Sep 2025, I-001); Differentiation adjustment −0.1",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Privileged Access & Secret/Key Lifecycle Management averages 2.0/5 over 150 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Breach <12mo → P4C4 cap 2.0 (Drift Aug-Sep 2025, I-001)); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "WINGS ERG (Women's Initiative for Growth and Success) at OneDigital launched 2026 IWD 'Give to Gain' T-shirt initiative with 'portion of the proceeds will support Nerdy Girl Success because when we lift each other, we all rise' (per LinkedIn Mar 8 2026) (Mar 2026).",
+      "evidence": [
+        "E-110"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Wings ERG (Women's Initiative for Growth and Success) at…",
+      "metric": null,
+      "peer_context": "Privileged Access & Secret/Key Lifecycle Management runs 1.97/5 vs a 3.10 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Producer/Advisor Channel Strategy — highest-fit surface at 58/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "WINGS ERG (Women's Initiative for Growth and Success) at OneDigital launched 2026 IWD 'Give to Gain' T-shirt initiative with 'portion of the proceeds will support Nerdy Girl Success because when we lift each other, we. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-08",
+        "event": "Wings ERG (Women's Initiative for Growth and Success) at…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "PATH FORWARD PEP SUITE LAUNCH (P2C4.5.1 + P2C4.5.3) — 401k Specialist Mar 2026: 'Ascensus today announced it is launching TWO NEW POOLED EMPLOYER PLANS (PEPs) in collaboration with OneDigital.",
+      "evidence": [
+        "E-158"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "PATH Forward PEP Suite Launch (P2C4.5.1 + P2C4.5.3) — 401k…",
+      "metric": null,
+      "peer_context": "Privileged Access & Secret/Key Lifecycle Management runs 1.97/5 vs a 3.10 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Producer/Advisor Channel Strategy — highest-fit surface at 58/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "PATH FORWARD PEP SUITE LAUNCH (P2C4.5.1 + P2C4.5.3) — 401k Specialist Mar 2026: 'Ascensus today announced it is launching TWO NEW POOLED EMPLOYER PLANS (PEPs) in collaboration with OneDigital. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "PATH Forward PEP Suite Launch (P2C4.5.1 + P2C4.5.3) — 401k…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "PRESIDENT'S CLUB ACHIEVERS (P2C4.7.1 + P2C4.7.2) — LinkedIn March 2026: 'Join us in celebrating OneDigital's 2025 PRESIDENT'S CLUB ACHIEVERS. At #OneDigitalSummit26, we had the opportunity to recognize our President's Club Achievers; an EXCEPTIONAL GROUP OF LEADERS WHOSE IMPACT, INNOVATION...' (Mar 2026).",
+      "evidence": [
+        "E-162"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "PRESIDENT'S CLUB Achievers (P2C4.7.1 + P2C4.7.2) — LinkedIn…",
+      "metric": null,
+      "peer_context": "Privileged Access & Secret/Key Lifecycle Management runs 1.97/5 vs a 3.10 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "PRESIDENT'S CLUB ACHIEVERS (P2C4.7.1 + P2C4.7.2) — LinkedIn March 2026: 'Join us in celebrating OneDigital's 2025 PRESIDENT'S CLUB ACHIEVERS. Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "PRESIDENT'S CLUB Achievers (P2C4.7.1 + P2C4.7.2) — LinkedIn…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "OneDigital operates in all 50 US states + Canada (post-PWL Capital acquisition) with ~4,671 employees many of whom are licensed producers — absence of publicly reported state-regulator enforcement actions against… (Jul 2026).",
+      "evidence": [
+        "E-053"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "OneDigital operates Canada (post-PWL Capital acquisition)",
+      "metric": "employees 4,671 employees",
+      "peer_context": "Privileged Access & Secret/Key Lifecycle Management runs 1.97/5 vs a 3.10 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "OneDigital operates in all 50 US states + Canada (post-PWL Capital acquisition) with ~4,671 employees many of whom are licensed producers — absence of publicly reported state-regulator enforcement actions against… (Jul. Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-07-02",
+        "event": "Clean regulatory standing"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "🎯 RPA/INTELLIGENT AUTOMATION GOVERNANCE FRAMEWORK (P3C1.6.1 + P3C1.1.2) — OneDigital AI Coworkers explicit governance model (Jan 28 2026 disclosure): 'Hiring, Training, and Managing AI Like Employees: Vinay walks through OneDigital's INTERN-TO-APPRENTICE MODEL FOR AI, including JOB DESCRIPTIONS",
+      "evidence": [
+        "E-177"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Vinay walks through OneDigital's INTERN-TO-APPRENTICE Model",
+      "metric": null,
+      "peer_context": "Privileged Access & Secret/Key Lifecycle Management runs 1.97/5 vs a 3.10 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "🎯 RPA/INTELLIGENT AUTOMATION GOVERNANCE FRAMEWORK (P3C1.6.1 + P3C1.1.2) — OneDigital AI Coworkers explicit governance model (Jan 28 2026 disclosure): 'Hiring, Training, and Managing AI Like Employees: Vinay walks through. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Privileged Access & Secret/Key Lifecycle Management scores 1.97/5 vs a typical 3.10 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-012"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Privileged Access & Secret/Key Lifecycle Management scores…",
+      "metric": "Privileged Access & Secret/Key Lifecycle Management 1.97/5 vs peer 3.10",
+      "peer_context": "Privileged Access & Secret/Key Lifecycle Management runs 1.97/5 vs a 3.10 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Producer/Advisor Channel Strategy — highest-fit surface at 58/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C4",
+      "text": "Privileged Access & Secret/Key Lifecycle Management scores 1.97/5 vs a typical 3.10 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

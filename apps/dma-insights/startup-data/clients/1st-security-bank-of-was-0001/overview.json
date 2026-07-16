@@ -1,0 +1,1325 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 135
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 199
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 88
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 143
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "1st-security-bank-of-was-0001",
+    "domain": null,
+    "hq": null,
+    "id": "7dcc9ab5-f9a7-4db9-afc5-31408375bb5a",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "1st Security Bank of Washington",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:48.031955Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 7,
+    "current_count": 56,
+    "dated_count": 1,
+    "median_age_months": 10.2,
+    "oldest_published_date": "2019-07-01",
+    "stale_count": 5,
+    "stale_pct": 7.25,
+    "total": 69,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "NEGATIVE": 5,
+      "NEUTRAL": 17,
+      "POSITIVE": 47
+    },
+    "connectors": {
+      "Clay": 6,
+      "Explorium": 15,
+      "Glassdoor": 2,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 54,
+      "POSITIVE": 13
+    },
+    "tiers": {
+      "T1": 17,
+      "T2": 21,
+      "T3": 22,
+      "T5": 9
+    },
+    "total_facts": 454,
+    "total_items": 69
+  },
+  "financial_trajectory": {
+    "cagr": "8.8%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2021,
+      2025
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        2.29,
+        3.21
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 3208825000.0,
+    "branches": "27",
+    "cagr": "8.9%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "433",
+    "financial_highlights": {
+      "lines": [
+        "1st Security Bank has demonstrated consistent growth driven by organic lending expansion and strategic acquisitions. Total assets grew from $2.286B in 2021 to $3.209B in 2025, representing a four-year CAGR of approximately 8.9% [E-015]. Key financial health indicators remain strong: NIM of 4.3%, NPL ratio of 0.7%, loans-to-assets of 82%, and ROE of 11.8% (FY2024) [E-005, E-002]. The Board has paid 52 consecutive quarterly dividends, most recently increasing to $0.29/share [E-003]. Free cash flow was $49.2M in FY2024 [E-002]. Trend classification: STABLE with upward trajectory."
+      ],
+      "net_income": 36100000.0,
+      "nim": 0.043,
+      "roe": 0.118,
+      "series": {
+        "2021": 2286000000.0,
+        "2025": 3209000000.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "tier1_leverage": 0.112,
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 433,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Matt Mullet named CEO"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2025"
+        ],
+        "geography": "WA/OR (Olympia HQ)",
+        "headline": "$3.2B assets · FY2025 · +8.8% CAGR",
+        "regulator": "Washington State DFI",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            2.29,
+            3.21
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "WA/OR (Olympia HQ)",
+    "footprint_basis": "derived:geography",
+    "founded": 1936,
+    "geography": "WA/OR (Olympia HQ)",
+    "headcount": 433,
+    "hq": "6920 220th St SW, Suite 300, Mountlake Terrace, WA 98043",
+    "hq_address": "6920 220th St SW, Suite 300, Mountlake Terrace, WA 98043",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Joe Adams (retiring May 2026)",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO (HoldCo)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Matthew D. Mullet",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO/President (Bank)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Shana Allen",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Erin M. Burr",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO & CRA Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "May-Ling Sowell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Phillip Whittington",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kelli Nielsen",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Retail Banking & Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Brooke Allan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Digital Products & Services"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jody Serl",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP/Digital Experience Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Justin Gordon",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "InfoSec Manager AVP"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "1st Security Bank of Washington",
+    "license_type": "State-chartered institution",
+    "narrative_md": "1st Security Bank of Washington is a relationship-focused community bank headquartered in Mountlake Terrace, Washington. It is the wholly-owned subsidiary of FS Bancorp, Inc. (NASDAQ: FSBW), a Washington corporation organized in September 2011 [E-002]. The Bank was originally founded in 1936 as Washington's Credit Union and converted from a mutual to stock savings bank on July 9, 2012 [E-001]. It is regulated by the Washington State Department of Financial Institutions (primary) and the Federal Deposit Insurance Corporation (FDIC Certificate #57633) [E-001, E-002].",
+    "primary_regulator": "Washington State DFI",
+    "revenue_usd": null,
+    "sentiment": {
+      "sources": [
+        {
+          "signal": "3.8",
+          "source": "Glassdoor Rating"
+        },
+        {
+          "signal": "59",
+          "source": "Glassdoor Reviews"
+        },
+        {
+          "signal": "79%",
+          "source": "Glassdoor Recommend"
+        },
+        {
+          "signal": "4.4",
+          "source": "Glassdoor Culture Values"
+        },
+        {
+          "signal": "4.2",
+          "source": "Glassdoor Work Life Balance"
+        },
+        {
+          "signal": "3.4",
+          "source": "Glassdoor Career Opportunities"
+        },
+        {
+          "source": "Glassdoor Key Themes Positive",
+          "themes": "culture; benefits; coworkers; community focus"
+        },
+        {
+          "source": "Glassdoor Key Themes Negative",
+          "themes": "technology needs updating; pay below competitors; departments are silos; growth strategy unclear"
+        },
+        {
+          "signal": "Management positive and supportive, team oriented",
+          "source": "Indeed Positive"
+        },
+        {
+          "signal": "False",
+          "source": "Bbb Accredited"
+        },
+        {
+          "signal": "Failure to respond to 2 complaints",
+          "source": "Bbb Complaint Note"
+        },
+        {
+          "signal": "New app launched (app ID: 6740878062)",
+          "source": "App Ios"
+        },
+        {
+          "signal": "Mixed reviews post-migration (linked accounts dropped, lockout issues)",
+          "source": "App Google Play"
+        },
+        {
+          "signal": "A",
+          "source": "Depositaccounts Health Rating"
+        },
+        {
+          "signal": "6th largest bank in Washington",
+          "source": "Depositaccounts State Rank"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Active LinkedIn presence with community banking themed posts (#CommunityBank, #WomenLeaders, #BusinessBanking) Promoting CD specials, referral programs ($50 bonus), and Customer Appreciation Week",
+        "title": "Active LinkedIn presence with community banking themed posts…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/1st-security-bank-of-washington"
+      }
+    ],
+    "ticker": null,
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "https://www.fsbwa.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.570184+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# 1st Security Bank of Washington — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — 1st Security Bank of Washington",
+    "scqa_md": "1st Security Bank of Washington is a $3.2B in assets regional bank regulated by Washington State DFI, operating since 1936 with 433 employees. A 8.9% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-005, E-002]. Zennify's assessment places overall digital maturity at 2.3/5. The deepest capability gap is Data Warehouse & Data Lake at 1.6/5 against a 2.5 peer median [E-049, E-068].\n\nNext is End-to-End Data Lineage at 1.6/5 against a 2.2 peer median [E-059]. Third is Value Proposition Clarity at 1.6/5 against a 3.0 peer median [E-032, E-043]. The issue register adds Capability gap: Enterprise Data Catalog & Discovery (high severity). The issue register adds Capability gap: End-to-End Data Lineage (high severity).\n\nCounter-signal: Steering Committee already runs at 3.9/5 against a 3.0 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below. The question for 1st Security Bank of Washington is whether to close Data Warehouse & Data Lake first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. 1st Security Bank of Washington should lead with Tableau (52/100 fit) against Enterprise Data Catalog & Discovery, then sequence nCino behind it.\n\nClosing Data Warehouse & Data Lake to the peer median alone is worth 0.9 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.27,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/corrections_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:47.996178+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/diagnostic_questions_P1P2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.000383+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/diagnostic_questions_P3P4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.001881+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/fit_gates.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.002439+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.003443+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/phase7_revalidation_findings.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.003957+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/proxy_validation_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.004270+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sentiment_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.004506+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.005713+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.006041+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.006598+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/cap_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.006976+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.007386+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A3_Tier_Distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.007916+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A4_ERS_Distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 64 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.008761+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_Coverage_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.009154+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Capability_Coverage_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.40); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.009662+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.011773+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/cross_pillar_unlocks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.012161+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/deal_architecture.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.012444+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/gap_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.013122+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/gap_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.013487+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/parameter_lock.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.013651+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.014251+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores_v2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.015026+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/zennify_solution_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.015863+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "package_manifest.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:48.016102+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 42
+    },
+    "stage_ms": {
+      "manifest": 25,
+      "parse": 3500,
+      "persist": 483
+    },
+    "structured": [
+      {
+        "code": "run_id format",
+        "detail": "run_id format: unrecognized run_id format: 'DMA-ASM-1SB-20260317-0001'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +698 subcap names +0 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 5 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. 'Verafin or Fiserv FCRM — both pre-integrated with Fiserv DNA via DNAappstore')",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator', 'ticker', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_1st_Security_Bank_20260317.docx count=10",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=11 subcaps=9 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 14 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 15 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 4 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/corrections_register.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/diagnostic_questions_P1P2.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/diagnostic_questions_P3P4.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/fit_gates.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/phase7_revalidation_findings.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/proxy_validation_log.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sentiment_summary.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/cap_register.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A3_Tier_Distribution.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A4_ERS_Distribution.csv — no fingerprint matched (best confidence 0.20); 64 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_Coverage_Map.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Capability_Coverage_Map.csv — no fingerprint matched (best confidence 0.40); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/critic_log.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/cross_pillar_unlocks.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/deal_architecture.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/gap_analysis.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/gap_register.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/parameter_lock.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores_v2.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/zennify_solution_map.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "package_manifest.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 18",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "run_id format: unrecognized run_id format: 'DMA-ASM-1SB-20260317-0001'",
+      "xlsx_name_enrichment: +698 subcap names +0 rationales merged from workbook into CSV-parsed rows",
+      "governance_audit_logs: reasoning_chain=0 contradictions=1",
+      "caps_applied_log: 5 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. 'Verafin or Fiserv FCRM — both pre-integrated with Fiserv DNA via DNAappstore')",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator', 'ticker', 'website'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_1st_Security_Bank_20260317.docx count=10",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=11 subcaps=9 replaced_docx_scqa=True",
+      "tech_stack_from_report_prose: 14 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 15 sources",
+      "insights_derived_from_category_gaps: 4",
+      "acquisitions_from_client_profile_docx: 4 events",
+      "INFO/pattern_gap: 01_evidence/corrections_register.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/diagnostic_questions_P1P2.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/diagnostic_questions_P3P4.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/fit_gates.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/phase7_revalidation_findings.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/proxy_validation_log.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sentiment_summary.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 04_reports/report_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/cap_register.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A3_Tier_Distribution.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A4_ERS_Distribution.csv — no fingerprint matched (best confidence 0.20); 64 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_Coverage_Map.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Capability_Coverage_Map.csv — no fingerprint matched (best confidence 0.40); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/critic_log.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/cross_pillar_unlocks.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/deal_architecture.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/gap_analysis.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/gap_register.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/parameter_lock.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores_v2.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/zennify_solution_map.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: package_manifest.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "timeline_events_persisted: 18",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.89,
+      "pillar_id": "P1",
+      "score": 2.8,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.89,
+      "pillar_id": "P2",
+      "score": 1.87,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.87,
+      "pillar_id": "P3",
+      "score": 2.4,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.62,
+      "pillar_id": "P4",
+      "score": 2.03,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": null,
+    "assessment_date_source": null,
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:48.031955Z",
+    "created_at": "2026-07-02T23:10:48.031955Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "cdf7d648-12ac-453d-9cce-63dcc5f98f3e",
+    "overall_score": null,
+    "request_id": "DMA-ASM-1SB-20260317-0001",
+    "started_at": "2026-07-02T23:10:48.031955Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Unify the 6 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-032",
+        "E-043",
+        "E-056",
+        "E-065"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.6,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 6 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Active LinkedIn presence with community banking themed posts (#CommunityBank, #WomenLeaders, #BusinessBanking) Promoting CD specials, referral programs ($50 bonus), and Customer Appreciation Week"
+    },
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 15 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-004",
+        "E-012",
+        "E-020",
+        "E-021"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 2.75,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 2.03,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 15 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: Merger with Pacific West Bancorp announced Feb 25, 2026, $34.6M deal, expected Q3 2026 close Pro forma: $3.6B assets, $3.0B loans, $3.0B deposits, 31 branches"
+    },
+    {
+      "body": "Treat the 3 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "evidence": [
+        "E-049",
+        "E-059",
+        "E-065",
+        "E-068"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Build the data foundation",
+      "peer_median": 2.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.58,
+      "so_what": "Prioritize Build the data foundation in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Build the data foundation",
+      "what": "Treat the 3 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "why": "The linked evidence records: BI/Analytics: Adobe Analytics, Google Analytics, Matomo, LogRocket (session replay), New Relic (APM), Highcharts (data viz) No dedicated data governance, MDM, or data catalog tools detected (no Collibra, Informatica, Alation)"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE: 3.5→3.0",
+        "cap applied: CRITIC_CHALLENGE: 4.0→3.0",
+        "120 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Strategy Document averages 2.9/5 over 165 scored subcaps; ceiling 3.5 reflects thin evidence density (45/165 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-017"
+      ],
+      "modifiers": [
+        "cap applied: Ceiling enforcement 4.0",
+        "172 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Steering Committee averages 3.9/5 over 217 scored subcaps; ceiling 4.5 reflects thin evidence density (45/217 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T2) cap 2.5 (CAP-EV-003)",
+        "175 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Pilot & Experimentation averages 2.0/5 over 190 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T2) cap 2.5 (CAP-EV-003)); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-041"
+      ],
+      "modifiers": [
+        "155 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Management Framework averages 2.7/5 over 205 scored subcaps; ceiling 3.3 reflects thin evidence density (50/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap M2 applied: NO_EVIDENCE cap 2.0",
+        "cap M2 applied: T5-only cap 2.0 (CAP-EV-001)",
+        "45 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Climate Scenario Analysis averages 1.7/5 over 70 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: NO_EVIDENCE cap 2.0); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-043"
+      ],
+      "modifiers": [
+        "cap M2 applied: NO_EVIDENCE cap 2.0",
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)",
+        "257 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Value Proposition Clarity averages 1.6/5 over 287 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: NO_EVIDENCE cap 2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-020"
+      ],
+      "modifiers": [
+        "cap M2 applied: T5-only cap 2.0 (CAP-EV-001); Single source cap 3.0 (CAP-EV-002)",
+        "242 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Exception Handling & Review Queues averages 2.2/5 over 287 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: T5-only cap 2.0 (CAP-EV-001); Single source cap 3.0 (CAP-EV-002)); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "cap M4 applied: Mobile migration minor cap 4.0 (CAP-APP-001)",
+        "241 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Partner/Ecosystem Integration averages 2.1/5 over 286 scored subcaps; ceiling 2.6 reflects the binding cap (cap M4 applied: Mobile migration minor cap 4.0 (CAP-APP-001)); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [
+        "cap M2 applied: NO_EVIDENCE cap 2.0",
+        "cap M2.5 applied: Single tier-type (T2) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)",
+        "235 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "External Data Integration averages 1.6/5 over 255 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: NO_EVIDENCE cap 2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "cap M2 applied: T5-only cap 2.0 (CAP-EV-001); Single source cap 3.0 (CAP-EV-002)",
+        "108 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Transaction Processing Automation averages 2.0/5 over 143 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: T5-only cap 2.0 (CAP-EV-001); Single source cap 3.0 (CAP-EV-002)); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T1) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)",
+        "100 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Threat Intelligence averages 2.4/5 over 130 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T1) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.6,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "111 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Change Management averages 3.0/5 over 141 scored subcaps; ceiling 3.6 reflects thin evidence density (30/141 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "cap M2 applied: NO_EVIDENCE cap 2.0",
+        "105 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "RTO/RPO Achievement averages 2.3/5 over 145 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: NO_EVIDENCE cap 2.0); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-049"
+      ],
+      "modifiers": [
+        "cap M2 applied: NO_EVIDENCE cap 2.0",
+        "cap M2.5 applied: Single tier-type (T1) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)",
+        "180 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "End-to-End Data Lineage averages 1.6/5 over 200 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: NO_EVIDENCE cap 2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-049"
+      ],
+      "modifiers": [
+        "cap M2 applied: NO_EVIDENCE cap 2.0",
+        "230 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Data Warehouse & Data Lake averages 1.6/5 over 270 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: NO_EVIDENCE cap 2.0); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-038"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE: 3.5→3.0",
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)",
+        "195 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "CI/CD Pipeline & Automation averages 2.5/5 over 235 scored subcaps; ceiling 2.5 reflects the binding cap (cap applied: CRITIC_CHALLENGE: 3.5→3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-039"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)",
+        "110 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Privileged Access & Secret/Key Lifecycle Management averages 2.7/5 over 150 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5 (CAP-EV-003); Single source cap 3.0 (CAP-EV-002)); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Merger with Pacific West Bancorp announced Feb 25, 2026, $34.6M deal, expected Q3 2026 close (Feb 2026).",
+      "evidence": [
+        "E-004"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Merger with Pacific West Bancorp announced",
+      "metric": "Bancorp announced Feb $34.6M",
+      "peer_context": "Data Warehouse & Data Lake runs 1.56/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 52/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Merger with Pacific West Bancorp announced Feb 25, 2026, $34.6M deal, expected Q3 2026 close (Feb 2026). Window: closes Q1 2026.",
+      "timeline": {
+        "date": "2026-02-25",
+        "event": "Merger with Pacific West Bancorp announced"
+      },
+      "window": "closes Q1 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "VP Marketing (Camberly G.) hired Dec 2025 - new marketing…. VP Marketing (Camberly G.) hired Dec 2025 - new marketing leadership",
+      "evidence": [
+        "E-029"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "VP Marketing (Camberly G.) hired Dec 2025 - new marketing",
+      "metric": null,
+      "peer_context": "Data Warehouse & Data Lake runs 1.56/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "VP Marketing (Camberly G.) hired Dec 2025 - new marketing…. VP Marketing (Camberly G.) hired Dec 2025 - new marketing leadership. Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-12-01",
+        "event": "VP Marketing (Camberly G.) hired Dec 2025 - new marketing…"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Matt Mullet named CEO. Matt Mullet named CEO effective Sept 2025; Joe Adams retiring (Sep 2025).",
+      "evidence": [
+        "E-007"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Matt Mullet named CEO",
+      "metric": null,
+      "peer_context": "Data Warehouse & Data Lake runs 1.56/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Matt Mullet named CEO. Matt Mullet named CEO effective Sept 2025; Joe Adams retiring (Sep 2025). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2025-09-01",
+        "event": "Matt Mullet named CEO"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "NO outages or security breaches detected in event scan (Jan 2024-Mar 2026) — clean operational record NO engineering department hiring events detected — confirms 0% engineering workforce composition",
+      "evidence": [
+        "E-045"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "NO outages or security breaches detected in event scan",
+      "metric": "events detected confirms 0%",
+      "peer_context": "Data Warehouse & Data Lake runs 1.56/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "NO outages or security breaches detected in event scan (Jan 2024-Mar 2026) — clean operational record NO engineering department hiring events detected — confirms 0% engineering workforce composition. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Data Warehouse & Data Lake scores 1.56/5 vs a typical 2.50 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-049",
+        "E-068",
+        "E-041",
+        "E-065"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Data Warehouse & Data Lake scores 1.56/5",
+      "metric": "Data Warehouse & Data Lake 1.56/5 vs peer 2.50",
+      "peer_context": "Data Warehouse & Data Lake runs 1.56/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 52/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C2",
+      "text": "Data Warehouse & Data Lake scores 1.56/5 vs a typical 2.50 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ],
+  "data_quality": {
+    "source_misattribution": "A",
+    "misattribution_markers": {
+      "foreign_tickers": [
+        "FSBW"
+      ],
+      "foreign_runid_tokens": [
+        "1SB"
+      ],
+      "foreign_entities": [
+        "Pacific West"
+      ]
+    }
+  }
+}

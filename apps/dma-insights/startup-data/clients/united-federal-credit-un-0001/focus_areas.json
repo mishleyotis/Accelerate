@@ -1,0 +1,422 @@
+{
+  "entity_display_id": "united-federal-credit-un-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-046",
+          "E-047",
+          "E-035",
+          "E-049",
+          "E-037",
+          "E-042"
+        ],
+        "representative_quote": "AI governance is in place; activation surface is missing (\u2192OBJ-2, HIGH)",
+        "source_kind": "docx"
+      },
+      "id": "63dee548-95ef-47bd-9e46-eaa04ebc6e9a",
+      "involved_subcap_ids": [
+        "P4C2.1.2",
+        "P4C2.1.1",
+        "P3C2.7.3",
+        "P3C2.7.4",
+        "P3C2.7.2",
+        "P3C2.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$4,800,000",
+          "delta": null,
+          "kpi_label": "Q2 platform stopped",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 67,
+        "P4": 33
+      },
+      "source_path": "Newly-created Director of AI & Data Science + AI Council govern model risk; Copilot/ChatGPT approved; predictive models already triple conversion on a mature Qlik/Snowflake foundation \u2014 but model outputs are manually exported into the CRM/marketing layer [E-046, E-047, E-035, E-049, E-037, E-042]",
+      "title": "Activation surface is missing",
+      "verbatim_quote": "F-002 | AI governance is in place; activation surface is missing (\u2192OBJ-2, HIGH) | Newly-created Director of AI & Data Science + AI Council govern model risk; Copilot/ChatGPT approved; predictive models already triple conversion on a mature Qlik/Snowflake foundation \u2014 but model outputs are manually exported into the CRM/marketing layer [E-046, E-047, E-035, E-049, E-037, E-042] | UFCU has the data and governance for AI but no production surface to put models into the flow of work | Salesforce Einstein + Agentforce, governed by the existing AI Council \u2014 Gives the AI Council an auditable production surface for next-best-action and agentic service on top of Snowflake (zero-copy via Data Cloud)"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-072",
+          "E-075",
+          "E-051"
+        ],
+        "representative_quote": "CRM system-of-record is ambiguous \u2014 the highest-value discovery item (\u2192OBJ-1, MEDIUM)",
+        "source_kind": "docx"
+      },
+      "id": "b5791922-4cea-4cc6-8066-df82684c7176",
+      "involved_subcap_ids": [
+        "P4C3.7.3",
+        "P4C3.7.1",
+        "P4C3.7.2",
+        "P2C1.4.2",
+        "P2C1.4.1",
+        "P2C1.4.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P4": 50
+      },
+      "source_path": "Conflicting public signals: ex-Head of Emerging Tech managed 'Salesforce (CRM)' 2020-22 and CMO led 'CRM implementations' (plural), vs current 2026 engineer postings preferring 'MS Dynamics familiarity' [E-072, E-075, E-051]",
+      "title": "CRM system-of-record the highest-value discovery item\u2026",
+      "verbatim_quote": "F-005 | CRM system-of-record is ambiguous \u2014 the highest-value discovery item (\u2192OBJ-1, MEDIUM) | Conflicting public signals: ex-Head of Emerging Tech managed 'Salesforce (CRM)' 2020-22 and CMO led 'CRM implementations' (plural), vs current 2026 engineer postings preferring 'MS Dynamics familiarity' [E-072, E-075, E-051] | Determines whether this is pure Salesforce land-and-expand or a layer-above/consolidation play | Confirm CRM system of record in discovery \u2014 If Salesforce \u2192 expand FSC+Data Cloud+Marketing Cloud (Zennify sweet spot); if Dynamics \u2192 position Salesforce data/engagement layer above it for member-360 unification"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-022",
+          "E-070",
+          "E-079",
+          "E-086",
+          "E-044",
+          "E-075"
+        ],
+        "representative_quote": "Commercial/SBA growth cornerstone outpaces relationship infrastructure (\u2192OBJ-1, HIGH)",
+        "source_kind": "docx"
+      },
+      "id": "1ddb035f-0863-4aae-a6a7-61e4d730d5ab",
+      "involved_subcap_ids": [
+        "P3C4.2.4",
+        "P3C4.2.3",
+        "P3C4.2.2",
+        "P3C4.2.1",
+        "P4C3.4.9",
+        "P4C3.4.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "$25,000,000",
+          "delta": null,
+          "kpi_label": "SBA Preferred Lender",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 67,
+        "P4": 33
+      },
+      "source_path": "Commercial & SBA lending named the growth cornerstone \u2014 CCO\u2192SLT (Jul 2025), EVP CCO (Nov 2024), SBA Preferred Lender, ~$25M Battle Creek deal, full treasury suite \u2014 yet no publicly-named CRM-based commercial relationship/opportunity management or unified business-member view [E-022, E-070, E-079, E-086, E-044, E-075]",
+      "title": "Commercial/SBA growth cornerstone outpaces relationship\u2026",
+      "verbatim_quote": "F-001 | Commercial/SBA growth cornerstone outpaces relationship infrastructure (\u2192OBJ-1, HIGH) | Commercial & SBA lending named the growth cornerstone \u2014 CCO\u2192SLT (Jul 2025), EVP CCO (Nov 2024), SBA Preferred Lender, ~$25M Battle Creek deal, full treasury suite \u2014 yet no publicly-named CRM-based commercial relationship/opportunity management or unified business-member view [E-022, E-070, E-079, E-086, E-044, E-075] | Business-member experience depends on manual coordination; ambition exceeds the system of record to scale it | Salesforce Financial Services Cloud (commercial/business banking) + Data Cloud business-member 360 \u2014 Directly operationalizes the stated 'elevate the business-member experience and drive personalized engagement' mandate, layered above core/treasury (non-displacing)"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-059",
+          "E-032",
+          "E-084"
+        ],
+        "representative_quote": "Consumer-protection history signals demand for proactive, transparent engagement (\u2192OBJ-3, MEDIUM)",
+        "source_kind": "docx"
+      },
+      "id": "20e1d649-daf4-4b3b-a39e-e18e8d208181",
+      "involved_subcap_ids": [
+        "P2C4.3.CU1",
+        "P2C4.3.4",
+        "P2C4.3.3",
+        "P2C4.3.1",
+        "P2C4.3.5",
+        "P2C4.3.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$1,750,000",
+          "delta": null,
+          "kpi_label": "engagement OBJ-3 MEDIUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "$1.75M overdraft-fee class action settled (Gunter v. UFCU; 2010\u20132018 practices; settled with denial of wrongdoing); mixed fee/service sentiment [E-059, E-032, E-084]",
+      "title": "Consumer-protection history signals demand for proactive\u2026",
+      "verbatim_quote": "F-010 | Consumer-protection history signals demand for proactive, transparent engagement (\u2192OBJ-3, MEDIUM) | $1.75M overdraft-fee class action settled (Gunter v. UFCU; 2010\u20132018 practices; settled with denial of wrongdoing); mixed fee/service sentiment [E-059, E-032, E-084] | Reputational sensitivity around fees/communication; proactive transparent engagement is a risk mitigant | Marketing Cloud proactive comms + Service Cloud transparency \u2014 Converts a historical liability into a proactive-engagement differentiator (factual settlement disclosure only; no projections)"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-034",
+          "E-047",
+          "E-048",
+          "E-049",
+          "E-057",
+          "E-037"
+        ],
+        "representative_quote": "Data/analytics leadership means the wedge is activation, not capability (\u2192OBJ-2, HIGH)",
+        "source_kind": "docx"
+      },
+      "id": "3d8b8489-ed7e-44bd-b3a9-17b6826f1565",
+      "involved_subcap_ids": [
+        "P4C3.4.5",
+        "P4C3.5.6",
+        "P4C3.6.4",
+        "P4C3.5.9",
+        "P4C4.5.4",
+        "P4C4.4.2",
+        "P4C4.5.4",
+        "P4C4.5.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "2x",
+          "delta": null,
+          "kpi_label": "VP Enterprise Analytics",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Qlik Replicate CDC + Qlik Sense/Cloud + Snowflake + Azure hybrid; VP Enterprise Analytics (2x Qlik Luminary) with data-governance + data-literacy programs; RPA 35,000 hrs saved \u2014 but analytics outputs are manually exported into CRM [E-034, E-047, E-048, E-049, E-057, E-037, E-042]",
+      "title": "Data/analytics leadership means",
+      "verbatim_quote": "F-004 | Data/analytics leadership means the wedge is activation, not capability (\u2192OBJ-2, HIGH) | Qlik Replicate CDC + Qlik Sense/Cloud + Snowflake + Azure hybrid; VP Enterprise Analytics (2x Qlik Luminary) with data-governance + data-literacy programs; RPA 35,000 hrs saved \u2014 but analytics outputs are manually exported into CRM [E-034, E-047, E-048, E-049, E-057, E-037, E-042] | The hard part (clean, governed, real-time data) is done; the missing layer is turning it into orchestrated member action | Salesforce Data Cloud (zero-copy on Snowflake) as the activation layer \u2014 Non-displacing; sits above the existing Microsoft/Snowflake estate and makes governed data actionable in journeys, service, and AI"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-077",
+          "E-078",
+          "E-081",
+          "E-080"
+        ],
+        "representative_quote": "M&A and multi-state expansion raise the bar for a unified member system of record (\u2192OBJ-4, HIGH)",
+        "source_kind": "docx"
+      },
+      "id": "b1b3ba64-14c4-49d1-909b-e948f988c06e",
+      "involved_subcap_ids": [
+        "P1C1.8.4",
+        "P1C1.8.2",
+        "P1C1.8.1",
+        "P1C1.8.3",
+        "P1C4.10.1",
+        "P1C4.10.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "190,227",
+          "delta": null,
+          "kpi_label": "Members",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "44",
+          "delta": null,
+          "kpi_label": "Offices",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "Edgewater Bank (2021), GOLD CU/PA (Spring 2024, ~10K members), active NV/NC/AR/PA expansion \u2192 44 offices/7 states/190,227 members; DR-in-practice post-Helene [E-077, E-078, E-081, E-080]",
+      "title": "M&A and multi-state expansion raise the bar",
+      "verbatim_quote": "F-007 | M&A and multi-state expansion raise the bar for a unified member system of record (\u2192OBJ-4, HIGH) | Edgewater Bank (2021), GOLD CU/PA (Spring 2024, ~10K members), active NV/NC/AR/PA expansion \u2192 44 offices/7 states/190,227 members; DR-in-practice post-Helene [E-077, E-078, E-081, E-080] | Each integration multiplies the cost of a fragmented member view; data unification becomes a growth enabler | Data Cloud + FSC as the post-merger member system of record \u2014 One golden member profile accelerates integration value capture; peers DFCU/Advia are also bank-acquirers (competitive parity)"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-041",
+          "E-074",
+          "E-044",
+          "E-083",
+          "E-084"
+        ],
+        "representative_quote": "No unified agent desktop / case management \u2014 a service-experience gap (\u2192OBJ-3, MEDIUM)",
+        "source_kind": "docx"
+      },
+      "id": "442e30b0-d6fc-4b5b-a53e-b73cfd929b29",
+      "involved_subcap_ids": [
+        "P2C3.6.4",
+        "P2C3.6.3",
+        "P2C3.6.1",
+        "P2C3.6.7",
+        "P2C3.6.2",
+        "P2C3.6.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "51%",
+          "delta": null,
+          "kpi_label": "Finn AI/Glia Mya'",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "Live chat on LivePerson with Finn AI/Glia 'Mya' (51% containment); no publicly-named CRM-based unified agent desktop or case management; service sentiment mixed (WalletHub 3.0 / Trustpilot 2.9) vs strong app (4.7/4.6) [E-041, E-074, E-044, E-083, E-084]",
+      "title": "No unified agent desktop / case management",
+      "verbatim_quote": "F-006 | No unified agent desktop / case management \u2014 a service-experience gap (\u2192OBJ-3, MEDIUM) | Live chat on LivePerson with Finn AI/Glia 'Mya' (51% containment); no publicly-named CRM-based unified agent desktop or case management; service sentiment mixed (WalletHub 3.0 / Trustpilot 2.9) vs strong app (4.7/4.6) [E-041, E-074, E-044, E-083, E-084] | Agents likely swivel-chair across systems; service friction surfaces in non-app sentiment | Salesforce Service Cloud + Agentforce unified agent desktop \u2014 Consolidates the member view for the contact center and gives 'Mya' a governed escalation surface, closing the service-sentiment gap"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-066",
+          "E-065",
+          "E-019",
+          "E-046",
+          "E-047"
+        ],
+        "representative_quote": "People-first culture + dedicated digital roles = strong platform-adoption runway (\u2192OBJ-5, HIGH)",
+        "source_kind": "docx"
+      },
+      "id": "bae327c1-5373-457b-9fc4-82578bec9259",
+      "involved_subcap_ids": [
+        "P2C1.2.1",
+        "P2C1.2.5",
+        "P2C1.2.4",
+        "P2C1.2.CU1",
+        "P2C1.2.8",
+        "P2C1.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "#10 Top Inspiring Workplaces NA 2025 (only CU); American Banker Best CU to Work For; dedicated Digital Marketing & Personalization, Digital Experience, AI&DS, Enterprise Analytics functions [E-066, E-065, E-019, E-046, E-047]",
+      "title": "People-first culture + dedicated digital roles = strong\u2026",
+      "verbatim_quote": "F-008 | People-first culture + dedicated digital roles = strong platform-adoption runway (\u2192OBJ-5, HIGH) | #10 Top Inspiring Workplaces NA 2025 (only CU); American Banker Best CU to Work For; dedicated Digital Marketing & Personalization, Digital Experience, AI&DS, Enterprise Analytics functions [E-066, E-065, E-019, E-046, E-047] | Change-adoption risk is low; the org structure to own a Salesforce platform already exists | Land-and-expand with named functional owners \u2014 Existing roles map cleanly to Salesforce clouds (Marketing\u2192Glupker, Service\u2192Knight, Data/AI\u2192Speer/Benassi, Commercial\u2192Beason/Johnson)"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-004",
+          "E-035",
+          "E-019",
+          "E-085",
+          "E-037"
+        ],
+        "representative_quote": "Proven in-app personalization, but no enterprise journey orchestration (\u2192OBJ-3, HIGH)",
+        "source_kind": "docx"
+      },
+      "id": "a040d3e0-a708-4ad5-9e95-9b264ec48a95",
+      "involved_subcap_ids": [
+        "P2C4.8.2",
+        "P2C4.8.4",
+        "P2C4.8.3",
+        "P2C4.8.1",
+        "P2C4.8.5",
+        "P4C3.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000",
+          "delta": null,
+          "kpi_label": "Dashboard tripled engagement",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 83,
+        "P4": 17
+      },
+      "source_path": "Q2 Composable Dashboard tripled engagement (+$5M/mo approved loans; fraud stopped); dedicated Director of Digital Marketing & Personalization \u2014 but no publicly-named marketing-automation/journey platform; engagement remains campaign/manual [E-004, E-035, E-019, E-085, E-037]",
+      "title": "Proven in-app personalization, but no enterprise journey\u2026",
+      "verbatim_quote": "F-003 | Proven in-app personalization, but no enterprise journey orchestration (\u2192OBJ-3, HIGH) | Q2 Composable Dashboard tripled engagement (+$5M/mo approved loans; fraud stopped); dedicated Director of Digital Marketing & Personalization \u2014 but no publicly-named marketing-automation/journey platform; engagement remains campaign/manual [E-004, E-035, E-019, E-085, E-037] | Personalization wins are confined to the banking app; there is no always-on cross-channel lifecycle engine | Salesforce Marketing Cloud + Data Cloud activation \u2014 Extends proven in-app personalization into orchestrated cross-channel member journeys, fed by the same Qlik/Snowflake data"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-088",
+          "E-054",
+          "E-053"
+        ],
+        "representative_quote": "Strong member-facing security floor; enterprise InfoSec internals non-public (\u2192OBJ-2, MEDIUM)",
+        "source_kind": "docx"
+      },
+      "id": "8ee6e162-c811-44ee-ad14-664fb4d035fd",
+      "involved_subcap_ids": [
+        "P2C2.6.6",
+        "P2C2.1.2",
+        "P2C2.1.CU2",
+        "P2C2.2.2",
+        "P2C4.8.4",
+        "P2C4.5.CU1",
+        "P2C4.2.6",
+        "P2C4.3.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "Member-facing 2FA/biometrics/LifeLock; clean breach history; NCUA Part 748 + GLBA regulatory floor; enterprise InfoSec internals not public [E-088, E-054, E-053]",
+      "title": "Strong member-facing security floor",
+      "verbatim_quote": "F-009 | Strong member-facing security floor; enterprise InfoSec internals non-public (\u2192OBJ-2, MEDIUM) | Member-facing 2FA/biometrics/LifeLock; clean breach history; NCUA Part 748 + GLBA regulatory floor; enterprise InfoSec internals not public [E-088, E-054, E-053] | P4C4 scoring should respect the regulatory floor \u2014 this is a governance enabler, not a sales gap | Salesforce Shield / FSC compliance posture as an enabler for the Data Cloud/AI expansion \u2014 Addresses the model-risk/governance concerns the AI Council already owns (secondary alignment, not a primary play)"
+    }
+  ]
+}

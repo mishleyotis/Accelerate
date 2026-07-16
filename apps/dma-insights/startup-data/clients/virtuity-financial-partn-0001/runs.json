@@ -1,0 +1,21 @@
+{
+  "active_run_id": "cb40da1b-997a-43f8-80bb-25043c0a5f6d",
+  "items": [
+    {
+      "assessment_date": "2026-04-14",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:53.698148Z",
+      "created_at": "2026-07-02T23:11:53.698148Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "cb40da1b-997a-43f8-80bb-25043c0a5f6d",
+      "overall_score": 1.6002906976744187,
+      "request_id": "DMA-ASM-VFP-20260414-0001",
+      "started_at": "2026-07-02T23:11:53.698148Z",
+      "status": "ACTIVE",
+      "subcap_count": 688,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

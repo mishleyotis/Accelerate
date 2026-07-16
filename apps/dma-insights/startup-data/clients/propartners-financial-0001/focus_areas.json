@@ -1,0 +1,188 @@
+{
+  "entity_display_id": "propartners-financial-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-009",
+          "E-023"
+        ],
+        "representative_quote": "VP Digital Strategy role created Feb 2025",
+        "source_kind": "docx"
+      },
+      "id": "ccbf972b-1162-4535-a37c-b9b5e261ea03",
+      "involved_subcap_ids": [
+        "P1C1.1.1",
+        "P2C1.1.1",
+        "P1C2.1.4",
+        "P1C1.8.1",
+        "P2C1.8.1",
+        "P1C4.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P2": 33
+      },
+      "source_path": "VP Digital Strategy role created Feb 2025 [E-009:F1], new President Nov 2024 [E-023:F1]. Role mandate explicitly includes automation, analytics, AI-dr",
+      "title": "Digital transformation initiated",
+      "verbatim_quote": "F-002 | Digital transformation just initiated | VP Digital Strategy role created Feb 2025 [E-009:F1], new President Nov 2024 [E-023:F1]. Role mandate explicitly includes automation, analytics, AI-dr | P1C1 Strategy transitioning M1\u2192M2 | Zennify as transformation partner \u2014 advisory + implementation"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-010"
+        ],
+        "representative_quote": "FCA FY2025 priorities: model risk, TPRM, IT security.",
+        "source_kind": "docx"
+      },
+      "id": "c0a0db47-870a-4d28-a4ed-2508cfd80cbf",
+      "involved_subcap_ids": [
+        "P1C5.3.1",
+        "P1C5.4.2",
+        "P1C5.3.1",
+        "P1C5.1.2",
+        "P1C3.6.4",
+        "P1C3.5.1",
+        "P1C3.6.2",
+        "P1C3.6.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "FCA FY2025 priorities: model risk, TPRM, IT security [E-010:F1]. NO public TPRM, model risk framework, IT committee despite outsourced model and NetSc",
+      "title": "Governance gap under FCA scrutiny",
+      "verbatim_quote": "F-004 | Governance gap under FCA scrutiny | FCA FY2025 priorities: model risk, TPRM, IT security [E-010:F1]. NO public TPRM, model risk framework, IT committee despite outsourced model and NetSc | P1C2 Governance ceiling capped at M2 | Salesforce Shield + Platform custom objects for governance tracking"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-018",
+          "E-001"
+        ],
+        "representative_quote": "92% same-day funding, 85% auto-renewal.",
+        "source_kind": "docx"
+      },
+      "id": "a96ef85c-0bc1-473b-bf11-6eb0df4142d4",
+      "involved_subcap_ids": [
+        "P3C4.4.3",
+        "P3C4.4.4",
+        "P3C4.5.1",
+        "P3C4.1.1",
+        "P3C2.7.4",
+        "P3C2.8.4",
+        "P3C2.7.4",
+        "P3C2.1.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "85%",
+          "delta": null,
+          "kpi_label": "Else same-day funding",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "92%",
+          "delta": null,
+          "kpi_label": "Weak everything else",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "92% same-day funding, 85% auto-renewal [E-018:F1]. But NO RPA, NO analytics platform, NO fraud vendor, NO service management [E-001:F3, batch 3 findin",
+      "title": "Strong lending automation, weak everything else",
+      "verbatim_quote": "F-005 | Strong lending automation, weak everything else | 92% same-day funding, 85% auto-renewal [E-018:F1]. But NO RPA, NO analytics platform, NO fraud vendor, NO service management [E-001:F3, batch 3 findin | P2C2 Onboarding M3+, but P3C1/P4C2 at M1-M2 | Einstein AI for credit enhancement, Tableau for portfolio analytics, Service Cloud for operations"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-006",
+          "E-002",
+          "E-004"
+        ],
+        "representative_quote": "Tech ops by GreenStone FCS, HR by Compeer Financial. 0% engineering/IT on LinkedIn",
+        "source_kind": "docx"
+      },
+      "id": "a7de7a8b-29af-40fc-ad33-6b9f79d3e53d",
+      "involved_subcap_ids": [
+        "P4C1.3.2",
+        "P4C1.8.7",
+        "P4C1.2.1",
+        "P4C1.6.2",
+        "P4C4.2.4",
+        "P4C4.6.1",
+        "P4C4.6.4",
+        "P4C4.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "Tech ops by GreenStone FCS, HR by Compeer Financial [E-006:F9]. 0% engineering/IT on LinkedIn [E-002:F2]. ~40 tech tools vs Compeer 200+ [E-004:F3].",
+      "title": "Technology operations outsourced",
+      "verbatim_quote": "F-003 | Technology operations fully outsourced | Tech ops by GreenStone FCS, HR by Compeer Financial [E-006:F9]. 0% engineering/IT on LinkedIn [E-002:F2]. ~40 tech tools vs Compeer 200+ [E-004:F3]. | P4C3 Architecture heavily dependent on vendor; ceiling M2 | MuleSoft for API layer; Platform for custom apps to reduce GreenStone dependency"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-001"
+        ],
+        "representative_quote": "PPF manages 200+ agribusiness clients with no detected CRM system.",
+        "source_kind": "docx"
+      },
+      "id": "483bb832-1be7-4519-84f2-30cb23a84237",
+      "involved_subcap_ids": [
+        "P2C1.4.6",
+        "P4C1.1.8",
+        "P2C3.4.4",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P1C2.1.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P4": 50
+      },
+      "source_path": "PPF manages 200+ agribusiness clients with no detected CRM system [E-001:F3]. Peer Compeer Financial runs full Salesforce CRM+Service+Marketing+Experi",
+      "title": "Zero CRM in a 200+ client ecosystem",
+      "verbatim_quote": "F-001 | Zero CRM in a 200+ client ecosystem | PPF manages 200+ agribusiness clients with no detected CRM system [E-001:F3]. Peer Compeer Financial runs full Salesforce CRM+Service+Marketing+Experi | P2C4 Personalization ceiling capped at M1-M2 | Salesforce Sales Cloud + Financial Services Cloud \u2014 immediate deal opportunity"
+    }
+  ]
+}

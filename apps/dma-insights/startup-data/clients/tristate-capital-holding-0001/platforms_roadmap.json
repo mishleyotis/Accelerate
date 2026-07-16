@@ -1,0 +1,112 @@
+{
+  "entity_display_id": "tristate-capital-holding-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P1C4 score 1.71 \u2192 4.0 (peer median 2.83)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Strategic",
+      "metric": "P1C4 score 1.71 \u2192 4.0 (peer median 2.83)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 Twilio",
+      "recommendations": [
+        {
+          "feature": "Twilio",
+          "maturity_lift": "+2.29",
+          "metric": "P1C4 score 1.71 \u2192 4.0 (peer median 2.83)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 score 1.71 \u2192 4.0 (peer median 2.83)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "twilio",
+          "platform_name": "Twilio",
+          "rec_id": "REC-01",
+          "title": "Strengthen P1C4: Customer-Centric Culture"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.14",
+          "metric": "P1C5 score 1.86 \u2192 4.0 (peer median 2.58)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.86 \u2192 4.0 (peer median 2.58)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Strengthen P1C5: ESG-Integrated Products"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.06",
+          "metric": "P2C3 score 1.94 \u2192 4.0 (peer median 2.67)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.94 \u2192 4.0 (peer median 2.67)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Strengthen P2C3: Vulnerable Customer Identification"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C4, P1C5"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P3C4 score 1.95 \u2192 4.0 (peer median 2.83)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Aspirational",
+      "metric": "P3C4 score 1.95 \u2192 4.0 (peer median 2.83)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.05",
+          "metric": "P3C4 score 1.95 \u2192 4.0 (peer median 2.83)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C4 score 1.95 \u2192 4.0 (peer median 2.83)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Strengthen P3C4: Crisis Framework"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.04",
+          "metric": "P2C1 score 1.96 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.96 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Strengthen P2C1: Content Review & Approval"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C4, P2C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TSCP-20260413-0001",
+  "total_duration_months": 16
+}

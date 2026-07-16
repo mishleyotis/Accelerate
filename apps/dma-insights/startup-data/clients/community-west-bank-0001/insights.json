@@ -1,0 +1,1555 @@
+{
+  "entity_display_id": "community-west-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.3.2",
+        "P4C3.8.CIB2",
+        "P4C3.8.AM1",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-008",
+      "id": "f46a94fe-c8f8-461f-8416-de95f1b51826",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P4C3.3.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Event-Driven Integration a near-term focus for Community West Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability.",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "SO7: Systems Conversion (CRITICAL): Summer 2026 systems conversion planned for USB integration. THIS IS THE TECHNOLOGY D",
+      "what_text": "Event-Driven Integration is one of Community West Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Community West Bank's ability to deliver a stronger data and technology foundation.",
+      "why_text": "At 1.5 out of 5, Event-Driven Integration sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C3.2.5",
+        "P2C1.1.RB1",
+        "P4C1.9.CIB1",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "cf39ac54-a7e5-47ee-8314-fd90ca756ac9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-02"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P1C3.2.5",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "twilio",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Idea Prioritization a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability.",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Community West Bank is pursuing a multi-pronged growth strategy anchored in acquisitive expansion, relationship banking,",
+      "what_text": "Community West Bank is pursuing a multi-pronged growth strategy anchored in acquisitive expansion, relationship banking, and digital modernization. The following strategic objectives are documented across public filings and corporate communications:. In Zennify's assessment Idea Prioritization scores 1.0 out of 5, versus a typical 2.0 at comparable institutions.",
+      "why_text": "At 1.0 out of 5, Idea Prioritization sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.5.1",
+        "P3C1.8.RB1",
+        "P3C3.8.CU1",
+        "P1C1.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-003",
+      "id": "ab2e8b1a-a36e-4eca-a2b1-313d8dd42eea",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-05"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-001"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-077"
+      ],
+      "linked_subcap_id": "P3C4.5.1",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make TPRM Strategy a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "SO4: Digital Roadmap (DELAYED): 2024 Annual Report committed to online deposit opening and online SBA lending for 2025.",
+      "what_text": "SO4: Digital Roadmap (DELAYED): 2024 Annual Report committed to online deposit opening and online SBA lending for 2025. As of April 2026, NEITHER has launched. Digital execution lagging intent. [, CTR-05]. In Zennify's assessment TPRM Strategy scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-077].",
+      "why_text": "At 1.0 out of 5, TPRM Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-077].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2.4.7",
+        "P2C2",
+        "P4C2.2.7",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "ff764892-1fa3-4fe0-842b-aeaf748f8d5b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P2C2.4.7",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Explainable AI in Decisioning a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability.",
+      "source_rec_id": "REC-01",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Explainable AI in Decisioning",
+      "what_text": "Explainable AI in Decisioning is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience.",
+      "why_text": "At 1.0 out of 5, Explainable AI in Decisioning sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C3.2.5",
+        "P1C3",
+        "P1C1.5.1",
+        "P1C3.2.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "8436d707-5a9e-411e-9d81-8f5d672c1957",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P1C3.2.5",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "twilio",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Idea Prioritization a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability.",
+      "source_rec_id": "REC-02",
+      "theme": "Innovation & Investment",
+      "title": "Idea Prioritization",
+      "what_text": "Idea Prioritization is one of Community West Bank's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Community West Bank's ability to deliver sharper strategic direction and stronger oversight.",
+      "why_text": "At 1.0 out of 5, Idea Prioritization sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.4.5",
+        "P2C4",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "66f4fd4a-d020-4cac-a055-f38959a636ef",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P2C4.4.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Streaming Event Processing a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability.",
+      "source_rec_id": "REC-03",
+      "theme": "CX & Personalization",
+      "title": "Streaming Event Processing",
+      "what_text": "Streaming Event Processing is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience.",
+      "why_text": "At 1.0 out of 5, Streaming Event Processing sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.1.2",
+        "P4C1",
+        "P4C1.1.1",
+        "P1C1.4.IB1",
+        "P1C2.1.5",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "525ac357-d18d-4b04-b8f9-f8aaf12858cf",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P4C1.1.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Data Governance Operating Model a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability.",
+      "source_rec_id": "REC-04",
+      "theme": "Data Management & Governance",
+      "title": "Data Governance Operating Model",
+      "what_text": "Data Governance Operating Model is one of Community West Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Community West Bank's ability to deliver a stronger data and technology foundation.",
+      "why_text": "At 1.0 out of 5, Data Governance Operating Model sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.5.1",
+        "P3C4",
+        "P4C2.2.7",
+        "P3C4.1.2",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "bf7efb5a-db21-471f-a8cd-d7019961ca59",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P3C4.5.1",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make TPRM Strategy a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability.",
+      "source_rec_id": "REC-05",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "TPRM Strategy",
+      "what_text": "TPRM Strategy is one of Community West Bank's least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Community West Bank's ability to deliver more efficient, dependable operations.",
+      "why_text": "At 1.0 out of 5, TPRM Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C2.5.6",
+        "P4C1.8.5",
+        "P4C3.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "fea3e83f-8c81-4616-951f-a7a4e87b3de8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Vendor-managed IT. CTO + PM = entire tech team. — Managed services + staff augmentation —: L2.0 ±0.5 —.",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "90+ Technologies, 0% Engineering",
+      "what_text": "Event-Driven Integration is one of Community West Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Community West Bank's ability to deliver a stronger data and technology foundation.",
+      "why_text": "At 1.5 out of 5, Event-Driven Integration sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P2C2.4.RB1",
+        "P3C2.1.5",
+        "P4C2.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "a96110f2-00af-4c2b-b25f-6aa486fa030d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-080",
+        "E-086"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Regulatory compliance exemplary — strongest capability — Trust anchor for consulting engagement —: L3.0 ±0.3 — [E-086].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "CRA Outstanding + Bauer 5-Star",
+      "what_text": "Compliance Organization is one of Community West Bank's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Community West Bank's ability to deliver more efficient, dependable operations [E-086].",
+      "why_text": "At 2.5 out of 5, Compliance Organization sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-080, E-086].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.1.5",
+        "P1C4.8.3",
+        "P1C4.1.7",
+        "P1C3.4.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-011",
+      "id": "e36d1fea-bfc9-40b2-b706-f9c49430a035",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Lauhon retiring Dec 2026. Fresno Culture 1.0. — Change management during leadership transition —: L2.0 ±0.5 —, CTR-06.",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "COO Retiring + Culture 1.0/5",
+      "what_text": "Change Metrics is one of Community West Bank's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Community West Bank's ability to deliver sharper strategic direction and stronger oversight.",
+      "why_text": "At 1.0 out of 5, Change Metrics sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2.7.3",
+        "P1C2.8.1",
+        "P1C2.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-002",
+      "id": "a86a526d-fcbc-4f81-a272-9e80de51864d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-009"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-017"
+      ],
+      "linked_subcap_id": "P2C2.7.3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Efficiency Metrics a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-017].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "SO5: Financial Performance: FY2025: NIM 4.04%, efficiency 61.6%, EPS $2.00. Post-USB: projected $60.2M combined earnings",
+      "what_text": "Efficiency Metrics is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-017].",
+      "why_text": "At 1.0 out of 5, Efficiency Metrics sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-016, E-017].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.3.3",
+        "P4C2",
+        "P3C1.3.3",
+        "P1C5.2.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-004",
+      "id": "d637233b-008e-45d0-91e1-e0bfa2d394f8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-003"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-001"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-077"
+      ],
+      "linked_subcap_id": "P4C2.3.3",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Community West Bank: invest to move it toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the improvement reaches well beyond this single capability [E-077].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO2: Geographic Expansion: Expanded from single Fresno office (1980) to 31 communities across 13 Central California coun",
+      "what_text": "SO2: Geographic Expansion: Expanded from single Fresno office (1980) to 31 communities across 13 Central California counties. Post-USB footprint spans Sacramento to Central Coast.. It underpins the data and technology foundation the rest of the business is built on, so its current level directly shapes Community West Bank's ability to deliver a stronger data and technology foundation [E-077].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger data and technology foundation. It builds on the data and technology foundation the rest of the business is built on, so progress here lifts the wider business too [E-077].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.3.2",
+        "P4C3.1.7",
+        "P3C1.8.RIA2",
+        "P4C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-005",
+      "id": "35a28263-55b4-498f-b109-1a92d73db460",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-092"
+      ],
+      "linked_subcap_id": "P4C3.3.2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Event-Driven Integration a near-term focus for Community West Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-092].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "SO3: Relationship Banking: CEO Kim: 'focused on thoughtful integration and ensuring seamless experience for clients.' Co",
+      "what_text": "SO3: Relationship Banking: CEO Kim: 'focused on thoughtful integration and ensuring seamless experience for clients.' Core values: Teamwork, Caring, Inclusivity, Excellence, Accountability.. In Zennify's assessment Event-Driven Integration scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-092].",
+      "why_text": "At 1.5 out of 5, Event-Driven Integration sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-092].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.7.3",
+        "P2C1.2.2",
+        "P2C1.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-009",
+      "id": "fe2e5beb-5319-46d6-9057-27d513e19b97",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-009"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-016"
+      ],
+      "linked_subcap_id": "P4C2.7.3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Reasoning Engine & Chain of Thought a near-term focus for Community West Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-016].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO1: M&A Growth Engine: 7 acquisitions since 2005, including USB merger completed April 1, 2026 ($185.5M all-stock). Com",
+      "what_text": "SO1: M&A Growth Engine: 7 acquisitions since 2005, including USB merger completed April 1, 2026 ($185.5M all-stock). Combined entity ~$5B total assets. CWB's proven M&A playbook is its primary growth driver.. In Zennify's assessment Reasoning Engine & Chain of Thought scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-016].",
+      "why_text": "At 1.5 out of 5, Reasoning Engine & Chain of Thought sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-016].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5.2.2",
+        "P1C1.4.4",
+        "P3C1.8.AM1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-010",
+      "id": "583cdb35-7dad-483c-8cca-9879257427a9",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-008"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-080",
+        "E-093"
+      ],
+      "linked_subcap_id": "P1C5.2.2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make community investment a near-term focus for Community West Bank: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-093].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "SO6: Community Investment: CRA OUTSTANDING rating. $1.975M affordable housing grant (Visalia). Tribal Nations grant. Hou",
+      "what_text": "Community investment is one of Community West Bank's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Community West Bank's ability to deliver sharper strategic direction and stronger oversight [E-093].",
+      "why_text": "At 2.0 out of 5, community investment sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-080, E-093].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2.1.IC1",
+        "P2C2.1",
+        "P2C4.1.1",
+        "P1C5.4.2",
+        "P2C4.3.2",
+        "P1C5.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-001",
+      "id": "a3138468-1458-4f09-87fc-fb0a0f8ed373",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-003"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-098",
+        "E-077"
+      ],
+      "linked_subcap_id": "P2C2.1.IC1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Risk Assessment & Quoting a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "#2 FSC + nCino",
+      "what_text": "Risk Assessment & Quoting is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-098].",
+      "why_text": "The analyst's opportunity map rates this 7.95 priority. scores 1.0/5 against a peer median of 3.0 on the current assessment — the gap this opportunity addresses [E-068, E-098].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.8.3",
+        "P4C3.3.2",
+        "P4C3.1.4",
+        "P4C4.1.4",
+        "P4C2.1.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-002",
+      "id": "4fc2f80d-80ec-4348-9332-3747d173b9ed",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-006"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-003"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-101",
+        "E-089",
+        "E-069"
+      ],
+      "linked_subcap_id": "P2C1.8.3",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Co-Branded Marketing a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "#4 Data Cloud + #5 MuleSoft",
+      "what_text": "Co-Branded Marketing is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-089].",
+      "why_text": "The analyst's opportunity map rates this 6.55 priority. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-101, E-089].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.8.3",
+        "P2C2.1.IC1",
+        "P1C1.5.5",
+        "P2C4.3.2",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-003",
+      "id": "fc9db282-1d3a-432d-8c39-97770b812221",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-006"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-009"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-057",
+        "E-069"
+      ],
+      "linked_subcap_id": "P2C1.8.3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Co-Branded Marketing a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "#1 Service Cloud",
+      "what_text": "Co-Branded Marketing is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-057].",
+      "why_text": "The analyst's opportunity map rates this 6.1 priority. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-097, E-057].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.8.3",
+        "P2C4.1.1",
+        "P4C2.1.3",
+        "P4C3.1.3",
+        "P4C4.1.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-004",
+      "id": "8b811e3c-5a1a-4fee-807c-c3b2d2426a92",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-003"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-067",
+        "E-061",
+        "E-097"
+      ],
+      "linked_subcap_id": "P2C1.8.3",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Co-Branded Marketing a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "#3 Marketing Cloud",
+      "what_text": "Co-Branded Marketing is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-061].",
+      "why_text": "The analyst's opportunity map rates this 6.25 priority. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-067, E-061].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.7",
+        "P2C4.1.1",
+        "P2C1.4.6",
+        "P2C4.3.2",
+        "P2C1.4.8"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-005",
+      "id": "4bc277d3-57cf-4ef3-9192-8342d46d0b2d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-001"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-006"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-101",
+        "E-069",
+        "E-068"
+      ],
+      "linked_subcap_id": "P4C2.2.7",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Report/Dashboard Rationalization & Retirement Governance a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-068].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "#6 CRM Analytics",
+      "what_text": "Report/Dashboard Rationalization & Retirement Governance is one of Community West Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Community West Bank's ability to deliver a stronger data and technology foundation [E-069].",
+      "why_text": "The analyst's opportunity map rates this 5.85 priority. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-101, E-069].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.1.7",
+        "P2C1",
+        "P2C4.3.2",
+        "P2C1.4.8",
+        "P2C1.15.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-006",
+      "id": "dd3e60af-c10b-45f9-9556-b9ae11971aef",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-003"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-009"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-101",
+        "E-069"
+      ],
+      "linked_subcap_id": "P2C1.1.7",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Community West Bank: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-069].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "#7 Shield",
+      "what_text": "This capability was flagged in Zennify's assessment of Community West Bank as a customer experience capability where focused investment would strengthen digital maturity. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-101].",
+      "why_text": "The analyst's opportunity map rates this 6.5 priority. averages 1.5/5 across its 75 scored capability (peer median ~ 2.5) on the current assessment — the gap this opportunity addresses [E-091, E-101].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.5.2",
+        "P2C4.3.2",
+        "P2C1.4.8"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-007",
+      "id": "80536c2d-d74b-45b2-ad3e-0635dc2fd01d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-099"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-010"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-087",
+        "E-099",
+        "E-061"
+      ],
+      "linked_subcap_id": "P1C1.5.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Platform Strategy a near-term focus for Community West Bank: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-061].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "#11 GRC Platform",
+      "what_text": "Platform Strategy is one of Community West Bank's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Community West Bank's ability to deliver sharper strategic direction and stronger oversight [E-099].",
+      "why_text": "The analyst's opportunity map rates this 6.75 priority. scores 2.5/5 against a peer median of 3.0 on the current assessment — the gap this opportunity addresses [E-087, E-099].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.8.3",
+        "P4C1.2.5",
+        "P3C3.2.5",
+        "P4C3.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-008",
+      "id": "8900a9d5-2a8e-4739-a9de-0cbde9a9c1d8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        },
+        {
+          "e_ids": [
+            "E-098"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-098",
+        "E-089",
+        "E-080"
+      ],
+      "linked_subcap_id": "P2C1.8.3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Co-Branded Marketing a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-080].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "#10 Experience Cloud",
+      "what_text": "Co-Branded Marketing is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-089].",
+      "why_text": "The analyst's opportunity map rates this 6.2 priority. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-098, E-089].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.4.IB1",
+        "P1C1.4",
+        "P1C1.1.1",
+        "P2C4.3.2",
+        "P2C1.4.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-009",
+      "id": "cdf2548b-1cab-4042-90a0-f7e62808eaf3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-069",
+        "E-068"
+      ],
+      "linked_subcap_id": "P1C1.4.IB1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Producer/Advisor Channel Strategy a near-term focus for Community West Bank: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-068].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "#12 Digital Strategy Workshop",
+      "what_text": "Producer/Advisor Channel Strategy is one of Community West Bank's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Community West Bank's ability to deliver sharper strategic direction and stronger oversight [E-069].",
+      "why_text": "The analyst's opportunity map rates this 6.7 priority. scores 2.0/5 against a peer median of 3.0 on the current assessment — the gap this opportunity addresses [E-016, E-069].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.8.3",
+        "P4C2.2.7",
+        "P3C2.2.4",
+        "P4C3.2.4",
+        "P2C4.3.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-010",
+      "id": "df068b41-5cfe-4bf1-a6ce-e1d3baa14802",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-099"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-094",
+        "E-099",
+        "E-059"
+      ],
+      "linked_subcap_id": "P2C1.8.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Co-Branded Marketing a near-term focus for Community West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "#9 Agentforce",
+      "what_text": "Co-Branded Marketing is one of Community West Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Community West Bank's ability to deliver a stronger, more personalised customer experience [E-099].",
+      "why_text": "The analyst's opportunity map rates this 5.55 priority. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-094, E-099].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 1.75 | vs Median: -0.95 | Trend: → Stagnant",
+        "heading": "6.1 Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 1.39 | vs Median: -1.21 | Trend: ↓ Declining",
+        "heading": "6.2 Pillar 2: Customer Experience & Engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.19 | vs Median: -0.61 | Trend: → Stable",
+        "heading": "6.3 Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 1.70 | vs Median: -0.90 | Trend: → Stagnant",
+        "heading": "6.4 Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": null
+  },
+  "run_request_id": "DMA-RES-CWB-20260408-0001"
+}

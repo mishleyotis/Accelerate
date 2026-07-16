@@ -1,0 +1,175 @@
+{
+  "entity_display_id": "baxter-credit-union-bcu-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint Platform",
+          "maturity_lift": "+1.81",
+          "metric": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "MuleSoft Integration Platform"
+        },
+        {
+          "feature": "Salesforce Service Cloud",
+          "maturity_lift": "+2.05",
+          "metric": "P4C1 score 1.95 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.95 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Service Cloud Omnichannel Consolidation"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.05",
+          "metric": "P4C1 score 1.95 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.95 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Data Cloud \u2014 Unified Member 360"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P4C3"
+    },
+    {
+      "customer_impact": {
+        "BCU $": "6.24B",
+        "Outcome": "P2C3 score 2.12 \u2192 4.0 (peer median 3.00)",
+        "strong ID": "85%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "strong ID 85%",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint Platform (extends Rec #1)",
+          "maturity_lift": "+1.88",
+          "metric": "strong ID 85%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "strong ID 85%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "MuleSoft for Onboarding Data Flow"
+        },
+        {
+          "feature": "CRM Analytics",
+          "maturity_lift": null,
+          "metric": "BCU $6.24B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "BCU $6.24B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "CRM Analytics for CRA Compliance"
+        },
+        {
+          "feature": "CRM Analytics + Shield + Agentforce governance consulting",
+          "maturity_lift": "+1.88",
+          "metric": "P2C3 score 2.12 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.12 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "CRM Analytics + AI Governance"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+        "SavvyMoney delivers": "2.3x"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Flow Orchestrator (Tier 3 \u2014 after MuleSoft)",
+          "maturity_lift": "+1.81",
+          "metric": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C3 score 2.19 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Flow Orchestrator for RPA Consolidation"
+        },
+        {
+          "feature": "Agentforce + Data Cloud (extends Recs #1 and #3)",
+          "maturity_lift": "+1.88",
+          "metric": "SavvyMoney delivers 2.3x",
+          "outcomes": {
+            "effort": "L",
+            "metric": "SavvyMoney delivers 2.3x",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Agentforce Expansion + Data Cloud Personalization"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C3"
+    }
+  ],
+  "run_request_id": "DMA-ASM-BCU-20260330-0001",
+  "total_duration_months": 12
+}

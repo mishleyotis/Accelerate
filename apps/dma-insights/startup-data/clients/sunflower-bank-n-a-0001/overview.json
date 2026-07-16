@@ -1,0 +1,1162 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 19,
+        "subcaps": 19,
+        "thin": 0
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 11,
+        "subcaps": 11,
+        "thin": 0
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 30,
+        "subcaps": 30,
+        "thin": 0
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 32,
+        "subcaps": 32,
+        "thin": 0
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "sunflower-bank-n-a-0001",
+    "domain": null,
+    "hq": null,
+    "id": "17cb844b-7145-44a9-b64c-11ea92cc9117",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Sunflower Bank, N.A.",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:51.279949Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 30,
+    "current_count": 108,
+    "dated_count": 3,
+    "median_age_months": 8.5,
+    "oldest_published_date": "2024-03-01",
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 206,
+    "undated_count": 65
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 5,
+      "NEGATIVE": 43,
+      "NEUTRAL": 43,
+      "POSITIVE": 50,
+      "RESEARCH_EVIDENCE": 65
+    },
+    "connectors": {
+      "Clay": 9,
+      "Explorium": 34,
+      "Indeed": 4,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 27,
+      "NEUTRAL": 164,
+      "POSITIVE": 15
+    },
+    "tiers": {
+      "T1": 13,
+      "T2": 60,
+      "T3": 109,
+      "T5": 24
+    },
+    "total_facts": 417,
+    "total_items": 206
+  },
+  "financial_trajectory": {
+    "cagr": "45.9%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        0.0,
+        0.01,
+        0.01,
+        0.01,
+        0.02
+      ]
+    },
+    "trend": null,
+    "unit": "K"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 20400000000.0,
+    "branches": 73,
+    "cagr": "45.9%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "Branches": "73+ (2026)",
+      "CET1_Pct": "14.12 (2025)",
+      "Deposit_Growth_Pct": "6.6 (2025)",
+      "Loan_Growth_Pct": "4.7 (2025)",
+      "NIM_Pct": "4.10 (2025)",
+      "Net_Income_M": "97.9 (2025)",
+      "ROA_Pct": "1.34 (2025)",
+      "Total_Assets_B": "20.4 (2026)",
+      "series": {
+        "2022": 4.5,
+        "2023": 8.1,
+        "2024": 8.2,
+        "2025": 8.5,
+        "2026": 20.4
+      },
+      "trajectory": {
+        "branches": 73,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 2500,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "OneTrust on FF website = privacy compliance tools deployed…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "HomeStreet appears as subsidiary — failed merger…"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": null,
+        "headline": "$20.4B assets · FY2026 · +45.9% CAGR",
+        "regulator": "FDIC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            4.5,
+            8.1,
+            8.2,
+            8.5,
+            20.4
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "AZ, CA, CO, FL, HI, KS, NM, NV, TX, WA",
+    "footprint_basis": "nlp:report_prose",
+    "founded": 1892,
+    "geography": "Kansas",
+    "geography_basis": "nlp:evidence+narrative",
+    "headcount": 2500,
+    "hq": "Dallas, TX",
+    "hq_address": null,
+    "hq_basis": "nlp:evidence+narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Brian Mulcahey",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Nina Wyatt",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Stephanie Noble",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Alissa Foth",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Bo Scott",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Treasury Ops",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Job Description",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Infrastructure Consolidation",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      }
+    ],
+    "legal_name": "Sunflower Bank, N.A.",
+    "license_type": "FDIC-insured bank",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Sunflower Bank, N.A. is a regional bank. It reports $20.4 billion in total assets and has operated since 1892. It is regulated by FDIC and employs approximately 2,500 people across 73 branches. Its overall digital maturity is assessed at 1.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC",
+    "regulator_basis": "inferred:subvertical",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 156,
+          "scale": 5,
+          "score": 3.2,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "n": 140,
+          "scale": 5,
+          "score": 2.4,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.2/5",
+          "signal": "P1C4",
+          "source": "Glassdoor",
+          "themes": "37% recommend; CEO 52%; culture declining",
+          "trend": "Declining",
+          "volume": "156 reviews"
+        },
+        {
+          "rating": "2.4/5",
+          "signal": "P1C4",
+          "source": "Indeed",
+          "themes": "ALL wellbeing LOW; mgmt 2.1; culture 2.1; comp 2.1",
+          "trend": "Low/Stable",
+          "volume": "140 reviews"
+        },
+        {
+          "rating": "5-Star",
+          "signal": "P1C1",
+          "source": "BauerFinancial",
+          "themes": "Superior financial health; strong capital",
+          "trend": "Stable",
+          "volume": "N/A"
+        },
+        {
+          "rating": "Negative",
+          "signal": "P3C3",
+          "source": "DepositAccounts",
+          "themes": "FCRA/GLBA allegations; OCC investigation; post-Pioneer",
+          "trend": "Negative",
+          "volume": "Multiple"
+        },
+        {
+          "rating": "Active",
+          "signal": "P2C1",
+          "source": "LinkedIn",
+          "themes": "CIO award; community posts; low engagement",
+          "trend": "Stable",
+          "volume": "Weekly posts"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "Dec 2025: Sunflower Bank partnered with VerityPay to add SMS-based B2C digital payouts (90 seconds, no app download) to Treasury Management suite — channel innovation for business disbursements Layne Nunes (SVP Treasury ",
+        "title": "Dec 2025: Sunflower Bank partnered with VerityPay to add SMS-based…",
+        "type": "article",
+        "url": "https://www.businesswire.com/news/home/20251201681769/en/Sunflower-Bank-Announces-Partnership-With-VerityPay-to-Enhance-B2C-Payments"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-008:F1, E-008:",
+        "excerpt": "[ERS: 3.80] [FACT] [E-008:F1] FirstSun 10-K Strategic Insights (Explorium/SEC) (T2, CURRENT): Strategic focus: relationship-based banking for personal, business, wealth management clients across multi-state footpri\n[ERS:",
+        "title": "[ERS: 3.80]",
+        "type": "linkedin-post",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "Website navigation added: Community Involvement, Client Stories, Resource Articles (May 2025) — brand repositioning toward community-focused messaging Implication per Explorium: 'Emphasizing community involvement enhance",
+        "title": "Website navigation added",
+        "type": "article",
+        "url": "https://sunflowerbank.com"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-027",
+        "excerpt": "LinkedIn posts include weekly wealth management market commentary — thought leadership content strategy active Post engagement: 6 likes, ~24 days old — modest social media engagement",
+        "title": "LinkedIn posts include weekly wealth management market commentary",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/feed/update/urn:li:activity:7439415232617324544"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "sunflowerbank.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.110438+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Sunflower Bank, N.A. — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Sunflower Bank was benchmarked against 5 SV1 Regional Bank peers selected for asset size proximity ($18-36B), Western US footprint, M&A-driven growth, and commercial + wealth business mix. Peers were locked in the research phase and scored at category level using public evidence.",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Sunflower Bank DMA Assessment",
+    "scqa_md": "Sunflower Bank, N.A. is a $20.4B in assets regional bank regulated by FDIC, operating since 1892 with 2,500 employees. A 45.9% multi-year growth rate gives it the balance sheet to fund transformation [E-053, E-041]. Zennify's assessment places overall digital maturity at 1.9/5.\n\nThe deepest capability gap is Behavioral Data Capture at 1.3/5 against a 2.0 peer median [E-024, E-032]. Next is AI & ML Strategy & Governance at 1.4/5 against a 2.0 peer median [E-093, E-121]. Third is Data Quality Framework & Dimensions at 1.4/5 against a 2.0 peer median [E-088, E-118]. Counter-signal: Strategy Foundation & Alignment already runs at 2.8/5 against a 2.5 peer median — a strength to build on, not rebuild.\n\nThe question for Sunflower Bank, N.A. is whether to close Behavioral Data Capture first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Sunflower Bank, N.A. should lead with nCino (64/100 fit) against Leader Role Modeling, then sequence Tableau behind it.\n\nClosing Behavioral Data Capture to the peer median alone is worth 0.7 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 1.91,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.258409+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/priorities.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.259542+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/DMA_Recommendation_Plan_Sunflower_Bank.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.260215+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.260838+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/caps_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.261151+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.261502+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.261899+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Coverage_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:51.262726+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 23
+    },
+    "stage_ms": {
+      "manifest": 11,
+      "parse": 5388,
+      "persist": 1250
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +97 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook_evidence",
+        "detail": "research_workbook_evidence: +84 new E-IDs, 0 CSV rows enriched with workbook subcaps (from DMA_Research_Workbook_Sunflower_Bank_20260410.xlsx)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 27 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_handoff.json",
+        "detail": "research_handoff.json: AttributeError: 'str' object has no attribute 'get'",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Report_Sunflower_Bank.docx leadership=0 focus_areas=8 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=40 subcaps=25 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 8 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "subcap coverage 14% below 80% threshold (97 of 700 expected for ",
+        "detail": "subcap coverage 14% below 80% threshold (97 of 700 expected for unknown)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 18 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 18 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_trends_csv",
+        "detail": "financial_highlights_from_trends_csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 5 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/report_analysis.json — no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/priorities.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/DMA_Recommendation_Plan_Sunflower_Bank.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/caps_summary.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.25); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Coverage_Map.csv — no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:RB",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:5/97 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +0 subcap names +97 rationales merged from workbook into CSV-parsed rows",
+      "research_workbook_evidence: +84 new E-IDs, 0 CSV rows enriched with workbook subcaps (from DMA_Research_Workbook_Sunflower_Bank_20260410.xlsx)",
+      "tech_stack_from_variant_source: 27 entries",
+      "research_handoff.json: AttributeError: 'str' object has no attribute 'get'",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Report_Sunflower_Bank.docx leadership=0 focus_areas=8 facts_extracted=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=40 subcaps=25 replaced_docx_scqa=True",
+      "used docx-extracted recommendations: 8 rec(s) from Assessment_Report.docx §9",
+      "subcap coverage 14% below 80% threshold (97 of 700 expected for unknown)",
+      "category_scores_derived_from_subcaps: 18 categories (mean rollup)",
+      "peer_benchmarks_filled: 18 categories",
+      "financial_highlights_from_trends_csv",
+      "sentiment_from_csv: 5 sources",
+      "insights_derived_from_category_gaps: 4",
+      "INFO/pattern_gap: 01_evidence/report_analysis.json — no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/priorities.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 04_reports/DMA_Recommendation_Plan_Sunflower_Bank.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/caps_summary.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.25); 12 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Coverage_Map.csv — no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+      "subvertical_inferred_from_name:RB",
+      "timeline_events_persisted: 6",
+      "catalogue_unresolved:5/97 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 19,
+      "peer_median": 2.47,
+      "pillar_id": "P1",
+      "score": 2.03,
+      "subcaps_scored": 19
+    },
+    {
+      "peer_benchmarked": 11,
+      "peer_median": 2.36,
+      "pillar_id": "P2",
+      "score": 1.82,
+      "subcaps_scored": 11
+    },
+    {
+      "peer_benchmarked": 30,
+      "peer_median": 2.5,
+      "pillar_id": "P3",
+      "score": 2.09,
+      "subcaps_scored": 30
+    },
+    {
+      "peer_benchmarked": 32,
+      "peer_median": 2.38,
+      "pillar_id": "P4",
+      "score": 1.75,
+      "subcaps_scored": 32
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-10",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:51.279949Z",
+    "created_at": "2026-07-02T23:11:51.279949Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "94dc2441-9f86-49ab-b7d7-ad9915f081d3",
+    "overall_score": 1.91,
+    "request_id": "DMA-ASM-SNFB-20260410-0001",
+    "started_at": "2026-07-02T23:11:51.279949Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": null,
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 156,
+        "scale": 5,
+        "score": 3.2,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "n": 140,
+        "scale": 5,
+        "score": 2.4,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "AMBER — SO-3 — Dual wealth platforms — SB Black Diamond vs FF Orion+eMoney. $6.8B AUM [E-022,E-040] — L2.0±0.5 — FSC Wealth, Data Cloud.",
+      "evidence": [
+        "E-022",
+        "E-040",
+        "E-093",
+        "E-121"
+      ],
+      "magnitude": "$6.8B",
+      "name": "Dual wealth platforms",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Dual wealth platforms in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Dual wealth platforms",
+      "what": "AMBER — SO-3 — Dual wealth platforms — SB Black Diamond vs FF Orion+eMoney. $6.8B AUM. [E-022,E-040] — L2.0±0.5 — FSC Wealth, Data Cloud.",
+      "why": "The linked evidence records: First Foundation Advisors (SEC-registered RIA) now wholly-owned subsidiary of FirstSun. Services: investment, trust, insurance, philanthropy Pre-merger FF operated in CA, NV, FL, TX, HI with wealth management platform competitive with larger institutions"
+    },
+    {
+      "body": "RED — SO-1 — Dual-platform conflict across 11 domains — SB Salesforce vs FF Dynamics, SB Actimize vs FF SAS, SB SailPoint vs FF Okta [E-040,E-007] — L2.0±0.5 — FSC, Data Cloud, MuleSoft.",
+      "evidence": [
+        "E-040",
+        "E-007",
+        "E-093",
+        "E-121"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Dual-platform conflict across 11 domains",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Dual-platform conflict across 11 domains in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Dual-platform conflict across 11 domains",
+      "what": "RED — SO-1 — Dual-platform conflict across 11 domains — SB Salesforce vs FF Dynamics, SB Actimize vs FF SAS, SB SailPoint vs FF. Okta. [E-040,E-007] — L2.0±0.5 — FSC, Data Cloud, MuleSoft.",
+      "why": "The linked evidence records: First Foundation uses Orion Advisor platform for wealth management portfolio tracking — different from Sunflower's Black Diamond First Foundation uses eMoney for financial planning software — no equivalent found in Sunflower's stack"
+    },
+    {
+      "body": "All findings aligned to 6 strategic objectives from SEC filings and earnings calls. SO-1 (Post-Merger Integration) at HIGHEST priority.",
+      "evidence": [
+        "E-012",
+        "E-018",
+        "E-032",
+        "E-036"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "All findings aligned to 6 strategic objectives from SEC filings…",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.6,
+      "so_what": "Prioritize All findings aligned to 6 strategic objectives from SEC filings… in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "All findings aligned to 6 strategic objectives from SEC filings…",
+      "what": "All findings aligned to 6 strategic objectives from SEC filings and earnings calls. SO-1 (Post-Merger Integration) at HIGHEST priority.",
+      "why": "The linked evidence records: Overall rating 2.4/5 (140+ reviews); Culture/Values 2.1/5; Management 2.1/5; Work-life balance 2.4/5; Compensation 2.8/5 All wellbeing scores rated LOW: happiness, stress-free, satisfaction, compensation, energy, support, purpose, learning, inclusion, flexibility"
+    },
+    {
+      "body": "RED — SO-5 — Cherwell ITSM EOL Dec 2026 — ITSM platform end-of-life in 8 months [E-137] — N/A — Service Cloud (URGENT)",
+      "evidence": [
+        "E-137",
+        "E-024",
+        "E-032",
+        "E-033"
+      ],
+      "magnitude": "8 months",
+      "name": "Cherwell ITSM EOL Dec 2026",
+      "peer_median": 2.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.33,
+      "so_what": "Prioritize Cherwell ITSM EOL Dec 2026 in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Cherwell ITSM EOL Dec 2026",
+      "what": "RED — SO-5 — Cherwell ITSM EOL Dec 2026 — ITSM platform end-of-life in 8 months [E-137] — N/A — Service Cloud (URGENT).",
+      "why": "The linked evidence records: Cherwell Service Management detected in SB tech stack (Explorium IT Management category). Cherwell provides ITIL-verified incident management, request management, change management, CMDB, and One-Step automation. ITSM automation CONFIRMED. CRITICAL:"
+    },
+    {
+      "body": "GREEN — SO-2 — CIO driving IT-business alignment — CXO/CIO Alignment diagnostic. EA approach. nCino co-presenter [E-044,E-026] — L3.0±0.3 — Platform expansion.",
+      "evidence": [
+        "E-044",
+        "E-026",
+        "E-024",
+        "E-032"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "CIO driving IT-business alignment",
+      "peer_median": 2.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.33,
+      "so_what": "Prioritize CIO driving IT-business alignment in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "CIO driving IT-business alignment",
+      "what": "GREEN — SO-2 — CIO driving IT-business alignment — CXO/CIO Alignment diagnostic. EA approach. NCino co-presenter. [E-044,E-026] — L3.0±0.3 — Platform expansion.",
+      "why": "The linked evidence records: CIO used Info-Tech CXO/CIO Alignment diagnostic with several top executives to understand what CEO wants and how IT bridges the gap — formal business-IT alignment tool deployed CIO stated: 'when I have conversations with the business about what they want to do, I'm able"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.3,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-008"
+      ],
+      "modifiers": [],
+      "rationale": "Strategy Foundation & Alignment averages 2.8/5 over 15 scored subcaps; ceiling 3.8 reflects solid evidence density (15/15 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.3,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-020"
+      ],
+      "modifiers": [
+        "cap applied: ADJ -0.2 HomeStreet"
+      ],
+      "rationale": "Steering Committee averages 2.2/5 over 25 scored subcaps; ceiling 3.2 reflects solid evidence density (25/25 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-009"
+      ],
+      "modifiers": [],
+      "rationale": "Innovation Vision averages 2.0/5 over 5 scored subcaps; ceiling 3.0 reflects solid evidence density (5/5 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.3,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-012"
+      ],
+      "modifiers": [],
+      "rationale": "Leader Role Modeling averages 1.6/5 over 25 scored subcaps; ceiling 2.6 reflects solid evidence density (25/25 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.3,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021:F1, E-021:"
+      ],
+      "modifiers": [],
+      "rationale": "ESG Governance averages 1.8/5 over 25 scored subcaps; ceiling 2.8 reflects solid evidence density (25/25 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.3,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [
+        "cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0"
+      ],
+      "rationale": "Marketing Strategy & Segmentation averages 2.0/5 over 10 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0); band ±0.3 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.3,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029:F1, E-029:"
+      ],
+      "modifiers": [
+        "cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0"
+      ],
+      "rationale": "Pre-Qualification Capabilities averages 2.0/5 over 15 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0); band ±0.3 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.3,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [
+        "cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0"
+      ],
+      "rationale": "Digital Self-Service Coverage averages 2.0/5 over 15 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0); band ±0.3 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.3,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-024"
+      ],
+      "modifiers": [
+        "cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0; P4C1<2.5 → cap 3.0"
+      ],
+      "rationale": "Behavioral Data Capture averages 1.3/5 over 15 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Sentiment cap: Indeed 2.4 < 3.0 → P2 cap 2.0; P4C1<2.5 → cap 3.0); band ±0.3 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.3,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-127"
+      ],
+      "modifiers": [
+        "cap M2 applied: Cherwell EOL cap 2.0"
+      ],
+      "rationale": "Automation Governance Framework averages 1.8/5 over 40 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Cherwell EOL cap 2.0); band ±0.3 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.3,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054:F1, E-054:"
+      ],
+      "modifiers": [],
+      "rationale": "Fraud Detection & Prevention averages 2.2/5 over 30 scored subcaps; ceiling 3.2 reflects solid evidence density (30/30 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-081:F1, E-081:"
+      ],
+      "modifiers": [
+        "cap applied: ADJ -0.3 CFPB complaint"
+      ],
+      "rationale": "Fair Lending Compliance averages 2.0/5 over 40 scored subcaps; ceiling 3.0 reflects solid evidence density (40/40 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-084:F1, E-084:"
+      ],
+      "modifiers": [
+        "cap M3 applied: MOVEit cap 3.0"
+      ],
+      "rationale": "BCP Plan Development averages 2.4/5 over 40 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: MOVEit cap 3.0); band ±0.3 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.3,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-026:F1, E-026:"
+      ],
+      "modifiers": [],
+      "rationale": "Data Quality Framework & Dimensions averages 1.4/5 over 40 scored subcaps; ceiling 2.4 reflects solid evidence density (40/40 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.3,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [],
+      "rationale": "AI & ML Strategy & Governance averages 1.4/5 over 32 scored subcaps; ceiling 2.4 reflects solid evidence density (32/32 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.3,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [],
+      "rationale": "Cloud-Native Application Development averages 2.2/5 over 40 scored subcaps; ceiling 3.2 reflects solid evidence density (40/40 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.3,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [
+        "cap applied: ADJ -0.3 MOVEit"
+      ],
+      "rationale": "Cybersecurity Strategy & Program averages 1.9/5 over 40 scored subcaps; ceiling 2.9 reflects solid evidence density (40/40 full-evidence cells); band ±0.3 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "CISO Nina Wyatt hired Nov 2025 — dedicated security leadership. CIO + CISO + 3LoD model (E-019:F3) suggests security operations capability.",
+      "evidence": [
+        "E-074",
+        "E-019"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "CISO Nina Wyatt hired Nov 2025 — dedicated security…",
+      "metric": null,
+      "peer_context": "Behavioral Data Capture runs 1.33/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "CISO Nina Wyatt hired Nov 2025 — dedicated security leadership. CIO + CISO + 3LoD model (E-019:F3) suggests security operations capability. Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "CISO Nina Wyatt hired Nov 2025 — dedicated security…"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "No enterprise SIEM (Splunk, QRadar, Sentinel) detected. CISO hired Nov 2025 — SOC capability likely under construction. Monitoring exists but enterprise-grade SOC unconfirmed.",
+      "evidence": [
+        "E-125"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "No enterprise SIEM (Splunk, QRadar, Sentinel) detected",
+      "metric": null,
+      "peer_context": "Behavioral Data Capture runs 1.33/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "No enterprise SIEM (Splunk, QRadar, Sentinel) detected. CISO hired Nov 2025 — SOC capability likely under construction. Monitoring exists but enterprise-grade SOC unconfirmed. Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "CISO hired Nov 2025 — SOC capability"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "[ERS: 3.80] [FACT] [E-019:F1] FirstSun 10-K Cybersecurity Governance Disclosure (T2, CURRENT): IT Steering Committee exists, chaired by CIO, meets quarterly for tech project oversight and security risk governance\n[ERS: 2.80] [FACT] [E-034:F1]",
+      "evidence": [
+        "E-019:F1, E-019:"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "[ERS: 3.80]",
+      "metric": null,
+      "peer_context": "Behavioral Data Capture runs 1.33/5 vs a 2.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "[ERS: 3.80] [FACT] [E-019:F1] FirstSun 10-K Cybersecurity Governance Disclosure (T2, CURRENT):. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Osano cookie consent on SB website (E-016:F8) + OneTrust on FF website (E-040:F15) = privacy compliance tools deployed on both pre-merger platforms (Apr 2026).",
+      "evidence": [
+        "E-060",
+        "E-016",
+        "E-040"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Osano cookie consent on SB website + OneTrust on FF website…",
+      "metric": null,
+      "peer_context": "Behavioral Data Capture runs 1.33/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Leader Role Modeling — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Osano cookie consent on SB website (E-016:F8) + OneTrust on FF website (E-040:F15) = privacy compliance tools deployed on both pre-merger platforms (Apr 2026). Window: closes ~Q4 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "OneTrust on FF website = privacy compliance tools deployed…"
+      },
+      "window": "closes ~Q4 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "HomeStreet appears as subsidiary — failed merger (regulatory withdrawal Oct 2024) but entity linkage persists in data",
+      "evidence": [
+        "E-017"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "HomeStreet appears as subsidiary — failed merger…",
+      "metric": null,
+      "peer_context": "Behavioral Data Capture runs 1.33/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Leader Role Modeling — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "HomeStreet appears as subsidiary — failed merger (regulatory withdrawal Oct 2024) but entity linkage persists in data",
+      "timeline": {
+        "date": "2024-10-01",
+        "event": "HomeStreet appears as subsidiary — failed merger…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Behavioral Data Capture scores 1.33/5 vs a typical 2.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-024",
+        "E-032",
+        "E-037",
+        "E-051"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Behavioral Data Capture scores 1.33/5",
+      "metric": "Behavioral Data Capture 1.33/5 vs peer 2.00",
+      "peer_context": "Behavioral Data Capture runs 1.33/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Leader Role Modeling — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Behavioral Data Capture scores 1.33/5 vs a typical 2.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

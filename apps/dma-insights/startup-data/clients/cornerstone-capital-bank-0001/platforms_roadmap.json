@@ -1,0 +1,97 @@
+{
+  "entity_display_id": "cornerstone-capital-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.25",
+          "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-001",
+          "title": "). Zennify has Salesforce-specific Data Cloud methodology for mortgage banking \u2014 including MISMO data standard compliance \u2014 that CCB's internal team is building from scratch."
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.25",
+          "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-002",
+          "title": "(AgentForce in FSC context). Neil Merritt's Newrez background means he understands FSC mortgage templates \u2014 Zennify brings the Salesforce implementation expertise to execute on his product roadmap."
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.25",
+          "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-003",
+          "title": "(Data Cloud build) completes first; CRM Analytics activates the Data Cloud intelligence in-platform."
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.25",
+          "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.75 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-008",
+          "title": "(FSC implementation) \u2192"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CCB-20260504-0001",
+  "total_duration_months": 8
+}

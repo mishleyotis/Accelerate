@@ -1,0 +1,163 @@
+{
+  "entity_display_id": "langley-federal-credit-u-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C3.6.4",
+        "P2C4.5.4",
+        "P3C1.3.2",
+        "P4C2.2.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "82763949-67d5-452b-902a-a25cac6035c6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-006",
+        "E-059",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Application Portfolio Management a near-term focus for Langley Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": "REC-01",
+      "theme": "Architecture & Cloud",
+      "title": "Deploy MuleSoft Anypoint Platform for Enterprise Integration",
+      "what_text": "#5 MuleSoft Anypoint connected unlock: improvement enables (Automation) — integration layer is prerequisite for enterprise automation. Also enables Data Cloud (R-02) and FSC (R-03) integrations. In Zennify's assessment Application Portfolio Management scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-059].",
+      "why_text": "At 1.5 out of 5, Application Portfolio Management sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-006, E-059].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P2C4.5.4",
+        "P4C3.2.7",
+        "P1C1.5.5",
+        "P4C3.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "536ae106-e115-4462-af79-40f720047768",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-024",
+        "E-006",
+        "E-014"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Governance Operating Model a near-term focus for Langley Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-014].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Implement Salesforce Data Cloud as Unified Member Data Platform",
+      "what_text": "#4 Data Cloud connected unlock: CRITICAL: rising above 2.5 RELEASES the cap at 3.0 (currently 7 subcaps capped). This is the single highest-impact connected unlock in the entire assessment. In Zennify's assessment Data Governance Operating Model scores 1.5 out of 5, versus a typical 3.5 at comparable institutions [E-006].",
+      "why_text": "At 1.5 out of 5, Data Governance Operating Model sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-024, E-006].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "6.1 Pillar 1: Strategy, Governance & Culture — Score 2.39 vs Median 3.0 (-0.61)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "6.2 Pillar 2: Member Experience & Engagement — Score 2.74 vs Median 3.0 (-0.26)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "6.3 Pillar 3: Operations, Risk & Compliance — Score 2.46 vs Median 3.0 (-0.54)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "6.4 Pillar 4: Data, Analytics & Technology — Score 2.41 vs Median 3.0 (-0.59)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Each recommendation includes institution-specific root cause analysis (E-IDs), Zennify solution mapping (validated against Explorium technographic scan to confirm non-redundancy), expected outcomes, and risk of inaction. All recommendations were validated in Phase 6."
+  },
+  "run_request_id": "DMA-ASM-LFCU-20260318-0001"
+}

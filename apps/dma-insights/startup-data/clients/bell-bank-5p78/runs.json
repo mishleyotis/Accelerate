@@ -1,0 +1,21 @@
+{
+  "active_run_id": "645a455a-9fb5-4586-be09-f4d4c658e65e",
+  "items": [
+    {
+      "assessment_date": null,
+      "assessment_date_source": null,
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:10:56.471592Z",
+      "created_at": "2026-07-02T23:10:56.471592Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "645a455a-9fb5-4586-be09-f4d4c658e65e",
+      "overall_score": 2.002923976608187,
+      "request_id": "DMA-RES-BELL-20260305-P78",
+      "started_at": "2026-07-02T23:10:56.471592Z",
+      "status": "ACTIVE",
+      "subcap_count": 684,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

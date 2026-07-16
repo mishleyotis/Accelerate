@@ -1,0 +1,21 @@
+{
+  "active_run_id": "5b6e5935-3282-42fa-88ab-1a9345c65234",
+  "items": [
+    {
+      "assessment_date": "2026-04-13",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:18.704975Z",
+      "created_at": "2026-07-02T23:11:18.704975Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "5b6e5935-3282-42fa-88ab-1a9345c65234",
+      "overall_score": 2.4010115606936417,
+      "request_id": "DMA-ASM-STCU-20260413-0001",
+      "started_at": "2026-07-02T23:11:18.704975Z",
+      "status": "ACTIVE",
+      "subcap_count": 692,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

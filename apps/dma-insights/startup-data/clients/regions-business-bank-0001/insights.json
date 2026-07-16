@@ -1,0 +1,831 @@
+{
+  "entity_display_id": "regions-business-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4.1.4",
+        "P1C4",
+        "P1C4.1.3",
+        "P1C1.5.1",
+        "P1C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "52300791-8876-4fd3-8ccd-0ade4874564e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-026",
+        "E-039",
+        "E-045",
+        "E-007",
+        "E-041",
+        "E-034",
+        "E-021",
+        "E-031"
+      ],
+      "linked_subcap_id": "P1C4.1.4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Change Readiness Assessment a near-term focus for Regions Business Bank: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-045].",
+      "source_rec_id": "REC-01",
+      "theme": "Culture & Change",
+      "title": "Change Readiness Assessment",
+      "what_text": "Change Readiness Assessment is one of Regions Business Bank's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Regions Business Bank's ability to deliver sharper strategic direction and stronger oversight [E-039].",
+      "why_text": "The assessment found: “Investor materials confirm 3-year talent investment plan: ~50 new Commercial/MM Relationship Managers; ~10 incremental Treasury Management Bankers; ~300 bankers reskilled for small business; ~300” [E-026]. At 1.0 out of 5, Change Readiness Assessment sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.5.4",
+        "P2C1",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "5d5d76d2-fd70-40b4-ad81-dfd7cdb2f446",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-002",
+            "E-012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-002",
+        "E-012",
+        "E-056"
+      ],
+      "linked_subcap_id": "P2C1.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Abandonment Recovery a near-term focus for Regions Business Bank: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-012].",
+      "source_rec_id": "REC-02",
+      "theme": "Digital Channels",
+      "title": "Abandonment Recovery",
+      "what_text": "Abandonment Recovery is one of Regions Business Bank's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Regions Business Bank's ability to deliver a stronger, more personalised customer experience [E-002].",
+      "why_text": "scores 1.5/5 against a peer median of 3.5 on the latest assessment; this recommendation targets 6 capabilities [E-001, E-002].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.3.2",
+        "P3C4",
+        "P2C4.6.1",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "00fc0418-8a2a-40e9-aeca-b88939df3399",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-058",
+        "E-065",
+        "E-019"
+      ],
+      "linked_subcap_id": "P3C4.3.2",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make RTO/RPO Achievement a near-term focus for Regions Business Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-019].",
+      "source_rec_id": "REC-03",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "RTO/RPO Achievement",
+      "what_text": "RTO/RPO Achievement is one of Regions Business Bank's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Regions Business Bank's ability to deliver more efficient, dependable operations [E-065].",
+      "why_text": "scores 1.5/5 against a peer median of 3.0 on the latest assessment; this recommendation targets 6 capabilities [E-058, E-065].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C1.6.3",
+        "P3C1",
+        "P2C4.6.1",
+        "P3C1.2.5",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "ccc9e78c-b3b4-4d79-afb2-e0bf8366587c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-001",
+            "E-007",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-011",
+        "E-059",
+        "E-007",
+        "E-009",
+        "E-060"
+      ],
+      "linked_subcap_id": "P3C1.6.3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Unattended Automation a near-term focus for Regions Business Bank: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": "REC-04",
+      "theme": "Core Automation",
+      "title": "Unattended Automation",
+      "what_text": "Unattended Automation is one of Regions Business Bank's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Regions Business Bank's ability to deliver more efficient, dependable operations [E-001].",
+      "why_text": "The assessment found: “2025 Investor materials confirm active technology investments with checkbox status:” [E-011]. At 1.5 out of 5, Unattended Automation sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2.9.1",
+        "P2C2",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "e677d877-cc54-4e82-9d90-3bb9297b7bf5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-054"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-057"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-049",
+        "E-057",
+        "E-053",
+        "E-008",
+        "E-054",
+        "E-052"
+      ],
+      "linked_subcap_id": "P2C2.9.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make 1033/Open Banking API Compliance a near-term focus for Regions Business Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-057].",
+      "source_rec_id": "REC-05",
+      "theme": "Customer Journeys & Servicing",
+      "title": "1033/Open Banking API Compliance",
+      "what_text": "1033/Open Banking API Compliance is one of Regions Business Bank's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Regions Business Bank's ability to deliver a stronger, more personalised customer experience [E-049].",
+      "why_text": "scores 1.5/5 against a peer median of 3.0 on the latest assessment; this recommendation targets 6 capabilities [E-010, E-049].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P2C2.2.CL1",
+        "P3C1.8.CL4",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "40fa3524-c422-4f8f-8633-48bb6fa63211",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-004",
+            "E-006",
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-022",
+        "E-084",
+        "E-004",
+        "E-072",
+        "E-003",
+        "E-005",
+        "E-006"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: nCino Standard Release Adoption + nCino Banking Advisor — PRIMARY engagement lever. Stated client objective. — 🔴 CRITICAL [E-022].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SAFe ART confirmed; CEO confirmed commercial loan system cloud upgrade Q2 2025. Deep…",
+      "what_text": "BYOLLM (Bring Your Own LLM) is one of Regions Business Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 4.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Regions Business Bank's ability to deliver a stronger data and technology foundation [E-019].",
+      "why_text": "The assessment found: “Regions explicitly listed 'Enhanced origination productivity: BUILT, Blooma, & nCino' as a 2022 technology investment under Corporate Investments, confirming active nCino use in commercial loan” [E-004]. The research report pins the maturity impact at: ceiling L2.5 — standard nCino releases blocked; IQ Agents inaccessible. averages 2.3/5 across its 54 scored capability (peer median ~ 4.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.5.5",
+        "P1C1.5.5",
+        "P2C2.2.CL1",
+        "P3C1.8.CL4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "bd2e5815-448f-4947-ac04-32f82731e2b3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-004",
+            "E-006",
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-004",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-084",
+        "E-004",
+        "E-003",
+        "E-009",
+        "E-011",
+        "E-006",
+        "E-086",
+        "E-083"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: nCino LOS cloud-native + Salesforce FSC + MuleSoft for Temenos integration. Window is live. — 🔴 CRITICAL [E-004].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Commercial loan system cloud upgrade confirmed — window OPEN NOW",
+      "what_text": "Business Observability & KPI Monitoring is one of Regions Business Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 4.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Regions Business Bank's ability to deliver a stronger data and technology foundation [E-084].",
+      "why_text": "The assessment found: “2025 Investor materials confirm active technology investments with checkbox status:” [E-011]. The research report pins the maturity impact at: cloud migration ceiling L3.5 ±0.3 with upward trajectory. averages 2.7/5 across its 47 scored capability (peer median ~ 4.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C3.5.5",
+        "P2C4.6.1",
+        "P2C2.2.2",
+        "P1C2.1.7",
+        "P2C3.3.RB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "3d93cdfa-4539-4be7-9611-90bc3113922a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-054"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-054"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-050",
+        "E-075",
+        "E-049",
+        "E-051",
+        "E-054"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Einstein Next Best Action via Salesforce FSC — #1 highest-probability net-new Salesforce deployment. — 🔴 CRITICAL [E-049].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "ROSIE–Salesforce NBA integration PLANNED but NOT deployed",
+      "what_text": "ROSIE = 22 ML models on IBM Interact across all channels. Roadmap confirmed: 'Regions will integrate ROSIE with Salesforce for commercial call center NBA.' 700+ bankers on IBM Banker Assist — NOT Salesforce.. In Zennify's assessment Personalized Insights scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-075].",
+      "why_text": "The research report pins the maturity impact at: ceiling L3.0 ±0.4 — backend strong; Salesforce delivery layer missing. averages 2.3/5 across its 51 scored capability (peer median ~ 3.0) on the current assessment [E-050, E-075].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.7",
+        "P3C2",
+        "P4C2.8.2",
+        "P2C2.4.FC1",
+        "P2C1.1.FC1",
+        "P1C1.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "c1967901-e271-45dd-99e8-f002f6d54c9a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-054"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-004",
+            "E-005",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-003",
+            "E-004",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-054",
+        "E-057",
+        "E-004",
+        "E-072",
+        "E-003",
+        "E-005",
+        "E-006"
+      ],
+      "linked_subcap_id": "P4C2.7",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: nCino Banking Advisor + nCino IQ Agents for ag lending — exact match to stated engagement objective. — 🔴 CRITICAL [E-057].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Ag lending: nCino deployed but headless AI absent",
+      "what_text": "Assistive AI Agent is one of Regions Business Bank's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 4.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Regions Business Bank's ability to deliver a stronger data and technology foundation [E-054].",
+      "why_text": "The research report pins the maturity impact at: at L1.0 for ag lending; ceiling L2.0 ±0.5. averages 2.5/5 across its 4 scored capability (peer median ~ 4.0) on the current assessment [E-019, E-054].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C5",
+        "P4C2.8.2",
+        "P2C4.6.1",
+        "P3C3.3.7",
+        "P3C3.3.6",
+        "P2C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "5df4dd0a-a8f7-4b54-88eb-1e7223aa5972",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-068",
+        "E-072"
+      ],
+      "linked_subcap_id": "P2C5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Regions Business Bank: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-072].",
+      "source_rec_id": null,
+      "theme": "Advice & Wealth Experience",
+      "title": "No Salesforce Data Cloud — consumer C360 gap at $157B scale",
+      "what_text": "RCLIQ covers commercial clients (350+ data elements, 100% adoption) but consumer C360 absent. Consumer Banking = 58.8% of revenue.. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes Regions Business Bank's ability to deliver a stronger, more personalised customer experience [E-068].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too [E-016, E-068].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.4",
+        "P4C4.3.2",
+        "P2C1.1.3",
+        "P1C1.2.6",
+        "P1C1.2.1",
+        "P1C1.2.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "d7e794cc-c2af-4fbc-86be-5bf8e541ba43",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-081",
+        "E-080",
+        "E-082",
+        "E-085"
+      ],
+      "linked_subcap_id": "P4C4.4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: CIAM at L2.0 ±0.5 — roadmap without platform. — Salesforce Customer Identity Cloud — open specification, no incumbent. — 🟡 HIGH [E-080].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Customer CIAM roadmap exists — no platform confirmed",
+      "what_text": "Secure Code Development is one of Regions Business Bank's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Regions Business Bank's ability to deliver a stronger data and technology foundation [E-081].",
+      "why_text": "At 2.0 out of 5, Secure Code Development sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-048, E-081].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.1.4",
+        "P3C3.8.3",
+        "P1C1.5.4",
+        "P3C2.2.CIB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "daae90f5-4822-4b40-bcf6-1c9a2476c466",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-035",
+        "E-059",
+        "E-084",
+        "E-001",
+        "E-002",
+        "E-012",
+        "E-014",
+        "E-007"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Vision Communication a near-term focus for Regions Business Bank: a scoped investment here would lift it from 2.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-084].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "CEO: no M&A interest; all capital in technology. 9–11% tech spend. Three simultaneous…",
+      "what_text": "Vision Communication is one of Regions Business Bank's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Regions Business Bank's ability to deliver sharper strategic direction and stronger oversight [E-059].",
+      "why_text": "The assessment found: “Regions reserves approximately 9-11% of revenue for technology spend — explicitly confirmed in investor materials across 2025. With ~$7.4B FY2025 revenue, this represents approximately $665M-$815M” [E-035]. The research report pins the maturity impact at: Digital Strategy ceiling L4.0 ±0.3 — executive mandate confirmed. averages 2.5/5 across its 33 scored capability (peer median ~ 3.5) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-REGIONS-20260518-0001"
+}

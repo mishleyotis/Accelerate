@@ -1,0 +1,297 @@
+{
+  "display_id": "bank-of-utah-30v2",
+  "identity": {
+    "display_id": "bank-of-utah-30v2",
+    "domain": null,
+    "hq": "Ogden, UT",
+    "lobs": [],
+    "name": "Bank of Utah",
+    "subvertical": "RB"
+  },
+  "latest_run": {
+    "assessment_date": null,
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:56.670630+00:00",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "request_id": "DMA-ASS-BKUT-20260330-V2",
+    "status": "ACTIVE"
+  },
+  "open_alerts": 0,
+  "scores": {
+    "overall": 2.7338141025641027,
+    "pillars": {
+      "P1": 2.98,
+      "P2": 2.55,
+      "P3": 2.58,
+      "P4": 2.83
+    },
+    "subcaps": [
+      {
+        "id": "P1C1.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.2",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.3",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.4",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C1.1.5",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.3",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.4",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P1C2.1.5",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P1C3.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C3.1.2",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C3.1.3",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C4.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C4.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C4.1.3",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P1C4.1.4",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C5.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C5.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P1C5.1.3",
+        "score": 1.5,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C1.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C2.1.3",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.3",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P2C3.1.4",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P2C4.1.1",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C1.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C1.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C1.1.3",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P3C2.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P3C2.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P3C2.1.3",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C3.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C3.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C3.1.3",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C3.1.4",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C4.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P3C4.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P3C4.1.3",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C1.1.1",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C1.1.2",
+        "score": 2.0,
+        "thin": false
+      },
+      {
+        "id": "P4C2.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P4C2.1.2",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C3.1.1",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P4C3.1.2",
+        "score": 3.0,
+        "thin": false
+      },
+      {
+        "id": "P4C3.1.3",
+        "score": 2.5,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.1",
+        "score": 3.5,
+        "thin": false
+      },
+      {
+        "id": "P4C4.1.2",
+        "score": 3.0,
+        "thin": false
+      }
+    ]
+  },
+  "top_platform": {
+    "fit_score": 46.2,
+    "platform_id": "tableau",
+    "short": "TBL"
+  }
+}

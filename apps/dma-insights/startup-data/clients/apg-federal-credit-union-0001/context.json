@@ -1,0 +1,851 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Apgfcu",
+      "amount": null,
+      "announced_on": "2025-08-29",
+      "body": "APGFCU acquired Members First of Maryland Federal Credit Union effective Aug 29, 2025 (announced Sep 2, 2025). Adds branches in Dundalk and Perry Hall, deepening Baltimore County footprint. Stated as 'mission-driven response to preserve financial services for Members First's loyal member base'.",
+      "closed_on": null,
+      "details": "APGFCU acquired Members First of Maryland Federal Credit Union effective Aug 29, 2025 (announced Sep 2, 2025). Adds branches in Dundalk and Perry Hall, deepening Baltimore County footprint. Stated as 'mission-driven response to preserve financial services for Members First's loyal member base'.",
+      "e_id": "E-048",
+      "event_date": "2025-08-29",
+      "id": "3cd382fe-4425-405e-a750-fcc0a67d5a0f",
+      "source_url": "https://www.apgfcu.com/about-us/news.html",
+      "status": "announced",
+      "target": "Maryland Federal Credit",
+      "title": "Apgfcu acquired Members First of Maryland Federal Credit\u2026"
+    }
+  ],
+  "entity_display_id": "apg-federal-credit-union-0001",
+  "financials": {
+    "metrics": {
+      "net_income": 25500000.0,
+      "trajectory": {
+        "branches": 19,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": null,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Workday Confirmed at Apgfcu (echoloc.ai 2026): Workday\u2026"
+          },
+          {
+            "fy": "FY2025",
+            "label": "Current 2026 Board (post David Gilbert death Oct 2025)\u2026"
+          }
+        ],
+        "fy": [
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Suitland, MD",
+        "headline": "$10.0B net income \u00b7 FY2026",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            1.0,
+            10000.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Suitland",
+      "MD"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Becky Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President / CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Stehl",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Experience Officer (CXO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Teshia Davis",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief People Officer / SVP HR"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jo Anna Shuba",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Marketing & Business Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Scott Weaver",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Wayne Beall",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Stakias",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP IT Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Faisal Shahzad",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP IT Infrastructure"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marco Miranda",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Security & Fraud"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Beth Bavis",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Business Banking"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "APG Federal Credit Union is a credit union. It reports $2.6 billion in total assets and has operated since 1938. It is regulated by NCUA and serves approximately 183,768 members through 19 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "regulatory_standing": {
+      "as_of": "2026-02-01",
+      "e_id": "E-016",
+      "label": "Clean regulatory standing",
+      "note": "Absence of enforcement = supportive evidence for P3C3 Compliance posture (per skill: 'Absence of enforcement IS informative')"
+    },
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-092",
+        "excerpt": "Indeed ratings for APGFCU: Overall 3.5/5; Culture & Values 3.5/5; Job Security & Advancement 3.5/5; Management 3.0/5; Work-Life Balance 4.0/5; Compensation & Benefits 4.5/5. Interview: Easy difficulty, Average experience",
+        "title": "Indeed ratings for APGFCU: Overall 3.5/5",
+        "type": "article",
+        "url": "https://www.indeed.com/cmp/Apg-Federal-Credit-Union"
+      },
+      {
+        "author": null,
+        "date": "2023-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-089",
+        "excerpt": "APGFCU uses Kadince (both Community Module + Marketing Module) \u2014 a credit-union-specific marketing compliance and project management platform. Since 2020, all marketing materials (flyers, posters, social media posts, vid",
+        "title": "Apgfcu uses Kadince (both Community Module + Marketing Module) \u2014 a\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/pulse/how-kadince-helped-apg-federal-credit-union-go-from-averaging-"
+      },
+      {
+        "author": null,
+        "date": "2023-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-065",
+        "excerpt": "APGFCU launched a Virtual Branch Team (Virtual Teller Center) in 2023, providing high-tech services to improve member experience. New service delivery model introduced as 'new chapter for employee empowerment' \u2014 digital ",
+        "title": "Apgfcu launched a Virtual Branch Team (Virtual Teller Center)",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/apgfcu_on-wednesday-apg-federal-credit-union-had-activity-7453093885993598977-9cWv"
+      },
+      {
+        "author": "Kevin Stehl",
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-111",
+        "excerpt": "Kevin Stehl (CXO) LinkedIn activity signals: Actively promotes 'Q1-2025 CU Peer Benchmark Dashboard' \u2014 a credit union benchmarking analytics tool ('See how your CU stacks up against peers; Spot hidden performance gaps; U",
+        "title": "Kevin Stehl (CXO) LinkedIn activity signals: promotes Q1-2025 CU Peer\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/in/kevinstehl/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "e32af74a-e215-4925-aff7-5f49007fe424",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "[E-057-E-062] found in Section 6 P1 pillar deep dive (P1C5.5.1). Governance spec requires explicit enumeration of all referenced IDs."
+    },
+    {
+      "id": "ecc01f92-6818-4cae-b9c4-9cb9d0913425",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "383/707 subcaps (54.2%) have caps_applied flags set. DC-04 threshold is 30%. However: this assessment is PUBLIC mode with 83.9% T1/T2 evidence. Evidence ceiling caps (T3-only \u2192 max M3.0) are applied structurally when evidence tiers cannot support higher scores. Cap content shows all caps are evidence-ceiling or sentiment-based \u2014 no arbitrary or unexplained caps found."
+    },
+    {
+      "id": "91f9dc27-6bdd-4dda-aeaf-8c65a338fb2f",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "6/50 sampled subcap rationales lacked direct E-ID citations (inline E-xxx format). 16/50 lacked explicit institution-specific technology/executive markers (concentrated in P1C5 ESG subcaps where framework language dominates). Not a systemic failure \u2014 concentrated in ESG subcaps."
+    },
+    {
+      "id": "bf9690e4-37e3-426c-84a8-6aba7d595d45",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Initial PV-03 detection found only 26% with classic counterclaim language ('however','despite'). Qualitative inspection and broad-marker recheck found 100% of rationales contain limitation/absence/gap language constituting valid counterclaims in the DMA rationale format. Root cause: detection marker set too narrow."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Most recent reported financials: $10.0B net income as of FY2026, within a series tracked FY2025 to FY2026.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.64,
+        "P1C3": 2.34,
+        "P1C4": 2.77,
+        "P1C5": 2.0,
+        "P2C1": 2.54,
+        "P2C2": 2.57,
+        "P2C3": 2.79,
+        "P2C4": 2.31,
+        "P3C1": 2.36,
+        "P3C2": 2.5,
+        "P3C3": 2.59,
+        "P3C4": 2.81,
+        "P4C1": 1.73,
+        "P4C2": 1.73,
+        "P4C3": 2.06,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.41,
+      "peer_name": "CCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 2.02,
+        "P1C3": 2.18,
+        "P1C4": 2.29,
+        "P1C5": 1.79,
+        "P2C1": 2.3,
+        "P2C2": 2.34,
+        "P2C3": 2.47,
+        "P2C4": 2.33,
+        "P3C1": 2.48,
+        "P3C2": 2.71,
+        "P3C3": 2.62,
+        "P3C4": 2.59,
+        "P4C1": 2.48,
+        "P4C2": 2.58,
+        "P4C3": 2.57,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.39,
+      "peer_name": "Mission Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.93,
+        "P1C2": 2.61,
+        "P1C3": 2.14,
+        "P1C4": 2.17,
+        "P2C1": 2.27,
+        "P2C2": 2.33,
+        "P2C3": 2.58,
+        "P2C4": 2.53,
+        "P3C1": 2.58,
+        "P3C2": 2.54,
+        "P3C3": 3.0,
+        "P3C4": 2.38,
+        "P4C1": 2.04,
+        "P4C2": 1.71,
+        "P4C3": 2.38,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.37,
+      "peer_name": "AAFCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.94,
+        "P1C2": 2.89,
+        "P1C3": 2.4,
+        "P1C4": 2.38,
+        "P1C5": 1.86,
+        "P2C1": 1.89,
+        "P2C2": 2.4,
+        "P2C3": 2.81,
+        "P2C4": 1.37,
+        "P3C1": 2.39,
+        "P3C2": 2.38,
+        "P3C3": 2.86,
+        "P3C4": 2.41,
+        "P4C1": 1.88,
+        "P4C2": 1.88,
+        "P4C3": 2.45,
+        "P4C4": 2.98
+      },
+      "overall_score": 2.36,
+      "peer_name": "Hudson Valley Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.49,
+        "P1C2": 1.98,
+        "P1C3": 1.99,
+        "P1C4": 2.24,
+        "P1C5": 1.11,
+        "P2C1": 1.95,
+        "P2C2": 2.25,
+        "P2C3": 1.86,
+        "P2C4": 1.48,
+        "P3C1": 2.31,
+        "P3C2": 2.83,
+        "P3C3": 3.03,
+        "P3C4": 2.29,
+        "P4C1": 1.9,
+        "P4C2": 1.92,
+        "P4C3": 2.79,
+        "P4C4": 3.12
+      },
+      "overall_score": 2.21,
+      "peer_name": "Global Federal Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-APGFCU-20260504-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Infrastructure at APGFCU since June 2022 (3.5+ year tenure) Glassdoor: 3.5/5 overall rating from 40+ reviews; 57% would recommend; comp/benefits 3.9/5; work-life 3.2/5; culture 3.4/5; career opps 3.1/5; 62% positive business outlook Employe",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 40,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.5
+      },
+      {
+        "drilldown": "Operations, Member Loan Center, IT, Home Loan Center \u2014 Indeed APGFCU reviews: training department called excellent; 'opportunities for advancement are plentiful'; benefits considered top differentiator APGFCU operates 19 physical branches \u2014",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Becky Smith named to Baltimore Business Journal Faces to Watch 2026 list. Key quote from context: 'APGFCU will double its investment in digital in 2025.' \u2014 strongest public signal of innovation funding commitment (P1C3.5).",
+      "date_precision": "year",
+      "e_id": "E-064",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "641fed23-be67-4dba-9621-f78ffc06272e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.mddccua.org/2026/01/apg-fcus-ceo-named-to-bbj-faces-to-watch-2026-list/",
+      "subcap_ids": [
+        "P1C3.5"
+      ],
+      "title": "Becky Smith named to Baltimore Business Journal Faces"
+    },
+    {
+      "body": "WORKDAY CONFIRMED at APGFCU (echoloc.ai 2026): Workday deployed for HR and Finance functions. This is a major enterprise ERP. Significance: (1) Workday HR overlaps with Salesforce Talent Intelligence (less relevant pitch for FSC). (2) Workday Finance provides general ledger and budgeting. (3) Workday + Corelation + Q2 = three major enterprise platforms requiring integration. MuleSoft is the natural integration layer.",
+      "date_precision": "year",
+      "e_id": "E-112",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-112"
+      ],
+      "id": "74d80cba-e805-4f71-bb1f-de86b859de7e",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://echoloc.ai/company/apgfcu/",
+      "subcap_ids": [],
+      "title": "Workday Confirmed at Apgfcu (echoloc.ai 2026): Workday\u2026"
+    },
+    {
+      "body": "Kevin Stehl (CXO) LinkedIn activity signals: Actively promotes 'Q1-2025 CU Peer Benchmark Dashboard' \u2014 a credit union benchmarking analytics tool ('See how your CU stacks up against peers; Spot hidden performance gaps; Understand loyalty signals'). Named a 'Top AI Marketing Leader' in Callan Consulting's 2026 State of AI Report. Topics: GEO/AEO shifts, 'Born in AI' companies, AI ROI challenges. Active analytics thought leader and external fintech advisor.",
+      "date_precision": "year",
+      "e_id": "E-111",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-111"
+      ],
+      "id": "e6fb42dd-7df8-4ec9-ae06-be4710747058",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/in/kevinstehl/",
+      "subcap_ids": [],
+      "title": "Named a 'Top AI Marketing Leader' in Callan Consulting's\u2026"
+    },
+    {
+      "body": "M&A integration framing for Members First of Maryland FCU (merged Aug-Sep 2025, member conversion Mar 31 2026): APGFCU described as 'blending of shared values' and 'member-first philosophy.' Merger framed as cultural alignment (shared co-op values). 7-month integration runway. No formal named CM methodology (Kotter/ADKAR) disclosed publicly.",
+      "date_precision": "day",
+      "e_id": "E-071",
+      "event_date": "2026-03-31",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "87905f44-c3f4-4b90-bb3c-14f5fca5dd26",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://thecudaily.com/apgfcu-completes-merger-with-members-first-of-maryland/",
+      "subcap_ids": [],
+      "title": "M&A integration framing for Members First of Maryland FCU\u2026"
+    },
+    {
+      "body": "NCUA Enforcement Actions database search: NO actions, consent orders, or prohibitions found against APG Federal Credit Union or any APGFCU-named individual in current or recent enforcement records \u2014 clean regulatory record",
+      "date_precision": "publish_fallback",
+      "e_id": "E-016",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "d1ef0c1e-ee1d-44a4-b623-a39d2a3b444b",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://ncua.gov/news/enforcement-actions",
+      "subcap_ids": [],
+      "title": "NCUA Enforcement Actions database search: NO actions\u2026"
+    },
+    {
+      "body": "APGFCU adopted Scienaptic AI's regulatory-compliant credit decisioning platform (announced Nov 12, 2025) to enable faster lending decisions, streamline credit processes, and extend lending to underserved members. Scienaptic is an established CUSO with 'rigorous risk and fair lending monitoring processes'.",
+      "date_precision": "day",
+      "e_id": "E-029",
+      "event_date": "2025-11-12",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "f4ed4bf1-a1dc-4d0f-b124-9a2b56a81eb6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20251110346324/en/APG-Federal-Credit-Union-Selects-Scienaptic-AI-to-Enhance-Inclusive-Credit-Decisioning",
+      "subcap_ids": [],
+      "title": "Apgfcu adopted Scienaptic AI's regulatory-compliant credit\u2026"
+    },
+    {
+      "body": "Beth Bavis appointed VP Business Banking (June 13, 2025) succeeding Debi Williams (retiring Aug 2025) \u2014 formal succession planning signal. Plus Kimberly Austing + Michael Galeone hired as Business Banking Loan Officers (Nov 5, 2025) bringing 50+ combined years",
+      "date_precision": "day",
+      "e_id": "E-051",
+      "event_date": "2025-11-05",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "841793c6-3556-41cf-a917-aa7bcc350c88",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/about-us/news.html",
+      "subcap_ids": [],
+      "title": "Kimberly Austing + Michael Galeone hired as Business\u2026"
+    },
+    {
+      "body": "Current 2026 Board (post David Gilbert death Oct 2025): Donald J. Burnett (Chair), Timothy A. Sherwood (Vice Chair), Emanuel C. Hatton (Secretary), Cheryl D. Rice (Treasurer), Sherif Eskaros (Asst Treasurer \u2014 promoted from Associate Director), B. Daniel DeMarinis, Michael L. Dixon LTC Ret., Paul D. Eikenberg, Wayne G. Taylor + Associate Directors Gerald Ernest, Kurt Wilhelm",
+      "date_precision": "month",
+      "e_id": "E-031",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "83f4f90c-d3a5-43db-b076-4de9270d2dde",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/about-us/volunteers.html",
+      "subcap_ids": [],
+      "title": "Current 2026 Board (post David Gilbert death Oct 2025)\u2026"
+    },
+    {
+      "body": "APGFCU acquired Members First of Maryland Federal Credit Union effective Aug 29, 2025 (announced Sep 2, 2025). Adds branches in Dundalk and Perry Hall, deepening Baltimore County footprint. Stated as 'mission-driven response to preserve financial services for Members First's loyal member base'.",
+      "date_precision": "day",
+      "e_id": "E-048",
+      "event_date": "2025-08-29",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "3cd382fe-4425-405e-a750-fcc0a67d5a0f",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/about-us/news.html",
+      "subcap_ids": [],
+      "title": "Apgfcu acquired Members First of Maryland Federal Credit\u2026"
+    },
+    {
+      "body": "NEW Loan Payment Portal launched 2025: 'one-time secure payments from your APGFCU account, debit card, or external accounts'; combined with online/mobile banking recurring payment scheduling \u2014 concrete P3C1 self-service automation outcome",
+      "date_precision": "year",
+      "e_id": "E-049",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "4053fbfc-094e-410c-a023-c1c291a0ec0d",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/content/docs/MemberNews_Fall_2025_web_v2.pdf",
+      "subcap_ids": [],
+      "title": "NEW Loan Payment Portal launched 2025"
+    },
+    {
+      "body": "APGFCU LAUNCHED AN EMPLOYEE VOLUNTEERISM PROGRAM in 2025 \u2014 staff get regular opportunities to leave the office and support nonprofit organizations across the service area. First formal employee volunteer program.",
+      "date_precision": "year",
+      "e_id": "E-057",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "6ca4984b-340d-4b3d-9351-d8c3ff1eea4d",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/content/docs/APGFCU-Annual-2025-WEB.pdf",
+      "subcap_ids": [],
+      "title": "Staff get regular opportunities to leave the office and\u2026"
+    },
+    {
+      "body": "2025 TECHNOLOGY UPGRADES confirmed in Annual Report: (1) Guest Loan Payment feature (2025) \u2014 no login required for loan payments, P3C1 automation. (2) SavvyMoney Instant Access launched 2025 \u2014 94,672 members enrolled; 84% are Credit Steady or Credit Savvy. SavvyMoney is now NAMED VENDOR (previously inferred). (3) Digital team launched 15+ enhancements; improved transaction limits, check-hold policies, credit score expansion.",
+      "date_precision": "year",
+      "e_id": "E-098",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-098"
+      ],
+      "id": "958a9fe0-d614-4c32-90fe-ff2ce6469b60",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/content/docs/APGFCU-Annual-2025-WEB.pdf",
+      "subcap_ids": [],
+      "title": "94,672 members enrolled"
+    },
+    {
+      "body": "Smith named to Baltimore Business Journal's PowerShift Leaders list and Faces to Watch (2025) \u2014 external recognition signals",
+      "date_precision": "year",
+      "e_id": "E-036",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "1c03ca15-c391-4c68-89f6-e19fc323507e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/post/becky_smith_appointed_new_president_ceo_of_apgfcu.html",
+      "subcap_ids": [],
+      "title": "Smith named to Baltimore Business Journal's PowerShift\u2026"
+    },
+    {
+      "body": "Kevin Stehl appointed Chief Experience Officer at APGFCU in July 2025 \u2014 NEW role; LinkedIn location: Greater Philadelphia",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "ae0d394e-c756-4f3f-b4e4-67f2b874c291",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/in/kevin-stehl-89013aa/",
+      "subcap_ids": [],
+      "title": "Kevin Stehl appointed Chief Experience Officer"
+    },
+    {
+      "body": "APGFCU established a NEW DIGITAL TEAM in 2025 that launched 15+ digital banking enhancements: guest loan payment feature, transaction limits/check-hold policy improvements, free credit score for all online and mobile banking users",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "ff8cd424-8d68-496c-9c11-1bb500a97838",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/content/docs/APGFCU-Annual-2025-WEB.pdf",
+      "subcap_ids": [],
+      "title": "Apgfcu established a NEW Digital that launched 15+ digital\u2026"
+    },
+    {
+      "body": "Beth Bavis appointed VP Business Banking (June 13, 2025) succeeding Debi Williams (retiring Aug 2025) \u2014 formal succession planning signal. Plus Kimberly Austing + Michael Galeone hired as Business Banking Loan Officers (Nov 5, 2025) bringing 50+ combined years",
+      "date_precision": "day",
+      "e_id": "E-051",
+      "event_date": "2025-06-13",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "aeae0901-84ed-4612-aac9-b6ab6bbb57d6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/about-us/news.html",
+      "subcap_ids": [],
+      "title": "Beth Bavis appointed VP Business Banking (June 13, 2025)"
+    },
+    {
+      "body": "Marco Miranda Sr. appointed VP Security and Fraud (May 22, 2025) \u2014 30+ years law enforcement experience, 9 years healthcare corporate security director designing/implementing 24/7 command center connected to local first responder networks; covered Stanley Black & Decker, UPS, Perdue clients",
+      "date_precision": "day",
+      "e_id": "E-030",
+      "event_date": "2025-05-22",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "2cc2538d-1694-44db-b63b-ffbd54efabe4",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.apgfcu.com/post/apgfcu_hires_marco_miranda_sr_as_vice_president_of_security_and_fraud.html",
+      "subcap_ids": [],
+      "title": "Marco Miranda Sr appointed VP Security and Fraud (May 22\u2026"
+    },
+    {
+      "body": "Teshia Davis appointed Chief People Officer at APGFCU in April 2025; previous role at SECU MD (Maryland's largest CU) \u2014 talent flow from peer",
+      "date_precision": "month",
+      "e_id": "E-012",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "627a9057-2f91-4b92-bb06-03271d2deabd",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/in/teshia-d-6964a26/",
+      "subcap_ids": [],
+      "title": "Teshia Davis appointed Chief People Officer"
+    },
+    {
+      "body": "Becky Smith appointed President/CEO of APGFCU (Jan 2025). Per LinkedIn bio: 'Experienced senior executive with a demonstrated history of working in the financial services, retail, high tech and healthcare industries supporting over 30 Fortune 500 organizations. Skilled in Leading Cross-Functional Teams across Strategy, Marketing, Retail Banking, Business Intelligence, Customer Experience, Employee Experience & Culture Building, DIGITAL TRANSFORMATION, Call Center Optimization, Sales, and Business Development.' \u2014 DIRECT digital transformation experience",
+      "date_precision": "month",
+      "e_id": "E-036",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "17f58318-bac5-4b4f-a545-82c3b9edb143",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/post/becky_smith_appointed_new_president_ceo_of_apgfcu.html",
+      "subcap_ids": [],
+      "title": "Becky Smith appointed President/CEO of Apgfcu ("
+    },
+    {
+      "body": "SECU MD named Forbes Best-In-State CU 2024 + Newsweek America's Best Regional CU 2024-2025 (consecutive years)",
+      "date_precision": "year",
+      "e_id": "E-019",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "e723b43e-e758-4ec8-a21d-1bf0bedb44c4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.secumd.org/news/secu-md-named-to-forbes-list-of-best-in-state-credit-unions-for-2024/",
+      "subcap_ids": [],
+      "title": "SECU MD named Forbes Best-In-State CU 2024 + Newsweek\u2026"
+    },
+    {
+      "body": "DIRECT QUOTE (CEO message): 'Improving service delivery is one of the key initiatives of a larger five-year strategic plan launched in 2024. Other areas of focus include elevating member satisfaction, deepening member relationships and maximizing our community impact.' Confirms 5-year STRATEGIC PLAN with 4 named focus areas.",
+      "date_precision": "year",
+      "e_id": "E-028",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "fb5f1711-9a8c-4110-98cb-58e33aecb8ea",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/about-us/what-is-a-credit-union.html",
+      "subcap_ids": [],
+      "title": "Direct Quote (CEO message): 'Improving service delivery is\u2026"
+    },
+    {
+      "body": "2023: nearly $2.3B in assets, ranked 5th-largest Maryland CU, named #1 Forbes Best-In-State Credit Union in Maryland 2023",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "14f3692e-ecb6-43da-87e9-3d938ceaceb8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/content/docs/APGFCU-Annual-Report-2023-WEB-PDF.pdf",
+      "subcap_ids": [],
+      "title": "2023: nearly $2.3B in assets, ranked 5th-largest Maryland\u2026"
+    },
+    {
+      "body": "APGFCU ranked #1 Maryland Best-In-State CU by Forbes: 2023 (4th year, 31K+ consumers surveyed), 2024 (5th year, 26K surveyed \u2014 announced by Interim CEO Chuck Kelly), 2025 (6th year, 26K surveyed \u2014 Becky Smith quote). Criteria: trust/transparency, terms/conditions, branch services, digital services, customer service. Sustained #1 position signals member satisfaction across all service channels.",
+      "date_precision": "year",
+      "e_id": "E-075",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "1df8aa26-650a-4e56-9814-8404eeb76b1a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/post/apgfcu_ranked_as_a_maryland_best_in_state_credit_union_by_forbes_in_2025.html",
+      "subcap_ids": [],
+      "title": "Apgfcu ranked #1 Maryland Best-In-State CU"
+    },
+    {
+      "body": "APGFCU launched a Virtual Branch Team (Virtual Teller Center) in 2023, providing high-tech services to improve member experience. New service delivery model introduced as 'new chapter for employee empowerment' \u2014 digital innovation delivery capability signal.",
+      "date_precision": "year",
+      "e_id": "E-065",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-065"
+      ],
+      "id": "4897f4aa-3761-4bd8-9454-768b1b1e4322",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/posts/apgfcu_on-wednesday-apg-federal-credit-union-had-activity-7453093885993598977-9cWv",
+      "subcap_ids": [],
+      "title": "Apgfcu launched a Virtual Branch Team (Virtual Teller\u2026"
+    },
+    {
+      "body": "PAGE TITLE DIRECTLY STATES: 'Q2 Online and Mobile Banking Upgrade: Intuit QuickBooks, Quicken and Mint Instructions' \u2014 CONFIRMS Q2 Holdings is APGFCU's digital banking platform vendor for both online and mobile banking. Q2 launched at APGFCU in February 2023 (online/mobile) with core conversion to Corelation KeyStone on May 1, 2023. Both part of a single 2022-planned technology transformation program.",
+      "date_precision": "day",
+      "e_id": "E-082",
+      "event_date": "2023-05-01",
+      "evidence_e_ids": [
+        "E-082"
+      ],
+      "id": "43ab8a02-cb26-4bc4-830b-cb995a84ea19",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.apgfcu.com/save/online-and-mobile-banking/online-and-mobile-banking-upgrade-intuit-quickbooks-quicken-and-mint-instructions.html",
+      "subcap_ids": [],
+      "title": "Q2 launched at Apgfcu"
+    },
+    {
+      "body": "2022 Annual Report and Spring 2023 Member News detail two-phase 2023 technology transformation: Phase 1: Online and mobile banking upgrade (Q2) launched February 2023. Phase 2: Core data processing system upgrade (Corelation KeyStone) April 28-May 1, 2023. Both planned in 2022. System downtime of 3 days for core conversion. Supports Intuit QuickBooks (Web Connect + Express Web Connect; NOT Direct Connect).",
+      "date_precision": "month",
+      "e_id": "E-084",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-084"
+      ],
+      "id": "f7700512-ece7-4bb6-ac65-8a6c598c0e16",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://apgfcu.com/content/docs/MemberNews_Spring2023_web.pdf",
+      "subcap_ids": [],
+      "title": "2022 Annual Report and Spring 2023 Member News detail\u2026"
+    },
+    {
+      "body": "Joelle Hash \u2014 Chief Operations Officer at APGFCU since May 1991 (34+ years tenure). Promoted from SVP Member Services (2022 designation) to COO. Continuity signal at executive level.",
+      "date_precision": "year",
+      "e_id": "E-039",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "510085c4-69b9-4bca-880c-2feffccb2a65",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/joelle-hash-8767367",
+      "subcap_ids": [],
+      "title": "Promoted from SVP Member Services (2022 designation) to COO"
+    },
+    {
+      "body": "APGFCU uses Kadince (both Community Module + Marketing Module) \u2014 a credit-union-specific marketing compliance and project management platform. Since 2020, all marketing materials (flyers, posters, social media posts, videos) flow through Kadince for review and approval. 1,003 marketing projects completed in 2021 (up from 790 in 2020). Kadince handles automated approval workflows, project history, audit trails, remote work enablement.",
+      "date_precision": "year",
+      "e_id": "E-089",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-089"
+      ],
+      "id": "ccecb1ac-6e4a-43b2-aacf-1fbf7395ecbc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/pulse/how-kadince-helped-apg-federal-credit-union-go-from-averaging-",
+      "subcap_ids": [],
+      "title": "1,003 marketing projects completed in 2021 (up from 790 in\u2026"
+    },
+    {
+      "body": "APGFCU 'Ram Branch' at Edgewood High School/Academy of Finance \u2014 FIRST student-run credit union in Harford County, opened February 2012. EHS/AOF juniors/seniors serve as tellers and run daily operations (new accounts, deposits, withdrawals, transfers). Same hiring process as regular APGFCU applicants. Cecil College branch (full-service) employs Cecil students. Two campus branches = deepest community financial education program in Maryland of any credit union.",
+      "date_precision": "month",
+      "e_id": "E-096",
+      "event_date": "2012-02-01",
+      "evidence_e_ids": [
+        "E-096"
+      ],
+      "id": "5a08beac-7aab-4cfd-929f-5dc120cbf5d8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.apgfcu.com/about-us/in-the-community.html",
+      "subcap_ids": [],
+      "title": "Apgfcu 'Ram Branch' at Edgewood High School/Academy of\u2026"
+    }
+  ]
+}

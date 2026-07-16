@@ -1,0 +1,1109 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 185,
+        "subcaps": 185,
+        "thin": 163
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 222,
+        "subcaps": 222,
+        "thin": 208
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 111,
+        "subcaps": 111,
+        "thin": 91
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 139
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "interactive-brokers-grou-0001",
+    "domain": null,
+    "hq": null,
+    "id": "0bb0523c-5a51-4a67-b0b3-feeb0d589758",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Interactive Brokers Group, Inc.",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RIA",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:12:03.385977Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 25,
+    "current_count": 25,
+    "dated_count": 9,
+    "median_age_months": 16.8,
+    "oldest_published_date": "2020-08-01",
+    "stale_count": 2,
+    "stale_pct": 2.33,
+    "total": 86,
+    "undated_count": 25
+  },
+  "evidence_summary": {
+    "claims": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 28,
+      "POSITIVE": 56
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 1,
+      "LinkedIn": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 6,
+      "NEUTRAL": 72,
+      "POSITIVE": 8
+    },
+    "tiers": {
+      "T1": 31,
+      "T2": 38,
+      "T3": 9,
+      "T4": 3,
+      "T5": 5
+    },
+    "total_facts": 421,
+    "total_items": 86
+  },
+  "financial_trajectory": {
+    "cagr": "21.8%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "IBKR exhibits ACCELERATING growth across all key metrics. Revenue grew at a 21.8% CAGR from 2021 to 2025 — driven by interest income on $780B in client equity and fee-compression-p",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 158000000000.0,
+    "cagr": "21.8%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "3100",
+    "financial_highlights": {
+      "lines": [
+        "IBKR exhibits ACCELERATING growth across all key metrics. Revenue grew at a 21.8% CAGR from 2021 to 2025 — driven by interest income on $780B in client equity and fee-compression-proof volume growth. The 79% pretax margin is the highest in the broker-dealer sector and a direct consequence of the proprietary, automated architecture. Most critically, 2025 delivered a record 1 million net new accounts — validating that the platform's scale advantage compounds with each new client.",
+        "IBKR exhibits ACCELERATING growth trajectory (2021-2025). Revenue CAGR of 21.8% driven primarily by interest income on growing client equity base. The 79% pretax margin reflects the automation advantage: 3,100 employees serve 4.4M accounts ($780B equity) — a structural efficiency that no traditional brokerage can replicate."
+      ],
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 3100,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Q4 2025 strategic highlights: 24/7 Stablecoin account…"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$15M net income · FY2025",
+        "regulator": "FCA (UK), ESMA (EU), ASIC (Australia), SFC (Hong Kong), MAS",
+        "series": {
+          "net_income_m": [
+            88.0,
+            205000.0,
+            3500.0,
+            4300.0,
+            5200.0,
+            15.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "founded": 1977,
+    "headcount": 3100,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Thomas Peterffy",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Founder & Executive Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Milan Galik",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Paul Brody",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Dr. Thomas Frank",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP & Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Somayajulu 'Soma' Bulusu",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Executive Vice President, Technology"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Dr. Boris Kogan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Information Security Officer (CISO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Colin Clarke",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Group Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jonathan Gelman",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Alamgir Hasan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Head of Technology & Cyber Risk"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Interactive Brokers Group, Inc.",
+    "license_type": "Internationally regulated broker-dealer",
+    "narrative_md": "IBKR is the technology-first broker that has spent 48 years building every system in-house. Unlike peers who acquired capabilities through M&A, IBKR's moat is proprietary automation at scale — and that same proprietary model now creates a Salesforce engagement opportunity as the firm enters its first-ever external technology transformation phase.",
+    "primary_regulator": "FCA (UK), ESMA (EU), ASIC (Australia), SFC (Hong Kong), MAS",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 19000000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 5,
+          "score": 1.6,
+          "source": "Better Business Bureau"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 712,
+          "scale": 5,
+          "score": 3.7,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.6,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "Glassdoor: 3.7/5.0 overall (712 reviews); 3.2/5.0 culture & values; 3.5/5.0 WLB; 3.1/5.0 career opportunities",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.6/5",
+          "signal": "Indeed: 3.6/5.0 overall; WLB 3.2; culture & values 3.2; management 3.4; compensation 3.8",
+          "source": "Indeed"
+        },
+        {
+          "signal": "5,222 Trustpilot reviews for Interactive Brokers",
+          "source": "Trustpilot"
+        },
+        {
+          "rating": "1.6/5",
+          "signal": "BBB: A+ rating but 1.6/5 customer reviews (heavily complaint-biased)",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "large",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-022",
+        "excerpt": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant portfolio insights via natural language queries — 'What sector am I underweight vs S&P 500?' — CEO Galik quoted at launch.",
+        "title": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant…",
+        "type": "article",
+        "url": "https://www.businesswire.com/news/home/20251015991473/en/Interactive-Brokers-Launches-Ask-IBKR-AI-Tool-Delivers-Instant-Portfolio-Answers"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-033",
+        "excerpt": "IBKR Campus: 8 pillars including Traders' Academy, Traders' Insight, IBKR Quant, webinars, podcasts, Student Trading Lab, Coursera integration. Free to clients and public.",
+        "title": "IBKR Campus: 8 pillars including Traders' Academy, Traders' Insight…",
+        "type": "podcast",
+        "url": "https://www.interactivebrokers.com/campus/trading-lessons/ibkr-campus-education-and-tutorials/"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "IBKR social media presence: Facebook, Instagram, LinkedIn, X (Twitter), YouTube, TikTok (US/World); Facebook, Instagram, X, TikTok (UK/Europe) — active multi-platform strategy.",
+        "title": "IBKR social media presence: Facebook, Instagram, LinkedIn, X…",
+        "type": "linkedin-post",
+        "url": "https://finance.yahoo.com/news/interactive-brokers-launches-zero-commission-020000901.html"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "stockbrokers.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v2.4",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:34.834793+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Interactive Brokers Group, Inc. — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "This section applies the Zennify Six-Factor Priority Formula to all below-median capabilities, producing a ranked priority register. The formula weights business impact (25%), risk exposure (20%), competitive gap (20%), effort inverse (15%), quick win potential (10%), and trend momentum (10%). Scores ≥8.0 = CRITICAL; 6.0-7.9 = HIGH; 4.0-5.9 = MEDIUM.",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Interactive Brokers Group, Inc. is a $158.0B in assets brokerage regulated by FCA (UK), ESMA (EU), ASIC (Australia), SFC (Hong Kong), MAS, operating since 1977 with 3,100 employees. A 21.8% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-047, E-065]. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is Website Quality at 1.8/5 against a 3.2 peer median [E-037, E-020].\n\nNext is Reference Data Management at 2.1/5 against a 2.7 peer median [E-081, E-084]. Third is Personalized Insights at 2.2/5 against a 2.7 peer median [E-052, E-022]. The issue register adds 'No CDO' pattern detected in rationales for capability (Data Governance within Governance & Risk)… (high severity). The issue register adds caps_applied_log.csv absent as standalone CSV file. Cap data embedded in scoring_scratchpad.json and IBKR_DMA_Assessment_Workbook_v1.xlsx… (high severity).\n\nThe roster shows no CDO — a named ownership gap for the capabilities below. The question for Interactive Brokers Group, Inc. is whether to close Website Quality first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Interactive Brokers Group, Inc. should lead with Tableau (72/100 fit) against Digital Marketing Strategy Document, then sequence nCino behind it.\n\nClosing Website Quality to the peer median alone is worth 1.4 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.37,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.327358+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/IBKR_CPR_Evidence_Source.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.334300+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.334724+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.334914+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.335171+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.335423+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/IBKR_GOV_Patch_Block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.339610+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.340047+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.340307+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:03.340518+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 3,
+      "INFO": 22
+    },
+    "stage_ms": {
+      "manifest": 12,
+      "parse": 5582,
+      "persist": 2546
+    },
+    "structured": [
+      {
+        "code": "run_manifest from case-insensitive verdict fallback",
+        "detail": "run_manifest from case-insensitive verdict fallback: 07_governance/IBKR_GOV_QA_Verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "run_id format",
+        "detail": "run_id format: unrecognized run_id format: 'DMA-SCORE-IBKR-20260514-0001'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx fallback extracted 709 subcaps from IBKR_DMA_Assessment_Wor",
+        "detail": "xlsx fallback extracted 709 subcaps from IBKR_DMA_Assessment_Workbook_v1.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (709 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (709 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from non-canonical layout IBKR_CPR_Evidence_Sour",
+        "detail": "evidence loaded from non-canonical layout IBKR_CPR_Evidence_Source.json (86 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: IBKR_Explorium_TechStack.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=Research Report.docx leadership=9 focus_areas=2 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 3 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:employees_approx",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 9",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/IBKR_CPR_Evidence_Source.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/IBKR_GOV_Patch_Block.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 8",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:20/709 subcaps unresolved against v2.4",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 9",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "run_manifest from case-insensitive verdict fallback: 07_governance/IBKR_GOV_QA_Verdict.json",
+      "run_id format: unrecognized run_id format: 'DMA-SCORE-IBKR-20260514-0001'",
+      "xlsx fallback extracted 709 subcaps from IBKR_DMA_Assessment_Workbook_v1.xlsx",
+      "scoring loaded from xlsx fallback (709 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from non-canonical layout IBKR_CPR_Evidence_Source.json (86 rows)",
+      "used variant tech stack xlsx: IBKR_Explorium_TechStack.xlsx",
+      "firmographics_from_client_profile_docx: source=Research Report.docx leadership=9 focus_areas=2 facts_extracted=0",
+      "used docx-extracted recommendations: 3 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:employees_approx",
+      "insights_from_client_profile_findings: 9",
+      "INFO/pattern_gap: 01_evidence/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/IBKR_CPR_Evidence_Source.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 04_reports/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 06_peers/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/IBKR_GOV_Patch_Block.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 07_governance/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 8",
+      "catalogue_unresolved:20/709 subcaps unresolved against v2.4",
+      "insight_cards_persisted: 9"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 185,
+      "peer_median": 3.06,
+      "pillar_id": "P1",
+      "score": 2.42,
+      "subcaps_scored": 185
+    },
+    {
+      "peer_benchmarked": 222,
+      "peer_median": 3.11,
+      "pillar_id": "P2",
+      "score": 2.15,
+      "subcaps_scored": 222
+    },
+    {
+      "peer_benchmarked": 111,
+      "peer_median": 2.95,
+      "pillar_id": "P3",
+      "score": 2.41,
+      "subcaps_scored": 111
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.02,
+      "pillar_id": "P4",
+      "score": 2.49,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": null,
+    "assessment_date_source": null,
+    "ccg_catalog_version": "v2.4",
+    "completed_at": "2026-07-02T23:12:03.385977Z",
+    "created_at": "2026-07-02T23:12:03.385977Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "d8017aad-3d0e-41b1-82de-c4029812bc08",
+    "overall_score": null,
+    "request_id": "DMA-SCORE-IBKR-20260514-0001",
+    "started_at": "2026-07-02T23:12:03.385977Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 5,
+        "score": 1.6,
+        "source": "Better Business Bureau"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 712,
+        "scale": 5,
+        "score": 3.7,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.6,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-029",
+        "E-030",
+        "E-031",
+        "E-032"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 3.0,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 2.35,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: Glassdoor: 3.7/5.0 overall (712 reviews); 3.2/5.0 culture & values; 3.5/5.0 WLB; 3.1/5.0 career opportunities. 60% recommend to a friend. Recurring positive themes: smart colleagues, no red tape, good pay, hybrid work (select roles)."
+    },
+    {
+      "body": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-036",
+        "E-037",
+        "E-020",
+        "E-023"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 3.23,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.8,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: IBKR social media presence: Facebook, Instagram, LinkedIn, X (Twitter), YouTube, TikTok (US/World); Facebook, Instagram, X, TikTok (UK/Europe) — active multi-platform strategy."
+    },
+    {
+      "body": "Reference Data Management is a priority capability gap in data and technology, scoring 2.09/5 against a peer median of 2.73. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-081",
+        "E-084",
+        "E-088",
+        "E-090"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Reference Data Management",
+      "peer_median": 2.73,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.09,
+      "so_what": "Prioritize Reference Data Management in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Reference Data Management",
+      "what": "Reference Data Management is a priority capability gap in data and technology, scoring 2.09/5 against a peer median of 2.73. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: Core data stack (LinkedIn confirmed): Oracle DBMS (relational layer) + Apache Parquet (columnar storage) = hybrid relational/columnar architecture for high-volume processing. AML pipeline: 1B+ order events + 5M+ trade events daily from 3M+ accounts."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-010"
+      ],
+      "modifiers": [
+        "141 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Data Strategy Alignment averages 2.5/5 over 166 scored subcaps; ceiling 3.0 reflects thin evidence density (25/166 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "196 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Data Classification averages 2.3/5 over 217 scored subcaps; ceiling 2.8 reflects thin evidence density (21/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-024"
+      ],
+      "modifiers": [
+        "175 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "GenAI Strategy averages 2.7/5 over 190 scored subcaps; ceiling 3.3 reflects thin evidence density (15/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-031"
+      ],
+      "modifiers": [
+        "180 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Champion Coordination averages 2.4/5 over 205 scored subcaps; ceiling 2.9 reflects thin evidence density (25/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-028"
+      ],
+      "modifiers": [
+        "104 of 122 subcaps on thin evidence"
+      ],
+      "rationale": "Social Responsibility — Subcap 3 averages 2.2/5 over 122 scored subcaps; ceiling 2.8 reflects thin evidence density (18/122 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "265 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Website Quality averages 1.8/5 over 285 scored subcaps; ceiling 2.3 reflects thin evidence density (20/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "275 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Partner Attribution & Analytics averages 2.4/5 over 285 scored subcaps; ceiling 2.9 reflects thin evidence density (10/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-049"
+      ],
+      "modifiers": [
+        "270 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Interaction History averages 2.3/5 over 285 scored subcaps; ceiling 2.8 reflects thin evidence density (15/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-052"
+      ],
+      "modifiers": [
+        "230 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Personalized Insights averages 2.2/5 over 255 scored subcaps; ceiling 2.7 reflects thin evidence density (25/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-091"
+      ],
+      "modifiers": [
+        "135 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Case Management & Resolution averages 2.5/5 over 140 scored subcaps; ceiling 3.0 reflects thin evidence density (5/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-059"
+      ],
+      "modifiers": [
+        "120 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Development Standards averages 2.5/5 over 130 scored subcaps; ceiling 3.0 reflects thin evidence density (10/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-095"
+      ],
+      "modifiers": [
+        "90 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "AML/BSA Compliance averages 2.2/5 over 140 scored subcaps; ceiling 2.9 reflects thin evidence density (50/140 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-073"
+      ],
+      "modifiers": [
+        "110 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Due Diligence Program averages 2.5/5 over 145 scored subcaps; ceiling 3.1 reflects thin evidence density (35/145 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-081"
+      ],
+      "modifiers": [
+        "165 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Reference Data Management averages 2.1/5 over 200 scored subcaps; ceiling 2.7 reflects thin evidence density (35/200 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-080"
+      ],
+      "modifiers": [
+        "255 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "AI Fairness & Explainability (XAI) averages 2.6/5 over 270 scored subcaps; ceiling 3.2 reflects thin evidence density (15/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-075"
+      ],
+      "modifiers": [
+        "185 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Pipeline Orchestration & Dependency Management averages 2.7/5 over 235 scored subcaps; ceiling 3.3 reflects thin evidence density (50/235 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [
+        "90 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Data Protection & Privacy Controls averages 2.4/5 over 150 scored subcaps; ceiling 3.0 reflects thin evidence density (60/150 full-evidence cells); band ±0.5 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "FINRA 2026 Annual Report: 'FINRA CORE launched in 2025 — identifies, assesses and shares cyber and technology risk intelligence with potentially impacted firms for vendor-related threats.' IBKR as major broker-dealer participates in FINRA risk monitoring program (Jul 2026).",
+      "evidence": [
+        "E-073"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Finra 2026 Annual Report: 'FINRA CORE launched in 2025",
+      "metric": null,
+      "peer_context": "Website Quality runs 1.80/5 vs a 3.23 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Marketing Strategy Document — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "FINRA 2026 Annual Report: 'FINRA CORE launched in 2025 — identifies, assesses and shares cyber and technology risk intelligence with potentially impacted firms for vendor-related threats.'. Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "Finra 2026 Annual Report: 'FINRA CORE launched in 2025"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Q4 2025 strategic highlights: 24/7 Stablecoin account funding deployed; GlobalTrader 2.0 mobile revamp; IBKR Desktop multi-monitor support; market expansion to Brazil, Taiwan, UAE, Slovenia; Karta Visa Infinite Card (Oct 2025); FDIC Suite doubled to $5M individual accounts (Nov 2025).",
+      "evidence": [
+        "E-091"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Q4 2025 strategic highlights: 24/7 Stablecoin account…",
+      "metric": "FDIC Suite doubled $5M",
+      "peer_context": "Website Quality runs 1.80/5 vs a 3.23 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Q4 2025 strategic highlights: 24/7 Stablecoin account funding deployed; GlobalTrader 2.0 mobile revamp; IBKR Desktop multi-monitor support; market expansion to Brazil, Taiwan, UAE, Slovenia; Karta Visa Infinite Card (Oct. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Q4 2025 strategic highlights: 24/7 Stablecoin account…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Prediction markets industry: $9B (2024) → $40B (2025). Robinhood: 11 billion contracts by Jan 2026 (March 2025-Jan 2026 = 10 months); ~$100M annualized revenue. LedgerX acquired Nov 2025. IBKR ForecastEx: 286M pairs Q4 2025 vs 15M Q3 = 19x QoQ.",
+      "evidence": [
+        "E-093"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Prediction markets industry: $9B (2024) → $40B (2025)",
+      "metric": "$9B",
+      "peer_context": "Website Quality runs 1.80/5 vs a 3.23 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Marketing Strategy Document — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Prediction markets industry: $9B (2024) → $40B (2025). Robinhood: 11 billion contracts by Jan 2026 (March 2025-Jan 2026 = 10 months); ~$100M annualized revenue. LedgerX acquired Nov 2025. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "LedgerX acquired"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "IBKR careers page states: 'Advisors and brokers use our database-driven CRM to manage the entire customer relationship life cycle, from contact to prospect to client, in one place' — confirming proprietary internal CRM in use, not a commercial platform like Salesforce.",
+      "evidence": [
+        "E-020"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "IBKR careers page states",
+      "metric": null,
+      "peer_context": "Website Quality runs 1.80/5 vs a 3.23 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "IBKR careers page states: 'Advisors and brokers use our database-driven CRM to manage the entire customer relationship life cycle, from contact to prospect to client, in one place' — confirming proprietary internal CRM. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant portfolio insights via natural language queries — 'What sector am I underweight vs S&P 500?' — CEO Galik quoted at launch (Oct 2025).",
+      "evidence": [
+        "E-022"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for…",
+      "metric": null,
+      "peer_context": "Website Quality runs 1.80/5 vs a 3.23 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Marketing Strategy Document — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant portfolio insights via natural language queries — 'What sector am I underweight vs S&P 500?' — CEO Galik quoted at launch (Oct 2025).",
+      "timeline": {
+        "date": "2025-10-15",
+        "event": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Website Quality scores 1.80/5 vs a typical 3.23 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-037",
+        "E-020",
+        "E-023",
+        "E-033"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Website Quality scores 1.80/5",
+      "metric": "Website Quality 1.80/5 vs peer 3.23",
+      "peer_context": "Website Quality runs 1.80/5 vs a 3.23 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Marketing Strategy Document — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C1",
+      "text": "Website Quality scores 1.80/5 vs a typical 3.23 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

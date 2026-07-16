@@ -1,0 +1,70 @@
+{
+  "entity_display_id": "calprivate-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-0104",
+          "E-0099"
+        ],
+        "representative_quote": "[P4C2.7.1] Assistive AI Agent: Score 1.0 (M1).",
+        "source_kind": "heuristic"
+      },
+      "id": "4d1aa49e-5bb0-49a3-b271-1ee32c4746d6",
+      "involved_subcap_ids": [
+        "P4C2.7.1",
+        "P4C2.7.2",
+        "P4C2.7.3",
+        "P4C2.7.4",
+        "P4C1.4.1",
+        "P4C1.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 17 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-0044",
+          "E-0051",
+          "E-0061"
+        ],
+        "representative_quote": "[P2C1.5.1] Marketing Automation Platform",
+        "source_kind": "heuristic"
+      },
+      "id": "f54ae9ea-6179-4cff-91c1-16ca60a41b95",
+      "involved_subcap_ids": [
+        "P2C1.5.1",
+        "P2C1.5.2",
+        "P2C1.5.3",
+        "P2C1.5.4",
+        "P2C1.5.5",
+        "P2C1.5.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 7 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

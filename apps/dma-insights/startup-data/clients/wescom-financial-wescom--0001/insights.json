@@ -1,0 +1,1046 @@
+{
+  "entity_display_id": "wescom-financial-wescom--0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.1.3",
+        "P1C1.8.2",
+        "P4C3.8.CIB2",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "a939f30a-b60d-4465-9b9b-ca0935ea96ef",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-006",
+        "E-008",
+        "E-007",
+        "E-009",
+        "E-015",
+        "E-023",
+        "E-047"
+      ],
+      "linked_subcap_id": "P4C3.1.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: MuleSoft deprioritized. Salesforce CDP on Informatica pipeline. FSC+Einstein on unified 360-degree member view [E-007].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Informatica IDMC is integration backbone, not MuleSoft",
+      "what_text": "Capability dimension 3 is one of Wescom Financial (Wescom Central Credit Union)'s strongest data and technology capabilities, scoring 4.0 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver a stronger data and technology foundation [E-008].",
+      "why_text": "The assessment found: “Wescom Resources 18.7% revenue growth YoY in FY2025 24 new CUSO clients in 2025 ($28B in CU assets, 2M members)” [E-006]. The research report pins the maturity impact at: Integration maturity higher than expected; data platform is strategic asset. scores 4.0/5 against a peer median of 2.5 on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.3.1",
+        "P4C2.1.3",
+        "P2C2.10.1",
+        "P1C4.2.5",
+        "P3C3.8.1",
+        "P1C3.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "1fa943d2-ae59-453d-aa7b-f35201d5e4bc",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-028"
+      ],
+      "linked_subcap_id": "P4C4.3.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Einstein AI/Copilot as next-gen AI expansion. Service Cloud Voice + Einstein Conversation Mining natural fit [E-028].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "OpenAI in production for call center QA — beyond PoC",
+      "what_text": "Network Security Architecture is one of Wescom Financial (Wescom Central Credit Union)'s developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver a stronger data and technology foundation [E-028].",
+      "why_text": "The research report pins the maturity impact at: AI maturity L3+ for specific use case; CIO validates production GenAI capability. scores 2.5/5 against a peer median of 2.5 on the current assessment [E-028].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.10.1",
+        "P2C1.3.3",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "cd5086f7-8638-49df-9ef6-eb2c24c62dd1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-029",
+            "E-039",
+            "E-044",
+            "E-045"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-039",
+        "E-044",
+        "E-045",
+        "E-050",
+        "E-046",
+        "E-029"
+      ],
+      "linked_subcap_id": "P2C4.10.1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Active buying window; marketing automation is current gap being filled NOW — SFMC + Marketing Cloud Personalization — HIGHEST PRIORITY. Timing is optimal [E-045].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Actively evaluating SFMC/HubSpot + personalization tools",
+      "what_text": "Capability dimension 46 is one of Wescom Financial (Wescom Central Credit Union)'s developing customer experience capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, ahead of the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver a stronger, more personalised customer experience [E-039].",
+      "why_text": "The assessment found: “25 free adult + 14 youth financial education modules (EVERFI-powered) GreenPath free financial counseling for all members” [E-044]. At 2.5 out of 5, capability dimension 46 shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.1.5",
+        "P2C1.10.1",
+        "P3C2.4.1",
+        "P1C1.4.2",
+        "P1C1.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "fe479629-822d-4fd5-85de-dccafb057125",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-050",
+        "E-048",
+        "E-037",
+        "E-049",
+        "E-020",
+        "E-003",
+        "E-002"
+      ],
+      "linked_subcap_id": "P2C1.1.5",
+      "platforms": [
+        "tableau",
+        "salesforce",
+        "ncino",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Material DEI and market penetration gap. Regulators may scrutinize under fair lending. — Experience Cloud (multilingual portal). FSC (Spanish-language member journeys). Marketing Cloud (Spanish campaigns) [E-048].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "No Spanish digital services in 44.6% Hispanic LA County",
+      "what_text": "Budget Allocation & ROI is one of Wescom Financial (Wescom Central Credit Union)'s developing customer experience capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver a stronger, more personalised customer experience [E-050].",
+      "why_text": "At 2.5 out of 5, Budget Allocation & ROI sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-042, E-050].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.8.3",
+        "P4C3.1.5",
+        "P3C4.1.5",
+        "P3C1.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "d578b2c3-68d1-4076-b7d3-aa3dd805c2b0",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        },
+        {
+          "e_ids": [
+            "E-026",
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-026",
+        "E-027",
+        "E-046"
+      ],
+      "linked_subcap_id": "P4C4.8.3",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: TPRM failure; WRG client data also exposed. No SOC 2 or ISO 27001 for WRG despite hosting $150B in CU assets. — Shield (event monitoring, encryption). Security Cloud. TPRM assessment consulting. SOC 2 readiness engagement [E-046].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Barracuda breach exposed 34,515 individuals; 7-month attacker dwell time",
+      "what_text": "Capability dimension 38 is one of Wescom Financial (Wescom Central Credit Union)'s developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver a stronger data and technology foundation [E-027].",
+      "why_text": "At 2.5 out of 5, capability dimension 38 shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-026, E-027].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.3.1",
+        "P1C2.1.1",
+        "P1C4.2.5",
+        "P1C1.1.5",
+        "P1C2.1.10",
+        "P1C2.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "c9bdd489-3a03-4457-872b-f92bc18e8520",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-031"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-022",
+        "E-023",
+        "E-031"
+      ],
+      "linked_subcap_id": "P4C4.3.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Material governance gap. Person evaluating vendor IS the vendor's board chair. No public conflict mitigation. — Advisory opportunity: governance framework design. Salesforce governance + audit trail capabilities via Shield [E-031].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "CIO=WRG Board Chair governance conflict; audit independence concern",
+      "what_text": "Network Security Architecture is one of Wescom Financial (Wescom Central Credit Union)'s developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver a stronger data and technology foundation [E-023].",
+      "why_text": "At 2.5 out of 5, Network Security Architecture shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-022, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.6.1",
+        "P1C3.6.4",
+        "P3C1.3.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "17164768-9f2d-4c1c-88bd-3d1e8ce3ba9b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-031"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-034",
+        "E-048",
+        "E-031"
+      ],
+      "linked_subcap_id": "P1C3.6.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong P2 (member experience) signal. Brand value high. BCP/crisis response proven across multiple events. — Community Cloud for crisis coordination. Marketing Cloud for member communication workflows during events [E-031].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "240 emergency loans, ForgiveCo partnership, response to non-members too",
+      "what_text": "Fintech Partnership Strategy is one of Wescom Financial (Wescom Central Credit Union)'s strongest strategy and governance capabilities, scoring 4.0 out of 5 in Zennify's latest assessment, ahead of the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Wescom Financial (Wescom Central Credit Union)'s ability to deliver sharper strategic direction and stronger oversight [E-048].",
+      "why_text": "At 4.0 out of 5, Fintech Partnership Strategy is a relative strength worth protecting and extending. Sustaining it keeps Wescom Financial (Wescom Central Credit Union) ahead while peers keep investing, and it anchors the planning and oversight the rest of the business relies on [E-034, E-048].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C2",
+        "P2C4.10.1",
+        "P3C1.1.5",
+        "P2C1.5.2",
+        "P2C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-001",
+      "id": "a1f3c641-85c3-491a-9244-b2558ce66c08",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-050"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-029",
+            "E-039",
+            "E-044",
+            "E-045"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-039",
+        "E-029",
+        "E-044",
+        "E-045",
+        "E-050",
+        "E-046"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for Wescom Financial (Wescom Central Credit Union): a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-029].",
+      "source_rec_id": "REC-001",
+      "theme": "CX & Personalization",
+      "title": "Deploy Salesforce Marketing Cloud",
+      "what_text": "No marketing automation platform deployed; actively evaluating SFMC/HubSpot per Feb 2026 job posting. ML churn model exists in Dynamics but no campaign execution engine. Marketing Cloud + Marketing Cloud Personalization connected unlock: improvement enables product personalization. In Zennify's assessment Customer Data Foundation (CDP) scores 2.5 out of 5, versus a typical 2.0 at comparable institutions [E-039].",
+      "why_text": "The assessment found: “25 free adult + 14 youth financial education modules (EVERFI-powered) GreenPath free financial counseling for all members” [E-044]. At 2.5 out of 5, Customer Data Foundation (CDP) shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P3C3",
+        "P2C1.10.1",
+        "P3C3.1.5",
+        "P2C3.2.2",
+        "P2C2.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-002",
+      "id": "987dd350-d95e-4906-aa85-7230d20ee584",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-003",
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-003",
+        "E-002"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Marketing Strategy Document a near-term focus for Wescom Financial (Wescom Central Credit Union): a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-002].",
+      "source_rec_id": "REC-002",
+      "theme": "Digital Channels",
+      "title": "Launch Experience Cloud Multilingual Portal",
+      "what_text": "No Spanish-language digital services in 44.6% Hispanic LA County market. English-only website and mobile app exclude ~25% of potential members. Experience Cloud + Lightning Web Components connected unlock: accessibility improvement strengthens compliance posture. In Zennify's assessment Digital Marketing Strategy Document scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-003].",
+      "why_text": "At 2.5 out of 5, Digital Marketing Strategy Document sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-042, E-003].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C2.1.3",
+        "P2C4.10.1",
+        "P1C1.5.5",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-003",
+      "id": "e5114b90-478e-4c5b-a09f-70936f3bab19",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-006",
+        "E-007"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Protect and build on Enterprise Data Strategy & Roadmap: keep investing so Wescom Financial (Wescom Central Credit Union) stays ahead as peers catch up, and use this strength as a platform to lift the data and technology foundation the rest of the business is built on and the capabilities that depend on it [E-007].",
+      "source_rec_id": "REC-003",
+      "theme": "Data Management & Governance",
+      "title": "Implement Financial Services Cloud + Einstein",
+      "what_text": "Dynamics 365 serves as MRM with 35+ data sources but is not full CRM. No NBA engine deployed. Informatica IDMC has unified member 360 accessible to 700+ agents. Financial Services Cloud + Einstein + Data Cloud connected unlock: data quality feeds personalization. In Zennify's assessment Enterprise Data Strategy & Roadmap scores 4.0 out of 5, versus a typical 2.0 at comparable institutions [E-029].",
+      "why_text": "The assessment found: “Wescom Resources 18.7% revenue growth YoY in FY2025 24 new CUSO clients in 2025 ($28B in CU assets, 2M members)” [E-006]. At 4.0 out of 5, Enterprise Data Strategy & Roadmap is a relative strength worth protecting and extending. Sustaining it keeps Wescom Financial (Wescom Central Credit Union) ahead while peers keep investing, and it anchors the data and technology foundation the rest of the business is built on.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P3C1",
+        "P4C2.1.3",
+        "P4C3.1.3",
+        "P2C2.10.1",
+        "P3C1.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-043",
+        "E-050"
+      ],
+      "ic_id": "INS-REC-004",
+      "id": "542ba607-9328-489d-8d77-414fe33e83d4",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-043",
+            "E-050"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-001",
+        "E-009",
+        "E-011"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Channel Strategy & Mix a near-term focus for Wescom Financial (Wescom Central Credit Union): a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-009].",
+      "source_rec_id": "REC-004",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Deploy Service Cloud Voice for Contact Center",
+      "what_text": "No identified CCaaS platform. OpenAI call analytics already in production analyzing 50K calls/month. Voice VA operational since 2023. Service Cloud Voice + Einstein Conversation Mining connected unlock: channel integration feeds automation. In Zennify's assessment Channel Strategy & Mix scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-001].",
+      "why_text": "At 3.0 out of 5, Channel Strategy & Mix shows a maturing capability within reach of best practice. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business [E-042, E-001].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P1C1",
+        "P4C4.8.3",
+        "P1C2.1.1",
+        "P1C4.2.5",
+        "P4C4.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-005",
+      "id": "4a888aa2-4339-4eea-b123-9d57f7bb1c81",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-026",
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-026",
+        "E-027",
+        "E-022"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Cybersecurity Strategy & Program a near-term focus for Wescom Financial (Wescom Central Credit Union): a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": "REC-005",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Enable Shield for Security & Governance",
+      "what_text": "Barracuda breach affected 34,515 individuals. No SOC 2/ISO 27001 for WRG. CIO=WRG Board Chair governance conflict. ~4-person security team. Shield (Event Monitoring + Field-Level Encryption + Audit Trail) connected unlock: security improvement enables governance maturity. In Zennify's assessment Cybersecurity Strategy & Program scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-027].",
+      "why_text": "At 2.5 out of 5, Cybersecurity Strategy & Program shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-026, E-027].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.4.4",
+        "P1C2.1.1",
+        "P1C1.1.1",
+        "P2C3.3.RIA1",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-006",
+      "id": "b8829ab9-a239-46c9-8edc-5f70366107a8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-015"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-018",
+        "E-022",
+        "E-001",
+        "E-003",
+        "E-002",
+        "E-009",
+        "E-010",
+        "E-015"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Strategy Document a near-term focus for Wescom Financial (Wescom Central Credit Union): a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-001].",
+      "source_rec_id": "REC-006",
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy Workshop & Governance Framework",
+      "what_text": "No formal digital strategy document. No board Technology Committee. Digital framed as operational enhancement, not strategic pillar. Digital Strategy Workshop + Advisory connected unlock: strategy maturity enables all P2-P4 investment decisions. In Zennify's assessment Digital Strategy Document scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-022].",
+      "why_text": "At 2.5 out of 5, Digital Strategy Document shows a developing capability still short of the peer standard. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business [E-018, E-022].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture (2.79) vs Peer Median (2.50)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience (2.65) vs Peer Median (2.62)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (2.67) vs Peer Median (2.62)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (2.73) vs Peer Median (2.25)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-WSCM-20260323-0001"
+}

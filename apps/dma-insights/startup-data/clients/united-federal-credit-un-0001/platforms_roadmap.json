@@ -1,0 +1,142 @@
+{
+  "entity_display_id": "united-federal-credit-un-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Data Cloud, federated zero-copy on the existing Snowflake lakehouse (no migration; Qlik retained for BI).",
+          "maturity_lift": "+1.99",
+          "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Activate the governed data estate with Salesforce Data Cloud (zero-copy on Snowflake)"
+        },
+        {
+          "feature": "Salesforce Marketing Cloud + Journey Builder, fed by R1 Data Cloud segments; orchestrates above Q2 across email/SMS/in-a",
+          "maturity_lift": "+1.94",
+          "metric": "P2C4 score 2.06 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.06 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Orchestrate lifecycle journeys with Salesforce Marketing Cloud"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Financial Services Cloud (commercial/business relationship 360, householding, Action Plans), integrated to Fi",
+          "maturity_lift": "+1.99",
+          "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Unify commercial & business banking on Salesforce Financial Services Cloud"
+        },
+        {
+          "feature": "Salesforce Service Cloud (member case management, unified agent desktop, Knowledge) + Agentforce (AI service agents), de",
+          "maturity_lift": "+1.99",
+          "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Stand up a unified member-service desktop with Service Cloud + Agentforce (above TeamDynamix)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Einstein (predictive scoring, next-best-action, propensity/attrition) + Agentforce (agentic member service),",
+          "maturity_lift": "+1.99",
+          "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 2.01 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Operationalize member-facing AI with Einstein + Agentforce under the AI Council's governance"
+        },
+        {
+          "feature": "Zennify Digital Strategy Workshop (CRM-identity + sequencing decision) + Salesforce GRC/Shield-class governance instrume",
+          "maturity_lift": "+1.74",
+          "metric": "P1C2 score 2.26 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C2 score 2.26 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Confirm CRM system-of-record + instrument activation-layer governance (gating discovery item)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2, P1C2"
+    }
+  ],
+  "run_request_id": "DMA-RES-UFCU-20260604-0001",
+  "total_duration_months": 12
+}

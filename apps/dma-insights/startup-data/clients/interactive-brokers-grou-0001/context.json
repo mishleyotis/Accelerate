@@ -1,0 +1,592 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "interactive-brokers-grou-0001",
+  "financials": {
+    "lines": [
+      "IBKR exhibits ACCELERATING growth across all key metrics. Revenue grew at a 21.8% CAGR from 2021 to 2025 \u2014 driven by interest income on $780B in client equity and fee-compression-proof volume growth. The 79% pretax margin is the highest in the broker-dealer sector and a direct consequence of the proprietary, automated architecture. Most critically, 2025 delivered a record 1 million net new accounts \u2014 validating that the platform's scale advantage compounds with each new client.",
+      "IBKR exhibits ACCELERATING growth trajectory (2021-2025). Revenue CAGR of 21.8% driven primarily by interest income on growing client equity base. The 79% pretax margin reflects the automation advantage: 3,100 employees serve 4.4M accounts ($780B equity) \u2014 a structural efficiency that no traditional brokerage can replicate."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 3100,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Q4 2025 strategic highlights: 24/7 Stablecoin account\u2026"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$15M net income \u00b7 FY2025",
+        "regulator": "FCA (UK), ESMA (EU), ASIC (Australia), SFC (Hong Kong), MAS",
+        "series": {
+          "net_income_m": [
+            88.0,
+            205000.0,
+            3500.0,
+            4300.0,
+            5200.0,
+            15.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "International"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Thomas Peterffy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Founder & Executive Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Milan Galik",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul Brody",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Dr. Thomas Frank",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Somayajulu 'Soma' Bulusu",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Executive Vice President, Technology"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Dr. Boris Kogan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Security Officer (CISO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Colin Clarke",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Group Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jonathan Gelman",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Alamgir Hasan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Technology & Cyber Risk"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Internationally regulated broker-dealer",
+    "narrative_md": "IBKR is the technology-first broker that has spent 48 years building every system in-house. Unlike peers who acquired capabilities through M&A, IBKR's moat is proprietary automation at scale \u2014 and that same proprietary model now creates a Salesforce engagement opportunity as the firm enters its first-ever external technology transformation phase.",
+    "primary_regulator": "FCA (UK), ESMA (EU), ASIC (Australia), SFC (Hong Kong), MAS",
+    "size_tier": "large",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-022",
+        "excerpt": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant portfolio insights via natural language queries \u2014 'What sector am I underweight vs S&P 500?' \u2014 CEO Galik quoted at launch.",
+        "title": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant\u2026",
+        "type": "article",
+        "url": "https://www.businesswire.com/news/home/20251015991473/en/Interactive-Brokers-Launches-Ask-IBKR-AI-Tool-Delivers-Instant-Portfolio-Answers"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-033",
+        "excerpt": "IBKR Campus: 8 pillars including Traders' Academy, Traders' Insight, IBKR Quant, webinars, podcasts, Student Trading Lab, Coursera integration. Free to clients and public.",
+        "title": "IBKR Campus: 8 pillars including Traders' Academy, Traders' Insight\u2026",
+        "type": "podcast",
+        "url": "https://www.interactivebrokers.com/campus/trading-lessons/ibkr-campus-education-and-tutorials/"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "IBKR social media presence: Facebook, Instagram, LinkedIn, X (Twitter), YouTube, TikTok (US/World); Facebook, Instagram, X, TikTok (UK/Europe) \u2014 active multi-platform strategy.",
+        "title": "IBKR social media presence: Facebook, Instagram, LinkedIn, X\u2026",
+        "type": "linkedin-post",
+        "url": "https://finance.yahoo.com/news/interactive-brokers-launches-zero-commission-020000901.html"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "dedaa3ec-33c8-4091-95ed-f2ec6580c847",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "'No CDO' pattern detected in rationales for P1C2.5 subcapabilities (Data Governance within Governance & Risk). This triggers SI-06 forbidden pattern check. Assessment prohibits 'No CDO found' as a finding without exhaustive proxy search.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "'No CDO' pattern detected in rationales for P1C2.5 subcapabilities (Data Governance within Governance & Risk). This triggers SI-06 forbidden pattern check. Assessment prohibits 'No CDO found' as a finding without exhaustive proxy search."
+    },
+    {
+      "id": "17f52e02-563c-49b8-9dac-01cb197c94ec",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "caps_applied_log.csv absent as standalone CSV file. Cap data embedded in scoring_scratchpad.json and IBKR_DMA_Assessment_Workbook_v1.xlsx. v2.4 governance audit expects standalone CSV per interface contract.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "caps_applied_log.csv absent as standalone CSV file. Cap data embedded in scoring_scratchpad.json and IBKR_DMA_Assessment_Workbook_v1.xlsx. v2.4 governance audit expects standalone CSV per interface contract."
+    },
+    {
+      "id": "654161e7-c82c-47e3-9a4d-b987a472f485",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "contradiction_log.csv absent as standalone CSV. Contradictions documented inline in rationale fields. v2.4 governance expects explicit contradiction_log.csv with Resolution_Rule column.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "contradiction_log.csv absent as standalone CSV. Contradictions documented inline in rationale fields. v2.4 governance expects explicit contradiction_log.csv with Resolution_Rule column."
+    },
+    {
+      "id": "50cf5b76-52c1-4f8f-969a-e86807dbdd39",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Evidence ID E-003 is cited in subcap rationales (P1C2.5.1, P1C2.5.2, P1C2.5.3) but is absent from evidence_index.json. This creates an orphan citation that cannot be traced.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Evidence ID E-003 is cited in subcap rationales (P1C2.5.1, P1C2.5.2, P1C2.5.3) but is absent from evidence_index.json. This creates an orphan citation that cannot be traced."
+    },
+    {
+      "id": "b4f184d1-b12a-4219-b14e-5ac891abd012",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Range-style E-ID references found in report: 'E-010 to E-095' appears 3 times in Section 12 (Evidence Sources). v2.4 requires all E-ID references to be explicit enumerations, not ranges.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Range-style E-ID references found in report: 'E-010 to E-095' appears 3 times in Section 12 (Evidence Sources). v2.4 requires all E-ID references to be explicit enumerations, not ranges."
+    },
+    {
+      "id": "4cf64569-1cec-4607-87b3-440c8abcddb1",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "RC-15 peer reference count: 9 (threshold \u226510). E*TRADE references not captured by simple grep due to asterisk escape in XML. Actual peer reference count including E*TRADE/Morgan Stanley = 10+.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "RC-15 peer reference count: 9 (threshold \u226510). E*TRADE references not captured by simple grep due to asterisk escape in XML. Actual peer reference count including E*TRADE/Morgan Stanley = 10+."
+    },
+    {
+      "id": "63e463a6-8bac-4ef5-8a36-2788dee77b99",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "RC-14 check found 0 E-IDs in recommendations section due to document boundary search offset. Section 9 content confirmed to contain E-ID citations (validated in AP-06: 86 unique E-IDs across full report). The XML boundary search using string.find() may have missed the recommendations content due to heading variation.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "RC-14 check found 0 E-IDs in recommendations section due to document boundary search offset. Section 9 content confirmed to contain E-ID citations (validated in AP-06: 86 unique E-IDs across full report). The XML boundary search using string.find() may have missed the recommendations content due to heading variation."
+    },
+    {
+      "id": "75f91787-3b3d-4648-8fe6-6760450e7b6d",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "PV-03 PASS_WITH_WARNINGS: Standalone counterclaim column absent from workbook schema (v5.5/v2.4 drift). Counterclaims embedded in rationale text using 'however', 'despite', 'but despite' constructs. Quality is substantive but not machine-verifiable per v2.4 PV-03 standard.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PV-03 PASS_WITH_WARNINGS: Standalone counterclaim column absent from workbook schema (v5.5/v2.4 drift). Counterclaims embedded in rationale text using 'however', 'despite', 'but despite' constructs. Quality is substantive but not machine-verifiable per v2.4 PV-03 standard."
+    },
+    {
+      "id": "9b05881c-f6ec-4378-bc50-743f8449fa59",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Standalone contradiction_log.csv absent. Same root cause as IV-06. Contradictions present in rationale text but not extractable by automated CL checks.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Standalone contradiction_log.csv absent. Same root cause as IV-06. Contradictions present in rationale text but not extractable by automated CL checks."
+    },
+    {
+      "id": "e4168bef-bb85-4d5e-8c80-35df27aaa7a1",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "P3: 33% subcaps capped (threshold >30%). Distributional CAUTION flag. This reflects the legitimate enforcement cascade from 9 AWCs \u2014 not a scoring problem.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "P3: 33% subcaps capped (threshold >30%). Distributional CAUTION flag. This reflects the legitimate enforcement cascade from 9 AWCs \u2014 not a scoring problem."
+    },
+    {
+      "id": "53c6e9d8-b98c-4da4-9ef2-a2dbfe2cc79f",
+      "issue_id": "ISS-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "DC-06: E-094 (IBKR 10-K Technology Philosophy) cited in 156 of 709 subcaps (22%). While below the 25% threshold, this is worth noting. The 10-K is a legitimately high-signal document for a broker-dealer assessment.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "DC-06: E-094 (IBKR 10-K Technology Philosophy) cited in 156 of 709 subcaps (22%). While below the 25% threshold, this is worth noting. The 10-K is a legitimately high-signal document for a broker-dealer assessment."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory enforcement actions, supervisory findings, and material incidents that impact capability scores through the assessment's scoring methodology. All items listed have been confirmed from primary source T1 evidence (FINRA AWC documents, SEC enforcement orders, CFTC orders, state AG filings). IBKR has accumulated ~$62M+ (10 enforcement actions/incidents, 2020-2025) across the period 2020-2025, representing the most material compliance headwind in this assessment cohort. Each enforcement action is mapped to the specific capabilities it caps and the maturity ceiling that applies. The pattern finding \u2014 confirmed by multiple independent regulators \u2014 is 'automation-without-governance scope': IBKR deploys automation at extraordinary scale, but each AWC identifies a specific domain where automated processes lacked adequate scope, coverage, or supervisory oversight.",
+    "trend_md": "Most recent reported financials: $15M net income as of FY2025, within a series tracked FY2020 to FY2025. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.12,
+        "P1C2": 3.19,
+        "P1C3": 2.66,
+        "P1C4": 2.72,
+        "P1C5": 2.7,
+        "P2C1": 2.59,
+        "P2C2": 2.34,
+        "P2C3": 2.72,
+        "P2C4": 2.48,
+        "P3C1": 3.13,
+        "P3C2": 3.13,
+        "P3C3": 3.13,
+        "P3C4": 3.14,
+        "P4C1": 2.85,
+        "P4C2": 2.61,
+        "P4C3": 2.72,
+        "P4C4": 3.15
+      },
+      "overall_score": 2.85,
+      "peer_name": "Commerce Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.46,
+        "P1C2": 3.51,
+        "P1C3": 2.34,
+        "P1C4": 3.51,
+        "P1C5": 3.0,
+        "P2C1": 1.98,
+        "P2C2": 1.49,
+        "P2C3": 2.5,
+        "P2C4": 2.48,
+        "P3C1": 2.4,
+        "P3C2": 3.52,
+        "P3C3": 3.98,
+        "P3C4": 3.43,
+        "P4C1": 1.99,
+        "P4C2": 1.98,
+        "P4C3": 3.52,
+        "P4C4": 4.05
+      },
+      "overall_score": 2.83,
+      "peer_name": "Odlum Brown Limited",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.66,
+        "P1C2": 2.7,
+        "P1C3": 1.96,
+        "P1C4": 2.35,
+        "P1C5": 2.34,
+        "P2C1": 2.31,
+        "P2C2": 1.98,
+        "P2C3": 1.82,
+        "P2C4": 2.13,
+        "P3C1": 2.53,
+        "P3C2": 2.35,
+        "P3C3": 2.77,
+        "P3C4": 2.5,
+        "P4C1": 2.61,
+        "P4C2": 2.68,
+        "P4C3": 2.89,
+        "P4C4": 2.55
+      },
+      "overall_score": 2.42,
+      "peer_name": "Vestgen Wealth Partners",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.78,
+        "P1C2": 2.18,
+        "P1C3": 2.32,
+        "P1C4": 2.32,
+        "P1C5": 2.14,
+        "P2C1": 1.65,
+        "P2C2": 1.34,
+        "P2C3": 2.18,
+        "P2C4": 1.82,
+        "P3C1": 2.34,
+        "P3C2": 3.0,
+        "P3C3": 2.95,
+        "P3C4": 2.0,
+        "P4C1": 2.23,
+        "P4C2": 2.7,
+        "P4C3": 3.14,
+        "P4C4": 2.78
+      },
+      "overall_score": 2.35,
+      "peer_name": "Fisher Investments",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.75,
+        "P1C2": 2.73,
+        "P1C3": 2.01,
+        "P1C4": 2.5,
+        "P1C5": 1.17,
+        "P2C1": 2.15,
+        "P2C2": 2.6,
+        "P2C3": 2.49,
+        "P2C4": 1.99,
+        "P3C1": 2.29,
+        "P3C2": 2.6,
+        "P3C3": 2.89,
+        "P3C4": 2.03,
+        "P4C1": 2.0,
+        "P4C2": 1.28,
+        "P4C3": 3.24,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.31,
+      "peer_name": "Pentegra Retirement Services",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-SCORE-IBKR-20260514-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor: 3.7/5.0 overall (712 reviews); 3.2/5.0 culture & values; 3.5/5.0 WLB; 3.1/5.0 career opportunities",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 712,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": "Indeed: 3.6/5.0 overall; WLB 3.2; culture & values 3.2; management 3.4; compensation 3.8",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.6
+      },
+      {
+        "drilldown": "5,222 Trustpilot reviews for Interactive Brokers",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "BBB: A+ rating but 1.6/5 customer reviews (heavily complaint-biased)",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": 1.6
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "FINRA 2026 Annual Report: 'FINRA CORE launched in 2025 \u2014 identifies, assesses and shares cyber and technology risk intelligence with potentially impacted firms for vendor-related threats.' IBKR as major broker-dealer participates in FINRA risk monitoring program.",
+      "date_precision": "year",
+      "e_id": "E-073",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-073"
+      ],
+      "id": "d09da0ce-6d43-4953-adfb-92c5a2da4721",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.cftc.gov/PressRoom/PressReleases/8218-20",
+      "subcap_ids": [],
+      "title": "Finra 2026 Annual Report: 'FINRA CORE launched in 2025"
+    },
+    {
+      "body": "Q4 2025 strategic highlights: 24/7 Stablecoin account funding deployed; GlobalTrader 2.0 mobile revamp; IBKR Desktop multi-monitor support; market expansion to Brazil, Taiwan, UAE, Slovenia; Karta Visa Infinite Card (Oct 2025); FDIC Suite doubled to $5M individual accounts.",
+      "date_precision": "quarter",
+      "e_id": "E-091",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "525ff590-29e4-4e58-a558-69d9a7cc33c6",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.nasdaq.com/articles/ibkr-seeks-national-trust-bank-charter-what-it-means-why-it-matters",
+      "subcap_ids": [],
+      "title": "Q4 2025 strategic highlights: 24/7 Stablecoin account\u2026"
+    },
+    {
+      "body": "Prediction markets industry: $9B (2024) \u2192 $40B (2025). Robinhood: 11 billion contracts by Jan 2026 (March 2025-Jan 2026 = 10 months); ~$100M annualized revenue. LedgerX acquired Nov 2025. IBKR ForecastEx: 286M pairs Q4 2025 vs 15M Q3 = 19x QoQ.",
+      "date_precision": "month",
+      "e_id": "E-093",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-093"
+      ],
+      "id": "2585f909-c0a4-4195-b528-7292e7e828f4",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://markets.financialcontent.com/stocks/article/predictstreet-2026-1-18-the-11-billion-contract-explosion-how-robinhood-and-interactive-brokers-mainstreamed-prediction-markets",
+      "subcap_ids": [],
+      "title": "LedgerX acquired"
+    },
+    {
+      "body": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for instant portfolio insights via natural language queries \u2014 'What sector am I underweight vs S&P 500?' \u2014 CEO Galik quoted at launch.",
+      "date_precision": "day",
+      "e_id": "E-022",
+      "event_date": "2025-10-15",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "8ab1066b-ad6e-474a-98c3-9cd1ab4d0ead",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.businesswire.com/news/home/20251015991473/en/Interactive-Brokers-Launches-Ask-IBKR-AI-Tool-Delivers-Instant-Portfolio-Answers",
+      "subcap_ids": [],
+      "title": "Ask IBKR launched Oct 15, 2025: AI-powered NLP tool for\u2026"
+    },
+    {
+      "body": "Oct 2025: Tax Planner launched in PortfolioAnalyst; IBKR Desktop v1.2; Ask IBKR \u2014 three simultaneous innovation releases in single month.",
+      "date_precision": "month",
+      "e_id": "E-041",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "a11ab225-ce13-464b-ba64-896b06523592",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://investors.interactivebrokers.com/en/general/about/press-releases-nav.php",
+      "subcap_ids": [],
+      "title": "Tax Planner launched Oct 2025"
+    },
+    {
+      "body": "Zero-commission US stock/ETF trading (IBKR Lite) launched Singapore Aug 2025; extending global zero-commission rollout following US launch. Competitive pricing as marketing differentiator.",
+      "date_precision": "month",
+      "e_id": "E-036",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "c5e3a358-41f2-4df2-8acf-99e37b38a8c0",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://finance.yahoo.com/news/interactive-brokers-launches-zero-commission-020000901.html",
+      "subcap_ids": [],
+      "title": "Zero-commission US stock/ETF trading (IBKR Lite) launched\u2026"
+    },
+    {
+      "body": "EVP Technology: Somayajulu (Soma) Bulusu, joined Feb 2024. 25+ years engineering/product/service delivery. Prior: Chewy (IT/Engineering Lead), Amazon, Nuance, TouchCommerce. First externally-hired technology executive in IBKR's history \u2014 signals cultural openness to external talent.",
+      "date_precision": "month",
+      "e_id": "E-075",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "9b52e964-ac2d-4321-9227-313b64f6f929",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.board-cybersecurity.com/annual-reports/tracker/20240226-interactive-brokers-group-inc-cybersecurity-10k/",
+      "subcap_ids": [],
+      "title": "EVP Technology: Somayajulu (Soma) Bulusu, joined"
+    },
+    {
+      "body": "CFTC Sep 29, 2023: $20M civil monetary penalty against IBKR + cease and desist + remedial undertakings. 'From at least 2019 to the present, Interactive Brokers failed to stop its employees, including those at senior levels, from communicating using unapproved communication methods, including messages sent via personal text and WhatsApp.' Parallel SEC action also filed same date.",
+      "date_precision": "day",
+      "e_id": "E-095",
+      "event_date": "2023-09-29",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "781b247d-7b35-4ee7-bc0d-3dfc4f3380cc",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.cftc.gov/PressRoom/PressReleases/8794-23",
+      "subcap_ids": [],
+      "title": "CFTC Sep 29, 2023: $20M civil monetary penalty against IBKR\u2026"
+    }
+  ]
+}

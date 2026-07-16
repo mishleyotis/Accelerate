@@ -1,0 +1,142 @@
+{
+  "entity_display_id": "iq-credit-union-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.99 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C2 score 2.99 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.01",
+          "metric": "P2C2 score 2.99 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.99 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Deploy Salesforce Shield for field-level encryption, audit logging, and compliance automation to address post-breach security hardening requirements"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.01",
+          "metric": "P2C2 score 2.99 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.99 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Implement MuleSoft Anypoint to create API-first integration layer, enabling core system modernization and vendor connectivity"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "GRC Platform",
+          "maturity_lift": "+2.18",
+          "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Deploy GRC Platform for centralized compliance tracking, policy management, and post-breach regulatory response"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+0.73",
+          "metric": "P2C4 score 3.27 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "S",
+            "metric": "P2C4 score 3.27 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "0\u20136 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy Salesforce Data Cloud to unify member data across Alkami, Arkalytics, and Genesys \u2014 enabling single member view and advanced analytics"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C4, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.18",
+          "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Extend Genesys Cloud + Cresta AI investment with Agentforce for autonomous member service agents and fraud detection"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+2.18",
+          "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C4 score 1.82 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Conduct Digital Strategy Workshop to formalize transformation roadmap, establish KPIs, and align board on multi-year digital investment"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-IQCU-20260310-0001",
+  "total_duration_months": 12
+}

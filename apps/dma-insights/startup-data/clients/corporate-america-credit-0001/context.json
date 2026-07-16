@@ -1,0 +1,657 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "corporate-america-credit-0001",
+  "financials": {
+    "lines": [
+      "tier1 capital q4 growth mm: 14.1",
+      "tier1 capital ratio pct q4 2025: 7.22"
+    ],
+    "metrics": {
+      "as_of_date": "2025-12-31",
+      "currency": "USD",
+      "net_income": 18480127.0,
+      "regulatory_minimum_tier1_pct": 4.0,
+      "roa_pct_2024": 0.61,
+      "size_tier": "Medium ($2B\u2013$10B)",
+      "size_tier_context_adjustment": -0.4,
+      "tier1_capital_ratio_pct": 7.22,
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 201,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "HQ Irondale AL; serves 533 member CUs nationally with 1% PCC participants in 11 ",
+        "headline": "$4.6B net income \u00b7 FY2024",
+        "regulator": "Alabama Credit Union Administration (ACUA)",
+        "series": {
+          "net_income_m": [
+            4460.0,
+            3070.0,
+            3470.0,
+            4600.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "HQ Irondale AL",
+      "serves 533 member CUs nationally with 1% PCC participants in 11"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Pete Pritts",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President / CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lauren Howle",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Strategy Officer (CSO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lisa Coffey",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Innovation Officer (CINO)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Donald Eagen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Technology Officer (CTO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rachel Dodson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial Officer (CFO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Penny Swindle",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kayla Barnett",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP HR & Culture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ashley Daniels",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Marketing & Communications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Alison Dagnan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael Kennedy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Electronic Payments"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Robert Rudder",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Strategic Balance Sheet"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brad Long",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Chair (external)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered institution",
+    "narrative_md": "Corporate America Credit Union is a credit union. It reports $5.8 billion in total assets and has operated since 1982. It is regulated by Alabama Credit Union Administration (ACUA) and employs approximately 201 people. Its overall digital maturity is assessed at 2.7 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Alabama Credit Union Administration (ACUA)",
+    "size_tier": "Medium ($2B\u2013$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-146",
+        "excerpt": "CACU operates dedicated Education hub at corpam.org/Education + CACU Webinars page (per Sub-Batch 2B B2B evidence) \u2014 formal training delivery infrastructure for 533 member CUs.",
+        "title": "CACU operates dedicated Education hub",
+        "type": "webinar",
+        "url": "https://www.corpam.org/Education"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-147",
+        "excerpt": "CACU 2025 DDR explicitly lists 'Annual ACH Audit Certification' as standalone compliance section. Nacha Operating Rules Article 1 mandates ALL ODFIs/RDFIs/TPSPs/TPSs conduct annual ACH audit by Dec 31 yearly. Performed b",
+        "title": "CACU lists Annual ACH Audit Certification' as standalone compliance\u2026",
+        "type": "article",
+        "url": "https://www.corpam.org/Documents/Due-Diligence/CACU-Due-Diligence-Packet-2025-newcover.pdf"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-178",
+        "excerpt": "CACU Education hub at corpam.org/Education + CACU Webinars page = formal content/knowledge base. Documented training delivery infrastructure for 533 member CUs. Daily Email Sign Up subscription infrastructure (per Sub-Ba",
+        "title": "CACU Education hub at corpam.org/Education",
+        "type": "webinar",
+        "url": "https://www.corpam.org/Education"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "Comprehensive Education hub with 13 dedicated training tracks (ACH, Cash Vault, Wire, Share Draft, Cybersecurity, Fraud, Payments, etc.) + Webinars + Events Calendar \u2014 enterprise-grade member training program supports ch",
+        "title": "Comprehensive Education hub with 13 dedicated training tracks (ACH\u2026",
+        "type": "webinar",
+        "url": "https://www.corpam.org/Education/Product-Training"
+      },
+      {
+        "author": "Lisa Coffey",
+        "date": "2019-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-039",
+        "excerpt": "Lisa Coffey (then Chief Innovation Officer) statement quoted by The Clearing House: 'Access to the RTP network is key for our member credit unions wanting to serve their members with the most up to date technology.' \u2014 in",
+        "title": "Lisa Coffey (then Chief Innovation Officer) statement quoted by The\u2026",
+        "type": "article",
+        "url": "https://www.theclearinghouse.org/payment-systems/Articles/2019/12/Corporate-America-Credit-Union-Becomes-Funding-Agent-for-the-RTP-Network"
+      },
+      {
+        "author": null,
+        "date": "2024-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "Coffey + Raven Johnson (CACU) + Nacha Ashley Mustico podcast \u2014 'Payments impacts all areas of your organization, you don't have to just send ACH professionals to this conference' \u2014 explicit cross-functional learning stra",
+        "title": "Coffey + Raven Johnson (CACU)",
+        "type": "podcast",
+        "url": "https://www.nacha.org/news/smarter-faster-payments-2024-you-cant-beat-it"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "6cb0cd13-02ec-4ec6-af39-ee2f9865ad21",
+      "issue_id": "GAP-1-P1C1.1.3",
+      "linked_subcap_ids": [
+        "P1C1.1.3"
+      ],
+      "opened_on": "2026-04-28",
+      "rationale": "Maturity 1.0/5 \u2014 1.8 pts below the CU peer median (2.8/5). NO_EVIDENCE for Strategy Refresh Cadence after Layer 0 exhaustive proxy sweep (B2A through B3D, ~165 search ops). Industry-typical for wholesale corporate CU model \u2014 public content sparse on this subcap; CT-001 MINOR cap (M4) applies. Score 1.0 reflects M1 Foundational default with cap. Internal evidence required to lift cap (see Appendix B.5 IER). For CACU specifically: 533 member-CU B2B model + NCUA Part 704 + clean enforcement record support inference but no public artifact confirms.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Strategy Refresh Cadence"
+    },
+    {
+      "id": "e67eb62b-3134-48fd-b65c-71d740d9ed87",
+      "issue_id": "GAP-2-P1C1.1.4",
+      "linked_subcap_ids": [
+        "P1C1.1.4"
+      ],
+      "opened_on": "2026-04-28",
+      "rationale": "Maturity 1.0/5 \u2014 1.8 pts below the CU peer median (2.8/5). NO_EVIDENCE for Vision Communication after Layer 0 exhaustive proxy sweep (B2A through B3D, ~165 search ops). Industry-typical for wholesale corporate CU model \u2014 public content sparse on this subcap; CT-001 MINOR cap (M4) applies. Score 1.0 reflects M1 Foundational default with cap. Internal evidence required to lift cap (see Appendix B.5 IER). For CACU specifically: 533 member-CU B2B model + NCUA Part 704 + clean enforcement record support inference but no public artifact confirms.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Vision Communication"
+    },
+    {
+      "id": "9974be80-7dda-44f7-982d-645c59f885ce",
+      "issue_id": "GAP-3-P1C1.1.5",
+      "linked_subcap_ids": [
+        "P1C1.1.5"
+      ],
+      "opened_on": "2026-04-28",
+      "rationale": "Maturity 1.0/5 \u2014 1.8 pts below the CU peer median (2.8/5). NO_EVIDENCE for Board Engagement after Layer 0 exhaustive proxy sweep (B2A through B3D, ~165 search ops). Industry-typical for wholesale corporate CU model \u2014 public content sparse on this subcap; CT-001 MINOR cap (M4) applies. Score 1.0 reflects M1 Foundational default with cap. Internal evidence required to lift cap (see Appendix B.5 IER). For CACU specifically: 533 member-CU B2B model + NCUA Part 704 + clean enforcement record support inference but no public artifact confirms.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Board Engagement"
+    },
+    {
+      "id": "e7adfce9-fc3a-4bc0-9b3d-de4a448976ed",
+      "issue_id": "GAP-4-P1C1.2.4",
+      "linked_subcap_ids": [
+        "P1C1.2.4"
+      ],
+      "opened_on": "2026-04-28",
+      "rationale": "Maturity 1.0/5 \u2014 1.8 pts below the CU peer median (2.8/5). NO_EVIDENCE for Dependency Management after Layer 0 exhaustive proxy sweep (B2A through B3D, ~165 search ops). Industry-typical for wholesale corporate CU model \u2014 public content sparse on this subcap; CT-001 MINOR cap (M4) applies. Score 1.0 reflects M1 Foundational default with cap. Internal evidence required to lift cap (see Appendix B.5 IER). For CACU specifically: 533 member-CU B2B model + NCUA Part 704 + clean enforcement record support inference but no public artifact confirms.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Dependency Management"
+    },
+    {
+      "id": "8c79db12-df87-4e29-b51a-b53c83f50771",
+      "issue_id": "GAP-5-P1C1.2.5",
+      "linked_subcap_ids": [
+        "P1C1.2.5"
+      ],
+      "opened_on": "2026-04-28",
+      "rationale": "Maturity 1.0/5 \u2014 1.8 pts below the CU peer median (2.8/5). NO_EVIDENCE for Budget Alignment after Layer 0 exhaustive proxy sweep (B2A through B3D, ~165 search ops). Industry-typical for wholesale corporate CU model \u2014 public content sparse on this subcap; CT-001 MINOR cap (M4) applies. Score 1.0 reflects M1 Foundational default with cap. Internal evidence required to lift cap (see Appendix B.5 IER). For CACU specifically: 533 member-CU B2B model + NCUA Part 704 + clean enforcement record support inference but no public artifact confirms.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Budget Alignment"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section is borrowed from the Layer 0 Client Profile Research report, enriched with assessment scoring impacts.",
+    "trend_md": "This section is borrowed from the Layer 0 Client Profile Research report, enriched with assessment-layer maturity annotations."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.28,
+        "P1C2": 3.26,
+        "P1C3": 2.96,
+        "P1C4": 3.09,
+        "P1C5": 3.28,
+        "P2C1": 3.3,
+        "P2C2": 2.99,
+        "P2C3": 3.14,
+        "P2C4": 3.27,
+        "P3C1": 1.87,
+        "P3C2": 2.5,
+        "P3C3": 2.72,
+        "P3C4": 2.5,
+        "P4C1": 2.99,
+        "P4C2": 2.02,
+        "P4C3": 2.21,
+        "P4C4": 1.82
+      },
+      "overall_score": 2.78,
+      "peer_name": "iQ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.4,
+        "P1C2": 2.61,
+        "P1C3": 3.17,
+        "P1C4": 2.14,
+        "P1C5": 2.28,
+        "P2C1": 2.31,
+        "P2C2": 2.63,
+        "P2C3": 2.46,
+        "P2C4": 2.67,
+        "P3C1": 2.19,
+        "P3C2": 2.79,
+        "P3C3": 2.94,
+        "P3C4": 2.25,
+        "P4C1": 2.76,
+        "P4C2": 2.6,
+        "P4C3": 2.71,
+        "P4C4": 2.81
+      },
+      "overall_score": 2.63,
+      "peer_name": "Kitsap Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-CACU-20260428-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Overall",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Moderate (CU industry trade press: CUInsight, CU Today, CU Times)",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Press",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Key Themes",
+        "themes": [
+          "Faster payments leadership (RTP/FedNow first-mover among corporates)",
+          "Tech innovation (AI bot)",
+          "Member-friendly capital program (1% PCC)",
+          "Aptys consortium alignment"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Negative Themes Found",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Quoted in The Clearing House announcements, FedNow pilot press, NCUA conferences",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Industry Recognition",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "VSoft 'AI-Ready Core' whitepaper published \u2014 Wings positioned as AI foundation. Forward-looking AI architecture commitment",
+      "date_precision": "month",
+      "e_id": "E-187",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-187"
+      ],
+      "id": "1b69fdc8-4f77-451a-b0ea-53cc3a4b9a14",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "'AI-Ready Core' whitepaper published"
+    },
+    {
+      "body": "VSoft API-first modernization announcement (Wings cloud-ready). Core vendor architectural reset",
+      "date_precision": "month",
+      "e_id": "E-187",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-187"
+      ],
+      "id": "6f65ff98-9d51-48f7-a517-fea5b0f92c98",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "VSoft API-first modernization announcement (Wings\u2026"
+    },
+    {
+      "body": "1% PCC capital model \u2014 70+ CUs / 11 states / $68M new investments / $12M dividen. Tiered relationship pricing innovation in production",
+      "date_precision": "year",
+      "e_id": "E-005",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "7fb9022f-a1e1-4822-b0c8-55e856e11931",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "1% PCC capital model"
+    },
+    {
+      "body": "Aptys Solutions selected for ACH+Wire+Cash payment processing consolidation. Vendor consolidation play \u2014 Zennify advisory window",
+      "date_precision": "month",
+      "e_id": "E-157",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-157"
+      ],
+      "id": "157a4d9e-334b-40dd-87c2-d150ea74f509",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Aptys Solutions selected for ACH+Wire+Cash payment\u2026"
+    },
+    {
+      "body": "Identifee IDA AI chatbot launched \u2014 first corporate-CU AI chatbot, RAG over Nach. Production GenAI proof-point \u2014 opens AI advisory pipeline",
+      "date_precision": "month",
+      "e_id": "E-156",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-156"
+      ],
+      "id": "86499238-b143-446a-832e-9373fabd5112",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Identifee IDA AI chatbot launched"
+    },
+    {
+      "body": "Aptys Wires ISO 20022 + RFP/FedNow + Fedwire ISO 20022 certifications. Industry-standard messaging + canonical data architecture",
+      "date_precision": "month",
+      "e_id": "E-196",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-196"
+      ],
+      "id": "c7d42f18-73b4-4443-b458-520fa5c2cf0c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Aptys Wires ISO 20022 + RFP/FedNow + Fedwire ISO 20022\u2026"
+    },
+    {
+      "body": "FedNow LIVE early adopter \u2014 among first 110+ FIs. Continued real-time payments leadership",
+      "date_precision": "year",
+      "e_id": "E-010",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "d1acfd3b-62b0-44f4-8e48-2aa70e4426ad",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "FedNow LIVE early adopter"
+    },
+    {
+      "body": "NCUA 12 CFR \u00a7748.1(c)(2) 72-hour Cyber Incident Notification Rule effective \u2014 CA. Regulatory baseline established",
+      "date_precision": "month",
+      "e_id": "E-185",
+      "event_date": "2023-09-01",
+      "evidence_e_ids": [
+        "E-185"
+      ],
+      "id": "6f9b5b83-6072-4572-a041-34fbbb02cd14",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "NCUA 12 CFR \u00a7748.1(c)(2) 72-hour Cyber Incident\u2026"
+    },
+    {
+      "body": "Multi-vendor real-time payments architecture maturity",
+      "date_precision": "month",
+      "e_id": "E-009",
+      "event_date": "2023-08-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "c0b8f89b-1fca-43dc-a3f8-49c620dcfdf7",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Pidgin RTP/FedNow connector partnership via VSoft"
+    },
+    {
+      "body": "First corporate to certify member-CU on RTP (AlaTrust + Share One). Operational track record on real-time rails",
+      "date_precision": "year",
+      "e_id": "E-008",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "916fb663-fe92-4ef4-92d6-04bde6879d39",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "First corporate to certify member-CU on RTP (AlaTrust\u2026"
+    },
+    {
+      "body": "RTP Funding Agent \u2014 first corporate CU on RTP network. Earliest signal of payments-modernization commitment \u2014 5+ year track record",
+      "date_precision": "month",
+      "e_id": "E-007",
+      "event_date": "2019-12-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "909871e4-c8aa-45b3-8db4-c77aa5718110",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "RTP Funding Agent"
+    }
+  ]
+}

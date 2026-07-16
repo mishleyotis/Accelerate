@@ -1,0 +1,158 @@
+{
+  "entity_display_id": "everbank-n-a-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C3 score 1.81 \u2192 4.0 (peer median 2.65)",
+        "Rate": "-based retention 4.30%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C3 score 1.81 \u2192 4.0 (peer median 2.65)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint Platform",
+          "maturity_lift": "+2.19",
+          "metric": "P2C3 score 1.81 \u2192 4.0 (peer median 2.65)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.81 \u2192 4.0 (peer median 2.65)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Deploy Enterprise Integration Middleware"
+        },
+        {
+          "feature": "Salesforce Data Cloud",
+          "maturity_lift": "+2.12",
+          "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Implement Unified Customer Data Platform"
+        },
+        {
+          "feature": "Salesforce Financial Services Cloud (FSC)",
+          "maturity_lift": "+2.25",
+          "metric": "P2C2 score 1.75 \u2192 4.0 (peer median 2.80)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 1.75 \u2192 4.0 (peer median 2.80)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Consolidate CRM onto Financial Services Cloud"
+        },
+        {
+          "feature": "Salesforce Einstein Bot + Service Cloud + Agentforce",
+          "maturity_lift": "+2.2",
+          "metric": "P1C4 score 1.80 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 score 1.80 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy Conversational AI for Customer Self-Service"
+        },
+        {
+          "feature": "Salesforce Marketing Cloud + Journey Builder",
+          "maturity_lift": "+2.35",
+          "metric": "Rate-based retention 4.30%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Rate-based retention 4.30%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Build Lifecycle Personalization Engine"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2, P1C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Tableau (consolidation from 16+ tools)",
+          "maturity_lift": "+2.12",
+          "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-06",
+          "title": "Standardize BI Platform via Tableau Consolidation"
+        },
+        {
+          "feature": "Salesforce Shield + GRC Advisory",
+          "maturity_lift": "+2.25",
+          "metric": "P2C2 score 1.75 \u2192 4.0 (peer median 2.80)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 1.75 \u2192 4.0 (peer median 2.80)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Strengthen Compliance Automation & Security Posture"
+        },
+        {
+          "feature": "Einstein AI + Data Architecture Advisory",
+          "maturity_lift": "+2.12",
+          "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 1.88 \u2192 4.0 (peer median 2.80)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Accelerate AI-Ready Data Infrastructure"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C2, P1C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-EVER-20260413-0001",
+  "total_duration_months": 8
+}

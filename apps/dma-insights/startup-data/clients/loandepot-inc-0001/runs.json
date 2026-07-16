@@ -1,0 +1,21 @@
+{
+  "active_run_id": "f9cda87d-884e-400d-9d87-dce49ca3cd0e",
+  "items": [
+    {
+      "assessment_date": "2026-03-24",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:02.108640Z",
+      "created_at": "2026-07-02T23:11:02.108640Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "f9cda87d-884e-400d-9d87-dce49ca3cd0e",
+      "overall_score": 2.343137254901961,
+      "request_id": "DMA-ASM-LOANDEPOT-20260324-0001",
+      "started_at": "2026-07-02T23:11:02.108640Z",
+      "status": "ACTIVE",
+      "subcap_count": 204,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

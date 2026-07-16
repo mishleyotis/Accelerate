@@ -1,0 +1,275 @@
+{
+  "entity_display_id": "wescom-financial-wescom--0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-057",
+          "E-034"
+        ],
+        "representative_quote": "$10M wildfire debt relief + $214K donations demonstrates community commitment",
+        "source_kind": "docx"
+      },
+      "id": "fafcb9c6-2f07-4154-9ec6-582f7b8fb9a9",
+      "involved_subcap_ids": [
+        "P3C4.4.1",
+        "P3C4.4.3",
+        "P3C3.2.5",
+        "P4C1.2.5",
+        "P3C2.2.5",
+        "P3C4.2.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$10,000,000",
+          "delta": null,
+          "kpi_label": "F-007",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$214,000",
+          "delta": null,
+          "kpi_label": "Wildfire debt relief",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": 2,
+      "pillars_weight": {
+        "P3": 85,
+        "P4": 15
+      },
+      "source_path": "(unknown)",
+      "title": "$10M wildfire debt relief + $214K donations demonstrates\u2026",
+      "verbatim_quote": "F-007 | $10M wildfire debt relief + $214K donations demonstrates community commitment | 240 emergency loans, ForgiveCo partnership, response to non-members too [E-057, E-034] | Strong P2 (member experience) signal. Brand value high. BCP/crisis response proven across multiple events. | Community Cloud for crisis coordination. Marketing Cloud for member communication workflows during events."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-039"
+        ],
+        "representative_quote": "Actively evaluating SFMC/HubSpot + personalization tools",
+        "source_kind": "docx"
+      },
+      "id": "e72d4c8a-6162-4ba8-ab33-bfb876fb4bd8",
+      "involved_subcap_ids": [
+        "P2C4.2.5",
+        "P2C1.5.1",
+        "P2C4.2.7",
+        "P2C1.1.1",
+        "P2C4.2.3",
+        "P2C4.8.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Actively evaluating SFMC/HubSpot + personalization tools",
+      "verbatim_quote": "F-003 | Actively evaluating SFMC/HubSpot + personalization tools | Feb 2026 Digital Marketing Manager posting seeks SFMC, HubSpot, Optimizely, Dynamic Yield, Adobe Target [E-039] | Active buying window; marketing automation is current gap being filled NOW | SFMC + Marketing Cloud Personalization \u2014 HIGHEST PRIORITY. Timing is optimal."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-069"
+        ],
+        "representative_quote": "Barracuda breach exposed 34,515 individuals; 7-month attacker dwell time",
+        "source_kind": "docx"
+      },
+      "id": "34af45f0-e139-4dbe-a863-5b8d8a2c6439",
+      "involved_subcap_ids": [
+        "P3C4.5.1",
+        "P1C2.3.1",
+        "P1C4.1.4",
+        "P3C4.6.3",
+        "P4C4.8.1",
+        "P2C3.7.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$150,000,000,000",
+          "delta": null,
+          "kpi_label": "WRG despite hosting",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P3": 33,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Barracuda breach exposed 34,515 individuals",
+      "verbatim_quote": "F-005 | Barracuda breach exposed 34,515 individuals; 7-month attacker dwell time | CVE-2023-2868, Chinese-nexus UNC4841, SSNs compromised; 5-month notification lag; class action settled [E-069] | TPRM failure; WRG client data also exposed. No SOC 2 or ISO 27001 for WRG despite hosting $150B in CU assets. | Shield (event monitoring, encryption). Security Cloud. TPRM assessment consulting. SOC 2 readiness engagement."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-073"
+        ],
+        "representative_quote": "CIO=WRG Board Chair governance conflict; audit independence concern",
+        "source_kind": "docx"
+      },
+      "id": "f2db1c4d-fa0b-4032-b30a-e939ceb9ebe2",
+      "involved_subcap_ids": [
+        "P4C4.3.1",
+        "P4C4.8.3",
+        "P4C4.3.3",
+        "P4C4.2.4",
+        "P4C2.4.9",
+        "P4C2.8.6",
+        "P4C2.4.3",
+        "P4C2.4.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "CIO=WRG Board Chair governance conflict",
+      "verbatim_quote": "F-006 | CIO=WRG Board Chair governance conflict; audit independence concern | Pellissery simultaneously CIO + WRG Board Chair; Hollis oversees both Legal and Internal Audit [E-073] | Material governance gap. Person evaluating vendor IS the vendor's board chair. No public conflict mitigation. | Advisory opportunity: governance framework design. Salesforce governance + audit trail capabilities via Shield."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-051"
+        ],
+        "representative_quote": "FSC+Einstein on unified 360-degree member view.",
+        "source_kind": "docx"
+      },
+      "id": "2401b18c-3567-45c0-af8f-7fcda3cf91ca",
+      "involved_subcap_ids": [
+        "P1C1.8.2",
+        "P1C4.8.6",
+        "P2C1.4.6",
+        "P2C2.9.4",
+        "P4C3.3.1",
+        "P2C4.1.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "85%",
+          "delta": null,
+          "kpi_label": "Temenos",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 50,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Informatica IDMC is integration backbone, not MuleSoft",
+      "verbatim_quote": "F-001 | Informatica IDMC is integration backbone, not MuleSoft | 35+ systems unified via IDMC; KeyStone\u2192IDMC\u2192Snowflake\u2192Dynamics\u2192BI [E-051] | Integration maturity higher than expected; data platform is strategic asset | MuleSoft deprioritized. Salesforce CDP on Informatica pipeline. FSC+Einstein on unified 360-degree member view."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-042",
+          "E-050"
+        ],
+        "representative_quote": "No Spanish digital services in 44.6% Hispanic LA County",
+        "source_kind": "docx"
+      },
+      "id": "da568313-ccf1-47db-a0b2-409e8949ea6f",
+      "involved_subcap_ids": [
+        "P2C1.1.5",
+        "P2C1.15.2",
+        "P2C1.8.4",
+        "P2C1.2.2",
+        "P2C4.7.2",
+        "P2C4.7.3",
+        "P2C4.13.5",
+        "P2C4.1.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "44.6%",
+          "delta": null,
+          "kpi_label": "Spanish digital services",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No Spanish digital services in 44.6% Hispanic LA County",
+      "verbatim_quote": "F-004 | No Spanish digital services in 44.6% Hispanic LA County | English-only website, app, and digital channels in heavily Hispanic SoCal market [E-042, E-050] | Material DEI and market penetration gap. Regulators may scrutinize under fair lending. | Experience Cloud (multilingual portal). FSC (Spanish-language member journeys). Marketing Cloud (Spanish campaigns)."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-052"
+        ],
+        "representative_quote": "OpenAI in production for call center QA \u2014 beyond PoC",
+        "source_kind": "docx"
+      },
+      "id": "3d60c8fe-3b57-4ff0-b973-4b8aafc65d02",
+      "involved_subcap_ids": [
+        "P4C4.3.1",
+        "P4C4.8.3",
+        "P4C4.3.3",
+        "P4C4.2.4",
+        "P4C2.4.9",
+        "P4C2.8.6",
+        "P4C2.4.3",
+        "P4C2.4.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "OpenAI in production for call center QA",
+      "verbatim_quote": "F-002 | OpenAI in production for call center QA \u2014 beyond PoC | 50K calls/month analyzed; automated 0-5 QA scoring replacing manual sampling [E-052] | AI maturity L3+ for specific use case; CIO validates production GenAI capability | Einstein AI/Copilot as next-gen AI expansion. Service Cloud Voice + Einstein Conversation Mining natural fit."
+    }
+  ]
+}

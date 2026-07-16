@@ -1,0 +1,885 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "odlum-brown-limited-0001",
+  "financials": {
+    "lines": [
+      "Odlum Brown's $28B+ AUM base as of May 2026 represents an 87% increase from the $15B reported in 2020, translating to an approximately 11% compound annual growth rate \u2014 achieved entirely through organic advisor-led growth with no merger or acquisition activity confirmed.  [E-001,E-002,E-088] This growth trajectory places OB firmly in the top tier of BC-based independent wealth managers by AUM. The firm's 2022 Client Insights survey (conducted by an external facilitator) showed 96% client satisfaction and 97% advisor satisfaction \u2014 the operational base underpinning this growth.  [E-010] A 56-fold increase in the Odlum Brown Model Portfolio since its 1994 inception (managed by CIO Murray Leith) provides the long-term performance credibility that sustains client retention and new asset inflows.",
+      "Classification: ACCELERATING | 6-Year CAGR: ~11.0% | Growth model: 100% organic (no M&A confirmed)",
+      "Odlum Brown's 87% organic AUM growth over six years \u2014 from $15B in 2020 to $28B+ in 2026 \u2014 at an 11% compound annual rate is among the strongest organic growth trajectories for an independent dealer in Canada. This growth has been achieved without any merger or acquisition activity, exclusively through advisor-led client acquisition and retention. The consistency of this growth through periods of significant market volatility (COVID-19 2020, inflation shock 2022, rate cycle 2022\u20132024) demonstrates structural resilience and deep client trust.  [E-001,E-088,E-116,E-117] From a Salesforce Account Executive perspective, this trajectory confirms two things: first, that budget availability is strong and expanding; and second, that the constraint on further growth is now technology \u2014 the BRC data showing declining CRM scores is the single data point in an otherwise accelerating growth story."
+    ],
+    "metrics": {
+      "covid": "19 2020, inflation shock 2022, rate cycle",
+      "growth_model": "100% organic (no M&A confirmed)",
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 400,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 400,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Deep Fortinet history predates OB deployment"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2026"
+        ],
+        "geography": "British Columbia, Canada (6 offices)",
+        "headline": "$28.0B assets \u00b7 FY2026 \u00b7 +11.0% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            15.0,
+            28.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        15000000000.0,
+        28000000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2020,
+          2026
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          15000000000.0,
+          28000000000.0
+        ]
+      }
+    ],
+    "years": [
+      2020,
+      2026
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "British Columbia",
+      "Canada (6 offices)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Warren Beach",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Current\nChief Strategy & Innovation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Sam Jiwani",
+        "recent_hire": false,
+        "tenure_months": 120,
+        "title": "9 yrs (joined 2016)\nChief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Peter Pacholko, CPA, CGA",
+        "note": "Pete",
+        "recent_hire": false,
+        "tenure_months": 480,
+        "title": "40 yrs (COO 2014, CFO 2000)\nChief Operating Officer & CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Daniel Dandar, CPA, CGA, BA",
+        "recent_hire": false,
+        "tenure_months": 396,
+        "title": "33 yrs (joined 1993)\nVP, Enterprise Risk Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Neumann Lim",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Current\nManager, Infrastructure & Cybersecurity (vCISO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Deena Magtoto",
+        "recent_hire": false,
+        "tenure_months": 288,
+        "title": "24 yrs (joined 2002)\nChief Marketing & Communications Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Andrea Linger",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "1 yr (joined 2025)\nVP, Sales & Business Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Debra Doucette, OBC",
+        "recent_hire": false,
+        "tenure_months": 13,
+        "title": "35+ yrs (Chair 2025)\nChair (since Jun 2025)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "Strategic Objectives Map \u2014 2025 Active Priorities\n\nThe following seven strategic objectives are derived from confirmed 2025 leadership statements, BRC survey data, regulatory requirements, and technology deployment signals. Each maps directly to a Salesforce ecosystem solution.\n\nEvery claim in this section is grounded in evidence IDs. Financial data covers 2020\u20132026.\n\nOdlum Brown was founded in 1923 by two Canadian military officers, establishing a culture of service, integrity, and disciplined investment that has persisted through the Great Depression, World War II, the Great Financial Crisis, and the COVID-19 pandemic.  [E-088] The firm has operated continuously for 103 years \u2014 a track record unmatched by any comparable independent dealer in Canada. Its 100% employee-owned model eliminates the conflicts of interest endemic to bank-owned or private-equity-backed wealth managers, and aligns team incentives directly with client outcomes.  [E-001] As of May 2026, Odlum Brown has been named one of Canada's Best Managed Companies for 26 consecutive years (since 1999) and one of Canada's Most Admired Corporate Cultures since 2017.  [E-010,E-088]\n\nThe firm maintains a wholly-owned subsidiary, Odlum Brown Financial Services Limited (OBFSL), offering insurance, estate planning, and financial planning to complement its investment advisory services (established 1988). A US registered investment adviser sub, Odlum Brown USA Investment Management Ltd (SEC CRD 132242), manages approximately $160M AUM and is subject to annual surprise examinations by KPMG.  [E-002,E-111]",
+    "primary_regulator": "SEC",
+    "size_tier": "mid-size",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-027",
+        "excerpt": "OB launched 'Different Makes a Difference\u00ae' podcast \u2014 equity analysts discuss market topics; published on Apple Podcasts + YouTube March 2026 episode 'Moody's: Standing Firm in an AI World' \u2014 Steve Boland +",
+        "title": "OB launched",
+        "type": "podcast",
+        "url": "https://podcasts.apple.com/ca/podcast/different-makes-a-difference/id1804206147"
+      },
+      {
+        "author": null,
+        "date": "2025-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "OB launched second podcast 'The Financial Long Game' hosted by Shelly Appleton-Benko (VP & Director). Season 1 wrapped 2024 with 41 episodes covering AI, cybersecurity, mortgages, tax, estate planning, insurance. S5E4 (M",
+        "title": "OB launched second podcast 'The Financial Long Game' hosted by Shelly\u2026",
+        "type": "podcast",
+        "url": "https://podcasts.apple.com/ca/podcast/the-financial-long-game/id1723891225"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-029",
+        "excerpt": "OB publishes 'OB Report' \u2014 monthly client newsletter PDF. Jan 2025 issue has President's Letter by Trevor Short and CIO Article by Murray Leith. Short articulates 2025 priorities: '2024 was an excellent year for our clie",
+        "title": "OB publishes 'OB Report'",
+        "type": "article",
+        "url": "https://www.odlumbrown.com/docs/default-source/insight-article/obreport_202501.p"
+      },
+      {
+        "author": null,
+        "date": "2022-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "Ian Robertson recently completed his DPhil (Economic Geography) at Oxford \u2014 thesis focused on 'institutional investors' proxy voting on ESG issues' \u2014 now Dr Ian Robertson Investment Executive (RIA 2021 conference): Rober",
+        "title": "Thesis focused on 'institutional investors' proxy voting on ESG\u2026",
+        "type": "conference",
+        "url": "https://blogs.cfainstitute.org/investor/2022/07/01/book-review-your-essential-gu"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-075",
+        "excerpt": "'Different Makes a Difference\u00ae' podcast launched March 2025; expanded to YouTube (@Different_MakesaDifference) and Instagram (@different_makesadifference) in December 2025; also on all major podcast platforms (Apple, Spo",
+        "title": "Different Makes also on all major podcast platforms (Apple, Spotify\u2026",
+        "type": "podcast",
+        "url": "https://podcasts.apple.com/ca/podcast/different-makes-a-difference/id1804206147"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "OB publishes via Apple Podcasts, Spotify, Amazon Music \u2014 multi-platform distribution OB social media presence confirmed: LinkedIn (ca.linkedin.com/company/odlum-brown-limited \u2014 note from B1: 1,415 Instagram followers), T",
+        "title": "OB publishes via Apple Podcasts, Spotify, Amazon Music\u2026",
+        "type": "podcast",
+        "url": "https://www.odlumbrown.com/insights/different-makes-a-difference"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "17a5cd23-80e8-4e8f-a32d-56df9ce52558",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "17 rationales missing E-ID refs"
+    },
+    {
+      "id": "9661a77e-619d-4da9-b27f-f3793af9ebf0",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Potential banned language: ['critical gap', 'no digital strategy']"
+    },
+    {
+      "id": "9822b3c6-6458-4e7d-91ff-e42372b02cad",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Confidence inflation: 85% subcaps = HIGH"
+    },
+    {
+      "id": "4c5224f1-3e92-4128-bc5d-f959205f0f37",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Evidence over-reuse: [('E-008', 111), ('E-046', 186), ('E-016', 184)]"
+    },
+    {
+      "id": "3e80df7c-5fba-43cf-b481-9bc44cd147b3",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Only 51% OB-specific sentences (threshold: 70%)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "BORROWED from Client Profile Research Report (Layer 0) \u00a75.1, enriched with assessment scoring cap impacts.",
+    "trend_md": "BORROWED from Client Profile Research Report (Layer 0) \u00a73.2-3.3, enriched with assessment scoring annotations. Source: Evidence items,,,,,."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.12,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.81,
+        "P1C5": 3.82,
+        "P2C1": 4.05,
+        "P2C2": 3.5,
+        "P2C3": 3.91,
+        "P2C4": 3.5,
+        "P3C1": 3.02,
+        "P3C2": 2.93,
+        "P3C3": 2.67,
+        "P3C4": 3.26,
+        "P4C1": 2.59,
+        "P4C2": 3.14,
+        "P4C3": 3.01,
+        "P4C4": 2.45
+      },
+      "overall_score": 3.34,
+      "peer_name": "LPL Financials",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.12,
+        "P1C2": 3.19,
+        "P1C3": 2.66,
+        "P1C4": 2.72,
+        "P1C5": 2.7,
+        "P2C1": 2.59,
+        "P2C2": 2.34,
+        "P2C3": 2.72,
+        "P2C4": 2.48,
+        "P3C1": 3.13,
+        "P3C2": 3.13,
+        "P3C3": 3.13,
+        "P3C4": 3.14,
+        "P4C1": 2.85,
+        "P4C2": 2.61,
+        "P4C3": 2.72,
+        "P4C4": 3.15
+      },
+      "overall_score": 2.85,
+      "peer_name": "Commerce Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.66,
+        "P1C2": 2.7,
+        "P1C3": 1.96,
+        "P1C4": 2.35,
+        "P1C5": 2.34,
+        "P2C1": 2.31,
+        "P2C2": 1.98,
+        "P2C3": 1.82,
+        "P2C4": 2.13,
+        "P3C1": 2.53,
+        "P3C2": 2.35,
+        "P3C3": 2.77,
+        "P3C4": 2.5,
+        "P4C1": 2.61,
+        "P4C2": 2.68,
+        "P4C3": 2.89,
+        "P4C4": 2.55
+      },
+      "overall_score": 2.42,
+      "peer_name": "Vestgen Wealth Partners",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.27,
+        "P1C3": 2.73,
+        "P1C4": 2.35,
+        "P1C5": 2.27,
+        "P2C1": 1.8,
+        "P2C2": 2.39,
+        "P2C3": 2.27,
+        "P2C4": 2.16,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.19,
+        "P3C4": 2.45,
+        "P4C1": 2.09,
+        "P4C2": 2.65,
+        "P4C3": 2.74,
+        "P4C4": 2.35
+      },
+      "overall_score": 2.36,
+      "peer_name": "Interactive Brokers Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.78,
+        "P1C2": 2.18,
+        "P1C3": 2.32,
+        "P1C4": 2.32,
+        "P1C5": 2.14,
+        "P2C1": 1.65,
+        "P2C2": 1.34,
+        "P2C3": 2.18,
+        "P2C4": 1.82,
+        "P3C1": 2.34,
+        "P3C2": 3.0,
+        "P3C3": 2.95,
+        "P3C4": 2.0,
+        "P4C1": 2.23,
+        "P4C2": 2.7,
+        "P4C3": 3.14,
+        "P4C4": 2.78
+      },
+      "overall_score": 2.35,
+      "peer_name": "Fisher Investments",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ODLB-20260527-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "a CIRO-regulated dealer OB's structural independence (no Glassdoor specific themes from reviews: 'transparency and accountability' positive; 'a lot of nepotism' concern (1 review); 'not much information/help provided to low net worth adviso",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": 1,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Vancouver pay rating 3.4/5 (3% better than company average) Indeed rating 3.3/5 based on 7 reviews (small sample) WLB 3.6; Pay 3.3; Job security 3.5; Management 3.3; Culture 3.0 Model Portfolio reached 50-fold gain in May 2024, only 2.5 yea",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 7,
+        "polarity": "positive",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.4
+      },
+      {
+        "drilldown": "Report Card (6 consecutive years); overall rating 9.5; NPS 97.7 Almost $40 billion AUA; founded 2017 Leith Wheeler founded 1982 by Murray Leith and Bill Wheeler; independent, employee-owned, value-based; offices Vancouver, Calgary, Toronto,",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 97,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Career history: Started at Incor Networks (firewall team, 1504 firewall module) \u2014 'Fortinet later acquired part of Incor Networks, Lim...' \u2014 deep Fortinet history predates OB deployment.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-095",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "86edc814-d8b5-480d-ab46-b97fb1af0982",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://financialpost.com/technology/tech-news/inside-the-mind-of-a-malware-hunter",
+      "subcap_ids": [],
+      "title": "Deep Fortinet history predates OB deployment"
+    },
+    {
+      "body": "Peter Pacholko, CPA, CGA \u2014 COO + CFO. 40 years at OB; COO since 2014; CFO since 2001. Board of Directors + Executive Committee + Senior Leadership Team. Active in CIRO's Conduct, Compliance and Legal Advisory Section (CCLS) + Financial and Operations Advisory Section (FOAS) + Operations Subcommittee. Member of CDS + CDCC Board of Directors, Governance Committee, Risk and Audit Committee since 2022. Appointed CIPF Board 2025.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "0ae75e58-7162-48d0-8cec-f21b77c0c30a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "Appointed CIPF Board 2025"
+    },
+    {
+      "body": "Andrea Linger \u2014 VP, Sales & Business Development (joined 2025). Previously VP Practice Management + Head of Women Canadian Advisors Network at Raymond James. Certified corporate coach. Strategic hire from peer firm.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "7591d5c5-9f1c-455e-980f-31f1bfe466f7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "Andrea Linger"
+    },
+    {
+      "body": "In-house Financial Planning Team \u2014 Mike (VP), Debbie (Manager Estate & Insurance), AJ + Eryn (Estate & Insurance Planners), James (Senior tax/cross-border, ex-Big 4 joined 2025), Rick (senior tax/wealth continuity), Max + Kimberley (Financial Planners)",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "34c1e221-68b3-4c93-9f1b-8e74f133b7d3",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/fpteam",
+      "subcap_ids": [],
+      "title": "In-house Financial Planning Team \u2014 Mike (VP), Debbie\u2026"
+    },
+    {
+      "body": "Note: Andrea Linger joined OB in 2025 from Raymond James to fill VP Sales & Business Development role vacated by Kim Abbott's 2024 retirement \u2014 formal succession in commercial leadership",
+      "date_precision": "year",
+      "e_id": "E-049",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "6d192aac-1355-4af8-b423-46743d56ab53",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.investmentexecutive.com/newspaper_/brokerage-report-card/brokerages-seek-balance-amid-leadership-strategic-change/",
+      "subcap_ids": [],
+      "title": "Note: Andrea Linger joined OB in 2025 from Raymond James"
+    },
+    {
+      "body": "Rick (FP team, joined 2025): former Big 4 senior partner, 28 years tax/family wealth transition planning; Institute of Family Enterprise Advisors graduate; 'committed to helping business families create a roadmap for successfully transferring their entrepreneurship and economic wealth across multiple family generations'",
+      "date_precision": "year",
+      "e_id": "E-081",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "d96a3df6-becd-4989-aa79-e0dd592d96e8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/solutions/individuals-and-families",
+      "subcap_ids": [],
+      "title": "Rick (FP team, joined"
+    },
+    {
+      "body": "CIPF membership (confirmed on OB website footer): OB is a Member of the Canadian Investor Protection Fund \u2014 mandatory capital adequacy requirements for CIRO dealers; client assets protected up to $1M per account category. Peter Pacholko appointed to CIPF Board of Directors 2025.",
+      "date_precision": "year",
+      "e_id": "E-107",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-107"
+      ],
+      "id": "223d0df3-a189-457a-9cce-050cc3d58874",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.cipf.ca",
+      "subcap_ids": [],
+      "title": "Peter Pacholko appointed to CIPF Board of Directors 2025"
+    },
+    {
+      "body": "Short formally announced CEO June 24, 2025. Statement: 'building on our strengths, staying true to our values, and shaping a future where we grow with purpose and deliver lasting impact.'",
+      "date_precision": "day",
+      "e_id": "E-031",
+      "event_date": "2025-06-24",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "c5f04469-19ea-407a-81a3-c9438a6a813f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/in-the-news/2025/06/24/congratulations--debra-and-trevor!",
+      "subcap_ids": [],
+      "title": "Short announced CEO"
+    },
+    {
+      "body": "Trevor Short appointed CEO of Odlum Brown (mid-2025), succeeding Debra Doucette",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2025-06-15",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "af11201b-641a-4d20-97c0-0ac7f852fcde",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.investmentexecutive.com/news/people/industry-moves/",
+      "subcap_ids": [],
+      "title": "Trevor Short appointed CEO of Odlum Brown (mid-2025)\u2026"
+    },
+    {
+      "body": "'Different Makes a Difference\u00ae' podcast launched March 2025; expanded to YouTube (@Different_MakesaDifference) and Instagram (@different_makesadifference) in December 2025; also on all major podcast platforms (Apple, Spotify etc.)",
+      "date_precision": "month",
+      "e_id": "E-075",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "75cb7306-fa17-4136-90b6-2007639ddcba",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://podcasts.apple.com/ca/podcast/different-makes-a-difference/id1804206147",
+      "subcap_ids": [],
+      "title": "Different Makes"
+    },
+    {
+      "body": "Julianna Zumpano joined Odlum Brown as 'Business Optimization' specialist in March 2025. Previously at STM Wealth Management in Business Optimization (Dec 2012 \u2013 Mar 2025, 12 years). Joined OB when STM merged into OB infrastructure.",
+      "date_precision": "month",
+      "e_id": "E-092",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-092"
+      ],
+      "id": "63eb495b-9cc3-40e8-9c7a-d9a98515c059",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/juliannazumpano",
+      "subcap_ids": [],
+      "title": "Julianna Zumpano joined Odlum Brown"
+    },
+    {
+      "body": "Additional named VPs/Directors: Jeff Davis (VP, Director, PM), Bruce McFarlane (VP, Director, PM), Mary Beck (VP Compliance), Mark Mawhinney (PM), Jas/Jaspreet Dhaliwal (VP Finance), Floyd Hill (VP), Samuel Chambers (Exec VP, Branch Manager, Director, PM, IA), Christina Anthony (VP, Director, PM), Janine Martin (VP), Michael Erez (VP, Director), Shelly Appleton-Benko (VP, Director, PM)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-041",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "4127a286-75ed-4b6d-bf29-532053f5dbfb",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.datanyze.com/companies/odlum-brown/37766120",
+      "subcap_ids": [],
+      "title": "Additional named VPs/Directors: Jeff Davis (VP, Director\u2026"
+    },
+    {
+      "body": "CIRO 2024 Annual Risk Questionnaire (ARQ): all CIRO dealer members must complete ARQ annually. In 2024, CIRO launched new ARQ platform where dealers complete questionnaire, upload compliance documents, and receive feedback. Enhanced for 2025. This is OB's formal annual risk identification and assessment process \u2014 functional RCSA equivalent.",
+      "date_precision": "year",
+      "e_id": "E-114",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-114"
+      ],
+      "id": "0efc3cf3-87c8-40aa-a296-6a70227914bb",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.ciro.ca/newsroom/publications/ciro-compliance-report-2025-helping-dealers-compliance",
+      "subcap_ids": [],
+      "title": "CIRO launched new ARQ platform where dealers complete\u2026"
+    },
+    {
+      "body": "CIRO harmonized risk models (2024): 'new harmonized risk models completed for Business Conduct, Financial & Operations and Trading Conduct Compliance. Annual member risk assessment uses new risk models as of December 31, 2024.' \u2014 OB receives risk score that determines examination frequency (1-4 year cycle).",
+      "date_precision": "year",
+      "e_id": "E-114",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-114"
+      ],
+      "id": "9007bfea-ff51-4d96-8ca1-ecce5d33b479",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.ciro.ca/newsroom/publications/ciro-compliance-report-2025-helping-dealers-compliance",
+      "subcap_ids": [],
+      "title": "CIRO harmonized risk models (2024): 'new harmonized risk\u2026"
+    },
+    {
+      "body": "Short was named president 2024 after nearly 30-year tenure at OB; portfolio manager 15 years",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "d7f57f2a-f34d-4618-88ee-2e06811c1af3",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.investmentexecutive.com/news/people/industry-moves/",
+      "subcap_ids": [],
+      "title": "Short was named president 2024"
+    },
+    {
+      "body": "OB launched formal professional mentorship program 2023 \u2014 pilot phase oversubscribed with 35 mentor-mentee matches; expansion planned (P1C3.3 \u2014 formal pilot framework with scaling plan)",
+      "date_precision": "year",
+      "e_id": "E-054",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-054"
+      ],
+      "id": "42b758f8-af3e-4774-8f21-5229065dce10",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://financialpost.com/sponsored/a-culture-built-to-endure",
+      "subcap_ids": [
+        "P1C3.3"
+      ],
+      "title": "OB launched formal professional mentorship program 2023\u2026"
+    },
+    {
+      "body": "Caroline (Chief People & Culture Officer) \u2014 joined 2023, 30+ years senior leadership experience, 'recognized for her expertise in building strong people and culture practices, she has successfully led transformation and growth initiatives across diverse industries and geographies'. Board of Directors + Senior Leadership Team.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-023",
+        "E-059"
+      ],
+      "id": "a087f123-7555-47fa-943c-d2b464699aca",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "She has led transformation and growth initiatives across\u2026"
+    },
+    {
+      "body": "OB named Canada's Most Admired Corporate Cultures 2023 \u2014 third consecutive recognition (requalification every 3 years; 2017, 2020, 2023)",
+      "date_precision": "year",
+      "e_id": "E-034",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "e92d08ff-53af-4633-ae94-04fc0a50a158",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://odlumbrown.com/about/news-and-events/2020/11/26/odlum-brown-named-one-of-canada-s-most-admired-trade-corporate-cultures-2020",
+      "subcap_ids": [],
+      "title": "OB named Canada's Most Admired Corporate Cultures 2023\u2026"
+    },
+    {
+      "body": "Doucette as founding CIRO Board Industry Director: 'Canadian securities regulators announce boards of new SRO' (2022) \u2014 Doucette named as Odlum Brown President & CEO on inaugural CIRO Board. OB is represented at the highest governance level of the Canadian investment industry's self-regulatory body.",
+      "date_precision": "year",
+      "e_id": "E-112",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-112"
+      ],
+      "id": "82c90c16-e127-4e01-9d39-10d8ad1076d2",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.ciro.ca/about-ciro/board-directors/debra-doucette",
+      "subcap_ids": [],
+      "title": "Doucette as founding CIRO Board Industry Director: '\u2026"
+    },
+    {
+      "body": "Wellington-Altus (top-rated competitor, Canada's #1 BRC 2024-2025): deployed Envestnet ecosystem (Dec 2021) + CapIntel portfolio presentation (2022) \u2014 unified financial wellness ecosystem for advisors and clients",
+      "date_precision": "month",
+      "e_id": "E-084",
+      "event_date": "2021-12-01",
+      "evidence_e_ids": [
+        "E-084"
+      ],
+      "id": "5f840dfe-d9eb-4988-8df9-208265cffe0b",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/news/ENV/wellington-altus-forges-strategic-partnership-with-envestnet",
+      "subcap_ids": [],
+      "title": "Wellington-Altus (top-rated competitor, Canada's #1 BRC\u2026"
+    },
+    {
+      "body": "Steven Sebastian (joined 2014) covers technology and health care sectors; works with CIO on strategy, model portfolios, risk management",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2014-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "adbe9a1b-16e4-4292-96eb-1359e6287294",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/research/equity-research",
+      "subcap_ids": [],
+      "title": "Steven Sebastian joined"
+    },
+    {
+      "body": "Mark Srdanovic, CFP\u00ae, FCSI\u00ae \u2014 VP & Chief Compliance Officer (since 2017). Joined 2014 as Senior Compliance Officer. CCO for both OB Canada (CIRO) and OB USA (SEC/FINRA). Board of Directors + Senior Leadership Team. IIAC Wealth, Legal and Compliance Committee. CIRO Pacific Regional Council.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2014-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "16724474-6867-4a7c-8727-d4ad51e471d5",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "Joined 2014 as Senior Compliance Officer"
+    },
+    {
+      "body": "Five formal core values articulated by named team members: Clients First (Martin, PM/IA since 2009), Integrity (Heather, PM/IA since 2014), Independence (Deborah, branch admin since 1994 retired 2024), People (Murray, CIO since 1994), Accountability (others)",
+      "date_precision": "year",
+      "e_id": "E-021",
+      "event_date": "2009-07-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "79c97d4a-4528-4db6-8e73-19a0c1a5a120",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://ca.indeed.com/cmp/Odlum-Brown-1",
+      "subcap_ids": [],
+      "title": "Five formal core values articulated by named team members\u2026"
+    },
+    {
+      "body": "Deena Magtoto \u2014 Chief Marketing & Communications Officer (joined 2002, 25+ years marketing). Board of Directors. Leads brand strategy, advertising, media relations, social media, events, community partnerships.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2002-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "830b118c-f2ec-40bf-85bc-921fb834f981",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "Deena Magtoto \u2014 Chief Marketing & Communications Officer (\u2026"
+    },
+    {
+      "body": "Ian Robertson is Portfolio Manager, Director, and Vice President of OB; member of Executive Committee. Joined OB 1997 (after 5 years Federal Government \u2014 Dept of Finance + Dept of Foreign Affairs).",
+      "date_precision": "year",
+      "e_id": "E-035",
+      "event_date": "1997-07-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "992fdbda-fcc8-431d-a0aa-2c3118aea42f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://ianrobertsoncfa.com/ian-robertson.html",
+      "subcap_ids": [],
+      "title": "OB 1997 (after 5 years Federal Government \u2014 Dept of Finance\u2026"
+    },
+    {
+      "body": "Dave \u2014 VP, Trading and Syndication (joined 1993). Audit Committee + Board of Directors + Senior Leadership Team.",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "1993-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "3b4bd60d-7afb-4cee-859f-74f1ca91f1de",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "Dave \u2014 VP, Trading and Syndication joined"
+    },
+    {
+      "body": "Dan (VP Enterprise Risk Management) full bio from OB website: 'Dan joined Odlum Brown in 1993 and has held a variety of senior positions including Controller; Director, Client Services; Vice President Finance; Vice President Operations; and most recently Vice President, Enterprise Risk Management.' Dan has been at OB for 30+ years \u2014 deepest possible institutional knowledge of OB's operational risk profile.",
+      "date_precision": "year",
+      "e_id": "E-104",
+      "event_date": "1993-07-01",
+      "evidence_e_ids": [
+        "E-104"
+      ],
+      "id": "990348d1-ef60-4bbc-99a9-0795f61dd76b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/meet-our-team/senior-leadership",
+      "subcap_ids": [],
+      "title": "Dan joined Odlum Brown"
+    },
+    {
+      "body": "Doucette joined firm 1991; served as President & CEO 2007-2024 (17 years); transitioned to Chair 2025",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "1991-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "e4073370-778f-4c69-9013-a4079fb203c4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.investmentexecutive.com/news/people/industry-moves/",
+      "subcap_ids": [],
+      "title": "Doucette joined"
+    },
+    {
+      "body": "Doucette tenure: Joined OB 1991. COO 2000-2007 (7 yrs). President & CEO 2007-2024 (17 yrs). Executive Chair, CEO 2024. Chair 2025-.",
+      "date_precision": "year",
+      "e_id": "E-032",
+      "event_date": "1991-07-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "18c3c5ce-a768-4b6f-9b88-ee6a6af9ae58",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.odlumbrown.com/about/chair-message",
+      "subcap_ids": [],
+      "title": "Doucette tenure: Joined OB 1991"
+    }
+  ]
+}

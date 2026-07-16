@@ -1,0 +1,845 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "american-homes-4-rent-lp-0001",
+  "financials": {
+    "lines": [
+      "5-Year Revenue CAGR (FY2020\u2013FY2025): 9.9% \u2014 ACCELERATING trend. AMH leads residential REIT sector in Core FFO growth (CEO statement, Q3 2025 earnings). Development-led capital strategy (zero acquisitions 2026) frees capital for platform investment."
+    ],
+    "metrics": {
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1730,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Lincoln Palmer promoted COO"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Financing costs include"
+          }
+        ],
+        "fy": [
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Sun Belt / West Coast",
+        "headline": "$478M assets \u00b7 FY2025 \u00b7 +9.6% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            0.44,
+            0.48
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        436600000.0,
+        478500000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2024,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          436600000.0,
+          478500000.0
+        ]
+      }
+    ],
+    "years": [
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Sun Belt / West Coast"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Bryan Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Philip Irby",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Natalie Birrell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Product Engineering"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Zack Johnson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Investment Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lincoln Palmer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Christopher Lau",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sara Vogt-Lowell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CAO / Chief Legal Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carrie Leonard",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Sustainability"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "American Homes 4 Rent, LP is an asset manager. It reports $11.7 billion in market capitalization and has operated since 2012. It is regulated by SEC and employs approximately 1,730 people. Its overall digital maturity is assessed at 2.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "SEC",
+    "size_tier": "Enterprise (>$1B revenue, publicly traded)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-02-20",
+        "derived_from": "evidence_index",
+        "e_id": "E-096",
+        "excerpt": "FACT: AMH 10-K FY2025: 'Cybersecurity program includes written policies and standards that follow guidance of well-recognized industry cybersecurity frameworks.' ISO 27001 compliance (CTO blog 2022) = recognized framewor",
+        "title": "AMH 10-K FY2025: 'Cybersecurity program includes written policies and\u2026",
+        "type": "blog",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240126000010/amh-20251231.htm"
+      },
+      {
+        "author": null,
+        "date": "2026-02-20",
+        "derived_from": "evidence_index",
+        "e_id": "E-109",
+        "excerpt": "FACT: AMH primary cloud = Microsoft Azure (confirmed across 20+ job postings, CTO blog, investor materials). Single-cloud Azure deployment = P4C3.4.1 (cloud strategy: Azure-first confirmed). 'appropriate duplication and ",
+        "title": "AMH primary cloud = Microsoft Azure confirmed + job postings, CTO\u2026",
+        "type": "blog",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240126000010/amh-20251231.htm"
+      },
+      {
+        "author": "Philip Irby",
+        "date": "2022-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-124",
+        "excerpt": "FACT: CTO Philip Irby AMH Technology Blog (2022): 'We're positioning ourselves to lead the single-family rental space with an innovative suite of services that seamlessly integrates both the technology we develop as well",
+        "title": "CTO Philip Irby AMH Technology Blog (2022): 're positioning ourselves",
+        "type": "blog",
+        "url": "https://www.amh.com/blog/post/innovating-the-single-family-industry-through-technology"
+      },
+      {
+        "author": null,
+        "date": "2025-05-21",
+        "derived_from": "evidence_index",
+        "e_id": "E-114",
+        "excerpt": "FACT: AMH blog (May 21, 2025): 'Years ago, we put our answer into action with Resident 360 \u2014 an internal initiative to strengthen our operational capabilities and boost our customer experience.'",
+        "title": "We put our answer",
+        "type": "blog",
+        "url": "https://www.amh.com/blog/post/using-ai-to-simplify-the-leasing-experience-for-renters"
+      },
+      {
+        "author": "Natalie Birrell",
+        "date": "2024-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-118",
+        "excerpt": "FACT: AMH LinkedIn post (confirmed): 'Natalie Birrell, SVP of Product Engineering, recognized as one of Women We Admire's Top 50 Women Leaders of Utah for 2024.",
+        "title": "AMH LinkedIn post (confirmed): 'Natalie Birrell, SVP of Product\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/amhliving"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-101",
+        "excerpt": "PROXY: AMH LinkedIn post from Caleb Keelan (AMH Land Development PM, Las Vegas) references 'Backups / Disaster Recovery / Business Continuity Best Practices tip of the week.' BCP/DR awareness content shared within AMH = ",
+        "title": "AMH LinkedIn post from Caleb Keelan (AMH Land Development PM, Las\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/in/caleb-keelan-79011452/"
+      }
+    ],
+    "ticker": "NYSE: AMH"
+  },
+  "issue_register": [
+    {
+      "id": "258b169f-06e8-4c12-a5bf-a301b60336a5",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Report contains two range-style E-ID references: 'E-001 to E-121' (cover page evidence count metadata) and 'E-001 to E-124' (Section 12 evidence sources header). AP-04 pattern match fires on these descriptive metadata labels."
+    },
+    {
+      "id": "6bbbd6cd-3e5c-4efe-a2a2-1067f6b0e2ab",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Report Section 9 anti-generic callout box contains: 'None of these recommendations contain forbidden phrases (Appoint a CDO without evidence, Create a CoE, Form an innovation lab)' \u2014 the AG-01 pattern fires on the cited examples."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Nine issues identified during the research phase (DMA-RES-AMH-20260506-0001). Issues are BORROWED from Client Profile Research Report Section 5.1 with assessment-layer scoring impact annotations. Caps are immutable \u2014 positive evidence cannot override a confirmed issue cap.",
+    "trend_md": "This section provides historical context for the assessment findings. Financial trajectory data is sourced from AMH SEC filings (T1). Digital evolution timeline is drawn from the Layer 0 research report with assessment-layer annotations."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.5,
+        "P2C1": 3.5,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.24,
+      "peer_name": "Invitation Homes",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.71,
+      "peer_name": "Progress Residential",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.65,
+      "peer_name": "Tricon Residential",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.41,
+      "peer_name": "FirstKey Homes",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-AMH-20260506-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "FACT: 53% of AMH employees would recommend working there (Glassdoor)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "trend": "Stable",
+        "value": null
+      },
+      {
+        "drilldown": "FACT: Indeed culture ratings (Las Vegas): Overall 2.7/5; Culture & Values 2.6/5; Management 2.4/5; Job Security/Advancement 2.5/5; Work-Life Balance 2.9/5; Compensation 3.2/5",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 2.7
+      },
+      {
+        "drilldown": "FACT: FACT: Employee NPS 51 (2024), up from 48 (2023) \u2014 20 points above sector benchmark",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 51,
+        "polarity": "positive",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      },
+      {
+        "drilldown": "PROXY: FACT: BBB reviews (2024-2025): Multiple complaints about maintenance delays (21 days without AC), online portal outage ('down for over a month'), HOA fee communication failures, deposit dispute charges",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Bryan Smith appointed CEO January 2025; Lincoln Palmer promoted COO; Zack Johnson promoted CIO; Sara Vogt-Lowell promoted CAO+CLO \u2014 major C-suite transition",
+      "date_precision": "publish_fallback",
+      "e_id": "E-005",
+      "event_date": "2025-12-20",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "1516b965-e2d5-4cc6-a1b3-77ec6e1fc816",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240125000083/investorhighlights-dec20.htm",
+      "subcap_ids": [],
+      "title": "Lincoln Palmer promoted COO"
+    },
+    {
+      "body": "FACT: Governance disclosure: 'Executive Transition / Ongoing Board Refreshment' as named governance feature (Investor Highlights Dec 2025 slide 20). Board refreshment: average tenure ~7 years; retirement policy; 11 trustees (2 retired May 2025).",
+      "date_precision": "month",
+      "e_id": "E-042",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "4694f0eb-f71c-4ad8-a1a7-f78d6a5cde75",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240125000083/investorhighlights-dec20.htm",
+      "subcap_ids": [],
+      "title": "Governance disclosure: 'Executive Transition / Ongoing\u2026"
+    },
+    {
+      "body": "FACT: 10-K FY2025 lists 'environmental liabilities' and 'cybersecurity' as named risk factors. Hurricane-related charges (Beryl, Debby, Helene, Milton) = $8.9M actual physical climate risk costs in FY2024. Physical climate risk materialized as financial loss.",
+      "date_precision": "year",
+      "e_id": "E-049",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "242a264a-ecdd-4ee0-8707-7dab8efb9f95",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.banking.senate.gov/imo/media/doc/letter_to_american_homes_4_rent_re_institutional_investors_housing1.pdf",
+      "subcap_ids": [],
+      "title": "10-K FY2025 lists environmental liabilities' and\u2026"
+    },
+    {
+      "body": "CEILING_ESTIMATE: Amy AI assistant launched Q2 2025 \u2014 AI-powered leasing: search, tour, apply. Amy 2.0 roadmap includes full resident journey (move-in, home management).",
+      "date_precision": "quarter",
+      "e_id": "E-007",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-007",
+        "E-014"
+      ],
+      "id": "c1957c85-4e2f-47e9-b740-8735260d0460",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://dcfmodeling.com/products/amh-business-model-canvas",
+      "subcap_ids": [],
+      "title": "Amy AI assistant launched Q2 2025 \u2014 AI-powered leasing\u2026"
+    },
+    {
+      "body": "FACT: Amy AI launched Q2 2025 nationwide (24/7). Explicit phased innovation roadmap: Amy = Phase 1 (search/tour); Amy 2.0 = Phase 2 (applying, move-in logistics, home management, 'and eventually doing much more'). Documented scaling trajectory from pilot to production confirmed.",
+      "date_precision": "quarter",
+      "e_id": "E-032",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "321bb308-7c77-4ae5-b2db-f041e92fa3c1",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.amh.com/blog/post/using-ai-to-simplify-the-leasing-experience-for-renters",
+      "subcap_ids": [],
+      "title": "Amy AI launched Q2 2025 nationwide (24/7)"
+    },
+    {
+      "body": "FACT: AMH crisis response structure confirmed via 10-K incident response protocol: 'CEO, CFO, COO and CLO' all named in crisis communications protocol. Named C-suite crisis response roles = P3C4.4.1 (crisis framework) + P3C4.4.2 (response procedures). 'Legal obligations to report incident to tenants, regulators and law enforcement' = P3C4.4.3 (crisis communications).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-097",
+      "event_date": "2025-02-20",
+      "evidence_e_ids": [
+        "E-097"
+      ],
+      "id": "d1b209b7-78dc-4133-b1ce-d3170a072c01",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/amh-reports-fourth-quarter-and-full-year-2024-financial-and-operating-results-302381857.html",
+      "subcap_ids": [
+        "P3C4.4.1",
+        "P3C4.4.2",
+        "P3C4.4.3"
+      ],
+      "title": "AMH crisis response structure confirmed via 10-K incident\u2026"
+    },
+    {
+      "body": "FACT: AMH investor highlights (Feb 2025 8-K) delivered 'Data Feedback Loop \u2014 Continuous Portfolio and Platform Optimization' as a named operational principle. Automated data feedback from portfolio operations \u2192 platform decisions = P3C1.4.3 (data validation/enrichment loop).",
+      "date_precision": "month",
+      "e_id": "E-081",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "5d005b97-f91e-446e-a2a1-0dfbbb4b1dfb",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240126000010/amh-20251231.htm",
+      "subcap_ids": [
+        "P3C1.4.3"
+      ],
+      "title": "AMH investor highlights (Feb 2025 8-K) delivered 'Data\u2026"
+    },
+    {
+      "body": "FACT: Q3 2025 earnings call (COO Lincoln Palmer): 'one of the things we haven't talked about for quite a while is our investments in our resident 360 program.' Resident 360 = ongoing named service investment program with COO executive ownership. Service design has C-suite sponsorship.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-062",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "3bd83d87-1e0a-49ba-9812-e6751f9a2051",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240125000015/investorhighlights-febru.htm",
+      "subcap_ids": [],
+      "title": "Resident 360 = named service investment program with COO\u2026"
+    },
+    {
+      "body": "FACT: Bryan Smith was COO for 10+ years before becoming CEO \u2014 deep operational continuity. Succession was planned (announced Q4 2024 earnings for Jan 2025 effective date). Planned transition, not crisis change.",
+      "date_precision": "month",
+      "e_id": "E-042",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "410a26bb-41c1-4fe4-9e3e-64b94064d797",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240125000083/investorhighlights-dec20.htm",
+      "subcap_ids": [],
+      "title": "Succession was planned"
+    },
+    {
+      "body": "FACT: CEO Bryan Smith succession from COO (announced Q4 2024, effective Jan 1 2025). 'Today at AMH, we do much more than just rent homes' \u2014 Bryan Smith (then-COO) at 2023 rebrand. Culture/innovation champion now at the top.",
+      "date_precision": "day",
+      "e_id": "E-039",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "1e324712-8863-4927-ba9c-6850735b6992",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/amhliving",
+      "subcap_ids": [],
+      "title": "CEO Bryan Smith succession from COO (announced Q4 2024\u2026"
+    },
+    {
+      "body": "Bryan Smith appointed CEO January 2025; Lincoln Palmer promoted COO; Zack Johnson promoted CIO; Sara Vogt-Lowell promoted CAO+CLO \u2014 major C-suite transition",
+      "date_precision": "month",
+      "e_id": "E-005",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "dcf18af0-c0b5-41d6-9233-65c79883e342",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000156240125000083/investorhighlights-dec20.htm",
+      "subcap_ids": [],
+      "title": "Bryan Smith appointed CEO"
+    },
+    {
+      "body": "FACT: Q4 2024 AMH earnings footnote 3: Financing costs include 'fourth quarter 2024 portfolio acquisition of nearly 1,700 homes' \u2014 confirming the Q4 2024 portfolio acquisition was ~1,700 homes, not a small bolt-on. AMH brought this onto the 4Platform + Yardi platform. CFO confirmed: 'unlocking value by bringing them onto the AMH platform.'",
+      "date_precision": "quarter",
+      "e_id": "E-117",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-117"
+      ],
+      "id": "ed53389d-9fc7-42a4-b9f3-42db64f439a3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://investors.amh.com/events-and-presentations/press-releases/news-details/2025/AMH-Reports-Fourth-Quarter-and-Full-Year-2024-Financial-and-Operating-Results/",
+      "subcap_ids": [],
+      "title": "Financing costs include"
+    },
+    {
+      "body": "FACT: AMH Rental Criteria (Oct 2024): 'VantageScore\u00ae credit report or substantially similar report will be completed on all Applicants. Verified credit history entered into an application scoring model to determine rental eligibility.' Named external credit model (VantageScore) + internal scoring model = two-layer decisioning model architecture P3C2.7.1.",
+      "date_precision": "month",
+      "e_id": "E-086",
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [
+        "E-086"
+      ],
+      "id": "7d50cb3e-55a2-4e7d-a388-434b889deaca",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.amh.com/rental-criteria",
+      "subcap_ids": [
+        "P3C2.7.1"
+      ],
+      "title": "AMH Rental Criteria (Oct 2024): 'VantageScore\u00ae credit\u2026"
+    },
+    {
+      "body": "FACT: AMH has SVP of Product Engineering (Natalie Birrell, joined 2023) who 'developed a comprehensive product delivery approach and roadmap' and 'oversaw the successful rollout of our maintenance experience platform.' Formal product delivery governance with named executive owner.",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-022",
+        "E-035"
+      ],
+      "id": "cc2832a0-b060-4c4b-be3a-0cc311e7313c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/amhliving",
+      "subcap_ids": [],
+      "title": "AMH has SVP of Product Engineering (Natalie Birrellwho\u2026"
+    },
+    {
+      "body": "FACT: AMH Cares Foundation launched (2023 per 6th sustainability report). Volunteer activities. 'Donated tens of thousands of dollars to charitable organizations.' Social impact program formalized as foundation.",
+      "date_precision": "year",
+      "e_id": "E-046",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "0e246abb-9a5d-4165-994f-20d217df9675",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://investors.amh.com/events-and-presentations/press-releases/news-details/2022/American-Homes-4-Rent-Releases-Annual-Sustainability-Report/default.aspx",
+      "subcap_ids": [],
+      "title": "AMH Cares Foundation launched 2023 per 6th sustainability\u2026"
+    },
+    {
+      "body": "FACT: AMH LinkedIn confirms SVP Natalie Birrell (joined 2023): 'developed comprehensive product delivery approach and roadmap, oversaw successful rollout of our maintenance experience platform.' Named maintenance workflow automation platform confirmed as production-deployed P3C1.5.1.",
+      "date_precision": "year",
+      "e_id": "E-078",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "24c2ea2b-ebc6-4e7c-8af3-104ed9f305a7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/amhliving",
+      "subcap_ids": [
+        "P3C1.5.1"
+      ],
+      "title": "AMH LinkedIn confirms SVP Natalie Birrell"
+    },
+    {
+      "body": "FACT: Natalie Birrell (SVP Product Engineering, AMH, joined Jul 2023): 'developed comprehensive product delivery approach and roadmap.' Named product delivery methodology + roadmap = proxy for Automation CoE governance framework P3C1.1.3. Previously led digital/agile transformation at CHG Healthcare with 'dedicated team model, agile methods' \u2014 brings mature automation CoE methodology to AMH.",
+      "date_precision": "month",
+      "e_id": "E-088",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-088"
+      ],
+      "id": "6bcc3cc5-2bd3-4320-89c6-305f81a64f78",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/nataliebirrell",
+      "subcap_ids": [
+        "P3C1.1.3"
+      ],
+      "title": "Natalie Birrell (SVP Product Engineering, AMH, joined Jul\u2026"
+    },
+    {
+      "body": "FACT: AMH LinkedIn post (confirmed): 'Natalie Birrell, SVP of Product Engineering, recognized as one of Women We Admire's Top 50 Women Leaders of Utah for 2024. Natalie joined our IT team in 2023 as SVP of Product Engineering, bringing her extensive technical and management experience to unify a large team dispersed across the country.' Natalie Birrell = primary AMH technology implementation lead (joined 2023, dispersed team unification mandate).",
+      "date_precision": "year",
+      "e_id": "E-118",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-118"
+      ],
+      "id": "a051b5e6-9341-4db8-a048-f34f4555cd4e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/amhliving",
+      "subcap_ids": [],
+      "title": "Natalie joined our IT team"
+    },
+    {
+      "body": "FACT: Resident 360 formally named as 'core focus' in Q1 2023: 'investments in added resources to property management platform, continued system innovation, and bolstering of various supporting functions, all in service of our customers.' CX program formalized at inception with three named investment pillars.",
+      "date_precision": "quarter",
+      "e_id": "E-075",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "92cbefdb-7a8e-4e53-b196-142144243a41",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.amh.com/blog/post/proving-our-continued-resilience-in-the-industry",
+      "subcap_ids": [],
+      "title": "Resident 360 formally named as 'core focus' in Q1 2023\u2026"
+    },
+    {
+      "body": "FACT: 6 ERGs launched 2022; expanded to 7 ERGs (2024/2025). ERGs 'designed to promote trust and collaboration across the organization.' Named DEI programs institutionalized as internal champions/networks.",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "6da07568-a86a-42f7-a688-f45fc1494630",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/amh-releases-2022-sustainability-report-301813056.html",
+      "subcap_ids": [],
+      "title": "6 ERGs launched"
+    },
+    {
+      "body": "FACT: Employee Stock Purchase Program (ESPP) launched in sustainability era (2022). Tuition Reimbursement Program launched same period. Learning investment programs tied to organizational commitment signal.",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "ea1fda74-5e90-4949-96c0-3ccf2e20f8be",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/amh-releases-2022-sustainability-report-301813056.html",
+      "subcap_ids": [],
+      "title": "Employee Stock Purchase Program (ESPP) launched in\u2026"
+    },
+    {
+      "body": "FACT: Workday Peakon employee engagement platform launched (2022 sustainability report). Real-time pulse surveying capability confirmed. Named technology for continuous feedback loop.",
+      "date_precision": "year",
+      "e_id": "E-040",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "bedb5ba0-96ce-4305-839a-89edddd2d591",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/amh-releases-2022-sustainability-report-301813056.html",
+      "subcap_ids": [],
+      "title": "Workday Peakon employee engagement platform launched (2022\u2026"
+    },
+    {
+      "body": "FACT: CTO Irby blog: 'A prospective resident will not only be able to remotely schedule a house tour and let themselves in, but also securely transfer a certified deposit, upload required documentation, and sign a lease, all directly from their smartphone and within the span of a lunch break.' = Full digital resident journey vision FROM the same CTO who built 4Platform. This is the Amy 2.0 + Agentforce use case described in Irby's own words from 2022 \u2014 3 years before Amy AI launched.",
+      "date_precision": "year",
+      "e_id": "E-124",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-124"
+      ],
+      "id": "74d4f36c-3d59-4f9b-8ce2-c2d28494e68d",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.amh.com/blog/post/innovating-the-single-family-industry-through-technology",
+      "subcap_ids": [],
+      "title": "This is the Amy 2.0 + Agentforce use case described in\u2026"
+    },
+    {
+      "body": "FACT: 'Made progress on next-generation maintenance services platform, which includes system enhancements to logistics, scheduling, and communications functions.' Named maintenance technology platform actively being developed in 2022/2023 \u2014 became SVP Birrell's maintenance experience platform delivered 2023-2024.",
+      "date_precision": "year",
+      "e_id": "E-075",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "0e6e0f9a-abf9-4dcb-93ec-7d4d9882fa10",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.amh.com/blog/post/proving-our-continued-resilience-in-the-industry",
+      "subcap_ids": [],
+      "title": "Named maintenance technology platform actively being\u2026"
+    },
+    {
+      "body": "FACT: AMH Green Bond Allocation Report (Q1 2025): '83% of $595.5M green bond proceeds allocated to eligible projects.' Green Bond as regulatory/investor reporting requirement = P3C3.8.4 (data quality management for ESG reporting). AMH SVP Sustainability (Carrie Leonard, 2022) = named sustainability reporting leadership.",
+      "date_precision": "year",
+      "e_id": "E-095",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "f702f9e3-c5b9-4b73-8eeb-064d5991fbe2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://investors.amh.com/events-and-presentations/press-releases/news-details/2025/AMH-Releases-2024-Sustainability-Report/default.aspx",
+      "subcap_ids": [
+        "P3C3.8.4"
+      ],
+      "title": "AMH SVP Sustainability (Carrie Leonard, 2022) named\u2026"
+    },
+    {
+      "body": "FACT: INVH has a named Chief Information and Digital Officer (CIDO) \u2014 Virginia Suliman, joined ~2020. Built product-led agile team + PMO + 5-year technology roadmap. Deploying EliseAI for leasing (piloted \u2192 national rollout) + expanding to renewals. Microsoft Copilot deployed. HOA notification AI. 'put data at the center of our universe.' PEER BENCHMARK: INVH has 4+ years structural governance advantage vs AMH (no CDO/CIDO confirmed).",
+      "date_precision": "year",
+      "e_id": "E-121",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-121"
+      ],
+      "id": "55d1ed5c-0d8e-45a8-a567-191ec5b6cdd8",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.reit.com/news/articles/invitation-homes-using-tech-to-elevate-the-resident-associate-experience-",
+      "subcap_ids": [],
+      "title": "INVH has a named Chief Information and Digital Officer\u2026"
+    },
+    {
+      "body": "FACT: ARPI (American Residential Properties) acquisition completed March 1, 2016. $1.3B total transaction value; ~38M shares + $0.8B debt assumed; portfolio grew to 47,000+ homes. Largest M&A in AMH history.",
+      "date_precision": "day",
+      "e_id": "E-029",
+      "event_date": "2016-03-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "046e7715-f2e5-4bee-a7a9-cccbc536e0e1",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000110465916103202/a16-6001_1ex99d1.htm",
+      "subcap_ids": [],
+      "title": "ARPI (American Residential Properties) acquisition completed"
+    },
+    {
+      "body": "FACT: Technology integration speed: 'AMH and ARP used the same accounting system. Completed integration of accounting and data systems over weekend prior to merger close. All systems operational March 1, 2016.' Demonstrates M&A technology integration capability \u2014 weekend turnaround.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-029",
+      "event_date": "2016-03-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "769b0145-331d-44c2-a0fe-a499563fefef",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000110465916103202/a16-6001_1ex99d1.htm",
+      "subcap_ids": [],
+      "title": "Completed integration of accounting and data systems over\u2026"
+    },
+    {
+      "body": "FACT: 'Tenant ledgers and resident portals integrated during the week of March 7, 2016.' Full resident-facing platform integration within one week of acquisition close. Synergies: ~80% G&A savings; reduced maintenance costs via AMH platform; accelerated in-house maintenance rollout (30 trucks + 30 technicians acquired).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-029",
+      "event_date": "2016-03-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "20f16caa-6b90-4bf5-9860-e82cc6da6195",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001562401/000110465916103202/a16-6001_1ex99d1.htm",
+      "subcap_ids": [],
+      "title": "Accelerated in-house maintenance rollout (30 trucks + 30\u2026"
+    }
+  ]
+}

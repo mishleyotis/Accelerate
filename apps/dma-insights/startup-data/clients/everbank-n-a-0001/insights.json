@@ -1,0 +1,1351 @@
+{
+  "entity_display_id": "everbank-n-a-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P4C3.1.2",
+        "P4C3.3.1",
+        "P4C3.8.CIB3",
+        "P4C3.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-001",
+      "id": "483474ce-0e7b-4b00-b910-94d6837d39d5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-121",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-121",
+        "E-134",
+        "E-135",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-135].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Zero integration middleware — MuleSoft",
+      "what_text": "Zero integration middleware. The research recorded: \"Finzly single API unifies payment processing across domestic, instant, and international rails — API-first payment architecture Finzly integrates with FIS + Temenos + Backbase — multi-vendor API orchestration achieved\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-134].",
+      "why_text": "The analyst's opportunity map rates this HIGH priority. Entry-point signal: CONFIRMED. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-121, E-134].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P4C1.2.2",
+        "P2C4.4.2",
+        "P2C4.1.1",
+        "P2C4.5.IB1",
+        "P2C4.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-002",
+      "id": "107bb5f8-b64b-487f-8755-21b870121b45",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-134",
+        "E-135",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021",
+        "E-037"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "CDP gap — Data Cloud",
+      "what_text": "CDP gap. The research recorded: \"178 technologies confirmed across 17 categories — comprehensive Vibe technographic scan NEW: Sitecore detected in customer_management AND marketing categories — DXP with native CDP/personalization capabilities\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-135].",
+      "why_text": "The analyst's opportunity map rates this HIGH priority. Entry-point signal: CONFIRMED. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-134, E-135].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P2C3",
+        "P3C1",
+        "P4C1",
+        "P4C1.2.2",
+        "P4C3.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "671f31bb-8e8f-4c6e-91c6-7d7abbdd4fe9",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-121",
+        "E-134",
+        "E-135",
+        "E-136",
+        "E-120",
+        "E-122",
+        "E-124",
+        "E-125"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Technology Roadmap & Investment Planning a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-134].",
+      "source_rec_id": "REC-01",
+      "theme": "Architecture & Cloud",
+      "title": "Deploy Enterprise Integration Middleware",
+      "what_text": "Zero ESB, iPaaS, or MuleSoft detected in EverBank's 178-technology stack across 17 categories. Backbase (commercial banking), Finzly (payments), FIS (teller), Temenos (core), Salesforce CRM, Microsoft Dynamics CRM, Oracle E-Business Suite, and 110+ other vendor systems operate without an integration orchestration layer. MuleSoft Anypoint Platform connected unlock: →: MuleSoft connects LoanCare mortgage + Elan cards + core banking into unified omnichannel (lifts P2 Omnichannel Service); →: Integration layer enables process automation across payment rails (lifts P3 Automation); →: API-led connectivity feeds Data Cloud/Databricks with real-time data from all systems (lifts P4 Data Governance). In Zennify's assessment Technology Roadmap & Investment Planning scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-121].",
+      "why_text": "The assessment found: “117+ technologies detected spanning COBOL/IBM legacy through modern Next.js/Contentstack — active modernization journey Legacy layer: COBOL, IBM CICS, IBM i, SQL Server 2000/2005/2008, Microsoft” [E-120]. At 1.0 out of 5, Technology Roadmap & Investment Planning sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C2",
+        "P1C1",
+        "P4C1.2.2",
+        "P4C2.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "a6ba18ef-de12-4dc8-870f-8b9b91169f18",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-065",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-065",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-134",
+        "E-135",
+        "E-046",
+        "E-065",
+        "E-109",
+        "E-111",
+        "E-107",
+        "E-108"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automated Data Quality Monitoring a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-135].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Implement Unified Customer Data Platform",
+      "what_text": "Sitecore detected with partial CDP capabilities but primary CMS is Contentstack (headless). Dual CRM (Salesforce+Dynamics) fragments customer profiles across systems. No Salesforce Data Cloud, Segment, Tealium, or Treasure Data detected. Customer data is siloed across 6+ business lines. Salesforce Data Cloud connected unlock: →: Unified profiles enable Marketing Cloud personalization (lifts P2 Personalization); →: Clean, governed data feeds AI/ML models (lifts P4 Analytics & AI); →: Data-driven strategy measurement becomes possible (lifts P1 Digital Strategy). In Zennify's assessment Automated Data Quality Monitoring scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-134].",
+      "why_text": "The assessment found: “Bill Bell developed bank-wide data privacy solution supporting GDPR and CCPA during 15yr tenure US Privacy User Signal Mechanism detected on website — consent management infrastructure” [E-111]. At 1.0 out of 5, Automated Data Quality Monitoring sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C2",
+        "P4C1",
+        "P3C2",
+        "P4C1.2.2",
+        "P2C4.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "a22cdc38-b7cd-445c-bc26-20566b606b0d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-065",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-065",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-065",
+        "E-134",
+        "E-072",
+        "E-135",
+        "E-073",
+        "E-075",
+        "E-076"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Life Event Triggers a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.4 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-065].",
+      "source_rec_id": "REC-03",
+      "theme": "CX & Personalization",
+      "title": "Consolidate CRM onto Financial Services Cloud",
+      "what_text": "Dual CRM detected: Salesforce CRM (Sales category) + Microsoft Dynamics CRM (Sales category) operating in parallel. No unified 360° customer view. Additionally, Desk.com Chat (Salesforce legacy EOL product) detected, proving deeper historical Salesforce relationship than CRM alone. Salesforce Financial Services Cloud (FSC) connected unlock: →: FSC onboarding workflows accelerate account opening (lifts P2 Onboarding); →: Single CRM eliminates data duplication (lifts P4 Data Governance); →: Unified customer view enhances fraud detection context (lifts P3 Fraud). In Zennify's assessment Life Event Triggers scores 1.0 out of 5, versus a typical 2.4 at comparable institutions [E-046].",
+      "why_text": "The assessment found: “Side-by-side product comparison on banking page — static comparison, not personalized NBA Optimizely A/B testing detected — experimentation capability for content personalization” [E-072]. At 1.0 out of 5, Life Event Triggers sits 1.4 points below the 2.4 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P3C1",
+        "P2C4",
+        "P1C4",
+        "P4C2.5.2",
+        "P2C4.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "fc63672e-cc10-41ea-bf20-196cbfd98735",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-065",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-065",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-134",
+        "E-135",
+        "E-060",
+        "E-065",
+        "E-069",
+        "E-080",
+        "E-070",
+        "E-062"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Policy Self-Service a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-135].",
+      "source_rec_id": "REC-04",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Deploy Conversational AI for Customer Self-Service",
+      "what_text": "No chatbot or virtual assistant on everbank.com — only phone (1.888.882.3837), secure messaging, and FAQ. Desk.com Chat (Salesforce EOL product) detected in tech stack but not functional on site. CommandBar provides UX guidance widgets but NOT conversational AI. LoanCare mortgage + Elan credit cards outsourced = fragmented service channels across 5+ lines. Salesforce Einstein Bot + Service Cloud + Agentforce connected unlock: →: Bot deflection automates routine inquiries (lifts P3 Automation); →: Conversational data feeds personalization engine (lifts P2 Personalization); →: Digital-first service culture signal for talent attraction (lifts P1 Culture). In Zennify's assessment Policy Self-Service scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-134].",
+      "why_text": "The assessment found: “LoanCare (Fidelity National Financial subsidiary) subservices all residential mortgage loans for EverBank Borrowers access mortgage via everbank.myloancare.com — separate portal from core banking” [E-060]. At 1.0 out of 5, Policy Self-Service sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P4C1",
+        "P4C1.2.2",
+        "P2C4.4.2",
+        "P3C1.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "75159d5f-8cf8-4726-b6fc-8d6e078cf66d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-077",
+        "E-135",
+        "E-069",
+        "E-043",
+        "E-045",
+        "E-048",
+        "E-059",
+        "E-044"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Value Proposition Clarity a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Build Lifecycle Personalization Engine",
+      "what_text": "No formal loyalty or rewards program. Rate-based retention (4.30% APY savings, GOBankingRates Gold) is primary customer value proposition. Drip email automation is limited scope. No Marketing Cloud, Pardot, or Journey Builder detected. SurveyGizmo and Contently in marketing stack but no lifecycle automation. Salesforce Marketing Cloud + Journey Builder connected unlock: →: Marketing data feeds personalization engine (bidirectional lift); →: Campaign data enriches customer profiles in Data Cloud (lifts P4 Data Governance). In Zennify's assessment Value Proposition Clarity scores 1.0 out of 5, versus a typical 2.8 at comparable institutions [E-135].",
+      "why_text": "At 1.0 out of 5, Value Proposition Clarity sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-077, E-135].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P1C1",
+        "P3C2",
+        "P4C2.5.2",
+        "P4C3.1.2",
+        "P1C1.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "4785bfe8-c9bc-4440-b753-3d9d1c52ea29",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-107",
+            "E-108",
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-113",
+        "E-134",
+        "E-107",
+        "E-116",
+        "E-135",
+        "E-117",
+        "E-108",
+        "E-112"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Model Validation & Testing a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.4 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-107].",
+      "source_rec_id": "REC-06",
+      "theme": "Analytics & AI",
+      "title": "Standardize BI Platform via Tableau Consolidation",
+      "what_text": "16+ BI tools detected: Cognos (FSR, TM1), Tableau Server, QlikView, Qlik Sense, Splunk Enterprise, SAS Base, Oracle Data Mining, SAP Crystal Reports, Crystal Solutions, Google Analytics, PowerBI, Talend, Talend Data Integration, Dun & Bradstreet, Experian. Duplicate licensing, skill fragmentation, inconsistent reporting. Tableau (consolidation from 16+ tools) connected unlock: →: Consolidated analytics enables strategy measurement (lifts P1 Digital Strategy); →: Unified fraud analytics improves detection (lifts P3 Fraud). In Zennify's assessment Model Validation & Testing scores 1.0 out of 5, versus a typical 2.4 at comparable institutions [E-134].",
+      "why_text": "At 1.0 out of 5, Model Validation & Testing sits 1.4 points below the 2.4 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-113, E-134].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P4C4",
+        "P2C2",
+        "P4C4.6.2",
+        "P2C4.4.2",
+        "P3C1.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "b71d55fd-efa6-475a-bbea-14743d45a6b7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-134",
+        "E-011",
+        "E-126",
+        "E-095",
+        "E-093",
+        "E-094",
+        "E-096"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Reporting Calendar a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-134].",
+      "source_rec_id": "REC-07",
+      "theme": "Compliance & Surveillance",
+      "title": "Strengthen Compliance Automation & Security Posture",
+      "what_text": "BSA/AML Chief Iris Smith departed Oct 2025 with no confirmed replacement. Windows 7 EOL (Jan 2020) still detected in production. Brandon Edwards is AVP Director InfoSec (not C-level CISO). BWise GRC has been operational since 2012 but may need modernization. Salesforce Shield + GRC Advisory connected unlock: →: Security automation lifts cybersecurity posture (bidirectional); →: Compliant onboarding enables faster account opening (lifts P2 Onboarding); Appoint BSA/AML Officer replacement — Zennify cannot execute this, but compliance tooling supports whoever fills the role. In Zennify's assessment Reporting Calendar scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-091].",
+      "why_text": "The assessment found: “OCC CRA Performance Evaluation (Nov 2024): Satisfactory rating for evaluation period 2021-2023 70.3% of total loans originated inside assessment areas — high AA lending concentration” [E-095]. At 1.0 out of 5, Reporting Calendar sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P3C2",
+        "P2C4",
+        "P1C1",
+        "P4C1.2.2",
+        "P4C2.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "5fab7afd-b0f1-412b-b7ce-35089ddf6b76",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-107",
+            "E-108",
+            "E-109",
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-107",
+        "E-108",
+        "E-109",
+        "E-014",
+        "E-112",
+        "E-134",
+        "E-116",
+        "E-135"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Model Validation & Testing a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.4 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-109].",
+      "source_rec_id": "REC-08",
+      "theme": "Analytics & AI",
+      "title": "Accelerate AI-Ready Data Infrastructure",
+      "what_text": "CDAIO Milind Zodge appointed Jan 2026 with governance-first AI mandate. Databricks Lakehouse and GenAI certifications pursued by CDAIO and Sr Data Architect Baskar K. CTO Stephen Sullivan is CBA AI Working Group member. Bill Bell (15yr data governance leader) departed Mar 2025 creating knowledge gap. AI infrastructure is in EARLY BUILD stage — no deployed AI/ML models detected. Einstein AI + Data Architecture Advisory connected unlock: →: AI-powered fraud detection enhances McDade's function (lifts P3 Fraud); →: ML-driven personalization enables next-best-action (lifts P2 Personalization); →: AI-driven insights support data-driven strategy (lifts P1 Digital Strategy). In Zennify's assessment Model Validation & Testing scores 1.0 out of 5, versus a typical 2.4 at comparable institutions [E-108].",
+      "why_text": "At 1.0 out of 5, Model Validation & Testing sits 1.4 points below the 2.4 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-107, E-108].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P2C4.4.2",
+        "P3C1.4.2",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-003",
+      "id": "6afb013b-1f0a-4a00-9689-b7f690773804",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-065",
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-065",
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-065",
+        "E-134",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-134].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Dual CRM fragmentation (SF+Dynamics) — Financial Services Cloud",
+      "what_text": "Dual CRM fragmentation (SF+Dynamics). The research recorded: \"Dual CRM: Salesforce CRM + Microsoft Dynamics CRM — lead management capability present Drip email marketing automation platform detected\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-065].",
+      "why_text": "The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: Existing Salesforce CRM footprint. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-046, E-065].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P4C1.2.2",
+        "P4C2.5.2",
+        "P2C4.4.2",
+        "P2C2.2.8",
+        "P2C4.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-004",
+      "id": "3996755d-b878-4aae-b9f6-9ea031d65392",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134",
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-134",
+        "E-135",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021",
+        "E-037"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "No chatbot/VA (Desk.com EOL) — Einstein Bot + Service Cloud",
+      "what_text": "No chatbot/VA (Desk.com EOL). The research recorded: \"178 technologies confirmed across 17 categories — comprehensive Vibe technographic scan NEW: Sitecore detected in customer_management AND marketing categories — DXP with native CDP/personalization capabilities\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-135].",
+      "why_text": "The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: Desk.com proves prior SF relationship. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-134, E-135].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P2C4.4.2",
+        "P2C4.7.1",
+        "P2C4.7.2",
+        "P1C4.7.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-005",
+      "id": "8acb7697-a090-4a7a-b118-56e81b2effaf",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-135"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-077",
+        "E-135",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021",
+        "E-037"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "No loyalty program — Marketing Cloud",
+      "what_text": "No loyalty program. The research recorded: \"No formal loyalty/rewards program detected — rate-based value proposition is primary retention mechanism Performance Checking: $5K+ balance unlocks unlimited ATM fee reimbursement — behavior-linked tier benefit\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-135].",
+      "why_text": "The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: CONFIRMED. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-077, E-135].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P4C2.5.2",
+        "P3C3.8.2",
+        "P4C2.1.7",
+        "P4C2.1.6",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-006",
+      "id": "2a96836e-85c0-4cb0-8a44-50550d7d7f19",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-113"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-016",
+            "E-021",
+            "E-034",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-007"
+        },
+        {
+          "e_ids": [
+            "E-016",
+            "E-021",
+            "E-034",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-113",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021",
+        "E-037",
+        "E-018"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-016].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "BI tool sprawl (16+) — Tableau consolidation",
+      "what_text": "BI tool sprawl (16+). The research recorded: \"Cognos (FSR for regulatory reporting, TM1 for financial planning) — IBM BI suite Tableau Server for visual analytics and dashboards across organization\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-034].",
+      "why_text": "The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: CONFIRMED. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-113, E-034].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P4C3.1.2",
+        "P2C2.2.8",
+        "P2C4.3.2",
+        "P2C1.4.8",
+        "P4C3.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-007",
+      "id": "fefa1717-54aa-4d6b-b917-9420406fab8c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-060",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-065",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021",
+        "E-037"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Channel fragmentation — Service Cloud",
+      "what_text": "Channel fragmentation. The research recorded: \"LoanCare (Fidelity National Financial subsidiary) subservices all residential mortgage loans for EverBank Borrowers access mortgage via everbank.myloancare.com — separate portal from core banking\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-065].",
+      "why_text": "The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: CONFIRMED. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-060, E-065].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.2.2",
+        "P2C4.4.2",
+        "P2C1.4.6",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-008",
+      "id": "e202c0cd-8e42-4536-82dd-44ab8fa1ad66",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-120",
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-134"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-134",
+        "E-120"
+      ],
+      "linked_subcap_id": "P4C3.2.2",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Legacy Modernization Strategy a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-134].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Legacy modernization — Advisory/Managed Services",
+      "what_text": "Legacy modernization. The research recorded: \"117+ technologies detected including Salesforce CRM, Microsoft Dynamics CRM, Temenos Transact, Fiserv, Oracle Financial Services 13 IT security technologies: Cisco, Symantec, Veracode, Forcepoint, Splunk, Oracle Identity Management\". In Zennify's assessment Legacy Modernization Strategy scores 3.0 out of 5, versus a typical 2.7 at comparable institutions [E-015].",
+      "why_text": "The assessment found: “117+ technologies detected spanning COBOL/IBM legacy through modern Next.js/Contentstack — active modernization journey Legacy layer: COBOL, IBM CICS, IBM i, SQL Server 2000/2005/2008, Microsoft” [E-120]. The analyst's opportunity map rates this LOW priority. Entry-point signal: DETECTED. scores 3.0/5 against a peer median of 2.6 on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P1C4.8.3",
+        "P4C2.5.2",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P1C3.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-009",
+      "id": "cb3b35f2-dcda-4030-acd9-93fcf654ab7e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-107",
+            "E-112"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-107",
+            "E-112"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-107",
+        "E-112",
+        "E-034",
+        "E-016",
+        "E-041",
+        "E-039",
+        "E-021",
+        "E-037"
+      ],
+      "linked_subcap_id": "P1C4.8.3",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Collaboration Culture a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "CDAIO building AI infrastructure — AI advisory + Einstein",
+      "what_text": "CDAIO building AI infrastructure. The research recorded: \"Milind Zodge appointed Chief Data Officer (CDAIO) Jan 2026; served as Interim CDO Sep-Dec 2025 — 30yr experience CDAIO title signals combined Data + AI + Intelligence mandate at C-level\". In Zennify's assessment Collaboration Culture scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-112].",
+      "why_text": "The analyst's opportunity map rates this LOW priority. Entry-point signal: CDAIO Jan 2026, Databricks/GenAI. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses [E-107, E-112].",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C1.2.2",
+        "P4C2.5.2",
+        "P1C2.1.7",
+        "P2C4.5.IB1",
+        "P1C2.5.5",
+        "P1C2.5.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-010",
+      "id": "9048aa3f-0bc8-4227-92c7-7763511ab825",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-109"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-116"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-109",
+            "E-116"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-109",
+        "E-116",
+        "E-110"
+      ],
+      "linked_subcap_id": "P4C1.2.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Automated Data Quality Monitoring a near-term focus for EverBank, N.A.: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-110].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data governance gap — Consulting",
+      "what_text": "Data governance gap. The research recorded: \"Baskar K. Senior Data Architect (since Apr 2023) — Databricks Lakehouse + GenAI certifications, 20yr experience, PMP Sanjay Vyawhare Data Warehouse BI Lead (since Sep 2023, EverBank since 2015) — 28yr experience, ETL/DW specialist\". In Zennify's assessment Automated Data Quality Monitoring scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-109].",
+      "why_text": "The assessment found: “Sanjay Vyawhare Data Warehouse BI Lead (28yr exp) — dedicated DW function since at least 2015 Bill Bell (departed): led Agile Data Warehouse team of 10+ employees, supported Accounting, Marketing” [E-116]. The analyst's opportunity map rates this LOW priority. Entry-point signal: DETECTED. scores 1.0/5 against a peer median of 2.5 on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "EverBank scores BELOW all four peers in overall maturity (1.9 vs peer range ~2.40-2.85). The primary driver is evidence mode limitations (PUBLIC) constraining P1 visibility. In P3 Operations, EverBank's fraud leadership and payment modernization likely match or exceed Hancock Whitney and Valley National. Cullen/Frost leads across all pillars with estimated ~2.85 overall, driven by single-platform CRM, digital-first commercial banking, and premium deposit strategy.",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience (P2) — Score 1.77 vs Median 2.65 (-0.88)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 2.12 vs Median 2.60 (-0.48)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 2.03 vs Median 2.60 (-0.57)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-EVER-20260413-0001"
+}

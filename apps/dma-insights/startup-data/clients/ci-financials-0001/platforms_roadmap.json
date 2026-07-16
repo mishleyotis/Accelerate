@@ -1,0 +1,132 @@
+{
+  "entity_display_id": "ci-financials-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "AUM $": "137.8B",
+        "CGI managing C $": "137.8B",
+        "Financial for C $": "12.1B",
+        "Outcome": "E-055_CF_P4 Addepar Corient $177B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "E-055_CF_P4 Addepar Corient $177B",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.75",
+          "metric": "E-055_CF_P4 Addepar Corient $177B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "E-055_CF_P4 Addepar Corient $177B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Unify 6 Data Silos via Salesforce Data Cloud + MuleSoft API Mesh on AWS Infrastructure"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.75",
+          "metric": "Financial for C $12.1B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Financial for C $12.1B",
+            "peer": null,
+            "time": "12 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Deploy Agentforce on FSC as Enterprise AI Platform \u2014 Satisfying Mubadala's 12-Month AI ROI Mandate"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.75",
+          "metric": "AUM $137.8B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "AUM $137.8B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy Marketing Cloud for 1.3M+ Investor Base \u2014 Campaign Orchestration Across CI GAM, Assante, Neo, CIAI ETF"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.75",
+          "metric": "CGI managing C $137.8B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "CGI managing C $137.8B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Implement Compliance Cloud + Shield: TPRM Automation for CIRO B-10, FINTRAC, and Multi-Jurisdiction Privacy"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.11",
+          "metric": "P1C4 score 1.89 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 score 1.89 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Digital Strategy Workshop + Change Management Program \u2014 Foundation for All Technology Deployments"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C4"
+    },
+    {
+      "customer_impact": {
+        "Services manage C $": "135B"
+      },
+      "dependencies": [
+        "REC-06"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Services manage C $135B",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.75",
+          "metric": "Services manage C $135B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Services manage C $135B",
+            "peer": "Salesforce FSC",
+            "time": "12-18 month"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Expand CI Financial's Salesforce Footprint: Deploy Financial Services Cloud for 1,430+ Advisors"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-CIF-20260512-0001",
+  "total_duration_months": 8
+}

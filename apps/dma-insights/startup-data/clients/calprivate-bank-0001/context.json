@@ -1,0 +1,719 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "calprivate-bank-0001",
+  "financials": {
+    "lines": [
+      "Financial data is derived from official PBAM quarterly press releases (T1 evidence). FY2021\u2013FY2023 figures are approximate, based on trajectory analysis. FY2024 and FY2025 are precise from official Q4 earnings releases. CAGR (FY2021-FY2025): Total Assets ~14% | Net Income ~19% \u2014 both classified as ACCELERATING. [E-0001, E-0003, E-0004]",
+      "Key performance highlights (FY2025): Net Income +13.5% YoY | ROA 1.61% (#1 in asset class <$5B) | NIM 4.76% | Efficiency ratio 48.46% | NPS 81 World Class (\u00d715 consecutive quarters) | EPS $6.92 | TBV/share $45.75 | Core deposits CAGR exceptional [E-0003, E-0004]",
+      "\u26a0\ufe0f  CREDIT QUALITY FLAG: NPA/total assets deteriorated from 0.47% (Q4'24) to 2.00% (Q4'25). Nine classified loans as of Dec 31, 2024; new CCO (August 2025) + new COO (April 2026) both have credit/risk oversight mandates. This creates urgency for systematic credit portfolio analytics \u2014 a direct Data Cloud + nCino portfolio analytics opportunity. [E-0005]",
+      "CalPrivate Bank's financial trajectory is classified as ACCELERATING on core growth metrics (net income CAGR ~19%, assets CAGR ~14% over 5 years) with STABLE-HIGH profitability (ROA consistently in top decile nationally) and VARIABLE credit quality (significant Q4'25 deterioration from NPA 0.47% to 2.00%). The efficiency ratio improvement from ~52% to 48.46% reflects disciplined expense management and operating leverage. [E-0003, E-0004]"
+    ],
+    "metrics": {
+      "fy2024_q4_roa": 1.8,
+      "net_income": 12000000.0,
+      "q1_2025_roa": 1.74,
+      "q3_2025_efficiency_ratio": 50.49,
+      "q3_2025_nim": 4.65,
+      "q4_2025_roa": 1.53,
+      "tbv_growth_yoy_pct": 19.1,
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 210,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Legal Services Specialties vertical: separate dedicated\u2026"
+          },
+          {
+            "fy": "FY2025",
+            "label": "NCino loan origination system Confirmed DEPLOYED: DCBO job\u2026"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Northern California",
+        "headline": "$535.0B assets \u00b7 FY2026",
+        "regulator": "FDIC",
+        "series": {
+          "net_income_m": [
+            20.0,
+            26.0,
+            29.0,
+            35.8,
+            40.7,
+            12.0
+          ],
+          "total_assets": [
+            1.5,
+            1.8,
+            2.1,
+            2.3,
+            2.5,
+            535.0
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Northern California"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rick L. Sowers",
+        "recent_hire": false,
+        "tenure_months": 120,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cory Stewart",
+        "recent_hire": false,
+        "tenure_months": 300,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Curtis Birkmann",
+        "recent_hire": false,
+        "tenure_months": 360,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Zina Robinson",
+        "recent_hire": false,
+        "tenure_months": 300,
+        "title": "EVP & Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael Pierron",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Meghan Bish",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Treasury Management Sales Manager"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "CalPrivate Bank is a California state-chartered commercial bank founded in 2006, headquartered at 4265 Executive Drive, La Jolla, California 92037. The bank operates as a wholly-owned subsidiary of Private Bancorp of America, Inc. (OTCQX: PBAM) and is supervised by the Federal Deposit Insurance Corporation (FDIC) as its primary federal regulator and the California Department of Financial Protection and Innovation (DFPI) as its state regulator. [E-0024]",
+    "primary_regulator": "FDIC",
+    "size_tier": "$1B-$5B",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-11-04",
+        "derived_from": "evidence_index",
+        "e_id": "E-0096",
+        "excerpt": "Crisis management demonstrated (anti-negative): CalPrivate's LinkedIn posts during 2024 LA/San Diego storms: 'They have played a proactive role in coordinating resources with the city and conducting door-to-door checks t",
+        "title": "Crisis management demonstrated anti",
+        "type": "linkedin-post",
+        "url": "https://finance.yahoo.com/news/calprivate-bank-celebrates-grand-opening-130000401.html"
+      },
+      {
+        "author": null,
+        "date": "2026-05-27",
+        "derived_from": "evidence_index",
+        "e_id": "E-0042",
+        "excerpt": "Content marketing assets identified: (1) 'Client Interview' video case studies featuring named clients (Jonathan Segal architect/developer, premier real estate education, restaurant/bar concepts, marketing agency, hospit",
+        "title": "Content marketing assets identified 1) 'Client Interview' video case\u2026",
+        "type": "article",
+        "url": "https://calprivate.bank/lending/"
+      },
+      {
+        "author": null,
+        "date": "2026-05-27",
+        "derived_from": "evidence_index",
+        "e_id": "E-0069",
+        "excerpt": "Knowledge Center categories: Business Mobile Deposit, Consumer Mobile Deposit, General Q&A, Lost or Stolen Card, Mobile Banking App, Trouble Making Payments, Foreclosure Avoidance Assistance, Knowledgebase FAQ articles. ",
+        "title": "Knowledge Center categories: Business Mobile Deposit, Consumer Mobile\u2026",
+        "type": "article",
+        "url": "https://calprivate.bank/knowledge-center/"
+      },
+      {
+        "author": null,
+        "date": "2026-05-27",
+        "derived_from": "evidence_index",
+        "e_id": "E-0061",
+        "excerpt": "Indeed company profile: Size 51-200 employees, Financial Services sector. Interview experience: MEDIUM difficulty, EXCELLENT experience, 1-week process. Salary satisfaction: 78% yes (7/9). Recommend to friend: 75% yes (6",
+        "title": "Indeed company profile: Size 51-200 employees, Financial Services\u2026",
+        "type": "article",
+        "url": "https://www.indeed.com/cmp/Calprivate-Bank"
+      }
+    ],
+    "ticker": "OTCQX:PBAM"
+  },
+  "issue_register": [
+    {
+      "id": "76ea4cdd-d69d-4b42-94bc-8be6a1ed5809",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "AP-04 flagged 'E-0001 through E-0125' in \u00a712 Evidence Sources and Appendix C metadata summary lines. These are metadata range descriptions ('Evidence items E-0001 through E-0125'), not inline citation range references in assessment prose. AP-04 intent is to prevent '[E-087 through E-095]' in rationale citations \u2014 not to prohibit metadata summary ranges."
+    },
+    {
+      "id": "ff2f26e7-88e6-41fe-a1a3-4836e4042bbc",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "P3 Operations, Risk & Compliance has 61.7% of subcaps at score 3.0, triggering SI-02 differentiation warning (threshold 60%). Unique values present: [2.5, 3.0, 3.5] \u2014 3 values across 115 P3 subcaps. P3 is the highest-scoring pillar (2.85) and cluster at M3 is expected given CRA High Satisfactory (T1 evidence) and zero enforcement actions."
+    },
+    {
+      "id": "4dd7440a-863d-459d-9e5f-6e40ba423ef5",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "RC-07-LLM regex 'P[1-4]\\s*[=:]\\s*([\\d.]+)' matched pillar weight percentages (P1=25%, P2=30%, P3=20%, P4=25%) in Appendix C Sub-Vertical Weights table, flagging them as score mismatches against calculated pillar scores (2.61, 2.42, 2.85, 2.35). All true pillar scores confirmed present in report: '2.61', '2.42', '2.85', '2.35', '2.56'."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Seven issues were identified and registered during the assessment research phase. Two MATERIAL issues impose binding level 3 score ceilings on specific capability clusters. Five MINOR issues impose level 4 ceilings. Together, 115 of 698 capability are subject to active issue caps. All issue determinations are grounded in evidence and documented in the Caps_Applied column of the assessment workbook.",
+    "trend_md": "This section provides historical context for the assessment findings. The financial trajectory and digital evolution timeline were originally documented in the CalPrivate Bank Client Profile Research Report and are reproduced here with assessment-layer maturity annotations to situate each initiative within the DMA scoring framework."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.88,
+        "P1C2": 3.0,
+        "P1C3": 2.19,
+        "P1C4": 2.35,
+        "P1C5": 3.11,
+        "P2C1": 3.02,
+        "P2C2": 2.49,
+        "P2C3": 1.77,
+        "P2C4": 2.59,
+        "P3C1": 2.99,
+        "P3C2": 3.0,
+        "P3C3": 2.98,
+        "P3C4": 2.43,
+        "P4C1": 3.04,
+        "P4C2": 2.46,
+        "P4C3": 2.24,
+        "P4C4": 2.25
+      },
+      "overall_score": 2.63,
+      "peer_name": "SouthState Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.65,
+        "P1C2": 3.14,
+        "P1C3": 2.37,
+        "P1C4": 2.82,
+        "P1C5": 3.44,
+        "P2C1": 2.33,
+        "P2C2": 2.56,
+        "P2C3": 1.9,
+        "P2C4": 2.13,
+        "P3C1": 2.4,
+        "P3C2": 2.46,
+        "P3C3": 2.76,
+        "P3C4": 2.53,
+        "P4C1": 2.88,
+        "P4C2": 2.3,
+        "P4C3": 2.73,
+        "P4C4": 2.73
+      },
+      "overall_score": 2.6,
+      "peer_name": "Amalgamated Financial Corp / Amalgamated Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.77,
+        "P1C2": 1.86,
+        "P1C3": 1.83,
+        "P1C4": 3.16,
+        "P1C5": 1.43,
+        "P2C1": 3.01,
+        "P2C2": 2.56,
+        "P2C3": 3.31,
+        "P2C4": 2.84,
+        "P3C1": 2.35,
+        "P3C2": 2.88,
+        "P3C3": 2.83,
+        "P3C4": 2.64,
+        "P4C1": 2.31,
+        "P4C2": 2.81,
+        "P4C3": 3.1,
+        "P4C4": 3.05
+      },
+      "overall_score": 2.57,
+      "peer_name": "First United Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.76,
+        "P1C2": 2.79,
+        "P1C3": 2.58,
+        "P1C4": 2.52,
+        "P1C5": 2.57,
+        "P2C1": 2.32,
+        "P2C2": 2.54,
+        "P2C3": 2.13,
+        "P2C4": 2.42,
+        "P3C1": 2.36,
+        "P3C2": 2.23,
+        "P3C3": 2.18,
+        "P3C4": 2.14,
+        "P4C1": 2.21,
+        "P4C2": 2.15,
+        "P4C3": 2.49,
+        "P4C4": 2.53
+      },
+      "overall_score": 2.41,
+      "peer_name": "Synchrony Financial",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 3.41,
+        "P1C3": 1.96,
+        "P1C4": 2.45,
+        "P2C1": 2.53,
+        "P2C2": 2.34,
+        "P2C3": 2.78,
+        "P2C4": 1.7,
+        "P3C1": 1.87,
+        "P3C2": 2.71,
+        "P3C3": 2.57,
+        "P3C4": 2.41,
+        "P4C1": 1.81,
+        "P4C2": 1.64,
+        "P4C3": 2.39,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.39,
+      "peer_name": "Exchange Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-CPB-20260527-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "glassdoor_review_count: 8, glassdoor_compensation_rating: 4.4, glassdoor_themes_positive: ['pay well', 'close-knit team', 'strong & supportive leadership', 'executives listen and respond', 'professional/customer-oriented",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Employee",
+        "themes": [],
+        "value": 4.4
+      },
+      {
+        "drilldown": "ios_app_store_app_id: 1017106053, ios_app_requires: iOS 13.0+ (later updated to iOS 16.0+; macOS 13.0+), google_play_present: True",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Customer",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Positive Q4'24 record earnings narrative through 2025. LA wildfires brief loan exposure concern but not material per management. M&A activity in California regional banking (Pacific Premier\u2192Columbia Sept 2025, First Foun",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "News Sentiment",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Legal Services Specialties vertical: separate dedicated page + Becky Mendoza named as 'Director, Legal Services Private Group' serving 'Mid to Large size [law] firms' in San Diego = dedicated named professional referral channel for legal sector.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-0065",
+      "event_date": "2026-05-27",
+      "evidence_e_ids": [
+        "E-0065"
+      ],
+      "id": "abdcfb4d-82e2-4aff-b262-c78c50c3824e",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/wealth-management-industry/",
+      "subcap_ids": [],
+      "title": "Legal Services Specialties vertical: separate dedicated\u2026"
+    },
+    {
+      "body": "Piper Sandler raised PBAM price target from $77 to $88 (April 20, 2026) \u2014 third Buy-side analyst upgrade since COO appointment. Angel Martinez appointed to CalPrivate Bank board \u2014 former President and CEO of Deckers Brands (Goleta, CA), $1B+ consumer brand. Martinez brings board-level consumer brand strategy and digital commerce experience. Confirms ongoing board capability expansion alongside technology-focused appointments (Leda Csanka, Kathy Lonowski).",
+      "date_precision": "day",
+      "e_id": "E-0125",
+      "event_date": "2026-04-20",
+      "evidence_e_ids": [
+        "E-0125"
+      ],
+      "id": "c8c0fc3d-b7b6-4365-b947-324898017831",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.cnbc.com/quotes/PBAM",
+      "subcap_ids": [],
+      "title": "Piper Sandler raised PBAM price target third Buy-side\u2026"
+    },
+    {
+      "body": "COO job description (Michael Pierron, appointed April 2026) requires: 'champion AI-driven automation, digital transformation, and data analytics'; 'proven track record of technology-led scaling, including implementations that reduce costs by 20%+ while improving service'; '90-day operational assessment covering deposits/branch ops, lending, treasury management, digital banking, risk ops, IT, vendor management, service delivery'. This establishes formal automation transformation mandate under new COO leadership.",
+      "date_precision": "month",
+      "e_id": "E-0085",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-0085"
+      ],
+      "id": "c200d3f2-0ec1-4b0c-af36-700ad46e551f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://headlightny.com/library/job/chief-operating-officer-newport-beach-at-calprivate-bank",
+      "subcap_ids": [],
+      "title": "COO job description (Michael Pierron, appointed April 2026)\u2026"
+    },
+    {
+      "body": "Change Management functional indicators (anti-negative framing): Multiple recent leadership changes managed in 2025-26: COO Michael Pierron hired April 2026; credit leadership change Q4'25; Andrew Meitzen added August 2025; Santa Barbara/Montecito office launch November 2025 - demonstrates ability to execute organizational change across leadership, geographic, and operational dimensions.",
+      "date_precision": "month",
+      "e_id": "E-0031",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-0031"
+      ],
+      "id": "c6a23ad6-db64-48cf-9ecb-e2e6ae3a21cb",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2026/01/16/3220292/0/en/Private-Bancorp-of-America-Inc-Announces-Continued-Strong-Net-Income-for-Fourth-Quarter-2025.html",
+      "subcap_ids": [],
+      "title": "Change Management functional indicators (anti-negative\u2026"
+    },
+    {
+      "body": "Three concrete tech investment areas named by Chairman: (1) core systems modernization, (2) digital capabilities enhancement, (3) AI. Implies AI strategy exists at the board/chairman level.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-0002",
+      "event_date": "2026-01-16",
+      "evidence_e_ids": [
+        "E-0002"
+      ],
+      "id": "033ad055-9e12-4163-86dd-def04563c144",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2026/01/16/3220292/0/en/Private-Bancorp-of-America-Inc-Announces-Continued-Strong-Net-Income-for-Fourth-Quarter-2025.html",
+      "subcap_ids": [],
+      "title": "Three concrete tech investment areas named by Chairman: (1)\u2026"
+    },
+    {
+      "body": "Leadership & sponsorship pattern (P1C4.2): CEO Sowers' direct commitment to tech investment in Q4'25 + Chairman Isakow's named AI/digital investment quotes establish top-down sponsorship for change initiatives.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-0031",
+      "event_date": "2026-01-16",
+      "evidence_e_ids": [
+        "E-0031"
+      ],
+      "id": "723947fa-bb1d-4eb0-a55c-0a5fe6570e01",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2026/01/16/3220292/0/en/Private-Bancorp-of-America-Inc-Announces-Continued-Strong-Net-Income-for-Fourth-Quarter-2025.html",
+      "subcap_ids": [
+        "P1C4.2"
+      ],
+      "title": "Leadership & sponsorship pattern (P1C4.2): CEO Sowers'\u2026"
+    },
+    {
+      "body": "Enterprise Analytics & AI Strategy: Chairman Isakow Q4'25 named AI as explicit strategic investment. COO mandate: 'champion AI-driven automation, digital transformation, and data analytics.' SVP Credit Risk Analytics posting: 'partner with IT and Finance to drive forward data and analytics strategic initiatives; play key role in the bank's overall data strategy and development.' Product Strategy & Innovation team = functional AI/analytics strategy governance.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-0100",
+      "event_date": "2026-01-16",
+      "evidence_e_ids": [
+        "E-0100"
+      ],
+      "id": "8a17fd81-1439-4877-895d-5b0a06dadea2",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2026/01/16/3220292/0/en/",
+      "subcap_ids": [],
+      "title": "Enterprise Analytics & AI Strategy: Chairman Isakow Q4'25\u2026"
+    },
+    {
+      "body": "Chairman Selwyn Isakow Q4'25: 'we are making targeted investments to scale the franchise, including our Santa Barbara County expansion, the addition of high-impact business development and operational talent, and continued enhancements to our core systems, digital capabilities, and AI.' - direct Chairman-level confirmation of AI as named investment area.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-0002",
+      "event_date": "2026-01-16",
+      "evidence_e_ids": [
+        "E-0002"
+      ],
+      "id": "d24fb151-c971-4126-9876-6a50756b6361",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2026/01/16/3220292/0/en/Private-Bancorp-of-America-Inc-Announces-Continued-Strong-Net-Income-for-Fourth-Quarter-2025.html",
+      "subcap_ids": [],
+      "title": "Direct Chairman-level confirmation of AI as named\u2026"
+    },
+    {
+      "body": "nCino loan origination system CONFIRMED DEPLOYED: DCBO job posting (Nov 2025) lists 'nCino SME, leveraging the platform to streamline sales processes and enhance client management' as REQUIRED qualification \u2014 not optional. nCino is a Salesforce-native cloud LOS with automated loan origination, credit analysis, and portfolio management workflows.",
+      "date_precision": "month",
+      "e_id": "E-0086",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-0086"
+      ],
+      "id": "62cc3154-5b16-4db0-b668-db3b58a46347",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/jobs_opening/deputy-chief-banking-officer/",
+      "subcap_ids": [],
+      "title": "NCino loan origination system Confirmed DEPLOYED: DCBO job\u2026"
+    },
+    {
+      "body": "\u2605\u2605\u2605 Board Director Kathy Lonowski (appointed September 2025): Former Regional Director for the FDIC San Francisco Region for over a decade, overseeing supervision of 350+ financial institutions with ~$1 trillion in assets. Expertise: 'regulatory compliance, operational risk, digital banking, payment services, commercial real estate, information technology, and anti-money laundering.' This is extraordinary board-level regulatory intelligence that directly strengthens CalPrivate's regulatory examination preparedness.",
+      "date_precision": "month",
+      "e_id": "E-0095",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-0095"
+      ],
+      "id": "85b15774-0474-464f-8797-f2aec25c821a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/carlos-c-6a3588152",
+      "subcap_ids": [],
+      "title": "\u2605\u2605\u2605 Board Director Kathy Lonowski (appointed September\u2026"
+    },
+    {
+      "body": "Competitive intelligence statement Q3 2025: 'increased non-bank competition' explicitly named - competitive awareness across non-bank fintech entrants.",
+      "date_precision": "quarter",
+      "e_id": "E-0022",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-0022"
+      ],
+      "id": "f72c2e7d-4c8f-4190-a694-8fcce93b9371",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2025/10/17/3168587/0/en/Private-Bancorp-of-America-Inc-Announces-Continued-Strong-Net-Income-and-Core-Deposit-Growth-for-Third-Quarter-2025.html",
+      "subcap_ids": [],
+      "title": "Competitive intelligence statement Q3 2025: 'increased\u2026"
+    },
+    {
+      "body": "8-member executive team (EVPs): Rick Sowers (Pres/CEO, ex-Accenture/CAST); Paul Azzi (Chief Banking Officer, co-founder San Diego Private Bank, 19-year tenure); Curtis Birkmann (CTO since May 2020, ex-Pacific Mercantile Bank CTO and Bank of Manhattan CIO); Scott Hurtik (CIO since Feb 2015, 11+ year tenure); Karen Lister (Chief Administrative Officer); Andrew Meitzen (hired Aug 2025); Zina Robinson (Chief People Officer); Cory Stewart (CFO since Jan 2023, ex-WaFd).",
+      "date_precision": "month",
+      "e_id": "E-0012",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-0012"
+      ],
+      "id": "7b502a7b-cad1-4f70-b7aa-e57c9ac2e14e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/directors-leadership/",
+      "subcap_ids": [],
+      "title": "Andrew Meitzen hired Aug 2025"
+    },
+    {
+      "body": "Data governance emerging: VP/Sr Application Support & Data Analyst (Christina Flury, July 2025) + VP Senior Data & Systems Analyst (James N.) = named data roles. Data governance operating model is nascent \u2014 roles exist but no formal data governance board or operating model identified publicly. Anti-negative: size/stage (2.5B assets, 210 employees) makes data governance maturity consistent with M2-M3 range.",
+      "date_precision": "month",
+      "e_id": "E-0097",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-0097"
+      ],
+      "id": "87d424bf-6aa3-45db-a8e6-bd8501453721",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2026/01/16/3220292/0/en/Private-Bancorp-of-America-Inc-Announces-Continued-Strong-Net-Income-for-Fourth-Quarter-2025.html",
+      "subcap_ids": [],
+      "title": "Data governance emerging VP/Sr Application Support & Data\u2026"
+    },
+    {
+      "body": "Impact Checking is a dedicated banking product for 501(c)(3) nonprofit organizations launched in 2025. Features: no monthly fee, interest-bearing, mission-ready account structure (sub-accounts by program/grant/campaign), donor-friendly incoming donation handling, no charge for mobile RDC, transparent service, board policy-aligned controls.",
+      "date_precision": "year",
+      "e_id": "E-0015",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-0015"
+      ],
+      "id": "1a257103-39eb-43c3-9bca-2b23f2a2e861",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://calprivate.bank/impact-checking/",
+      "subcap_ids": [],
+      "title": "Impact Checking is a dedicated banking product for 501(c)(3)"
+    },
+    {
+      "body": "Compliance governance evidence: Named Compliance department (confirmed in careers page department list). CCO Andrew Meitzen (EVP/Chief Credit Officer) appointed May 2025 \u2014 ex-OCC examiner, emphasis in 'disciplined credit and deal structuring, along with technical acumen to navigate the ever-evolving credit landscape.' His OCC background means he understands regulator expectations intimately.",
+      "date_precision": "month",
+      "e_id": "E-0090",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-0090"
+      ],
+      "id": "e15245cd-7d5e-4738-82f2-f37c7def745c",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/wp-content/uploads/2024/06/2024-03-CalPrivate-CRA-PE.pdf",
+      "subcap_ids": [],
+      "title": "CCO Andrew Meitzen (EVP/Chief Credit Officer) appointed\u2026"
+    },
+    {
+      "body": "AI Governance (P1C3.8.3): Chairman Isakow named AI as investment area Q4'25, but no public AI governance framework, ethics policy, or model risk extension to AI identified. Likely managed via Information Technology Management Committee + Model Risk function (CECL adjacency).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-0037",
+      "event_date": "2025-01-17",
+      "evidence_e_ids": [
+        "E-0037"
+      ],
+      "id": "cd42128f-d381-40a8-a772-60427de2d236",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/wp-content/uploads/2025/01/Investor-Presentation-2024-Q4-FINAL.pdf",
+      "subcap_ids": [
+        "P1C3.8.3"
+      ],
+      "title": "AI Governance (P1C3.8.3): Chairman Isakow named AI as\u2026"
+    },
+    {
+      "body": "2024 named community sponsorships: Project Self-Sufficiency (single parents, holiday event), Mychal's Learning Place (developmental disabilities, twice), A Step Beyond (underserved youth dance program), Westside Food Bank Hunger Walk (food insecurity LA County), Lifeline Community Services Viva La Vida, Challenged Athletes Foundation Surf for Impact, Marcus Allen Foundation Celebrity Golf Tournament, Leukemia & Lymphoma Society. = 8+ named 2024 sponsorships across LA and San Diego counties.",
+      "date_precision": "year",
+      "e_id": "E-0063",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-0063"
+      ],
+      "id": "f4ec6b2c-bb42-4a53-abf9-3e9689f2ac1f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/community-engagements/",
+      "subcap_ids": [],
+      "title": "2024 named community sponsorships: Project Self-Sufficiency\u2026"
+    },
+    {
+      "body": "Legacy modernization: 2023 Annual Report announced 'Digital Account Origination platform' launch. IFS Banking app described as 'outdated' by app reviewers = legacy mobile platform being addressed. Treasury One\u00ae enhanced with 'new features' = active platform evolution. The 2023 Q1 IR deck specifically targeted 'frictionless client experience through integrations of core, origination, servicing and online banking platforms' = legacy integration modernization strategy.",
+      "date_precision": "year",
+      "e_id": "E-0108",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-0108"
+      ],
+      "id": "dd055963-928c-45f9-99de-08e0258d036d",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://calprivate.bank/wp-content/uploads/2024/04/CalPrivate-Bank-2023-Annual-Report-web.pdf",
+      "subcap_ids": [],
+      "title": "Legacy modernization: 2023 Annual Report announced 'Digital\u2026"
+    },
+    {
+      "body": "\u2605\u2605\u2605 nCino DEPLOYMENT CONFIRMED: Q1 2023 IR deck: 'Utilize nCino loan origination platform to drive efficiency in CRM, lending workflow and approval.' nCino deployed since at least Q1 2023. Q2 2025 IR also references origination platform efficiencies. = CalPrivate has been on the Salesforce platform via nCino for 2+ years. DCBO job posting (Nov 2025) requiring 'nCino SME' is seeking someone to OPTIMIZE the existing platform.",
+      "date_precision": "quarter",
+      "e_id": "E-0105",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-0105"
+      ],
+      "id": "41661fc3-250f-4d0b-a38c-686b37c26b6e",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/wp-content/uploads/2023/04/Investor-Presentation-2023-Q1.pdf",
+      "subcap_ids": [],
+      "title": "NCino deployed since at least Q1 2023"
+    },
+    {
+      "body": "Application portfolio (confirmed vendors): (1) nCino = Salesforce-native LOS, deployed since Q1 2023; (2) IFS Banking = mobile/online banking platform; (3) Treasury One\u00ae = branded treasury management platform; (4) FIS = Remote Deposit Capture (Deposit One\u2122); (5) Centrix = Positive Pay fraud; (6) TIB/FDECS = consumer card; (7) AccessOne = merchant; (8) SharePoint Online + OnPrem = document management; (9) ServiceNow = ITSM; (10) Power Automate = workflow/RPA; (11) Microsoft Teams + Viva + Power Apps = M365. Total: 11+ confirmed applications.",
+      "date_precision": "quarter",
+      "e_id": "E-0108",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-0108"
+      ],
+      "id": "91c88576-3090-4b76-8782-deeb90d92927",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/wp-content/uploads/2024/04/CalPrivate-Bank-2023-Annual-Report-web.pdf",
+      "subcap_ids": [],
+      "title": "Application portfolio (confirmed vendors): (1) nCino\u2026"
+    },
+    {
+      "body": "IMPLICATION FOR SALESFORCE NARRATIVE REVISION: Glassdoor reviews saying 'no CRM, use Excel' may reflect frontline staff not using D365, or the D365 implementation may have stalled/been abandoned post-2022. TWO CRM-adjacent platforms now confirmed: (1) Dynamics 365 (2022 implementation, status unclear); (2) nCino (Salesforce-native, deployed Q1 2023). This creates a consolidation narrative: replace fragmented Dynamics + nCino with Salesforce FSC as single platform. FSC opportunity REMAINS but framing shifts from 'no CRM' to 'consolidate competing platforms'.",
+      "date_precision": "quarter",
+      "e_id": "E-0120",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-0120"
+      ],
+      "id": "1edbcacc-c290-4638-a563-7e0e24fe6755",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.alphabold.com/revamping-calprivate-banks-loan-process-with-microsoft-technologies/",
+      "subcap_ids": [],
+      "title": "NCino (Salesforce-native, deployed Q1 2023"
+    },
+    {
+      "body": "Integration architecture (confirmed integrations): (1) nCino \u2194 Salesforce platform APIs (nCino is Salesforce-native); (2) Treasury One \u2014 QuickBooks/Quicken/OFX export; (3) Power Automate M365 connectors (1000+ certified connectors to Salesforce, ServiceNow, SharePoint, Teams); (4) FIS RDC integration with IFS Banking; (5) nCino IR deck Q1 2023: 'integrations of core, origination, servicing and online banking platforms' = integration strategy explicitly named.",
+      "date_precision": "quarter",
+      "e_id": "E-0109",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-0109"
+      ],
+      "id": "80c5853b-103b-4b84-a899-0193b4e9579b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://calprivate.bank/business-banking/treasury-management-services/",
+      "subcap_ids": [],
+      "title": "NCino IR deck Q1 2023: 'integrations of core, origination\u2026"
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "entity_display_id": "kitsap-credit-union-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P3C1 score 2.23 (peer median 3.00)",
+        "documented friction $": "15"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "documented friction $15",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+1.69",
+          "metric": "documented friction $15",
+          "outcomes": {
+            "effort": "L",
+            "metric": "documented friction $15",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Unify member servicing on Salesforce Service Cloud + Agentforce"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.81",
+          "metric": "P3C1 score 2.23 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 2.23 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Automate core lending & fraud processes with Agentforce + Flow"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.38",
+          "metric": "P2C2 score 2.63 (peer median 3.20)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.63 (peer median 3.20)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Orchestrate digital onboarding & lending on FSC (extend Terafina)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C1, P2C2"
+    },
+    {
+      "customer_impact": {
+        "Luke Peterson toward $": "5B",
+        "Outcome": "P4C2 score 2.62 \u2192 4.0"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Luke Peterson toward $5B",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.69",
+          "metric": "Luke Peterson toward $5B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Luke Peterson toward $5B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Stand up marketing automation & journeys with Marketing Cloud"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.38",
+          "metric": "P4C2 score 2.62 \u2192 4.0",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.62 \u2192 4.0",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Build the member golden record with Data Cloud + Einstein + CRM Analytics"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.29",
+          "metric": "P4C3 score 2.65",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C3 score 2.65",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Establish the enterprise integration tier with MuleSoft"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C2, P4C3"
+    },
+    {
+      "customer_impact": {
+        "wellbeing Low' recommend": "-to-friend ~49%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "wellbeing Low' recommend-to-friend ~49%",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.69",
+          "metric": "wellbeing Low' recommend-to-friend ~49%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "wellbeing Low' recommend-to-friend ~49%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Pair the platform rollout with a member-facing change-enablement program"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-KCU-20260602-0001",
+  "total_duration_months": 12
+}

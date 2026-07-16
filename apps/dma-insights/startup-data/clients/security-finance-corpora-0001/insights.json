@@ -1,0 +1,851 @@
+{
+  "entity_display_id": "security-finance-corpora-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C1",
+        "P3C2",
+        "P4C2.4.2",
+        "P4C3.4.2",
+        "P2C4.7.2",
+        "P3C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "b13e2aff-840c-4296-92eb-8b113ab39820",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-P1C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C3-005",
+        "E-P1C1-028",
+        "E-P1C1-027"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Recommended play: MuleSoft optimization for higher STP rates; Data Cloud for real-time streaming integration; Shield for PII protection and audit trail [E--027] [E-P1C1-027].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Comprehensive MuleSoft integration architecture with 65+ documented error handling scenarios",
+      "what_text": "Error Handling & Fault Tolerance Matrix (INT-156) provides 7-phase integration architecture: SFTP ingestion → File Parsing/Validation → Salesforce Query → Data Transformation → Marketing Cloud Push → Reporting → Monitoring [E--002, E--005]; Sprint Plan (INT-064) documents phased API development including Payments API, Budget API, Charges/Fees API [E--007, E--008]; retry logic with exponential backoff (30s/2min/10min), quarantine workflows for failed records, PII leak detection triggers CRITICAL alerts [E--009, E--010, E--019]. In Zennify's assessment Workflow Design & Orchestration scores 1.5 out of 5, versus a typical 3.8 at comparable institutions [E--028] [E--028] [E-P1C1-028].",
+      "why_text": "The research report pins the maturity impact at: Robust integration governance in place; maturity opportunity in expanding STP rates, adding real-time streaming, and implementing advanced monitoring/alerting. averages 2.5/5 across its 35 scored capability (peer median ~ 3.8) on the current assessment [E--005, E--028] [E--005, E--028] [E--005, E--028] [E-P1C3-005, E-P1C1-028].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P2C1",
+        "P2C3",
+        "P2C4",
+        "P3C1",
+        "P4C2.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "00515d95-189b-4464-a7c2-f28b97fc15a7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-P1C2-003",
+            "E-P1C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-P1C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C3-005",
+        "E-P1C2-003",
+        "E-P1C1-022"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: FSC/MCE/MuleSoft stack directly aligns with Zennify core expertise; opportunity to optimize data flows via Data Cloud, enhance CRMA predictive analytics, unlock Agentforce automation for branch agents, and implement Shield audit trail for compliance [E--022] [E-P1C1-022].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Mature Salesforce ecosystem foundation with FSC core platform",
+      "what_text": "Salesforce FSC deployed across 905 branches with unified CRM view; Marketing Cloud Engage (MCE) executing 42 documented customer journey types including welcome, nurture, renewal, win-back, tax prep cross-sell campaigns; MuleSoft Anypoint providing real-time API integration with 7-phase error handling matrix (65+ classified failure scenarios); CRMA dashboards tracking open rates, click rates, conversion rates, unsubscribe rates [E--005, E--020, E--002, E--003, E--023, E--001, E--002]. In Zennify's assessment Multi-Year Roadmap scores 1.0 out of 5, versus a typical 3.5 at comparable institutions [E--003] [E--003] [E-P1C2-003].",
+      "why_text": "The research report pins the maturity impact at: Enterprise-grade digital foundation in place; next maturity phase requires advanced AI/ML predictive models (churn scoring, CLV, next-best-action) and Data Cloud unification. averages 1.8/5 across its 34 scored capability (peer median ~ 3.5) on the current assessment [E--005, E--003] [E--005, E--003] [E--005, E--003] [E-P1C3-005, E-P1C2-003].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P2C2",
+        "P2C3",
+        "P4C3.4.2",
+        "P2C4.7.2",
+        "P2C1.4.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "8a645d72-0ea8-4737-9df3-38400e74f913",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C1-001",
+        "E-P1C1-002",
+        "E-P1C1-003"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Advanced omnichannel execution; gap is in digital-first efficiency metrics (no evidence of cost-per-loan-by-channel, time-to-close-by-channel, NPS-by-channel tracking) — Experience Cloud for enhanced portal personalization; Service Cloud for customer support case management; Agentforce for branch agent real-time assistance; CRMA for channel-specific KPI dashboards [E--003] [E-P1C1-003].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Hybrid digital-branch model with complete omnichannel execution across 5 channels",
+      "what_text": "Integrated online application (web start → phone completion), iOS mobile app (App Store id1135450123, updated Jan 2025 with Auto Pay coming soon), Android app, customer portal (mysecurityfinance.com), and 905 physical branches; MuleSoft provides real-time data sync enabling seamless channel switching; FSC unified customer view across all touchpoints [E-B1-004, E-B1-005, E--001, E--002, E--003, E--001, E--001, E--010, E--015]. In Zennify's assessment Multi-Year Roadmap scores 1.0 out of 5, versus a typical 3.5 at comparable institutions [E--002] [E--002] [E-P1C1-002].",
+      "why_text": "At 1.0 out of 5, Multi-Year Roadmap sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-P1C1-001, E-P1C1-002].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P4C2.4.2",
+        "P2C4.7.2",
+        "P3C1.5.1",
+        "P2C2.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "90337e63-ef2b-43f8-88dd-0fc2ddfe7fae",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-021",
+            "E-P1C5-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C5-003",
+        "E-P1C1-002",
+        "E-P1C1-021"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Data Cloud integration unifies customer data from FSC/MCE/portal/branch/mobile; Agentforce enables AI-powered next-best-action recommendations; Marketing Cloud Intelligence for cross-channel attribution [E--021] [E-P1C1-021].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Lead Handoff",
+      "what_text": "MCE implements persona-based segmentation with defined behavioral attributes [E--002]; structured campaign cadence mapping for solicitations and engagement [E--004]; email marketing with segmented journeys (New Manager, Tax Prep, Renewal templates) [E--009]; SMS and mobile push with opt-in management [E--010]; SEO with location-specific landing pages for 905 branches [E--006]; social media presence on LinkedIn [E--008]; A/B testing of subject lines, send times, messaging variants [E--024]. In Zennify's assessment Lead Handoff scores 1.5 out of 5, versus a typical 3.3 at comparable institutions [E--002] [E--002] [E-P1C1-002].",
+      "why_text": "The research report pins the maturity impact at: Sophisticated multi-channel marketing automation deployed across email, SMS, push, social, web; maturity gap in AI-driven predictive modeling (Einstein Send Time Optimization, predictive content), real-time personalization at scale, and attribution modeling. averages 2.5/5 across its 59 scored capability (peer median ~ 3.2) on the current assessment [E--003, E--002] [E--003, E--002] [E--003, E--002] [E-P1C5-003, E-P1C1-002].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P3C3",
+        "P4C2.4.2",
+        "P3C3.8.3",
+        "P1C1.2.1",
+        "P1C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "56be25b1-970e-46d9-a991-da0bd28b5b44",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C1-021",
+        "E-P1C5-004",
+        "E-P1C1-004"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Compliance governance strengthened post-enforcement; ongoing vigilance required on fair lending (ECOA), consumer protection (GLBA, FDCPA), AML/BSA, and Section 1033 open banking — Shield audit trail for compliance documentation; Agentforce compliance guardrails for collections workflows; automated regulatory reporting through CRMA [E--004] [E-P1C1-004].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "CFPB 2018 consent order resolved with demonstrated multi-layer compliance governance",
+      "what_text": "CFPB consent order ($5M penalty) for improper collection attempts (physically preventing customers from leaving homes) and FCRA violations (inaccurate credit reporting) [E-B1-003, E--001]; post-settlement: written policies covering debt collection, FCRA furnisher compliance, fair lending [E--001]; Chief Compliance Officer or equivalent role mandated [E--002]; ongoing compliance testing including collections auditing, mystery shopping, file review [E--003]; board-level compliance reporting [E--004]; 24 compliance evidence items across documenting regulatory exam management [E--021 through E--024]. In Zennify's assessment Model Governance Framework scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E--004] [E--004] [E-P1C5-004].",
+      "why_text": "At 1.0 out of 5, Model Governance Framework sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-P1C1-021, E-P1C5-004].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P1C4",
+        "P1C1",
+        "P4C1.1.1",
+        "P4C2.4.2",
+        "P4C3.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "e04df811-9b89-4307-b72a-c3e99579480c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-P1C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-P1C2-003",
+            "E-P1C3-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-P1C2-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C3-005",
+        "E-P1C2-003",
+        "E-P1C1-010"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: STRATEGIC ADVISORY: Recommend Chief Data Officer / Chief Technology Officer placement; Zennify can facilitate executive search, 100-day technology governance roadmap, and organizational design for data/technology functions [E--010] [E-P1C1-010].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "Technology leadership vacuum: No identified CDO/CTO/CIO despite 127-technology ecosystem",
+      "what_text": "Leadership identified: CEO Mark Assad, President Ray Biggs, COOs Judy Perkins & Victor Barr, CFO Jennifer Meyer [E-B1-007, E--002, E--004]; zero publicly identified Chief Data Officer, Chief Technology Officer, or Chief Information Security Officer; 127 confirmed technologies including Salesforce FSC, MuleSoft, SQL Server, SAP ERP, Oracle PeopleSoft, AWS, Rapid7, Tableau, MicroStrategy, Cognos, Cloudflare [E--005]; tech stack spans Core Platform (12), Infrastructure (25), Supporting Tech (90) categories. In Zennify's assessment Model Governance Framework scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E--003] [E--003] [E-P1C2-003].",
+      "why_text": "The research report pins the maturity impact at: Critical governance gap: Technology decisions may be fragmented across CFO, COOs, and business units without single point of accountability; data governance accountability unclear for FCRA/GLBA compliance; cybersecurity oversight potentially lacking dedicated executive leadership. averages 1.8/5 across its 45 scored capability (peer median ~ 3.0) on the current assessment [E--005, E--003] [E--005, E--003] [E--005, E--003] [E-P1C3-005, E-P1C2-003].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.3.3",
+        "P2C2.5.1",
+        "P1C4.8.4",
+        "P2C1.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "63103e50-91ef-4403-9f36-97c2dfda6ae9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C4-001",
+        "E-P1C4-003",
+        "E-P1C1-022"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "salesforce",
+        "twilio",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong employer brand (Newsweek) masks significant customer experience gap; Glassdoor data reveals internal cultural challenges (micro-management, high stress, limited recognition) that likely translate to customer-facing execution issues — Service Cloud for case management and first-contact resolution improvement; Agentforce for coaching collections teams on compliant, empathetic communication; CRMA sentiment dashboards for real-time escalation triggers [E--022] [E-P1C1-022].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Employee culture dual perception: Newsweek award vs. customer experience challenges",
+      "what_text": "Newsweek America's Greatest Workplaces 2025 recognition (Financial Services category) [E--003]; Glassdoor: 3.1/5 overall (353 reviews) with culture & values 2.9/5, work-life balance 2.7/5, 52% would recommend [E--001]; PissedConsumer: 2.6/5 (203 reviews) with complaints about aggressive collections, poor customer service, surprise fees [E-B1-006]; Yelp: 3.1/5 (179 reviews); BBB below-average ratings [E-B1-002] [E--003] [E--003] [E-P1C4-003].",
+      "why_text": "At 1.0 out of 5, Champion Coordination sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-P1C4-001, E-P1C4-003].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P3C2",
+        "P1C2",
+        "P4C1",
+        "P3C3.8.3",
+        "P1C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-001",
+      "id": "028a3f6c-ea23-46ea-b435-f8a33f5758af",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-021",
+            "E-P1C5-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-P1C5-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-B1-007",
+        "E-P1C1-021",
+        "E-P1C5-003"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Workflow Design & Orchestration a near-term focus for Security Finance Corporation: a scoped investment here would lift it from 1.5 toward the 3.8 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-P1C5-003].",
+      "source_rec_id": "REC-001",
+      "theme": "Core Automation",
+      "title": "Deploy Integrated Operations & Compliance Platform",
+      "what_text": "Security Finance's 905-branch network runs on manual, paper-heavy processes (E--003, E--005). The 2018 CFPB consent order (ISS-001) exposed systemic compliance gaps in collections and FCRA adherence. Current operational maturity at level 2 (1.96-2.38) leaves the organization exposed to regulatory risk and unable to scale efficiently. connected unlock: governance visibility improves with centralized compliance data; data management benefits from integrated operational data flows. In Zennify's assessment Workflow Design & Orchestration scores 1.5 out of 5, versus a typical 3.8 at comparable institutions [E--021] [E--021] [E-P1C1-021].",
+      "why_text": "At 1.5 out of 5, Workflow Design & Orchestration sits 2.3 points below the 3.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-B1-007, E-P1C1-021].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P3C1",
+        "P4C2.4.2",
+        "P2C1.4.7",
+        "P2C3.2.IC1",
+        "P2C3.2.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-002",
+      "id": "f025f58f-1186-4f50-a263-65297a2f8261",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-B1-004",
+        "E-P1C1-002",
+        "E-P1C1-022"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Feature Store & Feature Lifecycle Management a near-term focus for Security Finance Corporation: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P1C1-022].",
+      "source_rec_id": "REC-002",
+      "theme": "Analytics & AI",
+      "title": "Modernize Customer Engagement & Digital Channels",
+      "what_text": "Security Finance's hybrid online-to-phone application model (E-B1-004) creates friction — customers start online but must complete via phone. Mobile app (id1135450123) lacks full self-service capabilities. Peer comparison: LendingClub and OppFi achieve 79-100% digital completion rates vs Security Finance's estimated <20%. connected unlock: analytics benefits from unified customer interaction data; operational efficiency improves as digital self-service reduces branch workload. In Zennify's assessment Feature Store & Feature Lifecycle Management scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E--002] [E--002] [E-P1C1-002].",
+      "why_text": "At 1.0 out of 5, Feature Store & Feature Lifecycle Management sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-B1-004, E-P1C1-002].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P2C4",
+        "P3C2",
+        "P1C1",
+        "P4C1.1.1",
+        "P4C2.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-003",
+      "id": "59b46cec-add3-48de-8250-794ba60d24bf",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-P1C5-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-P1C5-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C5-003",
+        "E-P1C1-012",
+        "E-P1C3-002"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Cloud-Native Application Development a near-term focus for Security Finance Corporation: a scoped investment here would lift it from 2.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P1C3-002].",
+      "source_rec_id": "REC-003",
+      "theme": "Architecture & Cloud",
+      "title": "Establish Enterprise Data Foundation with AI-Ready Analytics",
+      "what_text": "No CDO/CTO/CIO role identified (research_handoff.json, CDO_CTO_CIO=NOT_FOUND). Data management scored 1.96 — siloed across 905 branches with no centralized governance. 127 technologies detected (E--001) but lacking integration layer. Peers like OppFi leverage AI-driven underwriting (Model 6.1) while Security Finance relies on manual decisioning. connected unlock: personalization enabled by unified customer data; risk analytics improve with centralized data; strategic decision-making supported by enterprise BI. In Zennify's assessment Cloud-Native Application Development scores 2.0 out of 5, versus a typical 3.3 at comparable institutions [E--012] [E--012] [E-P1C1-012].",
+      "why_text": "At 2.0 out of 5, Cloud-Native Application Development sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-P1C5-003, E-P1C1-012].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P4C4",
+        "P3C3.8.3",
+        "P1C1.2.1",
+        "P1C2.4.1",
+        "P1C4.3.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-004",
+      "id": "ba1608ac-2d76-4f41-930e-9785c8c317a3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-P1C2-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-P1C2-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P1C1-001",
+        "E-P1C2-003",
+        "E-B1-001"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Reporting Technology a near-term focus for Security Finance Corporation: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-B1-001].",
+      "source_rec_id": "REC-004",
+      "theme": "Compliance & Surveillance",
+      "title": "Strengthen Digital Governance & Strategic Alignment",
+      "what_text": "P1 scores lowest at 1.70 — no dedicated technology executive (CDO/CTO/CIO gap, ISS-003). Digital strategy appears implicit rather than documented. Governance maturity at level 1-level 2 means technology investments lack structured oversight. Peers like Lendmark and Regional Finance have formalized digital leadership. connected unlock: compliance governance strengthened by enterprise policy framework; security posture improved with Shield controls. In Zennify's assessment Reporting Technology scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E--003] [E--003] [E-P1C2-003].",
+      "why_text": "At 1.5 out of 5, Reporting Technology sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-P1C1-001, E-P1C2-003].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P1C2",
+        "P3C3",
+        "P4C4.4.1",
+        "P3C3.8.3",
+        "P1C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-005",
+      "id": "11da188e-f8e8-4353-a912-7afe6d66ef0c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-P1C1-010"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-B1-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-P4C4-001",
+        "E-B1-007",
+        "E-P1C1-010"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Application Security Testing a near-term focus for Security Finance Corporation: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-P1C1-010].",
+      "source_rec_id": "REC-005",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Enhance Cybersecurity & Data Protection Posture",
+      "what_text": "While scores 2.58 (highest in P4), the consumer lending sector faces escalating cyber threats. No data breaches identified (ISS-006, positive signal), but proactive investment needed to maintain posture. CFPB consent order history (ISS-001) increases regulatory scrutiny on data handling. connected unlock: governance confidence improves with demonstrable security controls; compliance posture strengthened. In Zennify's assessment Application Security Testing scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-B1-007] [E-B1-007] [E-B1-007].",
+      "why_text": "At 1.5 out of 5, Application Security Testing sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-P4C4-001, E-B1-007].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Score: 1.70 | maturity level 2 | Peer Median: 2.95 | Gap: -1.25",
+        "heading": "3.1. Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Score: 2.06 | maturity level 2 | Peer Median: 3.31 | Gap: -1.25",
+        "heading": "3.2. Customer Experience",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": null
+  },
+  "run_request_id": "DMA-ASM-SF-20260311-0001"
+}

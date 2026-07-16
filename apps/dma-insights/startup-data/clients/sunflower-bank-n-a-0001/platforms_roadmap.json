@@ -1,0 +1,172 @@
+{
+  "entity_display_id": "sunflower-bank-n-a-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-1",
+          "title": "Service Cloud \u2014 Replace Cherwell ITSM (EOL December 2026)"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-2",
+          "title": "Shield \u2014 Compliance & Security Governance"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-3",
+          "title": "Financial Services Cloud \u2014 CRM Consolidation"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-4",
+          "title": "Data Cloud \u2014 Unified Customer 360"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-5",
+          "title": "FSC Wealth Management \u2014 Unified Advisor Platform"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-6",
+          "title": "Agentforce + Einstein AI \u2014 Enterprise AI Capability"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-8",
+          "title": "MuleSoft \u2014 Post-Merger Integration Backbone"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.67",
+          "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.33 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-7",
+          "title": "Marketing Cloud \u2014 Unified Campaign Orchestration"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-SNFB-20260410-0001",
+  "total_duration_months": 12
+}

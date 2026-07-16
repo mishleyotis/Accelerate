@@ -1,0 +1,21 @@
+{
+  "active_run_id": "2e1db6ee-aed9-4fd6-b8a0-b4e6a0a13182",
+  "items": [
+    {
+      "assessment_date": "2026-04-13",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:05.344425Z",
+      "created_at": "2026-07-02T23:11:05.344425Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "2e1db6ee-aed9-4fd6-b8a0-b4e6a0a13182",
+      "overall_score": 2.158625730994152,
+      "request_id": "DMA-ASM-TSCP-20260413-0001",
+      "started_at": "2026-07-02T23:11:05.344425Z",
+      "status": "ACTIVE",
+      "subcap_count": 684,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

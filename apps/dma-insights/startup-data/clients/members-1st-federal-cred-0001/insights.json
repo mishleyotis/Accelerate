@@ -1,0 +1,1104 @@
+{
+  "entity_display_id": "members-1st-federal-cred-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.2.1",
+        "P4C2.2.1",
+        "P2C4.4.3",
+        "P1C1.5.5",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-062",
+        "E-071",
+        "E-075"
+      ],
+      "ic_id": "CP-F-006",
+      "id": "cd9bd95b-44a9-4aab-846f-906854ced3fb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-062",
+            "E-071",
+            "E-075"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-069",
+        "E-063",
+        "E-054",
+        "E-068",
+        "E-002",
+        "E-003"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: Data + Analytics scoring HIGH on platform modernization; legacy Cognos coexistence = transitional state, likely Cognos→Power BI migration in flight [E-054].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Modern data platform (M1-360) + IBM Cognos legacy = BI consolidation opportunity",
+      "what_text": "Level 1-360 = Azure Databricks lakehouse + Microsoft Fabric overlay + Power BI. McAllister VP D&A team of 11 since 2008. Azure DevOps adopted as 'first instance of true cloud CI/CD'. IBM Cognos still in environment [, LeadIQ scan]. In Zennify's assessment Data Quality Framework & Dimensions scores 2.5 out of 5, versus a typical 2.8 at comparable institutions [E-063].",
+      "why_text": "The research report pins the maturity impact at: Salesforce CRM Analytics (Tableau Cloud) + Data Cloud activation lifts member-experience analytics out of Cognos legacy. Marketing Cloud Personalization grounded on level 1-360 = personalization-at-scale opportunity. averages 3.3/5 across its 40 scored capability (peer median ~ 2.8) on the current assessment [E-069, E-063].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C3",
+        "P4C2.2.1",
+        "P2C4.4.3",
+        "P2C2.3.6",
+        "P1C4.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-027",
+        "E-028"
+      ],
+      "ic_id": "CP-F-001",
+      "id": "faea9dfc-e1cc-47bd-b394-7109314a7ce7",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-027",
+            "E-028"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-009",
+        "E-017",
+        "E-003"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: **The core sales narrative.** M1FCU already owns the Salesforce platform — Zennify positions as the activation partner: Marketing Cloud Engagement Studio + Service Cloud Agentforce + Data Cloud activation. Atrium delivered transformation; Zennify drives utilization [E-003].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Salesforce trifecta confirmed: FSC + Data 360 + Marketing Cloud — multi-year transformation",
+      "what_text": "Atrium-delivered FSC + Data 360 + Marketing Cloud workstreams confirmed via public Atrium webinar (Feb 26, 2026). Atrium account team named (Lauren Marder, Ben Ernstoff). Salesforce ideation workshops co-hosted by CIO Garth Pricer. In Zennify's assessment Budget Allocation & ROI scores 1.0 out of 5, versus a typical 3.3 at comparable institutions [E-017].",
+      "why_text": "The assessment found: “Members 1st centers digital strategy on Salesforce FSC + Data 360 + Marketing Cloud — confirmed multi-year transformation Three workstreams: Member 360 unified view, automation of case” [E-009]. The research report pins the maturity impact at: Marketing & Servicing have a strong platform foundation but Marketing Cloud Engagement Studio activation depth + Service Cloud Agentforce activation are unconfirmed — likely L3.0-3.5 ceiling without internal validation. averages 3.1/5 across its 61 scored capability (peer median ~ 3.2) on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C1.2.1",
+        "P4C2.2.1",
+        "P3C1.5.1",
+        "P1C2.2.4",
+        "P1C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "e5865ed0-3f22-4d15-92ae-26d030efd33e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-003",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-064",
+        "E-066",
+        "E-069",
+        "E-070",
+        "E-002",
+        "E-003",
+        "E-004"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Salesforce Einstein Trust Layer + Agentforce + Data Cloud as AI-grounding source unifies the three portfolios. Zennify AI Governance offering bridges Zest + Tagetik + Microsoft Fabric into one auditable control plane within Salesforce [E-069].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Three-pillar AI portfolio with no unified governance layer",
+      "what_text": "Zest AI strategic investor Nov 2025 (: AI underwriting + Zest Protect fraud + LuLu Pulse GenAI). Tagetik AI Pathfinder finalist 2025 (: finance/CPM AI). Microsoft Fabric early adopter on level 1-360 lakehouse with 89% ML run-time reduction (, ). 30.4% lift / 3,634 cards / $27.9M card limit measured outcome. In Zennify's assessment Enterprise Reporting Platform scores 2.5 out of 5, versus a typical 2.8 at comparable institutions [E-066].",
+      "why_text": "The assessment found: “M1FCU strategic investor in Zest AI Nov 2025 round (with Citi Ventures, Truliant FCU, ORNL FCU, SchoolsFirst FCU) — institutional commitment to AI lending platform Zest AI scope at M1FCU:” [E-064]. The research report pins the maturity impact at: Analytics & AI: HIGH activity, MEDIUM governance maturity. Three AI portfolios run on three different platforms — fragmentation risk. Likely L3.5 ceiling with strong upside if governance unified. averages 3.3/5 across its 54 scored capability (peer median ~ 2.8) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P2C1.1.CU2",
+        "P4C4.1.3",
+        "P4C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-016"
+      ],
+      "ic_id": "CP-F-003",
+      "id": "1ab1954d-c0e6-4a32-b240-a79180e6582d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-016"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C4"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-019",
+        "E-012",
+        "E-079",
+        "E-002",
+        "E-001",
+        "E-008",
+        "E-006"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Operating-model stretch on Salesforce platform: branch onboarding + new-market member acquisition + leadership change-management all converging. Culture + Process Automation likely strained at scale. — Sales pitch: 'Your platform must scale with your geography.' Salesforce FSC branch-onboarding accelerator + Marketing Cloud SEG segmentation for new-market entry + Service Cloud Mobile for branch-employee enablement = expansion-velocity multiplier [E-019].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Geographic expansion 8→11 counties + 3 senior C-suite hires in 12 months = growth-phase capacity strain",
+      "what_text": "Branch network expanded into Lehigh, Lycoming, Northampton counties. Pavlakovich COO (Feb 2025), Culos SVP Retail (Mar 2026), Balestrini CCLO (2025) — three senior moves in 12 months. Wilson: 'preparing for significant expansion across Pennsylvania.'. In Zennify's assessment Change Metrics scores 1.0 out of 5, versus a typical 3.3 at comparable institutions [E-078].",
+      "why_text": "The assessment found: “Joseph Culos joined as SVP Retail (March 2026) from First Commonwealth Bank where he led 750-person/127-branch division + 2 call centers + L&D Wilson quote: 'Members 1st prepares for significant” [E-012]. At 1.0 out of 5, Change Metrics sits 2.3 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C1.1.5",
+        "P2C2.3.6",
+        "P4C4.1.4",
+        "P4C2.1.4",
+        "P4C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-027",
+        "E-028",
+        "E-034",
+        "E-052"
+      ],
+      "ic_id": "CP-F-004",
+      "id": "a786f15b-baee-4cf7-b8e0-a29faa5e2f76",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-027",
+            "E-028",
+            "E-034",
+            "E-052"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-049",
+        "E-047",
+        "E-008"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Servicing + Personalization scoring HIGH on differentiated service-philosophy operationalization. Loyalty + Concierge already exhibit Salesforce-FSC-grade member-360 logic. — MyConcierge becomes a Salesforce-grounded 1:1 personalization engine with Marketing Cloud Engagement Studio + Loyalty Cloud activation. Lift from in-house custom to Salesforce-platformed without losing the brand [E-047].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "MyConcierge + 4-tier Loyalty Rewards = differentiated proprietary service stack",
+      "what_text": "MyConcierge launched July 2020: proprietary 1:1 in-house concierge, NOT chatbot, accessible via mobile app + online banking. 4-tier Loyalty Rewards (Silver $2.5K-15K / Gold $15K-35K / Platinum $35K-75K / Titanium $75K+) with monthly automated tier evaluation + Authorized Family Group household aggregation. 18 specialized contact queues + 24/7 tech support. In Zennify's assessment Assistive Technology Support scores 1.0 out of 5, versus a typical 3.3 at comparable institutions [E-049].",
+      "why_text": "At 1.0 out of 5, Assistive Technology Support sits 2.3 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-048, E-049].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P3C3.5.1",
+        "P1C2.2.4",
+        "P1C4.1.5",
+        "P1C2.4.3",
+        "P1C2.4.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "9e4e05fe-316c-4af4-a2b6-5e222bba165c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-068",
+            "E-076"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-018",
+        "E-036",
+        "E-037",
+        "E-061",
+        "E-065",
+        "E-076",
+        "E-068",
+        "E-064"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "twilio",
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Operational Risk + Compliance scoring strong (likely L3.5+); GRC tool identity (Ncontracts/MetricStream/Quantivate/RSA Archer) not publicly disclosed = caution flag. — Salesforce Compliance Cloud + Industries Compliance Sentinel + nCino Compliance can replace/augment GRC tool. Risk-as-Salesforce-platform pitch fits new COO's ERM background [E-037].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit = mature risk org, GRC tool unconfirmed",
+      "what_text": "Three concurrent Risk & Compliance Officer roles (Marketing, Member Experience, Consumer Lending) at $132K-$214K each. Pavlakovich's prior VP ERM role formal. Required certifications: CRCM, NCCO, CMCP, CRC. RCSA + Issue Management + Risk Metrics + Change Management explicit. In Zennify's assessment Operational Risk Framework scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-018].",
+      "why_text": "The assessment found: “RCO Marketing role explicitly references '1:1 data driven marketing' = explicit personalization-at-marketing-layer signal Multi-channel marketing program: digital, social media, email, SMS, print” [E-036]. At 2.0 out of 5, Operational Risk Framework sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C3.1.1",
+        "P4C4.8.1",
+        "P2C4.4.3",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "0de242e1-490d-4542-bb30-2972abdfc703",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-068",
+            "E-076"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-068",
+            "E-076"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-076",
+        "E-068",
+        "E-075",
+        "E-067",
+        "E-071",
+        "E-062"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Salesforce Shield + Event Monitoring + Trust Layer for AI-driven threat detection; Privacy Center activation; Plaid integration governance via Data Cloud — full Salesforce-as-trust-platform pitch [E-068].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "MFA + biometrics + dedicated IdP subdomain + passkeys roadmap = mature cyber posture",
+      "what_text": "MFA stack: SMS + voice + email OTP + TouchID/FaceID biometrics. Dedicated sign-in subdomain (signin.members1st.org) suggests separate IdP (likely Salesforce Identity, Okta, or Auth0). Akamai Bot Manager + reCAPTCHA at edge. Privacy program comprehensive: GLBA + CCPA + Biometric Privacy + COPPA + Plaid integration + Session Replay disclosure. Kelly Hogan = Manager Cybersecurity Operations. In Zennify's assessment Vendor Security Assessment scores 2.5 out of 5, versus a typical 3.3 at comparable institutions [E-076].",
+      "why_text": "The assessment found: “Privacy Policy actively maintained — last updated 02/03/2026; multiple sub-policies: Online Privacy + GLBA Privacy Notice + California Privacy + Biometric Authentication +” [E-075]. The research report pins the maturity impact at: Cybersecurity scoring HIGH on perimeter + IAM; SIEM/EDR vendor + SOC depth not publicly disclosed = caution flag for cap determination. averages 3.6/5 across its 30 scored capability (peer median ~ 3.2) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P3C2",
+        "P3C4",
+        "P4C3.1.1",
+        "P2C4.4.3",
+        "P3C3.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "656b7cee-543f-4d0a-adcf-ff33907da701",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-061",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-061",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-065",
+        "E-061"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Industries Compliance Cloud + Compliance Sentinel — $10B Threshold Compliance Activation — addressable via salesforce [E-061].",
+      "source_rec_id": "REC-01",
+      "theme": "Governance & Risk",
+      "title": "Salesforce Industries Compliance Cloud + Compliance Sentinel — $10B Threshold Compliance Activation",
+      "what_text": "Connected unlock: Governance & Risk Mgmt (current 2.36) → unblocks connected caps that suppress P3 subcaps at level 3.0; Operational Risk (current 2.71) → shared policy/control framework; Resilience (current 3.10) → vendor risk module integration. In Zennify's assessment Risk-Informed Decisions scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-065].",
+      "why_text": "At 1.0 out of 5, Risk-Informed Decisions sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-005, E-065].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P3C4",
+        "P2C2",
+        "P4C3.1.1",
+        "P2C4.4.3",
+        "P3C3.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "bf5a77e5-d49d-4d72-9ba8-099ce893f0f7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-061",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-061",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-061",
+        "E-065"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Operational Risk Platform Integration — 3-Lines-of-Defense Activation on FSC — addressable via salesforce [E-065].",
+      "source_rec_id": "REC-02",
+      "theme": "Compliance & Surveillance",
+      "title": "Operational Risk Platform Integration — 3-Lines-of-Defense Activation on FSC",
+      "what_text": "Monitoring Program is one of Members 1st Federal Credit Union's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Members 1st Federal Credit Union's ability to deliver more efficient, dependable operations [E-061].",
+      "why_text": "At 2.0 out of 5, Monitoring Program sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-005, E-061].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P4C1",
+        "P4C4",
+        "P4C1.2.1",
+        "P4C2.2.1",
+        "P4C4.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "b24cb08a-e376-46ff-b94b-6495b63a3ff2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-061",
+        "E-069"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Monitoring Program a near-term focus for Members 1st Federal Credit Union: a scoped investment here would lift it from 2.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": "REC-03",
+      "theme": "Compliance & Surveillance",
+      "title": "Multi-AI Governance Layer + Einstein Trust Layer + Agentforce Activation Depth",
+      "what_text": "Connected unlock: Compliance — AI fair-lending governance overlay (CFPB readiness); Data Mgmt — model lineage + training data governance; Cybersecurity — model isolation + prompt injection defense via Trust Layer. In Zennify's assessment Monitoring Program scores 2.0 out of 5, versus a typical 3.3 at comparable institutions [E-061].",
+      "why_text": "At 2.0 out of 5, Monitoring Program sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-005, E-061].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C3",
+        "P4C1",
+        "P2C4.4.3",
+        "P2C1.1.5",
+        "P2C2.3.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-027",
+        "E-028"
+      ],
+      "ic_id": "INS-REC-04",
+      "id": "889b98aa-dee3-43fe-8d3c-ba6851e82b8a",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-027",
+            "E-028"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-009",
+        "E-057"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Marketing Cloud Engagement Studio Activation Depth — SEG-by-SEG Personalization at Scale — addressable via salesforce [E-057].",
+      "source_rec_id": "REC-04",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Marketing Cloud Engagement Studio Activation Depth — SEG-by-SEG Personalization at Scale",
+      "what_text": "Connected unlock: Onboarding (journey-driven digital onboarding for new-county members); Servicing (Marketing Cloud → Service Cloud handoff for proactive engagement); Data Mgmt (Data 360 segmentation activation). In Zennify's assessment Fraud Risk Scoring scores 1.0 out of 5, versus a typical 2.8 at comparable institutions [E-004].",
+      "why_text": "The assessment found: “Members 1st centers digital strategy on Salesforce FSC + Data 360 + Marketing Cloud — confirmed multi-year transformation Three workstreams: Member 360 unified view, automation of case” [E-009]. At 1.0 out of 5, Fraud Risk Scoring sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P3C1",
+        "P2C4",
+        "P4C2.2.1",
+        "P2C4.4.3",
+        "P2C1.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "d6693ed5-9339-4de1-80fb-0e2e85bef39b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-079"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-061",
+            "E-064",
+            "E-065",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068",
+            "E-076"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-076",
+        "E-068",
+        "E-064",
+        "E-061",
+        "E-079",
+        "E-065"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Service Cloud + Agentforce Service Activation — Member Self-Service + Voice Channel Depth — addressable via salesforce [E-064].",
+      "source_rec_id": "REC-05",
+      "theme": "Operational Workflow & Risk",
+      "title": "Service Cloud + Agentforce Service Activation — Member Self-Service + Voice Channel Depth",
+      "what_text": "Operational Risk Framework is one of Members 1st Federal Credit Union's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Members 1st Federal Credit Union's ability to deliver more efficient, dependable operations [E-068].",
+      "why_text": "At 2.0 out of 5, Operational Risk Framework sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-076, E-068].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P3C4",
+        "P4C3",
+        "P4C3.1.1",
+        "P2C4.4.3",
+        "P2C1.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-027",
+        "E-028"
+      ],
+      "ic_id": "INS-REC-06",
+      "id": "6a0873f4-a18d-461f-8898-d8fae2b0bde2",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-027",
+            "E-028"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-077",
+        "E-009"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: FSC + nCino + MuleSoft Process Automation — Lending + Onboarding Workflow Activation — addressable via salesforce [E-077].",
+      "source_rec_id": "REC-06",
+      "theme": "Customer Journeys & Servicing",
+      "title": "FSC + nCino + MuleSoft Process Automation — Lending + Onboarding Workflow Activation",
+      "what_text": "Connected unlock: Onboarding (FSC + nCino + MuleSoft for digital onboarding journey); Resilience (cross-system failover orchestration); Architecture (API-first foundation maturation). In Zennify's assessment Fraud Risk Scoring scores 1.0 out of 5, versus a typical 2.8 at comparable institutions [E-004].",
+      "why_text": "The assessment found: “Members 1st centers digital strategy on Salesforce FSC + Data 360 + Marketing Cloud — confirmed multi-year transformation Three workstreams: Member 360 unified view, automation of case” [E-009]. At 1.0 out of 5, Fraud Risk Scoring sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P3C3",
+        "P4C2",
+        "P4C2.2.1",
+        "P3C3.5.1",
+        "P1C1.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "40748b5e-8b41-43e0-b52f-e312a32f0de4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-064",
+        "E-066"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "twilio",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Risk-Informed Decisions a near-term focus for Members 1st Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-066].",
+      "source_rec_id": "REC-07",
+      "theme": "Governance & Risk",
+      "title": "Digital Strategy Workshop — $10B Threshold Operating Model + Multi-AI Governance Charter",
+      "what_text": "Connected unlock: Governance — governance charter directly lifts capability scores; Compliance ( dependency) — strategic alignment for compliance investment; AI ( dependency) — multi-AI governance charter component; All P3 subcaps — relaxes connected caps once ≥ 2.5. In Zennify's assessment Risk-Informed Decisions scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-005].",
+      "why_text": "The assessment found: “M1FCU strategic investor in Zest AI Nov 2025 round (with Citi Ventures, Truliant FCU, ORNL FCU, SchoolsFirst FCU) — institutional commitment to AI lending platform Zest AI scope at M1FCU:” [E-064]. At 1.0 out of 5, Risk-Informed Decisions sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "P1: Strategy, Governance & Culture — Score 2.05/5.0 vs Median 2.95 (-0.90)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "P2: Member Experience — Score 3.04/5.0 vs Median 3 (+0.04)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "P3: Operations, Risk & Compliance — Score 2.69/5.0 vs Median 3.05 (-0.36)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "P4: Data, Analytics & Technology — Score 3.38/5.0 vs Median 2.875 (+0.50)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Members 1st owns the Salesforce platform (FSC + Data 360 + Marketing Cloud + MuleSoft + Agentforce confirmed) — 4 of 7 recommendations are ACTIVATION DEPTH plays, not greenfield acquisition. The 'you already own the platform — let us help you use it' narrative is structurally aligned with M1FCU's actual stack.\nR6 Compliance: No investment amounts, cost estimates, or ROI projections appear in this section. Recommendations use milestone-anchored capability outcome framing exclusively. Out-of-scope items (Tableau, Slack, CDO/CISO hiring, culture remediation) are tagged [CLIENT] or [Zennify NOT-RECOMMENDED] in the in-scope/out-of-scope register."
+  },
+  "run_request_id": "DMA-ASM-MFCU-20260429-0001"
+}

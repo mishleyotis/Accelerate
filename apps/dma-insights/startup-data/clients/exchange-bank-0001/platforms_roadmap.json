@@ -1,0 +1,165 @@
+{
+  "entity_display_id": "exchange-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Analytics platform": "On-prem Tableau Server + Crystal Reports \u2192 Cloud-scale Tableau + Einstein predictions",
+        "Integration time for new systems": "Weeks-months (custom P2P) \u2192 Days (API-first)",
+        "Process automation": "Zero business automation (IT only) \u2192 Top 5 manual processes automated",
+        "Regulatory readiness": "Adequate for $3.3B \u2192 Prepared for $5B+ thresholds"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Integration time for new systems: Weeks-months (custom P2P) \u2192 Days (API-first)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "MuleSoft implementation + Fiserv API design + integration architecture advisory",
+          "maturity_lift": "+2.3",
+          "metric": "Integration time for new systems: Weeks-months (custom P2P) \u2192 Days (API-first)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Integration time for new systems: Weeks-months (custom P2P) \u2192 Days (API-first)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Unified Integration Platform \u2014 MuleSoft as Salesforce Foundation"
+        },
+        {
+          "feature": "Tableau Cloud migration + Data Cloud activation for analytics + Einstein AI implementation + Ganame as executive sponsor",
+          "maturity_lift": "+2.36",
+          "metric": "Analytics platform: On-prem Tableau Server + Crystal Reports \u2192 Cloud-scale Tableau + Einstein predictions",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Analytics platform: On-prem Tableau Server + Crystal Reports \u2192 Cloud-scale Tableau + Einstein predictions",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-06",
+          "title": "Analytics Modernization \u2014 Tableau Cloud + Einstein AI"
+        },
+        {
+          "feature": "Financial Services Cloud implementation + compliance workflow design + BSA case management + vendor risk management modu",
+          "maturity_lift": null,
+          "metric": "Regulatory readiness: Adequate for $3.3B \u2192 Prepared for $5B+ thresholds",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Regulatory readiness: Adequate for $3.3B \u2192 Prepared for $5B+ thresholds",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Compliance Process Digitization \u2014 Financial Services Cloud"
+        },
+        {
+          "feature": "Flow + OmniStudio implementation + BA training program + automation governance framework + PMO integration",
+          "maturity_lift": null,
+          "metric": "Process automation: Zero business automation (IT only) \u2192 Top 5 manual processes automated",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Process automation: Zero business automation (IT only) \u2192 Top 5 manual processes automated",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Citizen Development Platform \u2014 Flow + OmniStudio for BA Team"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Customer data unification": "5+ siloed systems \u2192 Unified customer profiles",
+        "Martech consolidation": "6 disconnected tools \u2192 Unified SFMC platform",
+        "Pipeline visibility": "Zero (individual BDO memory/spreadsheets) \u2192 Real-time dashboard for SVP Daulton",
+        "Service channel unification": "4 disconnected systems \u2192 Single Service Cloud platform"
+      },
+      "dependencies": [
+        "REC-01"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Customer data unification: 5+ siloed systems \u2192 Unified customer profiles",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud implementation + customer data model design + MuleSoft integration + Data Cloud activation for Sales/Marketin",
+          "maturity_lift": "+2.3",
+          "metric": "Customer data unification: 5+ siloed systems \u2192 Unified customer profiles",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Customer data unification: 5+ siloed systems \u2192 Unified customer profiles",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Customer Data Unification \u2014 Data Cloud as Enterprise CDP"
+        },
+        {
+          "feature": "Sales Cloud / FSC implementation + BDO workflow configuration + Fiserv integration design + user adoption via L&D team (",
+          "maturity_lift": "+2.3",
+          "metric": "Pipeline visibility: Zero (individual BDO memory/spreadsheets) \u2192 Real-time dashboard for SVP Daulton",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Pipeline visibility: Zero (individual BDO memory/spreadsheets) \u2192 Real-time dashboard for SVP Daulton",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Sales Pipeline Visibility \u2014 Sales Cloud for BDO Team"
+        },
+        {
+          "feature": "Marketing Cloud implementation + journey design + Data Cloud segment activation + Campaign Monitor migration",
+          "maturity_lift": "+2.3",
+          "metric": "Martech consolidation: 6 disconnected tools \u2192 Unified SFMC platform",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Martech consolidation: 6 disconnected tools \u2192 Unified SFMC platform",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Marketing Campaign Orchestration \u2014 Marketing Cloud for Growing Team"
+        },
+        {
+          "feature": "Service Cloud implementation + Einstein Bot configuration + NICE CXone integration + knowledge base design + agent train",
+          "maturity_lift": "+2.3",
+          "metric": "Service channel unification: 4 disconnected systems \u2192 Single Service Cloud platform",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Service channel unification: 4 disconnected systems \u2192 Single Service Cloud platform",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Contact Center Consolidation \u2014 Service Cloud + Einstein Bot"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-EXCH-20260331-0001",
+  "total_duration_months": 8
+}

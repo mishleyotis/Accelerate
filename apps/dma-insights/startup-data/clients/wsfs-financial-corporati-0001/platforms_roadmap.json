@@ -1,0 +1,128 @@
+{
+  "entity_display_id": "wsfs-financial-corporati-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "November which delivers": "-70%",
+        "institution's $": "9.9B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "institution's $9.9B",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "nCino",
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.1",
+          "metric": "institution's $9.9B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "institution's $9.9B",
+            "peer": null,
+            "time": "10 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-001",
+          "title": "Deploy Moody's CreditLens + nCino Automated Spreading on WSFS's $9.9B Commercial Portfolio"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+2.1",
+          "metric": "November which delivers -70%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "November which delivers -70%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-002",
+          "title": "Activate nCino Analyst Digital Partner \u2014 Converting WSFS's 9-Year nCino Investment into AI-Powered Credit Operations"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.11",
+          "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-003",
+          "title": "Implement Salesforce Agentforce Financial Services (Evolved from FSC, April 2026) for WSFS Commercial Banking"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.11",
+          "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-004",
+          "title": "Deploy Salesforce Data Cloud to Enable CEO Levenson's Cross-Sell Mandate Across $97.4B Wealth + $9.9B Commercial"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.11",
+          "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.89 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-005",
+          "title": "Scale Enterprise Agentforce Commercial Banking with NIST AI RMF Governance \u2014 Building on NewLane Proof of Concept"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-WSFS-20260519-0001",
+  "total_duration_months": 12
+}

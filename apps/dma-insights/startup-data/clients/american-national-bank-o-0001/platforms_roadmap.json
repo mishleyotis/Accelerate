@@ -1,0 +1,172 @@
+{
+  "entity_display_id": "american-national-bank-o-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.34",
+          "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Marketing Cloud"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.34",
+          "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Data Cloud"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.34",
+          "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce FSC"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.34",
+          "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "MuleSoft Expansion"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+2.21",
+          "metric": "P2C4 score 1.79 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.79 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Service Cloud + Digital Engagement\tMonths 7\u201312\tP2C4: 1.79 \u2192 2.00"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.34",
+          "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Agentforce + Einstein AI"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.34",
+          "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.66 \u2192 4.0 (peer median 2.92)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Salesforce Shield\tMonths 1\u20136\tP2C1: 1.66 \u2192 2.00"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+1.43",
+          "metric": "P4C2 score 2.57 \u2192 4.0 (peer median 2.67)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.57 \u2192 4.0 (peer median 2.67)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Experience Cloud\tMonths 13\u201318\tP4C2: 2.57 \u2192 3.00"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1, P4C2"
+    }
+  ],
+  "run_request_id": "DMA-RES-ANBTX-20260512-0001",
+  "total_duration_months": 12
+}

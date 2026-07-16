@@ -1,0 +1,717 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "loandepot-inc-0001",
+  "financials": {
+    "lines": [
+      "total funding raised: $250M+"
+    ],
+    "metrics": {
+      "annual_revenue_range": "1B-10B",
+      "entity_name": "loanDepot, Inc.",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 5676,
+        "events": [
+          {
+            "fy": "FY2023",
+            "label": "Mellohome Dec 2023 launched partnerships for solar, home\u2026"
+          }
+        ],
+        "fy": [
+          "FY2017",
+          "FY2021",
+          "FY2023"
+        ],
+        "geography": "US-national (all 50 states + DC)",
+        "headline": "$12.0B net income \u00b7 FY2023",
+        "regulator": "State financial regulator / CFPB",
+        "series": {
+          "net_income_m": [
+            80.0,
+            183000.0,
+            12000.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "entity_type": "Public Company",
+    "jurisdictions": [
+      "US-national (all 50 states + DC)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Anthony Hsieh",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "founder, returned Jul 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dominick Marchetti",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "Jul 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sean DeJulia",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "Jul 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nikul Patel",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "Jul 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rick Calle",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "date unknown"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joseph Grassi",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "Sep 2022"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gregg Smallwood",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CLO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mike Brown",
+        "recent_hire": false,
+        "tenure_months": 36,
+        "title": "Mar 2023"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Melanie Graper",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tom Fiddler",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "Nov 2025"
+      }
+    ],
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "loanDepot, Inc. is a lending institution. It reports $119.1 billion in servicing unpaid-principal balance and has operated since 2010. It is regulated by State financial regulator / CFPB and employs approximately 5,676 people. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "State financial regulator / CFPB",
+    "size_tier": "Large",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-011",
+        "excerpt": "Confirmed tech stack includes Salesforce, ServiceNow, Okta, Azure AD, Sitecore CMS, Angular, ASP.NET, Selenium, JIRA/Confluence, Braze, Mixpanel, Amplitude, DocuSign, Finicity Heavy marketing/analytics stack: Adobe Analy",
+        "title": "Confirmed tech stack includes Salesforce, ServiceNow, Okta, Azure AD\u2026",
+        "type": "conference",
+        "url": "https://builtwith.com/loandepot.com"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "Marketing automation: Braze (customer engagement), HubSpot, Marketo (email/forms), Tealium (tag mgmt) Analytics: Adobe Analytics, Google Analytics 4, Amplitude, Mixpanel, Hotjar, CrazyEgg, Lucky Orange",
+        "title": "Marketing automation: Braze (customer engagement), HubSpot, Marketo\u2026",
+        "type": "conference",
+        "url": "https://builtwith.com/loandepot.com"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-063",
+        "excerpt": "Personalization tools confirmed: Optimizely (A/B testing), Adobe Target (targeting), Google Optimize 360 \u2014 presence only, utilization unknown Product analytics: Amplitude + Mixpanel confirmed \u2014 suggests behavioral tracki",
+        "title": "Personalization tools confirmed: Optimizely (A/B testing), Adobe\u2026",
+        "type": "conference",
+        "url": "https://builtwith.com/loandepot.com"
+      },
+      {
+        "author": "Dominick Marchetti",
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-085",
+        "excerpt": "CDO role EXISTS: Elijah Pallante (CDO since Jan 2022); Dominick Marchetti (CDO appointed Jul 2025 per press release) \u2014 possible dual-CDO or role transition CDO NOT listed on official SEC investor presentation management ",
+        "title": "CDO role Exists",
+        "type": "article",
+        "url": "https://www.linkedin.com/company/loandepot"
+      }
+    ],
+    "ticker": "LDI"
+  },
+  "issue_register": [
+    {
+      "id": "1f3c3be0-064f-4674-af19-949982318055",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "0884a7a8-8668-410b-872c-51912d80cf41",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "0eb983f0-9b52-41e2-a823-7fadb0df4f13",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6602dd35-4abe-4801-8088-9f8cf2e92413",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e5b060ac-2225-4cca-8812-d89749b68a91",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Most recent reported financials: $12.0B net income as of FY2023, within a series tracked FY2017 to FY2023.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 4.5,
+        "P1C4": 3.5,
+        "P1C5": 3.0,
+        "P2C1": 4.0,
+        "P2C2": 4.5,
+        "P2C3": 4.0,
+        "P2C4": 4.0,
+        "P3C1": 4.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 4.0,
+        "P4C2": 4.5,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.88,
+      "peer_name": "Rocket Companies",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 4.0,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 4.0,
+        "P3C2": 3.0,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 4.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.15,
+      "peer_name": "PennyMac Financial",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.88,
+      "peer_name": "Newrez/Rithm Capital",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.59,
+      "peer_name": "CrossCountry Mortgage",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 3.5,
+        "P1C5": 2.5,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.47,
+      "peer_name": "Freedom Mortgage",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-LOANDEPOT-20260324-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "geographic footprint via JVs with builders and realtors Glassdoor overall 3.2/5.0 (2,835 reviews) \u2014 in-line with financial services avg (3.7) 51% recommend to friend, 46% positive business outlook ACES program: accelerated 6-week LO trainin",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 2835,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": "last year with very few formal CFPB complaints Trustpilot 4/5 stars melloNow: fully automated underwriting engine delivering conditional loan approval in minutes Uses fully digital verification: analyzes credit, detects fraud, validates inc",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": 4.0
+      },
+      {
+        "drilldown": ",000+ mortgages underwritten last year with very few formal CFPB complaints Trustpilot 4/5 stars melloNow: fully automated underwriting engine delivering conditional loan approval in minutes Uses fully digital verification: analyzes credit,",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": 4.0
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Wholesale lending channel launched Mar 9, 2026 led by Dan Pe\u00f1a (President Partnership Lending)",
+      "date_precision": "day",
+      "e_id": "E-041",
+      "event_date": "2026-03-09",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "e790c774-e68b-4043-8a44-6121a5556a67",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.stocktitan.net/news/LDI/",
+      "subcap_ids": [],
+      "title": "Wholesale lending channel launched"
+    },
+    {
+      "body": "Negative reviews cite: toxic culture, no merit increases, cult-like CEO reverence, women rarely promoted, morale at all-time low",
+      "date_precision": "publish_fallback",
+      "e_id": "E-046",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "e1e64fbd-fb97-45e7-9a8c-be53070d18d4",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.glassdoor.com/Reviews/loanDepot-Reviews-E375743.htm",
+      "subcap_ids": [],
+      "title": "Women promoted morale at all-time low"
+    },
+    {
+      "body": "AI capabilities deployed for lead acquisition and conversion (confirmed in Q4 2025 earnings)",
+      "date_precision": "quarter",
+      "e_id": "E-053",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-053"
+      ],
+      "id": "60596977-8518-41a7-b0dc-ef735bb4f6b2",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001831631/000183163125000218/a3q25investorpresentatio.htm",
+      "subcap_ids": [],
+      "title": "AI capabilities deployed for lead acquisition and\u2026"
+    },
+    {
+      "body": "AI lead acquisition/conversion deployed per Q4 2025 earnings \u2014 implies some level of customer scoring/targeting",
+      "date_precision": "quarter",
+      "e_id": "E-063",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-063"
+      ],
+      "id": "797c3ff0-9264-46e8-921f-f736e3fc1ea8",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://builtwith.com/loandepot.com",
+      "subcap_ids": [],
+      "title": "AI lead acquisition/conversion deployed per Q4 2025\u2026"
+    },
+    {
+      "body": "AI deployed in production for: lead acquisition, lead conversion, CRA (credit risk assessment) per Q4 2025 earnings",
+      "date_precision": "quarter",
+      "e_id": "E-086",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-086"
+      ],
+      "id": "71ca0f15-433a-4d5a-addc-c2a05ec1a534",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001831631/000183163125000218/a3q25investorpresentatio.htm",
+      "subcap_ids": [],
+      "title": "AI deployed in production for: lead acquisition, lead\u2026"
+    },
+    {
+      "body": "Nikul Patel appointed CGO Nov 2025: growth opportunities, acquisition activities, customer engagement",
+      "date_precision": "month",
+      "e_id": "E-042",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "90ed1ff4-413e-4c09-b832-d238af711800",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://media.loandepot.com/news-releases/press-release-details/2025/loanDepot-Appoints-Nikul-Patel-Chief-Growth-Officer/default.aspx",
+      "subcap_ids": [],
+      "title": "Nikul Patel appointed CGO"
+    },
+    {
+      "body": "Nikul Patel appointed Chief Growth Officer (Nov 2025): co-founded LoanGlide, senior roles at LendingTree, co-founded Movoto",
+      "date_precision": "month",
+      "e_id": "E-041",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "cb181092-7b76-4fb8-a077-cab65e6480f3",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.stocktitan.net/news/LDI/",
+      "subcap_ids": [],
+      "title": "Nikul Patel appointed Chief Growth Officer (Nov 2025)"
+    },
+    {
+      "body": "Completes leadership transformation: CDO (Marchetti), CIO (DeJulia), CGO (Patel), CSO (Calle) all hired Jul-Nov 2025",
+      "date_precision": "month",
+      "e_id": "E-042",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "2f4bec6c-2a55-4cd9-863f-895c0802e3f8",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://media.loandepot.com/news-releases/press-release-details/2025/loanDepot-Appoints-Nikul-Patel-Chief-Growth-Officer/default.aspx",
+      "subcap_ids": [],
+      "title": "Completes leadership transformation: CDO (Marchetti), CIO\u2026"
+    },
+    {
+      "body": "Alex Madonna (founding employee) named EVP Consumer Direct Lending (Oct 2025): deploying AI and modern sales structures",
+      "date_precision": "month",
+      "e_id": "E-041",
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "5917d4c1-2ad7-4e08-ae18-397796c580e1",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/news/LDI/",
+      "subcap_ids": [],
+      "title": "Alex Madonna (founding employee) named EVP Consumer Direct\u2026"
+    },
+    {
+      "body": "Sean DeJulia appointed CIO (Chief Innovation Officer)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-020",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "1d7ae8c5-05dc-4fc4-886e-95e0e05b3d7a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://media.loandepot.com/news-releases/press-release-details/2025/loanDepot-Adds-Mortgage-Technology-Trailblazers-to-Executive-Team/default.aspx",
+      "subcap_ids": [],
+      "title": "Sean DeJulia appointed CIO (Chief Innovation Officer)"
+    },
+    {
+      "body": "CDO role EXISTS: Elijah Pallante (CDO since Jan 2022); Dominick Marchetti (CDO appointed Jul 2025 per press release) \u2014 possible dual-CDO or role transition",
+      "date_precision": "month",
+      "e_id": "E-085",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-085"
+      ],
+      "id": "c48ba793-eba4-4a23-ae99-fc3d4dbef94d",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/loandepot",
+      "subcap_ids": [],
+      "title": "Dominick Marchetti ( appointed Jul 2025"
+    },
+    {
+      "body": "CEO transition visible in certifications: Martell signed Q1 2025, Hsieh signed Q2-Q3 2025",
+      "date_precision": "quarter",
+      "e_id": "E-043",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "cc809327-e260-4a65-b2e6-2eab81430df6",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001831631/000183163125000221/a322-q32025.htm",
+      "subcap_ids": [],
+      "title": "Martell signed Q1 2025"
+    },
+    {
+      "body": "Preliminary approval granted Jan 2025; final approval hearing Aug 18, 2025",
+      "date_precision": "month",
+      "e_id": "E-091",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "308d5fc7-4409-48b0-b8fa-34448188ea03",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.classaction.org/news/86-million-loandepot-settlement-reached-in-data-breach-class-action-lawsuit",
+      "subcap_ids": [],
+      "title": "Preliminary approval granted Jan 2025"
+    },
+    {
+      "body": "Project North Star launched Nov 2024 as 3-year strategic blueprint",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "aa2c1c00-2087-4d86-ba00-40fe3de05394",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1831631/000183163125000023/ldi-20241231.htm",
+      "subcap_ids": [],
+      "title": "Project North Star launched Nov 2024"
+    },
+    {
+      "body": "mellohome Dec 2023 launched partnerships for solar, home improvement, maintenance services",
+      "date_precision": "month",
+      "e_id": "E-038",
+      "event_date": "2023-12-01",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "7c96545a-e423-4f8c-aad2-d0e8a4509c34",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/loandepot",
+      "subcap_ids": [],
+      "title": "Mellohome Dec 2023 launched partnerships for solar, home\u2026"
+    },
+    {
+      "body": "Vision 2025 launched Jul 2022, completed Q3 2024",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "18708972-931f-472a-96bb-a65a0843225c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1831631/000183163125000023/ldi-20241231.htm",
+      "subcap_ids": [],
+      "title": "Vision 2025 launched Jul 2022"
+    },
+    {
+      "body": "mello operating unit launched Mar 2022 for mortgage-adjacent digital-first products/services",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "8f99e8e1-c9b1-4978-ae4c-c87063c6c2ae",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://investors.loandepot.com/news/corporate-and-financial-news/corporate-and-financial-news-details/2022/loanDepot-Inc-LDI-Announces-New-Operating-Unit-mello/default.aspx",
+      "subcap_ids": [],
+      "title": "Mello operating unit launched Mar 2022"
+    },
+    {
+      "body": "Zeenat Sidi named President/COO (FinTech executive, ex-SoFi)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-021",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "bb885375-a339-442a-b712-ba590e244297",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://investors.loandepot.com/news/corporate-and-financial-news/corporate-and-financial-news-details/2022/loanDepot-Inc-LDI-Announces-New-Operating-Unit-mello/default.aspx",
+      "subcap_ids": [],
+      "title": "Zeenat Sidi named President/COO (FinTech executive, ex-SoFi"
+    },
+    {
+      "body": "George Brady appointed CDO Jun 2021 (ex-CTO Capital One, 35yr tech leadership)",
+      "date_precision": "month",
+      "e_id": "E-024",
+      "event_date": "2021-06-01",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "bbc39c42-0d4d-4304-987c-a863752b2fa0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://investors.loandepot.com/news/corporate-and-financial-news/corporate-and-financial-news-details/2021/loanDepot-Names-George-Brady-Executive-Vice-President-and-Chief-Digital-Officer-as-the-Company-Further-Advances-Technological-Innovation-of-the-Mortgage-Lending-Industry/default.aspx",
+      "subcap_ids": [],
+      "title": "George Brady appointed CDO Jun 2021 (ex-CTO Capital One\u2026"
+    },
+    {
+      "body": "mello announced Mar 2017, engineered by loanDepot innovation team in Southern California, built from ground up",
+      "date_precision": "month",
+      "e_id": "E-090",
+      "event_date": "2017-03-01",
+      "evidence_e_ids": [
+        "E-090"
+      ],
+      "id": "e3d04a7a-bddc-42a2-81c2-40bcbb690371",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.loandepot.com/blog/inside-look-loandepot-mello",
+      "subcap_ids": [],
+      "title": "Mello announced Mar 2017, engineered by loanDepot\u2026"
+    },
+    {
+      "body": "Dominick Marchetti appointed CDO (was CTO 2015-2019, co-built mello platform)",
+      "date_precision": "year",
+      "e_id": "E-020",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "c4ec3dcc-e11b-4de2-af1d-fe342d17c9d3",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://media.loandepot.com/news-releases/press-release-details/2025/loanDepot-Adds-Mortgage-Technology-Trailblazers-to-Executive-Team/default.aspx",
+      "subcap_ids": [],
+      "title": "CTO 2015-2019, co-built mello platform was"
+    }
+  ]
+}

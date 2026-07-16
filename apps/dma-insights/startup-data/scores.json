@@ -1,0 +1,1122 @@
+{
+  "clients": [
+    {
+      "display_id": "1st-security-bank-of-was-0001",
+      "name": "1st Security Bank of Washington",
+      "overall": 2.2725500425071488,
+      "pillars": {
+        "P1": 2.8,
+        "P2": 1.87,
+        "P3": 2.4,
+        "P4": 2.03
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "aafcu-0001",
+      "name": "AAFCU",
+      "overall": 2.3577204061626875,
+      "pillars": {
+        "P1": 2.24,
+        "P2": 2.42,
+        "P3": 2.63,
+        "P4": 2.15
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "access-credit-union-limi-0001",
+      "name": "Access Credit Union Limited",
+      "overall": 1.58,
+      "pillars": {
+        "P1": 1.72,
+        "P2": 1.37,
+        "P3": 2.07,
+        "P4": 1.35
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "acuity-a-mutual-insuranc-0001",
+      "name": "Acuity, A Mutual Insurance Company",
+      "overall": 3.0,
+      "pillars": {
+        "P1": 2.95,
+        "P2": 3.11,
+        "P3": 3.1,
+        "P4": 2.9
+      },
+      "subvertical": "IC"
+    },
+    {
+      "display_id": "alliant-insurance-servic-0001",
+      "name": "Alliant Insurance Services",
+      "overall": 3.095914543140205,
+      "pillars": {
+        "P1": 2.75,
+        "P2": 2.72,
+        "P3": 3.77,
+        "P4": 3.14
+      },
+      "subvertical": "IB"
+    },
+    {
+      "display_id": "alma-bank-0001",
+      "name": "Alma Bank",
+      "overall": 1.97,
+      "pillars": {
+        "P1": 1.95,
+        "P2": 1.76,
+        "P3": 2.43,
+        "P4": 1.79
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "amalgamated-financial-co-0001",
+      "name": "Amalgamated Financial Corp / Amalgamated Bank",
+      "overall": 2.59,
+      "pillars": {
+        "P1": 2.8,
+        "P2": 2.23,
+        "P3": 2.54,
+        "P4": 2.63
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "amarillo-national-bank-0001",
+      "name": "Amarillo National Bank",
+      "overall": 3.23,
+      "pillars": {
+        "P1": 3.4,
+        "P2": 3.21,
+        "P3": 3.38,
+        "P4": 3.09
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "american-homes-4-rent-lp-0001",
+      "name": "American Homes 4 Rent, LP",
+      "overall": 2.75,
+      "pillars": {
+        "P1": 2.76,
+        "P2": 2.4,
+        "P3": 2.66,
+        "P4": 3.45
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "american-national-bank-o-0001",
+      "name": "American National Bank of Texas",
+      "overall": 2.7993863905438117,
+      "pillars": {
+        "P1": 3.04,
+        "P2": 2.15,
+        "P3": 3.14,
+        "P4": 2.86
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "americu-credit-union-0001",
+      "name": "AmeriCU Credit Union",
+      "overall": 2.4684186215349717,
+      "pillars": {
+        "P1": 2.47,
+        "P2": 2.37,
+        "P3": 2.52,
+        "P4": 2.51
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "apg-federal-credit-union-0001",
+      "name": "APG Federal Credit Union",
+      "overall": 2.32310011029819,
+      "pillars": {
+        "P1": 2.43,
+        "P2": 2.23,
+        "P3": 2.5,
+        "P4": 2.13
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "bank-of-utah-30v2",
+      "name": "Bank of Utah",
+      "overall": 2.7338141025641027,
+      "pillars": {
+        "P1": 2.98,
+        "P2": 2.55,
+        "P3": 2.58,
+        "P4": 2.83
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "bank-ozk-0001",
+      "name": "Bank OZK",
+      "overall": 2.1957775111980293,
+      "pillars": {
+        "P1": 2.35,
+        "P2": 2.1,
+        "P3": 2.27,
+        "P4": 2.06
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "baxter-credit-union-bcu-0001",
+      "name": "Baxter Credit Union (BCU)",
+      "overall": 2.71,
+      "pillars": {
+        "P1": 3.27,
+        "P2": 2.53,
+        "P3": 2.66,
+        "P4": 2.5
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "beacon-bank-0001",
+      "name": "Beacon Bank",
+      "overall": 2.908285673802715,
+      "pillars": {
+        "P1": 2.79,
+        "P2": 2.89,
+        "P3": 2.6,
+        "P4": 3.36
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "bell-bank-5p78",
+      "name": "Bell Bank",
+      "overall": 1.9999351471957043,
+      "pillars": {
+        "P1": 2.07,
+        "P2": 2.13,
+        "P3": 2.1,
+        "P4": 1.7
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "boeing-employees-credit--0001",
+      "name": "Boeing Employees Credit Union (BECU)",
+      "overall": 2.619789935977755,
+      "pillars": {
+        "P1": 2.51,
+        "P2": 2.66,
+        "P3": 2.5,
+        "P4": 2.8
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "bok-financial-corporatio-0001",
+      "name": "BOK Financial Corporation",
+      "overall": 1.9380075338707639,
+      "pillars": {
+        "P1": 1.89,
+        "P2": 1.74,
+        "P3": 2.18,
+        "P4": 1.95
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "bridgecrest-30v3",
+      "name": "Bridgecrest",
+      "overall": 2.618913031319146,
+      "pillars": {
+        "P1": 2.76,
+        "P2": 2.55,
+        "P3": 2.28,
+        "P4": 2.89
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "calprivate-bank-0001",
+      "name": "CalPrivate Bank",
+      "overall": 2.5435459698854492,
+      "pillars": {
+        "P1": 2.58,
+        "P2": 2.4,
+        "P3": 2.84,
+        "P4": 2.35
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "capital-farm-credit-0001",
+      "name": "Capital Farm Credit",
+      "overall": 1.9,
+      "pillars": {
+        "P1": 1.7,
+        "P2": 1.64,
+        "P3": 2.02,
+        "P4": 1.86
+      },
+      "subvertical": "FC"
+    },
+    {
+      "display_id": "cathay-bank-0001",
+      "name": "Cathay Bank",
+      "overall": 1.7302739946975274,
+      "pillars": {
+        "P1": 1.67,
+        "P2": 1.76,
+        "P3": 1.87,
+        "P4": 1.62
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "ccu-0001",
+      "name": "CCU",
+      "overall": 2.4059091986723566,
+      "pillars": {
+        "P1": 2.49,
+        "P2": 2.56,
+        "P3": 2.57,
+        "P4": 2.01
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "chemung-canal-trust-comp-0001",
+      "name": "Chemung Canal Trust Company",
+      "overall": 2.073592392616165,
+      "pillars": {
+        "P1": 2.1,
+        "P2": 1.91,
+        "P3": 2.37,
+        "P4": 1.92
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "ci-financials-0001",
+      "name": "CI Financials",
+      "overall": 1.951738066407423,
+      "pillars": {
+        "P1": 2.23,
+        "P2": 1.55,
+        "P3": 2.28,
+        "P4": 1.75
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "ci-segall-bryant-hamill--0001",
+      "name": "CI Segall Bryant & Hamill, LLC",
+      "overall": 2.1485027658995697,
+      "pillars": {
+        "P1": 2.27,
+        "P2": 2.23,
+        "P3": 2.52,
+        "P4": 1.57
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "commerce-trust-company-0001",
+      "name": "Commerce Trust Company",
+      "overall": 2.837175991781255,
+      "pillars": {
+        "P1": 2.89,
+        "P2": 2.53,
+        "P3": 3.13,
+        "P4": 2.79
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "community-west-bank-0001",
+      "name": "Community West Bank",
+      "overall": 1.7387583112920124,
+      "pillars": {
+        "P1": 1.71,
+        "P2": 1.4,
+        "P3": 2.18,
+        "P4": 1.66
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "compeer-financial-0001",
+      "name": "Compeer Financial",
+      "overall": 2.4230394472156904,
+      "pillars": {
+        "P1": 2.49,
+        "P2": 2.37,
+        "P3": 2.34,
+        "P4": 2.49
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "cornerstone-capital-bank-0001",
+      "name": "Cornerstone Capital Bank, SSB",
+      "overall": 2.71,
+      "pillars": {
+        "P1": 2.75,
+        "P2": 2.76,
+        "P3": 2.77,
+        "P4": 2.68
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "corporate-america-credit-0001",
+      "name": "Corporate America Credit Union",
+      "overall": 2.791615238249465,
+      "pillars": {
+        "P1": 1.85,
+        "P2": 2.48,
+        "P3": 2.97,
+        "P4": 3.87
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "east-west-bank-0001",
+      "name": "East West Bank",
+      "overall": 2.199750401005967,
+      "pillars": {
+        "P1": 2.14,
+        "P2": 1.88,
+        "P3": 2.96,
+        "P4": 1.82
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "elliott-investment-manag-0001",
+      "name": "Elliott Investment Management L.P.",
+      "overall": 3.3095898931600294,
+      "pillars": {
+        "P1": 3.49,
+        "P2": 2.75,
+        "P3": 3.72,
+        "P4": 3.28
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "empower-federal-credit-u-0001",
+      "name": "Empower Federal Credit Union",
+      "overall": 2.1135255946241993,
+      "pillars": {
+        "P1": 1.94,
+        "P2": 2.32,
+        "P3": 2.15,
+        "P4": 2.04
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "everbank-n-a-0001",
+      "name": "EverBank, N.A.",
+      "overall": 1.9154175221300394,
+      "pillars": {
+        "P1": 1.73,
+        "P2": 1.77,
+        "P3": 2.12,
+        "P4": 2.04
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "exchange-bank-0001",
+      "name": "Exchange Bank",
+      "overall": 2.3775953551428897,
+      "pillars": {
+        "P1": 2.67,
+        "P2": 2.36,
+        "P3": 2.37,
+        "P4": 2.11
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "farm-credit-mid-america--0001",
+      "name": "Farm Credit Mid-America, ACA",
+      "overall": 3.180647115817163,
+      "pillars": {
+        "P1": 3.03,
+        "P2": 2.77,
+        "P3": 3.54,
+        "P4": 3.38
+      },
+      "subvertical": "FC"
+    },
+    {
+      "display_id": "financial-partners-credi-0001",
+      "name": "Financial Partners Credit Union",
+      "overall": 2.5021677768794612,
+      "pillars": {
+        "P1": 2.24,
+        "P2": 2.47,
+        "P3": 2.67,
+        "P4": 2.63
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "first-citizens-bancshare-0001",
+      "name": "First Citizens BancShares, Inc.",
+      "overall": 1.8,
+      "pillars": {
+        "P1": 2.43,
+        "P2": 1.29,
+        "P3": 2.13,
+        "P4": 1.58
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "first-national-bank-of-o-0001",
+      "name": "First National Bank of Omaha",
+      "overall": 3.06,
+      "pillars": {
+        "P1": 2.68,
+        "P2": 2.88,
+        "P3": 3.5,
+        "P4": 3.27
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "first-united-bank-0001",
+      "name": "First United Bank",
+      "overall": 2.630228015291373,
+      "pillars": {
+        "P1": 2.11,
+        "P2": 2.93,
+        "P3": 2.67,
+        "P4": 2.81
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "fisher-investments-0001",
+      "name": "Fisher Investments",
+      "overall": 2.31,
+      "pillars": {
+        "P1": 2.36,
+        "P2": 1.74,
+        "P3": 2.57,
+        "P4": 2.72
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "frost-bank-0001",
+      "name": "Frost Bank",
+      "overall": 2.06,
+      "pillars": {
+        "P1": 2.24,
+        "P2": 1.94,
+        "P3": 2.17,
+        "P4": 2.04
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "fulton-bank-national-ass-8001",
+      "name": "Fulton Bank, National Association",
+      "overall": 2.1642136863766384,
+      "pillars": {
+        "P1": 2.15,
+        "P2": 2.11,
+        "P3": 2.18,
+        "P4": 2.21
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "global-federal-credit-un-0001",
+      "name": "Global Federal Credit Union",
+      "overall": 2.2345792229158907,
+      "pillars": {
+        "P1": 2.07,
+        "P2": 1.9,
+        "P3": 2.6,
+        "P4": 2.36
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "greenstone-farm-credit-s-3001",
+      "name": "GreenStone Farm Credit Services ACA",
+      "overall": 2.51,
+      "pillars": {
+        "P1": 2.59,
+        "P2": 2.2,
+        "P3": 2.89,
+        "P4": 2.17
+      },
+      "subvertical": "FC"
+    },
+    {
+      "display_id": "guaranteed-rate-inc-dba--0001",
+      "name": "Guaranteed Rate, Inc. (dba Rate)",
+      "overall": 2.227248789202707,
+      "pillars": {
+        "P1": 2.02,
+        "P2": 2.05,
+        "P3": 2.73,
+        "P4": 2.11
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "hapo-community-credit-un-0001",
+      "name": "HAPO Community Credit Union",
+      "overall": 2.026009085699497,
+      "pillars": {
+        "P1": 2.23,
+        "P2": 1.99,
+        "P3": 2.06,
+        "P4": 1.82
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "haventree-bank-0001",
+      "name": "Haventree Bank",
+      "overall": 2.9,
+      "pillars": {
+        "P1": 2.62,
+        "P2": 2.49,
+        "P3": 3.57,
+        "P4": 3.1
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "hudson-valley-credit-uni-0001",
+      "name": "Hudson Valley Credit Union",
+      "overall": 2.34,
+      "pillars": {
+        "P1": 2.58,
+        "P2": 2.14,
+        "P3": 2.51,
+        "P4": 2.23
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "ima-financial-group-inc-0001",
+      "name": "IMA Financial Group, Inc.",
+      "overall": 2.707911121193789,
+      "pillars": {
+        "P1": 2.97,
+        "P2": 2.64,
+        "P3": 2.73,
+        "P4": 2.49
+      },
+      "subvertical": "IB"
+    },
+    {
+      "display_id": "interactive-brokers-grou-0001",
+      "name": "Interactive Brokers Group, Inc.",
+      "overall": 2.3676718824087244,
+      "pillars": {
+        "P1": 2.42,
+        "P2": 2.15,
+        "P3": 2.41,
+        "P4": 2.49
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "iq-credit-union-0001",
+      "name": "iQ Credit Union",
+      "overall": 2.79,
+      "pillars": {
+        "P1": 3.16,
+        "P2": 3.18,
+        "P3": 2.39,
+        "P4": 2.26
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "kitsap-credit-union-0001",
+      "name": "Kitsap Credit Union",
+      "overall": 2.614933649553684,
+      "pillars": {
+        "P1": 2.72,
+        "P2": 2.51,
+        "P3": 2.53,
+        "P4": 2.7
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "langley-federal-credit-u-0001",
+      "name": "Langley Federal Credit Union",
+      "overall": 2.31,
+      "pillars": {
+        "P1": 2.45,
+        "P2": 2.74,
+        "P3": 2.46,
+        "P4": 2.41
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "loandepot-inc-0001",
+      "name": "loanDepot, Inc.",
+      "overall": 2.330069563387233,
+      "pillars": {
+        "P1": 2.35,
+        "P2": 2.51,
+        "P3": 2.18,
+        "P4": 2.29
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "lpl-financials-7f12",
+      "name": "LPL Financials",
+      "overall": 3.3227278742269424,
+      "pillars": {
+        "P1": 3.72,
+        "P2": 3.76,
+        "P3": 2.97,
+        "P4": 2.84
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "manasquan-bank-0001",
+      "name": "Manasquan Bank",
+      "overall": 1.6957158294163222,
+      "pillars": {
+        "P1": 2.04,
+        "P2": 1.64,
+        "P3": 1.61,
+        "P4": 1.49
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "members-1st-federal-cred-0001",
+      "name": "Members 1st Federal Credit Union",
+      "overall": 2.81,
+      "pillars": {
+        "P1": 2.18,
+        "P2": 3.06,
+        "P3": 2.7,
+        "P4": 3.45
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "mission-federal-credit-u-0001",
+      "name": "Mission Federal Credit Union",
+      "overall": 2.415359133398539,
+      "pillars": {
+        "P1": 2.13,
+        "P2": 2.36,
+        "P3": 2.6,
+        "P4": 2.57
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "odlum-brown-limited-0001",
+      "name": "Odlum Brown Limited",
+      "overall": 2.76,
+      "pillars": {
+        "P1": 3.0,
+        "P2": 2.11,
+        "P3": 3.33,
+        "P4": 2.76
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "oneaz-credit-union-0001",
+      "name": "OneAZ Credit Union",
+      "overall": 2.7438021214940704,
+      "pillars": {
+        "P1": 3.07,
+        "P2": 2.7,
+        "P3": 2.85,
+        "P4": 2.35
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "onedigital-partners-inc-0001",
+      "name": "OneDigital Partners, Inc.",
+      "overall": 3.1254291731445303,
+      "pillars": {
+        "P1": 3.2,
+        "P2": 3.09,
+        "P3": 3.3,
+        "P4": 2.91
+      },
+      "subvertical": "IB"
+    },
+    {
+      "display_id": "payments-canada-the-cana-0001",
+      "name": "Payments Canada (The Canadian Payments Association)",
+      "overall": 3.0376155869576924,
+      "pillars": {
+        "P1": 3.14,
+        "P2": 2.72,
+        "P3": 3.12,
+        "P4": 3.17
+      },
+      "subvertical": "CIB"
+    },
+    {
+      "display_id": "penderfund-capital-manag-0001",
+      "name": "PenderFund Capital Management Ltd.",
+      "overall": 1.5153290695803294,
+      "pillars": {
+        "P1": 1.59,
+        "P2": 1.51,
+        "P3": 1.45,
+        "P4": 1.52
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "pentegra-retirement-serv-0001",
+      "name": "Pentegra Retirement Services",
+      "overall": 2.31,
+      "pillars": {
+        "P1": 2.31,
+        "P2": 2.32,
+        "P3": 2.45,
+        "P4": 2.2
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "propartners-financial-0001",
+      "name": "ProPartners Financial",
+      "overall": 1.52,
+      "pillars": {
+        "P1": 1.49,
+        "P2": 1.66,
+        "P3": 1.53,
+        "P4": 1.47
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "regions-business-bank-0001",
+      "name": "Regions Business Bank",
+      "overall": 2.3684645678551868,
+      "pillars": {
+        "P1": 2.31,
+        "P2": 2.21,
+        "P3": 2.33,
+        "P4": 2.62
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "rockland-trust-company-0001",
+      "name": "Rockland Trust Company",
+      "overall": 1.8774911706197774,
+      "pillars": {
+        "P1": 2.54,
+        "P2": 2.08,
+        "P3": 1.45,
+        "P4": 1.44
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "royal-business-bank-0001",
+      "name": "Royal Business Bank",
+      "overall": 1.938275335436849,
+      "pillars": {
+        "P1": 1.98,
+        "P2": 1.71,
+        "P3": 2.25,
+        "P4": 1.81
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "security-finance-corpora-0001",
+      "name": "Security Finance Corporation",
+      "overall": 2.02,
+      "pillars": {
+        "P1": 1.75,
+        "P2": 2.37,
+        "P3": 2.31,
+        "P4": 2.42
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "sl-green-realty-corp-nys-0001",
+      "name": "SL Green Realty Corp (NYSE:SLG)",
+      "overall": 2.51,
+      "pillars": {
+        "P1": 3.04,
+        "P2": 1.98,
+        "P3": 2.63,
+        "P4": 2.11
+      },
+      "subvertical": "CIB"
+    },
+    {
+      "display_id": "sound-credit-union-0001",
+      "name": "Sound Credit Union",
+      "overall": 2.6700423428417963,
+      "pillars": {
+        "P1": 2.45,
+        "P2": 2.53,
+        "P3": 2.79,
+        "P4": 2.91
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "southstate-corporation-0001",
+      "name": "SouthState Corporation",
+      "overall": 2.6409128289473682,
+      "pillars": {
+        "P1": 2.74,
+        "P2": 2.45,
+        "P3": 2.87,
+        "P4": 2.51
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "spokane-teachers-credit--0001",
+      "name": "Spokane Teachers Credit Union",
+      "overall": 2.4159114403715405,
+      "pillars": {
+        "P1": 2.42,
+        "P2": 2.27,
+        "P3": 2.44,
+        "P4": 2.53
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "sunflower-bank-n-a-0001",
+      "name": "Sunflower Bank, N.A.",
+      "overall": 1.91,
+      "pillars": {
+        "P1": 2.03,
+        "P2": 1.82,
+        "P3": 2.09,
+        "P4": 1.75
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "synchrony-financial-0001",
+      "name": "Synchrony Financial",
+      "overall": 2.3876486254561198,
+      "pillars": {
+        "P1": 2.65,
+        "P2": 2.35,
+        "P3": 2.23,
+        "P4": 2.32
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "texas-capital-bancshares-0001",
+      "name": "Texas Capital Bancshares, Inc. / Texas Capital Bank",
+      "overall": 2.300673700015805,
+      "pillars": {
+        "P1": 2.07,
+        "P2": 2.18,
+        "P3": 2.45,
+        "P4": 2.51
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "tii-0001",
+      "name": "TII",
+      "overall": 2.143166996830659,
+      "pillars": {
+        "P1": 2.25,
+        "P2": 1.54,
+        "P3": 2.75,
+        "P4": 2.04
+      },
+      "subvertical": "IC"
+    },
+    {
+      "display_id": "townebank-insurance-0001",
+      "name": "TowneBank Insurance",
+      "overall": 2.581674004700355,
+      "pillars": {
+        "P1": 2.71,
+        "P2": 2.81,
+        "P3": 2.56,
+        "P4": 2.25
+      },
+      "subvertical": "IB"
+    },
+    {
+      "display_id": "tri-counties-bank-trico--0001",
+      "name": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "overall": 2.154055667959806,
+      "pillars": {
+        "P1": 2.16,
+        "P2": 1.8,
+        "P3": 2.67,
+        "P4": 1.99
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "tristate-capital-holding-0001",
+      "name": "TriState Capital Holdings, Inc.",
+      "overall": 2.1706484776392236,
+      "pillars": {
+        "P1": 2.31,
+        "P2": 2.07,
+        "P3": 2.22,
+        "P4": 2.08
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "trustco-bank-0001",
+      "name": "TrustCo Bank",
+      "overall": 1.74,
+      "pillars": {
+        "P1": 2.06,
+        "P2": 1.43,
+        "P3": 2.17,
+        "P4": 1.51
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "united-business-bank-0001",
+      "name": "United Business Bank",
+      "overall": 1.48,
+      "pillars": {
+        "P1": 1.22,
+        "P2": 1.19,
+        "P3": 1.98,
+        "P4": 1.67
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "united-federal-credit-un-0001",
+      "name": "United Federal Credit Union",
+      "overall": 2.5,
+      "pillars": {
+        "P1": 2.36,
+        "P2": 2.17,
+        "P3": 2.43,
+        "P4": 2.96
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "vestgen-wealth-partners-0001",
+      "name": "Vestgen Wealth Partners",
+      "overall": 2.428378706209978,
+      "pillars": {
+        "P1": 2.41,
+        "P2": 2.06,
+        "P3": 2.55,
+        "P4": 2.7
+      },
+      "subvertical": "RIA"
+    },
+    {
+      "display_id": "virtuity-financial-partn-0001",
+      "name": "Virtuity Financial Partners",
+      "overall": 1.5865835035149496,
+      "pillars": {
+        "P1": 1.72,
+        "P2": 1.79,
+        "P3": 1.62,
+        "P4": 1.21
+      },
+      "subvertical": "IB"
+    },
+    {
+      "display_id": "vno-0001",
+      "name": "VNO",
+      "overall": 2.341817200392536,
+      "pillars": {
+        "P1": 2.64,
+        "P2": 1.67,
+        "P3": 2.57,
+        "P4": 2.48
+      },
+      "subvertical": "AM"
+    },
+    {
+      "display_id": "wescom-financial-wescom--0001",
+      "name": "Wescom Financial (Wescom Central Credit Union)",
+      "overall": 2.71,
+      "pillars": {
+        "P1": 3.47,
+        "P2": 2.88,
+        "P3": 3.11,
+        "P4": 3.6
+      },
+      "subvertical": "CU"
+    },
+    {
+      "display_id": "wintrust-financial-corpo-0001",
+      "name": "Wintrust Financial Corporation",
+      "overall": 2.99,
+      "pillars": {
+        "P1": 3.21,
+        "P2": 2.41,
+        "P3": 3.42,
+        "P4": 2.98
+      },
+      "subvertical": "RB"
+    },
+    {
+      "display_id": "wsfs-financial-corporati-0001",
+      "name": "WSFS Financial Corporation",
+      "overall": 2.07,
+      "pillars": {
+        "P1": 2.28,
+        "P2": 1.84,
+        "P3": 2.05,
+        "P4": 2.13
+      },
+      "subvertical": "CL"
+    },
+    {
+      "display_id": "zions-bancorporation-0001",
+      "name": "Zions Bancorporation",
+      "overall": 2.0551437104896606,
+      "pillars": {
+        "P1": 2.5,
+        "P2": 1.42,
+        "P3": 2.56,
+        "P4": 1.75
+      },
+      "subvertical": "RB"
+    }
+  ],
+  "generated_at": "2026-07-04T15:15:25.207469+00:00",
+  "source_sha": "9f94292"
+}

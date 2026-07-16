@@ -1,0 +1,404 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "security-finance-corpora-0001",
+  "financials": {
+    "lines": [
+      "Financial Trajectory: As a private entity, Security Finance provides limited public financial disclosure, which constrains trend analysis to indirect indicators rather than audited financials. Nevertheless, three convergent data points support a STABLE trajectory classification. First, the 905-branch footprint has remained consistent across multiple data sources [E-B1-001, E-P1C1-006], with no evidence of branch closures or rapid expansion\u2014suggesting the company is maintaining operational scale rather than contracting or over-extending. Second, the ongoing multi-million-dollar investment in Salesforce ecosystem deployment (FSC, MCE, MuleSoft, CRMA) combined with the Zennify consulting partnership formalized in December 2024 [E-P1C1-007] signals that management is allocating capital toward digital modernization, which would be unlikely during a period of financial distress. Third, Security Finance's positioning in the underserved consumer lending segment provides a structural revenue advantage: renewal customers carry estimated 70%+ margins compared to 40% on new originations, and MCE evidence documents automated 90-day pre-maturity renewal campaigns designed to maximize this high-margin revenue stream [E-P2C4-020].",
+      "Growth Drivers: The most significant near-term growth lever is renewal rate optimization. Evidence shows that Security Finance has built sophisticated MCE automation around the renewal lifecycle\u2014including 90-day pre-maturity notifications, personalized renewal offers with dynamic content, and behavioral triggers that detect engagement drop-off [E-P2C4-019, E-P2C4-020]. Because renewals carry substantially higher margins than new originations, even a 3\u20135% improvement in renewal conversion could translate to $15\u201325M in incremental revenue. The secondary growth lever is tax preparation cross-sell: MCE campaigns document bundled messaging (\"One stop: loan + tax prep from one trusted partner\") [E-P2C4-034], but evidence suggests limited A/B testing and attribution tracking, meaning this $25\u201340M revenue opportunity remains under-optimized. Digital channel expansion also contributes by reducing cost-per-acquisition relative to the branch-only model, though the current hybrid handoff process (online start \u2192 phone/branch completion) limits the full cost benefit of digital origination [E-B1-004, E-P2C2-001].",
+      "Headwinds: The most consequential headwind is competitive disruption from digital-first lenders who operate without branch overhead. LendingClub ($787M revenue, zero branches, marketplace model), Elevate Credit/RISE ($417M+, AI-powered underwriting), and OppFi/OppLoans ($500M, embedded finance pioneer) demonstrate that consumer lending at scale no longer requires physical locations [E-P1C1-010]. This threatens Security Finance's unit economics: a branch-based lender carrying real estate, staffing, and operational costs for 905 locations faces structurally higher cost-to-serve than a digital competitor. The regulatory headwind compounds this pressure\u2014the CFPB junk fees rule (effective March 30, 2025) constrains fee-based revenue, while the CFPB Section 1033 open banking rule (compliance deadline April 2026 for the largest institutions) will require data portability APIs that Security Finance has not yet begun developing [E-P3C3-017]. Perhaps most concerning, the 2.6/5 PissedConsumer rating (203 reviews citing aggressive collections) [E-B1-006] creates churn risk precisely on the renewal revenue that constitutes Security Finance's highest-margin business line. If dissatisfied customers choose not to renew\u2014or worse, switch to a digital competitor offering a frictionless experience\u2014the impact on revenue quality could be substantial.",
+      "Because Security Finance is a private entity, traditional financial trajectory analysis using audited revenue, EBITDA, or CAGR is not possible. Instead, the following assessment triangulates six indirect indicators\u2014revenue trend, branch network stability, digital investment acceleration, employee base consistency, competitive position, and regulatory burden\u2014to construct a composite trajectory view. Each indicator is supported by specific evidence and assigned a directional classification. The overall picture that emerges is one of an organization whose core business remains stable, but whose competitive environment and regulatory obligations are accelerating faster than its current digital capabilities can match\u2014creating the urgency that makes the Zennify engagement strategically critical.",
+      "Growth Drivers: The strongest growth lever is renewal revenue optimization. Renewal customers carry estimated 70%+ margins versus approximately 40% on new originations, and MCE evidence shows that Security Finance has invested in automated renewal campaign infrastructure\u201490-day pre-maturity notifications, personalized renewal offers, and lifecycle milestone celebrations [E-P2C4-019, E-P2C4-020, E-P2C4-033]. However, the current renewal campaigns lack AI-driven propensity scoring (no evidence of Einstein predictive models), meaning the campaigns target customers uniformly rather than prioritizing those most likely to renew. Data Cloud integration with CLV prediction could transform this from a broadcast approach into a precision engagement strategy. The tax preparation adjacency offers a $25\u201340M incremental revenue opportunity through MCE optimization [E-P2C4-034], though this requires A/B testing, attribution tracking, and segment-based pricing analysis that are not yet in evidence.",
+      "Headwinds: The competitive headwind is structural rather than cyclical: pure-digital lenders like LendingClub, Elevate Credit, and OppFi have demonstrated that consumer lending at Security Finance's revenue scale ($500M+) can be achieved without any branch infrastructure, fundamentally undercutting the cost-to-serve of a 905-branch operation. The regulatory headwind compounds this through CFPB tightening on both fees (junk fees rule, March 2025) and data portability (Section 1033, April 2026), which increases compliance costs at exactly the moment when competitive pressure demands investment in digital capabilities [E-P3C3-017]. Most critically, the customer satisfaction gap (2.6/5 PissedConsumer, 203 reviews) threatens the renewal revenue stream that constitutes Security Finance's most valuable business line\u2014each percentage point of renewal churn caused by poor customer experience directly erodes the high-margin revenue base that funds digital transformation investment."
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US multi-state"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Assad",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ray Biggs",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Judy Perkins",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Victor Barr",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jennifer Meyer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "Security Finance Corporation is a private consumer installment lending company headquartered in Spartanburg, South Carolina, operating as a subsidiary of Security Group Inc. [E-B1-001]. Founded in 1955, the company has built a 71-year track record in branch-based lending, growing to 905 locations across 15+ states under a multi-brand portfolio that includes Security Finance (the primary consumer-facing brand), Sunbelt Credit, and PFS (Personal Finance Services) [E-P1C1-006, E-B1-001]. This multi-brand structure is significant because it suggests either historical acquisitions or deliberate state-level market segmentation\u2014a question that could not be resolved through public evidence alone and should be validated during internal discovery (see Assumption A-005).\n\nThe company's core market positioning centers on serving underserved consumers with limited credit history, articulated through a value proposition of \"Quick, Simple Loan Process\" that emphasizes no perfect credit score requirement and flexible loan amounts ($615\u2013$2,015 in South Carolina) [E-P2C1-003]. This positioning is strategically important for two reasons. First, it places Security Finance squarely in the non-prime consumer lending segment, which provides resilience during economic cycles because demand for alternative credit actually increases when traditional bank lending tightens. Second, it also means Security Finance competes not only against traditional branch-based peers like World Acceptance Corp (1,025 branches) and Lendmark Financial (520+ branches), but increasingly against digital-first disruptors like LendingClub ($787M revenue, zero branches) and OppFi ($500M, embedded finance model) who can undercut branch economics with lower origination costs [E-P1C1-010].\n\nSecurity Finance's response to this competitive pressure is a hybrid branch-digital model that represents a deliberate transitional strategy rather than a fully digital pivot. The company maintains five customer-facing channels: the primary website securityfinance.com with a conversion-optimized loan application flow [E-P2C1-005]; a native iOS mobile app (updated January 2025 with Auto Pay forthcoming) [E-P1C1-001]; a native Android app [E-P1C1-003]; a customer self-service portal at mysecurityfinance.com for payment tracking and account management [E-B1-005]; and the 905-branch network itself, which remains the primary touchpoint for loan origination and collections [E-P1C1-006]. Critically, the application process follows a handoff model where customers initiate online but complete via phone or branch visit [E-B1-004, E-P2C2-001]. This hybrid approach signals that Security Finance has not yet achieved full digital straight-through processing\u2014a gap that MuleSoft API integration and Agentforce could directly address by enabling end-to-end digital origination without requiring branch intervention.\n\nThe strategic context for digital transformation became concrete in December 2024, when Security Finance formalized a partnership with Zennify through a Statement of Work encompassing Phase 2 Discovery, Phase 2 Build, and Phase 1 Production Support workstreams [E-P1C1-007]. Internal documents reveal executive steering committee governance with RACI workstream views and multi-phase roadmap planning [E-P1C3-004, E-P1C4-004, E-P1C4-005], indicating that digital transformation has executive sponsorship and structured program management. This matters for scoring because it means the organization has moved beyond ad hoc technology adoption into deliberate, governed modernization\u2014a P1C2 Governance maturity indicator that distinguishes Security Finance from peers who deploy technology without formal transformation governance.",
+    "primary_regulator": "CFPB",
+    "size_tier": "Direct",
+    "sub_vertical": "Consumer Lending",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "1c54763a-349b-4df5-9ece-b964f0aff209",
+      "issue_id": "GOV-ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "P3 73% at 2.0. Evidence-justified but consider additional proxy searches."
+    },
+    {
+      "id": "a1b55e25-a501-48c4-a9b4-ca3a75b33a4f",
+      "issue_id": "GOV-ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "HYBRID mode but evidence_index.csv lacks source_type column."
+    },
+    {
+      "id": "fbca6482-e851-46ed-9d44-e89f81dbc0ef",
+      "issue_id": "GOV-ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Simplified 11-column proof vs full argumentation."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Growth Drivers: The most significant near-term growth lever is renewal rate optimization. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 4.0,
+        "P1C4": 3.5,
+        "P1C5": 3.0,
+        "P2C1": 4.0,
+        "P2C2": 4.0,
+        "P2C3": 3.5,
+        "P2C4": 4.0,
+        "P3C1": 4.0,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 4.0,
+        "P4C2": 4.0,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.74,
+      "peer_name": "LendingClub Corp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 4.0,
+        "P1C4": 3.5,
+        "P1C5": 3.0,
+        "P2C1": 4.0,
+        "P2C2": 4.0,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P3C1": 4.0,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 4.0,
+        "P4C1": 4.0,
+        "P4C2": 4.0,
+        "P4C3": 3.5,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.71,
+      "peer_name": "OppFi / OppLoans",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 2.5,
+        "P3C4": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 3.15,
+      "peer_name": "Elevate Credit / RISE",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 4.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.03,
+      "peer_name": "Lendmark Financial Services",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 3.5,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.59,
+      "peer_name": "Regional Finance / Regional Mgmt Corp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.5,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.0,
+      "peer_name": "World Acceptance Corp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-SF-20260311-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "portal integrated with 500+ branch locations; AskNicely NPS feedback loop drives continuous CX improvement Elevate Credit: 3.5 RISE brand provides fully online lending experience with real-time approval and automated servicing; Hadoop-scale",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      },
+      {
+        "drilldown": "Mixed sentiment indicators from BBB and consumer review sites confirm inconsistent service experiences across the 905-branch network",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Open banking compliance (CFPB Section 1033); advanced AI/ML predictive scoring (churn, CLV, cross-sell); Agentforce deployment for branch agent assistance; Data Cloud unified CDP. MuleSoft API strategy for open banking; Data Cloud implementation; Agentforce rollout; Einstein AI enablement",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [],
+      "id": "ff52fec3-6ec3-4f94-a1c1-85ba3f6f5a7a",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Data Cloud unified CDP"
+    },
+    {
+      "body": "iOS app update with Auto Pay coming soon; ongoing mobile app evolution. Mobile experience optimization; in-app personalization via MCE SDK",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "256c3072-8ebe-44d6-bb95-7cf34f0da55b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "IOS app update with Auto Pay coming soon"
+    },
+    {
+      "body": "Sprint plan execution: API development (Payments API, Budget API, Charges/Fees API) via MuleSoft; Error Handling Matrix (65+ failure scenarios) deployed. MuleSoft API optimization; STP rate improvement; advanced monitoring and alerting",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "e83874cd-914c-41c9-a2ef-8db0f84f470d",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "API development (Payments API, Budget API, Charges/Fees\u2026"
+    },
+    {
+      "body": "Newsweek America's Greatest Workplaces 2025 recognition for Financial Services. Employee brand leverage for digital transformation change management",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "07754d33-1745-4a89-acb5-f6982e8a420f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Newsweek America's Greatest Workplaces 2025 recognition for\u2026"
+    },
+    {
+      "body": "Zennify partnership formalized: SoW dated December 23, 2024 for Phase 2 Discovery, Phase 2 Build, Phase 1 Production Support. Zennify positioned as strategic transformation partner; multi-phase engagement spanning discovery through production",
+      "date_precision": "quarter",
+      "e_id": null,
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [],
+      "id": "29c64109-145a-4f22-af94-50cbb364f450",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Zennify partnership formalized"
+    },
+    {
+      "body": "Salesforce ecosystem deployment: FSC as core CRM across 905 branches; MCE for marketing automation (42 documented campaign types); MuleSoft for API integration (7-phase architecture); CRMA for analytics dashboards. Full Salesforce stack optimization; Data Cloud integration; Agentforce deployment; advanced CRMA predictive models",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "73763f1e-da1e-4c2d-b761-944c514e4e59",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Salesforce ecosystem deployment: FSC as core CRM across 905\u2026"
+    },
+    {
+      "body": "Digital channel expansion: iOS mobile app launch, Android app, web application (hybrid model), customer portal (mysecurityfinance.com); cross-platform mobile presence established. Mobile app optimization; Experience Cloud for portal enhancement; push notification strategy via MCE",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [],
+      "id": "896d6d0a-ec2c-47d2-8ded-50b45938985a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Digital channel expansion: iOS mobile app launch, Android\u2026"
+    },
+    {
+      "body": "CFPB consent order ($5M) for improper collections and FCRA violations; triggers formal governance framework overhaul. Shield audit trail and compliance automation address root causes; Agentforce compliance guardrails for collections",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [],
+      "id": "8a1028af-0fbb-464a-a5df-9082a191053f",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CFPB consent order ($5M) for improper collections and FCRA\u2026"
+    }
+  ]
+}

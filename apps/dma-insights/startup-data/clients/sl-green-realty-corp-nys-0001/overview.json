@@ -1,0 +1,962 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 169,
+        "subcaps": 169,
+        "thin": 169
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 232,
+        "subcaps": 232,
+        "thin": 232
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 121,
+        "subcaps": 121,
+        "thin": 121
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 177,
+        "subcaps": 177,
+        "thin": 177
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "sl-green-realty-corp-nys-0001",
+    "domain": null,
+    "hq": null,
+    "id": "04893769-dd10-41f9-ae63-ac6692c24384",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "SL Green Realty Corp (NYSE:SLG)",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CIB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:38.495794Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 48,
+    "current_count": 26,
+    "dated_count": 8,
+    "median_age_months": 25.0,
+    "oldest_published_date": "2011-04-01",
+    "stale_count": 18,
+    "stale_pct": 18.0,
+    "total": 100,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "CEILING_ESTIMATE": 8,
+      "FACT": 86,
+      "HYPOTHESIS": 3,
+      "INFERENCE": 3
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 4,
+      "NEUTRAL": 86,
+      "POSITIVE": 10
+    },
+    "tiers": {
+      "T1": 28,
+      "T2": 49,
+      "T3": 20,
+      "T4": 3
+    },
+    "total_facts": 100,
+    "total_items": 100
+  },
+  "financial_trajectory": {
+    "cagr": "23.4%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Financial data confirmed from SEC EDGAR earnings releases (T1 sources). Five-year trajectory with CAGR analysis. Revenue labels corrected from entity profile: FY2025 data from Q4 2",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "market_cap",
+    "aum_usd": 2600000000.0,
+    "cagr": "23.4%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Financial data confirmed from SEC EDGAR earnings releases (T1 sources). Five-year trajectory with CAGR analysis. Revenue labels corrected from entity profile: FY2025 data from Q4 2025 earnings release (SEC, filed Jan 28, 2026).",
+        "¹ FY2025 total revenues $1,003M confirmed from Q4 2025 SEC earnings release (Jan 28, 2026). Highest in 5 years. [T1]",
+        "² FY2024 FFO includes $216.1M ($3.08/share) one-time debt extinguishment gains [E-019]",
+        "³ FY2025 FFO includes $57.2M ($0.75/share) debt extinguishment gains [SEC FY2025 earnings]",
+        "Revenue Trend: VARIABLE-TO-RECOVERING. Decline FY2022→FY2024 reflects $8B+ deliberate portfolio dispositions. FY2025 recovery to $1,003M driven by: (1) One Madison full-year contribution, (2) GLS CMBS securitization income ($62.7M new in FY2025), (3) strong leasing velocity. Normalized FFO stable ~$5.00/share across 3 years. SUMMIT trajectory ACCELERATING (23.4% 3yr CAGR) then slight FY2025 moderation — Paris 2027 is next growth catalyst.",
+        "Trend: VARIABLE (office declining) + SUMMIT ACCELERATING + GLS/CMBS EMERGING",
+        "The five-year revenue trajectory reflects a deliberate strategic pivot, not operational decline. SLG disposed $8B+ of assets between 2021 and 2025 to concentrate on trophy Manhattan buildings commanding record rents. This reduced portfolio sq ft but lifted per-sq-ft metrics to all-time highs: $56/sqft average starting rent, 8.5% above prior fully-escalated rents in FY2024. [E-007, E-019]",
+        "FY2025 revenue recovered to $1,003M — the highest in five years — driven by: (1) One Madison full-year contribution, (2) GLS CMBS special servicing fee income ($62.7M in FY2025 vs $19M in FY2024), and (3) strong rental recovery from record leasing activity. This revenue mix shift toward recurring fee income is the execution of strategic objective SO-02. [SEC Q4 2025 earnings, T1]",
+        "SUMMIT inflection point: Revenue grew from near-zero (Oct 2021) to $133.2M (FY2024) at 23.4% 3yr CAGR, before a slight decline to $122.3M in FY2025 reflecting NYC tourism patterns. Paris 2027 is the next growth catalyst. Without marketing automation (VG-03 CONFIRMED) and a visitor CRM, SUMMIT cannot drive repeat visitation, pre-launch demand generation, or global audience acquisition at scale. This is the most tangible Marketing Cloud use case in the portfolio. [E-087]",
+        "Normalized FFO: Both FY2024 ($3.08/share gains) and FY2025 ($0.75/share gains) included one-time debt extinguishment gains. Normalized FFO is stable: FY2023 $4.94 → FY2024 $5.03 → FY2025 $4.97 → FY2026 guidance $4.40–$4.70. Reflects steady execution within a capital-recycling strategy. FY2026 guidance dilution reflects One Madison stabilization costs and casino license write-off. [E-086]"
+      ],
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1200,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Dedicated HR/people function with formal team structure"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2024"
+        ],
+        "geography": "Maryland, New York",
+        "headline": "$1.3B net income · FY2024",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            34.9,
+            1300.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Maryland, New York",
+    "footprint_basis": "derived:geography",
+    "founded": 1980,
+    "founded_basis": "nlp:narrative",
+    "geography": "Maryland, New York",
+    "geography_basis": "nlp:narrative",
+    "headcount": 1200,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Marc Holliday",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chairman & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Harrison Sitomer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Edward Piccinich",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Matthew DiLiberto",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "John Mathews",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Information Technology"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Senior Director InfoSec",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Information Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Bill Hand",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Sr. Director, Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Steven Durels",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Leasing & Real Property"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Brett Herschenfeld",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Retail & Opportunistic"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Robert Schiffer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sr. Director, InfoSec",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Information Security"
+      }
+    ],
+    "legal_name": "SL Green Realty Corp (NYSE:SLG)",
+    "license_type": "SEC-registered",
+    "narrative_md": "Legal Structure: SL Green Realty Corp. is a fully integrated, self-managed real estate investment trust (REIT) organized under the laws of the state of Maryland, incorporated in 1980 and publicly listed on the New York Stock Exchange under ticker SLG since 1997. [E-009] The company operates as Manhattan's largest office landlord, with its principal executive offices at One Vanderbilt Avenue, New York, NY 10017.\n\nThe self-managed REIT structure is directly relevant to Zennify's engagement model: all technology procurement — CRM, ESG platforms, and operations systems — is an internal corporate decision, not delegated to a third-party property manager. Technology investments must demonstrate clear operational ROI within the REIT's disciplined capital allocation framework (mandatory 90%+ taxable income distribution requirement).",
+    "primary_regulator": "SEC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 1003000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "culture promotes teamwork, diversity, and inclusion' (Indeed reviews) 91% of senior management hired from local community (Greater NYC area) per GRI — talent development rooted in local market cultivation Work-life balance rating 3.7/5 (low",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-002",
+        "excerpt": "SUMMIT 2024 revenue >$130M; Special Servicing FY2024: $13.2B active and designated assignments",
+        "title": "Summit 2024 revenue >$130M",
+        "type": "conference",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001040971/000110465925037534/tm252542-1"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-007",
+        "excerpt": "Digital business strategy embedded in CEO compensation structure: specific incentives for SUMMIT International, Debt Fund, Special Servicing, Casino bid",
+        "title": "Digital business strategy embedded in CEO compensation structure…",
+        "type": "conference",
+        "url": "https://www.sec.gov/Archives/edgar/data/0001040971/000110465925037534/tm252542-1"
+      },
+      {
+        "author": null,
+        "date": "2024-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Post-implementation optimization: SUMMIT celebrated 3rd anniversary Oct 2024 with record attendance; Jōji restaurant opened, then Jōji Box (284% YoY revenue growth) — continuous improvement post-launc",
+        "title": "Jōji restaurant opened",
+        "type": "conference",
+        "url": "https://www.costar.com/article/1584672744/sl-green-to-identify-two-sites-outside"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "No blog, research publication, or original content program found; content is primarily PR (press releases, deal announcements) not long-form editorial thought leadership",
+        "title": "Content is PR (press releases, deal announcements)",
+        "type": "blog",
+        "url": "https://slgreen.com/news/"
+      },
+      {
+        "author": null,
+        "date": "2024-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-062",
+        "excerpt": "SLG digital marketing stack as inferred: VTS (leasing CRM + marketing), Building Engines (tenant service), summitov.com (SUMMIT B2C ticketing), slgreen.com (corporate + properties portal), IR website",
+        "title": "SLG digital marketing stack",
+        "type": "conference",
+        "url": "https://www.vts.com/vts-market"
+      },
+      {
+        "author": "Marc Holliday",
+        "date": "2024-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "CEO Marc Holliday keynote at Commercial Observer Future of New York Forum March 2024 — active thought leadership participation",
+        "title": "CEO Marc Holliday keynote active thought leadership participation",
+        "type": "conference",
+        "url": "https://www.linkedin.com/company/sl-green"
+      }
+    ],
+    "ticker": "NYSE: SLG",
+    "ticker_basis": "prose:entity-scoped",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "slgreen.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.169178+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# SL Green Realty Corp (NYSE:SLG) — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peers were selected in Phase 0 (Batch 1, 2026-05-14) and are IMMUTABLE for this assessment. Selection criteria: NYSE-listed commercial office REIT; $1B–$15B market cap; NYC or major metro office concentration; institutional capital markets activity; public financial reporting. Each peer was scored at category level using public evidence to calculate medians.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "SL Green Realty Corp (NYSE:SLG) is a $2.6B in market capitalization real-estate investment trust regulated by SEC, operating since 1980 with 1,200 employees. A 23.4% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-001, E-024]. Zennify's assessment places overall digital maturity at 2.5/5.\n\nThe issue register adds Calculation_Chain sheet missing from scoring workbook. v5.5 does not generate this sheet; v2.4 expects it for score audit trail.. The issue register adds 9 sheet name mismatches between v5.5 workbook output and v2.4 audit expectations….\n\nCounter-signal: Climate Risk Assessment already runs at 4.0/5 against a 1.0 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-002, E-003, E-004]. The question for SL Green Realty Corp (NYSE:SLG) is whether to close its weakest capability area first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost.\n\nSL Green Realty Corp (NYSE:SLG) should lead with nCino (72/100 fit) against Vision Communication, then sequence Tableau behind it."
+  },
+  "overall_score": 2.51,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:38.436921+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_Gov_IssueRegister_SLGreen_20260514.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:38.437546+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_Gov_PatchBlock_SLGreen_20260514.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:38.438096+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Peer_Set.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:38.449853+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/ISS_Registry_SLGreen.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:38.450310+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 1,
+      "INFO": 14
+    },
+    "stage_ms": {
+      "manifest": 10,
+      "parse": 21159,
+      "persist": 461
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +712 subcap names +712 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+432 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: SLGreen_Explorium_TechStack_20260514.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_SLGreen_20260514.docx leadership=11 focus_areas=7 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 7",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_Gov_IssueRegister_SLGreen_20260514.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_Gov_PatchBlock_SLGreen_20260514.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Peer_Set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/ISS_Registry_SLGreen.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 22",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:13/712 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 7",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +712 subcap names +712 rationales merged from workbook into CSV-parsed rows",
+      "INFO/evidence_facts_merged_from_json_twin: +432 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "used variant tech stack xlsx: SLGreen_Explorium_TechStack_20260514.xlsx",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_SLGreen_20260514.docx leadership=11 focus_areas=7 facts_extracted=0",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "insights_from_client_profile_findings: 7",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_Gov_IssueRegister_SLGreen_20260514.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_Gov_PatchBlock_SLGreen_20260514.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Peer_Set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/ISS_Registry_SLGreen.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "timeline_events_persisted: 22",
+      "catalogue_unresolved:13/712 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 7",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 169,
+      "peer_median": 1.0,
+      "pillar_id": "P1",
+      "score": 3.04,
+      "subcaps_scored": 169
+    },
+    {
+      "peer_benchmarked": 232,
+      "peer_median": 1.0,
+      "pillar_id": "P2",
+      "score": 1.98,
+      "subcaps_scored": 232
+    },
+    {
+      "peer_benchmarked": 121,
+      "peer_median": 1.0,
+      "pillar_id": "P3",
+      "score": 2.63,
+      "subcaps_scored": 121
+    },
+    {
+      "peer_benchmarked": 177,
+      "peer_median": 1.0,
+      "pillar_id": "P4",
+      "score": 2.11,
+      "subcaps_scored": 177
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-14",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:38.495794Z",
+    "created_at": "2026-07-02T23:11:38.495794Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "d9217c89-22c1-4047-a1f4-0f33bf41c9d8",
+    "overall_score": 2.51,
+    "request_id": "DMA-ASM-SLG-20260514-0001",
+    "started_at": "2026-07-02T23:11:38.495794Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Governed Federation of External Data Sources scores 1.39/5 against a peer median of 1.0 — at or ahead of the peer benchmark, a relative strength in data and technology that other priorities can build on.",
+      "evidence": [
+        "E-046",
+        "E-062",
+        "E-069",
+        "E-094"
+      ],
+      "magnitude": null,
+      "name": "Governed Federation of External Data Sources",
+      "peer_median": 1.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.39,
+      "so_what": "Protect Governed Federation of External Data Sources as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Governed Federation of External Data Sources",
+      "what": "Governed Federation of External Data Sources scores 1.39/5 against a peer median of 1.0 — at or ahead of the peer benchmark, a relative strength in data and technology that other priorities can build on.",
+      "why": "The linked evidence records: No formal digital champions program, digital literacy curriculum, or structured change management methodology found in public disclosures — ceiling signals for P1C4.3.1, P1C4.5.2"
+    },
+    {
+      "body": "Goal Setting & Tracking scores 1.42/5 against a peer median of 1.0 — at or ahead of the peer benchmark, a relative strength in customer experience that other priorities can build on.",
+      "evidence": [
+        "E-029",
+        "E-048",
+        "E-053"
+      ],
+      "magnitude": null,
+      "name": "Goal Setting & Tracking",
+      "peer_median": 1.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.42,
+      "so_what": "Protect Goal Setting & Tracking as a proof point: use it to anchor the customer experience story while the true gaps close — Twilio is the platform surface that addresses it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Goal Setting & Tracking",
+      "what": "Goal Setting & Tracking scores 1.42/5 against a peer median of 1.0 — at or ahead of the peer benchmark, a relative strength in customer experience that other priorities can build on.",
+      "why": "The linked evidence records: No explicit data classification scheme or CCPA/GDPR compliance program disclosed in public filings; SLG is not a consumer bank — tenant/investor data covered by property law and investment management"
+    },
+    {
+      "body": "Trade Lifecycle Automation scores 1.55/5 against a peer median of 1.0 — at or ahead of the peer benchmark, a relative strength in operations that other priorities can build on.",
+      "evidence": [
+        "E-056",
+        "E-058",
+        "E-066",
+        "E-067"
+      ],
+      "magnitude": null,
+      "name": "Trade Lifecycle Automation",
+      "peer_median": 1.0,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.55,
+      "so_what": "Protect Trade Lifecycle Automation as a proof point: use it to anchor the operations story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P3C1",
+      "theme": "Operations",
+      "title": "Trade Lifecycle Automation",
+      "what": "Trade Lifecycle Automation scores 1.55/5 against a peer median of 1.0 — at or ahead of the peer benchmark, a relative strength in operations that other priorities can build on.",
+      "why": "The linked evidence records: CFO DiLiberto oversees investor relations function — IR is a C-suite prioritized digital communication capability; proactive investor outreach 2+ times/year per proxy disclosure"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "M&A Integration Strategy averages 3.0/5 over 165 scored subcaps; ceiling 3.5 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2 applied: ISS-009: AI governance cap M2",
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "215 of 215 subcaps on thin evidence"
+      ],
+      "rationale": "Fourth-Party Risk averages 3.2/5 over 215 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: ISS-009: AI governance cap M2); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Prioritization averages 2.5/5 over 190 scored subcaps; ceiling 3.0 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Readiness Assessment averages 3.0/5 over 205 scored subcaps; ceiling 3.5 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Climate Risk Assessment averages 4.0/5 over 70 scored subcaps; ceiling 4.5 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "cap applied: VG-01 cap: 2.0",
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Localization averages 1.9/5 over 287 scored subcaps; ceiling 2.4 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "cap applied: VG-04 cap: 2.0",
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Decisioning & Underwriting averages 1.9/5 over 287 scored subcaps; ceiling 2.4 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Vulnerable Customer Reporting averages 2.8/5 over 291 scored subcaps; ceiling 3.3 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "cap applied: VG-02 cap: 1.5",
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Goal Setting & Tracking averages 1.4/5 over 255 scored subcaps; ceiling 1.9 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "cap applied: VG-07 cap: 1.5",
+        "147 of 147 subcaps on thin evidence"
+      ],
+      "rationale": "Trade Lifecycle Automation averages 1.6/5 over 147 scored subcaps; ceiling 2.0 reflects thin evidence density (0/147 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "131 of 131 subcaps on thin evidence"
+      ],
+      "rationale": "Model Change Management averages 2.9/5 over 131 scored subcaps; ceiling 3.4 reflects thin evidence density (0/131 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Cross-Asset Surveillance averages 3.1/5 over 142 scored subcaps; ceiling 3.6 reflects thin evidence density (0/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Fourth-Party Risk averages 3.4/5 over 145 scored subcaps; ceiling 3.9 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "cap applied: VG-02 cap: 1.5",
+        "201 of 201 subcaps on thin evidence"
+      ],
+      "rationale": "Governed Federation of External Data Sources averages 1.4/5 over 201 scored subcaps; ceiling 1.9 reflects thin evidence density (0/201 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "cap applied: VG-09 cap: 1.5",
+        "271 of 271 subcaps on thin evidence"
+      ],
+      "rationale": "Corporate Treasury Utilization & Relationship Insights averages 2.0/5 over 271 scored subcaps; ceiling 2.5 reflects thin evidence density (0/271 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "239 of 239 subcaps on thin evidence"
+      ],
+      "rationale": "Corporate & Investment Banking: Payments & Treasury Integration averages 2.3/5 over 239 scored subcaps; ceiling 2.8 reflects thin evidence density (0/239 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: NO_EVIDENCE: score 1.0",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Secure Code Development averages 3.2/5 over 150 scored subcaps; ceiling 3.7 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "SLG 2026 strategy: sell ~$2.5B of property; pursue ~$1B in acquisitions; Park Avenue Tower acquired $730M (Jan 2026); 346 Madison purchased $160M for next major development",
+      "evidence": [
+        "E-024"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "346 Madison purchased $160M",
+      "metric": "Avenue Tower acquired $730",
+      "peer_context": null,
+      "play": "Prioritize the nCino conversation against Vision Communication — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "SLG 2026 strategy: sell ~$2.5B of property; pursue ~$1B in acquisitions; Park Avenue Tower acquired $730M (Jan 2026); 346 Madison purchased $160M for next major development. Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Park Avenue Tower acquired $730"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Debt fund launched 2024 — $1.3B final close Dec 2025; special servicing $13.2B active+designated assignments — quantified KPIs for new business lines",
+      "evidence": [
+        "E-019"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Debt fund launched",
+      "metric": "Debt fund launched $1.3B",
+      "peer_context": null,
+      "play": "Prioritize the nCino conversation against Vision Communication — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Debt fund launched 2024 — $1.3B final close Dec 2025; special servicing $13.2B active+designated assignments — quantified KPIs for new business lines. Window: closes Q4 2025.",
+      "timeline": {
+        "date": "2025-12-01",
+        "event": "Debt fund launched"
+      },
+      "window": "closes Q4 2025"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "'People Experience' team is a named organizational unit under COO — dedicated HR/people function with formal team structure reported on slgreen.com/about/people-experience-team/ (Dec 2024).",
+      "evidence": [
+        "E-089"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Dedicated HR/people function with formal team structure",
+      "metric": null,
+      "peer_context": null,
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "'People Experience' team is a named organizational unit under COO — dedicated HR/people function with formal team structure reported on slgreen.com/about/people-experience-team/ (Dec 2024).",
+      "timeline": {
+        "date": "2024-12-01",
+        "event": "Dedicated HR/people function with formal team structure"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Debt Fund (H2 innovation): 'in Q2 [2025], we closed over $500M in fund commitments, bringing total capital raised to more than $1B... surpassing our original target' — staged-gate funding model demonstrated (Jul 2025).",
+      "evidence": [
+        "E-048"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "We closed over $500M in fund commitments",
+      "metric": "We closed over $500M",
+      "peer_context": null,
+      "play": "Prioritize the nCino conversation against Vision Communication — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Debt Fund (H2 innovation): 'in Q2 [2025], we closed over $500M in fund commitments, bringing total capital raised to more than $1B... surpassing our original target' — staged-gate funding model demonstrated (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "We closed over $500M in fund commitments"
+      },
+      "window": null
+    }
+  ]
+}

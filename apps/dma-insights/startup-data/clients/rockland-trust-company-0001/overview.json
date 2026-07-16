@@ -1,0 +1,1395 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 155,
+        "subcaps": 155,
+        "thin": 155
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 221,
+        "subcaps": 221,
+        "thin": 221
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "rockland-trust-company-0001",
+    "domain": null,
+    "hq": null,
+    "id": "c8526ae2-e8e6-406a-b01e-b7e0361ab090",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Rockland Trust Company",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:01.962835Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 312,
+    "undated_count": 312
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 312
+    },
+    "connectors": {
+      "Explorium": 12
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 14,
+      "NEUTRAL": 287,
+      "POSITIVE": 11
+    },
+    "tiers": {
+      "T1": 73,
+      "T2": 182,
+      "T3": 37,
+      "T4": 20
+    },
+    "total_facts": 292,
+    "total_items": 312
+  },
+  "financial_trajectory": {
+    "cagr": "13%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Asset growth CAGR (2023–2025): ~13%, driven by Enterprise Bank acquisition. Organic growth (2023–2024) was effectively flat [E-073–E-075].",
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 50000000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 24900000000.0,
+    "branches": "151",
+    "cagr": "13%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "1,001-5,000",
+    "financial_highlights": {
+      "lines": [
+        "Rockland Trust operates 151 branches, 21 commercial lending centers, 12 investment management offices, and 5 mortgage centers across Massachusetts, Rhode Island, and New Hampshire, with 1,001–5,000 employees [E-071, E-072].",
+        "Asset growth CAGR (2023–2025): ~13%, driven by Enterprise Bank acquisition. Organic growth (2023–2024) was effectively flat [E-073–E-075].",
+        "Overall trend: VARIABLE (acquisition-driven step-change with modest organic growth). NIM compressed from 3.54% to 3.28% (FY2023–FY2024), partial recovery to 3.33% in Q4 2024. ROAA declined from 1.24% to 0.99%. The $300M subordinated debt raise in March 2025 provides acquisition funding and growth capital [E-071, E-073, E-075, E-076]."
+      ],
+      "net_income": 50000000.0
+    },
+    "footprint": "Northeast US",
+    "footprint_basis": "derived:geography",
+    "founded": 1907,
+    "geography": "Northeast US",
+    "headcount": 1001,
+    "hq": "Rockland, MA",
+    "hq_address": "Rockland, MA",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Lee C. Powlus",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Technology and Operations Officer"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "Rockland Trust Company",
+    "license_type": "State-chartered",
+    "narrative_md": "Rockland Trust Company, a wholly-owned subsidiary of Independent Bank Corp. (NASDAQ: INDB), is a state-chartered commercial bank and FRB member founded in 1907 (FDIC Certificate #613008). Headquartered at 288 Union Street, Rockland, Massachusetts, the institution is relocating to One Technology Place - a purpose-built 140,000 square-foot campus consolidating five existing offices - by fall 2026 [E-055]. The holding company trades on the NASDAQ Global Select Market with a market capitalization of approximately $3.8 billion as of March 2026 [E-050, E-051].",
+    "primary_regulator": "Federal Reserve",
+    "revenue_usd": null,
+    "sentiment": {
+      "derived_from": "research_report_prose",
+      "sources": [
+        {
+          "signal": "dies), and 25 T4 items (proxy indicators from job postings, Glassdoor, conference presentations)",
+          "source": "Glassdoor"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-INT-0009",
+        "excerpt": "Hubbl flows: 326 rows. Columns: id, itemId, label, description, interviewLabel, status",
+        "title": "Hubbl flows 326 rows",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-INT-0201",
+        "excerpt": "Hubbl flows.csv: 326 rows. Columns: id, itemId, label, description, interviewLabel, status",
+        "title": "Hubbl flows.csv: 326 rows",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0042",
+        "excerpt": "Financial wellness tools: savings trackers (biweekly/monthly), budgeting resources, Learning Center articles, 'Voices of RT' expert series. Q2/Q3 2025 roadmap: advanced budgeting, personalized investment insights, real-t",
+        "title": "Financial wellness tools: savings trackers (biweekly/monthly)…",
+        "type": "article",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0020",
+        "excerpt": "Metropolitan Commercial Bank, Rockland Trust & Salem Five Bank revealed successful CX strategies to drive digital growth. Conference presentation on digital acquisition.",
+        "title": "Metropolitan Commercial Bank, Rockland Trust & Salem Five Bank…",
+        "type": "conference",
+        "url": "einpresswire.com"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0039",
+        "excerpt": "PROXY: Rockland Connects (1,400 member customer community) used for feedback-driven improvement. CX Strategy conference presentation suggests measurement culture. Snowflake analytics platform enables funnel analysis.",
+        "title": "Rockland Connects (1,400 member customer community) used for…",
+        "type": "conference",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-PUB-0034",
+        "excerpt": "PROXY: Learning Center with financial education articles, savings trackers, 'Voices of Rockland Trust' series, Business Strategy Series. Thought leadership via banking conferences (CX Strategy conference).",
+        "title": "Learning Center with financial education articles, savings trackers…",
+        "type": "conference",
+        "url": null
+      }
+    ],
+    "ticker": "INDB",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": null,
+    "total_deposits": null,
+    "trend": "VARIABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "rocklandtrust.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.829716+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Rockland Trust Company — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Rockland Trust Company is a $24.9B in assets regional bank regulated by Federal Reserve, operating since 1907 with 1,001 employees. A 13.0% multi-year growth rate and a trajectory the analyst classifies as variable give it the balance sheet to fund transformation [E-PUB-0002, E-PUB-0005]. Zennify's assessment places overall digital maturity at 1.9/5. The deepest capability gap is Reporting Calendar at 1.0/5 against a 2.5 peer median [E-PUB-0006]. Next is TPRM Strategy at 1.0/5 against a 2.5 peer median [E-PROXY-0508, E-PROXY-0510].\n\nThird is Model CI/CD & Controlled Promotion at 1.1/5 against a 2.5 peer median. The issue register adds Evidence ID references not in registry (high severity). The issue register adds Evidence completeness gap: EC-02_ERS (high severity). Counter-signal: Model Governance Framework already runs at 2.9/5 against a 2.5 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-INT-0001].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Rockland Trust Company is whether to close Reporting Calendar first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Rockland Trust Company should lead with Tableau (48/100 fit) against TPRM Strategy, then sequence Databricks behind it. Closing Reporting Calendar to the peer median alone is worth 1.5 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"CTOO Consolidation = Unified Strategy — Lee C.\n\nPowlus: tech, ops, data security, PM, knowledge mgmt — ceiling level 3+…\"."
+  },
+  "overall_score": 1.88,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/coverage_analysis_b4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.153596+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/evidence_unified_by_capability.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.155286+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_coverage_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.159736+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3_coverage_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.160364+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4_coverage_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.160784+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/proxy_evidence_b3.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.161216+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/search_plan.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.162540+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/subcap_coverage_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.163449+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/exports/A2_peer_comparison.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.168058+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/exports/A3_coverage_by_category.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.168471+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/exports/A6_safeguard_gates.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.170349+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_comparison_table.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.172183+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.172702+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.172893+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass1_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.173290+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass2_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.173605+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.173833+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.174211+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/Rockland_Trust_DMA_Execution_Plan_v2.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.174624+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/04_calculation_chain.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.175141+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/04_critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.175347+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/04_scores_pass1.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.175631+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/05_priorities.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.176097+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/06_recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.176416+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/batch1_gate_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.176680+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/batch2_gate_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.176918+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/batch3_gate_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.177166+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/batch4_gate_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.177371+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/batch5_gate_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.177585+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b1_001.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.177787+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b1_002.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.178014+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b2_001.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.178217+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b2_final.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.178416+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b3_final.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.178632+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b4_final.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.178892+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b5_final.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.179136+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_b6_final.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.179339+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/safeguard_gates_b4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.179643+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/p1_subcaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.181326+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/p1_toolkit.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.183066+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/p2_subcaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.184428+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/p2_toolkit.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.186274+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/p3_toolkit.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.187549+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/p4_toolkit.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.189080+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.189696+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.190014+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 5,
+      "INFO": 62
+    },
+    "stage_ms": {
+      "manifest": 52,
+      "parse": 7005,
+      "persist": 1571
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +689 subcap names +0 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from json variant evidence_index_master.json (31",
+        "detail": "evidence loaded from json variant evidence_index_master.json (312 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_scores_BHLB.json",
+        "detail": "peer_scores_BHLB.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_CAC.json",
+        "detail": "peer_scores_CAC.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_EBC.json",
+        "detail": "peer_scores_EBC.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_PFS.json",
+        "detail": "peer_scores_PFS.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peers loaded from variant peer_set.json (4 peers)",
+        "detail": "peers loaded from variant peer_set.json (4 peers)",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. '200+')",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 57 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Rockland_Trust_Client_Profile_Research_Report.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_baseline_json_filled",
+        "detail": "financial_baseline_json_filled: ['total_assets', 'total_deposits']",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:branches,primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 3 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/coverage_analysis_b4.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/evidence_unified_by_capability.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_coverage_map.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3_coverage_map.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4_coverage_map.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/proxy_evidence_b3.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/search_plan.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/subcap_coverage_map.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/exports/A2_peer_comparison.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/exports/A3_coverage_by_category.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/exports/A6_safeguard_gates.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass1_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass2_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/Rockland_Trust_DMA_Execution_Plan_v2.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/04_calculation_chain.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/04_critic_log.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/04_scores_pass1.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/05_priorities.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/06_recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/batch1_gate_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/batch2_gate_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/batch3_gate_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/batch4_gate_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/batch5_gate_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b1_001.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b1_002.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b2_001.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b2_final.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b3_final.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b4_final.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b5_final.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_b6_final.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/safeguard_gates_b4.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/p1_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/p1_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/p2_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/p2_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/p3_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/p4_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:27/689 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 18",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +689 subcap names +0 rationales merged from workbook into CSV-parsed rows",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from json variant evidence_index_master.json (312 rows)",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "peer_scores_BHLB.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+      "peer_scores_CAC.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+      "peer_scores_EBC.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+      "peer_scores_PFS.json: schema_mismatch: ValidationError: 1 validation error for PeerScore",
+      "peers loaded from variant peer_set.json (4 peers)",
+      "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. '200+')",
+      "tech_stack_from_variant_source: 57 entries",
+      "firmographics_leadership_merged_from_docx: source=Rockland_Trust_Client_Profile_Research_Report.docx count=0",
+      "financial_baseline_json_filled: ['total_assets', 'total_deposits']",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:branches,primary_regulator",
+      "insights_from_client_profile_findings: 10",
+      "acquisitions_from_client_profile_docx: 3 events",
+      "firmographics_leadership_healed: count=1",
+      "INFO/pattern_gap: 01_evidence/coverage_analysis_b4.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/evidence_unified_by_capability.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/internal_coverage_map.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3_coverage_map.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4_coverage_map.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/proxy_evidence_b3.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/search_plan.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/subcap_coverage_map.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/exports/A2_peer_comparison.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/exports/A3_coverage_by_category.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/exports/A6_safeguard_gates.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass1_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass2_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/Rockland_Trust_DMA_Execution_Plan_v2.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/04_calculation_chain.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/04_critic_log.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/04_scores_pass1.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/05_priorities.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/06_recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/batch1_gate_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/batch2_gate_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/batch3_gate_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/batch4_gate_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/batch5_gate_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b1_001.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b1_002.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b2_001.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b2_final.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b3_final.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b4_final.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b5_final.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_b6_final.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/safeguard_gates_b4.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/p1_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/p1_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/p2_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/p2_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/p3_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/p4_toolkit.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 3",
+      "catalogue_unresolved:27/689 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 18"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 155,
+      "peer_median": 2.62,
+      "pillar_id": "P1",
+      "score": 2.54,
+      "subcaps_scored": 155
+    },
+    {
+      "peer_benchmarked": 221,
+      "peer_median": 2.82,
+      "pillar_id": "P2",
+      "score": 2.08,
+      "subcaps_scored": 221
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.57,
+      "pillar_id": "P3",
+      "score": 1.45,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.64,
+      "pillar_id": "P4",
+      "score": 1.44,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-11",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:01.962835Z",
+    "created_at": "2026-07-02T23:10:01.962835Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "hybrid",
+    "id": "3ec87239-86cd-4c65-98c6-f418a32320e5",
+    "overall_score": null,
+    "request_id": "DMA-RES-RTC-20260311-0001",
+    "started_at": "2026-07-02T23:10:01.962835Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "CTOO Consolidation = Unified Strategy — Lee C. Powlus: tech, ops, data security, PM, knowledge mgmt [E-050, E-051] — P1C1 ceiling M3+; single transformation decision-maker — Single exec sponsor. Advisory-led deal. Multi-pillar SF+Data+Ops narrative.",
+      "evidence": [
+        "E-050",
+        "E-051",
+        "E-INT-0007",
+        "E-INT-0008"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "CTOO Consolidation = Unified Strategy",
+      "peer_median": 2.75,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.29,
+      "so_what": "Prioritize CTOO Consolidation = Unified Strategy in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "CTOO Consolidation = Unified Strategy",
+      "what": "CTOO Consolidation = Unified Strategy — Lee C. Powlus: tech, ops, data security, PM, knowledge mgmt [E-050, E-051] — P1C1 ceiling M3+; single transformation decision-maker — Single exec sponsor. Advisory-led deal. Multi-pillar SF+Data+Ops narrative.",
+      "why": "The linked evidence records: Hubbl esLints: 9384 rows. Columns: metadataName, scanName, itemName, id, metadataId, itemId"
+    },
+    {
+      "body": "Advanced Analytics Stack Emerging — Snowflake + Tableau + Power BI + SAS + Alteryx + Splunk + AWS Glue + Azure Synapse [E-040, E-042, E-044, E-046, E-049] — M3–M4 P4C2; integration uncertain — Data & Analytics modernization: Snowflake optimization, CRM Analytics, Collibra governance.",
+      "evidence": [
+        "E-040",
+        "E-042",
+        "E-044",
+        "E-046"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Advanced Analytics Stack Emerging",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.12,
+      "so_what": "Prioritize Advanced Analytics Stack Emerging in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Advanced Analytics Stack Emerging",
+      "what": "Advanced Analytics Stack Emerging — Snowflake + Tableau + Power BI + SAS + Alteryx +. Splunk + AWS Glue +. Azure Synapse. [E-040, E-042, E-044, E-046, E-049] — M3–M4 P4C2; integration uncertain — Data & Analytics modernization: Snowflake optimization, CRM Analytics, Collibra governance.",
+      "why": "The shortfall is relative, not absolute: 1.12/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Digital Channels with Maturity Gaps — YourBanker AI, MANTL, Ada chatbot, biometric mobile, Pay wallets, Zelle. No omnichannel evidence [E-060, E-062, E-064, E-066, E-069] — M3 digital delivery P2C2–C3; M2 orchestration — Customer 360: unify on Service Cloud, MC journey orchestration, omnichannel routing.",
+      "evidence": [
+        "E-060",
+        "E-062",
+        "E-064",
+        "E-066"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Digital Channels",
+      "peer_median": 2.75,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.82,
+      "so_what": "Prioritize Digital Channels in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Digital Channels",
+      "what": "Digital Channels with Maturity Gaps — YourBanker AI, MANTL, Ada chatbot, biometric mobile, Pay wallets, Zelle. No omnichannel evidence [E-060, E-062, E-064, E-066, E-069] — M3 digital delivery P2C2–C3; M2 orchestration — Customer 360: unify on Service Cloud, MC journey orchestration, omnichannel routing.",
+      "why": "The shortfall is relative, not absolute: 1.82/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Deep Salesforce Ecosystem with Configuration Debt — 200+ technologies; SF CRM, MC, SC, nCino via Hubbl T1. 3,700+ fields, 161 flows, 52 workflows [E-001, E-005, E-010, E-015, E-020, E-025, E-030, E-035, E-039] — M3–M4 ceiling P4C3; M2–M3 security hygiene — SF Health Check: flow consolidation, field cleanup, security hardening. 60–90 day engagement.",
+      "evidence": [
+        "E-001",
+        "E-005",
+        "E-010",
+        "E-015"
+      ],
+      "magnitude": "90 day",
+      "name": "Deep Salesforce Ecosystem",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.0,
+      "so_what": "Prioritize Deep Salesforce Ecosystem in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C3",
+      "theme": "Operations",
+      "title": "Deep Salesforce Ecosystem",
+      "what": "Deep Salesforce Ecosystem with Configuration Debt — 200+ technologies; SF CRM, MC, SC, nCino via Hubbl T1. 3,700+ fields, 161 flows, 52 workflows [E-001, E-005, E-010, E-015, E-020, E-025, E-030, E-035, E-039] — M3–M4 ceiling P4C3; M2–M3 security hygiene — SF Health Check: flow consolidation, field cleanup, security hardening. 60–90 day engagement.",
+      "why": "The shortfall is relative, not absolute: 1.0/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Enterprise Bank Integration Window — Acquisition July 2025 - 151 branches, $24.9B. Systems integration in progress [E-053, E-054] — M2–M3 ceiling P3C1; 12–18mo decision window — Post-merger integration: CRM unification, nCino expansion, data migration. Multi-workstream.",
+      "evidence": [
+        "E-053",
+        "E-054",
+        "E-INT-0351",
+        "E-WEB-0407"
+      ],
+      "magnitude": "$24.9B",
+      "name": "Enterprise Bank Integration Window",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.0,
+      "so_what": "Prioritize Enterprise Bank Integration Window in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C3",
+      "theme": "Operations",
+      "title": "Enterprise Bank Integration Window",
+      "what": "Enterprise Bank Integration Window — Acquisition July 2025 - 151 branches, $24.9B. Systems integration in progress [E-053, E-054] — M2–M3 ceiling P3C1; 12–18mo decision window — Post-merger integration: CRM unification, nCino expansion, data migration. Multi-workstream.",
+      "why": "The linked evidence records: Delivery ZIP: Adverse Action Procedure (1).docx"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0034"
+      ],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Segment Definition averages 2.3/5 over 165 scored subcaps; ceiling 2.8 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0014"
+      ],
+      "modifiers": [
+        "215 of 215 subcaps on thin evidence"
+      ],
+      "rationale": "Model Governance Framework averages 2.9/5 over 215 scored subcaps; ceiling 3.4 reflects thin evidence density (0/215 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0012"
+      ],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Prioritization averages 2.4/5 over 190 scored subcaps; ceiling 2.9 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0016"
+      ],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Recognition Programs averages 2.6/5 over 205 scored subcaps; ceiling 3.1 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0026"
+      ],
+      "modifiers": [
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Lead Scoring & Qualification averages 1.8/5 over 285 scored subcaps; ceiling 2.3 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0032"
+      ],
+      "modifiers": [
+        "cap M3 applied: ; XP cap 3.0 (trigger: P2C2)",
+        "cap M4 applied: Issue cap 4.0; XP cap 3.0 (trigger: P2C2)",
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Abandonment Recovery averages 2.1/5 over 285 scored subcaps; ceiling 2.6 reflects the binding cap (cap M3 applied: ; XP cap 3.0 (trigger: P2C2)); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0018"
+      ],
+      "modifiers": [
+        "280 of 280 subcaps on thin evidence"
+      ],
+      "rationale": "Adapted Communication averages 2.4/5 over 280 scored subcaps; ceiling 2.9 reflects thin evidence density (0/280 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-0036"
+      ],
+      "modifiers": [
+        "cap M3 applied: ; XP cap 3.0 (trigger: P2C4)",
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Financial Guidance & Wellness averages 1.9/5 over 255 scored subcaps; ceiling 2.4 reflects the binding cap (cap M3 applied: ; XP cap 3.0 (trigger: P2C4)); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M3 applied: Issue cap 3.0",
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Case Management & Resolution averages 2.2/5 over 143 scored subcaps; ceiling 2.7 reflects the binding cap (cap M3 applied: Issue cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Threat Intelligence averages 1.6/5 over 130 scored subcaps; ceiling 2.1 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 1.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Reporting Calendar averages 1.0/5 over 141 scored subcaps; ceiling 1.5 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 1.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "TPRM Strategy averages 1.0/5 over 145 scored subcaps; ceiling 1.5 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Metadata Management & Data Catalog averages 1.4/5 over 200 scored subcaps; ceiling 1.9 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 1.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Model CI/CD & Controlled Promotion averages 1.1/5 over 270 scored subcaps; ceiling 1.6 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M3 applied: Issue cap 3.0",
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "DevOps & Delivery Excellence averages 1.7/5 over 235 scored subcaps; ceiling 2.2 reflects the binding cap (cap M3 applied: Issue cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Attack Surface Management averages 1.7/5 over 150 scored subcaps; ceiling 2.2 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Job posting: Google Vertex AI, Snowflake Cortex AI, AWS Bedrock, CI/CD pipelines, DevOps/MLOps practices. Active AI engineering hiring.",
+      "evidence": [
+        "E-PROXY-0509"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Job posting: Google Vertex AI, Snowflake Cortex AI, AWS…",
+      "metric": null,
+      "peer_context": "Reporting Calendar runs 1.00/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Job posting: Google Vertex AI, Snowflake Cortex AI, AWS Bedrock, CI/CD pipelines, DevOps/MLOps practices. Active AI engineering hiring. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Reporting Calendar scores 1.00/5 vs a typical 2.50 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "evidence": [
+        "E-INT-0351",
+        "E-WEB-0407"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Reporting Calendar scores 1.00/5 vs a typical 2.50 at…",
+      "metric": "Reporting Calendar 1.00/5 vs peer 2.50",
+      "peer_context": "Reporting Calendar runs 1.00/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against TPRM Strategy — highest-fit surface at 48/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P3C3",
+      "text": "Reporting Calendar scores 1.00/5 vs a typical 2.50 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "TPRM Strategy at 1.00/5 is one of Rockland Trust Company's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-INT-0367",
+        "E-INT-0370",
+        "E-INT-0371",
+        "E-INT-0378"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "TPRM Strategy at 1.00/5 is one of Rockland Trust Company's…",
+      "metric": null,
+      "peer_context": "Reporting Calendar runs 1.00/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against TPRM Strategy — highest-fit surface at 48/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P3C4",
+      "text": "TPRM Strategy at 1.00/5 is one of Rockland Trust Company's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

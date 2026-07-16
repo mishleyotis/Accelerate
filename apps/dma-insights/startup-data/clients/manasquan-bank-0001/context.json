@@ -1,0 +1,692 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "manasquan-bank-0001",
+  "financials": {
+    "metrics": {
+      "Branches": "15 (2024)",
+      "Efficiency Ratio": "61.58% (2024)",
+      "Employees": "253 (2024)",
+      "Net Interest Margin": "3.17% (2024)",
+      "Non-Current Loans": "$1.12M (2024)",
+      "Return on Assets": "0.82% (2024)",
+      "Return on Equity": "9.01% (2024)",
+      "Texas Ratio": "0.38% (2024)",
+      "Total Assets": "$3.43B (2024)",
+      "Total Deposits": "$2.97B (2024)",
+      "efficiency_ratio": 61.58,
+      "growth_cagr_4yr_pct": 6.2,
+      "net_income": 7000000.0,
+      "nim": 3.17,
+      "roa": 0.82,
+      "roe": 9.01,
+      "tier_1_capital_ratio": 10.861
+    },
+    "series": {
+      "value": [
+        3.43
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2024
+        ],
+        "metric": "value",
+        "unit": "unknown",
+        "values": [
+          3.43
+        ]
+      }
+    ],
+    "years": [
+      2024
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "NJ"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James S. Vaccaro",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chair, President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cathy Franzoni",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SEVP, Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mike Malloy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SEVP, Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Rich Lanza",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lisa Roettger",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SEVP, Chief Human Resources Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Katie Meyers CCXP",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Chief Experience Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nick Martin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Digital Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Luanne Siverio",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP, CRA & Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tina Reid",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP, Internal Audit"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark O\u2019Reilly",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "AVP, Information Security Manager"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "Manasquan Bank is a regional bank. It reports $3.4 billion in total assets and has operated since 1874. It is regulated by FDIC and employs approximately 253 people across 15 branches. Its overall digital maturity is assessed at 1.7 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2020-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Ed Skoudis appointed to Board Oct 2020. CEO/founder Counter Hack (infosec firm). Designed cyber range training for SANS Institute. 20+ yrs cybersecurity. CEO: 'well-cited expert in the field of cybersecurity... brings ov",
+        "title": "Ed Skoudis appointed to Board Oct 2020",
+        "type": "article",
+        "url": "https://manasquan.bank/today-manasquan/press-release/2020/november/manasquan-bank-names-ed-skoudis-to-board-of-directors"
+      },
+      {
+        "author": null,
+        "date": "2025-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-023",
+        "excerpt": "Indeed ratings: Overall 4.7/5, Culture 4.7, Management 4.7, Work-Life Balance 4.5, Compensation 4.7, Job Security 4.5. CEO approval 73%. 77% recommend to friend. Interview difficulty: Easy, process: 1 week.",
+        "title": "Indeed ratings: Overall 4.7/5, Culture 4.7, Management 4.7, Work-Life\u2026",
+        "type": "article",
+        "url": "https://www.indeed.com/cmp/Manasquan-Bank"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "VALIDATED MARKETING STACK: Marketo (marketing automation), Coremetrics/IBM (analytics), DoubleClick. Net (advertising), Juicer (social feed aggregation), ShareThis (social sharing), Typeform (forms/surveys), PodBean (pod",
+        "title": "Marketo (marketing automation), Coremetrics/IBM (analytics)\u2026",
+        "type": "podcast",
+        "url": "https://manasquan.bank/digital-center"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-072",
+        "excerpt": "FISERV TIER INVESTIGATION (6-tier escalation): T1 (direct search) = no MBNK+tier mention. T2 (CTO profile) = 'core provider, Fiserv' only. T3 (conference) = CTO attended 'Fiserv Forum Client Conference.' T4 (AppMarket cr",
+        "title": "T1 (direct search) = no MBNK+tier mention",
+        "type": "conference",
+        "url": "https://manasquan.bank/about-us/our-team/senior-management/rich-lanza"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "6th consecutive year on American Banker's Best Banks to Work For list. Honorees selected based on employee satisfaction + policies/benefits. D&I commitment stated: 'maximize colleagues talents, experiences, skills, and u",
+        "title": "6th consecutive year on American Banker's Best Banks",
+        "type": "article",
+        "url": "https://manasquan.bank/careers"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "3d8ae6be-5ebd-4d9a-a8a2-7ffc8dac90a0",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "P1: 80% scores at 2.0 (>70% threshold)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "The research corpus records a 3.17% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 1.5,
+        "P4C3": 2.5,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.09,
+      "peer_name": "First Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.5,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.97,
+      "peer_name": "BCB Community Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.0,
+        "P1C3": 2.0,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.91,
+      "peer_name": "Amboy Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.91,
+      "peer_name": "Spencer Savings Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.88,
+      "peer_name": "Unity Bank",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-MBNK-20260330-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 12,
+        "polarity": "positive",
+        "source": "Indeed",
+        "themes": [
+          "Culture, leadership, family-like, recognition"
+        ],
+        "trend": "POSITIVE",
+        "value": 4.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [
+          "Fun caring culture"
+        ],
+        "trend": "POSITIVE",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Apple App Store",
+        "themes": [
+          "Fraud protection praised, app issues noted"
+        ],
+        "trend": "MIXED",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "American Banker",
+        "themes": [
+          "Best Banks to Work For"
+        ],
+        "trend": "POSITIVE",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Forbes",
+        "themes": [
+          "Best-In-State Banks NJ"
+        ],
+        "trend": "POSITIVE",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Enhanced Digital Banking for Business platform launched March 9, 2026 \u2014 more modern, streamlined experience for business clients.",
+      "date_precision": "day",
+      "e_id": "E-034",
+      "event_date": "2026-03-09",
+      "evidence_e_ids": [
+        "E-034",
+        "E-058"
+      ],
+      "id": "09c2df69-aa7d-431f-b694-fc389235f59f",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://manasquan.bank/today-manasquan/blogs/2026/february/digital-banking-for-business-launch",
+      "subcap_ids": [],
+      "title": "Enhanced Digital Banking for Business platform launched"
+    },
+    {
+      "body": "Hiring for Old Bridge (acquired Metuchen area) \u2014 continued expansion into new markets.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-038",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "277c70ae-4ceb-41e6-aec5-16c09350f7fb",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://to.indeed.com/aay842fv8b9g",
+      "subcap_ids": [],
+      "title": "Hiring for Old Bridge (acquired Metuchen area)"
+    },
+    {
+      "body": "Noeleen Doelger appointed to Board Nov 2025. Former KPMG Partner, 35+ yrs operational leadership in financial services.",
+      "date_precision": "month",
+      "e_id": "E-030",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "75251a1c-3a44-4032-aa7c-fa03771f3dd0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://manasquan.bank/today-manasquan/press-release/2025/november/manasquan-bank-announces-appointment-of-noeleen-doelger-to-board-of-directors",
+      "subcap_ids": [],
+      "title": "Noeleen Doelger appointed to Board Nov 2025"
+    },
+    {
+      "body": "VP Digital Marketing/Design Manager (Nick Martin) hired Nov 2025 \u2014 recent hire suggests marketing function evolving. No Marketo-specific skills mentioned in available profile data.",
+      "date_precision": "month",
+      "e_id": "E-051",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "ab4a2b98-c9ab-4d5a-9a95-0551cf6fe05d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://everfi.com/case-studies/financial-education/how-manasquan-bank-reached-lmi-schools-and-shared-their-impact-story/",
+      "subcap_ids": [],
+      "title": "Recent hire suggests"
+    },
+    {
+      "body": "EVP/CTO Rich Lanza \u2014 promoted from SVP to EVP/CTO Nov 2025. Joined bank 2013. 19+ year IT veteran. ABA Stonier Graduate School of Banking (Wharton Leadership Certificate). DEDICATED CTO EXISTS.",
+      "date_precision": "month",
+      "e_id": "E-025-REVISED",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-025-REVISED"
+      ],
+      "id": "7c6c74da-30f6-4ff6-8290-8ed83190ced3",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/manasquan.bank",
+      "subcap_ids": [],
+      "title": "EVP/CTO Rich Lanza \u2014 promoted from SVP"
+    },
+    {
+      "body": "OPERATIONAL RESILIENCE EVIDENCE: Bay Head branch closed early Oct 30, 2025 due to weather \u2014 posted notice on website. Indicates operational disruption response procedures exist and are executed (branch closure protocol + client notification). Not a formal BCP test, but PROXY evidence of resilience procedures.",
+      "date_precision": "day",
+      "e_id": "E-066",
+      "event_date": "2025-10-30",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "cd6eb951-19c6-4de4-9c6f-733510810791",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://manasquan.bank/",
+      "subcap_ids": [],
+      "title": "Bay Head branch closed due to weather"
+    },
+    {
+      "body": "SVP Internal Audit (Tina Reid) hired 2025 = NEW investment in audit function. Board has Noeleen Doelger (KPMG financial forensics background) on Audit Committee. Audit function has both operational and governance layers.",
+      "date_precision": "year",
+      "e_id": "E-064",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "2b17746a-2808-40ee-a659-ee8f5f855b91",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/in/luanne-siverio-1aa98620/",
+      "subcap_ids": [],
+      "title": "SVP Internal Audit (Tina Reid) hired 2025 = NEW investment\u2026"
+    },
+    {
+      "body": "Named Top Workplace + 2025 Best Banks to Work For by American Banker (#1 NJ, #4 nationally $3-10B).",
+      "date_precision": "year",
+      "e_id": "E-023",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "1308d91b-9eb2-4cf2-96cc-7d754700ab48",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.indeed.com/cmp/Manasquan-Bank",
+      "subcap_ids": [],
+      "title": "Named Top Workplace + 2025 Best Banks to Work For by\u2026"
+    },
+    {
+      "body": "AVP Learning & Development Manager Tracy Woodfield Bucco \u2014 since Feb 2023. Named 2025 Rising Star. Formalized L&D function.",
+      "date_precision": "year",
+      "e_id": "E-025-REVISED",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-025-REVISED"
+      ],
+      "id": "a7a9b5bc-02da-48f6-8fe9-91f0d1bb600e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/manasquan.bank",
+      "subcap_ids": [],
+      "title": "Named 2025 Rising Star"
+    },
+    {
+      "body": "New personal digital banking platform launched August 21, 2024 at 9:00 AM EST. Complete platform overhaul (not incremental).",
+      "date_precision": "day",
+      "e_id": "E-018",
+      "event_date": "2024-08-21",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "ec94c819-6bb5-43e0-8c32-d5bd3284b3d5",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://manasquan.bank/today-manasquan/blogs/2024/july/config-xd",
+      "subcap_ids": [],
+      "title": "New personal digital banking platform launched at 9:00 AM\u2026"
+    },
+    {
+      "body": "2024 Days of Giving raised $12,228.70 for 10 charities (record-breaking). Program started 2021. Annual community engagement initiative.",
+      "date_precision": "year",
+      "e_id": "E-042",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "d34aef4e-0391-4b74-a097-2b9a4778d7fd",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/manasquan-bank-celebrates-150-years-with-record-breaking-days-of-giving-raising-over-12k-for-10-charities-302250382.html",
+      "subcap_ids": [],
+      "title": "2024 Days of Giving raised $12,228.70"
+    },
+    {
+      "body": "Launched Terafina platform Feb 2024 for fully online account opening \u2014 both business and consumer clients. All account types: checking, savings, money markets, CDs.",
+      "date_precision": "month",
+      "e_id": "E-047",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "2ab708a1-af3b-4b79-98db-dd428a8b88a4",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/manasquan-bank-announces-full-online-account-opening-for-business-and-consumer-clients-with-launch-of-terafina-platform-302072641.html",
+      "subcap_ids": [],
+      "title": "Launched Terafina platform Feb 2024 for fully online\u2026"
+    },
+    {
+      "body": "Partnered with ZSuite Tech to launch mSuite digital escrow platform for commercial clients (Oct 2022). Automates complex subaccounting transactions end-to-end.",
+      "date_precision": "month",
+      "e_id": "E-020",
+      "event_date": "2022-10-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "f865f04f-afd8-4f03-b324-3af51eb62a4f",
+      "kind": "partnership",
+      "signal": "positive",
+      "source_url": "https://zsuitetech.com/blog/manasquan-bank-partners-with-zsuite-tech-to-launch-digital-escrow-platform-for-commercial-clients",
+      "subcap_ids": [],
+      "title": "Partnered with ZSuite Tech"
+    },
+    {
+      "body": "Joseph Jeter Jr. appointed to Board Feb 2022. 20+ yrs executive leadership in telecom and technology, domestic and international.",
+      "date_precision": "month",
+      "e_id": "E-031",
+      "event_date": "2022-02-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "73b578b8-7129-4558-8810-6e2aacf6edd9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://manasquan.bank/today-manasquan/press-release/2022/february/manasquan-bank-names-joseph-c-jeter-jr-to-board-of-directors",
+      "subcap_ids": [],
+      "title": "Joseph Jeter Jr. appointed to Board Feb 2022"
+    },
+    {
+      "body": "Ed Skoudis appointed to Board Oct 2020. CEO/founder Counter Hack (infosec firm). Designed cyber range training for SANS Institute. 20+ yrs cybersecurity.",
+      "date_precision": "month",
+      "e_id": "E-032",
+      "event_date": "2020-10-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "797fa1ee-2dba-4ba8-badd-002732000664",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://manasquan.bank/today-manasquan/press-release/2020/november/manasquan-bank-names-ed-skoudis-to-board-of-directors",
+      "subcap_ids": [],
+      "title": "Ed Skoudis appointed to Board Oct 2020"
+    },
+    {
+      "body": "2019 Metuchen Savings Bank ACQUISITION: Successful integration of acquired bank (Apr 2019) without reported service disruptions = operational resilience demonstrated at enterprise scale.",
+      "date_precision": "month",
+      "e_id": "E-066",
+      "event_date": "2019-04-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "987bcb51-113f-4927-b011-6370418875a3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://manasquan.bank/",
+      "subcap_ids": [],
+      "title": "Successful integration of acquired bank (Apr 2019) without\u2026"
+    },
+    {
+      "body": "Theodore Raffetto appointed to Board Oct 2013. US and international business experience. CEO described him as understanding 'how important it is to innovate based on customer needs.'",
+      "date_precision": "month",
+      "e_id": "E-036",
+      "event_date": "2013-10-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "75e12a32-c999-4c59-b7bd-eaf35bb79d35",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://manasquan.bank/today-manasquan/newsletter/2013/december/manasquan-savings-bank-welcomes-new-board-member-theodore-f-raffetto",
+      "subcap_ids": [],
+      "title": "Theodore Raffetto appointed to Board Oct 2013"
+    },
+    {
+      "body": "COREMETRICS VALIDATED: IBM acquired Coremetrics in 2010, rebranded to IBM Digital Analytics. Product is now DISCONTINUED \u2014 support transferred to Acoustic. It is a WEB ANALYTICS ONLY platform, NOT a broader data/BI tool.",
+      "date_precision": "year",
+      "e_id": "E-069",
+      "event_date": "2010-07-01",
+      "evidence_e_ids": [
+        "E-069"
+      ],
+      "id": "6c3392f6-ce16-48a5-87e3-e7e64a15a822",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.trustradius.com/products/coremetrics/reviews",
+      "subcap_ids": [],
+      "title": "IBM acquired Coremetrics"
+    }
+  ]
+}

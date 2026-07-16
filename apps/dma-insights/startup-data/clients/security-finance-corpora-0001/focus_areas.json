@@ -1,0 +1,245 @@
+{
+  "entity_display_id": "security-finance-corpora-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "CFPB 2018 consent order resolved with demonstrated multi-layer compliance governance",
+        "source_kind": "docx"
+      },
+      "id": "6ed86b98-1c38-4ef0-9f70-8ed8c2129b1c",
+      "involved_subcap_ids": [
+        "P3C3.3.1",
+        "P2C1.7.4",
+        "P2C2.5.1",
+        "P3C3.5.2",
+        "P3C3.1.4",
+        "P1C2.7.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000",
+          "delta": null,
+          "kpi_label": "CFPB consent order",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P3": 50
+      },
+      "source_path": "(unknown)",
+      "title": "CFPB 2018 consent order resolved with demonstrated\u2026",
+      "verbatim_quote": "F-004 | CFPB 2018 consent order resolved with demonstrated multi-layer compliance governance | CFPB consent order ($5M penalty) for improper collection attempts (physically preventing customers from leaving homes) and FCRA violations (inaccurate credit reporting) [E-B1-003, E-P1C2-001]; post-settlement: written policies covering debt collection, FCRA furnisher compliance, fair lending [E-P3C3-001]; Chief Compliance Officer or equivalent role mandated [E-P3C3-002]; ongoing compliance testing including collections auditing, mystery shopping, file review [E-P3C3-003]; board-level compliance reporting [E-P3C3-004]; 24 compliance evidence items across P3C3 documenting regulatory exam management [E-P3C3-021 through E-P3C3-024] | Compliance governance strengthened post-enforcement; ongoing vigilance required on fair lending (ECOA), consumer protection (GLBA, FDCPA), AML/BSA, and Section 1033 open banking | Shield audit trail for compliance documentation; Agentforce compliance guardrails for collections workflows; automated regulatory reporting through CRMA"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Comprehensive MuleSoft integration architecture with 65+ documented error handling scenarios",
+        "source_kind": "docx"
+      },
+      "id": "660cc97d-c53a-4696-87e7-48df6d9ea02b",
+      "involved_subcap_ids": [
+        "P2C2.5.1",
+        "P4C3.3.6",
+        "P2C1.8.7",
+        "P4C3.3.3",
+        "P4C3.3.4",
+        "P2C1.8.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Comprehensive MuleSoft integration architecture with 65\u2026",
+      "verbatim_quote": "F-007 | Comprehensive MuleSoft integration architecture with 65+ documented error handling scenarios | Error Handling & Fault Tolerance Matrix (INT-156) provides 7-phase integration architecture: SFTP ingestion \u2192 File Parsing/Validation \u2192 Salesforce Query \u2192 Data Transformation \u2192 Marketing Cloud Push \u2192 Reporting \u2192 Monitoring [E-P3C1-002, E-P3C1-005]; Sprint Plan (INT-064) documents phased API development including Payments API, Budget API, Charges/Fees API [E-P3C1-007, E-P3C1-008]; retry logic with exponential backoff (30s/2min/10min), quarantine workflows for failed records, PII leak detection triggers CRITICAL alerts [E-P3C2-009, E-P3C2-010, E-P3C2-019] | Robust integration governance in place; maturity opportunity in expanding STP rates, adding real-time streaming, and implementing advanced monitoring/alerting | MuleSoft optimization for higher STP rates; Data Cloud for real-time streaming integration; Shield for PII protection and audit trail"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Customer acquisition pipeline automated through MCE with 42 documented evidence items across digital marketing subcapabilities",
+        "source_kind": "docx"
+      },
+      "id": "3275cd58-0d2a-48e1-ac19-f52970099ff4",
+      "involved_subcap_ids": [
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C3.9.2",
+        "P2C3.9.2",
+        "P2C3.9.2",
+        "P2C3.9.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "905",
+          "delta": null,
+          "kpi_label": "Branches",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Customer acquisition pipeline automated through MCE",
+      "verbatim_quote": "F-003 | Customer acquisition pipeline automated through MCE with 42 documented evidence items across digital marketing subcapabilities | MCE implements persona-based segmentation with defined behavioral attributes [E-P2C1-002]; structured campaign cadence mapping for solicitations and engagement [E-P2C1-004]; email marketing with segmented journeys (New Manager, Tax Prep, Renewal templates) [E-P2C1-009]; SMS and mobile push with opt-in management [E-P2C1-010]; SEO with location-specific landing pages for 905 branches [E-P2C1-006]; social media presence on LinkedIn [E-P2C1-008]; A/B testing of subject lines, send times, messaging variants [E-P2C4-024] | Sophisticated multi-channel marketing automation deployed across email, SMS, push, social, web; maturity gap in AI-driven predictive modeling (Einstein Send Time Optimization, predictive content), real-time personalization at scale, and attribution modeling | Data Cloud integration unifies customer data from FSC/MCE/portal/branch/mobile; Agentforce enables AI-powered next-best-action recommendations; Marketing Cloud Intelligence for cross-channel attribution"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Employee culture dual perception: Newsweek award vs. customer experience challenges",
+        "source_kind": "docx"
+      },
+      "id": "ba1ba1db-97b4-49e0-abb6-0ccc03cf3a1e",
+      "involved_subcap_ids": [
+        "P2C2.5.1",
+        "P1C4.8.4",
+        "P1C4.8.1",
+        "P1C4.8.3",
+        "P2C3.6.6",
+        "P2C1.7.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Employee culture dual perception: Newsweek award vs\u2026",
+      "verbatim_quote": "F-006 | Employee culture dual perception: Newsweek award vs. customer experience challenges | Newsweek America's Greatest Workplaces 2025 recognition (Financial Services category) [E-P1C4-003]; Glassdoor: 3.1/5 overall (353 reviews) with culture & values 2.9/5, work-life balance 2.7/5, 52% would recommend [E-P1C4-001]; PissedConsumer: 2.6/5 (203 reviews) with complaints about aggressive collections, poor customer service, surprise fees [E-B1-006]; Yelp: 3.1/5 (179 reviews); BBB below-average ratings [E-B1-002] | Strong employer brand (Newsweek) masks significant customer experience gap; Glassdoor data reveals internal cultural challenges (micro-management, high stress, limited recognition) that likely translate to customer-facing execution issues | Service Cloud for case management and first-contact resolution improvement; Agentforce for coaching collections teams on compliant, empathetic communication; CRMA sentiment dashboards for real-time escalation triggers"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Hybrid digital-branch model with complete omnichannel execution across 5 channels",
+        "source_kind": "docx"
+      },
+      "id": "41547589-0c58-4a23-af6b-a3697ff2324d",
+      "involved_subcap_ids": [
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C3.9.2",
+        "P2C3.9.2",
+        "P2C3.9.2",
+        "P2C3.9.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Hybrid digital-branch model with complete omnichannel\u2026",
+      "verbatim_quote": "F-002 | Hybrid digital-branch model with complete omnichannel execution across 5 channels | Integrated online application (web start \u2192 phone completion), iOS mobile app (App Store id1135450123, updated Jan 2025 with Auto Pay coming soon), Android app, customer portal (mysecurityfinance.com), and 905 physical branches; MuleSoft provides real-time data sync enabling seamless channel switching; FSC unified customer view across all touchpoints [E-B1-004, E-B1-005, E-P1C1-001, E-P1C1-002, E-P1C1-003, E-P2C2-001, E-P2C3-001, E-P2C3-010, E-P2C3-015] | Advanced omnichannel execution; gap is in digital-first efficiency metrics (no evidence of cost-per-loan-by-channel, time-to-close-by-channel, NPS-by-channel tracking) | Experience Cloud for enhanced portal personalization; Service Cloud for customer support case management; Agentforce for branch agent real-time assistance; CRMA for channel-specific KPI dashboards"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Mature Salesforce ecosystem foundation with FSC core platform",
+        "source_kind": "docx"
+      },
+      "id": "e869c6eb-3d6a-4bf3-a8ae-ce86ccc5a3c4",
+      "involved_subcap_ids": [
+        "P2C2.5.1",
+        "P1C2.1.7",
+        "P2C3.4.4",
+        "P2C4.1.1",
+        "P4C3.3.3",
+        "P3C1.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "905",
+          "delta": null,
+          "kpi_label": "Branches",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 49,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Mature Salesforce ecosystem foundation with FSC core\u2026",
+      "verbatim_quote": "F-001 | Mature Salesforce ecosystem foundation with FSC core platform | Salesforce FSC deployed across 905 branches with unified CRM view; Marketing Cloud Engage (MCE) executing 42 documented customer journey types including welcome, nurture, renewal, win-back, tax prep cross-sell campaigns; MuleSoft Anypoint providing real-time API integration with 7-phase error handling matrix (65+ classified failure scenarios); CRMA dashboards tracking open rates, click rates, conversion rates, unsubscribe rates [E-P1C1-005, E-P2C1-020, E-P2C3-002, E-P2C3-003, E-P2C4-023, E-P3C1-001, E-P3C1-002] | Enterprise-grade digital foundation in place; next maturity phase requires advanced AI/ML predictive models (churn scoring, CLV, next-best-action) and Data Cloud unification | FSC/MCE/MuleSoft stack directly aligns with Zennify core expertise; opportunity to optimize data flows via Data Cloud, enhance CRMA predictive analytics, unlock Agentforce automation for branch agents, and implement Shield audit trail for compliance"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Technology leadership vacuum: No identified CDO/CTO/CIO despite 127-technology ecosystem",
+        "source_kind": "docx"
+      },
+      "id": "564da816-a039-415e-ab6c-999e49634c3b",
+      "involved_subcap_ids": [
+        "P4C2.4.9",
+        "P4C2.4.2",
+        "P4C2.4.13",
+        "P4C2.4.12",
+        "P4C1.1.6",
+        "P4C1.1.6",
+        "P4C1.1.6",
+        "P4C1.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Technology leadership vacuum: No identified CDO/CTO/CIO\u2026",
+      "verbatim_quote": "F-005 | Technology leadership vacuum: No identified CDO/CTO/CIO despite 127-technology ecosystem | Leadership identified: CEO Mark Assad, President Ray Biggs, COOs Judy Perkins & Victor Barr, CFO Jennifer Meyer [E-B1-007, E-P1C2-002, E-P1C4-004]; zero publicly identified Chief Data Officer, Chief Technology Officer, or Chief Information Security Officer; 127 confirmed technologies including Salesforce FSC, MuleSoft, SQL Server, SAP ERP, Oracle PeopleSoft, AWS, Rapid7, Tableau, MicroStrategy, Cognos, Cloudflare [E-P1C1-005]; tech stack spans Core Platform (12), Infrastructure (25), Supporting Tech (90) categories | Critical governance gap: Technology decisions may be fragmented across CFO, COOs, and business units without single point of accountability; data governance accountability unclear for FCRA/GLBA compliance; cybersecurity oversight potentially lacking dedicated executive leadership | STRATEGIC ADVISORY: Recommend Chief Data Officer / Chief Technology Officer placement; Zennify can facilitate executive search, 100-day technology governance roadmap, and organizational design for data/technology functions"
+    }
+  ]
+}

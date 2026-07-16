@@ -1,0 +1,76 @@
+{
+  "entity_display_id": "elliott-investment-manag-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-063",
+          "E-033",
+          "E-032"
+        ],
+        "representative_quote": "Next Best Action (NBA) (P2C4.2.1) assessed at M2 (2.0) on category-proxy evidence",
+        "source_kind": "heuristic"
+      },
+      "id": "dd759f8f-9ed7-491c-a063-fb2e9637bd34",
+      "involved_subcap_ids": [
+        "P2C4.2.1",
+        "P2C4.2.2",
+        "P2C4.3.1",
+        "P2C4.4.1",
+        "P2C4.5.1",
+        "P2C4.6.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "21",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 21 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-052",
+          "E-050",
+          "E-010"
+        ],
+        "representative_quote": "Idea Sourcing Channels (P1C3.2.1) assessed at M3 (2.5) on category-proxy evidence (e.g., SEC EDGAR \u2014 proxy-solicitation; tiers T1).",
+        "source_kind": "heuristic"
+      },
+      "id": "e65d61eb-fcc4-4467-94c3-c0cbf893bc79",
+      "involved_subcap_ids": [
+        "P1C3.2.1",
+        "P1C3.3.1",
+        "P1C3.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 3 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

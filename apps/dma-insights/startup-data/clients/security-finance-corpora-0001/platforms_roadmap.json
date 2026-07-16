@@ -1,0 +1,129 @@
+{
+  "entity_display_id": "security-finance-corpora-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Cloud portal targeting": "50%",
+        "branches": "905 branches"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "branches 905 branches",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": null,
+          "metric": "branches 905 branches",
+          "outcomes": {
+            "effort": "L",
+            "metric": "branches 905 branches",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-001",
+          "title": "Deploy Integrated Operations & Compliance Platform"
+        },
+        {
+          "feature": null,
+          "maturity_lift": null,
+          "metric": "Cloud portal targeting 50%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Cloud portal targeting 50%",
+            "peer": "LendingClub",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-002",
+          "title": "Modernize Customer Engagement & Digital Channels"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1 scores lowest at 1.70 \u2014 no dedicated technology executive (CDO/CTO/CIO gap, ISS-003)",
+        "branches": "905 branches"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "branches 905 branches",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": null,
+          "metric": "branches 905 branches",
+          "outcomes": {
+            "effort": "L",
+            "metric": "branches 905 branches",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-003",
+          "title": "Establish Enterprise Data Foundation with AI-Ready Analytics"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.99",
+          "metric": "P1 scores lowest at 1.70 \u2014 no dedicated technology executive (CDO/CTO/CIO gap, ISS-003)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1 scores lowest at 1.70 \u2014 no dedicated technology executive (CDO/CTO/CIO gap, ISS-003)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-004",
+          "title": "Strengthen Digital Governance & Strategic Alignment"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C4 score 2.58"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C4 score 2.58",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.42",
+          "metric": "P4C4 score 2.58",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C4 score 2.58",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-005",
+          "title": "Enhance Cybersecurity & Data Protection Posture"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-SF-20260311-0001",
+  "total_duration_months": 12
+}

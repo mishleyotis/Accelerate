@@ -1,0 +1,157 @@
+{
+  "entity_display_id": "propartners-financial-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.89",
+          "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+            "peer": "Peer Compeer",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Implement Salesforce CRM for dealer relationship management"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.89",
+          "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Deploy marketing automation platform"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+2.23",
+          "metric": "P2C3 score 1.77 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.77 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Unify 3 fragmented portals on Experience Cloud"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.6",
+          "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Establish TPRM and governance framework"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.23",
+          "metric": "P2C3 score 1.77 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.77 \u2192 4.0 (peer median 2.50)",
+            "peer": "Peer FCS America",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Formalize API layer with MuleSoft"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.89",
+          "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C3 score 1.11 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Deploy analytics platform for portfolio intelligence"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.6",
+          "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Implement FCA compliance tooling"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C3, P1C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.6",
+          "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C2 score 1.40 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Establish data governance foundation"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C2"
+    }
+  ],
+  "run_request_id": "DMA-ASS-PPFIN-20260317-0001",
+  "total_duration_months": 8
+}

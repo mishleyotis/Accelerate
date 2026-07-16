@@ -1,0 +1,407 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "first-citizens-bancshare-0001",
+  "financials": {
+    "metrics": {
+      "adjusted_roa_pct": 1.1,
+      "adjusted_roe_pct": 11.93,
+      "financials_as_of": "2025-12-31",
+      "net_income": 580000000.0,
+      "nim_ex_paa_pct": 3.11,
+      "nim_pct": 3.2,
+      "tier1_capital_pct": 11.91,
+      "tier1_leverage_pct": 9.29
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US Regional"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Frank Holding Jr.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Scott Richardson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDAO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Marco Maiurano",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO (EVP)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "First Citizens BancShares, Inc. is a regional bank. It reports $213.8 billion in total assets and has operated since 1898. It is regulated by FDIC and employs approximately 18,467 people across 500 branches. Its overall digital maturity is assessed at 1.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC",
+    "size_tier": "Mega (>$50B)",
+    "thought_leadership": null,
+    "ticker": "FCNCA"
+  },
+  "issue_register": [
+    {
+      "id": "2a62ccd3-1cf9-4acf-a827-accded368d6d",
+      "issue_id": "GAP-5-P2C1.1.RB1",
+      "linked_subcap_ids": [
+        "P2C1.1.RB1"
+      ],
+      "opened_on": "2026-03-16",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the RB peer median (3.0/5). No direct evidence available for this subcapability. Proxy searches did not yield specific signals. Scored as Foundational (M1, 1.5) pending further research. This represents a data gap that should be addressed in future assessment cycles.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Community Bank Positioning"
+    },
+    {
+      "id": "a3a96357-eaca-4aec-af08-c06bb7db1c81",
+      "issue_id": "GAP-1-P2C1.1.3",
+      "linked_subcap_ids": [
+        "P2C1.1.3"
+      ],
+      "opened_on": "2026-03-16",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the RB peer median (3.0/5). No direct evidence available for this subcapability. Proxy searches did not yield specific signals. Scored as Foundational (M1, 1.5) pending further research. This represents a data gap that should be addressed in future assessment cycles.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Value Proposition Clarity"
+    },
+    {
+      "id": "075542f7-4280-48ec-8ff8-6f4de61edb44",
+      "issue_id": "GAP-2-P2C1.1.4",
+      "linked_subcap_ids": [
+        "P2C1.1.4"
+      ],
+      "opened_on": "2026-03-16",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the RB peer median (3.0/5). No direct evidence available for this subcapability. Proxy searches did not yield specific signals. Scored as Foundational (M1, 1.5) pending further research. This represents a data gap that should be addressed in future assessment cycles.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Campaign Planning & Calendar"
+    },
+    {
+      "id": "205c916e-98a5-469a-a096-5c1e93d55bff",
+      "issue_id": "GAP-3-P2C1.1.5",
+      "linked_subcap_ids": [
+        "P2C1.1.5"
+      ],
+      "opened_on": "2026-03-16",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the RB peer median (3.0/5). No direct evidence available for this subcapability. Proxy searches did not yield specific signals. Scored as Foundational (M1, 1.5) pending further research. This represents a data gap that should be addressed in future assessment cycles.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Budget Allocation & ROI"
+    },
+    {
+      "id": "c080fe99-a75e-4d45-bb06-d893d0c196df",
+      "issue_id": "GAP-4-P2C1.1.6",
+      "linked_subcap_ids": [
+        "P2C1.1.6"
+      ],
+      "opened_on": "2026-03-16",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the RB peer median (3.0/5). No direct evidence available for this subcapability. Proxy searches did not yield specific signals. Scored as Foundational (M1, 1.5) pending further research. This represents a data gap that should be addressed in future assessment cycles.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Competitive Marketing Intelligence"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Latest available financials show net income of $580.0M.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.18,
+      "peer_name": "Fifth Third Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.15,
+      "peer_name": "Huntington Bancshares",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.5,
+        "P1C5": 3.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.15,
+      "peer_name": "KeyCorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 2.5,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.91,
+      "peer_name": "Regions Financial",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 2.5,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "M&T Bank",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-FCNCA-20260316-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "google_play_rating: 2.4, google_play_reviews: 761, ios_rating: Not extracted \u2014 estimated 3.0-3.5 based on review themes",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Customer",
+        "themes": [],
+        "value": 2.4
+      },
+      {
+        "drilldown": "glassdoor_rating: 3.6, recommend_pct: 67, work_life_balance: 3.8",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee",
+        "themes": [],
+        "value": 3.6
+      },
+      {
+        "drilldown": "lunarcrush: Limited data \u2014 institutional banking topic, low social volume",
+        "evidence_e_id": null,
+        "kind": "social",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Social",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Continued M&A = continued integration need",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [],
+      "id": "11855462-d460-4293-bd51-1d2d725e1528",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "BMO Branch Acquisition (planned)"
+    },
+    {
+      "body": "Agentforce \u2014 conversational AI proven",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "33c2a483-2b45-4e55-aade-820526d68eb1",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CiZi Virtual Assistant (44% call reduction)"
+    },
+    {
+      "body": "MuleSoft \u2014 open banking API strategy in motion",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "c44395bd-6684-4cbc-bf81-935afc4107b3",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "95% Screen-Scraping Reduction"
+    },
+    {
+      "body": "Data Cloud/Tableau \u2014 CDAO in first year",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "e86aba5f-1ac0-4427-a6b0-a3a7f28908fc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CDAO Scott Richardson Appointed"
+    },
+    {
+      "body": "Marketing Cloud opportunity; concurrent risk investment",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "baa928f2-701b-4472-b07e-17abe5b56338",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CMO + Director of Risk Appointed"
+    },
+    {
+      "body": "Integration expertise proven; BMO next",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "82eda7fb-4762-4582-becf-f3ede001b61b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "SVB Systems Integration Completed"
+    },
+    {
+      "body": "Largest FDIC-assisted deal; inherited innovation banking tech",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [],
+      "id": "c29ea5c7-df33-4384-9b14-729083d13d70",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "SVB Bridge Bank Acquisition"
+    },
+    {
+      "body": "Core banking consolidation opportunity",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [],
+      "id": "126bef8b-640e-4427-99f6-684ad455ebbc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CIT Group Acquisition Completed"
+    }
+  ]
+}

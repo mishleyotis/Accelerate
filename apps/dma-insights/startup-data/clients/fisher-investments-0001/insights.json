@@ -1,0 +1,864 @@
+{
+  "entity_display_id": "fisher-investments-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C2.5.5",
+        "P2C2",
+        "P1C1.5.1",
+        "P2C2.5.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "daed023d-ece3-4598-9382-feb83be51112",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-033",
+            "E-034",
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-034",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-047",
+        "E-034",
+        "E-077",
+        "E-078",
+        "E-061",
+        "E-018",
+        "E-033"
+      ],
+      "linked_subcap_id": "P2C2.5.5",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Asset Transfer (ACAT/ACATs) a near-term focus for Fisher Investments: a scoped investment here would lift it from 1.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-01",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Asset Transfer (ACAT/ACATs)",
+      "what_text": "Asset Transfer (ACAT/ACATs) is one of Fisher Investments's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Fisher Investments's ability to deliver a stronger, more personalised customer experience [E-047].",
+      "why_text": "The assessment found: “Only 15.84% of RIA advisors use onboarding software (T3/Inside Information 2025 Survey) 60% of RIAs use at least one AI-enabled feature; 87% believe AI beneficial” [E-078]. At 1.0 out of 5, Asset Transfer (ACAT/ACATs) sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.7.6",
+        "P2C1",
+        "P4C2.2.6",
+        "P1C2.1.5",
+        "P1C1.5.1",
+        "P2C1.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-002"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "b2c32b1f-700c-493d-bd0a-f91e9785e8c6",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1.7.6"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-073",
+        "E-074",
+        "E-017",
+        "E-025",
+        "E-026",
+        "E-036",
+        "E-104"
+      ],
+      "linked_subcap_id": "P2C1.7.6",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Brand Governance a near-term focus for Fisher Investments: a scoped investment here would lift it from 1.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-074].",
+      "source_rec_id": "REC-02",
+      "theme": "Digital Channels",
+      "title": "Brand Governance",
+      "what_text": "Brand Governance is one of Fisher Investments's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Fisher Investments's ability to deliver a stronger, more personalised customer experience [E-073].",
+      "why_text": "The assessment found: “Code of Ethics filed with SEC — governs personal trading, conflicts, reporting SEC marketing rule compliance required for all advertising” [E-027]. At 1.0 out of 5, Brand Governance sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.5.6",
+        "P2C4",
+        "P2C4.1.6",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "a64c9c52-0c2b-4cad-8e8c-7029a5d1f068",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-034",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-021",
+            "E-034",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-081",
+        "E-062",
+        "E-021",
+        "E-019",
+        "E-034",
+        "E-037",
+        "E-092",
+        "E-077"
+      ],
+      "linked_subcap_id": "P2C4.5.6",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make CLV-Based Segmentation a near-term focus for Fisher Investments: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-062].",
+      "source_rec_id": "REC-03",
+      "theme": "CX & Personalization",
+      "title": "CLV-Based Segmentation",
+      "what_text": "CLV-Based Segmentation is one of Fisher Investments's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Fisher Investments's ability to deliver a stronger, more personalised customer experience [E-081].",
+      "why_text": "The assessment found: “Customer Service score 3.4/5 (Comparably) Customer Satisfaction score 51 (Comparably)” [E-019]. At 1.0 out of 5, CLV-Based Segmentation sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.1.4",
+        "P3C4",
+        "P4C2.2.6",
+        "P2C4.1.6",
+        "P1C1.5.1",
+        "P3C4.3.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "7cf0c739-fcea-4d1e-8988-1ab3dfc6fb31",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-083",
+        "E-088",
+        "E-055",
+        "E-057",
+        "E-058",
+        "E-087",
+        "E-101"
+      ],
+      "linked_subcap_id": "P3C4.1.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Resilience Reporting a near-term focus for Fisher Investments: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-055].",
+      "source_rec_id": "REC-04",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Resilience Reporting",
+      "what_text": "Resilience Reporting is one of Fisher Investments's least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Fisher Investments's ability to deliver more efficient, dependable operations [E-088].",
+      "why_text": "The assessment found: “SEC expects RIA firms to have robust BCPs as fiduciary obligation Rule 206(4)-7 requires written policies/procedures including BCPs” [E-083]. At 1.0 out of 5, Resilience Reporting sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.5",
+        "P3C3.8.3",
+        "P3C3.8.CU1",
+        "P3C3.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "5d24ea27-4aef-4bd6-8208-d6f46dd76dc1",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-044",
+        "E-038",
+        "E-054",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C1.8.5",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Privacy-Enhancing Technologies (PETs) a near-term focus for Fisher Investments: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-054].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Bifurcated Technology Maturity",
+      "what_text": "Privacy-Enhancing Technologies (PETs) is one of Fisher Investments's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Fisher Investments's ability to deliver a stronger data and technology foundation [E-038].",
+      "why_text": "The assessment found: “AI and digital asset technologies scaling rapidly across credit markets Data analytics, issuance and settlement infrastructure converging — driving automated capital allocation” [E-044]. The research report pins the maturity impact at: P3/P4 ceiling of L3.0-3.5 — strong infrastructure investment undermined by uneve. scores 1.5/5 against a peer median of 3.0 on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P4C2.2.6",
+        "P1C2.1.5",
+        "P1C3.8.3",
+        "P1C2.9.IC1",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-027",
+        "E-032"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "2b6228f5-7726-4614-b226-29c7e9c5c9d6",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-027",
+            "E-032"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-008",
+        "E-007"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: governance ahead of AI deployment — governance-first approach unusual — AI readiness consulting: governance foundation exists, needs deployment strategy. Einstein AI / Agen [E-007].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "AI Governance Without AI Products",
+      "what_text": "Decision Rights Framework is one of Fisher Investments's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Fisher Investments's ability to deliver sharper strategic direction and stronger oversight [E-008].",
+      "why_text": "The assessment found: “Fisher Investments SEC CRD 107342, registered investment adviser SEC-regulated entity, Form ADV filing current” [E-001]. At 1.5 out of 5, Decision Rights Framework sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.4.4",
+        "P1C1",
+        "P2C4.1.6",
+        "P2C1.3.AM1",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "58a421af-4287-4ca8-9f31-1f908b53b425",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-079",
+        "E-084",
+        "E-037",
+        "E-092",
+        "E-004",
+        "E-003",
+        "E-002",
+        "E-023"
+      ],
+      "linked_subcap_id": "P1C1.4.4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Fisher Investments: invest to move it toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the improvement reaches well beyond this single capability [E-037].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Jan 2025: Advent International + ADIA acquired minority stake at $12.75B. Investment…",
+      "what_text": "Jan 2025: Advent International + ADIA acquired minority stake at $12.75B. Investment earmarked for 'global growth and te... It underpins the planning and oversight the rest of the business relies on, so its current level directly shapes Fisher Investments's ability to deliver sharper strategic direction and stronger oversight [E-079].",
+      "why_text": "The assessment found: “Moody's investment manager quality scorecard assesses: scale, business profile, financial metrics, governance Framework revised Sep 2025 — current industry standard for manager assessment” [E-084]. The research report pins the maturity impact at: Timing is critical — PE-backed transformation creates budget + urgency for Salesforce/cloud implemen. averages 2.8/5 across its 34 scored capability (peer median ~ 3.5) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P3C1.8.RIA2",
+        "P2C4.12.5",
+        "P2C3.12.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "1e7da5d5-44b0-4443-8190-d049233a6e27",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-033",
+            "E-034",
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-034",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-047",
+        "E-034",
+        "E-077",
+        "E-078",
+        "E-061",
+        "E-018",
+        "E-033"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: - constrained to L2.0-2.5 — deliberate high-touch model but creates digi — Client Experience Cloud / Salesforce Experience Cloud opportunity. Digital onboarding + client porta [E-034].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Human-Led Service Model in Digital-First Industry",
+      "what_text": "Pre-Qualification Capabilities is one of Fisher Investments's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Fisher Investments's ability to deliver a stronger, more personalised customer experience [E-047].",
+      "why_text": "The assessment found: “Only 15.84% of RIA advisors use onboarding software (T3/Inside Information 2025 Survey) 60% of RIAs use at least one AI-enabled feature; 87% believe AI beneficial” [E-078]. At 1.0 out of 5, Pre-Qualification Capabilities sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P1C5.1.1",
+        "P1C5.1.2",
+        "P1C5.2.1",
+        "P1C5.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "bfb627c3-f734-4083-aa7e-dacc951cc82f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-05"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-013",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-007",
+        "E-013",
+        "E-086"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: likely L3.0-3.5 — formalized ESG program above peer median for private RIAs — Net Zero Cloud / ESG data integration opportunity. Sustainability reporting automation [E-013].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "ESG Framework with Institutional Scale",
+      "what_text": "ESG strategy is one of Fisher Investments's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Fisher Investments's ability to deliver sharper strategic direction and stronger oversight [E-007].",
+      "why_text": "The assessment found: “US ESG AUM reached $357B in 2021, up from $236B — but flows slowed in 2022 to $3B ESG pushback from political and regulatory uncertainty complicating AM strategy” [E-086]. At 2.0 out of 5, ESG strategy sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.1.6",
+        "P3C4.6.2",
+        "P3C1.8.CIB2",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "a4c7302f-66e9-44f5-a0c2-88798d51699b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-03"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-009",
+        "E-081",
+        "E-062",
+        "E-021",
+        "E-019",
+        "E-034",
+        "E-037",
+        "E-092"
+      ],
+      "linked_subcap_id": "P2C4.1.6",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Platform foundation exists — question is depth of adoption and integration matur — Upsell/optimization play, not greenfield. FSC health check, SFMC optimization, Data Cloud integratio [E-062].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Salesforce Footprint Already Established",
+      "what_text": "Privacy-Preserving Analytics is one of Fisher Investments's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Fisher Investments's ability to deliver a stronger, more personalised customer experience [E-081].",
+      "why_text": "The assessment found: “Salesforce Marketing Cloud confirmed via job postings AWS and Azure cloud infrastructure referenced in tech roles” [E-009]. At 1.0 out of 5, Privacy-Preserving Analytics sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.1.4",
+        "P2C2.13.4",
+        "P2C1.13.4",
+        "P2C4.13.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [
+        "E-035"
+      ],
+      "ic_id": "CP-F-007",
+      "id": "ecb7e360-6736-4641-9a6b-3d9b01f10686",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-035"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-009",
+        "E-006",
+        "E-005"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Culture & Talent constrained to L2.5-3.0 — investment in L&D not translatin — Change management consulting. Digital adoption platform needs (WalkMe/Pendo). User experience resear [E-005].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Culture-Innovation Tension",
+      "what_text": "Change Readiness Assessment is one of Fisher Investments's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Fisher Investments's ability to deliver sharper strategic direction and stronger oversight [E-006].",
+      "why_text": "At 1.5 out of 5, Change Readiness Assessment sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-009, E-006].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5.2.2",
+        "P1C5",
+        "P1C1.5.1",
+        "P1C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-007"
+      ],
+      "ic_id": "INS-REC-05",
+      "id": "27f0819d-6571-4c55-8e36-ae964ed761c7",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C5.2.2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-013",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-046",
+        "E-076",
+        "E-086",
+        "E-089",
+        "E-093",
+        "E-013",
+        "E-041"
+      ],
+      "linked_subcap_id": "P1C5.2.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make community investment a near-term focus for Fisher Investments: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-076].",
+      "source_rec_id": "REC-05",
+      "theme": "ESG & Sustainability",
+      "title": "Community investment",
+      "what_text": "Community investment is one of Fisher Investments's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Fisher Investments's ability to deliver sharper strategic direction and stronger oversight [E-042].",
+      "why_text": "The assessment found: “ESG considerations influence credit quality for ~16% of scored issuers 500 CIS, 600 G-IPS, 1500+ governance issuer category score revisions in 2025” [E-046]. At 2.0 out of 5, community investment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "What We See: Fisher has the strategic foundation for transformation: PE mandate with explicit technology focus (E-003, Advent International press release, T3), CEO Damian Ornani leading modernization since 2016 (E-001, SEC Form ADV, T1), and an ESG committee with 6 dedicated specialists managing $26.1B in ESG AUM (E-060, E-061, T3). However, governance is constrained by the 2019 controversy (E-007, ISS-001) and concentrated founder control with Ken Fisher retaining 70%+ voting shares post-PE transaction (E-014, T2). Innovation management lacks structure — no formal innovation program, no patents, no innovation lab (E-010, E-011). By contrast, Mercer Advisors' CTDO role and formal innovation charter demonstrate what structured innovation governance looks like at the peer level. Talent & culture is the critical challenge: GPTW certification and 8-year training MVP coexist with 15-18 month IC turnover (E-006, Glassdoor, T3) and micromanagement themes (E-064, T3).\nWhy It Matters: P1 scores cap downstream capabilities. (Governance) at 2.18 triggers connected constraints on P3 categories. The culture-innovation tension (training investment vs. turnover) limits Fisher's ability to execute on PE transformation goals without change management intervention. Creative Planning and Mariner Wealth Advisors, both PE-backed, have navigated similar culture transitions through dedicated change management offices (E-023).",
+        "heading": "2.1 Strategy, Governance & Culture (P1: 2.36)",
+        "linked_e_ids": [
+          "E-001",
+          "E-003",
+          "E-006",
+          "E-007",
+          "E-010",
+          "E-011",
+          "E-014",
+          "E-023",
+          "E-060",
+          "E-061",
+          "E-064"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized by business impact, competitive gap, and alignment to Fisher's PE-backed transformation mandate. Each maps to a specific Zennify solution with evidence-grounded root cause analysis."
+  },
+  "run_request_id": "DMA-ASM-FISH-20260310-0001"
+}

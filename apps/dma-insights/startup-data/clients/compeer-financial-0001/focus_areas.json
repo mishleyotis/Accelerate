@@ -1,0 +1,69 @@
+{
+  "entity_display_id": "compeer-financial-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+        "source_kind": "heuristic"
+      },
+      "id": "f6a3a669-134b-421a-9911-da28ef580f53",
+      "involved_subcap_ids": [
+        "P2C1.1.1",
+        "P2C1.1.CL1",
+        "P2C1.4.CL1",
+        "P2C2.1.CL1",
+        "P2C2.2.CL1",
+        "P2C2.4.CL1"
+      ],
+      "kpis": [
+        {
+          "current_value": "20",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+        "source_kind": "heuristic"
+      },
+      "id": "919e4598-d037-4945-b363-243888504fea",
+      "involved_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.3.CL1",
+        "P1C2.7.CU1",
+        "P1C2.9.RB1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "entity_display_id": "alma-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "P1C1 Digital Strategy score": "2.061 \u2192 2.5+ (M3 Established)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Quick Wins",
+      "metric": "P1C1 Digital Strategy score: 2.061 \u2192 2.5+ (M3 Established)",
+      "name": "Quick Wins",
+      "phase": 1,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+0.44",
+          "metric": "P1C1 Digital Strategy score: 2.061 \u2192 2.5+ (M3 Established)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 Digital Strategy score: 2.061 \u2192 2.5+ (M3 Established)",
+            "peer": "Hanover Community Bank (HNVR)",
+            "time": "6 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Zennify Digital Strategy Workshop \u2014 Technology Roadmap & Executive Alignment"
+        }
+      ],
+      "target": "M2 \u2192 M3 in P1C1"
+    },
+    {
+      "customer_impact": {
+        "Integration architecture maturity": "Point-to-point CodeConnect (M1) \u2192 API gateway platform (M2.5)",
+        "P3C3 Compliance score": "2.603 (below 3.0 peer median) \u2192 3.0 (peer parity)"
+      },
+      "dependencies": [
+        "REC-01"
+      ],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Integration architecture maturity: Point-to-point CodeConnect (M1) \u2192 API gateway platform (M2.5)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint Platform",
+          "maturity_lift": "+2.49",
+          "metric": "Integration architecture maturity: Point-to-point CodeConnect (M1) \u2192 API gateway platform (M2.5)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Integration architecture maturity: Point-to-point CodeConnect (M1) \u2192 API gateway platform (M2.5)",
+            "peer": "Hanover Community Bank (HNVR)",
+            "time": "0\u20136 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "MuleSoft Anypoint Platform \u2014 API Gateway + FedNow Integration + FIS CodeConnect Replacement"
+        },
+        {
+          "feature": "Salesforce Shield + Agentforce for Financial Services",
+          "maturity_lift": "+1.38",
+          "metric": "P3C3 Compliance score: 2.603 (below 3.0 peer median) \u2192 3.0 (peer parity)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P3C3 Compliance score: 2.603 (below 3.0 peer median) \u2192 3.0 (peer parity)",
+            "peer": "All 5 Peers (PDFS, HNVR, NECB, NFBK, MGYR)",
+            "time": "2-4 weeks"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Salesforce Shield + Agentforce \u2014 BSA Compliance Automation & NYCRR 500 Evidence Platform"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P3C3"
+    },
+    {
+      "customer_impact": {
+        "Customer data silos": "4 fragmented silos \u2192 1 unified Customer 360 in Data Cloud",
+        "Teams served by analytics": "1 (BSA, Ahmad manual) \u2192 4 (BSA, AWM, CRE, Compliance)"
+      },
+      "dependencies": [
+        "REC-01",
+        "REC-03"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Customer data silos: 4 fragmented silos \u2192 1 unified Customer 360 in Data Cloud",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Data Cloud",
+          "maturity_lift": "+2.49",
+          "metric": "Customer data silos: 4 fragmented silos \u2192 1 unified Customer 360 in Data Cloud",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Customer data silos: 4 fragmented silos \u2192 1 unified Customer 360 in Data Cloud",
+            "peer": "All peers est. P4C1 2.0",
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Salesforce Data Cloud \u2014 Customer 360 & Data Silo Unification"
+        },
+        {
+          "feature": "CRM Analytics (Einstein) \u2014 now part of Salesforce Agentforce platform",
+          "maturity_lift": "+2.49",
+          "metric": "Teams served by analytics: 1 (BSA, Ahmad manual) \u2192 4 (BSA, AWM, CRE, Compliance)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Teams served by analytics: 1 (BSA, Ahmad manual) \u2192 4 (BSA, AWM, CRE, Compliance)",
+            "peer": "Peer median P4C2 est. 2.0",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "CRM Analytics / Einstein \u2014 Enterprise BSA Analytics + Customer Intelligence Extension"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "P2C2 Origination score": "1.839 \u2192 2.5-3.0",
+        "P2C3 score": "1.828 \u2192 2.5 (peer parity)"
+      },
+      "dependencies": [
+        "REC-01",
+        "REC-05"
+      ],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C2 Origination score: 1.839 \u2192 2.5-3.0",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+0.66",
+          "metric": "P2C2 Origination score: 1.839 \u2192 2.5-3.0",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 Origination score: 1.839 \u2192 2.5-3.0",
+            "peer": "Northfield Bancorp (NFBK) \u2014 Stretch Peer",
+            "time": "12 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce FSC Reactivation + Alma Wealth Management Advisor Platform"
+        },
+        {
+          "feature": "Salesforce Service Cloud",
+          "maturity_lift": "+0.67",
+          "metric": "P2C3 score: 1.828 \u2192 2.5 (peer parity)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score: 1.828 \u2192 2.5 (peer parity)",
+            "peer": "Peer median P2C3 est. 2.5",
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Salesforce Service Cloud \u2014 Omnichannel Case Management & Digital Channel Quality"
+        }
+      ],
+      "target": "M2 \u2192 M3 in P2C3, P2C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ALMA-20260519-0001",
+  "total_duration_months": 16
+}

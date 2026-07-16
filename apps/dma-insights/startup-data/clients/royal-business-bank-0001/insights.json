@@ -1,0 +1,1075 @@
+{
+  "entity_display_id": "royal-business-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2.4.16",
+        "P1C4.8.5",
+        "P4C1.2.5",
+        "P4C3.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-1",
+      "id": "6d3c5dd4-aa34-4bb0-ba3d-a16c3da5ffc5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-5"
+        },
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-2"
+        },
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-012",
+        "E-057",
+        "E-046"
+      ],
+      "linked_subcap_id": "P4C2.4.16",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Speech-to-Text & Conversation Intelligence a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-046].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO-1: \"Ongoing digital and data processing improvements\" — the only technology reference in 10-K product development",
+      "what_text": "Speech-to-Text & Conversation Intelligence is one of Royal Business Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Royal Business Bank's ability to deliver a stronger data and technology foundation [E-057].",
+      "why_text": "At 1.0 out of 5, Speech-to-Text & Conversation Intelligence sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-012, E-057].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.2.7",
+        "P3C3.4.RIA1",
+        "P3C1.8.CIB1",
+        "P3C1.8.RIA1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-3",
+      "id": "9c07981e-7167-4a41-b867-4f72b1413503",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-028",
+        "E-022",
+        "E-055"
+      ],
+      "linked_subcap_id": "P2C4.2.7",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make In-Session Personalization a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-055].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "SO-3: \"Enhancement of trade finance and international banking services\" — SWIFT + Asia correspondents",
+      "what_text": "In-Session Personalization is one of Royal Business Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Royal Business Bank's ability to deliver a stronger, more personalised customer experience [E-022].",
+      "why_text": "At 1.0 out of 5, In-Session Personalization sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-028, E-022].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.4.16",
+        "P3C1.8.RB1",
+        "P1C1.7.1",
+        "P2C3.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-4",
+      "id": "95e05085-74bc-4d38-9089-452abc6caf34",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P4C2.4.16",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Speech-to-Text & Conversation Intelligence a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability.",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\" — $3.4B deposits (+8.6% YoY)",
+      "what_text": "Speech-to-Text & Conversation Intelligence is one of Royal Business Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Royal Business Bank's ability to deliver a stronger data and technology foundation.",
+      "why_text": "At 1.0 out of 5, Speech-to-Text & Conversation Intelligence sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2.6.7",
+        "P2C2",
+        "P1C1.3.7",
+        "P1C5.4.BK1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-2",
+      "id": "31b39ad4-5172-47cf-8fc2-23263cd53643",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-1"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-026",
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-047",
+        "E-026"
+      ],
+      "linked_subcap_id": "P2C2.6.7",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Royal Business Bank: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-026].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "SO-2: \"Expansion of SBA lending as Preferred Lender\" — $712.7M annual originations",
+      "what_text": "\"Expansion of SBA lending as Preferred Lender\" — $712.7M annual originations. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes Royal Business Bank's ability to deliver a stronger, more personalised customer experience [E-047].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too [E-046, E-047].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.9.2",
+        "P1C2.1.3",
+        "P3C3.4.AM2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-5",
+      "id": "8a2117ac-45c0-44eb-b4da-6e1ec3ab01c5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-030",
+        "E-062",
+        "E-012"
+      ],
+      "linked_subcap_id": "P1C3.9.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Innovation Team a near-term focus for Royal Business Bank: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-012].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "SO-5: \"Established new executive management team\" (FY2024) — CEO Johnny Lee, CRO Rizkalla, CFO Hopkins",
+      "what_text": "Innovation Team is one of Royal Business Bank's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Royal Business Bank's ability to deliver sharper strategic direction and stronger oversight [E-062].",
+      "why_text": "At 2.0 out of 5, Innovation Team sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-030, E-062].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.4.CIB1",
+        "P2C1",
+        "P3C3.6.4",
+        "P2C3.3.RB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-6",
+      "id": "6a6f8cb9-0ae6-4bdd-b9f9-4477c984fe08",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [],
+      "linked_subcap_id": "P2C1.4.CIB1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Royal Business Bank: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability.",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "SO-6: \"Leverage branch network and community relationships\" — marketing strategy = relationship-first",
+      "what_text": "\"Leverage branch network and community relationships\" — marketing strategy = relationship-first. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes Royal Business Bank's ability to deliver a stronger, more personalised customer experience.",
+      "why_text": "Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2.1.2",
+        "P2C4.2.5",
+        "P2C1.1.RB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "1fda629e-c938-4846-9832-46b2ca115543",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-2"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-006",
+        "E-067",
+        "E-047",
+        "E-048"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make External Data Integration a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-047].",
+      "source_rec_id": "REC-01",
+      "theme": "CX & Personalization",
+      "title": "Unified Relationship Platform",
+      "what_text": "Zero CRM across $4.2B bank with 25 branches. 10-K: 'leverage branch network and community relationships'. Staff knows customers by name but institutional knowledge fragile. Separate personal/business logins. Evidence:,,:F1,:F4,:F4.\nPeer Gap:: RBB 1.57 vs Peer 2.5 (-0.93). Platform: Salesforce Financial Services Cloud. Phase: 1. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Ponce Bank (MDI, 54+ systems unified, FSC+Marketing Cloud+Tableau). In Zennify's assessment External Data Integration scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-067].",
+      "why_text": "At 1.0 out of 5, External Data Integration sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-006, E-067].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.2.5",
+        "P3C1.4.2",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "b79be773-849d-4fac-b96b-7fe3cf756df9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-041",
+        "E-059",
+        "E-049"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Thought Leadership a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": "REC-02",
+      "theme": "Digital Channels",
+      "title": "Digital Marketing & Lead Capture Engine",
+      "what_text": "Zero marketing automation with 32.9K monthly visits. LinkedIn +23% YoY without nurturing. CAPTCHA contact form only. Bilingual EN+中文 needed. Evidence::F5,:F2,:F3,:F1.\nPeer Gap:: RBB 1.84 vs Peer 3 (-1.16). Platform: Marketing Cloud / Account Engagement. Phase: 2. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Ponce Bank uses Marketing Cloud email journeys for underbanked communities. In Zennify's assessment Thought Leadership scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-041].",
+      "why_text": "At 1.0 out of 5, Thought Leadership sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-042, E-041].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C4.2.5",
+        "P3C1.4.2",
+        "P2C2.6.7",
+        "P1C1.5.2",
+        "P3C1.8.CL5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "6bae0438-7707-4404-b453-7ca9f26a2172",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-1"
+        },
+        {
+          "e_ids": [
+            "E-026",
+            "E-046"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-2"
+        },
+        {
+          "e_ids": [
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-076",
+        "E-046",
+        "E-026",
+        "E-049"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Application Flow Screen Configuration a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-026].",
+      "source_rec_id": "REC-03",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Digital Loan Origination Platform",
+      "what_text": "$712.7M annual originations through 'Speak with Loan Officer' only. Blog acknowledges digital lending 2026 trend. LinkedIn: proud of 12-day close speed. Evidence::F1,:F4,:F1.\nPeer Gap:: RBB 1.66 vs Peer 2.5 (-0.84). Platform: nCino + FSC. Phase: 2. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Zions Bancorporation ($89B) selected nCino Apr 2025; Luana Savings Bank adopted nCino 2026. In Zennify's assessment Application Flow Screen Configuration scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-046].",
+      "why_text": "At 1.0 out of 5, Application Flow Screen Configuration sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-076, E-046].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.1.2",
+        "P2C4.2.5",
+        "P1C4.3.1",
+        "P2C1.1.RB1",
+        "P1C1.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "7d2de745-a42e-46e0-8be3-44b68b6c7070",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-068",
+        "E-020",
+        "E-049"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": "REC-04",
+      "theme": "Analytics & AI",
+      "title": "Modern Analytics Platform",
+      "what_text": "IBM Cognos 8 end-of-support detected in Vibe scan. Abrigo Connect GPT-4 supplement. ITSC 8x/yr demands analytics. Data processing +$1M YoY. East West Bank (#1 peer) hiring BI Manager $150-200K. Evidence::F7,:F5,:F2,:F10.\nPeer Gap:: RBB 1.48 vs Peer 2 (-0.52). Platform: Tableau + CRM Analytics. Phase: 3. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Global bank: Cognos→Tableau reduced reports from months to weeks. In Zennify's assessment AI & ML Strategy & Governance scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-068].",
+      "why_text": "At 1.0 out of 5, AI & ML Strategy & Governance sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-073, E-068].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.6",
+        "P2C4.2.5",
+        "P1C1.4.5",
+        "P3C4.6.3",
+        "P3C4.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "1fff0067-f77a-4262-9bb3-21e8524ee65b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-077",
+        "E-067",
+        "E-036",
+        "E-078"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Environment Promotion for Data Pipelines a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-036].",
+      "source_rec_id": "REC-05",
+      "theme": "Architecture & Cloud",
+      "title": "Integration Orchestration Layer",
+      "what_text": "Dual-vendor Fiserv+Banno with point-to-point integration. 80+ technologies. QuickBooks/Zelle/Clover/SWIFT via vendor connectors. Zero iPaaS/ESB. Evidence::F3,,:F4,:F4.\nPeer Gap:: RBB 2.1 vs Peer 2.5 (-0.4). Platform: MuleSoft Anypoint Platform. Phase: 1. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Ponce Bank: FSC+MuleSoft+Fiserv Cleartouch+nCino (EXACT vendor match). In Zennify's assessment Environment Promotion for Data Pipelines scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-067].",
+      "why_text": "At 1.0 out of 5, Environment Promotion for Data Pipelines sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-077, E-067].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.5.2",
+        "P2C4.2.5",
+        "P1C4.3.1",
+        "P4C4.5.4",
+        "P4C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "edfa34dc-5b63-4738-8f68-28f9645981df",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        },
+        {
+          "e_ids": [
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-09"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-029",
+        "E-072",
+        "E-038"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Data Catalog & Discovery a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-072].",
+      "source_rec_id": "REC-06",
+      "theme": "Data Management & Governance",
+      "title": "Customer Data Platform",
+      "what_text": "No CDO. Separate personal/business logins. Data siloed across Fiserv+Banno+Abrigo+Calyx Point+Forms+Trustpilot. CIO de facto data steward. Evidence::F4,:F3.\nPeer Gap:: RBB 1.89 vs Peer 2.5 (-0.61). Platform: Salesforce Data Cloud. Phase: 3. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: $2.25B S&L: 93% reduction in manual data entry; Ponce Bank: 54+ systems unified. In Zennify's assessment Enterprise Data Catalog & Discovery scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-029].",
+      "why_text": "At 1.0 out of 5, Enterprise Data Catalog & Discovery sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-048, E-029].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C2.1.2",
+        "P2C1.4.5",
+        "P2C2.2.10",
+        "P3C3.7.1",
+        "P2C3.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "88991510-d794-4bba-ab0b-aaddf68660f4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-028"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-3"
+        },
+        {
+          "e_ids": [
+            "E-006",
+            "E-048",
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-051",
+        "E-048",
+        "E-006",
+        "E-067",
+        "E-028"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "tableau",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Document Management a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-006].",
+      "source_rec_id": "REC-07",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Omnichannel Service Modernization",
+      "what_text": "App 'worst' rating. Phone 8AM-6PM PST only. Desk.com Chat sunset. CINNOX evaluation detected. Customer service workforce DECLINING -9. Evidence:,:F1,,:F1.\nPeer Gap:: RBB 1.75 vs Peer 2.5 (-0.75). Platform: Service Cloud + Einstein Bot. Phase: 2. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Community bank: 60% fewer compliance errors with Service Cloud. In Zennify's assessment Document Management scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-048].",
+      "why_text": "At 1.0 out of 5, Document Management sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-051, E-048].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.1.2",
+        "P1C3.8.3",
+        "P4C2.4.10"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "4d3e6e04-e16e-4845-91b0-9cc58c0f64a6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-068",
+        "E-067",
+        "E-001"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": "REC-08",
+      "theme": "Analytics & AI",
+      "title": "AI-Powered Intelligence Layer",
+      "what_text": "Zero enterprise AI. Vendor AI only (DarkTrace+Abrigo ML+Emailage ML). Zero AI jobs. 10-K: 'ongoing digital improvements'. FDIC supports bank AI adoption. Evidence::F2,,:F5.\nPeer Gap:: RBB 1.48 vs Peer 2 (-0.52). Platform: Einstein AI + Agentforce. Phase: 3. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: FDIC Chairman Hill Mar 2026: 'enable banks to adopt AI technologies'. In Zennify's assessment AI & ML Strategy & Governance scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-068].",
+      "why_text": "At 1.0 out of 5, AI & ML Strategy & Governance sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-061, E-068].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P2C4.2.5",
+        "P3C1.4.2",
+        "P3C3.7.1",
+        "P3C3.1.2",
+        "P1C2.7.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "1eebc530-fce4-4c92-8252-42c29b7294e1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-057"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-1"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-003",
+        "E-008",
+        "E-020",
+        "E-072",
+        "E-057"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Policy Governance a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": "REC-09",
+      "theme": "Compliance & Surveillance",
+      "title": "Compliance Automation Extension",
+      "what_text": "BSA/CFT consent order resolved 10 months. Audit Committee 20x/yr. CRO CAMS/CFE 32yr. 11-tool security stack lacks CRM compliance. strongest at 2.58. Evidence:,,,,:F4.\nPeer Gap:: RBB 2.58 vs Peer 3 (-0.42). Platform: Salesforce Shield. Phase: 1. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: Community bank: 60% fewer compliance errors; Salesforce Process Compliance Navigator 2026. In Zennify's assessment Policy Governance scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-008].",
+      "why_text": "At 1.5 out of 5, Policy Governance sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-003, E-008].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P4C2.1.2",
+        "P1C5.3.1",
+        "P2C4.8.2",
+        "P1C5.5.CU1",
+        "P1C5.5.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "653735c2-58d8-4f67-bb8e-fd5b9f5d7fbe",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-09"
+        }
+      ],
+      "linked_e_ids": [
+        "E-034",
+        "E-035",
+        "E-020",
+        "E-010"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Royal Business Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": "REC-10",
+      "theme": "ESG & Sustainability",
+      "title": "Community Impact Measurement [CLIENT/ZENNIFY]",
+      "what_text": "CDFI/MDI designations = social strategy. CRA Committee 4x/yr. $500K+ CDFI investment. No ESG tools. California SB 253/261 trajectory. Evidence:.\nPeer Gap:: RBB 1.62 vs Peer 2 (-0.38). Platform: Net Zero Cloud. Phase: 3. In Stack: NET NEW — confirmed absent via Explorium scan. Analog: California climate disclosure trajectory; CDFI Fund impact reporting requirements. In Zennify's assessment this capability scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-035].",
+      "why_text": "At 1.0 out of 5, this capability sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-034, E-035].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture — Score 1.94 vs Median 2.60 (-0.66)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience — Score 1.71 vs Median 2.80 (-1.09)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — Score 2.25 vs Median 2.80 (-0.55)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology — Score 1.96 vs Median 2.60 (-0.64)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All 10 recommendations validated as NET NEW via Explorium technographic scan (87 technologies, zero Salesforce products). 10/10 specificity tests PASS. 17 analog case studies validated across REC-A/B/C/D sub-batches. FDIC Chairman Hill (March 2026) explicitly supports bank AI adoption."
+  },
+  "run_request_id": "DMA-RES-RBB-20260413-0001"
+}

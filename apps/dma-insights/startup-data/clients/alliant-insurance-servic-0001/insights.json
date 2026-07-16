@@ -1,0 +1,1619 @@
+{
+  "entity_display_id": "alliant-insurance-servic-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.1.4",
+        "P2C3.12.4",
+        "P4C4.1.3",
+        "P2C4.12.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "74999648-bd46-4312-a460-e74e01f2ac83",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-103",
+        "E-095",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C1.1.4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Growth outpaces integration — 200+ tech tools, dual AMS, 4 MDM platforms, 7... — Platform consolidation is the #1 opportunity. Salesforce as unifying CRM across all 8 business units [E-011].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Aggressive Growth Platform — #5 Global Broker With M&A",
+      "what_text": "Data Products & Data as a Product is one of Alliant Insurance Services's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Alliant Insurance Services's ability to deliver a stronger data and technology foundation [E-095].",
+      "why_text": "The assessment found: “Data & Analytics team exists at Alliant Insurance Services (confirmed via The Org): 'specializes in leveraging data to drive informed decision-making and enhance member services' Team capabilities:” [E-103]. At 2.0 out of 5, Data Products & Data as a Product sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.3.4",
+        "P1C1.1.3",
+        "P1C2.1.7",
+        "P3C1.8.RIA2",
+        "P1C4.4.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "2d7ec68e-57c5-42e1-97a7-347237e1bee9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "INT-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-071",
+        "INT-003",
+        "E-020",
+        "E-062",
+        "E-066",
+        "E-074"
+      ],
+      "linked_subcap_id": "P2C4.3.4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Milestone Recognition a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "EXISTING Zennify Client — Employee Benefits Salesforce",
+      "what_text": "Milestone Recognition is one of Alliant Insurance Services's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Alliant Insurance Services's ability to deliver a stronger, more personalised customer experience [E-053].",
+      "why_text": "The assessment found: “AI-driven analysis of shipper, carrier, and broker agreements — AI used for contract review and risk identification in transportation division FleetLytics: 'leading fleet analytics software” [E-071]. The research report pins the maturity impact at: Salesforce maturity higher than public evidence showed for EB division. Exp. scores 1.0/5 against a peer median of 2.5 on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.4",
+        "P1C2.1.6",
+        "P1C2.5.3",
+        "P1C2.5.5",
+        "P1C2.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-108",
+        "E-095",
+        "E-100",
+        "E-101"
+      ],
+      "ic_id": "CP-F-003",
+      "id": "46e9cb35-37fc-4c00-ba28-f39dbc5fd263",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-108",
+            "E-095",
+            "E-100",
+            "E-101"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-007",
+        "E-008",
+        "INT-002"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Products & Data as a Product a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-008].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Quality Crisis Confirmed — 'Incomplete Data Is a H",
+      "what_text": "Data Products & Data as a Product is one of Alliant Insurance Services's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Alliant Insurance Services's ability to deliver a stronger data and technology foundation [E-008].",
+      "why_text": "The research report pins the maturity impact at: Data Governance ceiling LOWERED by internal evidence: L1.5 ±0.3 for Da. averages 2.4/5 across its 41 scored capability (peer median ~ 2.5) on the current assessment [E-007, E-008].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4.5.5",
+        "P3C4",
+        "P3C2.5.5",
+        "P3C3.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "dfa3ef59-13dd-4de0-80d4-e00c77bb8c80",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-113",
+        "E-092",
+        "E-090",
+        "E-080",
+        "E-091"
+      ],
+      "linked_subcap_id": "P3C4.5.5",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Alliant Insurance Services: invest to move it toward best practice. Because it underpins the core processes that keep the institution running, the improvement reaches well beyond this single capability [E-090].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "NPS 25 — 11 Points Below Insurance Broker Industry Aver",
+      "what_text": "Comparably NPS 25 (50% promoters, 25% detractors). Customer service score 2.2/5. eNPS 9. Contrasts w... It underpins the core processes that keep the institution running, so its current level directly shapes Alliant Insurance Services's ability to deliver more efficient, dependable operations [E-092].",
+      "why_text": "The research report pins the maturity impact at: P2 Customer Experience scoring capped. Despite strong growth, client satisf. averages 3.8/5 across its 29 scored capability (peer median ~ 2.5) on the current assessment [E-113, E-092].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.7.3",
+        "P3C1.1.1",
+        "P3C1.8.IC1",
+        "P2C2.4.FC1",
+        "P2C3.11.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-096",
+        "E-100",
+        "E-098",
+        "E-099"
+      ],
+      "ic_id": "CP-F-005",
+      "id": "487fede1-d232-44f9-8515-e803d3fbb573",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-096",
+            "E-100",
+            "E-098",
+            "E-099"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-007",
+        "E-008",
+        "E-044"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Innovation outpaces governance. AI/Advanced Analytics shows L3+ for pr... — Einstein AI Platform for governed model deployment. Agentforce for GenAI (greenfield). AI governance [E-044].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Qubie (ML+CV underwriting), Nvidia DGX A100 hardware, SAS Viya, Alliant Analytics…",
+      "what_text": "Reasoning Engine & Chain of Thought is one of Alliant Insurance Services's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Alliant Insurance Services's ability to deliver a stronger data and technology foundation [E-008].",
+      "why_text": "At 1.5 out of 5, Reasoning Engine & Chain of Thought sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-007, E-008].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.1.2",
+        "P3C3.8.3",
+        "P4C3.3.1",
+        "P4C1.3.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [
+        "INT-002",
+        "E-052",
+        "E-100",
+        "E-109",
+        "E-114"
+      ],
+      "ic_id": "CP-F-006",
+      "id": "6dae80b9-5875-4913-a434-3c1a94b0b9ba",
+      "interconnections": [
+        {
+          "e_ids": [
+            "INT-002",
+            "E-052",
+            "E-100",
+            "E-109",
+            "E-114"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-007",
+        "E-029",
+        "E-097"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Technology Roadmap & Investment Planning a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "No Enterprise Integration Platform — 200+ Tools Connect",
+      "what_text": "Technology Roadmap & Investment Planning is one of Alliant Insurance Services's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, roughly in line with the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Alliant Insurance Services's ability to deliver a stronger data and technology foundation [E-029].",
+      "why_text": "The research report pins the maturity impact at: Architecture ceiling constrained at L2.5. Integration complexity grows. averages 3.5/5 across its 48 scored capability (peer median ~ 3.0) on the current assessment [E-007, E-029].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P3C1.1.1",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "8b6f9b83-6fb2-4dc5-b899-f2ae66da5b92",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "INT-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "INT-002",
+        "E-075",
+        "E-083",
+        "E-079",
+        "INT-003",
+        "E-076",
+        "E-081"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: STP and Product Innovation show L3.5-L4.0. Alliant innovates fast... — Salesforce Platform as the foundation for next-gen products. Einstein for AI-powered underwriting. H [E-083].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Innovation Engine — QUBIE, ALPS, 123OCP Demonstrate Pro",
+      "what_text": "Automation Vision & Strategy is one of Alliant Insurance Services's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Alliant Insurance Services's ability to deliver more efficient, dependable operations [E-075].",
+      "why_text": "The assessment found: “Dedicated Safety & Loss Control practice: experienced local consultants in major markets nationwide — decentralized risk management delivery model Services: risk elimination, safety program” [E-079]. At 2.5 out of 5, Automation Vision & Strategy sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.4",
+        "P1C2.1.6",
+        "P1C2.5.3",
+        "P3C3.8.4",
+        "P4C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-108",
+        "E-095",
+        "E-100",
+        "E-101"
+      ],
+      "ic_id": "F-003",
+      "id": "563d1ec5-3163-42b8-8cab-c5096a138ae5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-108",
+            "E-095",
+            "E-100",
+            "E-101"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008",
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-007",
+        "E-008",
+        "INT-002"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Data Cloud + validation rules + duplicate management + field-level security. The 26 pain points ARE the business case — each maps to a Salesforce capability [E-008].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Quality Crisis Confirmed — 'Incomplete Data Is a Huge Problem'",
+      "what_text": "Internal RTM documents 26 BenefitPoint pain points. Client names overwritable by end users (no field-level security), Vertafore controls carrier master data (vendor lock-in), specialty products tracked in spreadsheets. [INT-002]. In Zennify's assessment Data Products & Data as a Product scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-008].",
+      "why_text": "Data Governance ceiling LOWERED by internal evidence: L1.5 ±0.3 for Data Quality and Data Stewardship subcaps. Gap is WORSE than public evidence suggested [E-007, E-008].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.7.3",
+        "P3C1.1.1",
+        "P3C3.2.1",
+        "P1C2.1.6",
+        "P1C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-096",
+        "E-100",
+        "E-098",
+        "E-099"
+      ],
+      "ic_id": "F-005",
+      "id": "49d5740d-a511-4354-a4e2-a0c635a4bf3d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-096",
+            "E-100",
+            "E-098",
+            "E-099"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008",
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-044",
+        "E-105",
+        "E-107",
+        "E-007",
+        "E-008"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Einstein AI Platform for governed model deployment. Agentforce for GenAI (greenfield). AI governance advisory engagement [E-044].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "5 AI Models in Production Without Governance Framework",
+      "what_text": "QUBIE (ML+CV underwriting), NVIDIA DGX A100 hardware, SAS Viya, Alliant Analytics proprietary platform, AI-powered ALPS pricing — but no AI governance committee, no model risk framework, no internal GenAI deployment.. In Zennify's assessment Reasoning Engine & Chain of Thought scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-029].",
+      "why_text": "The assessment found: “Alliant Cyber offers 'AI Cyber Risk & Governance Workshop' that guides organizations through developing AI governance models and draft risk management policies — CLIENT-FACING AI governance service” [E-105]. Innovation outpaces governance. AI/Advanced Analytics shows L3+ for production models but L1 for governance. NAIC model bulletin compliance likely required.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.1.2",
+        "P4C3.3.1",
+        "P2C1.8.7",
+        "P4C3.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "INT-002",
+        "E-052",
+        "E-100",
+        "E-109",
+        "E-114"
+      ],
+      "ic_id": "F-006",
+      "id": "ccf14ec6-2542-4bc2-b8e6-eba5d0aa1bff",
+      "interconnections": [
+        {
+          "e_ids": [
+            "INT-002",
+            "E-052",
+            "E-100",
+            "E-109",
+            "E-114"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-029",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-039",
+        "E-097",
+        "E-007"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: MuleSoft is the #1 architecture opportunity. Enterprise integration backbone connecting Applied Epic, Salesforce, ServiceNow, Snowflake, and 200+ tools. API-led connectivity [E-097].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "No Enterprise Integration Platform — 200+ Tools Connected Point-to-Point",
+      "what_text": "200+ technologies detected (Vibe). Azure Service Bus is only middleware. No MuleSoft, Boomi, Workato, or similar iPaaS. REST/SOAP APIs confirmed at developer level (Sr SFDC Dev JD) but no centralized API management.. In Zennify's assessment Technology Roadmap & Investment Planning scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-029].",
+      "why_text": "The assessment found: “Actively hiring Senior Salesforce Developer (posted Mar 30, 2026), $120-150K, remote — confirms ongoing Salesforce investment Role at SMS (Senior Market Sales) — Alliant subsidiary IMO operating in” [E-039]. At 3.0 out of 5, Technology Roadmap & Investment Planning shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P2C2",
+        "P4C2.7.3",
+        "P3C1.1.1",
+        "P1C3.1.3",
+        "P1C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-081",
+        "E-076"
+      ],
+      "ic_id": "F-007",
+      "id": "fe5e752a-a9c9-40e0-a29c-4d198b05de52",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-081",
+            "E-076"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P3C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-075",
+            "E-083",
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "INT-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-048",
+        "E-049",
+        "E-050",
+        "E-100",
+        "INT-002",
+        "E-075",
+        "E-083"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Salesforce Platform as the foundation for next-gen products. Einstein for AI-powered underwriting. Heroku/Functions for custom innovation [E-049].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Innovation Engine — QUBIE, ALPS, 123OCP Demonstrate Product Velocity",
+      "what_text": "QUBIE: ML+CV auto-underwriting for residential RE (PropTech Innovation 2023). ALPS: first-of-kind London capacity solution. 123OCP: on-demand commercial property quoting. FleetLytics IoT telematics. Alliant Analytics proprietary risk tolerance platform.. In Zennify's assessment Automation Vision & Strategy scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-048].",
+      "why_text": "At 2.5 out of 5, Automation Vision & Strategy sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-044, E-048].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C1",
+        "P2C4",
+        "P4C1.1.4",
+        "P4C3.1.2",
+        "P2C4.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "INT-002",
+        "E-052",
+        "E-100",
+        "E-109",
+        "E-114"
+      ],
+      "ic_id": "INS-REC-01",
+      "id": "321e1219-8bbc-44ff-bd03-7aa66c116a41",
+      "interconnections": [
+        {
+          "e_ids": [
+            "INT-002",
+            "E-052",
+            "E-100",
+            "E-109",
+            "E-114"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-039",
+        "E-097",
+        "E-092",
+        "E-005",
+        "E-007"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Technology Roadmap & Investment Planning a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-039].",
+      "source_rec_id": "REC-01",
+      "theme": "Architecture & Cloud",
+      "title": "Enterprise Integration Platform (MuleSoft Anypoint)",
+      "what_text": "{'solution': 'MuleSoft Anypoint Platform', 'from_catalog': 'Solution 5: MuleSoft Anypoint', 'fit': 'Excellent — API-first enterprise, Salesforce ecosystem alignment, insurance-specific connectors for Applied Epic, carrier systems, and BenefitPoint', 'capability_growth_path': ' from 3.02 → 3.5 (Phase 1: 0-6mo API layer) → 4.0 (Phase 2: full connector library + API governance)', 'validation': 'MuleSoft recognized as 2026 Gartner Leader for iPaaS. Insurance-specific solution page confirms broker use case. Holmes Murphy case study: FSC + MuleSoft = connected systems + improved efficiency.'} connected unlock: integration → enables real-time data flow → lifts Data Governance (currently 2.41, capped by fragmentation); improvement above 2.5 → uncaps Marketing (currently connected capped at 3.0);. In Zennify's assessment Technology Roadmap & Investment Planning scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-029].",
+      "why_text": "The assessment found: “'Alliant fully integrates its retail acquisitions, providing state-of-the-art systems, technology, and resources' — standardized integration process exists 59 total acquisitions with avg 6/yr over” [E-092]. At 3.0 out of 5, Technology Roadmap & Investment Planning shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C1",
+        "P4C2.7.3",
+        "P4C3.1.2",
+        "P2C4.3.4",
+        "P2C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "INT-002",
+        "E-052",
+        "E-057",
+        "E-063",
+        "E-072"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "1a505852-7130-419e-908d-9f1829d62efb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "INT-002",
+            "E-052",
+            "E-057",
+            "E-063",
+            "E-072"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-059",
+        "E-065",
+        "E-074",
+        "E-075",
+        "E-078",
+        "E-050",
+        "E-080",
+        "E-036"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Accessibility & Inclusion a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-065].",
+      "source_rec_id": "REC-02",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Unified Client Portal (Salesforce Experience Cloud)",
+      "what_text": "{'solution': 'Salesforce Experience Cloud', 'from_catalog': 'Solution 10: Experience Cloud', 'fit': 'Excellent — replaces 11+ fragmented portals with unified, role-based client experience that surfaces data from Salesforce CRM, Applied Epic (via MuleSoft), and specialty systems', 'capability_growth_path': ' from 2.37 → 2.8 (Phase 1: unified portal MVP) → 3.2 (Phase 2: personalized by BU + self-service) → 3.5 (Phase 3: AI-powered recommendations)', 'validation': 'Salesforce FSC for Insurance Brokerages launched Feb 2025 specifically for this use case. Insure 247 case study: doubled customer growth without increasing staff. AAA Washington: consolidated member data into single Salesforce platform.'} connected unlock: Unified portal → requires clean data ( Data Cloud). In Zennify's assessment Accessibility & Inclusion scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-059].",
+      "why_text": "At 1.0 out of 5, Accessibility & Inclusion sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-029, E-059].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.4",
+        "P2C4.3.4",
+        "P1C2.1.6",
+        "P1C4.1.4",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-108",
+        "INT-002",
+        "E-095",
+        "E-101"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "be8f1eba-1443-4db4-a5bc-1faf194f755d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-108",
+            "INT-002",
+            "E-095",
+            "E-101"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008",
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-029",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-100",
+        "E-039",
+        "E-044",
+        "E-097",
+        "E-007",
+        "E-008"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Products & Data as a Product a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-100].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Enterprise Data Governance Platform (Salesforce Data Cloud)",
+      "what_text": "{'solution': 'Salesforce Data Cloud', 'from_catalog': 'Solution 4: Data Cloud', 'fit': 'Excellent — unifies client data across Applied Epic, AMS360, Salesforce CRM, BenefitPoint/Client Central into single harmonized profile. Replaces 4 MDM platforms with native Salesforce data governance. Field-level security, validation rules, duplicate management all native. ', 'capability_growth_path': ' from 2.41 → 2.8 (Phase 1: unified client data model) → 3.2 (Phase 2: data quality rules + governance) → 3.5 (Phase 3: predictive data quality + CDO function)', 'validation': 'Salesforce 2026 roadmap emphasizes strengthened CDP with unified customer data. Data Cloud natively integrates with FSC (already deployed at Alliant EB). In Zennify's assessment Data Products & Data as a Product scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-029].",
+      "why_text": "The assessment found: “Actively hiring Senior Salesforce Developer (posted Mar 30, 2026), $120-150K, remote — confirms ongoing Salesforce investment Role at SMS (Senior Market Sales) — Alliant subsidiary IMO operating in” [E-039]. At 2.0 out of 5, Data Products & Data as a Product sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C2.7.3",
+        "P2C4.3.4",
+        "P2C1.1.2",
+        "P2C2.1.2",
+        "P3C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "INT-002",
+        "E-052",
+        "E-057",
+        "E-063"
+      ],
+      "ic_id": "INS-REC-04",
+      "id": "6ce78419-98ec-484f-9865-81358c5a2bde",
+      "interconnections": [
+        {
+          "e_ids": [
+            "INT-002",
+            "E-052",
+            "E-057",
+            "E-063"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-074",
+        "E-036",
+        "E-072",
+        "E-059",
+        "E-029",
+        "E-073",
+        "E-053"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Accessibility & Inclusion a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-036].",
+      "source_rec_id": "REC-04",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Client Experience Transformation (Service Cloud + Einstein)",
+      "what_text": "{'solution': 'Salesforce Service Cloud + Einstein AI', 'from_catalog': 'Solution 1: Service Cloud', 'fit': 'Excellent — unified agent desktop replacing ServiceNow CSM + Freshdesk. Omnichannel routing, case management, service analytics, Einstein AI for case classification and next-best-action.', 'capability_growth_path': ' from 2.37 → 2.8 (Phase 1: unified case management) → 3.2 (Phase 2: omnichannel + Einstein routing) → 3.5 (Phase 3: proactive service + sentiment analytics)', 'validation': 'Salesforce FSC for Insurance includes service automation. AXA case study: increased customer satisfaction through unified agent desktop. In Zennify's assessment Accessibility & Inclusion scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-074].",
+      "why_text": "At 1.0 out of 5, Accessibility & Inclusion sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-065, E-074].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P1C1",
+        "P2C4",
+        "P4C2.7.3",
+        "P2C4.3.4",
+        "P1C4.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-108",
+        "INT-002",
+        "E-095",
+        "E-101"
+      ],
+      "ic_id": "INS-REC-05",
+      "id": "f6fe378e-57ce-44c5-9abe-a7fc7a1774fc",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-108",
+            "INT-002",
+            "E-095",
+            "E-101"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008",
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-029",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-100",
+        "E-013",
+        "E-044",
+        "E-097",
+        "E-007",
+        "E-008"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Products & Data as a Product a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-013].",
+      "source_rec_id": "REC-05",
+      "theme": "Data Management & Governance",
+      "title": "Analytics Consolidation (CRM Analytics / Tableau)",
+      "what_text": "{'solution': 'CRM Analytics (Tableau) on Salesforce', 'from_catalog': 'Solution 6: CRM Analytics', 'fit': \"Good — native Salesforce analytics layer that reads from Data Cloud. Preserves 'analytics by specialty' approach while adding enterprise layer.\", 'capability_growth_path': ' analytics subcaps from 2.0 → 2.8 (consolidation) → 3.2 (enterprise dashboards + predictive)', 'validation': 'Tableau is Salesforce-native BI. CRM Analytics provides embedded dashboards in FSC (already deployed at Alliant EB).'} connected unlock: Unified analytics → CIO gets cross-BU visibility → enables data-driven strategy; Analytics on Data Cloud → cross-sell identification — which clients have coverage gaps? In Zennify's assessment Data Products & Data as a Product scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-100].",
+      "why_text": "At 2.0 out of 5, Data Products & Data as a Product sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-029, E-100].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.7.3",
+        "P4C3.1.2",
+        "P2C4.3.4",
+        "P1C2.1.6",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-096",
+        "E-098",
+        "E-099"
+      ],
+      "ic_id": "INS-REC-06",
+      "id": "fcc6924e-d470-4872-84c7-17d98429481c",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-096",
+            "E-098",
+            "E-099"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-029",
+        "E-100",
+        "E-105",
+        "E-107",
+        "E-048",
+        "E-063",
+        "E-007"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Reasoning Engine & Chain of Thought a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-029].",
+      "source_rec_id": "REC-06",
+      "theme": "Analytics & AI",
+      "title": "AI Governance & GenAI Enablement (Agentforce + Shield)",
+      "what_text": "{'solution': 'Agentforce + Einstein AI Platform + Salesforce Shield', 'from_catalog': 'Solutions 9 (Agentforce) + 7 (Shield)', 'fit': 'Excellent — Agentforce for GenAI deployment (greenfield), Shield for audit trail and governance, Einstein Platform for governed model deployment within Salesforce ecosystem', 'capability_growth_path': ' governance subcaps from 1.5 → 2.5 (Phase 1: governance framework + Shield) → 3.0 (Phase 2: Agentforce GenAI pilots) → 3.5 (Phase 3: enterprise AI platform with monitoring)', 'validation': 'NAIC model bulletin requires model risk management for AI in insurance. Salesforce 2026 roadmap: AI governance and agent orchestration are top priorities. MuleSoft Agent Fabric for cross-ecosystem AI agent governance.'} connected unlock: AI governance → enables responsible scale of QUBIE and future AI products;. In Zennify's assessment Reasoning Engine & Chain of Thought scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-044].",
+      "why_text": "The assessment found: “Alliant Cyber offers 'AI Cyber Risk & Governance Workshop' that guides organizations through developing AI governance models and draft risk management policies — CLIENT-FACING AI governance service” [E-105]. At 1.5 out of 5, Reasoning Engine & Chain of Thought sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P1C1",
+        "P2C3",
+        "P4C2.7.3",
+        "P2C4.3.4",
+        "P3C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-062",
+        "E-074"
+      ],
+      "ic_id": "INS-REC-07",
+      "id": "010b86ad-bbd1-4948-97af-b8a8e91ac3ca",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-062",
+            "E-074"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-071",
+            "INT-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "INT-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-100",
+        "E-029",
+        "E-059",
+        "E-044",
+        "E-053",
+        "E-071",
+        "INT-003"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Milestone Recognition a near-term focus for Alliant Insurance Services: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-029].",
+      "source_rec_id": "REC-07",
+      "theme": "CX & Personalization",
+      "title": "Cross-Sell Intelligence Engine (Data Cloud + Einstein Next Best Action)",
+      "what_text": "{'solution': 'Data Cloud + Einstein Next Best Action', 'from_catalog': 'Solution 4: Data Cloud + Solution 9: Agentforce/Einstein', 'fit': 'Excellent — Data Cloud creates unified client profiles across 8 BUs; Einstein NBA identifies which clients in Retail P&C also need Employee Benefits, Transportation coverage, or Specialty protection', 'capability_growth_path': ' from 2.39 → 2.8 (Phase 2: cross-BU profiles) → 3.2 (Phase 3: NBA recommendations in producer workflow)', 'validation': 'Data Cloud + Einstein NBA is the standard Salesforce pattern for cross-sell in multi-BU financial services organizations.'} connected unlock: Cross-sell engine → directly supports 21.9% organic growth strategy → strategic execution; Unified client profiles → better service → higher NPS → virtuous cycle. In Zennify's assessment Milestone Recognition scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-100].",
+      "why_text": "At 1.0 out of 5, Milestone Recognition sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-001, E-100].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture — Score 2.67 vs Median 2.8",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience — Score 2.71 vs Median 2.8",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — Score 3.77 vs Median 2.8",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology — Score 3.25 vs Median 2.8",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Each recommendation traces from evidence-grounded root cause through strategic alignment to Zennify solution. No investment amounts per R6 rule."
+  },
+  "run_request_id": "DMA-RES-ALLI-20260331-0001"
+}

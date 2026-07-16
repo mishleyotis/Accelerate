@@ -1,0 +1,751 @@
+{
+  "entity_display_id": "trustco-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.2.5",
+        "P2C4.9.1",
+        "P4C2.4.12",
+        "P4C2.1.4",
+        "P4C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "fe559b82-d614-4cb9-a093-681329e8d429",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-021",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-015",
+            "E-021",
+            "E-022",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-024",
+        "E-021",
+        "E-022",
+        "E-036",
+        "E-053",
+        "E-071",
+        "E-076"
+      ],
+      "linked_subcap_id": "P4C1.2.5",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 10 a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Recommended Discovery Focus Areas",
+      "what_text": "Recommended discovery focus: (1) Salesforce CRM utilization audit — what does the bank actually use it for? Who are the users? Is there an admin? (2) Tealium CDP activation review — are any audiences/segments created? What downstream systems consume the data? (3) Fiserv feature inventory — which Architect and Signature features are active vs available but unused? (4) Telephony consolidation — which of the 4 vendors are active vs legacy remnants? In Zennify's assessment capability dimension 10 scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-024].",
+      "why_text": "At 1.0 out of 5, capability dimension 10 sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-015, E-024].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P3C1",
+        "P1C4",
+        "P4C2.1.4",
+        "P2C1.10.3",
+        "P2C2.10.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-030",
+        "E-044",
+        "E-047",
+        "E-082",
+        "E-084"
+      ],
+      "ic_id": "INS-REC-01",
+      "id": "23b70212-75b1-44c2-bc89-5c71b2af8419",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-030",
+            "E-044",
+            "E-047",
+            "E-082",
+            "E-084"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-051",
+        "E-071",
+        "E-049",
+        "E-048",
+        "E-033",
+        "E-054",
+        "E-021"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Journey Design a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-071].",
+      "source_rec_id": "REC-01",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Service Cloud + Agentforce: Replace Legacy Contact Center",
+      "what_text": "TrustCo operates 4 legacy on-prem telephony vendors (Avaya, Cisco IP, Zultys, Panasonic IP-PBX) with 33-minute average hold times and 11% issue resolution rate (, ). No live chat, chatbot, or digital service channels exist. Desk.com Chat was detected but sunset in 2018. Omnichannel Service scored 1.35 — lowest customer experience category. Service Cloud, Agentforce connected unlock: improvement unlocks (process automation via case routing) and (employee satisfaction — staff currently frustrated by legacy tools per Glassdoor 2.8/5, ) [E-051].",
+      "why_text": "At 1.0 out of 5, Service Journey Design sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-046, E-051].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C1",
+        "P4C1.2.5",
+        "P2C4.9.1",
+        "P1C2.1.4",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [
+        "E-043"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "f959c1ee-3d86-4886-be64-96cfc614a47e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-043"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-075",
+        "E-063",
+        "E-054",
+        "E-041",
+        "E-047",
+        "E-053",
+        "E-082"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Financial Services Cloud: Consolidate CRM Landscape",
+      "what_text": "TrustCo has base Salesforce CRM (BASIC utilization) coexisting with Nimble CRM as a shadow system (, ). Zero Salesforce admin or developer staff (, confirmed via Clay). No FSC features deployed. Personalization scored 1.09 — the single lowest category score in the entire assessment. Financial Services Cloud (FSC) connected unlock: FSC is the foundation for Data Cloud, Marketing Cloud, and Experience Cloud. Without FSC, personalization and data governance cannot improve. In Zennify's assessment Customer Data Foundation (CDP) scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-071].",
+      "why_text": "The assessment found: “Tealium AudienceStream CDP + Tealium iQ Tag Mgmt detected — customer data platform IS present but no evidence of activation for personalized campaigns. Marketing tools: Facebook Pixel, Google Tag” [E-041]. At 1.0 out of 5, Customer Data Foundation (CDP) sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P2C1",
+        "P4C2",
+        "P4C1.2.5",
+        "P4C2.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-076",
+        "E-084",
+        "E-072"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "e016580a-d13a-4b1e-ae16-a62144a6ff57",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-076",
+            "E-084",
+            "E-072"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [
+            "E-015",
+            "E-021",
+            "E-022",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-071",
+        "E-073",
+        "E-015",
+        "E-024",
+        "E-021",
+        "E-022",
+        "E-036"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Data Strategy & Roadmap a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-073].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Data Cloud: Activate Tealium CDP Investment",
+      "what_text": "Tealium AudienceStream CDP is deployed but feeds ONLY ad tech pixels — zero downstream activation for personalization, segmentation, or customer journey orchestration (, ). No CDO (quadruple confirmed, ). 1 Business Data Analyst hired Aug 2025 — the first data role ever. Data Governance scored 1.14 — second-lowest category. Data Cloud connected unlock: Data Cloud feeds (personalization via Einstein AI), (marketing automation via segmented audiences), and (analytics via unified data model). In Zennify's assessment Enterprise Data Strategy & Roadmap scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-071].",
+      "why_text": "At 1.0 out of 5, Enterprise Data Strategy & Roadmap sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-053, E-071].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P2C2",
+        "P2C3",
+        "P3C1",
+        "P4C3.1.3",
+        "P2C4.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-022",
+        "E-063",
+        "E-064",
+        "E-075",
+        "E-078"
+      ],
+      "ic_id": "INS-REC-04",
+      "id": "92badff4-ce22-48f2-ad5f-a50d2951de28",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-022",
+            "E-063",
+            "E-064",
+            "E-075",
+            "E-078"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [
+            "E-015",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-033",
+            "E-048",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-055",
+        "E-068",
+        "E-079",
+        "E-048",
+        "E-015",
+        "E-019",
+        "E-033"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 3 a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-068].",
+      "source_rec_id": "REC-04",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft: Build Integration Layer to Decouple Fiserv",
+      "what_text": "TrustCo has zero API or integration layer. Fiserv provides 5+ critical functions (core banking, digital, back-office, potentially teller, potentially fraud) creating massive vendor concentration risk (, ). Every system is an island — Salesforce, Tealium, Avaya, Nimble, Sage, ADP, Cornerstone operate independently. Architecture scored 1.41. Tech debt: ASP.NET Classic + VB.NET backend. MuleSoft connected unlock: MuleSoft is the ROOT CAUSE FIX for the branch-mediated pattern. Without integration, digital tools cannot operate independently of branch staff. unlocks (digital onboarding), (omnichannel), (process automation). In Zennify's assessment capability dimension 3 scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-055].",
+      "why_text": "At 1.0 out of 5, capability dimension 3 sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-071, E-055].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P2C4.9.1",
+        "P3C1.3.4",
+        "P2C1.5.2",
+        "P2C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "b6237ca1-1ec8-4349-a8e6-e2d39d8ba06e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-049",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-041",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-041",
+        "E-071",
+        "E-049",
+        "E-023",
+        "E-021",
+        "E-045",
+        "E-050",
+        "E-086"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Marketing Strategy Document a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-049].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Marketing Cloud: Enable Data-Driven Customer Acquisition",
+      "what_text": "Zero marketing automation platform (, ). Marketing is rate-driven, not data-driven — advertising focuses on CD rates and mortgage rates. Fragmented tools: StackAdapt (programmatic), WordStream (PPC), Later (social scheduling). LinkedIn marketing = NULL. Digital Marketing scored 1.37. Marketing Cloud connected unlock: Marketing Cloud connects to Data Cloud for segmented audiences and FSC for relationship-aware campaigns. Improves and feeds personalization. In Zennify's assessment Digital Marketing Strategy Document scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-071].",
+      "why_text": "At 1.0 out of 5, Digital Marketing Strategy Document sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-041, E-071].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P1C1",
+        "P3C2",
+        "P2C4",
+        "P4C2.1.4",
+        "P2C4.9.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [
+        "E-062",
+        "E-072"
+      ],
+      "ic_id": "INS-REC-06",
+      "id": "b4a092a4-3fe1-43e5-829a-ed0bcb264274",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-062",
+            "E-072"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-022",
+            "E-024",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-071",
+            "E-082"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-074",
+        "E-024",
+        "E-021",
+        "E-022",
+        "E-071",
+        "E-076",
+        "E-082",
+        "E-084"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Analytics Strategy a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": "REC-06",
+      "theme": "Analytics & AI",
+      "title": "Tableau: Establish Enterprise Analytics Foundation",
+      "what_text": "Zero enterprise BI platform. Analytics limited to Google Analytics (web), Bloomberg Terminal (treasury), Siteimprove (accessibility). No predictive models, no dashboards, no reporting layer. Analytics & AI scored 1.11 — the absolute lowest category score. CRM Analytics / Tableau connected unlock: Analytics capability feeds (strategy measurement), (fraud analytics), and (customer behavior analysis). In Zennify's assessment Enterprise Analytics Strategy scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-024].",
+      "why_text": "At 1.0 out of 5, Enterprise Analytics Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-074, E-024].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C3.1.3",
+        "P2C4.9.1",
+        "P1C1.4.3",
+        "P2C1.4.RB1",
+        "P2C2.6.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "2d8497fe-faa8-4a63-8be9-65c387fec4c4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-033"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-033"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-040",
+        "E-042",
+        "E-084",
+        "E-033",
+        "E-039",
+        "E-047",
+        "E-016"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Pre-Qualification Capabilities a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-042].",
+      "source_rec_id": "REC-07",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Experience Cloud: Enable Digital Account Origination",
+      "what_text": "Despite Fiserv Architect deployment (2021), account opening remains branch-only. 2026 FAQs explicitly state 'Visit a branch to set up your account' (, ). ClickSWITCH is deployed but branch-initiated only. Industry avg online origination: 20% (Cornerstone 2025, ). TrustCo: effectively 0%. scored 1.87. Experience Cloud connected unlock: Digital origination requires MuleSoft for Fiserv integration and FSC for the customer data model. This is the capstone of the digital transformation. In Zennify's assessment Pre-Qualification Capabilities scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-040].",
+      "why_text": "The assessment found: “TrustCo implemented Fiserv Architect™ open services platform (2021) for end-to-end digital banking across all channels. Integrated solutions deployed: online account opening, digital payments” [E-033]. At 1.5 out of 5, Pre-Qualification Capabilities sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P2C4.9.1",
+        "P3C3.2.5",
+        "P1C4.2.5",
+        "P2C4.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-034",
+        "E-083"
+      ],
+      "ic_id": "INS-REC-08",
+      "id": "56e39f2c-b1a1-40bb-b844-21aa6c97c4c4",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-034",
+            "E-083"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C4"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-063"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-022"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-063",
+        "E-065",
+        "E-084",
+        "E-056",
+        "E-011",
+        "E-022",
+        "E-030",
+        "E-032"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Change Impact Assessment a near-term focus for TrustCo Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-065].",
+      "source_rec_id": "REC-08",
+      "theme": "Culture & Change",
+      "title": "Managed Services: Augment Technology Capacity",
+      "what_text": "TrustCo has 10 technology staff for a $6.4B bank (, ). Zero Salesforce admin/developer staff despite owning CRM (confirmed via Clay). 60% more compliance staff (16) than tech staff (10). Engineering workforce flat at 1% — no growth, no tech hiring. 5 current job openings are all branch/teller/lending. scored 1.93. Managed Services connected unlock: Managed Services is the ENABLER for all other recommendations. Without technical capacity, no Salesforce implementation can be sustained. This is the prerequisite for through. In Zennify's assessment Change Impact Assessment scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-063].",
+      "why_text": "The assessment found: “No documented digital strategy or multi-year technology roadmap disclosed in 10-K. Business description emphasizes traditional banking and community commitment. Board reviews lending policies” [E-011]. At 1.5 out of 5, Change Impact Assessment sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "P1 is scored from 186 capability across 5 categories. this area reveals a bank that governs compliance exceptionally (: 2.88) but treats technology as a cost center rather than a strategic capability. The Research Report Insight Cards for -C5 identified this as an 'implicit strategy' model — Fiserv IS the strategy.",
+        "heading": "4.1 Pillar 1: Digital Strategy & Leadership (2.03, M2 Developing)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "P2 is the heaviest-weighted pillar (30%) and TrustCo's weakest overall. 232 capability scored reveal a bank where digital tools exist (Fiserv Architect, Tealium CDP, ClickSWITCH, Credit Sense) but NONE operate independently of branch staff. The Research Report's central pattern — 'branch-mediated digital model' — is most visible in P2.",
+        "heading": "4.2 Pillar 2: Customer Experience (1.42, M1 Foundational)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "P3 contains TrustCo's defining paradox and its most actionable discovery. 118 capability reveal a bank where compliance (: 3.38) operates at level 3+ Established — the ONLY category above level 3 in the entire assessment — while operational automation (: 1.42) is absent. The Research Report's 'Efficiency Paradox' is the core P3 finding: best-in-class efficiency ratio built on lean staffing, not technology. This model is fragile.",
+        "heading": "4.3 Pillar 3: Operations, Risk & Compliance (2.14, M2 Developing)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "P4 is the ROOT CAUSE pillar. 172 capability reveal that TrustCo's digital challenges across P1-P3 trace back to fundamental technology architecture gaps. The Research Report identified this as the root cause of the 'branch-mediated pattern' — without integration (: 1.41), digital tools cannot operate independently. Without data governance (: 1.14), personalization is impossible. Without analytics (: 1.11), the bank cannot measure what matters.",
+        "heading": "4.4 Pillar 4: Data, Analytics & Technology (1.52, M2 Developing)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "8 recommendations are sequenced across 3 implementation waves. Each traces an evidence chain from Research Report findings through assessment scores to a specific Zennify solution. Recommendations are ordered by implementation wave (dependencies), not priority score."
+  },
+  "run_request_id": "DMA-ASM-TRST-20260330-0001"
+}

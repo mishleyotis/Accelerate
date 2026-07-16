@@ -1,0 +1,753 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "regions-business-bank-0001",
+  "financials": {
+    "lines": [
+      "Regions Bank operates at super-regional bank scale across five key dimensions:",
+      "Key operational metrics: 1,253 branches | 1,850+ ATMs | ~23,000 associates | 56% efficiency ratio (best-in-class regional bank) | 200K hours saved through process centralization | 30%+ organic deposit growth 5-year CAGR vs. peers (top-quartile) | New native mobile app launched July 2025. Evidence: E-035, E-058, E-059, E-084.",
+      "5-year CAGR (net income 2020\u20132025): +16.2%. Efficiency ratio: 56% (best-in-class regional bank). Technology investment sustained at 9\u201311% of revenue (~$400\u2013500M annually) through 2027. Q2 2025: $1.9B total revenue | $0.60 adjusted EPS | +12% YoY net income. 30%+ organic deposit growth vs. peers over 5 years (top quartile). Capital markets revenue: 14% CAGR since 2019. Evidence: E-035, E-058, E-059, E-084."
+    ],
+    "metrics": {
+      "capital_markets_revenue": "14% CAGR since 2019. Evidence: E-035, E-05",
+      "efficiency_ratio": "56% (best-in-class regional bank). Technol",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 23000,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Manav Misra named Chief Analytics Officer of the Year"
+          },
+          {
+            "fy": "FY2024",
+            "label": "CashFlowIQ launched"
+          },
+          {
+            "fy": "FY2023",
+            "label": "NSight 2023 (nCino's annual user conference, 1,700\u2026"
+          },
+          {
+            "fy": "FY2022",
+            "label": "Regions Bank appointed Scott Peters"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "South, Midwest, Texas (15\u201316 states)",
+        "headline": "$160.0B assets \u00b7 FY2025 \u00b7 +0.6% CAGR",
+        "regulator": "Federal Reserve",
+        "series": {
+          "net_income_m": [
+            990.0,
+            2400.0,
+            2150.0,
+            1980.0,
+            1770.0,
+            2100.0
+          ],
+          "total_assets": [
+            155.2,
+            162.8,
+            163.2,
+            152.2,
+            157.3,
+            160.0
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "South",
+      "Midwest",
+      "Texas (15\u201316 states)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Engagement Access",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": null
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Regions Financial Corporation (NYSE: RF) is a publicly traded bank holding company incorporated in Delaware and headquartered at 1900 Fifth Avenue North, Birmingham, Alabama. Founded in 1971, Regions Financial Corporation is the parent company of Regions Bank \u2014 an Alabama state-chartered commercial bank and member of the Federal Reserve System. As a Bank Holding Company (BHC) supervised by the Federal Reserve under the Bank Holding Company Act, Regions Financial submits annual 10-K filings and CCAR stress test results to the Federal Reserve.\n\nRegions Bank holds FDIC deposit insurance and is jointly examined by the Federal Reserve and Alabama Banking Department. Dan Massey (Chief Enterprise Operations and Technology Officer) joined from Truist Bank in May 2022 and reports directly to CEO John Turner. As of March 31, 2026, Anil Chadha serves as Chief Financial Officer, succeeding David Turner who retired after 20 years. Evidence: E-001, E-007, E-009, E-058.",
+    "primary_regulator": "Federal Reserve",
+    "size_tier": "large",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2022-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "Contact center wait times reduced by more than 30% per Dan Massey early accomplishments (DoingMoreToday Feb 2023). Reggie handled 1.5M calls + 1.4M banker questions (IBM press release). 50 FTE equivalent from automation.",
+        "title": "Contact center wait times reduced by more than 30% per Dan Massey",
+        "type": "article",
+        "url": "https://thefinancialbrand.com/news/digital-transformation-banking/inside-regions-banks-cloud-driven-digital-transformation-strategy-147818"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "nSight 2023 (nCino's annual user conference, 1,700+ attendees) launched Banking Advisor closed beta testing Product Design Program \u2014 demonstrating nCino's early adopter program for AI capabilities. As a 9-year nCino cust",
+        "title": "NSight 2023 (nCino's annual user conference, 1,700+ attendees)\u2026",
+        "type": "conference",
+        "url": "https://www.ncino.com/en-US/news/ncino-kicks-off-annual-user-conference-nsight-advancing-modernization-financial-services"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-056",
+        "excerpt": "Social media presence confirmed: Twitter/X @askRegions (social customer service), Facebook regionsbank, Instagram regionsbank, Pinterest regionsbank, LinkedIn Regions Financial Corporation \u2014 multi-channel social presence",
+        "title": "Social media presence confirmed : Twitter/X @askRegions (social\u2026",
+        "type": "linkedin-post",
+        "url": "https://doingmoretoday.com"
+      }
+    ],
+    "ticker": "NYSE: RF"
+  },
+  "issue_register": [
+    {
+      "id": "e981a250-c85e-4eac-a975-eb043c0c7b9e",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Run ID found fewer than 2 times in report"
+    },
+    {
+      "id": "86efe199-0f2d-4c6f-a37a-f9c69cd3bb2d",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "4 range-style E-ID references: ['E-001 to E-091', 'E-001 to E-091']"
+    },
+    {
+      "id": "09da0268-4830-4040-9bdc-0acbc1fb3f92",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Pillar P2 rollup mismatch: workbook=2.17 computed=1.87"
+    },
+    {
+      "id": "1f777c4a-46be-42e6-8d66-45420c0290c1",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "294 rows (42.1%) missing Source_URLs"
+    },
+    {
+      "id": "709e351d-a681-4458-a088-98c2eaeb58ca",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "'caps_applied_log.csv' absent \u2014 known v5.5\u2194v2.4 schema drift (not an engagement error)"
+    },
+    {
+      "id": "dcdecee8-ceb5-469f-bacb-6f017df37edf",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "'contradiction_log.csv' absent \u2014 known v5.5\u2194v2.4 schema drift (not an engagement error)"
+    },
+    {
+      "id": "4d608de5-9b72-4fbd-904d-f933d90280ab",
+      "issue_id": "GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "'evidence_index.csv' absent \u2014 known v5.5\u2194v2.4 schema drift (not an engagement error)"
+    },
+    {
+      "id": "6b913796-8a86-4942-83ed-0e4ca5e850a4",
+      "issue_id": "GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "'reasoning_chain_log.json' absent \u2014 known v5.5\u2194v2.4 schema drift (not an engagement error)"
+    },
+    {
+      "id": "ab08159c-9631-4bad-bf74-70c0fb24bcd2",
+      "issue_id": "GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "'Calculation_Chain sheet in workbook' absent \u2014 known v5.5\u2194v2.4 schema drift (not an engagement error)"
+    },
+    {
+      "id": "f441c16a-91a6-41dc-827f-7bf832d9a56a",
+      "issue_id": "GOV-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Technology validation used 3-source fallback (Exa+Dice) because Vibe Prospecting credits were exhausted. All 5 solutions confirmed absent per fallback methodology. Fallback documented explicitly per framework rule."
+    },
+    {
+      "id": "afc243e0-14cc-425b-b3d3-716b15bfc704",
+      "issue_id": "GOV-014",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Export CSVs: 3 of 5 present (export_scoring_detail.csv, export_category_summary.csv, export_pillar_summary.csv). Missing: export_evidence_inventory.csv, export_issue_register.csv. Known v5.5\u2194v2.4 schema drift \u2014 these 2 CSVs not generated by dma-assessment v5.5."
+    },
+    {
+      "id": "8ad727d2-1ef0-4444-a68d-f54bf4763504",
+      "issue_id": "GOV-015",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "294 rows (42.1%) have blank Source_URLs (col G). These rows were scored from proxy labels which have E-ID references but no direct URL. Evidence_IDs column is populated for all rows. Not a scoring integrity issue."
+    },
+    {
+      "id": "33429a4a-f9e7-496f-b7d4-8fa758345936",
+      "issue_id": "GOV-016",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "P2C5 'Customer Analytics & Insights' has 0 subcap rows in Regional Banks toolkit. Score=2.00 is evidence-based default in workbook Category_Detail. Report narrative is well-evidenced (E-016, E-072, E-058). This is a framework taxonomy gap, not an engagement error."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Most recent reported financials: $160.0B assets as of FY2025 as of +0.6% CAGR, within a series tracked FY2020 to FY2025.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 3.03,
+        "P1C3": 2.05,
+        "P1C4": 2.46,
+        "P1C5": 2.68,
+        "P2C1": 2.43,
+        "P2C2": 2.02,
+        "P2C3": 2.52,
+        "P2C4": 2.68,
+        "P3C1": 2.81,
+        "P3C2": 2.63,
+        "P3C3": 3.07,
+        "P3C4": 2.84,
+        "P4C1": 2.21,
+        "P4C2": 2.09,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.55,
+      "peer_name": "CalPrivate Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.76,
+        "P1C2": 2.79,
+        "P1C3": 2.58,
+        "P1C4": 2.52,
+        "P1C5": 2.57,
+        "P2C1": 2.32,
+        "P2C2": 2.54,
+        "P2C3": 2.13,
+        "P2C4": 2.42,
+        "P3C1": 2.36,
+        "P3C2": 2.23,
+        "P3C3": 2.18,
+        "P3C4": 2.14,
+        "P4C1": 2.21,
+        "P4C2": 2.15,
+        "P4C3": 2.49,
+        "P4C4": 2.53
+      },
+      "overall_score": 2.41,
+      "peer_name": "Synchrony Financial",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 3.41,
+        "P1C3": 1.96,
+        "P1C4": 2.45,
+        "P2C1": 2.53,
+        "P2C2": 2.34,
+        "P2C3": 2.78,
+        "P2C4": 1.7,
+        "P3C1": 1.87,
+        "P3C2": 2.71,
+        "P3C3": 2.57,
+        "P3C4": 2.41,
+        "P4C1": 1.81,
+        "P4C2": 1.64,
+        "P4C3": 2.39,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.39,
+      "peer_name": "Exchange Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.47,
+        "P1C3": 1.93,
+        "P1C4": 1.87,
+        "P1C5": 1.61,
+        "P2C1": 2.39,
+        "P2C2": 2.37,
+        "P2C3": 2.0,
+        "P2C4": 1.93,
+        "P3C1": 2.09,
+        "P3C2": 2.63,
+        "P3C3": 2.52,
+        "P3C4": 2.55,
+        "P4C1": 2.28,
+        "P4C2": 2.37,
+        "P4C3": 2.5,
+        "P4C4": 3.07
+      },
+      "overall_score": 2.29,
+      "peer_name": "Texas Capital Bancshares, Inc. / Texas Capital Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 3.86,
+        "P1C3": 2.03,
+        "P1C4": 2.66,
+        "P1C5": 1.71,
+        "P2C1": 1.6,
+        "P2C2": 2.15,
+        "P2C3": 2.07,
+        "P2C4": 1.61,
+        "P3C1": 1.98,
+        "P3C2": 2.37,
+        "P3C3": 3.0,
+        "P3C4": 2.28,
+        "P4C1": 1.58,
+        "P4C2": 1.56,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.27,
+      "peer_name": "1st Security Bank of Washington",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-REGIONS-20260518-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Regions Bank Indeed ratings (Birmingham, AL): Overall 3.7/5; Culture & Values 3.5/5; Work-Life Balance 3.8/5; Job Security & Advancement 3.3/5; Management 3.3/5",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.7
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Jacob Kosoff named Head of Model Risk Management and Validation at Regions Bank. Elizabeth Scribner (PhD, Senior Model Risk Analyst/Model Risk Manager, Aug 2023-present) confirms: 'Oversees validation activities for the bank's portfolio of models across Wealth Management, BSA/AML, Fraud, Marketing, Operations, Consumer Lending.'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-076",
+      "event_date": "2026-05-01",
+      "evidence_e_ids": [
+        "E-076"
+      ],
+      "id": "222c8df5-4099-4719-a5f7-778255138434",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/elizabeth-scribner-phd-43426510b",
+      "subcap_ids": [],
+      "title": "Jacob Kosoff named Head of Model Risk Management and\u2026"
+    },
+    {
+      "body": "Forbes named Regions Financial #103 of Top 200 Most Cybersecure Companies 2023. Deputy CISO Charles Carter appointed November 2025.",
+      "date_precision": "month",
+      "e_id": "E-018",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "b1a22ade-de19-40d1-840f-699aeab7d2fe",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/ivana-cojbasic-crisc-gslc-1874245",
+      "subcap_ids": [],
+      "title": "Deputy CISO Charles Carter appointed"
+    },
+    {
+      "body": "CFPB Consent Order (2022-CFPB-0008) for overdraft fee violations was TERMINATED July 21, 2025. Regions Bank fulfilled obligations including $50M civil money penalty and consumer redress.",
+      "date_precision": "day",
+      "e_id": "E-010",
+      "event_date": "2025-07-21",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "18b163f5-3611-40dc-9856-52726f8ee538",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://files.consumerfinance.gov/f/documents/cfpb_regions-bank_termination-of-consent-order_2025-07.pdf",
+      "subcap_ids": [],
+      "title": "CFPB Consent Order (2022-CFPB-0008) for overdraft fee\u2026"
+    },
+    {
+      "body": "Regions Bank fully resolved 2022 CFPB Consent Order on overdraft fees (July 2025 termination, $50M penalty paid, consumer redress complete). Resolution demonstrates active regulatory compliance remediation capability and exam readiness process.",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "7df4f1b3-4621-4789-883c-5a78f2cac46b",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinance.gov/enforcement/actions/regions-bank_2022/",
+      "subcap_ids": [],
+      "title": "Regions Bank resolved 2022 CFPB Consent Order on overdraft\u2026"
+    },
+    {
+      "body": "CFPB Consent Order FULLY RESOLVED July 2025 per E-001: The most recent consent order was resolved \u2014 strongest positive compliance signal. Regions launched 'Regions Overdraft Grace' feature proactively giving customers an extra business day to make deposits and avoid overdraft \u2014 confirms embedded consumer protection response.",
+      "date_precision": "month",
+      "e_id": "E-064",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-064",
+        "E-001"
+      ],
+      "id": "5d1473c5-b65b-452b-b307-d2879fbd8f30",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinance.gov/about-us/newsroom/cfpb-fines-regions-bank-7-5-million-for-unlawful-overdraft-practices/",
+      "subcap_ids": [],
+      "title": "CFPB Consent Order Resolved per E-001"
+    },
+    {
+      "body": "Regions Bank named in top-performing banks for banking financial health support index per J.D. Power 2025 U.S. Retail Banking Advice Satisfaction Study (alongside BofA, Chase, Capital One, Fifth Third, First Citizens, Huntington, PNC, TD Bank, US Bank).",
+      "date_precision": "year",
+      "e_id": "E-027",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "cc6516b6-e6a5-40bd-9fb3-d9f594b9a037",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://ir.regions.com/news-events/press-releases/news-details/2024/Regions-Bank-is-Top-Regional-Bank-in-the-J.D.-Power-2024-U.S.-Online-Banking-Satisfaction-Study/default.aspx",
+      "subcap_ids": [],
+      "title": "Regions Bank named in top-performing banks for banking\u2026"
+    },
+    {
+      "body": "Manav Misra named Chief Analytics Officer of the Year at MachineCon 2025 \u2014 invitation-only event for analytics and AI leaders. He is 'at the forefront of the generative AI (GenAI) revolution' and is 'routinely sought out to speak about trends and impact AI is making in financial services.'",
+      "date_precision": "year",
+      "e_id": "E-069",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-069"
+      ],
+      "id": "a0fa7a88-d687-4f1f-b754-0950b7a9d027",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://doingmoretoday.com/better-banking-through-data-and-analytics/",
+      "subcap_ids": [],
+      "title": "Manav Misra named Chief Analytics Officer of the Year"
+    },
+    {
+      "body": "Regions Embedded ERP Finance launched February 2025 (powered by Koxa): Connects Regions banking directly into client ERP systems. 'Clients now have the option of using this tool, powered by Koxa, to seamlessly connect financial data to their own enterprise resource planning (ERP) systems.' Real-time banking data integration into ERP \u2014 open banking use case.",
+      "date_precision": "month",
+      "e_id": "E-070",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-070"
+      ],
+      "id": "0eed25e4-e6fd-41f4-ab4c-448021760240",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://ir.regions.com/news-events/press-releases/news-details/2024/Regions-Bank-Launches-CashFlowIQ-Powered-by-BILL-to-Help-Business-Clients-Manage-Money-Better/default.aspx",
+      "subcap_ids": [],
+      "title": "Regions Embedded ERP Finance launched"
+    },
+    {
+      "body": "Board has Risk Committee and Technology Committee with separate charters. Roger Jenkins (appointed Jan 2025) appointed to both committees.",
+      "date_precision": "month",
+      "e_id": "E-013",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-013"
+      ],
+      "id": "4bc0c464-b8a5-4ec6-84c7-5ba7160e7fcf",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001281761/000128176124000016/rf2024proxystatement.pdf",
+      "subcap_ids": [],
+      "title": "Roger Jenkins (appointed Jan 2025) appointed to both\u2026"
+    },
+    {
+      "body": "Fortune 2024 Most Innovative Companies named Regions Bank. Forbes 2024 Top 300 companies for customer service \u2014 Regions is the highest-ranked bank. Multiple external innovation/service validations confirm innovation culture.",
+      "date_precision": "year",
+      "e_id": "E-041",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "316ac844-bc06-402e-9627-fa9fc8a555ec",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001281761/000128176124000006/a1q24investormeetingmate.htm",
+      "subcap_ids": [],
+      "title": "Fortune 2024 Most Innovative Companies named Regions Bank"
+    },
+    {
+      "body": "CashFlowIQ launched June 2024 (powered by BILL): Advanced AP/AR digital solution. Features: bill payment, invoice creation, payment tracking, workflow approvals, automated payment reconciliation, accounting software sync (QuickBooks, etc.). Integrated with Regions OnePass portal. Bryan Ford (Head Treasury Management) confirms.",
+      "date_precision": "month",
+      "e_id": "E-070",
+      "event_date": "2024-06-01",
+      "evidence_e_ids": [
+        "E-070"
+      ],
+      "id": "e5ddbfb9-d823-46f3-9acb-2a8da864fcf5",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://ir.regions.com/news-events/press-releases/news-details/2024/Regions-Bank-Launches-CashFlowIQ-Powered-by-BILL-to-Help-Business-Clients-Manage-Money-Better/default.aspx",
+      "subcap_ids": [],
+      "title": "CashFlowIQ launched"
+    },
+    {
+      "body": "Russ Zusi is Chief Risk Officer (joined January 2024), oversees Financial Risk, Non-Financial Risk, Enterprise Compliance Risk, Enterprise Risk, Risk Initiative Integration, and Business Unit Risk Groups for Corporate, Consumer, and Wealth. Previously co-head of Global Compliance and Operational Risk at Bank of America (20 years).",
+      "date_precision": "month",
+      "e_id": "E-024",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-024",
+        "E-030"
+      ],
+      "id": "690febfd-d445-4bd6-a7cd-72b11d03475b",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://ir.regions.com/governance/management/default.aspx",
+      "subcap_ids": [],
+      "title": "Russ Zusi is Chief Risk Officer (joined January 2024)\u2026"
+    },
+    {
+      "body": "nSight 2023 (nCino's annual user conference, 1,700+ attendees) launched Banking Advisor closed beta testing Product Design Program \u2014 demonstrating nCino's early adopter program for AI capabilities. As a 9-year nCino customer, Regions is ideally positioned for early adopter status.",
+      "date_precision": "year",
+      "e_id": "E-036",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "508dd065-0a25-477b-b50e-17d1f443d118",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.ncino.com/en-US/news/ncino-kicks-off-annual-user-conference-nsight-advancing-modernization-financial-services",
+      "subcap_ids": [],
+      "title": "NSight 2023 (nCino's annual user conference, 1,700\u2026"
+    },
+    {
+      "body": "Forbes named Regions Financial #103 of Top 200 Most Cybersecure Companies 2023. Deputy CISO Charles Carter appointed November 2025.",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "d920e478-2a02-401a-a106-1d875c002bd1",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/ivana-cojbasic-crisc-gslc-1874245",
+      "subcap_ids": [],
+      "title": "Forbes named Regions Financial"
+    },
+    {
+      "body": "Dr. Chun Schiros, Head of Enterprise Data Science at Regions Bank, named to American Banker's 2023 Most Powerful Women in Banking: Next list. Stated: 'Data and analytics are important parts of our lives, and using my experience to help make banking easier and more beneficial is my professional calling.'",
+      "date_precision": "year",
+      "e_id": "E-021",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "062641f0-4590-4c14-b654-9fc645f1ae09",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://doingmoretoday.com/what-do-regions-rc-cars-and-machine-learning-have-in-common-data-science-day/",
+      "subcap_ids": [],
+      "title": "Chun Schiros, Head of Enterprise Data Science at Regions\u2026"
+    },
+    {
+      "body": "Anna Brackin named Chief Compliance Officer at Regions Bank (2023). Gary Walton named Risk Management Executive (2023). These appointments confirmed via Rebecca Leon LinkedIn post: 'Experience. Leadership. Strategy. We've named Anna Brackin as Chief Compliance Officer and Gary Walton as Risk Management Executive.'",
+      "date_precision": "year",
+      "e_id": "E-064",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "daa327dd-b3fa-4d9f-959b-dd6e63d7e0f0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.consumerfinance.gov/about-us/newsroom/cfpb-fines-regions-bank-7-5-million-for-unlawful-overdraft-practices/",
+      "subcap_ids": [],
+      "title": "Anna Brackin named Chief Compliance Officer"
+    },
+    {
+      "body": "Dan Massey (CEOTO) named among 7 top technologists hired by banks and credit unions in 2022 by American Banker. 30 years fintech/banking experience (Truist/SunTrust). Reports directly to CEO Turner.",
+      "date_precision": "year",
+      "e_id": "E-015",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "80be7aca-651b-47e3-be18-91aa11029212",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://doingmoretoday.com/top-tech-talent/",
+      "subcap_ids": [],
+      "title": "Dan Massey (CEOTO) named among 7 top technologists hired by\u2026"
+    },
+    {
+      "body": "Regions completed successful technology integrations for Sabal Capital Partners and EnerBank (both M&A) per Dan Massey's early accomplishments. Sabal closed +$730M loans in 2022, FNMA small balance origination volume doubled. EnerBank generating high quality loans.",
+      "date_precision": "year",
+      "e_id": "E-025",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "cafd34e4-ef50-4f49-a8a6-f47dffd94220",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001281761/000128176123000022/ex991-2023annualsharehol.htm",
+      "subcap_ids": [],
+      "title": "FNMA small balance origination volume doubled"
+    },
+    {
+      "body": "Regions Bank appointed Scott Peters as first-ever Chief Transformation Officer in May 2022, part of a multi-year initiative to create the Regions Bank of the future. Peters, Danella, and Massey all report directly to CEO Turner.",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2022-05-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "79e5a830-577a-4c7b-8e74-08305767fad4",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://ir.regions.com/news-events/press-releases/news-details/2022/Regions-Bank-Names-Scott-Peters-as-Chief-Transformation-Officer-Kate-Danella-Named-Head-of-Consumer-Banking-05-12-2022/default.aspx",
+      "subcap_ids": [],
+      "title": "Regions Bank appointed Scott Peters"
+    },
+    {
+      "body": "Axway Amplify Open Banking selected January 2025: 'Through Amplify Open Banking from Axway, Regions is further enhancing data privacy and providing increased security to the flow of customer data.' Features: FDX-standard APIs, integrated consent management (opt-in/opt-out), third-party activity monitoring, customer data sharing deactivation. Regions joined FDX (Financial Data Exchange) in 2021.",
+      "date_precision": "year",
+      "e_id": "E-074",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-074"
+      ],
+      "id": "94d2e7dc-f2c6-4d73-9c0e-4263e4c39e03",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://ir.regions.com/news-events/press-releases/news-details/2025/Enhancing-Customer-Control-of-Financial-Data-Regions-Bank-Selects-Axway-to-Accelerate-Open-Banking-Services/default.aspx",
+      "subcap_ids": [],
+      "title": "Regions joined FDX (Financial Data Exchange)"
+    },
+    {
+      "body": "CFPB Consent Order History: 2015 \u2014 CFPB fined Regions Bank $7.5M + required $49M consumer refunds for unlawful overdraft fees. CFPB cited Regions as 'repeat offender' for overdraft practices. Regions cooperated by self-reporting and making voluntary reimbursements.",
+      "date_precision": "year",
+      "e_id": "E-064",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "74b033c9-186c-47bb-b555-89cc66c65cc5",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinance.gov/about-us/newsroom/cfpb-fines-regions-bank-7-5-million-for-unlawful-overdraft-practices/",
+      "subcap_ids": [],
+      "title": "CFPB Consent Order History: 2015 \u2014 CFPB fined Regions Bank\u2026"
+    },
+    {
+      "body": "Anna Brackin named Chief Compliance Officer at Regions Bank (2023). Gary Walton named Risk Management Executive (2023). These appointments confirmed via Rebecca Leon LinkedIn post: 'Experience. Leadership. Strategy. We've named Anna Brackin as Chief Compliance Officer and Gary Walton as Risk Management Executive.'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-064",
+      "event_date": "2015-04-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "873b6b52-61d1-441f-8d34-c1ad5b94f2e0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.consumerfinance.gov/about-us/newsroom/cfpb-fines-regions-bank-7-5-million-for-unlawful-overdraft-practices/",
+      "subcap_ids": [],
+      "title": "We 've named Anna Brackin as Chief Compliance Officer and\u2026"
+    }
+  ]
+}

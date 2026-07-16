@@ -1,0 +1,690 @@
+{
+  "entity_display_id": "tii-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "AM Best upgraded C&F Insurance Group (including United States Fire Insurance Company, TII's underwriter) to A+ Superior on August 28, 2025 \u2014 upgrading from A Excellent.",
+        "source_kind": "docx"
+      },
+      "id": "a00660b1-aea2-4605-b6f3-ee2daa413e79",
+      "involved_subcap_ids": [
+        "P2C3.1.6",
+        "P4C3.1.2",
+        "P3C1.5.3",
+        "P1C1.2.1",
+        "P1C1.2.5",
+        "P1C5.3.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,200,000,000",
+          "delta": null,
+          "kpi_label": "C&F GWP",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "13%",
+          "delta": null,
+          "kpi_label": "year CAGR",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 49,
+        "P2": 17,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "AM Best upgraded C&F Insurance Group (including United States Fire Insurance Company\u2026",
+      "verbatim_quote": "AM Best upgraded C&F Insurance Group (including United States Fire Insurance Company, TII's underwriter) to A+ Superior on August 28, 2025 \u2014 upgrading from A Excellent. C&F GWP reached $6.2B in 2025 (vs $5.7B in 2024, +8.8% YoY). The 4-year CAGR from 2021-2025 is approximately 13%. This financial strength upgrade at an accelerating growth trajectory indicates investment headroom for technology programmes and directly supports platform expansion budget approvals."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "C&F's EVP issued a public statement in March 2026: 'On-Demand Coverage, Digital Claims Redefine Travel Insurance.'",
+        "source_kind": "docx"
+      },
+      "id": "a009a54a-ba30-4fb6-8cb9-79186a594aaf",
+      "involved_subcap_ids": [
+        "P1C2.2.1",
+        "P2C3.2.1",
+        "P1C2.1.6",
+        "P3C3.5.3",
+        "P2C3.5.IB1",
+        "P2C3.5.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 35,
+        "P2": 48,
+        "P3": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "C&F's EVP issued a public statement in March 2026: 'On-Demand Coverage\u2026",
+      "verbatim_quote": "C&F's EVP issued a public statement in March 2026: 'On-Demand Coverage, Digital Claims Redefine Travel Insurance.' This represents a board-level strategic commitment to transforming the claims experience \u2014 directly acknowledging TII's most visible customer pain point (months-long claim waits, BBB complaints, Trustpilot 4.4\u2605 with claims speed as the primary driver of negative reviews). Digital claims transformation is now an explicitly stated corporate objective."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Chris Livingston promoted to Deputy CISO (March 2025), now directing the Security Operations and Engineering team and the Identity and Access Management (IAM) team.",
+        "source_kind": "docx"
+      },
+      "id": "d69f11f6-7185-4668-8fce-3e4cb59d8b85",
+      "involved_subcap_ids": [
+        "P1C2.6.2",
+        "P1C3.9.2",
+        "P4C4.7.1",
+        "P4C4.4.1",
+        "P4C2.5.6",
+        "P4C4.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P4": 67
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Chris Livingston promoted to Deputy CISO (March 2025)\u2026",
+      "verbatim_quote": "Chris Livingston promoted to Deputy CISO (March 2025), now directing the Security Operations and Engineering team and the Identity and Access Management (IAM) team. Livingston built what CISO Holden publicly characterised as 'an exceptional third-party risk management program and a world-class cloud and applications security program.' C&F separately launched CISO Professional Liability Insurance (November 2024) \u2014 a product that demonstrates deep internal cybersecurity expertise at board level."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Denise Bialek appointed VP, Business Development & Partnerships (January 2026).",
+        "source_kind": "docx"
+      },
+      "id": "8365a787-5ebf-4a3f-981a-7eb8d7ff0f3e",
+      "involved_subcap_ids": [
+        "P2C1.4.IB1",
+        "P3C2.4.1",
+        "P2C1.5.6",
+        "P2C3.1.1",
+        "P1C1.4.2",
+        "P1C1.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 35,
+        "P2": 48,
+        "P3": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Denise Bialek appointed VP, Business Development & Partnerships (January 2026)\u2026",
+      "verbatim_quote": "Denise Bialek appointed VP, Business Development & Partnerships (January 2026). This hire signals active channel expansion beyond TII's existing portfolio (USAA 14M-member affinity, Squaremouth aggregator, direct agency distribution). The January 2025 launch of the 3-tier product suite (Essential/Deluxe/Platinum) was specifically designed with flexible channel deployment in mind \u2014 providing the product architecture to support new distribution relationships at scale."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Jared Ionin appointed Chief Digital Officer, C&F A&H Division (November 21, 2025).",
+        "source_kind": "docx"
+      },
+      "id": "88c34c7b-e98f-40af-984a-d215fcc8ac70",
+      "involved_subcap_ids": [
+        "P1C1.8.1",
+        "P1C1.1.1",
+        "P3C2.4.1",
+        "P1C1.6.1",
+        "P1C2.1.1",
+        "P2C1.1.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "35%",
+          "delta": null,
+          "kpi_label": "AI success S&S",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 66,
+        "P2": 17,
+        "P3": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Jared Ionin appointed Chief Digital Officer, C&F A&H Division (November 21, 2025)\u2026",
+      "verbatim_quote": "Jared Ionin appointed Chief Digital Officer, C&F A&H Division (November 21, 2025). His mandate: 'strengthening digital infrastructure and establishing a roadmap for continued innovation and scalability.' This marks the first time a dedicated CDO has been appointed to the A&H division \u2014 signalling a formally funded digital transformation programme at the TII level. The appointment follows S&S Division's proven AI success (S&S UP, 35% turnaround reduction, Datos Insights 2025 Award) and Brizzi CDO's December 2025 statement that AI's most tangible impact is underwriting productivity."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-065"
+        ],
+        "representative_quote": "SO-001: Data & AI Infrastructure Buildout (Nov 2025)",
+        "source_kind": "docx"
+      },
+      "id": "7c874259-aaee-4481-b58a-e8fb1d358a69",
+      "involved_subcap_ids": [
+        "P4C3.4.5",
+        "P4C3.4.9",
+        "P4C1.5.4",
+        "P4C1.1.4",
+        "P1C3.8.3",
+        "P4C2.6.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P4": 83
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-001: Data & AI Infrastructure Buildout  (Nov 2025)  [E-065]",
+      "verbatim_quote": "SO-001: Data & AI Infrastructure Buildout  (Nov 2025)  [E-065]"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-190"
+        ],
+        "representative_quote": "SO-002: Digital Claims Transformation (Mar 2026)",
+        "source_kind": "docx"
+      },
+      "id": "de9f81ff-dfce-473f-b8b6-5e8a1ef7bd1a",
+      "involved_subcap_ids": [
+        "P2C3.5.IB1",
+        "P1C1.8.1",
+        "P1C1.1.1",
+        "P3C2.4.1",
+        "P1C1.6.1",
+        "P1C2.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 70,
+        "P2": 13,
+        "P3": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-002: Digital Claims Transformation  (Mar 2026)  [E-190]",
+      "verbatim_quote": "SO-002: Digital Claims Transformation  (Mar 2026)  [E-190]"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "SO-003: Channel Partnership Expansion (Jan 2026)",
+        "source_kind": "docx"
+      },
+      "id": "017169b9-08df-47d1-8f49-8eaf11cd3b7d",
+      "involved_subcap_ids": [
+        "P2C4.2.7",
+        "P2C4.5.1",
+        "P2C4.4.6",
+        "P2C4.4.6",
+        "P2C3.6.1",
+        "P2C3.2.7",
+        "P2C3.5.5",
+        "P2C3.1.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-003: Channel Partnership Expansion  (Jan 2026)  [ep_profile]",
+      "verbatim_quote": "SO-003: Channel Partnership Expansion  (Jan 2026)  [ep_profile]"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-090"
+        ],
+        "representative_quote": "SO-004: Product Portfolio Modernisation (Jan 2025)",
+        "source_kind": "docx"
+      },
+      "id": "b8ad9a7f-c672-4a35-98d8-0a3c7ab410b7",
+      "involved_subcap_ids": [
+        "P1C2.8.2",
+        "P4C3.2.1",
+        "P2C2.1.3",
+        "P2C4.5.1",
+        "P4C1.1.4",
+        "P4C3.5.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P4": 50
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-004: Product Portfolio Modernisation  (Jan 2025)  [E-090]",
+      "verbatim_quote": "SO-004: Product Portfolio Modernisation  (Jan 2025)  [E-090]"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-063",
+          "E-065"
+        ],
+        "representative_quote": "SO-005: AI/ML Extension from S&S Division to A&H (Late 2024\u20132025)",
+        "source_kind": "docx"
+      },
+      "id": "398990c3-084b-4bcb-b417-b09e85d728df",
+      "involved_subcap_ids": [
+        "P1C1.5.4",
+        "P4C2.1.2",
+        "P2C4.8.5",
+        "P1C3.8.3",
+        "P4C2.4.10",
+        "P3C1.6.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-005: AI/ML Extension from S&S Division to A&H  (Late 2024\u20132025)  [E-063, E-065]",
+      "verbatim_quote": "SO-005: AI/ML Extension from S&S Division to A&H  (Late 2024\u20132025)  [E-063, E-065]"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-010",
+          "E-021"
+        ],
+        "representative_quote": "SO-006: Financial Scale & Credit Rating Upgrade (Aug 2025)",
+        "source_kind": "docx"
+      },
+      "id": "feb0ab58-ab5e-4375-b273-9b8d05e223c2",
+      "involved_subcap_ids": [
+        "P1C3.4.1",
+        "P2C2.4.2",
+        "P2C2.4.1",
+        "P1C5.2.3",
+        "P2C4.6.5",
+        "P3C4.6.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 30,
+        "P2": 53,
+        "P3": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-006: Financial Scale & Credit Rating Upgrade  (Aug 2025)  [E-010, E-021]",
+      "verbatim_quote": "SO-006: Financial Scale & Credit Rating Upgrade  (Aug 2025)  [E-010, E-021]"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-182"
+        ],
+        "representative_quote": "SO-007: Enterprise Security & Resilience Governance Uplift (Mar 2025)",
+        "source_kind": "docx"
+      },
+      "id": "31c34885-fc1b-4bb2-9165-b6e439bff1fa",
+      "involved_subcap_ids": [
+        "P3C4.1.2",
+        "P3C4.1.1",
+        "P3C4.1.4",
+        "P4C1.3.1",
+        "P4C3.3.1",
+        "P4C2.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 50,
+        "P4": 50
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO-007: Enterprise Security & Resilience Governance Uplift  (Mar 2025)  [E-182]",
+      "verbatim_quote": "SO-007: Enterprise Security & Resilience Governance Uplift  (Mar 2025)  [E-182]"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "TII launched its new 3-tier product suite (Essential, Deluxe, Platinum) in January 2025, replacing the legacy Worldwide Trip Protector and WTP Edge products.",
+        "source_kind": "docx"
+      },
+      "id": "b2b0532c-29c9-4e31-8104-ffa908aeda9c",
+      "involved_subcap_ids": [
+        "P2C2.1.3",
+        "P2C4.5.1",
+        "P4C1.1.4",
+        "P4C3.5.6",
+        "P4C2.2.9",
+        "P4C3.5.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 33,
+        "P4": 67
+      },
+      "source_path": "docx:strategic_section",
+      "title": "TII launched its new 3-tier product suite (Essential, Deluxe, Platinum) in January 2025\u2026",
+      "verbatim_quote": "TII launched its new 3-tier product suite (Essential, Deluxe, Platinum) in January 2025, replacing the legacy Worldwide Trip Protector and WTP Edge products. Each tier offers configurable optional coverage bundles \u2014 a meaningful shift from fixed-benefit products to flexible, modular coverage architecture. This is the most significant product architecture change TII has made in several years."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "The S&S UP platform (ML + GenAI + OCR in production, Datos Insights 2025 Award winner) provides the proven innovation template for C&F. Ionin's CDO mandate explicitly extends this programme to the A&H division.",
+        "source_kind": "docx"
+      },
+      "id": "c087041b-dcca-41e3-b17b-1cccd6f54ff9",
+      "involved_subcap_ids": [
+        "P3C1.6.1",
+        "P1C3.8.1",
+        "P4C2.5.3",
+        "P4C1.1.8",
+        "P2C1.5.7",
+        "P2C3.6.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "The S&S UP platform (ML + GenAI + OCR in production\u2026",
+      "verbatim_quote": "The S&S UP platform (ML + GenAI + OCR in production, Datos Insights 2025 Award winner) provides the proven innovation template for C&F. Ionin's CDO mandate explicitly extends this programme to the A&H division. Marc Adee, C&F CEO, personally champions GenAI adoption via biweekly leadership meetings ('starting small, with people who are interested, then socialise it into the organisation'). The 'several hundred' C&F enterprise RPA bots demonstrate active automation capability at scale."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Zennify Implication: Einstein AI + Agentforce: proven C&F infrastructure extended to TII.",
+        "source_kind": "docx"
+      },
+      "id": "faef9aac-3e12-421b-9474-5bdd6c5b44c0",
+      "involved_subcap_ids": [
+        "P4C3.4.5",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C1.1.7",
+        "P4C4.2.6",
+        "P1C3.8.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P4": 83
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Einstein AI + Agentforce: proven C&F infrastructure extended to TII\u2026",
+      "verbatim_quote": "Zennify Implication: Einstein AI + Agentforce: proven C&F infrastructure extended to TII. Zennify accelerates the S&S\u2192A&H playbook."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Ionin CDO + Bialek VP BD both hired at this inflection \u2014 active investment cycle.",
+        "source_kind": "docx"
+      },
+      "id": "eff888ec-708d-4aa0-ba82-a798a741115e",
+      "involved_subcap_ids": [
+        "P4C3.1.2",
+        "P3C1.1.4",
+        "P1C5.2.2",
+        "P2C4.5.7",
+        "P3C3.8.3",
+        "P4C4.5.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 13,
+        "P2": 17,
+        "P3": 35,
+        "P4": 35
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Financial growth creates technology investment urgency\u2026",
+      "verbatim_quote": "Zennify Implication: Financial growth creates technology investment urgency. Ionin CDO + Bialek VP BD both hired at this inflection \u2014 active investment cycle."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Zennify Implication: Revenue Cloud + OmniStudio: product catalogue management, quote-bind automation, and commission configuration across 3 tiers.",
+        "source_kind": "docx"
+      },
+      "id": "b06d4606-00ab-41e9-a17f-5f29e8cfdf56",
+      "involved_subcap_ids": [
+        "P3C1.8.IB3",
+        "P4C3.4.7",
+        "P1C1.5.5",
+        "P4C3.5.6",
+        "P4C3.4.10",
+        "P4C3.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 13,
+        "P4": 70
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Revenue Cloud + OmniStudio: product catalogue management\u2026",
+      "verbatim_quote": "Zennify Implication: Revenue Cloud + OmniStudio: product catalogue management, quote-bind automation, and commission configuration across 3 tiers."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Ionin's roadmap is the engagement entry point.",
+        "source_kind": "docx"
+      },
+      "id": "a7918509-3f52-46d7-9578-385611bcc466",
+      "involved_subcap_ids": [
+        "P4C1.1.1",
+        "P1C1.2.1",
+        "P4C3.1.2",
+        "P1C3.7.1",
+        "P4C1.5.4",
+        "P1C1.1.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P4": 50
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Salesforce Data Cloud + Einstein AI: Ionin's roadmap is the engagement\u2026",
+      "verbatim_quote": "Zennify Implication: Salesforce Data Cloud + Einstein AI: Ionin's roadmap is the engagement entry point. Zennify must engage before Q3 2026 roadmap finalisation."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "CISO Holden is an ally, not a gatekeeper.",
+        "source_kind": "docx"
+      },
+      "id": "147a9041-1fc2-4c4d-ba0e-9bfb99b11b19",
+      "involved_subcap_ids": [
+        "P4C1.8.1",
+        "P4C1.5.1",
+        "P4C1.5.1",
+        "P4C1.8.1",
+        "P4C3.5.1",
+        "P4C3.5.1",
+        "P4C3.6.1",
+        "P4C3.6.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Salesforce Identity + External Identity platform: security governance\u2026",
+      "verbatim_quote": "Zennify Implication: Salesforce Identity + External Identity platform: security governance supports Salesforce platform expansion approvals. CISO Holden is an ally, not a gatekeeper."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Zennify Implication: Salesforce PRM Partner Community: multi-channel commission management, affiliate onboarding, and performance analytics.",
+        "source_kind": "docx"
+      },
+      "id": "007316d2-3802-41da-bb07-a3de25d1ef1d",
+      "involved_subcap_ids": [
+        "P2C4.2.7",
+        "P2C4.5.1",
+        "P2C4.4.6",
+        "P2C4.4.6",
+        "P2C3.6.1",
+        "P2C3.2.7",
+        "P2C3.5.5",
+        "P2C3.1.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Salesforce PRM Partner Community: multi-channel commission management\u2026",
+      "verbatim_quote": "Zennify Implication: Salesforce PRM Partner Community: multi-channel commission management, affiliate onboarding, and performance analytics."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Tool activation \u2014 TII is already on Salesforce.",
+        "source_kind": "docx"
+      },
+      "id": "5328a049-a4b7-4013-8a9d-5279fe4217c8",
+      "involved_subcap_ids": [
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P2C3.5.IB1",
+        "P2C3.5.2",
+        "P4C4.2.6",
+        "P4C2.4.10"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 30,
+        "P4": 70
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Zennify Implication: Service Cloud + Agentforce Claims AI: first-touch automation + SLA\u2026",
+      "verbatim_quote": "Zennify Implication: Service Cloud + Agentforce Claims AI: first-touch automation + SLA tracking. Tool activation \u2014 TII is already on Salesforce."
+    }
+  ]
+}

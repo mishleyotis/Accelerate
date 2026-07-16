@@ -1,0 +1,313 @@
+{
+  "entity_display_id": "1st-security-bank-of-was-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C1",
+        "P2C1.4.5",
+        "P2C1.2.CU1",
+        "P2C1.2.7",
+        "P2C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C1",
+      "id": "a23b7197-98d4-4830-8571-f38cbd06d35e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-056",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C4"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C2"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-043",
+        "E-065",
+        "E-056",
+        "E-032"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Close the Digital Channels gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-056].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Digital Channels trails peers by 1.3",
+      "what_text": "Audience Segmentation is one of 1st Security Bank of Washington's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes 1st Security Bank of Washington's ability to deliver a stronger, more personalised customer experience [E-065].",
+      "why_text": "Digital Channels trails the peers by 1.3 points — a competitive maturity gap that compounds across the pillars it feeds [E-043, E-065].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C4.1.6",
+        "P2C4.2.5",
+        "P2C4.8.4",
+        "P2C4.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C4",
+      "id": "3b34d353-90b0-455a-80d8-cc03723068f7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C1"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C2"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-066",
+        "E-021",
+        "E-056",
+        "E-067"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Prioritize CX & Personalization: recovering the 1.1-point deficit against the cohort moves overall maturity more than any at-parity category can [E-021].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "CX & Personalization trails peers by 1.1",
+      "what_text": "Behavioral Data Capture is one of 1st Security Bank of Washington's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes 1st Security Bank of Washington's ability to deliver a stronger, more personalised customer experience [E-066].",
+      "why_text": "The peer benchmark for CX & Personalization is 2.8; at 1.6 this institution operates 1.1 points behind the peers it competes with for the same customers [E-065, E-066].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P1C2.1.2",
+        "P1C2.5.5",
+        "P1C2.5.2",
+        "P1C2.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P4C1",
+      "id": "0b029356-f743-4e47-a697-3e3e429580d8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C1"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C4"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-049",
+        "E-065",
+        "E-059"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Sequence Data Management & Governance into the near-term roadmap: the 1.1-point peer gap is measurable, so progress is provable quarter over quarter [E-059].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Management & Governance trails peers by 1.1",
+      "what_text": "Enterprise Data Catalog & Discovery is one of 1st Security Bank of Washington's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes 1st Security Bank of Washington's ability to deliver a stronger data and technology foundation [E-065].",
+      "why_text": "At 1.6/5, Data Management & Governance is the widest measured deficit vs the peer median (2.7) among this run's remaining categories [E-049, E-065].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.6.1",
+        "P4C2.1.2",
+        "P1C3.8.3",
+        "P2C1.6.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P4C2",
+      "id": "f6273bfa-2d97-4d03-87b7-fd3668c2b40e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C1"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C4"
+        },
+        {
+          "e_ids": [
+            "E-049",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-041",
+        "E-049",
+        "E-065",
+        "E-068"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Start with Analytics & AI — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-065].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Analytics & AI trails peers by 1.1",
+      "what_text": "Data Warehouse & Data Lake is one of 1st Security Bank of Washington's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes 1st Security Bank of Washington's ability to deliver a stronger data and technology foundation [E-049].",
+      "why_text": "Peers score 2.7 on Analytics & AI against this institution's 1.6 — the 1.1-point shortfall shows up in every capability rolled into this category [E-041, E-049].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 2.71 | maturity level 3",
+        "heading": "6.1. Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 1.87 | maturity level 2",
+        "heading": "6.2. Pillar 2: Member/Customer Experience",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.40 | maturity level 2",
+        "heading": "6.3. Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 2.03 | maturity level 2",
+        "heading": "6.4. Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on the 6-factor scoring framework. Each recommendation includes institution-specific root cause analysis with evidence citations and maps to a named Zennify solution. All recommendations have been validated via proxy searches (Clay, Explorium, web) and checked against Zennify solution \"When NOT to Recommend\" gates. No investment amounts, cost estimates, or ROI projections are included per assessment policy."
+  },
+  "run_request_id": "DMA-ASM-1SB-20260317-0001"
+}

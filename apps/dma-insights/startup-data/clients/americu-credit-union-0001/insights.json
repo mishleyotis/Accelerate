@@ -1,0 +1,628 @@
+{
+  "entity_display_id": "americu-credit-union-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C2.8.4",
+        "P1C1.7.2",
+        "P2C1.1.CL1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "07838608-4e2e-441c-97c5-6bd317b6f5c2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-017",
+        "E-001"
+      ],
+      "linked_subcap_id": "P3C2.8.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Adequate but lean capital cushion. Investment capacity for digital transformation may be more constrained than peer set assumptions suggest. — Capital strategy flag — MEDIUM — opportunity area [E-001].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Q3 2025 NW ratio 9.74% versus credit union industry average 14.53% per BestCashCow",
+      "what_text": "Industry Collaboration is one of AmeriCU Credit Union's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes AmeriCU Credit Union's ability to deliver more efficient, dependable operations [E-017].",
+      "why_text": "The assessment found: “Sept 30, 2025 NCUA-sourced metrics: total assets ~$2,819M; non-current loans $18.6M; ALLL $25.2M; net worth $274.5M (9.74% NW ratio — well-capitalized); Texas Ratio 6.43%. Net worth ratio 9.74% is” [E-004]. At 2.0 out of 5, Industry Collaboration sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.2.3",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "28dc833b-ca0c-4105-a9c4-58d32d3a6664",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-036",
+        "E-014",
+        "E-016"
+      ],
+      "linked_subcap_id": "P2C4.2.3",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Contextual Personalization a near-term focus for AmeriCU Credit Union: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-016].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Salesforce CRM + Marketing Cloud + Marketo + LiveRamp + Rapleaf detected via Clay…",
+      "what_text": "Contextual Personalization is one of AmeriCU Credit Union's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes AmeriCU Credit Union's ability to deliver a stronger, more personalised customer experience [E-036].",
+      "why_text": "The assessment found: “Broadview FCU — Albany NY; formed by SEFCU + CAP COM merger (Aug 1, 2022); ~$8.99B assets (Dec 31 2025); ~500K members; ~1,400 employees; ~60+ branches; ranked top 30 nationwide / top 5 NY. Net worth” [E-014]. The research report pins the maturity impact at: Material over-estimation risk if utilization not validated. Active utilization could lift ceiling to level 3.5–4.0; vestigial would cap at level 2.0. scores 2.0/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.5.2",
+        "P4C1.1.4",
+        "P2C4.2.3",
+        "P1C2.3.5",
+        "P1C3.1.5",
+        "P1C3.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "02333c0a-32ee-43c8-b4a2-f1363a769c1d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-007",
+        "E-005"
+      ],
+      "linked_subcap_id": "P1C3.5.2",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "databricks",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Layer 1 should not over-credit narrative-only capabilities. Material gap for transformation acceleration. — HIGH — opportunity area [E-005].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Three-pillars strategic framework published",
+      "what_text": "Three-pillars strategic framework published [:F3]; SVP Digital Innovation (Kevin Porter, Sept 2025); AVP Salesforce Innovation (Jacquelyn Orvis, Feb 2025) — but no formal Chief Data Officer, no published enterprise data governance, no formal innovation lab. In Zennify's assessment Stage-Gate Funding scores 2.0 out of 5, versus a typical 2.8 at comparable institutions [E-037].",
+      "why_text": "The assessment found: “AmeriCU launched 'new Digital Innovation role to elevate member experience' (mid-2025). Amber Cooleen joined as new SVP Marketing in Aug 2025 — leadership refresh in customer-facing digital functions” [E-007]. The research report pins the maturity impact at: level 2.5–3.0. scores 2.0/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C2.2.1",
+        "P4C3.3.2",
+        "P2C4.2.3",
+        "P3C3.3.1",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "e5795da9-7de7-477f-a88c-9356018c4d7b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-023",
+        "E-029",
+        "E-036"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Eligibility Transparency a near-term focus for AmeriCU Credit Union: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-036].",
+      "source_rec_id": "REC-03",
+      "theme": "Customer Journeys & Servicing",
+      "title": "(untitled)",
+      "what_text": "AmeriCU's documented Symitar SymAdvisor partnership reduced account-opening time 10→3.5 minutes (65% reduction [:F1]) — a strong concrete metric. However, 37 of 60 subcaps are BLOCKED [blocked_subcaps.json] meaning eligibility, IDV/KYC, decisioning architecture, save-and-resume, and onboarding communication sequences are entirely unevidenced publicly. The disparity between the strong time-to-fund metric and the BLOCKED upstream/downstream capabilities suggests sophisticated onboarding execution exists but is not framework-managed at the capability level. Salesforce CRM is detected but not Financial Services Cloud — the FSC vertical adds the onboarding-specific data model (member household, life events, financial-needs assessment) Salesforce CRM alone does not provide. In Zennify's assessment Eligibility Transparency scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-029].",
+      "why_text": "At 2.0 out of 5, Eligibility Transparency sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-023, E-029].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2",
+        "P2C1",
+        "P4C1",
+        "P4C1.1.4",
+        "P4C2.2.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "2de0bc4b-52a3-40b8-a1ef-33ddfa8cbb09",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-029",
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-036",
+        "E-055"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Contextual Personalization a near-term focus for AmeriCU Credit Union: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-055].",
+      "source_rec_id": "REC-04",
+      "theme": "CX & Personalization",
+      "title": "(untitled)",
+      "what_text": "AmeriCU operates a multi-system data architecture (Salesforce CRM + Marketing Cloud + Symitar core + Jack Henry analytics + LiveRamp + Rapleaf) without a unified Customer Data Platform or formal data governance framework. There is no publicly named Chief Data Officer (INT-DATA-001), no published data strategy, no documented data-quality standards. AVP Salesforce Innovation (Orvis, Feb 2025 [:F1]) addresses the CRM/martech subset but not enterprise data governance. This is the single highest connected leverage point in the assessment — personalization, analytics & AI, and marketing all sit downstream of data governance maturity. In Zennify's assessment Contextual Personalization scores 2.0 out of 5, versus a typical 2.8 at comparable institutions [E-036].",
+      "why_text": "At 2.0 out of 5, Contextual Personalization sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-029, E-036].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C1",
+        "P4C1.1.4",
+        "P4C2.2.1",
+        "P3C1.2.1",
+        "P1C1.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "fd3404bc-161b-41d2-9a73-ba19e07fe70f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-023",
+        "E-040",
+        "E-021",
+        "E-035"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for AmeriCU Credit Union: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-040].",
+      "source_rec_id": "REC-05",
+      "theme": "Analytics & AI",
+      "title": "(untitled)",
+      "what_text": "AmeriCU has multiple AI/analytics touchpoints in production — AI fraud detection deployed 2024 [Batch 1 baseline], SAM 24/7 virtual assistant since Sept 2023, Jack Henry analytics for adoption-based rewards, transaction + fraud alerting. Stated AI/automation strategic intent since 2022 [:F4,:F3]. However, NO formal GenAI policy, NO documented AI use-case roadmap, NO formal Model Risk Management framework (INT-AI-001, INT-RISK-001). URF-03 red flag (intent-vs-deployment gap) caps capability at level 2.5. The 2-year gap between stated intent (2022) and first material AI use case (2024 fraud detection) demonstrates that AI sophistication is execution-constrained, not vision-constrained. sits downstream of data foundation — the two are paired investments. In Zennify's assessment Enterprise Reporting Platform scores 2.0 out of 5, versus a typical 2.8 at comparable institutions [E-023].",
+      "why_text": "At 2.0 out of 5, Enterprise Reporting Platform sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-048, E-023].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2.6.2",
+        "P3C2",
+        "P4C3.8.3",
+        "P4C4.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "9b9309ba-3527-475e-b27e-1dfc830344ff",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-038",
+        "E-013"
+      ],
+      "linked_subcap_id": "P3C2.6.2",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Modest erosion concurrent with Mountain Valley merger period; cultural integration risk is the next 12-18 months' watch item. — LOW — adjacent [E-013].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "American Banker Best CUs to Work For #27 (2024) → #38 (2025)",
+      "what_text": "American Banker Best CUs to Work For #27 (2024) → #38 (2025) — 3 consecutive years [:F1,:F1]. Glassdoor -5% trend over 12 months. It underpins the core processes that keep the institution running, so its current level directly shapes AmeriCU Credit Union's ability to deliver more efficient, dependable operations [E-038].",
+      "why_text": "The research report pins the maturity impact at: level 3.0. averages 2.6/5 across its 26 scored capability (peer median ~ 2.8) on the current assessment [E-037, E-038].",
+      "pillar": "P3",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P2C2.7.3",
+        "P2C2.6.1",
+        "P3C4.6.2",
+        "P3C1.1.3",
+        "P4C4.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "aedbea94-40d1-48c5-b199-9af1f3588db5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-047",
+        "E-048",
+        "E-049"
+      ],
+      "linked_subcap_id": "P2C2.7.3",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Multi-modal service delivery is a competitive differentiator vs. peer set; member retention via virtual channel is documented strategy. — MEDIUM — opportunity area [E-049].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Virtual Financial Center served 13,600+ members SAM 24/7 chatbot; 25 financial centers…",
+      "what_text": "Efficiency Metrics is one of AmeriCU Credit Union's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes AmeriCU Credit Union's ability to deliver a stronger, more personalised customer experience [E-048].",
+      "why_text": "The research report pins the maturity impact at: level 3.0–3.5. scores 2.0/5 against a peer median of 3.0 on the current assessment [E-047, E-048].",
+      "pillar": "P2",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C1.8.3",
+        "P3C1.6.5",
+        "P4C4.6.5",
+        "P3C3.6.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "a8bc9bb9-01cc-47d6-964d-6b40ff2e441a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-023"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-023",
+        "E-021",
+        "E-005"
+      ],
+      "linked_subcap_id": "P4C1.8.3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Stable platform spine de-risks transformation programs and signals capacity for additive modernization rather than replacement. — MEDIUM — opportunity area [E-005].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "30-year Jack Henry Symitar partnership powering 14× asset growth ($193M→$2.7B)",
+      "what_text": "Data Segregation & Security Controls is one of AmeriCU Credit Union's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes AmeriCU Credit Union's ability to deliver a stronger data and technology foundation [E-021].",
+      "why_text": "The research report pins the maturity impact at: level 3.0–3.5. scores 2.0/5 against a peer median of 3.0 on the current assessment [E-023, E-021].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C4.3.1",
+        "P1C4.8.2",
+        "P3C2.7.2",
+        "P1C4.1.2",
+        "P3C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "7dd05362-c1d0-4ae3-90a1-7f9d86d711f1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-027",
+        "E-029"
+      ],
+      "linked_subcap_id": "P4C4.3.1",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Network Security Architecture a near-term focus for AmeriCU Credit Union: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-029].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "CIO Lewin holds MBA in Economic Crime/Fraud",
+      "what_text": "Network Security Architecture is one of AmeriCU Credit Union's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, ahead of the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes AmeriCU Credit Union's ability to deliver a stronger data and technology foundation [E-027].",
+      "why_text": "The research report pins the maturity impact at: Strong public posture on a sensitive capability. Layer 1 should score this category at level 3.0+; not a transformation target. scores 3.0/5 against a peer median of 2.8 on the current assessment [E-052, E-027].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-RES-AMERICU-20260427-0001"
+}

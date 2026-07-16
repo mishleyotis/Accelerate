@@ -1,0 +1,658 @@
+{
+  "entity_display_id": "global-federal-credit-un-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C5.4.1",
+        "P1C5",
+        "P1C1.3.3",
+        "P1C1.5.1",
+        "P1C5.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "d1d9e931-8ee4-420d-af46-4dd954afb21c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-009"
+      ],
+      "linked_subcap_id": "P1C5.4.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make this capability a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-009].",
+      "source_rec_id": "REC-01",
+      "theme": "ESG & Sustainability",
+      "title": "Strategy and governance capability",
+      "what_text": "This capability is one of Global Federal Credit Union's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Global Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-009].",
+      "why_text": "The assessment found: “Implemented MX Direct Deposit solution — 40x deposit growth in 72 hours vs previous method Solution identifies members with deposits at external institutions, delivers targeted messaging” [E-009]. At 1.0 out of 5, this capability sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.3.5",
+        "P2C4",
+        "P2C4.3.4",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "77c221a1-0187-4c07-ad90-c372600e82ea",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-016",
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-021",
+        "E-009",
+        "E-020",
+        "E-016"
+      ],
+      "linked_subcap_id": "P2C4.3.5",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Household Coordination a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Household Coordination",
+      "what_text": "Household Coordination is one of Global Federal Credit Union's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Global Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "The assessment found: “Implemented MX Direct Deposit solution — 40x deposit growth in 72 hours vs previous method Solution identifies members with deposits at external institutions, delivers targeted messaging” [E-009]. At 1.0 out of 5, Household Coordination sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C3.9.2",
+        "P2C3",
+        "P4C2.1.2",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-001"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "61e84088-4bb8-40ba-a0d8-593d3c254f59",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3.9.2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-016",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-026",
+        "E-021",
+        "E-042",
+        "E-017",
+        "E-028",
+        "E-016",
+        "E-002",
+        "E-007"
+      ],
+      "linked_subcap_id": "P2C3.9.2",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Adapted Communication a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-042].",
+      "source_rec_id": "REC-03",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Adapted Communication",
+      "what_text": "Adapted Communication is one of Global Federal Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Global Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "The assessment found: “FFNW acquisition closed April 11, 2025 — purchase price $228.7M ($231.2M pre-adjustment) FFNW operates as separately branded division until system+brand integration later 2025” [E-026]. At 1.5 out of 5, Adapted Communication sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.4",
+        "P4C1",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "0b5818e9-39aa-43ec-af15-60cac59378ed",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-031"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-034",
+        "E-031"
+      ],
+      "linked_subcap_id": "P4C1.8.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Synthetic Data Generation a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-031].",
+      "source_rec_id": "REC-04",
+      "theme": "Data Management & Governance",
+      "title": "Synthetic Data Generation",
+      "what_text": "Synthetic Data Generation is one of Global Federal Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Global Federal Credit Union's ability to deliver a stronger data and technology foundation [E-034].",
+      "why_text": "scores 1.5/5 against a peer median of 3.0 on the latest assessment; this recommendation targets 6 capabilities [E-004, E-034].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.4.13",
+        "P4C2",
+        "P1C1.7.1",
+        "P1C1.5.1",
+        "P4C1.1.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "47d5eeb1-fb91-4bdd-a304-972528634b30",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-041"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-009",
+        "E-041",
+        "E-031"
+      ],
+      "linked_subcap_id": "P4C2.4.13",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Experiment Tracking + Model Registry Operating Model a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-041].",
+      "source_rec_id": "REC-05",
+      "theme": "Analytics & AI",
+      "title": "Experiment Tracking + Model Registry Operating Model",
+      "what_text": "Experiment Tracking + Model Registry Operating Model is one of Global Federal Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Global Federal Credit Union's ability to deliver a stronger data and technology foundation [E-009].",
+      "why_text": "The assessment found: “MuleSoft integration platform processes 300M annual transactions, delivering $1.2M value Uses Tableau for data analytics (Salesforce ecosystem)” [E-004]. At 1.5 out of 5, Experiment Tracking + Model Registry Operating Model sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.2",
+        "P2C1.4.6",
+        "P4C4.5.5",
+        "P4C3.4.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "ab40e91a-18cf-4c2a-910d-738a8b154b14",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-016",
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-021",
+        "E-009",
+        "E-020",
+        "E-016"
+      ],
+      "linked_subcap_id": "P2C4.1.2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Behavioral Data Capture a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Highest-probability revenue",
+      "what_text": "Behavioral Data Capture is one of Global Federal Credit Union's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Global Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "The assessment found: “Implemented MX Direct Deposit solution — 40x deposit growth in 72 hours vs previous method Solution identifies members with deposits at external institutions, delivers targeted messaging” [E-009]. At 1.0 out of 5, Behavioral Data Capture sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.7.2",
+        "P2C3.3.RIA1",
+        "P4C2.5.5",
+        "P4C2.5.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "c68b469e-3eb8-472f-b4c4-b4b69e8dda16",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-015",
+        "E-024",
+        "E-005",
+        "E-007",
+        "E-003",
+        "E-004",
+        "E-012"
+      ],
+      "linked_subcap_id": "P1C4.7.2",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Recognition Programs a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-024].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "No CDO/CTO/CIO: Digital leadership at Director level only.",
+      "what_text": "Recognition Programs is one of Global Federal Credit Union's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Global Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-015].",
+      "why_text": "The assessment found: “CEO Lundfelt appointed to FRB San Francisco CDIAC — 3-year term effective Jan 1, 2020 CDIAC provides input to Fed on economic conditions, regulatory policies, payment issues” [E-025]. At 1.5 out of 5, Recognition Programs sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.4.7",
+        "P4C3.4.9",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "46187058-0a6b-4f96-a1aa-bef7f74f9859",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-004",
+        "E-008",
+        "E-035",
+        "E-037",
+        "E-020",
+        "E-032",
+        "E-041"
+      ],
+      "linked_subcap_id": "P4C3.4.7",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make FinOps & Cloud Cost Management a near-term focus for Global Federal Credit Union: a scoped investment here would lift it from 3.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-008].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Cloud-First Since 2019: Hybrid DC, self-healing DR, cost savings realized.",
+      "what_text": "FinOps & Cloud Cost Management is one of Global Federal Credit Union's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Global Federal Credit Union's ability to deliver a stronger data and technology foundation [E-004].",
+      "why_text": "The assessment found: “747 million transactions processed in 2024 61,776 new loans totaling $3.40B in 2024” [E-002]. At 3.0 out of 5, FinOps & Cloud Cost Management sits 0.5 points below the 3.5 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "4.1 Strategy, Governance & Culture (P1: 1.97)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-GFCU-20260309-0001"
+}

@@ -1,0 +1,360 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "iq-credit-union-0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: VARIABLE \u2014 strong asset and member growth but expense growth (102% over 5Y) significantly outpacing revenue growth (68%). [E-002, E-003]",
+      "iQ CU has grown from $1.22B to $2.076B in assets over 5 years (11.2% CAGR), nearly doubling. Member growth reached 25% recently with Portland market expansion. However, expense growth at 102% significantly outpaces revenue growth at 68%, indicating operational efficiency challenges that digital transformation must address. Fee income reached $2.795M in Q1 2024. Net worth ratio at 10.57% and RBC at 13.94 indicate strong capitalization. [E-002, E-003]"
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Pacific Northwest (WA/OR)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jordan Lehrman",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Restructuring\tCreated",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Eric Petracca",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ali Migaki",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Experience Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Monique Lim",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Legal Name: iQ Credit Union\n\nFormation: 1940 (as an education credit union in Clark County, WA)\n\nCharter: NCUA Federal Credit Union Charter #60438\n\nStructure: Member-owned cooperative, not-for-profit\n\nHeadquarters: Vancouver, WA (Clark County)\n\nMerger History: Merged with Lacamas Community CU in 2014, forming 67,000-member, $700M institution [E-042]",
+    "primary_regulator": "NCUA",
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "Active blog with 15+ content categories: budgeting, business, credit, mortgage, investing, etc. Tagline: 'Helping Pacific Northwesterners navigate the financial wilderness'",
+        "title": "Active blog with 15+ content categories: budgeting, business, credit\u2026",
+        "type": "blog",
+        "url": "https://blog.iqcu.com/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "79e8d320-2988-4dac-9d93-e699851441e2",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Rationales with counter-argument: 0/707 (0.0%)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Trend Classification: VARIABLE \u2014 strong asset and member growth but expense growth (102% over 5Y) significantly outpacing revenue growth (68%).",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.85,
+        "P1C2": 2.36,
+        "P1C3": 2.31,
+        "P1C4": 2.15,
+        "P2C1": 3.11,
+        "P2C2": 2.87,
+        "P2C3": 3.06,
+        "P2C4": 3.22,
+        "P3C1": 2.71,
+        "P3C2": 2.56,
+        "P3C3": 2.69,
+        "P3C4": 2.81,
+        "P4C1": 3.34,
+        "P4C2": 3.28,
+        "P4C3": 3.67,
+        "P4C4": 3.57
+      },
+      "overall_score": 2.85,
+      "peer_name": "Members 1st Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-IQCU-20260310-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "Company Profile - Technology (RECENT, NEUTRAL): iQ CU Indeed Profile - Workplace Culture (CURRENT, POSITIVE)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "No model risk management framework MEDIUM CG-006 No NPS/member survey/VoC program evidence LOW Metric 2019 2021 2023 2025 (Latest) 5Y CAGR Total Assets $1.22B \u2014 $2.065B $2.076B ~11.2% Revenue $68.1M \u2014 $114.4M \u2014 ~10.9% Expenses $53.5M \u2014 $108",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "CFPB Complaints: No significant CFPB complaint patterns identified in public databases",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "trend": "Declining",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Ali Migaki appointed Chief Experience Officer (CXO) - newly created role",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "f1c9a3da-cb48-47ec-9375-cbc3dc95d181",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://gowestassociation.org/2024/04/03/iq-credit-union-unveils-key-promotions-to-enhance-member-experience/",
+      "subcap_ids": [],
+      "title": "Ali Migaki appointed Chief Experience Officer (CXO) - newly\u2026"
+    },
+    {
+      "body": "iQ CU joined Arkatechture CUSO as customer AND investor (April 2023)",
+      "date_precision": "month",
+      "e_id": "E-035",
+      "event_date": "2023-04-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "ef8feb72-d5de-4242-a01b-cfe86018407f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.arkatechture.com/blog/one-nevada-credit-union-iq-credit-union-join-arkatechture-cuso-partnership",
+      "subcap_ids": [],
+      "title": "CU joined Arkatechture CUSO"
+    },
+    {
+      "body": "CTO Jordan Lehrman hired Aug 30, 2021 \u2014 NEW position created",
+      "date_precision": "day",
+      "e_id": "E-027",
+      "event_date": "2021-08-30",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "32a81772-b62a-4207-bd7b-28b114e27af0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/iq-credit-union-hires-chief-technology-officer-301395045.html",
+      "subcap_ids": [],
+      "title": "CTO Jordan Lehrman hired Aug 30, 2021 \u2014 NEW position created"
+    },
+    {
+      "body": "Deployed Alkami digital banking platform (announced Oct 2019)",
+      "date_precision": "month",
+      "e_id": "E-005",
+      "event_date": "2019-10-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "549a50a0-2e51-4c7a-bbf3-ab487a34bea2",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.alkami.com/news/iq-credit-union-strengthens-member-relationships-with-alkami-digital-banking-platform/",
+      "subcap_ids": [],
+      "title": "Deployed Alkami digital banking platform (announced Oct\u2026"
+    },
+    {
+      "body": "Alkami digital banking platform launched in 2019 to enhance member experience",
+      "date_precision": "year",
+      "e_id": "E-039",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "3ec72454-b535-4fbd-917e-f89609f08883",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.iqcu.com/hubfs/Annual%20Report/iQCU-2019-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Alkami digital banking platform launched in 2019"
+    },
+    {
+      "body": "iQ CU merged with Lacamas Community CU in 2014, creating 67,000-member, $700M CU with 15 branches",
+      "date_precision": "year",
+      "e_id": "E-042",
+      "event_date": "2014-07-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "ace238c9-cb60-4155-ae05-28a0282e57b7",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.columbian.com/news/2014/jan/14/lacamas-iq-credit-unions-merge/",
+      "subcap_ids": [],
+      "title": "IQ CU merged with Lacamas Community CU in 2014"
+    }
+  ]
+}

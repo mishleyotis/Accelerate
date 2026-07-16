@@ -1,0 +1,177 @@
+{
+  "entity_display_id": "greenstone-farm-credit-s-3001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.74 \u2192 4.0 (peer median 2.25)",
+        "SunStream shareholders represent $": "82B",
+        "Yet": "96%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 1.74 \u2192 4.0 (peer median 2.25)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud + Account Engagement",
+          "maturity_lift": "+2.26",
+          "metric": "P2C1 score 1.74 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.74 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Automate member lifecycle marketing"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.07",
+          "metric": "P4C1 score 1.93 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.93 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Build unified member 360 view"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+1.67",
+          "metric": "P1C1 score 2.33 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 2.33 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Define digital roadmap with new CIO and board"
+        },
+        {
+          "feature": "CRM Analytics (Tableau)",
+          "maturity_lift": "+2.37",
+          "metric": "P4C2 score 1.63 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.63 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-04",
+          "title": "Deliver board-ready digital KPIs"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.39",
+          "metric": "P3C1 Automation ceiling 35%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 Automation ceiling 35%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Connect systems via API-first integration"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": null,
+          "metric": "Yet 96%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Yet 96%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Modernize member digital portal"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.1",
+          "metric": "P4C4 score 2.90 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C4 score 2.90 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Strengthen compliance reporting for Technology Committee"
+        },
+        {
+          "feature": "Financial Services Cloud + Platform",
+          "maturity_lift": null,
+          "metric": "SunStream shareholders represent $82B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "SunStream shareholders represent $82B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "CTC template: 1 deployment = 10 institutions"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2, P2C1"
+    },
+    {
+      "customer_impact": {
+        "Compeer Ocrolus AI": "50%"
+      },
+      "dependencies": [
+        "REC-02",
+        "REC-05"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Compeer Ocrolus AI 50%",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": null,
+          "metric": "Compeer Ocrolus AI 50%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Compeer Ocrolus AI 50%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Deploy AI-powered member self-service"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-GFCS-20260323-001",
+  "total_duration_months": 8
+}

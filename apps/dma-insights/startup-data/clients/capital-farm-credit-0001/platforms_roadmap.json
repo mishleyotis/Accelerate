@@ -1,0 +1,67 @@
+{
+  "entity_display_id": "capital-farm-credit-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P1C3 score 1.55 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P1C3 score 1.55 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "GRC Platform",
+          "maturity_lift": "+2.45",
+          "metric": "P1C3 score 1.55 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C3 score 1.55 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Digital Governance Formalization via GRC Platform & Digital Risk Framework"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+2.42",
+          "metric": "P2C1 score 1.58 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.58 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Member Experience Modernization via Salesforce Service & Experience Cloud"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.42",
+          "metric": "P2C1 score 1.58 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.58 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Analytics & AI Foundation via Salesforce Data Cloud & CRM Analytics"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C3, P2C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CFC-20260305-0001",
+  "total_duration_months": 4
+}

@@ -1,0 +1,1398 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "beacon-bank-0001",
+  "financials": {
+    "lines": [
+      "Note: Brookline Bancorp is accounting acquirer. FY2021-FY2024 = Brookline standalone. FY2025 onwards = combined Beacon entity (merger effective Sept 1, 2025).",
+      "Trajectory: Standalone DECLINING (2021-2024) \u2192 Merger SCALE EXPANSION (2025) \u2192 OPTIMIZATION phase (2026). 11.5pp efficiency gap is primary 2026 KPI.",
+      "The standalone Brookline entity delivered record net income of $115.4M ($1.48 EPS) in FY2021 in a stable rate environment. FY2022 showed NIM peak at 3.67% but modest earnings decline to $109.7M. The PCSB Bank acquisition (Q1 2023, +$2.3B assets) triggered $25.5M credit loss provisions, collapsing Q1 2023 net income to $7.6M; full-year 2023 fell 31.7% to $75.0M ($0.85 EPS). FY2024 deteriorated further to $68.7M ($0.77 EPS) at the NIM trough of 3.06% [E-048].",
+      "FY2025 reflects the combined Beacon entity from September 1, 2025: NII surged 52.6% to $503.1M; NIM recovered to 3.56%; net income rose 31.4% to $90.3M (four months combined). Q1 2026 revealed integration headwinds \u2014 operating EPS $0.70 (GAAP $0.55), $13M merger charges, loan growth below plan \u2014 but CEO Perrault characterized headwinds as 'not structural in nature' [E-048]."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 145,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 2000,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Gordon Prescott (GC) ensure 1-year post-merger continuity\u2026"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2026"
+        ],
+        "geography": null,
+        "headline": "$18.0B assets \u00b7 FY2026",
+        "regulator": "FDIC",
+        "series": {
+          "net_income_m": [
+            2300.0,
+            22200.0
+          ],
+          "total_assets": [
+            null,
+            18.0
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul A. Perrault",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carl M. Carlson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial & Strategy Officer (dual role)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sean A. Gray",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Operations Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Mona Macero",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Chief Digital Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Michael Schroeder",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Security Officer / Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Todd Byers",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP, Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gary R. Levante",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Marketing Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael McCurdy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Wm. Gordon Prescott",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "General Counsel & Corporate Secretary"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jacqueline Courtwright",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Human Resources Officer"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "Beacon Bank is a regional bank. It reports $22.2 billion in total assets. It is regulated by FDIC and employs approximately 2,000 people across 145 branches. Its overall digital maturity is assessed at 2.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC",
+    "size_tier": "mid-size",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "Berkshire Bank was an EARLY ADOPTER of The Clearing House RTP Network \u2014 June 2019 via Finastra Fusion Global PAYplus platform: 'Berkshire Bank of Massachusetts becomes one of the first regional banks in the Northeast to ",
+        "title": "Berkshire Bank was an Early Adopter of The Clearing House RTP Network\u2026",
+        "type": "article",
+        "url": "https://www.theclearinghouse.org/payment-systems/Articles/2019/06/Berkshire-Adopts-RTP-06-18-2019"
+      },
+      {
+        "author": null,
+        "date": "2024-04-19",
+        "derived_from": "evidence_index",
+        "e_id": "E-079",
+        "excerpt": "Former CEO Nitin Mhatre RBC Capital Markets interview (April 2024) on AI strategy verbatim: 'everybody's talking about using AI.",
+        "title": "Former CEO Nitin Mhatre RBC Capital Markets interview (April 2024) on\u2026",
+        "type": "article",
+        "url": "https://www.rbccm.com/en/story/story.page?dcr=templatedata%2Farticle%2Fstory%2Fdata%2F2024%2F04%2Fembracing-technology-without-losing-the-human-touch"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-082",
+        "excerpt": "**CrowdStrike official customer case study on Berkshire Bank** \u2014 CSO Ryan Melle quoted directly. **Berkshire Bank deployed CrowdStrike Falcon platform** with: (a) **Falcon Discover** (IT hygiene); (b) **Falcon Insight XD",
+        "title": "CrowdStrike official customer case study on Berkshire Bank \u2014 CSO Ryan\u2026",
+        "type": "article",
+        "url": "https://www.crowdstrike.com/en-gb/resources/customer-stories/berkshire-bank/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-031",
+        "excerpt": "Beacon Bank operates a 'Marketing & Communications division' (per Levante LinkedIn post celebrating Marketing & Communications team for 'transformation they are helping lead') \u2014 formal functional division; CMO Gary Levan",
+        "title": "CMO Gary Levante appointed",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/beaconbank"
+      },
+      {
+        "author": null,
+        "date": "2022-03-28",
+        "derived_from": "evidence_index",
+        "e_id": "E-014",
+        "excerpt": "Legacy Berkshire Bank had a FORMAL, NAMED digital transformation program: 'BEST' (Berkshire's Exciting Strategic Transformation) \u2014 referenced in 2022 press releases and ESG reports. Narmi partnership was an explicit mile",
+        "title": "Legacy Berkshire Bank had a FORMAL, Named digital transformation\u2026",
+        "type": "article",
+        "url": "https://ir.berkshirebank.com/news-events/press-releases-news/news-details/2022/Berkshire-Bank-Expands-Partnership-with-FinTech-Narmi/default.aspx"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-045",
+        "excerpt": "Customer Data Platform (P2C4.1.1) HYPOTHESIS: No public disclosure of CDP deployment (Salesforce Data Cloud, Adobe Real-Time CDP, Treasure Data, Tealium, Segment, mParticle).",
+        "title": "Customer Data Platform (P2C4.1.1) Hypothesis",
+        "type": "article",
+        "url": "https://www.beaconbank.com"
+      }
+    ],
+    "ticker": "NYSE: BBT"
+  },
+  "issue_register": [
+    {
+      "id": "2c07c137-a80f-40b1-8ec4-ee9b6ea0779a",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Report DOCX cites only 21 unique E-IDs. Governance spec requires \u226530."
+    },
+    {
+      "id": "d588dec6-e1cc-475a-846d-a034411dc401",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Governance regex matched financial figures in report text. Reclassified MEDIUM after manual review: all figures are factual financial context ($22.2B assets, $3B AUM, $119.8M synergy run-rate), not Zennify cost estimates or ROI projections."
+    },
+    {
+      "id": "011e2335-c6b7-47dd-9ef2-f646e2ebda3c",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Confirmed by LLM pass: 21 unique E-IDs in report vs 85 in evidence base and 30 required. 24.7% of evidence base directly cited in report narrative."
+    },
+    {
+      "id": "ac3957bf-4ac6-4983-800c-976d132e62af",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PV-02 triggered on partial Marshall cap application: some P3C2/P3C3 subcaps show 2.5 with ISS-001 in caps_applied field rather than exact 2.0 floor. Cap ceiling of 2.0 applies to specifically named subcaps (P3C2.3, P3C2.5, P3C3.2) but not all P3C2/P3C3 subcaps."
+    },
+    {
+      "id": "8bbf9ed5-ddba-4abc-939f-5779bf30be17",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "v5.5 assessment workbook uses 11-column format (A-K). Layer 2 v2.4 expects 22-column format (A-V) with Columns R/S/T proof structure. Missing artifacts generated by Layer 2 from Layer 1 data: caps_applied_log.csv, contradiction_log.csv, reasoning_chain_log.json, evidence_index.csv, peer_synthesis.md."
+    },
+    {
+      "id": "44f4abd5-9abb-44a3-84f0-5e7fe908dea8",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "HIGH confidence: 65% of subcaps (threshold: \u226460%). LOW confidence: 0% (threshold: \u22655%). Confidence distribution is skewed toward HIGH."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Most recent reported financials: $18.0B assets as of FY2026, within a series tracked FY2023 to FY2026. Trajectory classified DECLINING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.5,
+        "P1C5": 3.5,
+        "P2C1": 3.5,
+        "P2C2": 4.0,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P2C5": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P3C5": 3.5,
+        "P3C6": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.5,
+      "peer_name": "Webster Financial (WBS)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.5,
+        "P1C3": 3.0,
+        "P1C4": 3.5,
+        "P1C5": 3.5,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P2C5": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P3C5": 3.0,
+        "P3C6": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.15,
+      "peer_name": "Eastern Bankshares (EBC)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P2C5": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P3C5": 3.0,
+        "P3C6": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "NBT Bancorp (NBTB)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P2C5": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P3C5": 3.0,
+        "P3C6": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Provident Financial Services (PFS)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P2C5": 3.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P3C5": 2.5,
+        "P3C6": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.65,
+      "peer_name": "Independent Bank Group/Rockland Trust (INDB)",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-BBT-20260511-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "a Ponzi scheme' Per complaint: ~70 Legacy Berkshire Bank Indeed overall rating: 2.8/5 across ~365 reviews \u2014 well below banking industry median of 3.6 Berkshire Bank Indeed CEO approval: 32.2% \u2014 Recommend-to-friend: 40.5% (148 yes vs 217 no)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 365,
+        "polarity": "negative",
+        "source": "Indeed",
+        "themes": [],
+        "value": 2.8
+      },
+      {
+        "drilldown": "as 'averages a two-star rating between the two competing app stores' with 'common customer complaints include issues BSA/AML Enhanced Due Diligence (): Marshall Ponzi case provides critical T1 evidence \u2014 Berkshire's pre-Beacon BSA/AML monit",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "app (post-Narmi conversion Feb 2026): 4.4/5 rating on Google Play with 38K+ downloads \u2014 substantial improvement over legacy Berkshire app which SmartAsset described as 'averages a two-star rating between the two competing app stores' with '",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 5,
+        "polarity": "positive",
+        "source": "Google Play",
+        "themes": [],
+        "trend": "Improving",
+        "value": 4.4
+      },
+      {
+        "drilldown": "downloads), legacy Berkshire app prior 2-star average; (2) BBB profiles in Pittsfield MA (0261-256493) Customer Data Platform () HYPOTHESIS: No public disclosure of CDP deployment (Salesforce Data Cloud, Adobe Real-Time CDP, Treasure Data,",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": 4.4
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Beacon executive retention discipline (DEFA14A supplement): Retention Bonus Agreements with Jacqueline Courtwright (CHRO) + Wm. Gordon Prescott (GC) ensure 1-year post-merger continuity (through Sept 2026); structured as retention payments not severance; demonstrates **formal succession planning + executive continuity governance** at Beacon Board level.",
+      "date_precision": "month",
+      "e_id": "E-063",
+      "event_date": "2026-09-01",
+      "evidence_e_ids": [
+        "E-063"
+      ],
+      "id": "4c727005-faef-4942-aba5-8921a5f4b676",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://s206.q4cdn.com/539240745/files/doc_financials/2025/ar/BEACON-FINANCIAL-CORP-PROXY-2026.pdf",
+      "subcap_ids": [],
+      "title": "Gordon Prescott (GC) ensure 1-year post-merger continuity\u2026"
+    },
+    {
+      "body": "KPMG LLP appointed as independent registered public accounting firm for FY2026 (Proposal 2 ratification)",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "aefb021f-f53f-4729-9048-762ff246f1a5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000162828026022949/bbt-20260402.htm",
+      "subcap_ids": [],
+      "title": "KPMG LLP appointed as independent registered public\u2026"
+    },
+    {
+      "body": "Feb 6-9, 2026 Systems Conversion \u2014 formal planned outage execution: Friday Feb 6 3 PM all branches closed; weekend Feb 7-8 system integration; Monday Feb 9 9 AM reopen as Beacon Bank brand. Multi-bank legacy conversion: Berkshire/Brookline/BankRI/PCSB cores consolidated into single Beacon system on FIS IBS via CodeConnect.",
+      "date_precision": "year",
+      "e_id": "E-070",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-070"
+      ],
+      "id": "77250d4d-3f9a-4f7d-b295-7ac9c4893986",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.berkshireeagle.com/business/berkshire-bank-conversion-rebranding-beacon-bank/article_5112f1c7-8641-4dbc-baa7-28ce6b117e3c.html",
+      "subcap_ids": [],
+      "title": "All branches closed"
+    },
+    {
+      "body": "**P4C3.1 EA Strategy** anchored: (a) **CTO Todd Byers + CIO James Belliveau** (E-051/E-081) = named tech leadership for EA governance; (b) **9-workstream merger integration** (E-050) including 'Technology & Cybersecurity' workstream = formal EA-level coordination; (c) Salesforce DevOps Architect role 'provides guidance... to ensure consistency and alignment with industry best practices' + 'define and document architecture standards, policies, and procedures' = formal architecture standards function; (d) Mhatre 'tech North Star' philosophy (E-079); (e) **3-year cybersecurity roadmap** by CSO Melle (E-067) = published technology roadmap",
+      "date_precision": "publish_fallback",
+      "e_id": "E-083",
+      "event_date": "2026-05-01",
+      "evidence_e_ids": [
+        "E-083",
+        "E-051",
+        "E-081",
+        "E-050",
+        "E-079",
+        "E-067"
+      ],
+      "id": "9afb41ed-db49-44c7-8a41-db8acb15df40",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "synthesized",
+      "subcap_ids": [
+        "P4C3.1"
+      ],
+      "title": "EA Strategy anchored CTO Todd Byers + CIO James Belliveau"
+    },
+    {
+      "body": "Narmi AI adoption benchmarking (April 29, 2026 Founders Corner): **91% of Narmi One (full digital banking + account opening) clients signed Narmi AI Terms & Conditions** \u2014 Beacon is a Narmi One client \u2192 very high probability Beacon has signed AI T&Cs and unlocked access. Top adopted features: (1) Narmi MCP Integration (#1) > (2) Narmi AI Messages > (3) Narmi AI Marketing Promotions. 33% of signed clients using AI in production; 23% using two features.",
+      "date_precision": "day",
+      "e_id": "E-077",
+      "event_date": "2026-04-29",
+      "evidence_e_ids": [
+        "E-077"
+      ],
+      "id": "1d6d4970-21d0-4838-b3d9-8b7fe0094f48",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.narmitech.com/narmi-ai",
+      "subcap_ids": [],
+      "title": "Beacon is a Narmi One client"
+    },
+    {
+      "body": "Beacon Bank operates a 'Marketing & Communications division' (per Levante LinkedIn post celebrating Marketing & Communications team for 'transformation they are helping lead') \u2014 formal functional division; CMO Gary Levante appointed April 23, 2026 to lead it",
+      "date_precision": "day",
+      "e_id": "E-031",
+      "event_date": "2026-04-23",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "f3911806-5ad8-463c-b519-7c0828cde24e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/beaconbank",
+      "subcap_ids": [],
+      "title": "CMO Gary Levante appointed"
+    },
+    {
+      "body": "Gary R. Levante appointed Chief Marketing Officer effective April 23 2026 \u2014 first dedicated CMO at executive officer level post-merger; reports to CEO Perrault; member of Executive Management Committee",
+      "date_precision": "day",
+      "e_id": "E-011",
+      "event_date": "2026-04-23",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "175a7749-6369-4db6-abb3-2d9f0df91486",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.stocktitan.net/news/BBT/beacon-financial-appoints-gary-levante-chief-marketing-51yzxba2zm0u.html",
+      "subcap_ids": [],
+      "title": "Gary R. Levante appointed Chief Marketing Officer"
+    },
+    {
+      "body": "Newly-formed Beacon Bank selected Narmi One as comprehensive digital banking platform for both business and individual customers in March 2026 \u2014 vendor decision is FIRST major post-merger digital infrastructure commitment",
+      "date_precision": "month",
+      "e_id": "E-016",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "b73086b3-2950-454a-aca9-2ac6a1af9e6b",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.fintechfutures.com/digital-banking/beacon-bank-partners-narmi-one",
+      "subcap_ids": [],
+      "title": "Vendor decision is First major post-merger digital\u2026"
+    },
+    {
+      "body": "Brand consolidation announced Feb 23 2026 \u2014 'successful combination of four storied financial institutions under one new brand, Beacon Bank' \u2014 completed multi-phase branding update at all locations",
+      "date_precision": "day",
+      "e_id": "E-010",
+      "event_date": "2026-02-23",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "2c430ab2-ceb2-49e4-bb27-002d51f4a3d5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.beaconfinancialcorporation.com/News--Events/news/news-details/2026/Beacon-Financial-Corporation-Announces-Debut-of-Beacon-Bank/default.aspx",
+      "subcap_ids": [],
+      "title": "Brand consolidation announced"
+    },
+    {
+      "body": "Core systems conversion completed mid-February 2026 \u2014 Paul Perrault (CEO): 'a major milestone in our integration process... successful completion of a core systems conversion... months of preparation, disciplined execution and a continued focus on serving clients during a period of significant change'; Carl Carlson (CFO): 'two general ledger conversions, and all the systems conversions onto a new system'",
+      "date_precision": "month",
+      "e_id": "E-048",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "8a1747d6-67b2-4af3-a4c1-2969e9fe71f8",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000117184326002833/exh_991.htm",
+      "subcap_ids": [],
+      "title": "Core systems conversion completed midPaul Perrault (CEO)\u2026"
+    },
+    {
+      "body": "Branch closure / vendor-exit governance discipline: pre-merger Brookline closed 1016 Beacon Street + 1160 Walnut Street (2024); Beacon-era closed 3 RI branches (Feb 2026); each closure preceded by formal application to Mass DOB + comment period + regulatory approval = formal regulator-coordinated decommissioning process (applies methodology to vendor exit per P3C4.8)",
+      "date_precision": "month",
+      "e_id": "E-071",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "89b21dc7-132b-456f-9f4c-64a123eb8587",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-activities.asp?certno=17798",
+      "subcap_ids": [
+        "P3C4.8"
+      ],
+      "title": "Beacon-era closed 3 RI branches (Feb 2026"
+    },
+    {
+      "body": "**P3C4.3 DR architecture** \u2014 anchored via: (a) FIS IBS as core banking with FIS-managed DR (industry-standard FIS hot-DR with sub-RTO failover); (b) Feb 2026 systems conversion = real-world DR demonstration (40M tx Day-1 + 55K user migration completed); (c) Multi-cloud architecture (Azure + AWS) provides geographic redundancy (E-069); (d) ATM/card-processing decoupled from core during Feb 2026 conversion = formal infrastructure separation enabling partial-failure tolerance",
+      "date_precision": "month",
+      "e_id": "E-072",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-072",
+        "E-069"
+      ],
+      "id": "9c43b631-9948-4527-96d7-1d11d7d33fcc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "synthesized",
+      "subcap_ids": [
+        "P3C4.3"
+      ],
+      "title": "Feb 2026 systems conversion = real-world DR demonstration\u2026"
+    },
+    {
+      "body": "Integration timing: originally targeted November 2025; rescheduled to February 2026 (4-month slip); Q1 2026 merger charges higher than initial guidance as a result; management explicitly disclosed this delay rationale to investors",
+      "date_precision": "quarter",
+      "e_id": "E-004",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "387bf179-95e2-456d-b2e7-18a03cc140fc",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.fool.com/earnings/call-transcripts/2026/04/21/beacon-financial-bbt-q4-2025-earnings-transcript/",
+      "subcap_ids": [],
+      "title": "Q1 2026 merger charges higher than initial guidance as a\u2026"
+    },
+    {
+      "body": "CEO Perrault on Q1 2026: 'The first quarter results reflect near-term pressures and the tail end of merger activity as we completed the core system conversion in February.' \u2014 confirms successful Feb 2026 conversion completion",
+      "date_precision": "quarter",
+      "e_id": "E-005",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "12910d36-7f4d-4e07-a292-0124db549ada",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001108134/000117184326002833/exh_991.htm",
+      "subcap_ids": [],
+      "title": "CEO Perrault on Q1 2026: ' reflect near-term pressures and\u2026"
+    },
+    {
+      "body": "Management forward guidance includes effective tax rate (26% for 2026 ex-merger charges), merger charge recognition through Q1 2026, and explicit statement on synergy timing delay due to Feb 2026 conversion delay \u2014 demonstrates dependency management and re-baselining process",
+      "date_precision": "month",
+      "e_id": "E-025",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "269b5a8c-e040-4592-9e1e-975ad2141486",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001108134/000110813425000017/bbtearningspres20251030.htm",
+      "subcap_ids": [],
+      "title": "Management forward guidance includes effective tax rate\u2026"
+    },
+    {
+      "body": "Merger FAQ covers: routing number 211371489 (Beacon Bank), legacy routing numbers preserved during transition, direct deposit continuity, statements/online banking branding rollover, Q1 2026 systems integration timeline \u2014 proactive transition communication",
+      "date_precision": "quarter",
+      "e_id": "E-032",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "588628f5-9017-4153-95a4-5c05d088ea3d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.beaconbank.com/disclosures/consumer-digital-banking",
+      "subcap_ids": [],
+      "title": "Merger FAQ covers , statements/online banking branding\u2026"
+    },
+    {
+      "body": "Cost synergies fully realized: Carl Carlson (Q1 2026 earnings call): 'Total merger costs were in line with expectations and management is confident the announced cost synergies of the merger have been realized'; merger charges 'are over now... if anything sneaks through, it'll just go in the operating run rate'",
+      "date_precision": "quarter",
+      "e_id": "E-048",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "43337e06-9f48-4476-b528-76e58f7096c5",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000117184326002833/exh_991.htm",
+      "subcap_ids": [],
+      "title": "Cost synergies realized"
+    },
+    {
+      "body": "Automation ROI Tracking (P3C1.1.4) \u2014 anchored via Q1 2026 earnings call quote (Carl Carlson): 'management is confident the announced cost synergies of the merger have been realized' + Q3 2025 disclosed $68.9M pretax cost synergies + Q2 2026 quarterly run-rate $119.8M pretax + operating efficiency ratio Q1 2026 = 59.5% = TRACKED efficiency metrics with public quarterly reporting",
+      "date_precision": "quarter",
+      "e_id": "E-054",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-054"
+      ],
+      "id": "572f4f2c-e7db-47e9-97eb-6a2d8b3c9621",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.beaconbank.com",
+      "subcap_ids": [
+        "P3C1.1.4"
+      ],
+      "title": "Management is confident the announced cost synergies of the\u2026"
+    },
+    {
+      "body": "Marshall case timeline: (a) April 20, 2023 \u2014 Marshall filed Chapter 11 (debts $92.7M, $90.5M unsecured promissory notes to 990 investors); (b) May 2024 \u2014 Mark O'Dell first class action filed N.D.N.Y.; (c) **October 31, 2024 \u2014 Judge David Hurd DISMISSED first class action WITH PREJUDICE** (failed to plausibly allege actual knowledge); (d) **June 2025 \u2014 NY AG Letitia James announced 49-count criminal indictment against Marshall** (securities fraud + grand larceny; ~$50M from 988 investors); (e) **September 10, 2025 \u2014 Stevens (court-appointed administrator) + class refiled lawsuit in N.D.N.Y.** with stronger evidence; (f) Sept 15, 2025 \u2014 Marshall Madison County Court appearance.",
+      "date_precision": "day",
+      "e_id": "E-058",
+      "event_date": "2025-09-10",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "3ce64da0-387c-47b2-a51f-fa638e6b218c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.peifferwolf.com/clients-sue-berkshire-bank-ponzi/",
+      "subcap_ids": [],
+      "title": "Stevens (court-appointed administrator)"
+    },
+    {
+      "body": "Critical operational risk failure alleged in Sept 2025 refiled suit: **After Berkshire closed Marshall's most-used branch, it provided him with a remote check scanner enabling deposits up to $300,000 per day** \u2014 alleged enablement of fraud through deposit channel; suggests upstream branch-closure operational decision was not coupled with concurrent enhanced due diligence/transaction monitoring on residual customer relationship",
+      "date_precision": "month",
+      "e_id": "E-058",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "e6c925c1-01aa-4fbf-86b4-87bc7a20e5c2",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.peifferwolf.com/clients-sue-berkshire-bank-ponzi/",
+      "subcap_ids": [],
+      "title": "Critical operational risk failure alleged in Sept 2025\u2026"
+    },
+    {
+      "body": "Executive officer team named effective Sept 1, 2025: Paul A. Perrault (President/CEO, legacy Brookline), Carl M. Carlson (CFO+CSO dual role, legacy Brookline), Sean A. Gray (COO, legacy Berkshire), Michael McCurdy (Chief Banking Officer, legacy Brookline), Mark Meiklejohn (Chief Credit Officer, legacy Brookline), Jacqueline Courtwright (CHRO, legacy Berkshire), Wm. Gordon Prescott (GC/Corporate Secretary, legacy Berkshire)",
+      "date_precision": "day",
+      "e_id": "E-003",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "2111410f-b56d-4465-8712-128111b1a548",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000110465925086043/tm2524397d1_8k.htm",
+      "subcap_ids": [],
+      "title": "Executive officer team named effective Sept 1, 2025: Paul\u2026"
+    },
+    {
+      "body": "Formal NPS / CSAT / CES metric framework: NOT publicly disclosed by Beacon. Bank too new (Sept 2025 merger) to appear in J.D. Power 2025 U.S. Retail Banking Satisfaction Study rankings. Internal NPS/CSAT measurement likely exists per industry standard but not publicized",
+      "date_precision": "month",
+      "e_id": "E-044",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "8edf49ed-dcd1-4c16-9c7e-75abff375112",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://apps.apple.com/us/app/beacon-bank-mobile/id1665241460",
+      "subcap_ids": [],
+      "title": "Bank too new (Sept 2025 merger) to appear in J.D. Power\u2026"
+    },
+    {
+      "body": "FY2025 Merger and restructuring expense: $61.7M (vs $4.2M 2024) \u2014 Q3 2025 $45.9M + Q4 2025 $14.4M + Q1+Q2 negligible; total merger charges incurred Sept 2025-Q1 2026 = ~$84M against $93M plan",
+      "date_precision": "month",
+      "e_id": "E-049",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "7cba5923-c9ea-4635-b4c1-4e957d8dbe3a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000117184326000481/exh_991.htm",
+      "subcap_ids": [],
+      "title": "Total merger charges incurred Sept 2025-Q1 2026"
+    },
+    {
+      "body": "Automation Center of Excellence (P3C1.1.3) \u2014 HYPOTHESIS framed via FUNCTIONAL EQUIVALENT: (a) Merger Integration Office for the Sept 2025 - Feb 2026 conversion likely functions as enterprise automation CoE during transition; (b) named Technology & Cybersecurity integration workstream within 9-workstream architecture; (c) Pustake (Chief Strategy & Marketing Officer at Berkshire) + Belliveau (CIO) provided pre-merger leadership; (d) Narmi One implementation team (23 cross-functional stakeholders + 8 core PT) = ad-hoc CoE for digital banking transformation. Beacon-state CoE structure pending public disclosure; HYPOTHESIS: enterprise-scale automation CoE may consolidate post-integration",
+      "date_precision": "month",
+      "e_id": "E-054",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-054"
+      ],
+      "id": "c6f8d886-6ae3-4bb0-b417-892d33cc7721",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.beaconbank.com",
+      "subcap_ids": [
+        "P3C1.1.3"
+      ],
+      "title": "Hypothesis framed Merger Integration Office for the Sept\u2026"
+    },
+    {
+      "body": "**P3C4.2 BCP gaps** \u2014 anchored via: (a) FFIEC BCP Handbook mandatory for FRB+MDOB+RIDBR+NYDFS-regulated entity; (b) COVID-19 2020 BCP activation (E-068) + Sept 2025 merger (E-027) + Feb 2026 systems conversion (E-070) + Jan 2026 winter storm closure (E-031 carry-forward) = 4 real-world activations in 6-year period; (c) HYPOTHESIS \u2014 annual BCP refresh required by FFIEC; recent merger likely triggered formal BCP rewrite + tabletop exercises (already documented in Brookline 10-K Item 1C E-060)",
+      "date_precision": "month",
+      "e_id": "E-072",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-072",
+        "E-068",
+        "E-027",
+        "E-070",
+        "E-031",
+        "E-060"
+      ],
+      "id": "7460ea1c-8986-4aba-bbc7-a3f407ab04af",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "synthesized",
+      "subcap_ids": [
+        "P3C4.2"
+      ],
+      "title": "Sept 2025 merger + Feb 2026 systems conversion + Jan 2026\u2026"
+    },
+    {
+      "body": "**P3C4.4 Crisis Management** \u2014 anchored via: (a) 4 documented crisis activations (COVID 2020 + Sept 2025 merger + Jan 2026 winter storm + Feb 2026 conversion); (b) Mass DOB winter storm closure announcement Jan 26 2026 (E-031); (c) Multi-outlet media coverage of merger/conversion (Berkshire Eagle + Boston Globe + Worcester BJ + Banker & Tradesman); (d) Dedicated comms infrastructure: BeaconBank.com + 800 number + customer email + social media + branch signage",
+      "date_precision": "month",
+      "e_id": "E-072",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-072",
+        "E-031"
+      ],
+      "id": "eb2e8d2a-e32a-4158-8e30-59b961f5d340",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "synthesized",
+      "subcap_ids": [
+        "P3C4.4"
+      ],
+      "title": "Crisis Management \u2014 anchored Jan 2026 winter storm + Feb\u2026"
+    },
+    {
+      "body": "**P3C4.8 Vendor Exit & Contingency** \u2014 anchored via: (a) Berkshire Upstart partnership SUSPENDED mid-2022 (formal vendor exit decision per E-051); (b) Multi-bank merger required formal vendor consolidation/exit for duplicative platforms (Sept 2025-Feb 2026); (c) Narmi platform implementation March 2026 replaced multiple legacy digital banking platforms; (d) Brookline historical: ran Eastern Funding indirect auto lending through 2009 BSA C&D Order then comprehensive remediation (E-057) = capability to exit problematic vendor relationships; (e) Mass DOB-approved branch closure workflow (regulator-coordinated decommissioning) provides operational pattern",
+      "date_precision": "month",
+      "e_id": "E-072",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-072",
+        "E-051",
+        "E-057"
+      ],
+      "id": "7490d656-ac69-43c0-a876-d7045559f897",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "synthesized",
+      "subcap_ids": [
+        "P3C4.8"
+      ],
+      "title": "Multi-bank merger required formal vendor consolidation/exit\u2026"
+    },
+    {
+      "body": "Mass DOB Activity Log \u2014 Beacon regulatory engagement record: **2/27/2026** approved Beacon to close 3 RI branches (132 East Main Road Middletown; 100 Bellevue Avenue Newport; 121 Old Town Hill Road Wakefield); **8/29/2025** approved Berkshire/Brookline merger; **9/30/2024** approved Brookline 1016 Beacon Street closure; **5/31/2024** approved Brookline 1160 Walnut Street Newton Highlands closure. = active regulator-engagement record demonstrating ongoing exam + branch lifecycle management",
+      "date_precision": "day",
+      "e_id": "E-071",
+      "event_date": "2025-08-29",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "bec32d00-b7c4-4032-82d0-8543f16ff3a3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-activities.asp?certno=17798",
+      "subcap_ids": [],
+      "title": "8/29/2025 approved Berkshire/Brookline merger"
+    },
+    {
+      "body": "Q3 2025 (first combined quarter): $(56.3)M net loss reflecting $129.8M one-time merger charges",
+      "date_precision": "quarter",
+      "e_id": "E-004",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "9fa6aaca-dc6f-4d65-9838-64f85b3c06b1",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://www.fool.com/earnings/call-transcripts/2026/04/21/beacon-financial-bbt-q4-2025-earnings-transcript/",
+      "subcap_ids": [],
+      "title": "Q3 2025 (first combined quarter): $(56.3)M net loss\u2026"
+    },
+    {
+      "body": "**P3C3.6.4 Regulator Relationship** \u2014 comprehensively anchored: (a) 4-regulator footprint = Federal Reserve Board (FRB), Massachusetts Division of Banks (MDOB), Rhode Island Department of Business Regulation (RIDBR), New York State Department of Financial Services (NYDFS); all 4 explicitly named in Brookline 10-K Item 1C cybersecurity governance disclosure; (b) **Eric S. Rosengren on Beacon Board + Risk Committee Chair** \u2014 former Boston Federal Reserve Bank President 2007-2021 = UNIQUE deep relationship with primary regulator; (c) Mass DOB merger approval (Aug 2025) documents collaborative regulatory engagement during merger process; (d) FRB merger approval documented; (e) Berkshire received Newsweek 'America's Best Regional Banks' + ABA Foundation Community Commitment Award = positive regulator + industry relationship signaling",
+      "date_precision": "month",
+      "e_id": "E-066",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "82132df4-f2b6-4aba-a3c6-830a4ebc5b17",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "synthesized from Berkshire Q4 2024 Call Report + 4-regulator footprint",
+      "subcap_ids": [
+        "P3C3.6.4"
+      ],
+      "title": "Mass DOB merger approval (Aug 2025) documents collaborative\u2026"
+    },
+    {
+      "body": "All 4 legacy banks (Brookline, BankRI, PCSB, Berkshire) received CRA 'Satisfactory' ratings prior to merger (E-012 evidence); Mass DOB approval of bank merger required confirmation of MHPF affordable housing arrangement (Jul 15 2025) \u2014 both are positive fair lending compliance signals",
+      "date_precision": "day",
+      "e_id": "E-026",
+      "event_date": "2025-07-15",
+      "evidence_e_ids": [
+        "E-026",
+        "E-012"
+      ],
+      "id": "c9b54ac6-7f03-4c76-910e-9226cfe0ebd3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.mass.gov/info-details/community-reinvestment-act-cra-for-banks-and-credit-unions",
+      "subcap_ids": [],
+      "title": "Both are positive fair lending compliance signals"
+    },
+    {
+      "body": "Q4 2025 efficiency ratio 63.09% \u2014 substantial sequential improvement from Q3 2025 transition spike (91.57%); full year 2025 efficiency ratio 70.48% vs 68.09% 2024 (elevated due to integration); Perrault: 'We're beginning to build momentum as we closed 2025 with the strength of the combined Beacon organization and ongoing synergies created by our merger of equals'",
+      "date_precision": "year",
+      "e_id": "E-049",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "ca7de73c-1fc9-497c-85f4-69d2b07b8f9e",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000117184326000481/exh_991.htm",
+      "subcap_ids": [],
+      "title": "Perrault: 'We're beginning to build momentum"
+    },
+    {
+      "body": "Marshall case timeline: (a) April 20, 2023 \u2014 Marshall filed Chapter 11 (debts $92.7M, $90.5M unsecured promissory notes to 990 investors); (b) May 2024 \u2014 Mark O'Dell first class action filed N.D.N.Y.; (c) **October 31, 2024 \u2014 Judge David Hurd DISMISSED first class action WITH PREJUDICE** (failed to plausibly allege actual knowledge); (d) **June 2025 \u2014 NY AG Letitia James announced 49-count criminal indictment against Marshall** (securities fraud + grand larceny; ~$50M from 988 investors); (e) **September 10, 2025 \u2014 Stevens (court-appointed administrator) + class refiled lawsuit in N.D.N.Y.** with stronger evidence; (f) Sept 15, 2025 \u2014 Marshall Madison County Court appearance.",
+      "date_precision": "month",
+      "e_id": "E-058",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "69ba7a20-542a-4f94-8409-1eaa5f661043",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.peifferwolf.com/clients-sue-berkshire-bank-ponzi/",
+      "subcap_ids": [],
+      "title": "NY AG Letitia James announced 49-count criminal indictment\u2026"
+    },
+    {
+      "body": "Berkshire NAMED Chief Strategy & Marketing Officer pre-merger: Sumant Pustake, Age 40, EVP \u2014 strategy/marketing leadership unified, transformation function explicitly designated",
+      "date_precision": "publish_fallback",
+      "e_id": "E-051",
+      "event_date": "2025-04-04",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "7a76026c-4faa-4a38-aec8-92ebe99643fa",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://s27.q4cdn.com/998829972/files/doc_downloads/2025/BHLB-10K-2024-amended-ir.pdf",
+      "subcap_ids": [],
+      "title": "Berkshire Named Chief Strategy & Marketing Officer\u2026"
+    },
+    {
+      "body": "Berkshire pre-merger executive team operational completeness: CIO (Belliveau), CCO (Ashlee Flores), Chief Internal Audit (Andrew Plumridge), Chief Strategy (Pustake), CRO equivalents likely embedded in named EVPs. Formal C-suite operations governance \u2014 strong starting point for Beacon",
+      "date_precision": "publish_fallback",
+      "e_id": "E-051",
+      "event_date": "2025-04-04",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "84fd2398-a861-41bf-b708-fc18a756bcfa",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://s27.q4cdn.com/998829972/files/doc_downloads/2025/BHLB-10K-2024-amended-ir.pdf",
+      "subcap_ids": [],
+      "title": "Berkshire pre-merger executive team operational\u2026"
+    },
+    {
+      "body": "CISO previously served as Brookline's Chief Information Officer (merged CIO/CISO function); holds CISSP + CISM industry certifications \u2014 credentialed security leadership",
+      "date_precision": "publish_fallback",
+      "e_id": "E-018",
+      "event_date": "2025-03-03",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "84151f24-8783-4e46-aeb1-801bbd849298",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.board-cybersecurity.com/annual-reports/tracker/20250303-brookline-bancorp-inc-cybersecurity-10k/",
+      "subcap_ids": [],
+      "title": "CISO served as Brookline's Chief Information Officer"
+    },
+    {
+      "body": "**Todd Byers \u2014 Chief Technology Officer at Beacon Bank (Current)** (LinkedIn-verified); previously **SVP Chief Technology Officer at Berkshire Bank (Apr 2024 \u2013 Jan 2026)**; before that: SVP IT Service and Operations Management \u2192 FVP of ITSM \u2192 VP of ITSM/Senior Manager Helpdesk at Berkshire \u2014 multi-decade Berkshire IT tenure. Pre-Berkshire: Manager Engineering and Infrastructure at CDPHP (Linux + Automation + CFEngine + Nagios + AWS/Cloud DR + VMware + VDI). = NAMED Beacon CTO with deep operational and IT background.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-081",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "2c9ac2ae-c4a0-48e2-a51c-36b1934ba040",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.theladders.com/job/salesforce-devops-architect-berkshire-bank-virtual-travel_80802403",
+      "subcap_ids": [],
+      "title": "Named Beacon CTO with deep operational and IT background"
+    },
+    {
+      "body": "Pre-merger Berkshire Q4 2024 8-K disclosed CFO Brbovic commentary: 'Quarter-over-quarter operating income increased 5% on higher fee revenue and lower operating expense. The efficiency ratio was 62.4%, an improvement over prior periods' + 'investments in new client-facing bankers and enhancements to our digital platform and consumer product offerings' \u2014 provides legacy Berkshire baseline KPIs",
+      "date_precision": "quarter",
+      "e_id": "E-025",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "1c1df6b7-4544-4629-b7f0-b19d848d40b2",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001108134/000110813425000017/bbtearningspres20251030.htm",
+      "subcap_ids": [],
+      "title": "Pre-merger Berkshire Q4 2024 8-K disclosed CFO Brbovic\u2026"
+    },
+    {
+      "body": "Macero career arc demonstrates deep Brookline transformation knowledge: (a) Started as senior consultant at Brookline Bank advising on Global Trade, Commercial Lending, Credit Policy, Treasury Management; (b) Promoted to SVP/MD of Commercial Markets Payments Group (Oct 2021-Apr 2024 \u2014 2.5 years); (c) Promoted to EVP CDO Oct 10 2024 (E-067 carry-forward). Reference letter (recommendation) confirms: 'Brookline Bank has been undergoing a major transformation with the **acquisition and consolidation of two banks, a corporate-wide conversion to new core and online platforms** and the transition from a single Community Bank to a **Multi-Bank shared services operating model**' \u2014 Macero led multiple major bank transformations + data integration projects",
+      "date_precision": "day",
+      "e_id": "E-075",
+      "event_date": "2024-10-10",
+      "evidence_e_ids": [
+        "E-075",
+        "E-067"
+      ],
+      "id": "e5c1453a-a7d9-417c-aeb2-accfd3580d1d",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/mona-macero-4a9b5a15",
+      "subcap_ids": [],
+      "title": "Promoted to EVP CDO Oct 10 2024"
+    },
+    {
+      "body": "Regulator relationship operating model evidence: (a) Brookline 10-K Item 1C 'extensive regulatory compliance requirements, including those established by the FRB, MDOB, RIDBR, and NYDFS' \u2014 explicitly listed; (b) CCO Flores's scope includes 'compliance with the Bank Secrecy Act, Community Reinvestment Act, consumer protection laws and regulations' = formal regulator-engagement function; (c) Beacon CRA exams completed by Mass DOB + Federal Reserve in coordinated fashion (Brookline Sept 2024 Mass DOB + Federal Reserve consultative review); (d) USA PATRIOT Act Section 314(a) contact information formally designated to FinCEN \u2014 direct regulator communication channel established",
+      "date_precision": "month",
+      "e_id": "E-066",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "2ce41a20-5ffb-4f02-84d5-4a66410374d3",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "synthesized from Berkshire Q4 2024 Call Report + 4-regulator footprint",
+      "subcap_ids": [],
+      "title": "Beacon CRA exams completed by Mass DOB + Federal Reserve in\u2026"
+    },
+    {
+      "body": "Berkshire risk management organization includes (per official IR page): Risk function = ERM, loan review, information security, strategic services (Lindenmuth's scope); Compliance function = BSA, CRA, consumer protection, security, fraud investigations (Flores's scope); Internal Audit function = separate from Risk/Compliance per Berkshire 2024 10-K with named EVP Andrew Plumridge as Chief Internal Audit Officer \u2014 formal 3-line-of-defense governance.",
+      "date_precision": "year",
+      "e_id": "E-056",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "86bd158f-dbf0-4f9c-9c23-527a09f8f516",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-officers.asp?certno=23621",
+      "subcap_ids": [],
+      "title": "Internal Audit function = separate from Risk/Compliance per\u2026"
+    },
+    {
+      "body": "Branch closure / vendor-exit governance discipline: pre-merger Brookline closed 1016 Beacon Street + 1160 Walnut Street (2024); Beacon-era closed 3 RI branches (Feb 2026); each closure preceded by formal application to Mass DOB + comment period + regulatory approval = formal regulator-coordinated decommissioning process (applies methodology to vendor exit per P3C4.8)",
+      "date_precision": "year",
+      "e_id": "E-071",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "23f5e64f-9417-466c-9d13-6159692f3e44",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-activities.asp?certno=17798",
+      "subcap_ids": [
+        "P3C4.8"
+      ],
+      "title": "Branch closure / vendor-exit governance discipline: pre\u2026"
+    },
+    {
+      "body": "Berkshire NAMED Chief Information & Electronic Banking Officer pre-merger: James Belliveau, Age 59, EVP \u2014 promoted April 2024 (formerly Commerce Bank CTO; joined Berkshire 2017 via Commerce Bank acquisition); served as SVP Electronic Banking before promotion. Critical CIO-equivalent leadership confirmed in legacy Berkshire executive team",
+      "date_precision": "month",
+      "e_id": "E-051",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "2495bea0-17e0-4728-80c6-0340c07991cc",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://s27.q4cdn.com/998829972/files/doc_downloads/2025/BHLB-10K-2024-amended-ir.pdf",
+      "subcap_ids": [],
+      "title": "Berkshire Named Chief Information & Electronic Banking\u2026"
+    },
+    {
+      "body": "Berkshire One digital banking product (now Beacon One): launched mid-2024 via Berkshire under 4-month accelerated timeline (March 2024 concept \u2192 July 2024 soft launch); built via 'coalition of collaborative partnerships rather than outsourcing everything to a large fintech company'",
+      "date_precision": "month",
+      "e_id": "E-023",
+      "event_date": "2024-03-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "52ddf465-fe6b-4861-a270-ce843dfb648b",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://thefinancialbrand.com/news/digital-banking/insane-perks-and-smart-strategy-how-berkshire-bank-created-a-digital-success-story-182854",
+      "subcap_ids": [],
+      "title": "Berkshire One digital banking product (now Beacon One)\u2026"
+    },
+    {
+      "body": "Berkshire Bank 2022 ESG Report 'Purpose Performance that Matters' published April 2023 \u2014 comprehensive ESG disclosure publication, year-2 of $5B BEST Community Comeback program (launched Sept 2021)",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2023-04-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "9c7b3229-262b-4519-a087-6ba1c4bbb1bf",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.brooklinebancorp.com/News--Events/news/news-details/2023/Berkshire-Releases-Environmental-Social--Governance-ESG-Report/default.aspx",
+      "subcap_ids": [],
+      "title": "Berkshire Bank 2022 ESG Report 'Purpose Performance"
+    },
+    {
+      "body": "Sumant Pustake quoted as 'Chief Transformation & Strategy Officer' at Berkshire Bank in 2022 \u2014 C-suite level transformation function existed pre-merger. (LinkedIn confirms Pustake remained at Berkshire as EVP from Jan 2023, signaling continued role through merger.)",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "ea9f3f26-06c9-4f72-97a2-8037c9bf5834",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://ir.berkshirebank.com/news-events/press-releases-news/news-details/2022/Berkshire-Bank-Expands-Partnership-with-FinTech-Narmi/default.aspx",
+      "subcap_ids": [],
+      "title": "LinkedIn confirms"
+    },
+    {
+      "body": "**Ashlee Picard-Flores \u2014 EVP, Chief Compliance Officer Berkshire Bank** (promoted Sept 2022 from SVP Compliance; replaced Deborah Stephenson; 15+ years industry experience; joined Berkshire 2015 via Hampden Bank acquisition; BS Journalism BU). Reports directly to CRO Lindenmuth. Responsibilities: 'oversees all aspects of the compliance risk management program, including compliance with the Bank Secrecy Act, Community Reinvestment Act, consumer protection laws and regulations, as well as the Security and Fraud Investigations functions'. Confirmed via both Berkshire IR + Mass DOB regulatory listing.",
+      "date_precision": "month",
+      "e_id": "E-056",
+      "event_date": "2022-09-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "22214bb5-273f-46e7-8457-193c7789eda7",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-officers.asp?certno=23621",
+      "subcap_ids": [],
+      "title": "Ashlee Picard-Flores \u2014 EVP, Chief Compliance Officer\u2026"
+    },
+    {
+      "body": "Legacy Berkshire Bank had a FORMAL, NAMED digital transformation program: 'BEST' (Berkshire's Exciting Strategic Transformation) \u2014 referenced in 2022 press releases and ESG reports. Narmi partnership was an explicit milestone within BEST digital plan.",
+      "date_precision": "year",
+      "e_id": "E-014",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "62aa8614-bb2b-428d-a2a1-df29fe8badb1",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://ir.berkshirebank.com/news-events/press-releases-news/news-details/2022/Berkshire-Bank-Expands-Partnership-with-FinTech-Narmi/default.aspx",
+      "subcap_ids": [],
+      "title": "Legacy Berkshire Bank had a FORMAL, Named digital\u2026"
+    },
+    {
+      "body": "Berkshire-Narmi partnership (announced March 2022, expansion of 2019 deal) explicitly positioned the bank as 'forward-thinking, cloud-based...tech-forward Community Bank' with 'digital first growth strategy'",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "0d7cda5a-e003-4134-b83e-91ab6258b83a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://ir.berkshirebank.com/news-events/press-releases-news/news-details/2022/Berkshire-Bank-Expands-Partnership-with-FinTech-Narmi/default.aspx",
+      "subcap_ids": [],
+      "title": "Berkshire-Narmi partnership announced"
+    },
+    {
+      "body": "EVP Ellen Steinfeld, Head of Consumer Lending and Payments, on Upstart AI governance: 'With the **predictive underwriting models and lower fraud rates** delivered by the Upstart AI-based lending platform, Berkshire can deliver more inclusive lending options that ensure our neighbors and communities continue to thrive while delivering an enhanced customer experience.' = formal ML-based credit risk model governance at EVP level; Steinfeld = additional named data/AI governance officer at Berkshire (now continuing at Beacon as SEVP Consumer Lending+Payments)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-078",
+      "event_date": "2021-10-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "6c5770ab-7e97-4a17-aaa3-e0a0cdc77689",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000094337421000457/ex99-1_8kupstart.htm",
+      "subcap_ids": [],
+      "title": "Steinfeld = additional named data/AI governance officer at\u2026"
+    },
+    {
+      "body": "Macero career arc demonstrates deep Brookline transformation knowledge: (a) Started as senior consultant at Brookline Bank advising on Global Trade, Commercial Lending, Credit Policy, Treasury Management; (b) Promoted to SVP/MD of Commercial Markets Payments Group (Oct 2021-Apr 2024 \u2014 2.5 years); (c) Promoted to EVP CDO Oct 10 2024 (E-067 carry-forward). Reference letter (recommendation) confirms: 'Brookline Bank has been undergoing a major transformation with the **acquisition and consolidation of two banks, a corporate-wide conversion to new core and online platforms** and the transition from a single Community Bank to a **Multi-Bank shared services operating model**' \u2014 Macero led multiple major bank transformations + data integration projects",
+      "date_precision": "month",
+      "e_id": "E-075",
+      "event_date": "2021-10-01",
+      "evidence_e_ids": [
+        "E-075",
+        "E-067"
+      ],
+      "id": "cba42831-3923-42f9-b02a-5f79f76a528b",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/mona-macero-4a9b5a15",
+      "subcap_ids": [],
+      "title": "Promoted to SVP/MD of Commercial Markets Payments Group\u2026"
+    },
+    {
+      "body": "BEST Community Comeback (launched Sept 2021): $5B 3-year commitment with QUANTIFIED targets including $2.5B mortgage lending; $2.5B LMI neighborhood lending; $1.5B small business lending; $300M low-carbon project lending; $200M minority mortgage borrowers; $50M socially responsible investments; 200,000 socially responsible accounts; 300,000 people impacted with financial wellness; 100% renewable electricity usage; GHG emissions reduction commitment",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2021-09-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "7aa06f3c-12f2-4208-9bd4-47c7048232d7",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.brooklinebancorp.com/News--Events/news/news-details/2023/Berkshire-Releases-Environmental-Social--Governance-ESG-Report/default.aspx",
+      "subcap_ids": [],
+      "title": "BEST Community Comeback launched $5B 3-year commitment with\u2026"
+    },
+    {
+      "body": "**Berkshire Bank Upstart AI partnership (Aug 2021 start, Oct 2021 announced, July 2022 paused)**: 'AI based lending solutions'; Upstart = 'artificial intelligence (AI) based lender' founded by ex-Googlers; $20B+ consumer loans transacted; 42 bank partners. Berkshire was early AI lending adopter aligned with BEST 'digitize' pillar. CEO Mhatre: 'first of many programs to result directly from the \"digitize\" pillar within Berkshire's Exciting Strategic Transformation (BEST) plan.'",
+      "date_precision": "month",
+      "e_id": "E-078",
+      "event_date": "2021-08-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "dc6463c0-6208-4e1e-9685-c44ab95a8a63",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000094337421000457/ex99-1_8kupstart.htm",
+      "subcap_ids": [],
+      "title": "Berkshire Bank Upstart AI partnership (Aug 2021 start\u2026"
+    },
+    {
+      "body": "Beacon-Narmi relationship is 7 years long, originating 2019 when Berkshire partnered with Narmi for Consumer Account Opening \u2014 2026 selection represents consolidation/standardization of digital banking on Narmi platform for the merged entity",
+      "date_precision": "year",
+      "e_id": "E-016",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "33339d57-e3b9-4a3f-97f6-b123c8f24bf3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.fintechfutures.com/digital-banking/beacon-bank-partners-narmi-one",
+      "subcap_ids": [],
+      "title": "2026 selection represents consolidation/standardization of\u2026"
+    },
+    {
+      "body": "Brookline named CIO-equivalent leader for cash management: Mona Macero \u2014 40 years industry experience (Century Bank, Fleet Bank, US Trust, Citizens Bank, Blue Hills Bank); 4 years as CIO at Endurance Capital; ran m4m.Solutions (2010-2015) specializing in 'business integration support for **system conversions, implementations, mergers, and acquisitions**' \u2014 uniquely qualified for Beacon merger integration on commercial payments side. **P3C1.1.1 + P3C1.1.4 anchor**",
+      "date_precision": "publish_fallback",
+      "e_id": "E-055",
+      "event_date": "2019-06-18",
+      "evidence_e_ids": [
+        "E-055"
+      ],
+      "id": "2131e722-a231-4092-b512-8ff588b150db",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.theclearinghouse.org/payment-systems/Articles/2019/06/Berkshire-Adopts-RTP-06-18-2019",
+      "subcap_ids": [
+        "P3C1.1.1",
+        "P3C1.1.4"
+      ],
+      "title": "Brookline named CIO-equivalent leader for cash management"
+    },
+    {
+      "body": "Sean A. Gray \u2014 President, Chief Operating Officer at Berkshire Bank/Beacon since Dec 2018 (now COO of merged Beacon Bank); LinkedIn profile confirms scope: 'managing Retail, Commercial, Wealth Management and Insurance day to day operations' + 'establishing the strategic direction within the departments' \u2014 tech function reports through COO Gray",
+      "date_precision": "month",
+      "e_id": "E-020",
+      "event_date": "2018-12-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "b55f0fb2-1447-4440-a03a-8bd833b791a4",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/sumantpustake",
+      "subcap_ids": [],
+      "title": "Sean A. Gray"
+    },
+    {
+      "body": "**Gregory D. Lindenmuth \u2014 SEVP, Chief Risk Officer Berkshire Bank** (promoted Oct 2018); 24 years FDIC tenure as Senior Risk Examiner for Division of Risk Management Supervision; Capital Markets, Mortgage Banking & Fraud Specialist at FDIC; member of National Examination Procedures Committee; expertise in capital markets, derivatives, securitizations, market risk, liquidity/funds management, mortgage banking; co-developed FDIC's Technical Assistance Videos on Interest Rate Risk; Plattsburgh State BS + Clarkson MBA. Confirmed via both Berkshire IR page + Mass DOB Officer Lookup (regulatory primary source). Responsibilities: 'enterprise risk management as well as loan review, information security and strategic services'",
+      "date_precision": "month",
+      "e_id": "E-056",
+      "event_date": "2018-10-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "80c31ee9-cb41-4e10-bb0d-3b88d781497a",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-officers.asp?certno=23621",
+      "subcap_ids": [],
+      "title": "Gregory D. Lindenmuth \u2014 SEVP, Chief Risk Officer Berkshire\u2026"
+    },
+    {
+      "body": "Berkshire NAMED Chief Information & Electronic Banking Officer pre-merger: James Belliveau, Age 59, EVP \u2014 promoted April 2024 (formerly Commerce Bank CTO; joined Berkshire 2017 via Commerce Bank acquisition); served as SVP Electronic Banking before promotion. Critical CIO-equivalent leadership confirmed in legacy Berkshire executive team",
+      "date_precision": "year",
+      "e_id": "E-051",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "7f71f8db-24fe-4808-a646-574085df88f5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s27.q4cdn.com/998829972/files/doc_downloads/2025/BHLB-10K-2024-amended-ir.pdf",
+      "subcap_ids": [],
+      "title": "Joined Berkshire 2017 via Commerce Bank acquisition)"
+    },
+    {
+      "body": "Berkshire **CRO Lindenmuth ex-FDIC Examiner-in-Charge for Berkshire Bank**: 'During his tenure with the FDIC, the CRO served from time to time as the Examiner-in-Charge for Berkshire Bank and numerous other banks throughout New England' \u2014 UNIQUE pre-employment regulator-side knowledge of the bank he now governs; joined Berkshire Oct 2016 from FDIC after 24-year tenure",
+      "date_precision": "month",
+      "e_id": "E-067",
+      "event_date": "2016-10-01",
+      "evidence_e_ids": [
+        "E-067"
+      ],
+      "id": "905e0031-80fb-4fd0-95a6-8fe01e7743d4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1108134/000110813425000003/R39.htm",
+      "subcap_ids": [],
+      "title": "Joined Berkshire Oct 2016 from FDIC after 24-year tenure"
+    },
+    {
+      "body": "**Ashlee Picard-Flores \u2014 EVP, Chief Compliance Officer Berkshire Bank** (promoted Sept 2022 from SVP Compliance; replaced Deborah Stephenson; 15+ years industry experience; joined Berkshire 2015 via Hampden Bank acquisition; BS Journalism BU). Reports directly to CRO Lindenmuth. Responsibilities: 'oversees all aspects of the compliance risk management program, including compliance with the Bank Secrecy Act, Community Reinvestment Act, consumer protection laws and regulations, as well as the Security and Fraud Investigations functions'. Confirmed via both Berkshire IR + Mass DOB regulatory listing.",
+      "date_precision": "year",
+      "e_id": "E-056",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "baab8456-d8e8-41a5-9625-076156b51437",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://services.oca.state.ma.us/LicenseeLookup/in-choose-officers.asp?certno=23621",
+      "subcap_ids": [],
+      "title": "Joined Berkshire 2015 via Hampden Bank acquisition"
+    }
+  ]
+}

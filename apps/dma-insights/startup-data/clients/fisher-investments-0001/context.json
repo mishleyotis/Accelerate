@@ -1,0 +1,499 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "fisher-investments-0001",
+  "financials": {
+    "lines": [
+      "Fisher manages $386B in assets under management as of December 2025 (SEC Form ADV, T1, current), serving 195,000 clients worldwide through 6,300 employees across 16 offices in 8 countries (Fisher Corporate Website, T5, current). The five-year CAGR of 19.4% reflects accelerating growth, driven by organic acquisition and market appreciation. The Advent/ADIA transaction at $12.75B enterprise value (Advent Press Release, T2, current) implies a valuation multiple of approximately 3.3% of AUM \u2014 a premium for a private RIA.",
+      "5-Year CAGR: 19.4% | Trend: ACCELERATING | Valuation: $12.75B (Jan 2025)"
+    ],
+    "metrics": {
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 16,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 6300,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022"
+        ],
+        "geography": "US (primary), 8 countries globally",
+        "headline": "$236.0B assets \u00b7 FY2022 \u00b7 -33.9% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            357.0,
+            236.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        357000000000.0,
+        236000000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2022
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          357000000000.0,
+          236000000000.0
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2022
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US (primary)",
+      "8 countries globally"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Damian Ornani",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Triplett",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "Fisher Investments is the largest independent fee-only RIA in the US with $386B AUM and 19.4% five-year CAGR (SEC Form ADV, T1, current; Citywire, T3, current). Despite this scale, the firm\u2019s client experience remains anchored in a human-led model: no proprietary client portal, manual onboarding, and a content-only mobile app (Fisher Website, T5, current; App Store, T5, current). The Jan 2025 Advent/ADIA minority stake at $12.75B valuation, earmarked for \u201cglobal growth and technology capabilities,\u201d creates an 18\u201324 month transformation window (Advent Press, T2, current). Salesforce FSC and SFMC are already deployed \u2014 positioning Zennify for optimization and expansion rather than greenfield implementation.",
+    "primary_regulator": "SEC",
+    "size_tier": "Mega (>$100B AUM)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-075",
+        "excerpt": "iCIMS ATS integrated with Yello event management for campus recruiting Text-message interview scheduling \u2014 uptick in TA efficiency and response rates",
+        "title": "ICIMS ATS integrated with Yello event management for campus\u2026",
+        "type": "article",
+        "url": "https://resources.ripplematch.com/fisher-investments-2025-campus-forward-award-winner"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-094",
+        "excerpt": "Interview requires experience with Agile (Scrum/Kanban) frameworks DevOps + CI/CD processes required \u2014 hands-on Azure cloud deployment",
+        "title": "Interview requires experience with Agile (Scrum/Kanban) frameworks\u2026",
+        "type": "article",
+        "url": "https://www.interviewquery.com/interview-guides/fisher-investments-software-engineer"
+      },
+      {
+        "author": null,
+        "date": "2019-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-007",
+        "excerpt": "Ken Fisher inappropriate comments at Tiburon conference Oct 2019, lost ~$3.9B AUM from institutional clients Multiple pension funds (Iowa, Boston, Michigan) pulled mandates",
+        "title": "Multiple pension funds (Iowa, Boston, Michigan) pulled mandates",
+        "type": "conference",
+        "url": "https://www.nytimes.com/2019/10/09/business/ken-fisher-comments.html"
+      },
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-039",
+        "excerpt": "Fisher's AI stance: measured/cautious \u2014 'AI hype' perspective, long-term patience Recognize ML for cost-cutting and efficiency but skeptical about investment alpha from AI",
+        "title": "Fisher's AI stance: measured/cautious",
+        "type": "article",
+        "url": "https://www.fisherinvestments.com/en-us/insights/market-commentary/putting-mondays-airelated-volatility-in-perspective"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-104",
+        "excerpt": "Fisher Market Insights app on iOS/Android \u2014 articles, videos, podcasts App is content/educational focused \u2014 NOT account management or transactional",
+        "title": "Fisher Market Insights app on iOS/Android",
+        "type": "podcast",
+        "url": "https://apps.apple.com/us/app/fisher-market-insights/id1169932255"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-091",
+        "excerpt": "Financial Planning Services team elevates client experience through personalized plans Client Programs: Forecast Seminars, Client Forums, Roundtables, Webinars, Video Conferences",
+        "title": "Financial Planning Services team elevates client experience",
+        "type": "webinar",
+        "url": "https://www.fishercareers.com/financial-planning-services-elevates-our-client-experience"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "7a48e3a2-98c4-4c6c-b491-221db1e2c2dc",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Export CSV missing Evidence_IDs column (7 cols vs 11-col workbook). Workbook has 100% evidence population \u2014 export pipeline gap only."
+    },
+    {
+      "id": "49d14eb5-270d-4897-893e-e5dec438b1aa",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Report has 23 unique E-ID citations (threshold: 30). Executive summary adequate (9 E-IDs) but pillar sections under-cite T2 evidence."
+    },
+    {
+      "id": "aabbe2cb-a852-47d3-be1f-3844fe73bca0",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Report has 7 peer references (threshold: 10). Peers concentrated in Section 4. Executive summary has 0 peer name references. P1/P3 have 0 peer context."
+    },
+    {
+      "id": "afccf46d-b828-4d7c-9e49-be9104939689",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Overall score '2.31' not explicitly stated in report body text. Pillar scores present but overall absent from narrative."
+    },
+    {
+      "id": "4b5638ec-10d9-40fb-b032-854f0b330848",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Recommendation category matching against export CSV inconclusive due to column structure difference. Workbook categories confirmed present."
+    },
+    {
+      "id": "99f47df4-bb39-4f83-ab2d-76c40dff1c03",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Workbook rationales lack explicit counterclaim/rebuttal sections. Counterclaims present in recommendations.json but not per-subcap."
+    },
+    {
+      "id": "96d2d187-e31b-410b-ba66-15485de9c606",
+      "issue_id": "GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "No formal Critic_Log worksheet in workbook. Governance skill expects this artifact but assessment skill v5.5 does not produce it."
+    },
+    {
+      "id": "480e3515-07b5-44c8-9f67-254210d76c06",
+      "issue_id": "GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "export_scoring_detail.csv has 7 columns instead of expected 11. Missing: Evidence_IDs Source_URLs Rationale Proxy_Searched. Workbook is complete."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Value declined from $357.0B (2021) to $236.0B (2022) \u2014 -33.9% CAGR. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 4.0,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 4.0,
+        "P4C4": 3.0,
+        "P4C5": 4.0
+      },
+      "overall_score": 3.47,
+      "peer_name": "Mercer Advisors",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.5,
+        "P2C1": 4.0,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0,
+        "P4C5": 3.0
+      },
+      "overall_score": 3.35,
+      "peer_name": "Edelman Financial Engines",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0,
+        "P4C5": 3.0
+      },
+      "overall_score": 3.21,
+      "peer_name": "Hightower Advisors",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0,
+        "P4C5": 3.5
+      },
+      "overall_score": 3.12,
+      "peer_name": "Mariner Wealth Advisors",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0,
+        "P4C5": 2.5
+      },
+      "overall_score": 3.0,
+      "peer_name": "Creative Planning",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-FISH-20260310-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "in Texas Average IC manages ~190 households (unverified Glassdoor claim) Azure Synapse, Azure Data Factory, Azure Data Lake Storage, Power BI confirmed Databricks + Microsoft Purview for data platform Fisher's AI stance: measured/cautious \u2014",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "and fund transfers Customer Service score 3.4/5 (Comparably) Customer Satisfaction score 51 (Comparably) Fisher Market Insights app available on iOS and Android \u2014 free App provides market analysis, videos, podcasts \u2014 NOT account management",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Comparably",
+        "themes": [],
+        "value": 3.4
+      },
+      {
+        "drilldown": "AWS and Azure cloud infrastructure referenced in tech roles BBB Accredited since March 2014 TTS (Technology, Transformation & Security) department exists Digital Workplace team supports digital transformation and infrastructure Damian Ornan",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Ralph Haberli appointed CEO Nov 2025 after PE owners halted sale efforts",
+      "date_precision": "month",
+      "e_id": "E-081",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "cb6aa725-b824-4cb0-92e5-49c82ba3b838",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.investmentnews.com/companies/edelman-financial-engines/263549",
+      "subcap_ids": [],
+      "title": "Ralph Haberli appointed CEO Nov 2025"
+    },
+    {
+      "body": "Michael Liersch appointed Chief Planning Officer Aug 2025 \u2014 financial planning/advice focus",
+      "date_precision": "month",
+      "e_id": "E-081",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "12750dc9-2114-4da5-bdb5-bacc7b98ee25",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.investmentnews.com/companies/edelman-financial-engines/263549",
+      "subcap_ids": [],
+      "title": "Michael Liersch appointed Chief Planning Officer Aug 2025\u2026"
+    },
+    {
+      "body": "$3B minority common stock investment at $12.75B valuation \u2014 completed Jan 7 2025",
+      "date_precision": "day",
+      "e_id": "E-023",
+      "event_date": "2025-01-07",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "1dd3d6f8-602e-49f5-aa62-9b87fde999e6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.adventinternational.com/news/fisher-investments-finalizes-strategic-partnership-with-advent-and-adia-with-completion-of-minority-common-stock-investment/",
+      "subcap_ids": [],
+      "title": "$3B minority common stock investment at $12.75B valuation"
+    },
+    {
+      "body": "$3B minority stake by Advent International + ADIA at $12.75B valuation, completed Jan 2025",
+      "date_precision": "month",
+      "e_id": "E-004",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "cdee6925-00c4-4032-8f17-9248936742ee",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.adventinternational.com/portfolio/fisher-investments/",
+      "subcap_ids": [],
+      "title": "$3B minority stake by Advent International + ADIA at\u2026"
+    },
+    {
+      "body": "App ID 1169932255 \u2014 launched 2017, regularly updated",
+      "date_precision": "year",
+      "e_id": "E-104",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-104"
+      ],
+      "id": "0e0a3f96-00e1-40b7-90f6-f16faffa326a",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://apps.apple.com/us/app/fisher-market-insights/id1169932255",
+      "subcap_ids": [],
+      "title": "App ID 1169932255 \u2014 launched"
+    }
+  ]
+}

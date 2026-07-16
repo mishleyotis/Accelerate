@@ -1,0 +1,431 @@
+{
+  "entity_display_id": "rockland-trust-company-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3",
+        "P2C4.6.4",
+        "P3C1.6.1",
+        "P3C3.8.3",
+        "P2C2.2.10",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "e93cb3cb-9a1b-46b0-8165-7f6d84fcb507",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-PUB-0010"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-PROXY-0506",
+        "E-PUB-0010",
+        "E-WEB-0419"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-PUB-0010].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Deep Salesforce Ecosystem with Configuration Debt",
+      "what_text": "Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) is one of Rockland Trust Company's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Rockland Trust Company's ability to deliver a stronger data and technology foundation [E-PROXY-0506] [E-PROXY-0506] [E-PROXY-0506].",
+      "why_text": "The assessment found: “MuleSoft Anypoint, Apache Kafka, Apache Airflow for event-driven integration and orchestration. 200+ technologies in stack” [E-WEB-0419]. The research report pins the maturity impact at: level 3–level 4 ceiling; level 2–level 3 security hygiene. averages 1.7/5 across its 47 scored capability (peer median ~ 3.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C3.6.1",
+        "P2C3.3.4",
+        "P1C4.1.2",
+        "P3C3.8.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "6d15a990-e2d2-419a-8686-43adf7e0a3e6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-PUB-0031",
+        "E-PUB-0005",
+        "E-INT-0338"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make RPA Platform & Bot Management a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-INT-0338].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Enterprise Bank Integration Window",
+      "what_text": "RPA Platform & Bot Management is one of Rockland Trust Company's least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Rockland Trust Company's ability to deliver more efficient, dependable operations [E-PUB-0005] [E-PUB-0005] [E-PUB-0005].",
+      "why_text": "The research report pins the maturity impact at: level 2–level 3 ceiling; 12–18mo decision window. averages 2.2/5 across its 31 scored capability (peer median ~ 2.8) on the current assessment [E-PUB-0031, E-PUB-0005] [E-PUB-0031, E-PUB-0005] [E-PUB-0031, E-PUB-0005] [E-PUB-0031, E-PUB-0005].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C2.2.3",
+        "P2C1.2.3",
+        "P2C2.1.2",
+        "P2C1.2.1",
+        "P2C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "51b3510d-7a3a-4c3c-8768-763663d93421",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-INT-0001",
+            "E-INT-0008",
+            "E-INT-0009",
+            "E-INT-0024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-INT-0001",
+        "E-INT-0009",
+        "E-INT-0024",
+        "E-INT-0032",
+        "E-INT-0034",
+        "E-INT-0035",
+        "E-INT-0036",
+        "E-INT-0008"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Pre-Qualification Capabilities a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-INT-0024].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Digital Channels with Maturity Gaps",
+      "what_text": "Pre-Qualification Capabilities is one of Rockland Trust Company's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Rockland Trust Company's ability to deliver a stronger, more personalised customer experience [E-INT-0009] [E-INT-0009] [E-INT-0009].",
+      "why_text": "The research report pins the maturity impact at: level 3 digital delivery –C3; level 2 orchestration. averages 2.1/5 across its 57 scored capability (peer median ~ 3.0) on the current assessment [E-INT-0001, E-INT-0009] [E-INT-0001, E-INT-0009] [E-INT-0001, E-INT-0009] [E-INT-0001, E-INT-0009].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2.7.3",
+        "P1C2.1.3",
+        "P2C4.4.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "e795e76a-876a-41e9-b4f6-76acb38be256",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-INT-0001",
+            "E-INT-0008",
+            "E-INT-0009",
+            "E-INT-0024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-INT-0001",
+        "E-INT-0009",
+        "E-INT-0024",
+        "E-INT-0032",
+        "E-INT-0034",
+        "E-INT-0035",
+        "E-INT-0036",
+        "E-INT-0008"
+      ],
+      "linked_subcap_id": "P2C2.7.3",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Efficiency Metrics a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-INT-0024].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "NIM Compression Drives Efficiency",
+      "what_text": "Efficiency Metrics is one of Rockland Trust Company's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Rockland Trust Company's ability to deliver a stronger, more personalised customer experience [E-INT-0009] [E-INT-0009] [E-INT-0009].",
+      "why_text": "At 1.5 out of 5, Efficiency Metrics sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-INT-0001, E-INT-0009].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P4C1.7.3",
+        "P1C4.1.2",
+        "P4C4.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-PUB-0009"
+      ],
+      "ic_id": "CP-F-003",
+      "id": "d5553d8f-322f-4899-abf9-fa099d67b7d1",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-PUB-0009"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-INT-0003",
+            "E-INT-0004",
+            "E-INT-0011",
+            "E-INT-0012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-INT-0003",
+        "E-INT-0004",
+        "E-INT-0011",
+        "E-INT-0012",
+        "E-INT-0013",
+        "E-INT-0014",
+        "E-INT-0015",
+        "E-INT-0021"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Customer Segment Definition a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-INT-0011].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "CTOO Consolidation = Unified Strategy",
+      "what_text": "Customer Segment Definition is one of Rockland Trust Company's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Rockland Trust Company's ability to deliver sharper strategic direction and stronger oversight [E-INT-0004] [E-INT-0004] [E-INT-0004].",
+      "why_text": "The research report pins the maturity impact at: ceiling level 3+; single transformation decision-maker. averages 2.3/5 across its 33 scored capability (peer median ~ 2.8) on the current assessment [E-INT-0003, E-INT-0004] [E-INT-0003, E-INT-0004] [E-INT-0003, E-INT-0004] [E-INT-0003, E-INT-0004].",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.2.3",
+        "P4C3.6.1",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "ceee317e-3b1b-40bf-959b-e99b65f8d947",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-PUB-0010"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-WEB-0413",
+        "E-PUB-0010",
+        "E-WEB-0414"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Embedded Analytics & Actionable Insights a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-WEB-0414].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Advanced Analytics Stack Emerging",
+      "what_text": "Embedded Analytics & Actionable Insights is one of Rockland Trust Company's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Rockland Trust Company's ability to deliver a stronger data and technology foundation [E-PUB-0010] [E-PUB-0010] [E-PUB-0010].",
+      "why_text": "The assessment found: “Snowflake cloud data warehouse platform for centralized data management. AWS Glue + Azure Synapse for ETL/data integration” [E-WEB-0413]. The research report pins the maturity impact at: level 3–level 4; integration uncertain. averages 1.1/5 across its 54 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C2.4.1",
+        "P4C1.7.3",
+        "P1C4.1.2",
+        "P3C3.8.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-PUB-0009"
+      ],
+      "ic_id": "CP-F-007",
+      "id": "55b26bef-5053-46d8-b12d-547556aea698",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-PUB-0009"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-INT-0003",
+            "E-INT-0004",
+            "E-INT-0011",
+            "E-INT-0012"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-INT-0003",
+        "E-INT-0004",
+        "E-INT-0011",
+        "E-INT-0012",
+        "E-INT-0013",
+        "E-INT-0014",
+        "E-INT-0015",
+        "E-INT-0021"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Customer Segment Definition a near-term focus for Rockland Trust Company: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-INT-0011].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Board Fintech Expertise Upgrade",
+      "what_text": "Customer Segment Definition is one of Rockland Trust Company's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Rockland Trust Company's ability to deliver sharper strategic direction and stronger oversight [E-INT-0004] [E-INT-0004] [E-INT-0004].",
+      "why_text": "The research report pins the maturity impact at: governance level 3+. averages 2.3/5 across its 33 scored capability (peer median ~ 2.8) on the current assessment [E-INT-0003, E-INT-0004] [E-INT-0003, E-INT-0004] [E-INT-0003, E-INT-0004] [E-INT-0003, E-INT-0004].",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Evidence Base: 52 items | T1: 26 | T2: 24 | T3: 0 | T4: 2 | Peer Median: 2.60 | Gap: -0.32",
+        "heading": "4. Strategy, Governance & Culture (P1: 2.28, M2)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-RES-RTC-20260311-0001"
+}

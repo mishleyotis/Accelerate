@@ -1,0 +1,833 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "CI Segall Bryant & Hamill, LLC",
+      "amount": null,
+      "announced_on": null,
+      "body": "CI Financial Corp acquired by Accelerate Holdings Corp (Mubadala Capital), closed Aug 12 2025",
+      "closed_on": "2025-08-12",
+      "details": "CI Financial Corp acquired by Accelerate Holdings Corp (Mubadala Capital), closed Aug 12 2025",
+      "e_id": "E-005",
+      "event_date": "2025-08-12",
+      "id": "c984774d-190c-4b6a-bfd8-e5b77d0c55af",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000357204/000158064225005238/sbhfunds497.htm",
+      "status": "closed",
+      "target": "CI Financial Corp",
+      "title": "CI Financial Corp acquired"
+    },
+    {
+      "acquirer": "CI Segall Bryant & Hamill, LLC",
+      "amount": null,
+      "announced_on": null,
+      "body": "Denver Investment Advisors acquired April 30, 2018. Selected strategies managed by DIA PMs prior to this.",
+      "closed_on": null,
+      "details": "Denver Investment Advisors acquired April 30, 2018. Selected strategies managed by DIA PMs prior to this.",
+      "e_id": "E-016",
+      "event_date": "2018-04-30",
+      "id": "ffc4ee38-3c29-4837-988d-5993e4a99970",
+      "source_url": "https://www.sbhic.com/strategy-category/institutions/",
+      "status": null,
+      "target": "Denver Investment Advisors",
+      "title": "Denver Investment Advisors acquired"
+    }
+  ],
+  "entity_display_id": "ci-segall-bryant-hamill--0001",
+  "financials": {
+    "lines": [
+      "Revenue Growth: $35M (2024) \u2192 $63.9M (2026 est.) = +83% in two years (E-053). This growth reflects both organic AUM appreciation and the Roosevelt Investments integration (May 2024).",
+      "AUM Growth: $23.6B at CI acquisition (Apr 2021) \u2192 $25.4B (Mar 2024) = +7.6% over 3 years. 13F equity: $7.1B (Q2 2025).",
+      "M&A History: Four acquisitions integrated: Philadelphia International Advisors (2015), Denver Investment Advisors (2018), Roosevelt Investments (2024), plus Barrett Asset Management was acquired by CI Financial in the same wave but operates separately.",
+      "Parent Context: Corient platform: $224B aggregate. Mubadala backing brings sovereign-fund discipline. SBH is one of 14+ RIAs in the CI/Corient family, each at different stages of FSC standardization."
+    ],
+    "metrics": {
+      "aum_growth": "23.6B at CI acquisition (Apr 2021) \u2192 $25.4B (",
+      "corient_platform": "224B aggregate. Mubadala backing brings sove",
+      "f_equity": "7.1B (Q2 2025).",
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 6,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 100,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Jim Rogers hired May 2024"
+          },
+          {
+            "fy": "FY2021",
+            "label": "CI Financial Corp (TSX:CIX) acquired"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2024"
+        ],
+        "geography": null,
+        "headline": "$21.3B assets \u00b7 FY2024 \u00b7 -5.8% CAGR",
+        "regulator": "SEC (Investment Advisers Act)",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            25.4,
+            21.27
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        25400000000.0,
+        21267060906.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2024
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          25400000000.0,
+          21267060906.0
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2024
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Illinois"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carolyn Goldhaber",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Executive Sponsor (SBH)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Adam Konrad",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Client PM / Technical SME"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ryan Koshar",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Client Technical Resource"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Philip Hildebrandt",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO (status unclear)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jasper Frontz",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CCO (CFA, CPA)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Rewey",
+        "recent_hire": false,
+        "tenure_months": 336,
+        "title": "Head of Distribution (28yr)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Scott Decatur, PhD",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Quant Team Lead"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Suresh Rajagopal",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Dir. ESG Research (CFA)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "SEC-registered investment adviser",
+    "narrative_md": "CI Segall Bryant & Hamill (SBH) is a Chicago-headquartered, SEC-registered investment adviser founded in 1994, managing approximately $25.4 billion in combined AUM/AUA as of March 2024 (INT-005:F1). The firm is wholly owned within a multi-layered corporate structure: SBH reports to Corient Management LLC, which sits under Corient Holdings Inc., itself a subsidiary of CI Financial Corp. (TSX:CIX, NYSE:CIXX). In August 2025, CI Financial was taken private by Mubadala Capital (Abu Dhabi sovereign wealth fund) at C$12.1B enterprise value (E-078). SBH operates from six U.S. offices \u2014 Chicago (HQ), Denver, Philadelphia (Ardmore), St. Louis, Naples FL, and Cincinnati OH \u2014 with 115\u2013124 employees (INT-005:F2). The firm serves institutional clients (foundations, endowments, pension plans), intermediary channels, and high-net-worth individuals through 27+ investment strategies, 16 mutual funds, 1 ETF (USSE), 9 collective investment trusts, and 3+ private funds (INT-005).\n\nSBH\u2019s stated mission is \"to exceed our clients\u2019 expectations by helping them realize their long-term investment goals across complex market environments and by delivering a customized, high-touch service experience. The result is long-lasting relationships with our clients built on trust\" (E-084, SBH About Us page). This mission anchors all strategic priorities and defines how technology investments \u2014 including the current FSC migration \u2014 should be evaluated.",
+    "primary_regulator": "SEC (Investment Advisers Act)",
+    "size_tier": "Mid-Size AM ($10B-$50B AUM)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "SBH is a signatory to the United Nations Principles for Responsible Investment (UN PRI). Confirmed in CI GAM press release and cisbh.com article. ESG factors integrated into investment process across strategies. Roosevel",
+        "title": "SBH is a signatory to the United Nations Principles for Responsible\u2026",
+        "type": "article",
+        "url": "https://cisbh.com/insights/the-advantages-of-a-quantitative-investing-approach"
+      },
+      {
+        "author": null,
+        "date": "2024-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "SBH has a dedicated 'Advisor Solutions' segment targeting financial advisors. Positions strategies as 'Institutional-Quality Strategies for Your Clients'. 'Latest Insights' section provides thought leadership content to ",
+        "title": "SBH has a dedicated 'Advisor Solutions' segment targeting financial\u2026",
+        "type": "article",
+        "url": "https://www.sbhic.com/backup-advisor-solutions/"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "Active LinkedIn presence with regular market commentary posts (Fixed Income recaps, EM insights, quarterly newsletters). Content topics: Fixed income market recaps, EM valuation analysis, dot-com bubble parallels, award ",
+        "title": "Active LinkedIn presence with regular market commentary posts (Fixed\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/segall-bryant-&-hamill"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "Glassdoor overall rating: 4.3/5 stars based on 15 reviews. 100% of employees recommend working at SBH to a friend. 100% positive interview experience. 77% positive business outlook \u2014 some uncertainty, likely related to o",
+        "title": "Glassdoor overall rating: 4.3/5 stars based on 15 reviews",
+        "type": "article",
+        "url": "https://www.glassdoor.com/Overview/Working-at-Segall-Bryant-Hamill-EI_IE1341202.11,31.htm"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "Digital channels: LinkedIn (active, regular posts), 3 websites (sbhic.com, cisbh.com, sbhfunds.com), Vimeo (video hosting). No Twitter/X, no YouTube, no podcast, no webinar platform detected. LinkedIn content: quarterly ",
+        "title": "Digital channels: LinkedIn (active, regular posts), 3 websites\u2026",
+        "type": "podcast",
+        "url": "https://www.linkedin.com/company/segall-bryant-&-hamill"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "eceeb790-e907-453a-859e-166bf1558e79",
+      "issue_id": "GAP-1-P1C1.1.2",
+      "linked_subcap_ids": [
+        "P1C1.1.2"
+      ],
+      "opened_on": "2026-04-01",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the AM peer median (2.5/5). CI SBH scores M1.0 for Business Alignment based on 24 evidence items (E-014, E-016, E-017). Digital Strategy & Investment: ceiling L1.0-1.5. Gaps: No digital/tech strategy, No CTO/CIO. Peer median: 2.5. To reach next M-level, SBH would need documented processes and technology enablement in this area",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Business Alignment"
+    },
+    {
+      "id": "80bb5f95-8803-4698-afcb-f8e1e7999ac5",
+      "issue_id": "GAP-2-P1C1.1.3",
+      "linked_subcap_ids": [
+        "P1C1.1.3"
+      ],
+      "opened_on": "2026-04-01",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the AM peer median (2.5/5). CI SBH scores M1.0 for Strategy Refresh Cadence based on 24 evidence items (E-014, E-016, E-017). Digital Strategy & Investment: ceiling L1.0-1.5. Gaps: No digital/tech strategy, No CTO/CIO. Peer median: 2.5. To reach next M-level, SBH would need documented processes and technology enablement in thi",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Strategy Refresh Cadence"
+    },
+    {
+      "id": "47439409-1c01-41c1-a6e3-9d4f2b514fe6",
+      "issue_id": "GAP-3-P1C1.1.4",
+      "linked_subcap_ids": [
+        "P1C1.1.4"
+      ],
+      "opened_on": "2026-04-01",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the AM peer median (2.5/5). CI SBH scores M1.0 for Vision Communication based on 24 evidence items (E-014, E-016, E-017). Digital Strategy & Investment: ceiling L1.0-1.5. Gaps: No digital/tech strategy, No CTO/CIO. Peer median: 2.5. To reach next M-level, SBH would need documented processes and technology enablement in this ar",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Vision Communication"
+    },
+    {
+      "id": "192d80b9-9abb-4886-8e2c-7e1729cad3f8",
+      "issue_id": "GAP-4-P1C1.1.5",
+      "linked_subcap_ids": [
+        "P1C1.1.5"
+      ],
+      "opened_on": "2026-04-01",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the AM peer median (2.5/5). CI SBH scores M1.0 for Board Engagement based on 24 evidence items (E-014, E-016, E-017). Digital Strategy & Investment: ceiling L1.0-1.5. Gaps: No digital/tech strategy, No CTO/CIO. Peer median: 2.5. To reach next M-level, SBH would need documented processes and technology enablement in this area.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Board Engagement"
+    },
+    {
+      "id": "9bdcd0ac-d1a2-4735-bf93-da87d5fcce91",
+      "issue_id": "GAP-5-P1C1.2.1",
+      "linked_subcap_ids": [
+        "P1C1.2.1"
+      ],
+      "opened_on": "2026-04-01",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the AM peer median (2.5/5). CI SBH scores M1.0 for Multi-Year Roadmap based on 24 evidence items (E-014, E-016, E-017). Digital Strategy & Investment: ceiling L1.0-1.5. Gaps: No digital/tech strategy, No CTO/CIO. Peer median: 2.5. To reach next M-level, SBH would need documented processes and technology enablement in this area",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Multi-Year Roadmap"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Value declined from $25.4B (2021) to $21.3B (2024) \u2014 -5.7% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.5,
+        "P1C4": 2.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 1.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 4.0,
+        "P4C3": 4.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.79,
+      "peer_name": "American Homes 4 Rent, LP",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.79,
+        "P1C2": 2.36,
+        "P1C3": 2.34,
+        "P1C4": 2.63,
+        "P1C5": 4.04,
+        "P2C1": 1.48,
+        "P2C2": 2.14,
+        "P2C3": 1.18,
+        "P2C4": 1.88,
+        "P3C1": 2.45,
+        "P3C2": 1.83,
+        "P3C3": 3.22,
+        "P3C4": 2.71,
+        "P4C1": 2.34,
+        "P4C2": 2.35,
+        "P4C3": 2.52,
+        "P4C4": 2.85
+      },
+      "overall_score": 2.42,
+      "peer_name": "VNO",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.15,
+        "P1C2": 2.47,
+        "P1C3": 1.76,
+        "P1C4": 1.95,
+        "P2C1": 2.03,
+        "P2C2": 2.07,
+        "P2C3": 1.84,
+        "P2C4": 1.64,
+        "P3C1": 2.08,
+        "P3C2": 2.38,
+        "P3C3": 2.6,
+        "P3C4": 2.43,
+        "P4C1": 1.64,
+        "P4C2": 1.72,
+        "P4C3": 1.96,
+        "P4C4": 2.62
+      },
+      "overall_score": 2.08,
+      "peer_name": "Chemung Canal Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.16,
+        "P1C3": 2.47,
+        "P1C4": 1.89,
+        "P1C5": 2.5,
+        "P2C1": 1.25,
+        "P2C2": 1.79,
+        "P2C3": 1.8,
+        "P2C4": 1.33,
+        "P3C1": 2.48,
+        "P3C2": 2.12,
+        "P3C3": 2.8,
+        "P3C4": 1.67,
+        "P4C1": 1.2,
+        "P4C2": 1.7,
+        "P4C3": 2.12,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.98,
+      "peer_name": "CI Financials",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.5,
+        "P1C2": 1.59,
+        "P1C3": 1.64,
+        "P1C4": 1.6,
+        "P2C1": 1.61,
+        "P2C2": 1.46,
+        "P2C3": 1.46,
+        "P2C4": 1.51,
+        "P3C1": 1.38,
+        "P3C2": 1.37,
+        "P3C3": 1.47,
+        "P3C4": 1.57,
+        "P4C1": 1.58,
+        "P4C2": 1.43,
+        "P4C3": 1.51,
+        "P4C4": 1.62
+      },
+      "overall_score": 1.52,
+      "peer_name": "PenderFund Capital Management Ltd.",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-CISBH-20260401-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor overall rating: 4.3/5 stars based on 15 reviews",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 15,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.3
+      },
+      {
+        "drilldown": "Minimal Indeed presence suggests small headcount and limited employer brand investment SBH HQ at 10 S Wacker Dr Suite 3100, Chicago IL 60606",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Searched: 'SBH client survey satisfaction NPS feedback service quality' \u2014 zero SBH-specific results",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "SEC Form 497 confirms: 'The Trustees have appointed a Chief Compliance Officer who is an employee of the Adviser' \u2014 CCO is internal, not outsourced.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-066",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "5facd381-715b-4105-9ea4-e3bd88053c81",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/in/jasper-frontz-cfa-cpa-25482a22/",
+      "subcap_ids": [],
+      "title": "SEC Form 497 confirms"
+    },
+    {
+      "body": "CI Financial Corp acquired by Accelerate Holdings Corp (Mubadala Capital), closed Aug 12 2025",
+      "date_precision": "day",
+      "e_id": "E-005",
+      "event_date": "2025-08-12",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "c984774d-190c-4b6a-bfd8-e5b77d0c55af",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000357204/000158064225005238/sbhfunds497.htm",
+      "subcap_ids": [],
+      "title": "CI Financial Corp acquired"
+    },
+    {
+      "body": "Mubadala Capital (Abu Dhabi sovereign fund) completed take-private of CI Financial Aug 2025 at C$12.1B enterprise value. SBH is now part of a sovereign-fund-backed global wealth platform.",
+      "date_precision": "month",
+      "e_id": "E-078",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "16e05ce7-3d13-4691-a010-91802ca78617",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://cisbh.com/news/ci-financial-set-to-acquire-segall-bryant---hamill",
+      "subcap_ids": [],
+      "title": "Mubadala Capital (Abu Dhabi sovereign fund) completed\u2026"
+    },
+    {
+      "body": "Mark Brubaker CFA named 2025 Knowledge Broker by Chief Investment Officer magazine \u2014 investment CIO recognition, NOT technology CIO.",
+      "date_precision": "year",
+      "e_id": "E-024",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "0ad61182-0a14-4fa5-a813-7ad1ea40ecc4",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/segall-bryant-&-hamill",
+      "subcap_ids": [],
+      "title": "Mark Brubaker CFA named 2025 Knowledge Broker by Chief\u2026"
+    },
+    {
+      "body": "Mubadala acquisition (Nov 2024 agreement, closed Aug 2025) triggered 1940 Act 'change in control' \u2014 required new advisory agreements with all fund shareholders.",
+      "date_precision": "month",
+      "e_id": "E-030",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "29b63ed6-f84f-4204-9836-624de126fa50",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.okapivote.com/SBH/",
+      "subcap_ids": [],
+      "title": "Mubadala acquisition (Nov 2024 agreement, closed"
+    },
+    {
+      "body": "Kathryn Burns (CPA, ex-PwC Audit Manager) appointed Independent Trustee Aug 2024 \u2014 brings accounting/audit expertise.",
+      "date_precision": "month",
+      "e_id": "E-028",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "6698fa28-f918-4a30-96da-15827e21471b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000357204/000158064225006811/sbh_497.htm",
+      "subcap_ids": [],
+      "title": "Kathryn Burns (CPA, ex-PwC Audit Manager) appointed"
+    },
+    {
+      "body": "Jim Rogers hired May 2024 as Director, Marketing & Business Development (from LinkedIn via Clay). Two marketing directors now \u2014 Johnson (institutional) and Rogers (likely intermediary/advisor).",
+      "date_precision": "month",
+      "e_id": "E-048",
+      "event_date": "2024-05-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "d3ded0eb-339a-466a-b3e5-9d5dc7280631",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/segall-bryant--hamill/5a1d861e2400002400607893",
+      "subcap_ids": [],
+      "title": "Jim Rogers hired May 2024"
+    },
+    {
+      "body": "Frontz resigned as Treasurer, Leamer appointed (Feb 2024). Romie as Asst Treasurer (Jan 2024)",
+      "date_precision": "month",
+      "e_id": "E-008",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "d24d6207-39f2-43e8-9d15-456abc59e705",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000357204/000158064224001630/barrettgrowth_497.htm",
+      "subcap_ids": [],
+      "title": "Frontz resigned as Treasurer"
+    },
+    {
+      "body": "Oct 25, 2023: Myles Johnson joined as Director, Marketing & Business Development 'as the firm continues to enhance servicing of its institutional clients and investment consultants.'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-048",
+      "event_date": "2023-10-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "88d0b5f3-aa0e-4dd3-8ba0-c55ed9a17b76",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/segall-bryant--hamill/5a1d861e2400002400607893",
+      "subcap_ids": [],
+      "title": "Myles Johnson joined as Director, Marketing & Business\u2026"
+    },
+    {
+      "body": "VENDOR TENURE CLASSIFICATION:\nLEGACY (>5yr): FactSet, ADP, Slack, Zoom\nESTABLISHED (2-5yr): Ultimus (since 2019), AWS/Fastly (cisbh.com ~2022), Seismic, Pardot\nNEW (<2yr): Northern Lights (ETF launched ~2024)\nUNKNOWN: MangoApps, Wire",
+      "date_precision": "year",
+      "e_id": "E-070",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-070"
+      ],
+      "id": "38efd72a-547b-4170-81c9-6a5f9062ceb2",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://cisbh.com/",
+      "subcap_ids": [],
+      "title": "Northern Lights launched ) UNKNOWN: MangoApps, Wire"
+    },
+    {
+      "body": "SBH named 2022 Best Places to Work in Money Management by P&I \u2014 2nd consecutive year. Category: large companies (100-499 US employees).",
+      "date_precision": "year",
+      "e_id": "E-035",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-035"
+      ],
+      "id": "73a201af-5cf9-49ae-9266-f1ba41c1cafa",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/segall-bryant--hamill-wins-pensions--investments-best-places-to-work-in-money-management-award-301700638.html",
+      "subcap_ids": [],
+      "title": "SBH named 2022 Best Places"
+    },
+    {
+      "body": "Carolyn Goldhaber promoted from CFO to President (May 2022)",
+      "date_precision": "month",
+      "e_id": "E-007",
+      "event_date": "2022-05-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "d01c4f3e-78aa-455c-ba63-7d96f094b4f9",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.zoominfo.com/c/segall-bryant--hamill-llc/79790726",
+      "subcap_ids": [],
+      "title": "Carolyn Goldhaber promoted from CFO"
+    },
+    {
+      "body": "CI Financial Corp (TSX:CIX) acquired SBH April 2021. CI described as 'diversified global asset and wealth management company' with C$261B total assets at time of deal.",
+      "date_precision": "month",
+      "e_id": "E-078",
+      "event_date": "2021-04-01",
+      "evidence_e_ids": [
+        "E-078"
+      ],
+      "id": "bd141af2-916c-4509-b163-4f84f1c75c0f",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://cisbh.com/news/ci-financial-set-to-acquire-segall-bryant---hamill",
+      "subcap_ids": [],
+      "title": "CI Financial Corp (TSX:CIX) acquired"
+    },
+    {
+      "body": "Suresh Rajagopal CFA appointed Director of ESG Research Nov 2020 \u2014 NEW ROLE created to enhance firm's broader ESG commitment.",
+      "date_precision": "month",
+      "e_id": "E-045",
+      "event_date": "2020-11-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "3bf15072-13c3-4aae-9163-45ebeb948f57",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/segall-bryant--hamill-names-director-of-esg-research-301175313.html",
+      "subcap_ids": [],
+      "title": "Suresh Rajagopal CFA appointed Director of ESG Research Nov\u2026"
+    },
+    {
+      "body": "Private funds include: EM Small Cap LP, EM Fund LP (+ offshore), Private Opportunities Fund LP (+offshore, closed), PO Fund 2020 LP (+offshore, closed), PO Fund III LP (+offshore, closed).",
+      "date_precision": "year",
+      "e_id": "E-014",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "e12780df-a660-4849-b492-dc5900c5900b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.privatebank.citibank.com/pdf/adv/SegallBryantHamillADV.pdf",
+      "subcap_ids": [],
+      "title": "Private funds include"
+    },
+    {
+      "body": "SBH raised <$5M in 1 funding round closed Apr 15, 2020 (pre-CI acquisition).",
+      "date_precision": "day",
+      "e_id": "E-038",
+      "event_date": "2020-04-15",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "856dc64d-0644-47d0-bf65-2adffeb41989",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.zoominfo.com/c/segall-bryant--hamill-llc/79790726",
+      "subcap_ids": [],
+      "title": "SBH raised $5"
+    },
+    {
+      "body": "Conversion completed Dec 2019 from TWO previous service providers \u2014 consolidation of fund operations into single vendor.",
+      "date_precision": "month",
+      "e_id": "E-062",
+      "event_date": "2019-12-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "75d42407-9777-4127-903d-e94f0af7eb49",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2020/01/16/1971417/0/en/Segall-Bryant-Hamill-Converts-Over-2-5Bn-in-AUM-to-Ultimus-for-Fund-Administration.html",
+      "subcap_ids": [],
+      "title": "Conversion completed Dec 2019"
+    },
+    {
+      "body": "Troy Johnson (Sr PM, Dir FI Research) joined May 2018 via Denver Investments acquisition. 11yr tenure at DIA.",
+      "date_precision": "month",
+      "e_id": "E-022",
+      "event_date": "2018-05-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "763a3521-10c3-494a-a1db-86a5767b1c91",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "http://test.sbhic.com/advisor-solutions/high-yield-sma/",
+      "subcap_ids": [],
+      "title": "Troy Johnson (Sr PM, Dir FI Research) joined via Denver\u2026"
+    },
+    {
+      "body": "Nick Foley (Sr PM) also joined via Denver Investments acquisition May 2018. Prior: Bank of West/BNP, Janus Capital.",
+      "date_precision": "month",
+      "e_id": "E-022",
+      "event_date": "2018-05-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "1e47e564-89e3-4ac9-822b-baade31e06f8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "http://test.sbhic.com/advisor-solutions/high-yield-sma/",
+      "subcap_ids": [],
+      "title": "Nick Foley (Sr PM) joined via Denver Investments acquisition"
+    },
+    {
+      "body": "Denver Investment Advisors acquired April 30, 2018. Selected strategies managed by DIA PMs prior to this.",
+      "date_precision": "day",
+      "e_id": "E-016",
+      "event_date": "2018-04-30",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "ffc4ee38-3c29-4837-988d-5993e4a99970",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sbhic.com/strategy-category/institutions/",
+      "subcap_ids": [],
+      "title": "Denver Investment Advisors acquired"
+    },
+    {
+      "body": "Most recent deal: Buyout/LBO of Denver Investment Advisors (Apr 2018)",
+      "date_precision": "month",
+      "e_id": "E-012",
+      "event_date": "2018-04-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "ca814aba-fde0-4504-aca8-697ecbc9b04c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://pitchbook.com/profiles/company/60330-97",
+      "subcap_ids": [],
+      "title": "Most recent deal: Buyout/LBO of Denver Investment Advisors\u2026"
+    },
+    {
+      "body": "SBH acquired PIA quantitative investment team July 2015. Scott Decatur became partner at SBH. Team managed ~$150M in intl small cap and EM equity at PIA.",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "89d7fabc-c89f-4f24-8393-fa40c9ec73f9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.pionline.com/article/20150707/ONLINE/150709936/segall-bryant-hamill-acquires-philadelphia-international-quant-team",
+      "subcap_ids": [],
+      "title": "SBH acquired PIA quantitative investment team"
+    },
+    {
+      "body": "PIA closed same day (June 30, 2015) due to CEO retirement + outflows. SBH opened new Philadelphia office to house the team.",
+      "date_precision": "day",
+      "e_id": "E-039",
+      "event_date": "2015-06-30",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "f317a74b-c812-4fbf-913d-a5eacf207876",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.pionline.com/article/20150707/ONLINE/150709936/segall-bryant-hamill-acquires-philadelphia-international-quant-team",
+      "subcap_ids": [],
+      "title": "PIA closed due to CEO retirement + outflows"
+    },
+    {
+      "body": "Workplace Equality strategy launched in 1998 \u2014 invests in US companies with progressive workplace policies treating all employees equally regardless of sexual orientation, gender, ethnicity, religion.",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "1998-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "a0766cbc-ed71-42cd-a3c6-24e1dda9c218",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/segall-bryant--hamill-names-director-of-esg-research-301175313.html",
+      "subcap_ids": [],
+      "title": "Workplace Equality strategy launched in 1998"
+    }
+  ]
+}

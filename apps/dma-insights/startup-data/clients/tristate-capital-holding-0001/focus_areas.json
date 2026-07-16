@@ -1,0 +1,273 @@
+{
+  "entity_display_id": "tristate-capital-holding-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-027",
+          "E-001"
+        ],
+        "representative_quote": "400+ Financial Intermediary Distribution Network",
+        "source_kind": "docx"
+      },
+      "id": "63169118-950e-4597-a27f-970aa4fa48d5",
+      "involved_subcap_ids": [
+        "P2C4.6.5",
+        "P4C1.1.8",
+        "P4C2.4.13",
+        "P4C1.1.7",
+        "P4C4.2.6",
+        "P4C4.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "60%",
+          "delta": null,
+          "kpi_label": "TSC's private banking",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "400+ Financial Intermediary Distribution Network",
+      "verbatim_quote": "F-005 | 400+ Financial Intermediary Distribution Network | TSC's private banking (60%+ of loans) sources through 400+ financial advisors/intermediaries nationally via a Digital Lending Platform with 24/7 access and 3-day document delivery [E-027, E-001] | Unique B2B2C model where advisors are the primary customer interface. P2C2 (Onboarding) and P2C3 (Omnichannel) benefit from digital-first intermediary model. | Experience Cloud portal for 400+ intermediary network = massive SF opportunity. Partner Community + FSC + Einstein = advisor enablement platform."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-099",
+          "E-094"
+        ],
+        "representative_quote": "AI/GenAI Proof-of-Concept with RAG Architecture",
+        "source_kind": "docx"
+      },
+      "id": "fbb1a0d6-5e0e-4ff9-87fa-8c19dc2d3aa7",
+      "involved_subcap_ids": [
+        "P4C2.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "AI/GenAI Proof-of-Concept with RAG Architecture",
+      "verbatim_quote": "F-003 | AI/GenAI Proof-of-Concept with RAG Architecture | TSC piloted Azure AI Studio with vector-based RAG retrieval, in-memory tokenization for PII protection, and proposed internal AI review boards for governance [E-099, E-094] | P4C2.4 AI/ML emerging from M2\u2192M3. Responsible AI approach (tokenization, retrieval-only, governance proposals) shows maturity beyond typical regional banks. | Einstein AI + Agentforce deployment \u2014 TSC has the data platform and AI governance readiness. Zennify can accelerate from PoC to production AI on Salesforce platform."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-081"
+        ],
+        "representative_quote": "Bizagi BPM + Blue Prism RPA \u2014 Documented Automation Success",
+        "source_kind": "docx"
+      },
+      "id": "c1b9f7f5-f079-42e5-8f4a-a01cefe26e04",
+      "involved_subcap_ids": [
+        "P2C3.5.2",
+        "P3C1.6.1",
+        "P4C3.5.8",
+        "P4C1.1.8",
+        "P4C3.5.7",
+        "P4C2.4.13"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 17,
+        "P3": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "Bizagi BPM + Blue Prism RPA",
+      "verbatim_quote": "F-004 | Bizagi BPM + Blue Prism RPA \u2014 Documented Automation Success | Official Bizagi case study: money movement fully automated with stage gates, API integrations (data warehouse\u2194Bizagi\u2194Salesforce\u2194Finserv), SLA dashboards, and Blue Prism RPA bots [E-081] | P3C1 Automation M3+ \u2014 formalized BPM with governance, compliance logging, and SLA monitoring. Not just tool deployment but process transformation. | Salesforce Flow + FSC can extend Bizagi patterns. Money movement workflow = FSC lending module use case. SLA dashboards \u2192 Service Cloud SLA tracking."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-009",
+          "E-010",
+          "E-094"
+        ],
+        "representative_quote": "CIO Dan Pavlick (2025 Pittsburgh Tech Council CIO of Year finalist), CTO Justin Sansonetti, SVP Data Management Mark Landi (since 2012), VP Enterprise Apps Darin Fabian, 2 named Data Architects",
+        "source_kind": "docx"
+      },
+      "id": "ba529101-5b82-4d0e-a28e-06239b49ac75",
+      "involved_subcap_ids": [
+        "P4C3.7.1",
+        "P4C3.6.10",
+        "P4C3.6.10",
+        "P4C3.6.2",
+        "P4C4.3.1",
+        "P4C4.4.1",
+        "P4C4.3.1",
+        "P4C4.2.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "CIO of Year Finalist + Dedicated Technology Leadership",
+      "verbatim_quote": "F-007 | CIO of Year Finalist + Dedicated Technology Leadership | CIO Dan Pavlick (2025 Pittsburgh Tech Council CIO of Year finalist), CTO Justin Sansonetti, SVP Data Management Mark Landi (since 2012), VP Enterprise Apps Darin Fabian, 2 named Data Architects [E-009, E-010, E-094] | P1C1 (Digital Strategy) and P4C3 (Architecture) benefit from strong technology leadership bench. CIO scope includes apps, infra, cloud, architecture, data, process automation. | CIO as executive sponsor for Salesforce platform expansion. Technology leadership maturity de-risks implementation. Named contacts for Zennify account team."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-094"
+        ],
+        "representative_quote": "TSC built a cloud-native 'Common Data Platform' on Azure Data Lake Gen2 with medallion architecture (bronze/silver/gold), Azure Data Factory (<1 day new source onboarding), and Azure Synapse for business user direct querying",
+        "source_kind": "docx"
+      },
+      "id": "398dafa3-0fb3-48cf-aa95-bf27a516322e",
+      "involved_subcap_ids": [
+        "P4C3.7.1",
+        "P4C3.6.10",
+        "P4C3.6.10",
+        "P4C3.6.2",
+        "P4C4.3.1",
+        "P4C4.4.1",
+        "P4C4.3.1",
+        "P4C4.2.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "1 days",
+          "delta": null,
+          "kpi_label": "Azure Data Factory",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Common Data Platform",
+      "verbatim_quote": "F-001 | Common Data Platform \u2014 Enterprise Data Lake on Azure | TSC built a cloud-native 'Common Data Platform' on Azure Data Lake Gen2 with medallion architecture (bronze/silver/gold), Azure Data Factory (<1 day new source onboarding), and Azure Synapse for business user direct querying [E-094] | P4C1 Data Management likely M3-M3.5 \u2014 formalized architecture with governance, lineage, and quality rigor. Positions TSC ahead of most regional bank peers. | Salesforce Data Cloud integration point \u2014 connect Common Data Platform to SF CDP for unified customer intelligence. MuleSoft to replace Jitterbit as integration backbone."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-006",
+          "E-073",
+          "E-081"
+        ],
+        "representative_quote": "Deep Salesforce Ecosystem \u2014 6+ Products in Production",
+        "source_kind": "docx"
+      },
+      "id": "41f37fbf-4066-4887-9c83-d41fc6d69be4",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C1.5.5",
+        "P4C3.4.1",
+        "P2C1.4.6",
+        "P4C3.4.6",
+        "P4C3.4.7"
+      ],
+      "kpis": [],
+      "page_number": 2,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Deep Salesforce Ecosystem",
+      "verbatim_quote": "F-002 | Deep Salesforce Ecosystem \u2014 6+ Products in Production | TSC runs Salesforce CRM, Sales Cloud, Service Cloud, Experience Cloud, Pardot (SFMC Account Engagement), Connect, Forms, and AppExchange \u2014 integrated with Bizagi BPM and Fiserv core [E-006, E-073, E-081] | Strong CRM foundation across P2 (Customer Experience) and P3 (Automation). Salesforce-Bizagi integration indicates process maturity. | CRITICAL: Existing SF customer = no greenfield risk. Immediate opportunities: FSC upgrade, Einstein AI overlay, Marketing Cloud (Pardot\u2192Journey Builder), Agentforce for branchless service."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-044",
+          "E-046",
+          "E-074"
+        ],
+        "representative_quote": "Glassdoor 3.4/5, Indeed 3.2/5, Comparably D (2.5/5), eNPS",
+        "source_kind": "docx"
+      },
+      "id": "4b79e938-42b0-4c75-8e4f-29f24911d4e5",
+      "involved_subcap_ids": [
+        "P1C4.8.1",
+        "P1C4.8.3",
+        "P1C4.7.3",
+        "P1C4.8.4",
+        "P1C3.3.3",
+        "P2C3.7.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "5%",
+          "delta": null,
+          "kpi_label": "Fetterolf approval Top",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "5%",
+          "delta": null,
+          "kpi_label": "credibility CEO Top",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "15%",
+          "delta": null,
+          "kpi_label": "eNPS Bottom",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 83,
+        "P2": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Employee Sentiment Gap Despite Strong Compensation",
+      "verbatim_quote": "F-006 | Employee Sentiment Gap Despite Strong Compensation | Glassdoor 3.4/5, Indeed 3.2/5, Comparably D (2.5/5), eNPS Bottom 15%. Work-life balance (2.5-2.6) and post-RJF culture concerns. CEO Fetterolf approval Top 5% in Pittsburgh. Compensation rated 3.7-3.8 [E-044, E-046, E-074] | P1C4 Culture & Change likely capped at M2.5-M3. Leadership credibility (CEO Top 5%) coexists with operational culture challenges. Post-acquisition integration stress. | Change management consulting opportunity. Salesforce adoption depends on culture \u2014 Zennify's change management practice directly addresses this gap."
+    }
+  ]
+}

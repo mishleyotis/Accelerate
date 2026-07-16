@@ -1,0 +1,1190 @@
+{
+  "entity_display_id": "amalgamated-financial-co-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C3.5.7",
+        "P4C1.6.2",
+        "P4C3.3.6",
+        "P4C3.3.1",
+        "P2C1.4.6",
+        "P2C2.9.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "9f5bb360-3fe8-4922-8adb-db143147ad15",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-012"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-037",
+        "E-044"
+      ],
+      "linked_subcap_id": "P2C3.5.7",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Service Process Configuration & Routing a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-044].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Integration Architecture Expansion. MuleSoft as integration fabric extending to CreditLens (Moody’s pilot customer), MAN",
+      "what_text": "5. Integration Architecture Expansion. MuleSoft as integration fabric extending to CreditLens (Moody’s pilot customer), MANTL, and Horizon Core with bi-directional sync planned. Phase 2 integration scope $450K in pipeline. Master Data Management strategy explicitly “formative” [:F4,:F8]. In Zennify's assessment Service Process Configuration & Routing scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-037].",
+      "why_text": "At 1.0 out of 5, Service Process Configuration & Routing sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-072, E-037].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.8.5",
+        "P1C5.1.4",
+        "P1C2.2.7",
+        "P1C5.3.1",
+        "P2C1.6.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-005",
+      "id": "69e1ad2e-dc00-446b-b3e6-67c91dedd601",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-03"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-021",
+        "E-025"
+      ],
+      "linked_subcap_id": "P4C2.8.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Document Chunking & Metadata Enrichment Pipelines a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-025].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Mission Alignment Preservation. Workers United retains ~38% ownership; Delaware Public Benefit Corp; B Corp score 155.3;",
+      "what_text": "7. Mission Alignment Preservation. Workers United retains ~38% ownership; Delaware Public Benefit Corp; B Corp score 155.3; founding signatory NZBA, PRB, PCAF, SBTi. Climate strategy operational with named leadership across community impact, climate partnerships, sustainability advisory [:F1,:F1,:F1]. In Zennify's assessment Document Chunking & Metadata Enrichment Pipelines scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-021].",
+      "why_text": "At 1.0 out of 5, Document Chunking & Metadata Enrichment Pipelines sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-002, E-021].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C3.5.7",
+        "P2C3",
+        "P2C4.4.2",
+        "P1C1.5.1",
+        "P3C1.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "9321fa00-47d9-4f22-86e9-3d3d144f2ba7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-021",
+        "E-044"
+      ],
+      "linked_subcap_id": "P2C3.5.7",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Service Process Configuration & Routing a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-044].",
+      "source_rec_id": "REC-01",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Service Process Configuration & Routing",
+      "what_text": "Service Process Configuration & Routing is one of Amalgamated Financial Corp / Amalgamated Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "scores 1.0/5 against a peer median of 2.7 on the latest assessment; this recommendation targets 6 capabilities [E-020, E-021].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.7.2",
+        "P2C4",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "9589ce21-2755-4189-80c9-eb1be7dae52e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-021",
+        "E-031"
+      ],
+      "linked_subcap_id": "P2C4.7.2",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Behavior-Based Rewards a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-031].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Behavior-Based Rewards",
+      "what_text": "Behavior-Based Rewards is one of Amalgamated Financial Corp / Amalgamated Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "scores 1.0/5 against a peer median of 2.8 on the latest assessment; this recommendation targets 6 capabilities [E-020, E-021].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.8.5",
+        "P4C2",
+        "P2C4.4.2",
+        "P1C1.5.1",
+        "P2C1.4.2",
+        "P3C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "02d54450-e59a-4e94-b577-4acbf40a647e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-023",
+        "E-020",
+        "E-021"
+      ],
+      "linked_subcap_id": "P4C2.8.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Document Chunking & Metadata Enrichment Pipelines a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": "REC-03",
+      "theme": "Analytics & AI",
+      "title": "Document Chunking & Metadata Enrichment Pipelines",
+      "what_text": "Document Chunking & Metadata Enrichment Pipelines is one of Amalgamated Financial Corp / Amalgamated Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger data and technology foundation [E-020].",
+      "why_text": "scores 1.0/5 against a peer median of 2.7 on the latest assessment; this recommendation targets 6 capabilities [E-023, E-020].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.8.6",
+        "P2C1",
+        "P2C4.4.2",
+        "P3C3.3.3",
+        "P1C2.4.3",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "b90fcf9c-7333-4d35-b436-dc02ecfa48b8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-021",
+        "E-038"
+      ],
+      "linked_subcap_id": "P2C1.8.6",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Partner Compliance Governance a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-038].",
+      "source_rec_id": "REC-04",
+      "theme": "Digital Channels",
+      "title": "Partner Compliance Governance",
+      "what_text": "Partner Compliance Governance is one of Amalgamated Financial Corp / Amalgamated Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger, more personalised customer experience [E-021].",
+      "why_text": "scores 1.0/5 against a peer median of 2.9 on the latest assessment; this recommendation targets 6 capabilities [E-020, E-021].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C3.9.1",
+        "P1C3",
+        "P2C4.4.2",
+        "P1C1.5.1",
+        "P1C3.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "0245a6a9-8159-4176-afc7-da5ad2cbf942",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-020",
+        "E-021"
+      ],
+      "linked_subcap_id": "P1C3.9.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Innovation Lab/Center a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": "REC-05",
+      "theme": "Innovation & Investment",
+      "title": "Innovation Lab/Center",
+      "what_text": "Innovation Lab/Center is one of Amalgamated Financial Corp / Amalgamated Bank's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver sharper strategic direction and stronger oversight [E-020].",
+      "why_text": "scores 1.0/5 against a peer median of 2.7 on the latest assessment; this recommendation targets 6 capabilities [E-029, E-020].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C3.5.7",
+        "P1C4.9.3",
+        "P3C3.1.3",
+        "P1C1.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "ef150ca9-4d39-4a58-977f-e4572bf1958b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-032",
+        "E-061"
+      ],
+      "linked_subcap_id": "P2C3.5.7",
+      "platforms": [
+        "salesforce",
+        "twilio",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Segment & Line-of-Business CX discovery conversation — the finding is documented in the client's research report [E-061].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what_text": "Service Process Configuration & Routing is one of Amalgamated Financial Corp / Amalgamated Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger, more personalised customer experience [E-032].",
+      "why_text": "At 1.0 out of 5, Service Process Configuration & Routing sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-071, E-032].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3",
+        "P4C1.6.2",
+        "P1C1.8.2",
+        "P1C2.4.3",
+        "P4C1.7.2",
+        "P4C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "8b52770c-6d90-4249-b0b7-2f875bdd1973",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-05"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-051",
+        "E-070",
+        "E-015"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Innovation & Investment discovery conversation — the finding is documented in the client's research report [E-015].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what_text": "Data Strategy (highest uncertainty ±1.50): MDM operating model, Unity Catalog deployment, data domain ownership matrix, and data product portfolio definition. Engage Brad Fiery (Head of Data Governance) plus Databricks/Zeb. In Zennify's assessment Innovation Lab/Center scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-070].",
+      "why_text": "At 1.0 out of 5, Innovation Lab/Center sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-051, E-070].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.7.3",
+        "P1C2.4.3",
+        "P1C4.10.2",
+        "P2C4.8.5",
+        "P1C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "afe68e81-4e6e-4dfb-b34a-e3b160fdb833",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-03"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-070",
+        "E-032",
+        "E-038"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Reasoning Engine & Chain of Thought a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-038].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what_text": "AI Enablement (lowest ceiling level 1.5): SR 11-7 model governance framework, ML model inventory, Agentforce production rollout, AI risk tiering rubric. Engage CTO Adrian Glace, COO/CIO Sean Searby, CFO Jason Darby. In Zennify's assessment Reasoning Engine & Chain of Thought scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-032].",
+      "why_text": "At 1.0 out of 5, Reasoning Engine & Chain of Thought sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-070, E-032].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P3C3.3.3",
+        "P3C2.8.3",
+        "P3C2.6.IC1",
+        "P2C2.3.6"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "8237f40b-42dc-481b-9c63-0bd38eaeafa6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-042",
+        "E-039"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Operational Workflow & Risk discovery conversation — the finding is documented in the client's research report [E-039].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what_text": "Operational Risk & Fraud (vendor unknown): Fraud detection platform vendor identification, transaction fraud KRIs, operational loss event database trend. Engage CRO Ina Narula, BSA/AML Mark Fernandez. In Zennify's assessment Law Enforcement Coordination scores 1.5 out of 5, versus a typical 2.9 at comparable institutions [E-042].",
+      "why_text": "At 1.5 out of 5, Law Enforcement Coordination sits 1.4 points below the 2.9 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-037, E-042].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C2.7.3",
+        "P3C3.8.4",
+        "P1C2.5.3",
+        "P4C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "986cf030-bd8f-4fdb-a0d0-66f6baae2e2c",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-070",
+        "E-057",
+        "E-032"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Data Management & Governance discovery conversation — the finding is documented in the client's research report [E-032].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what_text": "Automated Lineage Discovery is one of Amalgamated Financial Corp / Amalgamated Bank's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger data and technology foundation [E-057].",
+      "why_text": "At 2.0 out of 5, Automated Lineage Discovery sits 0.7 points below the 2.7 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-070, E-057].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P1C4.10.2",
+        "P3C3.5.3",
+        "P2C2.12.3",
+        "P2C4.12.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-008",
+      "id": "0da968c1-9df9-4522-be32-888f66a99e70",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-057"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-050",
+        "E-057"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Segment & Line-of-Business CX discovery conversation — the finding is documented in the client's research report [E-057].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what_text": "Channel Experience (largest CX risk): Service center technology stack, agent training program, BBB-cited issue remediation roadmap. Engage VP Director Customer Service Michael Pepe Jr., CMO Dawn Zappetti. In Zennify's assessment Video Banking scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-050].",
+      "why_text": "At 1.0 out of 5, Video Banking sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-052, E-050].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.1.RB1",
+        "P2C1.1",
+        "P4C2.2.10",
+        "P4C3.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-009",
+      "id": "66e5295d-5eb2-420f-a293-71b6b5aec69d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-030",
+        "E-070",
+        "E-001"
+      ],
+      "linked_subcap_id": "P2C1.1.RB1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Community Bank Positioning a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 2.5 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-001].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Drawn from internal evidence dated November 2025 through April 2026 (E-068 through E-073), Amalgamated Bank’s active str",
+      "what_text": "Community Bank Positioning is one of Amalgamated Financial Corp / Amalgamated Bank's developing customer experience capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Amalgamated Financial Corp / Amalgamated Bank's ability to deliver a stronger, more personalised customer experience [E-070].",
+      "why_text": "At 2.5 out of 5, Community Bank Positioning sits 0.4 points below the 2.9 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-030, E-070].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.7.3",
+        "P4C3.3.6",
+        "P1C1.8.2",
+        "P1C2.4.3",
+        "P1C3.8.3",
+        "P4C2.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-010",
+      "id": "fedcb9a2-73c0-4b46-8d4c-83f3bfdd828b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-03"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-070",
+        "E-071",
+        "E-032"
+      ],
+      "linked_subcap_id": "P4C2.7.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Reasoning Engine & Chain of Thought a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 1.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-032].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "AI Strategic Plan Engagement. Six-to-seven-week prescriptive AI advisory across three phases (Assess/Align/Inventory → B",
+      "what_text": "1. AI Strategic Plan Engagement. Six-to-seven-week prescriptive AI advisory across three phases (Assess/Align/Inventory → Blueprint → Mobilize) producing the Banking AI Value Framework, Enterprise AI Reference Architecture, Use Case Prioritization, Governance Framework with risk tiering, Data Readiness Roadmap, and 2-3 implementation-ready pilot designs [:F1,:F1]. In Zennify's assessment Reasoning Engine & Chain of Thought scores 1.0 out of 5, versus a typical 2.7 at comparable institutions [E-071].",
+      "why_text": "At 1.0 out of 5, Reasoning Engine & Chain of Thought sits 1.7 points below the 2.7 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-070, E-071].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.6.2",
+        "P4C2.7.3",
+        "P1C2.4.3",
+        "P1C4.10.2",
+        "P1C2.1.3",
+        "P1C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-011",
+      "id": "2e5f937e-539e-4f9e-bb95-f12c20fc577b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-033",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C1.6.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automated Lineage Discovery a near-term focus for Amalgamated Financial Corp / Amalgamated Bank: a scoped investment here would lift it from 2.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-070].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "AI PMO Formation with Executive Sponsorship. Cross-functional AI Program Management Office forming with executive sponso",
+      "what_text": "2. AI PMO Formation with Executive Sponsorship. Cross-functional AI Program Management Office forming with executive sponsorship from CTO, COO/CIO, CFO, and Head of Data Governance. Adrian Glace explicitly stated executives “do not have strong command of what they need from an AI standpoint” — advisory authority being delegated to Zennify [:F1,:F3]. In Zennify's assessment Automated Lineage Discovery scores 2.0 out of 5, versus a typical 2.7 at comparable institutions [E-033].",
+      "why_text": "At 2.0 out of 5, Automated Lineage Discovery sits 0.7 points below the 2.7 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-071, E-033].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.3.6",
+        "P1C4.10.2",
+        "P1C1.5.5",
+        "P1C1.4.5",
+        "P4C3.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-012",
+      "id": "ba39c70d-b6ce-472e-a0fb-fb9d18aa6b66",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-071",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C3.3.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "CTO Adrian Glace directing selective vendor strategy: “where not MuleSoft” — Zennify advisory engaged to recommend lower-cost alternatives where Mule is over-specified [E-070].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Cost-Optimized Cloud Strategy. CTO Adrian Glace directing selective vendor strategy: “where not MuleSoft” — Zennify advi",
+      "what_text": "6. Cost-Optimized Cloud Strategy. CTO Adrian Glace directing selective vendor strategy: “where not MuleSoft” — Zennify advisory engaged to recommend lower-cost alternatives where Mule is over-specified. MuleSoft V-core entitlement gap and old SKU explicit; $250K Mule support change request pending [:F2,:F3]. In Zennify's assessment API Analytics & Monitoring scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-071].",
+      "why_text": "At 1.5 out of 5, API Analytics & Monitoring sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-037, E-071].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASSESS-AMAL-20260428-0001"
+}

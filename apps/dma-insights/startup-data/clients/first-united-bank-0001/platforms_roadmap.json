@@ -1,0 +1,202 @@
+{
+  "entity_display_id": "first-united-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Consolidate Marketing Stack onto Salesforce Marketing Cloud"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Consolidate to a Single System Integrator and Establish Salesforce/nCino Center of Excellence"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Rationalize Competing CRM and Service Platforms onto the Existing Salesforce Ecosystem"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.65",
+          "metric": "P3C1 score 2.35 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 2.35 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-03",
+          "title": "Expand nCino from Mortgage-Only to Full Lending Suite and Digital Account Opening"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C1, P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Rationalize Analytics from 14 Tools to a Unified Salesforce Analytics Platform"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Unify Integration Layer on MuleSoft and Decommission Dell Boomi"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Formalize Digital Strategy Anchored to the Salesforce/nCino Consolidation Roadmap"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.57",
+          "metric": "P1C5 score 1.43 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.43 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Formalize Cybersecurity Governance and Designate Security Leadership"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C5, P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.43 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P1C5 score 1.43 \u2192 4.0 (peer median 2.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.57",
+          "metric": "P1C5 score 1.43 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.43 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "Deepen Financial Services Cloud Feature Utilization Across Lines of Business"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.44",
+          "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 score 2.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-10",
+          "title": "Establish ESG Reporting Baseline Using Existing Salesforce Platform Data"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C5, P2C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-FUB-20260312-0001",
+  "total_duration_months": 12
+}

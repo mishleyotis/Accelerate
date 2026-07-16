@@ -1,0 +1,1091 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 186,
+        "subcaps": 186,
+        "thin": 111
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 189
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 55
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 39
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "vestgen-wealth-partners-0001",
+    "domain": null,
+    "hq": null,
+    "id": "41ff48f6-bfb0-465e-a83b-42104d2febb7",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Vestgen Wealth Partners",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RIA",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:20.456228Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 17,
+    "current_count": 89,
+    "dated_count": 0,
+    "median_age_months": 9.0,
+    "oldest_published_date": "2021-01-01",
+    "stale_count": 1,
+    "stale_pct": 0.89,
+    "total": 112,
+    "undated_count": 5
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 22,
+      "NEUTRAL": 7,
+      "POSITIVE": 83
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 3,
+      "LinkedIn": 11
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 87,
+      "POSITIVE": 23
+    },
+    "tiers": {
+      "T1": 38,
+      "T2": 59,
+      "T3": 15
+    },
+    "total_facts": 1218,
+    "total_items": 112
+  },
+  "financial_trajectory": {
+    "cagr": "-0.3%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2022,
+      2025
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        3.5,
+        3.47
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "aum",
+    "aum_usd": 6665601941.0,
+    "branches": 19,
+    "cagr": "38.0%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "VestGen is the fastest-growing RIA aggregator in its peer cohort. AUM trajectory is classified as ACCELERATING — approximately 92% growth in the 12 months from March 2025 to February 2026. Entity is only 16 months old (Dec 2024 founding); a full 3-year CAGR is not calculable.",
+        "AUM Trajectory (Available Data Points):",
+        "AUM trajectory classified as ACCELERATING. ~92% growth in 12 months (Mar 2025 → Feb 2026). Entity is 16 months old — full 3-year CAGR not calculable. Growth driven by M&A acquisitions (12+ practices), organic appreciation, and service line expansion. CAGR baseline will be available from Mar 2027 (36-month window)."
+      ],
+      "series": {
+        "2022": 3500000000.0,
+        "2025": 3470310102.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 19,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": null,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "The segment strategy gets a dedicated leader at director…"
+          }
+        ],
+        "fy": [
+          "FY2017",
+          "FY2022",
+          "FY2025",
+          "FY2028"
+        ],
+        "geography": "US Multi-State (HQ: Illinois; footprint: 17+ states; clients: 35 states)",
+        "headline": "$3.5B assets · FY2025 · -0.3% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            2.9,
+            null,
+            1500.0,
+            100.0
+          ],
+          "total_assets": [
+            null,
+            3.5,
+            3.47,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "17+ states",
+    "footprint_basis": "nlp:report_prose",
+    "founded": 2024,
+    "geography": "US Multi-State (HQ: Illinois; footprint: 17+ states; clients: 35 states)",
+    "headcount": null,
+    "hq": "Illinois",
+    "hq_address": null,
+    "hq_basis": "nlp:narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Ferian Nickelson's",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "William Blair",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Information Security",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Josh Gerry",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Jason Hanavan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Ferian Nickelson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Fairport Wealth",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Tom Ericson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Compliance Officer"
+      }
+    ],
+    "legal_name": "Vestgen Wealth Partners",
+    "license_type": "SEC-registered",
+    "narrative_md": "VestGen Wealth Partners operates as a multi-entity holding structure. The parent entity (VestGen Wealth Partners Holdings LLC) was incorporated in September 2024; the public RIA platform (VestGen Advisors LLC) launched December 2024. All five affiliated entities are covered by the Privacy Policy (March 31, 2026) and Form ADV annual filing. [E-097, E-081]\n\n4 Material Changes Disclosed in March 2026 Form ADV:\n\n(1) Headquarters address updated to 1 N Franklin St, Suite 1850, Chicago IL 60606 [E-081]\n\n(2) Item 14: VGA discontinued use of LPL Financial as custodial product provider; no longer receives economic benefits from LPL [E-081, E-094]\n\n(3) Item 14: Limited pilot program with lead generation platform (SmartVestor Pro — Dave Ramsey) disclosed [E-066, E-081]\n\n(4) Item 5: Material cash AND equity compensation for advisors transitioning their practices to VGA — formal M&A economics [E-081]",
+    "primary_regulator": "SEC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 100000000.0,
+    "sentiment": {
+      "derived_from": "evidence_excerpts",
+      "sources": [
+        {
+          "signal": "cadence; topics include M&A announcements + Direct VestGen Glassdoor search returned NO results for the parent VestGen Wealth Partners brand",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "Indeed search 'VestGen Wealth Partners' Chicago IL = NO active job postings (Apr 2026 query)",
+          "source": "Indeed"
+        },
+        {
+          "signal": "Louis MO office, heritage practice) is **BBB Accredited since 5/8/2015** — pre-acquisition accreditation maintained through M&A integration ( Community & Social Proof + Complaint Management baseline)",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mid-Market RIA ($1B–$15B AUM)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "ONE VestGen Conference (May 20-22, 2025, Peninsula Hotel Chicago) — 'Three-Day Conference Focused on Strategy, Growth, and Continuing Education' for 50+ multi-generational advisors + Advisory Board + leading investment m",
+        "title": "ONE VestGen Conference (May 20-22, 2025, Peninsula Hotel Chicago)…",
+        "type": "conference",
+        "url": "https://vestgen.com/vestgen-wealth-partners-hosts-inaugural-one-vestgen-conference-in-chicago/"
+      },
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "Cerulli 2024 data quoted by Gerry: 105,887 advisors plan to retire (37.4% headcount, 41.4% total assets) over decade; 30% of independent RIA advisors UNSURE of retirement plans. Gerry positioning: VestGen targets $100M-$",
+        "title": "Cerulli 2024 data quoted by Gerry30% of independent RIA advisors…",
+        "type": "article",
+        "url": "https://www.investmentnews.com/ria-news/seeking-success-from-succession-with-vestgen-ceo-josh-gerry/260464"
+      },
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-030",
+        "excerpt": "ONE VestGen Conference (May 20-22, 2025) agenda explicitly covered: 'integration of advanced technology and AI into their practices and marketing and communications strategies' — AI strategy elevated to firm-level confer",
+        "title": "ONE VestGen Conference (May 20-22, 2025) agenda covered strategies'…",
+        "type": "conference",
+        "url": "https://vestgen.com/one-vestgen-conference-fostered-advisor-relationships-and-best-practices-at-vestgen-wealth-partners-inaugural-event/"
+      },
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-039",
+        "excerpt": "Gerry strategic thesis (verbatim): 'At that specific size, you have a successful business. These advisors know they are good at what they do... What they also realize is that to get to the next level, there would be quit",
+        "title": "Gerry strategic thesis (verbatim): '",
+        "type": "article",
+        "url": "https://www.investmentnews.com/ria-news/seeking-success-from-succession-with-vestgen-ceo-josh-gerry/260464"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-047",
+        "excerpt": "Annual ONE VestGen Conference (May 20-22, 2025 inaugural; 'first time we'll all be together in one place to celebrate everything we've accomplished in just five months') = de-facto strategy-refresh + Advisory Board engag",
+        "title": "Annual ONE VestGen Conference (May 20-22, 2025 inaugural; ' 'll be in…",
+        "type": "conference",
+        "url": "https://vestgen.com/vestgen-wealth-partners-hosts-inaugural-one-vestgen-conference-in-chicago/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-059",
+        "excerpt": "VestGen LinkedIn activity (per Exa scrape — multiple posts visible 7423092837854007296, 7420201146767814657, 7420586429858189312, 7387488..., 7382429626301845507, 7358474441682522113) — active corporate communications ch",
+        "title": "Topics include M&A announcements",
+        "type": "linkedin-post",
+        "url": "https://linkedin.com/company/vestgen-wealth-partners"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "vestgen.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v2.3",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.768830+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Vestgen Wealth Partners — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "VestGen was benchmarked against 5 peers selected for sub-vertical alignment (RIA aggregators), AUM proximity ($3B–$20B), and geographic/competitive relevance. The peer set was locked in research Batch 1 and is immutable for this engagement. Peer scores are category-level estimates derived from public evidence using the same scoring methodology applied to VestGen.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "SITUATION\nVestGen Wealth Partners is a $6.67B AUM (Feb 28, 2026) [E-081] RIA aggregator founded December 2024, serving 9,453 mass-affluent clients across 35 states with an average balance of $367K [E-009]. In 16 months, VestGen doubled its regulatory AUM through 12+ practice acquisitions and the launch of 5 service lines [E-092, E-075, E-077]. Tom Woods (CLO/CCO, Hightower $150B, E-086), Ferian Nickelson (COO+CTO, BNY Pershing X, E-091), and 2 additional Hightower alumni arrived with institutional-grade discipline. VestGen already operates Salesforce Financial Services Cloud [E-098], a Snowflake+Azure data platform [E-099], and Zocks AI meeting notes [E-098].\n\nCOMPLICATION\nDespite a technology-leading P4 score (2.68 vs peer median 2.38, +0.30), VestGen trails peers in P1 Strategy (2.40 vs 3.00, −0.60) and P2 Client Experience (2.06 vs 2.62, −0.56). The FinCEN August 2024 final rule [E-088] requires a complete BSA/AML program by January 1, 2028 — VestGen has no publicly disclosed RIA-side AML program. Privacy Policy March 31, 2026 [E-097] delivers manual-only opt-out, creating active non-compliance in 12 GPC-mandate states across VestGen's 35-state footprint [E-104, E-110]. The 13+ vendor stack with mixed API/ETL/SFTP patterns [E-090, E-098] creates per-acquisition integration debt.\n\nOverall DMA score of 2.42 places VestGen 0.18 points below the peer median of 2.60, with Innovation (1.96, −1.04) and Advisor Experience (1.98, −1.02) as the two widest capability gaps. QUESTION\nHow can VestGen scale from $6.67B to $20B+ AUM through industrialized M&A integration — while closing compliance and client-experience maturity gaps — by leveraging its existing Salesforce FSC org and Snowflake platform before the January 2028 FinCEN deadline and April 2028 CCPA cybersecurity audit obligation? ANSWER\nA three-phase Salesforce platform expansion — Activate (FSC optimization + Agentforce), Comply (Industries Compliance Cloud + AML 360 + Privacy Center + Shield), Scale (Data Cloud + Snowflake Zero Copy + MuleSoft + Industries Wealth Cloud) — advances VestGen from 2.42 to projected level 3 maturity across all four pillars, directly addressing three hard regulatory deadlines and the M&A integration industrialization imperative that underpins VestGen's $20B+ growth thesis."
+  },
+  "overall_score": 2.43,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/A9_Evidence_Citations_VESTGEN.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 112 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.397248+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/rollup.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.398078+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/A6_Peer_Set_VESTGEN.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.398706+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.399156+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass1_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.399608+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pass2_llm_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.399883+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.400100+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A3_Coverage_Summary_VESTGEN.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.400787+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A4_Stakeholder_Map_VESTGEN.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.401323+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Salesforce_Wedge_Summary_VESTGEN.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.401796+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A8_Capability_Score_Ceilings_VESTGEN.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:20.402369+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 24
+    },
+    "stage_ms": {
+      "manifest": 15,
+      "parse": 13009,
+      "persist": 4705
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'RIAs & Broker-Dealers'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 709 subcaps from DMA_Assessment_VESTGEN_",
+        "detail": "xlsx fallback extracted 709 subcaps from DMA_Assessment_VESTGEN_20260429.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (709 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (709 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peers loaded from variant peer_set.json (5 peers)",
+        "detail": "peers loaded from variant peer_set.json (5 peers)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 24 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_handoff.json",
+        "detail": "research_handoff.json: schema_mismatch: ValidationError: 1 validation error for Firmographics",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=VestGen_Client_Profile_Research_Report_FINAL.docx leadership=0 focus_areas=2 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 2 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/A9_Evidence_Citations_VESTGEN.csv — no fingerprint matched (best confidence 0.20); 112 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/rollup.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/A6_Peer_Set_VESTGEN.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass1_check_results.json — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pass2_llm_results.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A3_Coverage_Summary_VESTGEN.csv — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A4_Stakeholder_Map_VESTGEN.csv — no fingerprint matched (best confidence 0.25); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Salesforce_Wedge_Summary_VESTGEN.csv — no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A8_Capability_Score_Ceilings_VESTGEN.csv — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 29",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_auto_bootstrapped",
+        "detail": "catalogue_auto_bootstrapped:709 ccg_subcaps rows seeded from scoring workbook taxonomy for v2.3 (no ccg_loader run required).",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'RIAs & Broker-Dealers'",
+      "xlsx fallback extracted 709 subcaps from DMA_Assessment_VESTGEN_20260429.xlsx",
+      "scoring loaded from xlsx fallback (709 subcaps, dir=03_scoring_workbook)",
+      "peers loaded from variant peer_set.json (5 peers)",
+      "tech_stack_from_variant_source: 24 entries",
+      "research_handoff.json: schema_mismatch: ValidationError: 1 validation error for Firmographics",
+      "firmographics_from_client_profile_docx: source=VestGen_Client_Profile_Research_Report_FINAL.docx leadership=0 focus_areas=2 facts_extracted=0",
+      "used docx-extracted recommendations: 2 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 01_evidence/A9_Evidence_Citations_VESTGEN.csv — no fingerprint matched (best confidence 0.20); 112 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/rollup.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 06_peers/A6_Peer_Set_VESTGEN.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass1_check_results.json — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pass2_llm_results.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A3_Coverage_Summary_VESTGEN.csv — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A4_Stakeholder_Map_VESTGEN.csv — no fingerprint matched (best confidence 0.25); 15 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Salesforce_Wedge_Summary_VESTGEN.csv — no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A8_Capability_Score_Ceilings_VESTGEN.csv — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+      "timeline_events_persisted: 29",
+      "catalogue_auto_bootstrapped:709 ccg_subcaps rows seeded from scoring workbook taxonomy for v2.3 (no ccg_loader run required).",
+      "insight_cards_persisted: 12"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 186,
+      "peer_median": 3.02,
+      "pillar_id": "P1",
+      "score": 2.41,
+      "subcaps_scored": 186
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.64,
+      "pillar_id": "P2",
+      "score": 2.06,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 2.64,
+      "pillar_id": "P3",
+      "score": 2.55,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.38,
+      "pillar_id": "P4",
+      "score": 2.7,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-28",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v2.3",
+    "completed_at": "2026-07-02T23:10:20.456228Z",
+    "created_at": "2026-07-02T23:10:20.456228Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "bd65770d-9efb-4baf-9b07-521cbedc01c7",
+    "overall_score": null,
+    "request_id": "DMA-RES-VESTGEN-20260428-0001",
+    "started_at": "2026-07-02T23:10:20.456228Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Each gap has a maturity cap, priority, and internal discovery guidance. Each gap is a priority capability gap in customer experience, scoring 1.81/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-009",
+        "E-013",
+        "E-063",
+        "E-065"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Each gap",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.81,
+      "so_what": "Prioritize Each gap in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Each gap",
+      "what": "Each gap has a maturity cap, priority, and internal discovery guidance. Each gap is a priority capability gap in customer experience, scoring 1.81/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Nov 2025: VestGen Athlete launched as service line for athletes; partnered with Athlete Collective; led by Cole Dow (former football player). Targets: college athletes (NIL income), pros, and former pros — extends VestGen's segment strategy into a niche client base."
+    },
+    {
+      "body": "Address the 7 P3 capability gaps as one operations + automation programme — payments, lending ops, and core.",
+      "evidence": [
+        "E-001",
+        "E-011",
+        "E-017",
+        "E-022"
+      ],
+      "magnitude": null,
+      "name": "Operationalize process automation",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 2.6,
+      "so_what": "Protect Operationalize process automation as a proof point: use it to anchor the operations story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P3C1",
+      "theme": "Operations",
+      "title": "Operationalize process automation",
+      "what": "Address the 7 P3 capability gaps as one operations + automation programme — payments, lending ops, and core.",
+      "why": "The linked evidence records: VestGen Advisors, LLC (formerly Wealth Management Group), founded 2003, SEC-registered March 2022; parent VestGen Wealth Partners Holdings, LLC since Sept 30, 2024."
+    },
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 2 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-002",
+        "E-014",
+        "E-015",
+        "E-019"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 3.0,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 1.96,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 2 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: Total VestGen platform AUM grew to $7B with addition of 6 breakaway practices (Oct 2025), totaling 45 advisors across 4 states."
+    },
+    {
+      "body": "Unify the 15 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-006",
+        "E-010",
+        "E-011",
+        "E-018"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.95,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 15 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Aug 2025: Robert 'Bob' Hostetter appointed first Chief INVESTMENT Officer (CFA, CAIA), reporting to CEO. Note: Investment role, NOT Technology — VestGen still has no announced CTO/CIO-IT/CDO."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.5,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [
+        "85 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Resource Planning averages 2.6/5 over 166 scored subcaps; ceiling 3.4 reflects thin evidence density (81/166 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "120 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Tolerance Metrics averages 2.7/5 over 217 scored subcaps; ceiling 3.4 reflects thin evidence density (97/217 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [
+        "140 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation ROI Tracking averages 2.0/5 over 190 scored subcaps; ceiling 2.6 reflects thin evidence density (50/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.5,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-062"
+      ],
+      "modifiers": [
+        "120 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Champion Recognition averages 2.4/5 over 205 scored subcaps; ceiling 3.1 reflects thin evidence density (85/205 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-062"
+      ],
+      "modifiers": [
+        "81 of 123 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Risk Appetite averages 2.3/5 over 123 scored subcaps; ceiling 3.0 reflects thin evidence density (42/123 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-071"
+      ],
+      "modifiers": [
+        "212 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Predictive Analytics averages 2.3/5 over 289 scored subcaps; ceiling 2.9 reflects thin evidence density (77/289 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "255 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Identity Verification & KYC averages 1.9/5 over 291 scored subcaps; ceiling 2.5 reflects thin evidence density (36/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-073"
+      ],
+      "modifiers": [
+        "257 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Video Banking averages 1.8/5 over 289 scored subcaps; ceiling 2.4 reflects thin evidence density (32/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-078"
+      ],
+      "modifiers": [
+        "209 of 263 subcaps on thin evidence"
+      ],
+      "rationale": "Proactive Outreach & Alerts averages 2.1/5 over 263 scored subcaps; ceiling 2.7 reflects thin evidence density (54/263 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.4,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-091"
+      ],
+      "modifiers": [
+        "51 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Reconciliation Automation averages 2.6/5 over 146 scored subcaps; ceiling 3.4 reflects thin evidence density (95/146 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-082"
+      ],
+      "modifiers": [
+        "80 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Check & ACH Fraud averages 2.4/5 over 130 scored subcaps; ceiling 3.0 reflects thin evidence density (50/130 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.4,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-083"
+      ],
+      "modifiers": [
+        "53 of 148 subcaps on thin evidence"
+      ],
+      "rationale": "Disclosure Management averages 2.9/5 over 148 scored subcaps; ceiling 3.7 reflects thin evidence density (95/148 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-084"
+      ],
+      "modifiers": [
+        "70 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Backup & Recovery averages 2.5/5 over 145 scored subcaps; ceiling 3.3 reflects thin evidence density (75/145 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.4,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-099"
+      ],
+      "modifiers": [
+        "47 of 202 subcaps on thin evidence"
+      ],
+      "rationale": "RIA / Broker-Dealer — Multi-Custodian Data Integration & Householding averages 2.6/5 over 202 scored subcaps; ceiling 3.5 reflects thin evidence density (155/202 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-099"
+      ],
+      "modifiers": [
+        "70 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Statistical Analysis & Modeling averages 2.7/5 over 270 scored subcaps; ceiling 3.6 reflects thin evidence density (200/270 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.3,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-100"
+      ],
+      "modifiers": [
+        "15 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Data Pipeline Test Automation averages 2.9/5 over 235 scored subcaps; ceiling 3.9 reflects thin evidence density (220/235 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-104"
+      ],
+      "modifiers": [
+        "60 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Software Supply Chain Security averages 2.5/5 over 150 scored subcaps; ceiling 3.3 reflects thin evidence density (90/150 full-evidence cells); band ±0.5 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Technology function exists internally but no Chief Technology Officer or equivalent C-suite head named in any public press release through April 2026 — gap suggests Technology reports to COO Ferian Nickelson or operates without dedicated C-level sponsor (Apr 2026).",
+      "evidence": [
+        "E-023"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Gap suggests",
+      "metric": null,
+      "peer_context": "Video Banking runs 1.81/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Technology function exists internally but no Chief Technology Officer or equivalent C-suite head named in any public press release through April 2026 — gap suggests Technology reports to COO Ferian Nickelson or operates. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Gap suggests"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "INFERENCE — REDUNDANCY: TWO competing financial planning systems (eMoney + MoneyGuidePro) suggest acquired-practice technology preservation rather than rationalized stack. Same with potential dual broker-dealer dual systems (PCS + WEG). P3C1 Automation Strategy implication: redundant tools fragment workflows, prevent STP (Apr 2026).",
+      "evidence": [
+        "E-090"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "REDUNDANCY: suggest acquired-practice technology…",
+      "metric": null,
+      "peer_context": "Video Banking runs 1.81/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Vulnerable Customer Reporting — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "INFERENCE — REDUNDANCY: TWO competing financial planning systems (eMoney + MoneyGuidePro) suggest acquired-practice technology preservation rather than rationalized stack. Window: closes ~Q4 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "REDUNDANCY: suggest acquired-practice technology…"
+      },
+      "window": "closes ~Q4 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "VestGen Senior Operations Associate posting (Chicago, hybrid, 4 days ago via LinkedIn) — 'Acquisition & Integration Support... Support integration efforts for newly acquired firms or advisors, including account transitions, data migration, and operational alignment.' (Apr 2026).",
+      "evidence": [
+        "E-101"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "VestGen Senior Operations Associate posting",
+      "metric": "posting Chicago hybrid 4 days",
+      "peer_context": "Video Banking runs 1.81/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Vulnerable Customer Reporting — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "VestGen Senior Operations Associate posting (Chicago, hybrid, 4 days ago via LinkedIn) — 'Acquisition & Integration Support. Window: closes ~Q4 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Support integration efforts for newly acquired firms or…"
+      },
+      "window": "closes ~Q4 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Posting mentions OPTIONAL familiarity with EXTENDED tech stack: 'Knowledge of custodial platforms (e.g., Schwab, Pershing) and record-keepers (e.g. **Empower**, Voya) is a strong plus' (Empower = retirement plan record-keeper, Voya = retirement provider) + (Apr 2026).",
+      "evidence": [
+        "E-101"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Posting mentions is a strong plus",
+      "metric": null,
+      "peer_context": "Video Banking runs 1.81/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Vulnerable Customer Reporting — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Posting mentions OPTIONAL familiarity with EXTENDED tech stack: 'Knowledge of custodial platforms (e.g., Schwab, Pershing) and record-keepers (e.g. **Empower**, Voya) is a strong plus' (Empower = retirement plan. Window: closes ~Q4 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Alternative systems mentioned suggest acquired-practice…"
+      },
+      "window": "closes ~Q4 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Video Banking scores 1.81/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-009",
+        "E-013",
+        "E-063",
+        "E-065"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Video Banking scores 1.81/5",
+      "metric": "Video Banking 1.81/5 vs peer 2.50",
+      "peer_context": "Video Banking runs 1.81/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Vulnerable Customer Reporting — highest-fit surface at 74/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C3",
+      "text": "Video Banking scores 1.81/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

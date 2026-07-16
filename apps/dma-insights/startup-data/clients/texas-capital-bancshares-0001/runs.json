@@ -1,0 +1,21 @@
+{
+  "active_run_id": "aa5ca855-bf2d-48e8-9be2-b1b5d1169a43",
+  "items": [
+    {
+      "assessment_date": "2026-05-11",
+      "assessment_date_source": "run_manifest",
+      "ccg_catalog_version": "v5.5",
+      "completed_at": "2026-07-02T23:11:44.600512Z",
+      "created_at": "2026-07-02T23:11:44.600512Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "aa5ca855-bf2d-48e8-9be2-b1b5d1169a43",
+      "overall_score": 2.274310595065312,
+      "request_id": "DMA-ASM-TCB-20260511-0001",
+      "started_at": "2026-07-02T23:11:44.600512Z",
+      "status": "ACTIVE",
+      "subcap_count": 689,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

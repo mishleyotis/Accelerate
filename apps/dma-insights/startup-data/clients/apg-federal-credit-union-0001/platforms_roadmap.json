@@ -1,0 +1,112 @@
+{
+  "entity_display_id": "apg-federal-credit-union-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.75 \u2192 4.0 (peer median 2.25)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Strategic",
+      "metric": "P1C5 score 1.75 \u2192 4.0 (peer median 2.25)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Databricks \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.25",
+          "metric": "P1C5 score 1.75 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.75 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Strengthen P1C5: Materiality Assessment"
+        },
+        {
+          "feature": "nCino",
+          "maturity_lift": "+2.01",
+          "metric": "P2C4 score 1.99 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.99 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-02",
+          "title": "Strengthen P2C4: Real-Time Decisioning"
+        },
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+2.01",
+          "metric": "P4C2 score 1.99 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.99 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-03",
+          "title": "Strengthen P4C2: AI & Machine Learning"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C5, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 2.14 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 8,
+      "label": "Aspirational",
+      "metric": "P4C1 score 2.14 \u2192 4.0 (peer median 3.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Databricks",
+      "recommendations": [
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+1.86",
+          "metric": "P4C1 score 2.14 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.14 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-04",
+          "title": "Strengthen P4C1: Enterprise Data Catalog & Discovery"
+        },
+        {
+          "feature": "Databricks Lakehouse",
+          "maturity_lift": "+1.81",
+          "metric": "P2C1 score 2.19 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 2.19 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12-18 months"
+          },
+          "platform_id": "databricks",
+          "platform_name": "Databricks",
+          "rec_id": "REC-05",
+          "title": "Strengthen P2C1: Predictive Analytics"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P2C1"
+    }
+  ],
+  "run_request_id": "DMA-RES-APGFCU-20260504-0001",
+  "total_duration_months": 16
+}

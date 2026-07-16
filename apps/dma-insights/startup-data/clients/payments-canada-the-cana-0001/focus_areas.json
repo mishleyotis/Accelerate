@@ -1,0 +1,42 @@
+{
+  "entity_display_id": "payments-canada-the-cana-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": "member_investment: 93% of Canadian FIs have payments moderniz",
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+        "source_kind": "heuristic"
+      },
+      "id": "1d4325e1-8a09-41ab-9c37-65401a136529",
+      "involved_subcap_ids": [
+        "P2C3.9.1",
+        "P2C3.9.2",
+        "P2C3.9.3",
+        "P2C3.9.4",
+        "P2C3.9.5",
+        "P2C4.2.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

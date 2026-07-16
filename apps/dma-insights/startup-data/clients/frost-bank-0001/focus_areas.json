@@ -1,0 +1,266 @@
+{
+  "entity_display_id": "frost-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-128"
+        ],
+        "representative_quote": "Head of DG (CDMP certified) but federated model",
+        "source_kind": "docx"
+      },
+      "id": "39bb7347-eb3f-459d-ad90-b065d94e82a9",
+      "involved_subcap_ids": [
+        "P4C1.8.7",
+        "P4C1.1.6",
+        "P4C1.8.8",
+        "P4C1.3.7",
+        "P4C2.4.11",
+        "P4C2.4.10",
+        "P4C2.7.3",
+        "P4C2.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Data governance without CDO",
+      "verbatim_quote": "F-006 | Data governance without CDO | Head of DG (CDMP certified) but federated model [E-128] | Governance exists but fragmented | Data Cloud + unified data strategy + CDO advisory"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-131"
+        ],
+        "representative_quote": "LivePerson Copilot + KnowledgeAI, 250K convos/yr, 91%",
+        "source_kind": "docx"
+      },
+      "id": "3c94b58d-b0e4-4675-9f17-7d8bdad51c4b",
+      "involved_subcap_ids": [
+        "P4C1.8.7",
+        "P4C1.1.6",
+        "P4C1.8.8",
+        "P4C1.3.7",
+        "P4C2.4.11",
+        "P4C2.4.10",
+        "P4C2.7.3",
+        "P4C2.4.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "91%",
+          "delta": null,
+          "kpi_label": "KnowledgeAI K convos/yr",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Employee-first AI strategy",
+      "verbatim_quote": "F-002 | Employee-first AI strategy | LivePerson Copilot + KnowledgeAI, 250K convos/yr, 91% CSAT [E-131] | Strong augmentation, no customer-facing AI | Einstein GPT / Data Cloud for predictive agent enablement"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-145"
+        ],
+        "representative_quote": "Phase 1 live July 2025, 550 monthly RTP transactions",
+        "source_kind": "docx"
+      },
+      "id": "3707fea6-c65e-4fd3-aaeb-207d6f068050",
+      "involved_subcap_ids": [
+        "P3C1.2.2",
+        "P4C3.2.2",
+        "P3C3.2.1",
+        "P3C2.3.1",
+        "P4C1.3.1",
+        "P4C3.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "1,766",
+          "delta": null,
+          "kpi_label": "Atms",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Finzly FedNow+RTP go-live",
+      "verbatim_quote": "F-004 | Finzly FedNow+RTP go-live | Phase 1 live July 2025, 550 monthly RTP transactions [E-145] | \"First step in enterprise modernization\" | MuleSoft API-led payment rail consolidation"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-136"
+        ],
+        "representative_quote": "25 years, 95%+ CSAT, fix in hours",
+        "source_kind": "docx"
+      },
+      "id": "7000febd-24c4-4b73-9004-74e638529823",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C1.5.2",
+        "P4C3.5.2",
+        "P2C1.5.1",
+        "P4C1.2.3",
+        "P4C2.2.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "95%",
+          "delta": null,
+          "kpi_label": "Digital platform years",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "In-house digital platform",
+      "verbatim_quote": "F-001 | In-house digital platform | 25 years, 95%+ CSAT, fix in hours [E-136] | Proprietary platform moat but tech debt risk | Salesforce CRM 360 to augment (not replace) proprietary platform"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-135"
+        ],
+        "representative_quote": "OpenShift since 2021, presented at KubeCon NA 2024",
+        "source_kind": "docx"
+      },
+      "id": "1911bc3d-d748-45a5-adb9-f52f7a69b9c8",
+      "involved_subcap_ids": [
+        "P4C1.8.7",
+        "P4C1.1.6",
+        "P4C1.8.8",
+        "P4C1.3.7",
+        "P4C2.4.11",
+        "P4C2.4.10",
+        "P4C2.7.3",
+        "P4C2.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "KubeCon platform engineering",
+      "verbatim_quote": "F-005 | KubeCon platform engineering | OpenShift since 2021, presented at KubeCon NA 2024 [E-135] | Container-native shift underway | Cloud migration strategy + DevOps maturity consulting"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-141"
+        ],
+        "representative_quote": "9 InfoSec functions, Sr.EVP CISO, clean enforcement",
+        "source_kind": "docx"
+      },
+      "id": "af65a56e-ed7b-41be-bc64-5b5ba577f80e",
+      "involved_subcap_ids": [
+        "P3C4.6.3",
+        "P4C4.8.1",
+        "P4C4.5.3",
+        "P4C4.4.1",
+        "P4C4.7.1",
+        "P4C4.6.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "NIST CSF security program",
+      "verbatim_quote": "F-003 | NIST CSF security program | 9 InfoSec functions, Sr.EVP CISO, clean enforcement [E-141] | Mature security posture | Security assessment + zero trust roadmap advisory"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-138"
+        ],
+        "representative_quote": "14-15% YoY cloud expense growth, CEO cited 50-person gap",
+        "source_kind": "docx"
+      },
+      "id": "6a936241-1b00-496a-ba2b-c8d499deda76",
+      "involved_subcap_ids": [
+        "P4C1.8.7",
+        "P4C1.1.6",
+        "P4C1.8.8",
+        "P4C1.3.7",
+        "P4C2.4.11",
+        "P4C2.4.10",
+        "P4C2.7.3",
+        "P4C2.4.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "-15%",
+          "delta": null,
+          "kpi_label": "Gap spending surge",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Tech talent gap + spending surge",
+      "verbatim_quote": "F-007 | Tech talent gap + spending surge | 14-15% YoY cloud expense growth, CEO cited 50-person gap [E-138] | Capacity constraint on transformation | Managed services for Salesforce, MuleSoft, cloud engineering"
+    }
+  ]
+}

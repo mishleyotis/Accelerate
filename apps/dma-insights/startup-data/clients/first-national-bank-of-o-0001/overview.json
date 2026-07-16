@@ -1,0 +1,1106 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "first-national-bank-of-o-0001",
+    "domain": null,
+    "hq": null,
+    "id": "49263b82-9318-4529-b251-70fdfe5165bc",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "First National Bank of Omaha",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:06.230780Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 11,
+    "current_count": 14,
+    "dated_count": 7,
+    "median_age_months": 19.0,
+    "oldest_published_date": "2019-09-25",
+    "stale_count": 2,
+    "stale_pct": 1.36,
+    "total": 147,
+    "undated_count": 113
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 147
+    },
+    "connectors": {
+      "Indeed": 3,
+      "LinkedIn": 13
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 15,
+      "NEUTRAL": 80,
+      "POSITIVE": 52
+    },
+    "tiers": {
+      "T1": 90,
+      "T2": 21,
+      "T4": 2,
+      "T5": 34
+    },
+    "total_facts": 147,
+    "total_items": 147
+  },
+  "financial_trajectory": {
+    "cagr": "9.9%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Note: Asset CAGR 2021–2025 ~9.9%. CCB adds ~$2.2B assets + $2.8B trust AUM. FNBO moved from 16th to 9th-largest bank in Kansas City by deposit share. [E-001, E-002, E-003, financia",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 35000000000.0,
+    "branches": "120",
+    "cagr": "9.9%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "5,000",
+    "financial_highlights": {
+      "asset_cagr_2021": "2025 ~9.9%. CCB adds ~$2.2B assets + $2.8B t",
+      "lines": [
+        "Note: Asset CAGR 2021–2025 ~9.9%. CCB adds ~$2.2B assets + $2.8B trust AUM. FNBO moved from 16th to 9th-largest bank in Kansas City by deposit share. [E-001, E-002, E-003, financial_baseline.json]",
+        "Trajectory Classification: ACCELERATING. CCB acquisition (+$2.2B assets, +$2.8B trust AUM) represents a step-change in scale. Revenue CAGR (~13.6%) outpaces asset growth — improving operational leverage from BaaS/embedded finance. [E-001, E-002, E-003, financial_baseline.json]"
+      ],
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 5000,
+        "events": [
+          {
+            "fy": "FY2022",
+            "label": "AmeriFirst Financial (POS/home improvement lending)"
+          }
+        ],
+        "fy": [
+          "FY2016",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "Omaha, NE / Midwest (9 states post-CCB)",
+        "headline": "$31.0B assets · FY2024",
+        "regulator": "OCC / FDIC (Member FDIC)",
+        "series": {
+          "net_income_m": [
+            null,
+            1200.0,
+            1400.0,
+            1500.0,
+            1900.0
+          ],
+          "total_assets": [
+            0.03,
+            24.0,
+            30.0,
+            30.78,
+            31.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Omaha, NE / Midwest (9 states post-CCB)",
+    "footprint_basis": "derived:geography",
+    "founded": 1857,
+    "geography": "Omaha, NE / Midwest (9 states post-CCB)",
+    "headcount": 5000,
+    "hq": "1620 Dodge Street, Omaha, Nebraska 68102",
+    "hq_address": "1620 Dodge Street, Omaha, Nebraska 68102",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Clark Lauritzen",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CHAIRMAN PRESIDENT"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Matt Spyers",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 19,
+        "title": "promoted from CTO Dec 2024"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kurt Spieler",
+        "recent_hire": true,
+        "tenure": null,
+        "tenure_months": 0,
+        "title": "retired Jan 2026"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Rusty Vanneman, CFA, CMT",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 6,
+        "title": "joined Jan 2026"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tammy Trilli",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP COMMERCIAL PAYMENTS"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Brett Worick",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP PARTNERSHIP LENDING"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Barry Benson",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 48,
+        "title": "Nov 2022–present"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Stacey Cole",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP AGRIBUSINESS BANKING"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sammy Sufian",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 48,
+        "title": "Feb 2022–present"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Laura Nelson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP MARKETING"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "First National Bank of Omaha",
+    "license_type": "Nationally chartered",
+    "narrative_md": "FNBO is a nationally chartered, FDIC-insured bank headquartered at 1601 Dodge Street, Omaha, Nebraska 68197 — a new headquarters as of 2025. Founded in 1857, FNBO is one of the longest-operating privately held banks in the United States, operating as a subsidiary of First National of Nebraska, Inc. (FNNI), a multi-generational family holding company led by Chairman and President Clark Lauritzen.",
+    "primary_regulator": "OCC / FDIC (Member FDIC)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 100,
+          "score": 27.0,
+          "source": "CFPB complaints"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "FNBO Indeed ratings: Overall 3.7/5; Culture & Values 3.6; Work-Life Balance 3.7; Compensation 3.8; Wellbeing: Above Average for happiness, satisfaction, inclusion, flexibility, trust, purpose; CEO approval 58.9%; recommend fr",
+          "source": "Indeed"
+        },
+        {
+          "signal": "App Store reviews note friction for rural users with 2024 login change",
+          "source": "App Store"
+        },
+        {
+          "signal": "nsfers; Zelle P2P; card controls (lock/unlock); Apple Store/Google Play apps",
+          "source": "Google Play"
+        },
+        {
+          "rating": "27%",
+          "signal": "approved 27% more borrowers; 16% lower average APRs; CFPB no-action letter validated regulatory acceptance; demonstrates live production AI in underwriting",
+          "source": "CFPB complaints"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": "Kurt Spieler",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-116",
+        "excerpt": "Cashology by FNBO: multi-channel financial wellness community (website, podcast, YouTube, Facebook Group); FNBO financial experts answer questions; Consumer Financial Trends annual study (2025 AI study); personal finance",
+        "title": "Cashology by FNBO: multi-channel financial wellness community…",
+        "type": "podcast",
+        "url": "https://www.fnbo.com/insights/podcast/cashology"
+      },
+      {
+        "author": "Barry Benson",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "Barry Benson publishes ag trend analysis: record cattle prices, precision agriculture, inflation impacts; FNBO Vault podcast on ag banking; demonstrates systematic industry monitoring and thought leadership in ag segment",
+        "title": "Barry Benson publishes ag record cattle prices, precision…",
+        "type": "podcast",
+        "url": "https://www.fnbo.com/insights/commercial-business/2025/three-key-agribusiness-trends"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-058",
+        "excerpt": "Butterfield: 'accountable for accelerating innovation throughout enterprise; identifying disruptive business model threats; establishment & creation of new business models and fintech engagement; responsible for leading ",
+        "title": "Butterfield: 'accountable for accelerating innovation throughout…",
+        "type": "article",
+        "url": "https://board.fastcompany.com/profile/Marc-Butterfield-SVP-Innovation-Disruption-First-National-Bank-of-Omaha-FNBO/cf3d59c1-d7f9-4d0a-b4a3-4f0642345102"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "Marc Butterfield: ABA Innovation Committee + ABA Investment Committee; Tearsheet Product Council; speaking at CX BFSI West Exchange 2024 ('Applying Learnings from Disruptive Banking to Your Digital Platforms'); UNL Raike",
+        "title": "Marc Butterfield: ABA Innovation Committee + ABA Investment…",
+        "type": "conference",
+        "url": "https://futuredigitalfinance.wbresearch.com/speakers/marc-butterfield"
+      },
+      {
+        "author": "Tammy Trilli",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-064",
+        "excerpt": "FNBO has a dedicated 'Innovation Insights' section on website — institutional commitment to innovation thought leadership; Tammy Trilli featured in PYMNTS eBook 'The Innovation Mindset: How to Achieve It in 2025'; GenAI ",
+        "title": "GenAI strategy focused on fraud prevention, payments, personalization",
+        "type": "article",
+        "url": "https://www.fnbo.com/insights/innovation"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-065",
+        "excerpt": "'Milli Bank is an amazing product incubated within FNBO's Innovation & Disruption team'; 'Brent Hanson is adding an Innovation Product Manager'; Marc Butterfield invites FNBO 'I&D team' congratulations; demonstrates form",
+        "title": "Marc Butterfield invites FNBO 'I&D team' congratulations",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/marc-butterfield-0263281_greenlight-announces-family-cash-card-the-activity-6932392302564843520-2QcP"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$30.8B",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "fnbo.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.405954+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# First National Bank of Omaha — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "Formula: Priority = (0.25×Gap Size) + (0.20×Peer Comparison) + (0.15×Strategic Alignment) + (0.15×Implementation Complexity) + (0.15×Investment Efficiency) + (0.10×Stakeholder Readiness). Each factor 1–5.",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "First National Bank of Omaha is a $35.0B in assets regional bank regulated by OCC / FDIC (Member FDIC), operating since 1857 with 5,000 employees. A 9.9% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-145, E-117]. Zennify's assessment places overall digital maturity at 3.1/5. The deepest capability gap is Compensation Alignment at 2.4/5 against a 3.0 peer median [E-016, E-018]. Next is Digital KPI Framework at 2.5/5 against a 3.0 peer median [E-078, E-149].\n\nThird is Customer Acquisition Cost (CAC) Analysis at 2.5/5 against a 3.0 peer median [E-024, E-044]. The issue register adds Capability gap: Digital KPI Framework. The issue register adds Capability gap: Business Outcome Linkage. Counter-signal: Model Performance Monitoring already runs at 4.0/5 against a 3.0 peer median — a strength to build on, not rebuild. Leadership is in motion: Kurt Spieler (retired Jan 2026) is newly in seat, and new executives set platform direction in their first quarters.\n\nThe question for First National Bank of Omaha is whether to close Compensation Alignment first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. First National Bank of Omaha should lead with Twilio (63/100 fit) against Change Impact Assessment, then sequence Tableau behind it. Closing Compensation Alignment to the peer median alone is worth 0.6 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Five Vendor AI, No Enterprise Platform — Verafin (agentic AML), Pindrop (voice AI), Zeta AI (cardholder), Alloy (risk), Zest AI (underwriting) deployed independently…\". Timing favors acting inside the new leadership's first two quarters, before platform commitments lock."
+  },
+  "overall_score": 3.06,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_medians.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:06.201630+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/validation_registry.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:06.202481+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:06.203053+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:06.203275+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 22
+    },
+    "stage_ms": {
+      "manifest": 22,
+      "parse": 6490,
+      "persist": 427
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/qa_verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "institution_name derived from report artifacts",
+        "detail": "institution_name derived from report artifacts: 'First National Bank of Omaha'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_FN",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_FNBO_20260518.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "evidence_index.json",
+        "detail": "evidence_index.json: 1 validation error for EvidenceRow\ne_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence loaded from json variant evidence_index.json (147 rows)",
+        "detail": "evidence loaded from json variant evidence_index.json (147 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 07_governance/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. 'Various; Various; Various')",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: FNBO_Tech_Stack_Explorium_20260518.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator', 'total_assets'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=FNBO_Client_Profile_Research_Report_20260518.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 7",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_from_client_profile_docx",
+        "detail": "timeline_from_client_profile_docx: 21 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 2 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=10",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_medians.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/validation_registry.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:RB",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 23",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 7",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/qa_verdict.json",
+      "institution_name derived from report artifacts: 'First National Bank of Omaha'",
+      "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_FNBO_20260518.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "evidence_index.json: 1 validation error for EvidenceRow\ne_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+      "evidence loaded from json variant evidence_index.json (147 rows)",
+      "used variant recommendations source: 07_governance/recommendations.json",
+      "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. 'Various; Various; Various')",
+      "used variant tech stack xlsx: FNBO_Tech_Stack_Explorium_20260518.xlsx",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator', 'total_assets'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=FNBO_Client_Profile_Research_Report_20260518.docx count=0",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 7",
+      "timeline_from_client_profile_docx: 21 events",
+      "acquisitions_from_client_profile_docx: 2 events",
+      "firmographics_leadership_healed: count=10",
+      "INFO/pattern_gap: 06_peers/peer_medians.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 07_governance/validation_registry.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "subvertical_inferred_from_name:RB",
+      "timeline_events_persisted: 23",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 7"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.0,
+      "pillar_id": "P1",
+      "score": 2.68,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 3.13,
+      "pillar_id": "P2",
+      "score": 2.88,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 3.13,
+      "pillar_id": "P3",
+      "score": 3.5,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.0,
+      "pillar_id": "P4",
+      "score": 3.27,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-18",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:06.230780Z",
+    "created_at": "2026-07-02T23:11:06.230780Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "f268d079-ecc2-492a-8836-b7bc83e1f1b9",
+    "overall_score": 3.06,
+    "request_id": "DMA-RES-FNBO-20260518-0001",
+    "started_at": "2026-07-02T23:11:06.230780Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 100,
+        "score": 27.0,
+        "source": "CFPB complaints"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Governance Ready — CDP Fragmented — CATCH Intelligence DG KickStart 10/10. Named Data Steward (Core Banking, 6yr). BUT: Adobe RTCDP + Tealium + Zeta AI + QuickSight = 4-platform CDP. [E-154, E-160] — Cory Mann (Mar 2025): \"stable data foundation\" required for GenAI. Fragmentation is the bottleneck. — Data Cloud: governance foundations ready. Gap = unified customer data across nCino, COMS, Zeta, Developer Circle.",
+      "evidence": [
+        "E-154",
+        "E-160",
+        "E-022",
+        "E-024"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Governance Ready",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 2.38,
+      "so_what": "Prioritize Governance Ready in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Governance Ready",
+      "what": "Governance Ready — CDP Fragmented — CATCH Intelligence DG KickStart 10/10. Named Data Steward (Core Banking, 6yr). BUT: Adobe RTCDP + Tealium + Zeta AI +. QuickSight = 4-platform CDP. [E-154, E-160] — Cory Mann (Mar 2025): \"stable data foundation\" required for GenAI. Fragmentation is the bottleneck. Data Cloud: governance foundations ready.",
+      "why": "The linked evidence records: CATCH Intelligence (Omaha-based data governance consultancy) confirms long-term partnership with FNBO. FNBO Director, Data Product Owner testimonial: 'CATCH Intelligence consistently supports FNBO with work and solid communication."
+    },
+    {
+      "body": "Five explicitly confirmed FNBO strategic priorities in 2025–2026. These are the lens through which every Zennify solution must be framed.",
+      "evidence": [
+        "E-022",
+        "E-024",
+        "E-045",
+        "E-053"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Five explicitly confirmed FNBO strategic priorities in 2025–2026…",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 2.38,
+      "so_what": "These are the lens through which every Zennify solution must be framed.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Five explicitly confirmed FNBO strategic priorities in 2025–2026…",
+      "what": "Five explicitly confirmed FNBO strategic priorities in 2025–2026.",
+      "why": "The linked evidence records: Clark Lauritzen 6th generation chairman/president; Harvard MBA, Princeton; KC Fed director; vision: 'top-performing bank for customers, employees, communities and shareholders'; innovation heritage (first credit cards 1950s); active board engagement with Federal Reserve"
+    },
+    {
+      "body": "Five Vendor AI, No Enterprise Platform — Verafin (agentic AML), Pindrop (voice AI), Zeta AI (cardholder), Alloy (risk), Zest AI (underwriting) deployed independently. No orchestration layer. [E-131, E-130, E-097, E-146, E-106] — Model governance gaps. BSA/AML Model Governance Committee manages 5 tools independently. — Agentforce: orchestration above vendor AI. Champion: Megan Hennigs (Dir AI Adoption, Jan 2026).",
+      "evidence": [
+        "E-131",
+        "E-130",
+        "E-097",
+        "E-146"
+      ],
+      "magnitude": null,
+      "name": "Five Vendor AI",
+      "peer_median": 3.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 3.05,
+      "so_what": "Protect Five Vendor AI as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Five Vendor AI",
+      "what": "Five Vendor AI, No Enterprise Platform — Verafin (agentic AML), Pindrop (voice AI), Zeta AI (cardholder), Alloy (risk), Zest AI (underwriting) deployed independently. No orchestration layer. [E-131, E-130, E-097, E-146, E-106] — Model governance gaps. BSA/AML Model Governance Committee manages 5 tools independently. Agentforce: orchestration above vendor AI.",
+      "why": "The linked evidence records: FNBO confirmed deploying Nasdaq Verafin Agentic Sanctions Analyst and Agentic EDD Analyst. CRO Nick Baxter: 'The technology makes managing risk easier — and 50% faster.'"
+    },
+    {
+      "body": "Ag Digital LOS Gap at #3 National Rank — #3 US ag lender (2026). nCino deployed for Commercial/CRE/Consumer. Ag digital loan portal NOT confirmed. FCSAmerica has full Ag nCino. [E-091, E-093] — Competitively vulnerable as FCSAmerica digitizes Ag origination with nCino. — nCino Ag module: highest-urgency upsell. Champion: Barry Benson (SVP Agribusiness).",
+      "evidence": [
+        "E-091",
+        "E-093",
+        "E-022",
+        "E-024"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Ag Digital LOS Gap at #3 National Rank",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 2.38,
+      "so_what": "Prioritize Ag Digital LOS Gap at #3 National Rank in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Ag Digital LOS Gap at #3 National Rank",
+      "what": "Ag Digital LOS Gap at #3 National Rank — #3 US ag lender (2026). NCino deployed for Commercial/CRE/Consumer. Ag digital loan portal NOT confirmed. FCSAmerica has full Ag nCino. [E-091, E-093] — Competitively vulnerable as FCSAmerica digitizes Ag origination with nCino. — nCino Ag module: highest-urgency upsell. Champion: Barry Benson (SVP Agribusiness).",
+      "why": "The linked evidence records: CRITICAL VALIDATION - nCino DEPLOYED at FNBO (confirmed)."
+    },
+    {
+      "body": "Three Salesforce Products, No FSC — FNBO runs SFDC Service Cloud (COMS), Experience Cloud (Developer Circle — © salesforce.com confirmed), and nCino. FSC absent. [E-092, E-156, E-091] — Commercial bankers lack 360° relationship view. Cross-sell between Ag/CRE/Healthcare is siloed. — Salesforce FSC — upgrade within existing licensing. Target: Spyers (CIO), Kobjerowski (EVP CCO).",
+      "evidence": [
+        "E-092",
+        "E-156",
+        "E-091",
+        "E-022"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Three Salesforce Products",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 2.38,
+      "so_what": "Prioritize Three Salesforce Products in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Three Salesforce Products",
+      "what": "Three Salesforce Products, No FSC — FNBO runs SFDC Service Cloud (COMS), Experience Cloud (Developer Circle — © salesforce.com confirmed), and nCino. FSC absent. [E-092, E-156, E-091] — Commercial bankers lack 360° relationship view. Cross-sell between Ag/CRE/Healthcare is siloed. Salesforce FSC — upgrade within existing licensing.",
+      "why": "The linked evidence records: CRITICAL VALIDATION - Salesforce DEPLOYED at FNBO (confirmed)."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Digital KPI Framework averages 2.5/5 over 165 scored subcaps; ceiling 3.0 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Model Monitoring averages 2.9/5 over 217 scored subcaps; ceiling 3.4 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Consortium Participation averages 2.9/5 over 190 scored subcaps; ceiling 3.4 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Compensation Alignment averages 2.4/5 over 205 scored subcaps; ceiling 2.9 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG governance averages 2.6/5 over 70 scored subcaps; ceiling 3.1 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Acquisition Cost (CAC) Analysis averages 2.5/5 over 287 scored subcaps; ceiling 3.0 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Data Sharing Consent averages 3.3/5 over 287 scored subcaps; ceiling 3.8 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Employee Experience Enablement averages 2.9/5 over 286 scored subcaps; ceiling 3.4 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Dynamic Journey Pivoting averages 2.7/5 over 255 scored subcaps; ceiling 3.2 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Action Plan Template Library & Configuration averages 3.3/5 over 143 scored subcaps; ceiling 3.8 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Performance Monitoring averages 4.0/5 over 130 scored subcaps; ceiling 4.5 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 4.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Change Management averages 3.6/5 over 141 scored subcaps; ceiling 4.1 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Fourth-Party Risk averages 3.3/5 over 145 scored subcaps; ceiling 3.8 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Residency & Sovereignty Controls averages 3.0/5 over 200 scored subcaps; ceiling 3.5 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Analytics Data Platform averages 3.1/5 over 270 scored subcaps; ceiling 3.6 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Cloud Strategy & Infrastructure averages 3.4/5 over 235 scored subcaps; ceiling 3.9 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Tokenization / Format-Preserving Protection for High-Risk Fields averages 3.6/5 over 150 scored subcaps; ceiling 4.2 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "core_migration",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Pindrop Fraud Assist GenAI deployed (deepfake + IVR). Agentic AI fragmentation deepens (Nov 2025).",
+      "evidence": [
+        "E-130"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Pindrop Fraud Assist GenAI deployed",
+      "metric": null,
+      "peer_context": "Compensation Alignment runs 2.38/5 vs a 3.00 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Pindrop Fraud Assist GenAI deployed (deepfake + IVR). Agentic AI fragmentation deepens (Nov 2025). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Pindrop Fraud Assist GenAI deployed"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "CORRECTED - PRIOR FINDING REVERSED: Salesforce IS deployed at FNBO (confirmed via job postings Apr 2025). Sr. Salesforce Developer posted Apr 30 2025: \"COMS squad seeking Senior Developer for Salesforce and AWS for Customer Care; development primarily focused on Salesforce.\" Scope = Customer Care/Service Cloud.",
+      "evidence": [
+        "E-043"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Prior Finding Reversed",
+      "metric": null,
+      "peer_context": "Compensation Alignment runs 2.38/5 vs a 3.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CORRECTED - PRIOR FINDING REVERSED: Salesforce IS deployed at FNBO (confirmed via job postings Apr 2025). Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "firmographics.leadership",
+      "detail": "Kurt Spieler is newly in seat as retired Jan 2026 at First National Bank of Omaha — new executives set platform direction in their first two quarters.",
+      "evidence": [
+        "E-121",
+        "E-127",
+        "E-142",
+        "E-059"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "New executives set platform direction",
+      "metric": null,
+      "peer_context": "Compensation Alignment runs 2.38/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Kurt Spieler is newly in seat as retired Jan 2026 at First National Bank of Omaha — new executives set platform direction in their first two quarters. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Verafin Agentic Sanctions Analyst + EDD Analyst live (The Banker). Enterprise AI platform gap confirmed (May 2026).",
+      "evidence": [
+        "E-131"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Verafin Agentic Sanctions Analyst + EDD Analyst live",
+      "metric": null,
+      "peer_context": "Compensation Alignment runs 2.38/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Change Impact Assessment — highest-fit surface at 63/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Verafin Agentic Sanctions Analyst + EDD Analyst live (The Banker). Enterprise AI platform gap confirmed (May 2026). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2026-05-01",
+        "event": "Verafin Agentic Sanctions Analyst + EDD Analyst live"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Director, AI Adoption & Workforce Enablement created (Hennigs). Agentforce champion named (Jan 2026).",
+      "evidence": [
+        "E-151"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Director, AI Adoption & Workforce Enablement created",
+      "metric": null,
+      "peer_context": "Compensation Alignment runs 2.38/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Change Impact Assessment — highest-fit surface at 63/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Director, AI Adoption & Workforce Enablement created (Hennigs). Agentforce champion named (Jan 2026).",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Director, AI Adoption & Workforce Enablement created"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CCB acquisition closed — Country Club Bank division of FNBO. HIGHEST URGENCY Salesforce window (Oct 2025).",
+      "evidence": [],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "CCB acquisition closed Country Club Bank division of FNBO",
+      "metric": null,
+      "peer_context": "Compensation Alignment runs 2.38/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Change Impact Assessment — highest-fit surface at 63/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "CCB acquisition closed — Country Club Bank division of FNBO. HIGHEST URGENCY Salesforce window (Oct 2025).",
+      "timeline": {
+        "date": "2025-10-01",
+        "event": "CCB acquisition closed Country Club Bank division of FNBO"
+      },
+      "window": null
+    }
+  ]
+}

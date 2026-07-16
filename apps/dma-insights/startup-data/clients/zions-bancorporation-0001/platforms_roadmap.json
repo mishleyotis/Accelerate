@@ -1,0 +1,142 @@
+{
+  "entity_display_id": "zions-bancorporation-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.83",
+          "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Deploy Unified Salesforce FSC Agent Desktop"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.83",
+          "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Implement Skills-Based Routing with Genesys SCV"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.83",
+          "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Deploy Einstein AI Agent Assist & Guided Workflows"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.83",
+          "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Build Customer 360 & Unified Interaction History"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.83",
+          "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Implement Conversation Intelligence & QA"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.83",
+          "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.17 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Deploy Agentforce Virtual Agent for Self-Service"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ZIONS-20260306-0001",
+  "total_duration_months": 12
+}

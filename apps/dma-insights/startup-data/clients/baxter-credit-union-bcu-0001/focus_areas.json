@@ -1,0 +1,40 @@
+{
+  "entity_display_id": "baxter-credit-union-bcu-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-061",
+          "E-065"
+        ],
+        "representative_quote": "Three capabilities carry \u00b10.8 uncertainty (the maximum) because public evidence cannot determine utilization: P3C1 Core Automation (3 RPA platforms detected but bot count",
+        "source_kind": "docx"
+      },
+      "id": "cef1f01e-a478-4ffa-85fa-bf1d2d2fa02a",
+      "involved_subcap_ids": [
+        "P3C1.6.1",
+        "P1C1.5.2",
+        "P4C1.2.3",
+        "P2C1.5.1",
+        "P4C2.3.2",
+        "P4C3.4.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 17,
+        "P3": 17,
+        "P4": 49
+      },
+      "source_path": "(unknown)",
+      "title": "Critical Gaps",
+      "verbatim_quote": "Three capabilities carry \u00b10.8 uncertainty (the maximum) because public evidence cannot determine utilization: P3C1 Core Automation (3 RPA platforms detected but bot count unknown [URF-02]), P4C1 Data Governance (strategy mature but infrastructure \"patchwork\" [E-061:F2]), and P4C3 Technology Architecture (MuleSoft absent, legacy platforms detected [E-065:F9]). These three areas are the highest-priority discovery items for the engagement team and also represent Zennify's largest deal opportunity \u2014 Data Cloud, MuleSoft, and CRM Analytics directly address all three."
+    }
+  ]
+}

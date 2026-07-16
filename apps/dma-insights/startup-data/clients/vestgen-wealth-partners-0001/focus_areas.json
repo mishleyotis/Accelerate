@@ -1,0 +1,112 @@
+{
+  "entity_display_id": "vestgen-wealth-partners-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[P2C2.3.3] No public evidence surfaced for biometric authentication at VestGen Wealth Partners ($6.67B AUM).",
+        "source_kind": "heuristic"
+      },
+      "id": "51536315-07be-4eda-969b-a450ba9f25b5",
+      "involved_subcap_ids": [
+        "P2C2.3.3",
+        "P2C2.3.5",
+        "P2C2.3.7",
+        "P2C3.3.3",
+        "P2C3.3.5",
+        "P2C3.3.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,670,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 15 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[P3C1.2.3] No public evidence surfaced for reconciliation automation at VestGen Wealth Partners ($6.67B AUM).",
+        "source_kind": "heuristic"
+      },
+      "id": "c359f1a7-4c8f-47a2-bdcc-f015f4aad88b",
+      "involved_subcap_ids": [
+        "P3C1.2.3",
+        "P3C1.2.5",
+        "P3C1.8.RIA3",
+        "P3C3.3.3",
+        "P3C3.4.RIA3",
+        "P3C4.2.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,670,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Operationalize process automation",
+      "verbatim_quote": "Address the 7 P3 capability gaps as one operations + automation programme \u2014 payments, lending ops, and core."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[P1C3.5.3] No public evidence surfaced for innovation roi tracking at VestGen Wealth Partners ($6.67B AUM).",
+        "source_kind": "heuristic"
+      },
+      "id": "eed2c3f9-9477-45a0-ad62-9dd8750b8cb2",
+      "involved_subcap_ids": [
+        "P1C3.5.3",
+        "P1C1.2.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,670,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 2 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

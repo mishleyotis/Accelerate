@@ -1,0 +1,197 @@
+{
+  "entity_display_id": "odlum-brown-limited-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C3.5.3",
+        "P1C1.8.2",
+        "P1C1.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "0447ed32-293b-44e4-b1b5-a4a981ba30fa",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-028",
+        "E-057",
+        "E-052",
+        "E-053",
+        "E-054",
+        "E-017",
+        "E-018"
+      ],
+      "linked_subcap_id": "P1C3.5.3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "databricks",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Innovation ROI Tracking a near-term focus for Odlum Brown Limited: a scoped investment here would lift it from 2.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-057].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Strategic Objectives Map",
+      "what_text": "Innovation ROI Tracking is one of Odlum Brown Limited's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Odlum Brown Limited's ability to deliver sharper strategic direction and stronger oversight [E-028].",
+      "why_text": "The assessment found: “OB launched 'Different Makes a Difference®' podcast — equity analysts discuss market topics; published on Apple Podcasts + YouTube March 2026 episode 'Moody's: Standing Firm in an AI World' — Steve” [E-027]. At 2.0 out of 5, Innovation ROI Tracking sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.3",
+        "P1C2.1.3",
+        "P2C2.2.RIA1",
+        "P3C2.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "ddf6e5c5-9290-4931-8f09-9fb3be498f9e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-050",
+        "E-052",
+        "E-040",
+        "E-075",
+        "E-081",
+        "E-082",
+        "E-083",
+        "E-090"
+      ],
+      "linked_subcap_id": "P2C4.1.3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make External Data Integration a near-term focus for Odlum Brown Limited: a scoped investment here would lift it from 2.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-052].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Seven findings are ranked to a Zennify Account Executive",
+      "what_text": "External Data Integration is one of Odlum Brown Limited's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Odlum Brown Limited's ability to deliver a stronger, more personalised customer experience [E-050].",
+      "why_text": "The assessment found: “OB uses 'advanced software to model investment and estate values' — financial planning software confirmed; vendor unnamed in public sources OB explicitly lists 'strategies to transfer wealth to the” [E-081]. At 2.0 out of 5, External Data Integration sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Peer median: 3.30 | Gap: −0.34 | Strengths: Governance (3.51), Culture (3.51) | Development areas: Digital Strategy (2.46), Innovation (2.34)\nPillar 1 is a study in institutional governance at its best — and strategic articulation at its weakest. Odlum Brown has built genuine governance and culture infrastructure that exceeds peer median (: 3.51 vs. 3.25;: 3.51 vs. 3.50) while struggling to formalise the digital strategy and innovation management frameworks that would anchor the firm's 2025 leadership transition. [E-088,E-012]",
+        "heading": "6.1 Pillar 1 — Strategy, Governance & Culture  |  2.96 / 5.00  |  M3",
+        "linked_e_ids": [
+          "E-012",
+          "E-088"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% (highest) | Peer median: 3.06 | Gap: −0.95 (largest pillar gap) | All 4 categories below peer median | Indeed sentiment cap (3.3/5) applied\nPillar 2 is the most commercially urgent pillar in OB's assessment — and the one where the evidence is most unambiguous. All four P2 categories score below peer median. The Indeed sentiment cap of 3.3/5 applies a level 2.5 ceiling across all P2 categories, but in most cases this cap is not the binding constraint — the underlying architectural absences (no mobile app, no marketing automation, no integrated CRM) are the true ceiling. The −0.95 pillar gap against peers with a 30% Weighting is the single largest contributor to OB's 0.39-point overall deficit. [E-012,E-025,E-030]",
+        "heading": "6.2 Pillar 2 — Customer Experience  |  2.11 / 5.00  |  M2",
+        "linked_e_ids": [
+          "E-012",
+          "E-025",
+          "E-030"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Peer median: 3.19 | Gap: +0.14 (OB above peer median) | Strengths: Compliance (3.98), Operational Risk (3.52) | Development area: Process Automation (2.40)\nPillar 3 is OB's strongest pillar and the one where its institutional tenure and governance culture create measurable differentiation. Two of four P3 categories materially exceed peer median (: 3.98, +0.73;: 3.52, +0.27). The single P3 development area — Process Automation (2.40, −0.60) — is directly caused by the Broadridge-Salesforce integration gap documented in ISS-002, and is the precise gap that MuleSoft (R-02) closes. [E-093,E-112,E-012]",
+        "heading": "6.3 Pillar 3 — Operations, Risk & Compliance  |  3.33 / 5.00  |  M3",
+        "linked_e_ids": [
+          "E-012",
+          "E-093",
+          "E-112"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Peer median: 3.06 | Gap: −0.18 | Strengths: Cybersecurity (4.05), Cloud Architecture (3.52) | Development areas: Data Architecture (1.99), Analytics (1.98)\nPillar 4 tells the Infrastructure Paradox story. OB has invested in genuinely best-practice infrastructure ( Cybersecurity: 4.05, +0.80 vs. peers; Cloud Architecture: 3.52, +0.52) that makes Salesforce cloud deployment simpler and safer than at most comparable independent dealers. Yet the application layer above that foundation ( Data Architecture: 1.99; Analytics: 1.98) is critically underdeveloped — both scoring 1.99-2.0 against a peer median of 3.00. [E-093,E-091,E-019]",
+        "heading": "6.4 Pillar 4 — Data, Analytics & Technology  |  2.88 / 5.00  |  M3",
+        "linked_e_ids": [
+          "E-019",
+          "E-091",
+          "E-093"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "6 recommendations | All technologies validated absent before inclusion | No investment amounts, estimates, or timelines | Each aligned to OB's 2025 strategic objectives\nThe following six recommendations address the confirmed capability gaps identified in Sections 6-8. Each recommendation maps to one of OB's seven 2025 strategic objectives, cites specific evidence for the root cause, confirms the technology is not currently deployed, and identifies the named economic buyer. The recommendations are presented in dependency sequence — R-01 (FSC) establishes the financial services data model that R-03, R-05, and R-06 require; R-02 (MuleSoft) establishes the API layer that R-04 (Data Cloud) requires.\n[Continued in Sub-Batch R4 — Sections 10-12 + Appendices + Final Assembly]"
+  },
+  "run_request_id": "DMA-ASM-ODLB-20260527-0001"
+}

@@ -1,0 +1,1123 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 157,
+        "subcaps": 157,
+        "thin": 59
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 124
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 70
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 126
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "fulton-bank-national-ass-8001",
+    "domain": null,
+    "hq": null,
+    "id": "a3b80090-efaa-41b2-a863-e28ab25117fd",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Fulton Bank, National Association",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:01.962187Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 17,
+    "current_count": 23,
+    "dated_count": 3,
+    "median_age_months": 13.2,
+    "oldest_published_date": "2024-04-01",
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 45,
+    "undated_count": 2
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 1,
+      "MIXED_POSITIVE": 1,
+      "NEGATIVE": 1,
+      "NEGATIVE_THEMATIC": 1,
+      "NEUTRAL": 1,
+      "NEUTRAL_GAP": 1,
+      "NEUTRAL_LOW_CONFIDENCE": 1,
+      "POSITIVE": 36,
+      "POSITIVE_WITH_FRICTION_SIGNALS": 1,
+      "POSITIVE_WITH_HISTORICAL_REMEDIA": 1
+    },
+    "connectors": {
+      "Indeed": 1,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 4,
+      "NEUTRAL": 38,
+      "POSITIVE": 3
+    },
+    "tiers": {
+      "T1": 10,
+      "T2": 29,
+      "T6": 2,
+      "T7": 3,
+      "T8": 1
+    },
+    "total_facts": 1216,
+    "total_items": 45
+  },
+  "financial_trajectory": {
+    "cagr": "9.2%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Six-year balance-sheet trajectory (FY2019 through FY2025, with calculated CAGRs from full-year data sourced from the FY2025 Annual Report [E-001]):",
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 381400000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 50200000000.0,
+    "branches": "32",
+    "cagr": "9.2%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "1636",
+    "financial_highlights": {
+      "branch_network": "200+ financial centers across five Mid-Atla",
+      "e-001/e": "002/E-003/E-027/E-063]:",
+      "e-002/e": "027], and Q1 2026 8-K [E-063]. CAGRs comput",
+      "lines": [
+        "Fulton operates approximately 3,400+ employees (LinkedIn corporate-page count of 1,636 employees +7.7% YoY [E-050] reflects only the LinkedIn-affiliated subset; full holdco employment is materially higher per 10-K disclosures). Branch network: 200+ financial centers across five Mid-Atlantic states (PA, NJ, MD, DE, VA), having exited New York in September 2024 to concentrate footprint in core markets. The 2024 Republic First Bank acquisition added 32 branches in the Greater Philadelphia metro, and the pending Q2 2026 Blue Foundry Bancorp close will further extend Northern New Jersey presence [E-001].",
+        "Six-year balance-sheet trajectory (FY2019 through FY2025, with calculated CAGRs from full-year data sourced from the FY2025 Annual Report [E-001]):",
+        "Trend Classification: ACCELERATING (M&A-driven step in 2024 from $27.6B to $32.1B; +16.3% YoY assets via Republic First; followed by stable 2025 organic growth + Blue Foundry pending Q2 2026). The 2024 step-change from $27.6B to $32.1B in total assets reflects the inorganic addition of Republic First Bank ($6B assets, $4B deposits, 32 branches via FDIC-assisted failed-bank deal completed April 26, 2024). FY2025 was a year of organic stabilization with all three core metrics holding flat-to-slightly-up; the next inorganic inflection arrives with Blue Foundry close in Q2 2026.",
+        "FY2025 Record Performance Metrics [E-001/E-002/E-003/E-027/E-063]:",
+        "FY2026 Forward Guidance [E-063 — Q1 2026 8-K]:",
+        "The FY2026 OpEx envelope of $800-835M is a material number for engagement planning: it explicitly includes Blue Foundry merger-related costs estimated at approximately $36M, leaving $764-799M of base operating spend in which discretionary technology investments compete. FY2025's $191M of returned capital to shareholders ($150M new buyback authorization Q4 2025 effective through January 2027 plus $0.73 dividend, +5.8% YoY) signals a confident capital posture compatible with strategic technology spend.",
+        "Six years of full-year balance-sheet and operating data (FY2019 through FY2025) sourced from the FY2025 Annual Report [E-001], Q3 2025 Investor Presentation [E-002/E-027], and Q1 2026 8-K [E-063]. CAGRs computed over the full six-year window. Trend classifications follow the ACCELERATING / STABLE / DECLINING / VARIABLE schema with directional commentary.",
+        "FY2025 record-year milestones. Record annual operating EPS of $2.16 (+16.8% YoY); Record total revenue >$1.4B; Record net income $381.4M (+$102.9M YoY = +37%); Customer deposits grew $449M to $26.6B; Wealth advisor referrals from financial centers +17% YoY (~$50M); Wealth AUM crossed $17B threshold; $191M returned to shareholders ($150M new buyback authorization Q4 2025 effective through Jan 2027).",
+        "FY2026 forward guidance (per Q1 2026 8-K [E-063]):",
+        "Trajectory interpretation for Zennify engagement. The seven-metric trajectory shows a bank in active acceleration: ACCELERATING on assets/loans/deposits/EPS/NIM/Wealth AUM, with efficiency ratio DECLINING (favorable). The FY2026 OpEx envelope of $800-835M explicitly includes Blue Foundry merger costs (~$36M), giving the AE clear visibility into discretionary technology spend availability. Wealth AUM CAGR of ~9.2% (the fastest CAGR across the trajectory) signals where the strategic energy is — and Wealth Access's 10K-household life-event detection deployment (E-053) shows where the technology investment is already flowing."
+      ],
+      "net_income": 381400000.0
+    },
+    "footprint": "PA, OH, MD, WV, NC, SC, DC, VA (8 states + DC)",
+    "footprint_basis": "derived:geography",
+    "founded": 1882,
+    "geography": "PA, OH, MD, WV, NC, SC, DC, VA (8 states + DC)",
+    "headcount": 4500,
+    "hq": "One Penn Square, Lancaster, PA 17604",
+    "hq_address": "One Penn Square, Lancaster, PA 17604",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Prior CDO Jad Abou",
+        "recent_hire": true,
+        "tenure": null,
+        "tenure_months": 0,
+        "title": "Maarouf (2021-2025) departed before Dearwester appointment Feb 2026 — interim governance gap closed by Dearwester arrival"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Fulton Bank, National Association",
+    "license_type": "National Association",
+    "narrative_md": "This section establishes the institutional context that anchors every downstream finding. Every claim cites evidence IDs traceable to the Evidence Linkage Matrix in the Research Workbook.\n\nFulton Financial Corporation (the holding company; NASDAQ: FULT common shares, FULTP Series A Preferred) is a Pennsylvania-domiciled bank holding company. Its operating bank subsidiary, Fulton Bank, National Association, is a national bank chartered under the Office of the Comptroller of the Currency. The institution was founded in 1882 and has operated continuously for 143 years from its current headquarters at One Penn Square, Lancaster, PA 17604 [E-001/E-002/E-003]. It is a component of the S&P SmallCap 600 index. CEO Curtis J. Myers holds an ownership stake of 0.13%; institutional ownership constitutes the majority of the float. The independent registered public accounting firm is KPMG LLP, which signed the FY2025 audit opinion in the combined 2026 Notice/Proxy Statement and 2025 Annual Report [E-005].",
+    "primary_regulator": "FDIC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 1400000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "INDEED OVERALL RATING: 3.7/5 (Lancaster, PA)",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-024",
+        "excerpt": "CEO Curt Myers Banking+ interview (Nov 2025) explicit cultural management framing: 'culture must be actively managed like any core business line to ensure organizational alignment and success' — direct CEO-level cultural",
+        "title": "CEO Curt Myers Banking+ interview (Nov 2025) explicit cultural…",
+        "type": "article",
+        "url": "https://bankingplus.news/enrichment/fulton-bank-ceo-managing-culture-performance/"
+      }
+    ],
+    "ticker": "FULT (NASDAQ Common); FULTP (Series A Preferred)",
+    "ticker_basis": "prose:entity-scoped",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "s205.q4cdn.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.842885+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Fulton Bank, National Association — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Fulton Bank, National Association is a $50.2B in assets regional bank regulated by FDIC, operating since 1882 with 4,500 employees. A 9.2% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-001, E-016]. Zennify's assessment places overall digital maturity at 2.2/5. The deepest capability gap is Data Quality Management at 1.8/5 against a 2.7 peer median [E-019, E-006]. Next is Idea Sourcing Channels at 1.9/5 against a 2.6 peer median [E-020, E-002].\n\nThird is Mobile App Experience at 2.0/5 against a 2.8 peer median [E-028]. The issue register adds External customer-sentiment gap: Comparably -21 NPS / 46 CSAT; Birdeye 1.1/5 [E-033]; WalletHub 2.6/5; BBB 1/5; Yelp 3.8/5… (high severity). The issue register adds Overby-Seawell Co. (insurance verification vendor) compromise exposed 100,744 Fulton customer records… (high severity). Leadership is in motion: Prior CDO Jad Abou (Maarouf (2021-2025) departed before Dearwester appointment Feb 2026 — interim governance gap closed by Dearwester arrival) is newly in seat, and new executives set platform direction in their first quarters.\n\nThe question for Fulton Bank, National Association is whether to close Data Quality Management first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Fulton Bank, National Association should lead with Salesforce (66/100 fit) against Business Impact Analysis, then sequence Databricks behind it. Closing Data Quality Management to the peer median alone is worth 0.9 maturity points, and the capabilities that depend on it compound the gain. Timing favors acting inside the new leadership's first two quarters, before platform commitments lock."
+  },
+  "overall_score": 2.16,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.807659+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.807929+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L1_qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.808380+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_audit_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.808922+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_audit_checkpoint_SB_A1.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.809238+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_audit_finding_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.809600+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_audit_preliminary_issues.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.809954+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/batch_l2_1_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.810378+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/batch_l2_2_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.810698+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/batch_l2_3_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.810999+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/batch_l2_4_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.811347+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/caps_predetermined.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.811746+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.813354+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.814052+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/ranked_gaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.814576+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/recommendations_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.815763+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/scope_compliance_check.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.816378+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/strategic_anchors.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.816581+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/tech_validation_matrix.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.817028+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/zennify_catalog_lock.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:01.817374+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 35
+    },
+    "stage_ms": {
+      "manifest": 30,
+      "parse": 13413,
+      "persist": 2690
+    },
+    "structured": [
+      {
+        "code": "run_id format",
+        "detail": "run_id format: unrecognized run_id format: 'DMA-ASM-FULT-20260508-001'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_index.json",
+        "detail": "evidence_index.json: 6 validation errors for EvidenceRow\nfacts.0\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"Mark Hoffman, Chief Inve...ights: Video Updates').\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.1\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value='Quarterly Economic Updat... cadence over 3+ years.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.2\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"Education Center FFA sec... 'four key takeaways').\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.3\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value='Topical breadth: rising ...ntent at CIO/CIS level.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.4\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"Explicit lead capture CT...dvisor lead generation.\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.5\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value='Videos surface from Fult... brand authority + SEO.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='FAIL' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=698 contradictions=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 266 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 07_governance/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Fulton_Bank_Client_Profile_Research_Report.docx count=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 13 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:branches,employees_approx,primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_derived_from_scores",
+        "detail": "scqa_derived_from_scores",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 3 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L1_qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_audit_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_audit_checkpoint_SB_A1.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_audit_finding_classification.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_audit_preliminary_issues.csv — no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/batch_l2_1_complete.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/batch_l2_2_complete.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/batch_l2_3_complete.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/batch_l2_4_complete.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/caps_predetermined.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/priority_scores.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/ranked_gaps.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/recommendations_register.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/scope_compliance_check.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/strategic_anchors.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/tech_validation_matrix.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/zennify_catalog_lock.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 43",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:28/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 15",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "run_id format: unrecognized run_id format: 'DMA-ASM-FULT-20260508-001'",
+      "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "evidence_index.json: 6 validation errors for EvidenceRow\nfacts.0\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"Mark Hoffman, Chief Inve...ights: Video Updates').\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.1\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value='Quarterly Economic Updat... cadence over 3+ years.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.2\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"Education Center FFA sec... 'four key takeaways').\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.3\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value='Topical breadth: rising ...ntent at CIO/CIS level.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.4\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"Explicit lead capture CT...dvisor lead generation.\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type\nfacts.5\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value='Videos surface from Fult... brand authority + SEO.', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='FAIL' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=698 contradictions=0",
+      "caps_applied_log: 266 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 07_governance/recommendations.json",
+      "firmographics_leadership_merged_from_docx: source=Fulton_Bank_Client_Profile_Research_Report.docx count=1",
+      "tech_stack_from_report_prose: 13 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:branches,employees_approx,primary_regulator",
+      "scqa_derived_from_scores",
+      "insights_from_client_profile_findings: 12",
+      "acquisitions_from_client_profile_docx: 3 events",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L1_qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_audit_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_audit_checkpoint_SB_A1.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_audit_finding_classification.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_audit_preliminary_issues.csv — no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/batch_l2_1_complete.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 07_governance/batch_l2_2_complete.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 07_governance/batch_l2_3_complete.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 07_governance/batch_l2_4_complete.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 07_governance/caps_predetermined.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/priority_scores.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/ranked_gaps.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/recommendations_register.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 07_governance/scope_compliance_check.csv — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 07_governance/strategic_anchors.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/tech_validation_matrix.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 07_governance/zennify_catalog_lock.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "timeline_events_persisted: 43",
+      "catalogue_unresolved:28/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 15"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 157,
+      "peer_median": 2.75,
+      "pillar_id": "P1",
+      "score": 2.15,
+      "subcaps_scored": 157
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.77,
+      "pillar_id": "P2",
+      "score": 2.11,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.78,
+      "pillar_id": "P3",
+      "score": 2.18,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.7,
+      "pillar_id": "P4",
+      "score": 2.21,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": null,
+    "assessment_date_source": null,
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:01.962187Z",
+    "created_at": "2026-07-02T23:10:01.962187Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "7856c02a-b6de-4272-9068-f07424785416",
+    "overall_score": null,
+    "request_id": "DMA-ASM-FULT-20260508-001",
+    "started_at": "2026-07-02T23:10:01.962187Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Each carries explicit priority, capability impact, and an internal discovery question that feeds 5 (Internal Evidence Request).",
+      "evidence": [
+        "E-006",
+        "E-013",
+        "E-018",
+        "E-019"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Each carries explicit priority",
+      "peer_median": 2.7,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.81,
+      "so_what": "Prioritize Each carries explicit priority in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Each carries explicit priority",
+      "what": "Each carries explicit priority, capability impact, and an internal discovery question that feeds 5 (Internal Evidence Request).",
+      "why": "The linked evidence records: FULTON BANK CONFIRMED TECH STACK (per Boomi customer page Sep 2024): Fiserv Signature (core banking), Black Knight (mortgage origination/servicing), SALESFORCE (CRM), UiPath (RPA), Reltio (MDM), voice recognition application, fintech partners."
+    },
+    {
+      "body": "Section 1 evidence basis: 29 unique evidence items cited — E-001, E-007, E-019, E-022, E-026, E-027, E-028, E-029, E-030, E-033, E-035, E-037, E-039, E-040, E-042, E-043, E-051, E-052, E-054, E-057, E-058, E-059, E-060, E-062, E-063, E-064, E-065, E-066, E-068.",
+      "evidence": [
+        "E-001",
+        "E-007",
+        "E-019",
+        "E-022"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Section 1 evidence basis",
+      "peer_median": 2.7,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.81,
+      "so_what": "Prioritize Section 1 evidence basis in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Section 1 evidence basis",
+      "what": "Section 1 evidence basis: 29 unique evidence items cited — E-001, E-007, E-019, E-022, E-026, E-027, E-028, E-029, E-030, E-033, E-035, E-037, E-039, E-040, E-042, E-043, E-051, E-052, E-054, E-057, E-058, E-059, E-060, E-062, E-063, E-064, E-065, E-066, E-068.",
+      "why": "The linked evidence records: FY2025 financial results: Net income $381.4M, diluted EPS $2.08, operating EPS $2.16 (record), total revenue $1.31B (record), NIM 3.51% (+9bp YoY despite 3 Fed rate cuts), assets stable at $32.1B, deposits +$460M to $26.6B, loans +$100M to $24.1B, dividend +5.8% to"
+    },
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 22 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-020",
+        "E-002",
+        "E-006",
+        "E-008"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 2.65,
+      "platforms": [
+        "Salesforce",
+        "Databricks"
+      ],
+      "score": 1.86,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 22 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: Fulton Bank is an Institute for Business and Information Technology (IBIT) Partner at Temple University — formal academic-industry innovation partnership (P1C3.6 ecosystem)."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: EvCeil_3.0",
+        "60 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Segment Definition averages 2.2/5 over 165 scored subcaps; ceiling 3.0 reflects thin evidence density (105/165 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-018"
+      ],
+      "modifiers": [
+        "cap applied: EvCeil_3.0",
+        "45 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Model Risk Management averages 2.4/5 over 217 scored subcaps; ceiling 3.3 reflects thin evidence density (172/217 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.5,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: EvCeil_2.0",
+        "115 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Sourcing Channels averages 1.9/5 over 190 scored subcaps; ceiling 2.6 reflects thin evidence density (75/190 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.4,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-009"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.5",
+        "cap applied: EvCeil_2.0",
+        "75 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Middle Manager Enablement averages 2.1/5 over 205 scored subcaps; ceiling 2.9 reflects thin evidence density (130/205 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.5,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-039"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: EvCeil_2.0",
+        "126 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Website Quality averages 2.3/5 over 287 scored subcaps; ceiling 3.1 reflects thin evidence density (161/287 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.4,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: EvCeil_2.0",
+        "105 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Abandonment Recovery averages 2.1/5 over 287 scored subcaps; ceiling 2.9 reflects thin evidence density (182/287 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: EvCeil_3.0",
+        "211 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Mobile App Experience averages 2.0/5 over 286 scored subcaps; ceiling 2.6 reflects thin evidence density (75/286 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "cap applied: CAP-I005-001(SENTIMENT)→3.0",
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "170 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Consent-Based Personalization Tiers averages 2.1/5 over 255 scored subcaps; ceiling 2.8 reflects thin evidence density (85/255 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-018"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: CRITIC_CHALLENGE→2.5",
+        "93 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Straight-Through Processing (STP) averages 2.2/5 over 143 scored subcaps; ceiling 2.9 reflects thin evidence density (50/143 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "cap applied: CAP-I007-002(ADJ_M&A)→3.0",
+        "cap applied: EvCeil_3.0",
+        "75 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Quantification Methods averages 2.3/5 over 130 scored subcaps; ceiling 3.0 reflects thin evidence density (55/130 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "cap applied: CAP-I007-001(ADJ_M&A)→2.5",
+        "cap applied: EvCeil_3.0",
+        "56 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Compliance Testing averages 2.2/5 over 141 scored subcaps; ceiling 3.0 reflects thin evidence density (85/141 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "cap applied: EvCeil_3.0",
+        "110 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Business Impact Analysis averages 2.1/5 over 145 scored subcaps; ceiling 2.7 reflects thin evidence density (35/145 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-039"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: CrossPillar_P4C4_low_security(2.28)→3.0",
+        "155 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Quality Management averages 1.8/5 over 200 scored subcaps; ceiling 2.4 reflects thin evidence density (45/200 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "cap applied: EvCeil_3.0",
+        "210 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "AI Vision & Image Recognition averages 2.5/5 over 270 scored subcaps; ceiling 3.1 reflects thin evidence density (60/270 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.5,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-039"
+      ],
+      "modifiers": [
+        "cap applied: CAP-I006-001(REGULATORY)→2.0",
+        "cap applied: CRITIC_CHALLENGE→2.0",
+        "145 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Runbooks for Data Pipelines averages 2.2/5 over 235 scored subcaps; ceiling 2.9 reflects thin evidence density (90/235 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "cap applied: EvCeil_3.0",
+        "120 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Network Security Architecture averages 2.3/5 over 150 scored subcaps; ceiling 2.9 reflects thin evidence density (30/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Blue Foundry Bancorp acquisition announced Nov 2025; Blue Foundry Bank operates 20 locations, will be merged into Fulton Bank N.A. in Q3 2026; targets Northern New Jersey market share expansion (Aug 2026).",
+      "evidence": [
+        "E-001"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Blue Foundry Bank operates 20 locations",
+      "metric": "locations 20 locations",
+      "peer_context": "Data Quality Management runs 1.81/5 vs a 2.70 median at comparable institutions.",
+      "play": "Prioritize the Salesforce conversation against Business Impact Analysis — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Blue Foundry Bancorp acquisition announced Nov 2025; Blue Foundry Bank operates 20 locations, will be merged into Fulton Bank N.A. in Q3 2026; targets Northern New Jersey market share expansion (Aug 2026). Window: closes ~Q1 2028.",
+      "timeline": {
+        "date": "2026-08-01",
+        "event": "Blue Foundry Bank operates 20 locations"
+      },
+      "window": "closes ~Q1 2028"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "BLUE FOUNDRY ACQUISITION RESHAPE: $243M all-stock deal announced Nov 24, 2025. $1.5M Fulton Forward Foundation contribution tied to deal. Expected close Q2 2026 (per NJ Biz April 2026 — earlier reports said Q3 2026; discrepancy in close timing). $2.5B-asset Blue Foundry → $34B combined asset base. Part of broader 2025-2026 banking M&A wave (Nov 2025).",
+      "evidence": [
+        "E-014"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "$243M all-stock deal announced Nov 24, 2025",
+      "metric": "$243M",
+      "peer_context": "Data Quality Management runs 1.81/5 vs a 2.70 median at comparable institutions.",
+      "play": "Prioritize the Salesforce conversation against Business Impact Analysis — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "BLUE FOUNDRY ACQUISITION RESHAPE: $243M all-stock deal announced Nov 24, 2025. $1.5M Fulton Forward Foundation contribution tied to deal. Window: closes Q2 2026.",
+      "timeline": {
+        "date": "2025-11-24",
+        "event": "$243M all-stock deal announced Nov 24, 2025"
+      },
+      "window": "closes Q2 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "DATA GOVERNANCE FUNCTION CONFIRMED WITH NAMED LEADER: Ethan Farrell — Manager, Data Governance at Fulton Bank (since June 2025). Career path entirely within Fulton: IT Management Trainee (2015) → IT Data Quality Associate Analyst → IT Data Quality Engineer → Senior IT Data Governance Analyst (2022-2025) → Manager Data Governance (2025-Present) (Feb 2026).",
+      "evidence": [
+        "E-012"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Ethan Farrell",
+      "metric": null,
+      "peer_context": "Data Quality Management runs 1.81/5 vs a 2.70 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "DATA GOVERNANCE FUNCTION CONFIRMED WITH NAMED LEADER: Ethan Farrell — Manager, Data Governance at Fulton Bank (since June 2025). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-02-01",
+        "event": ""
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "'Works under the direction of the Chief Enterprise Architect and Project Managers' — explicit confirmation of NAMED Chief Enterprise Architect role at Fulton (governance maturity signal P1C1.5.1 Target Architecture Vision + P1C2.8 Project Governance) (Feb 2026).",
+      "evidence": [
+        "E-026"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "'Works under the direction of the Chief Enterprise…",
+      "metric": null,
+      "peer_context": "Data Quality Management runs 1.81/5 vs a 2.70 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "'Works under the direction of the Chief Enterprise Architect and Project Managers' — explicit confirmation of NAMED Chief Enterprise Architect role at Fulton (governance maturity signal P1C1.5.1 Target Architecture. Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-02-01",
+        "event": "'Works under the direction of the Chief Enterprise…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "issue_register",
+      "detail": "Consent Orders covering 3 legacy Fulton bank subsidiaries (BSA/AML program deficiencies pre-charter consolidation). Successfully remediated through 5-year cycle culminating in Fed termination May 2019.",
+      "evidence": [
+        "E-043",
+        "E-016",
+        "E-018",
+        "E-027"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Consent Orders covering 3 legacy Fulton bank subsidiaries…",
+      "metric": null,
+      "peer_context": "Data Quality Management runs 1.81/5 vs a 2.70 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Consent Orders covering 3 legacy Fulton bank subsidiaries (BSA/AML program deficiencies pre-charter consolidation). Successfully remediated through 5-year cycle culminating in Fed termination May 2019. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Data Quality Management scores 1.81/5 vs a typical 2.70 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-019",
+        "E-006",
+        "E-013",
+        "E-018"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Data Quality Management scores 1.81/5",
+      "metric": "Data Quality Management 1.81/5 vs peer 2.70",
+      "peer_context": "Data Quality Management runs 1.81/5 vs a 2.70 median at comparable institutions.",
+      "play": "Prioritize the Salesforce conversation against Business Impact Analysis — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Data Quality Management scores 1.81/5 vs a typical 2.70 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

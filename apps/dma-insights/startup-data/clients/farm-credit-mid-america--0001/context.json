@@ -1,0 +1,667 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "farm-credit-mid-america--0001",
+  "financials": {
+    "metrics": {
+      "total_assets": "$48.9B",
+      "trajectory": {
+        "branches": 88,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 1700,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Midsouth merger in-progress + portfolio repositioning"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2026"
+        ],
+        "geography": "Arkansas, Indiana, Kentucky, Missouri, Ohio, Tennessee (6 states)",
+        "headline": "$48.9B assets \u00b7 FY2026 \u00b7 +0.0% CAGR",
+        "regulator": "Farm Credit Administration (FCA)",
+        "series": {
+          "net_income_m": [
+            null,
+            430.0,
+            475.0,
+            null,
+            null,
+            null
+          ],
+          "total_assets": [
+            48.9,
+            32.0,
+            36.0,
+            40.8,
+            0.6,
+            48.9
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        430000000.0,
+        475000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2022
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          430000000.0,
+          475000000.0
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2022
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "KY",
+      "TN",
+      "OH",
+      "IN",
+      "AR",
+      "MO"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dan Wagner",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President and Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Kevin Geron",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Hanna",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Risk Officer (EVP)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Zagar",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chuck Millhollan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Heather Vidourek",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Administrative Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tara Durbin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Lending Officer Agriculture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Derrick Waggoner",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Lending Officer Diversified Markets"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Art Whaley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Lending Officer Rural 1st"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Kuper",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Daniel Brittain",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Product Strategy, Data and Architecture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tiffany Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Security Officer + Head of IT Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joe E. Martinez",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Information Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Kleinholter",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Fred Gordon",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director of Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Glenn Choat",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marc Miles",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Senior Technology Strategist"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Daro Mott",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP of Process Improvement & Execution"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dan Robertson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "General Counsel \u2014 Lending and Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kristie Phillips",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "General Counsel \u2014 Corporate Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lindsey Bridges",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Brand Experience"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Leili Ghazi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Managing Director Capital Markets"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael Jones",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Human Resources Officer (per ZoomInfo)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Camille Moore",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Auditor"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rebecca Mark",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Lending Support"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gary Book",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director Retail Credit Underwriting"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Mills",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Security Architect (CISSP)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Security Engineer Sinclair",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Security Engineer Lambdin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Security Engineer McGurgan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Security Engineer Collin L",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Matt Kelley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Access Management Technician"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Network Engineer Mathews",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Network Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Network Engineer Sageser",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Network Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Charissa O'Daniel",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "PR/Comms support"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_md": "Farm Credit Mid-America, ACA is a farm-credit institution. It reports $48.9 billion in earning assets. It is regulated by Farm Credit Administration (FCA) and employs approximately 1,700 people across 88 branches. Its overall digital maturity is assessed at 3.1 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "size_tier": "mid-size",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-131",
+        "excerpt": "\ud83d\udea8 GROWING FORWARD\u00ae (registered trademark) \u2014 formal YBS content/nurture program: 'offers young and first time farmers the loan and financing options, financial education, network of experts and support to guide them on th",
+        "title": "\ud83d\udea8 offers KNOW formal",
+        "type": "conference",
+        "url": "https://fcma.com/about/growing-forward"
+      },
+      {
+        "author": "Kristie Phillips",
+        "date": "2025-07-24",
+        "derived_from": "evidence_index",
+        "e_id": "E-142",
+        "excerpt": "\ud83d\udea8 FCMA BYLAWS (July 24, 2025) authored by KRISTIE PHILLIPS (General Counsel Corporate Ops) \u2014 formal legal structure. Association = Farm Credit Mid-America, ACA. Subsidiaries = MidAm, FLCA (Federal Land Bank Association) ",
+        "title": "\ud83d\udea8 FCMA Bylaws (July 24, 2025) authored by Kristie Phillips (General\u2026",
+        "type": "article",
+        "url": "https://www.fcma.com/docs/src/pdf/farm-credit-mid-america-bylaws.pdf"
+      },
+      {
+        "author": null,
+        "date": "2026-01-08",
+        "derived_from": "evidence_index",
+        "e_id": "E-151",
+        "excerpt": "\ud83d\udea8 FARMER BRIDGE ASSISTANCE PROGRAM (FBA) LAUNCHED Jan 8, 2026 (Business Insights article): 'critical financial relief to producers in 2026, bridging the gap until new farm bill provisions take effect' \u2014 FORMAL VULNERABLE",
+        "title": "\ud83d\udea8 Farmer Bridge Assistance Program (FBA) Launched Jan 8, 2026\u2026",
+        "type": "article",
+        "url": "https://www.fcma.com/"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-158",
+        "excerpt": "\ud83d\udea8 FORWARD THINKER AWARD \u2014 formal milestone recognition program: $5,000 + personalized plaque + recognized at Know to Grow\u00ae conference. Self-nominated. Judged on leadership + involvement + goals + unique practices. Applic",
+        "title": "\ud83d\udea8 Forward Thinker Award",
+        "type": "conference",
+        "url": "https://fcma.com/about/forward-thinker"
+      },
+      {
+        "author": null,
+        "date": "2013-02-13",
+        "derived_from": "evidence_index",
+        "e_id": "E-187",
+        "excerpt": "\ud83d\udea8\ud83d\udea8 FCMA DR INFRASTRUCTURE MATURITY (2013 press release \u2014 12-year DR journey): 'Farm Credit Mid-America, an agricultural cooperative serving more than 95,000 farmers [then], selected EMC VNX unified storage over NetApp an",
+        "title": "\ud83d\udea8\ud83d\udea8 FCMA DR Infrastructure Maturity (2013 press release",
+        "type": "article",
+        "url": "https://www.prnewswire.com/news-releases/farm-credit-mid-america-cultivates-improved-business-performance-and-efficiency-with-emc-191005641.html"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-072",
+        "excerpt": "Bylaws Article VII Committees specifies formal charters: Executive Committee (700), Human Resources Committee (705, formerly Compensation Committee), Loan Committee (710), Audit Committee (715, must include financial exp",
+        "title": "Executive Committee (700), Human Resources Committee (705, formerly\u2026",
+        "type": "article",
+        "url": "https://www.fcma.com/docs/src/pdf/farm-credit-mid-america-bylaws.pdf?sfvrsn=528c133c_11"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "9bb1f976-3970-4f80-867d-a45abf446fc5",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "FCA Enforcement History \u2014 NONE 1998-2025"
+    },
+    {
+      "id": "06633d9d-f6e5-4ccb-bde4-c2cc47cecaa3",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "CFPB Enforcement \u2014 NONE (Jurisdictional Scope Limited)"
+    },
+    {
+      "id": "731b7229-7140-4513-b5d8-8bbac8e78bfa",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Wilson v. FCMA \u2014 Single Borrower Civil Litigation"
+    },
+    {
+      "id": "52460e1c-4016-477b-8db0-56eebe772cbd",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "FCMA-PCA v. Uncle Nearest \u2014 Credit Event (Plaintiff)"
+    },
+    {
+      "id": "559ef797-bac0-489d-b625-b12d17098a5a",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Data Breach / Cybersecurity Incident \u2014 NONE Identified"
+    },
+    {
+      "id": "2dbc86b2-c544-4025-967d-a60271a0596f",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Credit Concentration \u2014 ACLL +38.4% YoY"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Value grew from $430.0M (2021) to $475.0M (2022) \u2014 10.5% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.33,
+        "P1C2": 2.93,
+        "P1C3": 2.33,
+        "P1C4": 3.21,
+        "P1C5": 2.0,
+        "P2C1": 1.74,
+        "P2C2": 2.69,
+        "P2C3": 1.98,
+        "P2C4": 2.39,
+        "P3C1": 2.61,
+        "P3C2": 2.48,
+        "P3C3": 3.24,
+        "P3C4": 3.23,
+        "P4C1": 1.93,
+        "P4C2": 1.63,
+        "P4C3": 2.26,
+        "P4C4": 2.9
+      },
+      "overall_score": 2.46,
+      "peer_name": "GreenStone Farm Credit Services ACA",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.82,
+        "P1C2": 1.66,
+        "P1C3": 1.55,
+        "P1C4": 1.67,
+        "P1C5": 2.07,
+        "P2C1": 1.58,
+        "P2C2": 1.6,
+        "P2C3": 1.65,
+        "P2C4": 1.74,
+        "P3C1": 2.14,
+        "P3C2": 1.98,
+        "P3C3": 1.88,
+        "P3C4": 2.03,
+        "P4C1": 1.58,
+        "P4C2": 1.81,
+        "P4C3": 2.09,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.81,
+      "peer_name": "Capital Farm Credit",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-FCMA-20260418-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "ownership of social impact reporting Peer NPS benchmark (Comparably Brand Intelligence): FCSA NPS 60 (LEADER among FCS peers) | CoBank 50 | Rabobank 25 | Wells Fargo 7 | American AgCredit 0 \u2014 FCMA NPS not publicly captured in Comparably (A-",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Comparably",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "CAO-level ownership of social impact reporting Peer NPS benchmark (Comparably Brand Intelligence): FCSA NPS 60 (LEADER among FCS peers) | CoBank 50 | Rabobank 25 | Wells Fargo 7 | American AgCredit 0 \u2014 FCMA NPS not publicly captured in Comp",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 60,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "e18d01cf-d5c1-42a6-8c2d-f1e1f3dc9ba9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Midsouth merger in-progress + portfolio repositioning"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [],
+      "id": "e546cb66-7593-4eae-a894-30bc2614163b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "$45.1B"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [],
+      "id": "b2def9f0-bc3a-4adb-9f7a-f4b3e10fb76c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "$40.2B"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "cda5203b-bd40-4e90-834b-7e47c9485491",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "$35.6B"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [],
+      "id": "b9c08962-1bae-47e8-82a7-d873468a3b3c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "$32.0B"
+    }
+  ]
+}

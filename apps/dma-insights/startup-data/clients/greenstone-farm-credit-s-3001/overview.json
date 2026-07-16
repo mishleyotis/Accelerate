@@ -1,0 +1,1109 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 137,
+        "subcaps": 137,
+        "thin": 137
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 245,
+        "subcaps": 245,
+        "thin": 245
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 123,
+        "subcaps": 123,
+        "thin": 123
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 138,
+        "subcaps": 138,
+        "thin": 138
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "greenstone-farm-credit-s-3001",
+    "domain": null,
+    "hq": null,
+    "id": "4ba4157d-4928-451b-91f1-dd0ba2b34795",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "GreenStone Farm Credit Services ACA",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "FC",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:56.665929Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 2,
+    "current_count": 8,
+    "dated_count": 2,
+    "median_age_months": 11.9,
+    "oldest_published_date": "2024-01-01",
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 12,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 12
+    },
+    "connectors": {
+      "Glassdoor": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 12
+    },
+    "tiers": {
+      "T1": 4,
+      "T2": 3,
+      "T3": 3,
+      "T5": 2
+    },
+    "total_facts": 19,
+    "total_items": 12
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": "M",
+        "value": 296.6,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "M"
+  },
+  "firmographics": {
+    "aum_basis": "aum",
+    "aum_usd": 15000000000.0,
+    "branches": 35,
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "net_income": "$296.6M"
+    },
+    "footprint": "Michigan and northeast Wisconsin, USA",
+    "footprint_basis": "derived:geography",
+    "founded": 2003,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "Michigan and northeast Wisconsin, USA",
+    "headcount": null,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Travis Jones",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kimberly Brunner",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Brett Dutcher",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ian McGonigal",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Chief Sales & Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Melissa Rogers",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Marketing & PR"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Pete Lemmer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Legal Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Melissa Stolicker",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Internal Auditor"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "GreenStone Farm Credit Services ACA",
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "GreenStone Farm Credit Services ACA is a farm-credit institution. It reports $15.0 billion in assets under management. It is regulated by Farm Credit Administration (FCA) and operates 35 branches. Its overall digital maturity is assessed at 2.5 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 5,
+          "score": 2.6,
+          "source": "Google Play"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.3,
+          "source": "Better Business Bureau"
+        }
+      ],
+      "derived_from": "research_report_prose",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.2,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.2/5",
+          "signal": "sustained for 21+ consecutive years, T2), 4.2/5 Glassdoor with 4.3/5 culture sub-score, T3), Top-5 Detroit Free Press Top Workplaces large companies, T3), ATD-certified Credit Learning Partner program, ADKAR change management methodology in",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "case study, Moody's credit opinion (AgriBank Aa3), app store ratings, Enlyft/ZoomInfo tech profiles, Glassdoor reviews (T3)",
+          "source": "App Store"
+        },
+        {
+          "rating": "2.6/5",
+          "signal": "Google Play rating of 2.6/5 with member reports of login lockouts and authentication failures, T3) versus 96% satisfaction on relationship channels, T2)",
+          "source": "Google Play"
+        },
+        {
+          "rating": "3.3/5",
+          "signal": "BBB: not accredited with at least one complaint regarding unauthorized hard credit inquiry",
+          "source": "Better Business Bureau",
+          "trend": "Declining"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large",
+    "thought_leadership": null,
+    "tl_synced_at": null,
+    "website": "greenstonefcs.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.070664+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# GreenStone Farm Credit Services ACA — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — GreenStone Farm Credit Services DMA",
+    "scqa_md": "GreenStone Farm Credit Services ACA is a $15.0B in assets under management farm-credit institution regulated by Farm Credit Administration (FCA). Zennify's assessment places overall digital maturity at 2.5/5. The deepest capability gap is a lower-scoring capability area at 1.7/5 against a 2.8 peer median [E-085, E-091]. Next is Co-Branded Marketing at 1.8/5 against a 2.2 peer median [E-056]. Third is Data Mesh Strategy & Domain Ownership at 1.9/5 against a 2.2 peer median. The issue register adds Overall score recomputation mismatch: Computed=2.46 from workbook data vs Stated=2.51 (delta=0.055).\n\nExceeds ±0.01 threshold. (critical severity). The issue register adds No scoring detail rows found in pillar sheets with expected column format (Columns R/S/T proof structure). (critical severity). Counter-signal: Regulator Relationship already runs at 3.3/5 against a 3.0 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-070, E-072, E-073].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for GreenStone Farm Credit Services ACA is whether to close a lower-scoring capability area first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. GreenStone Farm Credit Services ACA should lead with nCino (51/100 fit) against Key Risk Indicators, then sequence Tableau behind it. Closing a lower-scoring capability area to the peer median alone is worth 1.1 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"No AI/ML in production — cap at level 1.5 — Exhaustive search across all sources + job postings — HIGH\"."
+  },
+  "overall_score": 2.51,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/01_evidence_P1_deepened.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.686146+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/01_evidence_P2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.686767+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/01_evidence_P2_updated.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.687210+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/01_evidence_P3.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.687810+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/01_evidence_P4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.688615+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/batch3_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.688990+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/batch4_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.689396+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/05_priorities.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.690306+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/counter_arguments.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.690828+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/cross_pillar_unlocks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.691106+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/gap_heat_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.691421+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.692329+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/solution_mapping.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.692729+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/transformation_roadmap.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.693105+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/unlock_chain_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.693399+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.694274+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.695050+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_pass1_5_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.695365+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_pass2_llm_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.695622+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.695820+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 3,
+      "INFO": 34
+    },
+    "stage_ms": {
+      "manifest": 11,
+      "parse": 3169,
+      "persist": 1057
+    },
+    "structured": [
+      {
+        "code": "run_id format",
+        "detail": "run_id format: unrecognized run_id format: 'DMA-ASM-GFCS-20260323-001'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx fallback extracted 653 subcaps from GreenStone_DMA_Workbook",
+        "detail": "xlsx fallback extracted 653 subcaps from GreenStone_DMA_Workbook.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (653 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (653 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/layer2_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='FAIL' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=5 contradictions=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 10 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 02_research_workbook/06_recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=GreenStone_Client_Research_Report.docx leadership=7 focus_areas=8 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=31 subcaps=17 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 8 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "rec_prerequisites_parsed",
+        "detail": "rec_prerequisites_parsed: 2 edges across 1 recs",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/01_evidence_P1_deepened.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/01_evidence_P2.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/01_evidence_P2_updated.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/01_evidence_P3.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/01_evidence_P4.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/batch3_summary.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/batch4_summary.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/05_priorities.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/counter_arguments.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/cross_pillar_unlocks.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/gap_heat_map.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/report_analysis.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/solution_mapping.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/transformation_roadmap.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/unlock_chain_map.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_pass1_5_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_pass2_llm_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_patch_block.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:10/653 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 11",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "run_id format: unrecognized run_id format: 'DMA-ASM-GFCS-20260323-001'",
+      "xlsx fallback extracted 653 subcaps from GreenStone_DMA_Workbook.xlsx",
+      "scoring loaded from xlsx fallback (653 subcaps, dir=03_scoring_workbook)",
+      "used variant issue register: 07_governance/layer2_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='FAIL' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=5 contradictions=2",
+      "caps_applied_log: 10 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 02_research_workbook/06_recommendations.json",
+      "firmographics_from_client_profile_docx: source=GreenStone_Client_Research_Report.docx leadership=7 focus_areas=8 facts_extracted=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=31 subcaps=17 replaced_docx_scqa=True",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "tech_stack_from_report_prose: 8 vendors mentioned",
+      "rec_prerequisites_parsed: 2 edges across 1 recs",
+      "insights_from_client_profile_findings: 3",
+      "INFO/pattern_gap: 01_evidence/01_evidence_P1_deepened.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/01_evidence_P2.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/01_evidence_P2_updated.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/01_evidence_P3.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/01_evidence_P4.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/batch3_summary.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/batch4_summary.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/05_priorities.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/counter_arguments.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/cross_pillar_unlocks.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/gap_heat_map.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/report_analysis.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/solution_mapping.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/transformation_roadmap.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/unlock_chain_map.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_pass1_5_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_pass2_llm_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_patch_block.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "catalogue_unresolved:10/653 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 11"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 137,
+      "peer_median": 2.71,
+      "pillar_id": "P1",
+      "score": 2.59,
+      "subcaps_scored": 137
+    },
+    {
+      "peer_benchmarked": 245,
+      "peer_median": 2.5,
+      "pillar_id": "P2",
+      "score": 2.2,
+      "subcaps_scored": 245
+    },
+    {
+      "peer_benchmarked": 123,
+      "peer_median": 2.93,
+      "pillar_id": "P3",
+      "score": 2.89,
+      "subcaps_scored": 123
+    },
+    {
+      "peer_benchmarked": 138,
+      "peer_median": 2.62,
+      "pillar_id": "P4",
+      "score": 2.17,
+      "subcaps_scored": 138
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-23",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:56.665929Z",
+    "created_at": "2026-07-02T23:11:56.665929Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "930c7867-8ba0-43aa-9bf2-71aa92b48bb0",
+    "overall_score": 2.51,
+    "request_id": "DMA-ASM-GFCS-20260323-001",
+    "started_at": "2026-07-02T23:11:56.665929Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 5,
+        "score": 2.6,
+        "source": "Google Play"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.3,
+        "source": "Better Business Bureau"
+      }
+    ],
+    "derived_from": "research_report_prose",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.2,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "No AI/ML in production — P4C2 cap at M1.5 — Exhaustive search across all sources + job postings — HIGH.",
+      "evidence": [
+        "E-085",
+        "E-091"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "No AI/ML in production",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize No AI/ML in production in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No AI/ML in production",
+      "what": "No AI/ML in production — P4C2 cap at M1.5 — Exhaustive search across all sources + job postings — HIGH.",
+      "why": "The shortfall is relative, not absolute: 1.67/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "No RPA deployment — P3C1 subcaps capped — Web search + tech profile scan — MEDIUM. No RPA deployment is a priority capability gap in data and technology, scoring 1.67/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-085",
+        "E-091"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "No RPA deployment",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize No RPA deployment in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No RPA deployment",
+      "what": "No RPA deployment — P3C1 subcaps capped — Web search + tech profile scan — MEDIUM. No RPA deployment is a priority capability gap in data and technology, scoring 1.67/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The shortfall is relative, not absolute: 1.67/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "No API strategy/middleware — P4C3 subcaps capped — Tech stack scan + job postings — MEDIUM.",
+      "evidence": [
+        "E-001"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "No API strategy/middleware",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 2.0,
+      "so_what": "Prioritize No API strategy/middleware in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "No API strategy/middleware",
+      "what": "No API strategy/middleware — P4C3 subcaps capped — Tech stack scan + job postings — MEDIUM.",
+      "why": "The shortfall is relative, not absolute: 2.0/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "No GRC platform — P3C3 tech subcaps capped — Web search + SunStream services review — MEDIUM.",
+      "evidence": [
+        "E-085",
+        "E-091"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "No GRC platform",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize No GRC platform in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No GRC platform",
+      "what": "No GRC platform — P3C3 tech subcaps capped — Web search + SunStream services review — MEDIUM.",
+      "why": "The shortfall is relative, not absolute: 1.67/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "No CDO role — P4C1 governance subcaps — Executive search + org chart review — HIGH. No CDO role is a priority capability gap in data and technology, scoring 1.67/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-085",
+        "E-091"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "No CDO role",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize No CDO role in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No CDO role",
+      "what": "No CDO role — P4C1 governance subcaps — Executive search + org chart review — HIGH. No CDO role is a priority capability gap in data and technology, scoring 1.67/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The shortfall is relative, not absolute: 1.67/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Segment-Specific Journeys averages 2.3/5 over 130 scored subcaps; ceiling 2.8 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Exit Planning averages 2.9/5 over 145 scored subcaps; ceiling 3.4 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "137 of 137 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Management averages 2.3/5 over 137 scored subcaps; ceiling 2.8 reflects thin evidence density (0/137 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "133 of 133 subcaps on thin evidence"
+      ],
+      "rationale": "Champion Recognition averages 3.3/5 over 133 scored subcaps; ceiling 3.8 reflects thin evidence density (0/133 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "76 of 76 subcaps on thin evidence"
+      ],
+      "rationale": "Climate Risk Assessment averages 2.0/5 over 76 scored subcaps; ceiling 2.5 reflects thin evidence density (0/76 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-056"
+      ],
+      "modifiers": [
+        "222 of 222 subcaps on thin evidence"
+      ],
+      "rationale": "Co-Branded Marketing averages 1.8/5 over 222 scored subcaps; ceiling 2.3 reflects thin evidence density (0/222 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "233 of 233 subcaps on thin evidence"
+      ],
+      "rationale": "Document Upload & Capture averages 2.7/5 over 233 scored subcaps; ceiling 3.2 reflects thin evidence density (0/233 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-010"
+      ],
+      "modifiers": [
+        "237 of 237 subcaps on thin evidence"
+      ],
+      "rationale": "Voice of Customer & Feedback averages 1.9/5 over 237 scored subcaps; ceiling 2.4 reflects thin evidence density (0/237 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "221 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "Proactive Opportunity Identification averages 2.4/5 over 221 scored subcaps; ceiling 2.9 reflects thin evidence density (0/221 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "131 of 131 subcaps on thin evidence"
+      ],
+      "rationale": "Automation Governance Framework averages 2.6/5 over 131 scored subcaps; ceiling 3.1 reflects thin evidence density (0/131 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "107 of 107 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Risk Modeling averages 2.4/5 over 107 scored subcaps; ceiling 2.9 reflects thin evidence density (0/107 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-072"
+      ],
+      "modifiers": [
+        "115 of 115 subcaps on thin evidence"
+      ],
+      "rationale": "Regulator Relationship averages 3.3/5 over 115 scored subcaps; ceiling 3.8 reflects thin evidence density (0/115 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-079"
+      ],
+      "modifiers": [
+        "122 of 122 subcaps on thin evidence"
+      ],
+      "rationale": "Resilience Strategy averages 3.2/5 over 122 scored subcaps; ceiling 3.8 reflects thin evidence density (0/122 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-085"
+      ],
+      "modifiers": [
+        "139 of 139 subcaps on thin evidence"
+      ],
+      "rationale": "Data Mesh Strategy & Domain Ownership averages 1.9/5 over 139 scored subcaps; ceiling 2.4 reflects thin evidence density (0/139 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-085"
+      ],
+      "modifiers": [
+        "147 of 147 subcaps on thin evidence"
+      ],
+      "rationale": "capability dimension 35 averages 1.7/5 over 147 scored subcaps; ceiling 2.2 reflects thin evidence density (0/147 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-085"
+      ],
+      "modifiers": [
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Architecture & API averages 2.3/5 over 146 scored subcaps; ceiling 2.8 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Data Protection & Privacy Controls averages 2.9/5 over 142 scored subcaps; ceiling 3.4 reflects thin evidence density (0/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "issue_register",
+      "detail": "Overall score recomputation mismatch: Computed=2.46 from workbook data vs Stated=2.51 (delta=0.055). Exceeds ±0.01 threshold.",
+      "evidence": [],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Overall score recomputation mismatch",
+      "metric": null,
+      "peer_context": "capability dimension 35 runs 1.67/5 vs a 2.75 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Overall score recomputation mismatch: Computed=2.46 from workbook data vs Stated=2.51 (delta=0.055). Exceeds ±0.01 threshold. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of GreenStone Farm Credit Services ACA. Overall digital maturity scored 2.41/5.0 (Mar 2026).",
+      "evidence": [],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of…",
+      "metric": null,
+      "peer_context": "capability dimension 35 runs 1.67/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Key Risk Indicators — highest-fit surface at 51/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of GreenStone Farm Credit Services ACA. Overall digital maturity scored 2.41/5.0 (Mar 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-23",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "capability dimension 35 scores 1.67/5 vs a typical 2.75 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit. The pattern is corroborated across the assessment's evidence index [E-070, E-072, E-073].",
+      "evidence": [
+        "E-085",
+        "E-091",
+        "E-070",
+        "E-072",
+        "E-073"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Capability dimension 35 scores 1.67/5 vs a typical 2.75 at…",
+      "metric": "capability dimension 35 1.67/5 vs peer 2.75",
+      "peer_context": "capability dimension 35 runs 1.67/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Key Risk Indicators — highest-fit surface at 51/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C2",
+      "text": "a lower-scoring capability area scores 1.67/5 vs a typical 2.75 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

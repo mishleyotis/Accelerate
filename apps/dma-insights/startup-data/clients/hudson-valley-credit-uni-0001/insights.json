@@ -1,0 +1,915 @@
+{
+  "entity_display_id": "hudson-valley-credit-uni-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P4C1.1.2",
+        "P4C2.1.2",
+        "P2C4.1.1",
+        "P1C2.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "3c3017bd-0d68-4d89-9366-3260b6b2f229",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-05"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-055",
+        "E-049",
+        "E-067"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Audience Segmentation a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Federal Charter = National Scale Digital Gap",
+      "what_text": "Audience Segmentation is one of Hudson Valley Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger, more personalised customer experience [E-049].",
+      "why_text": "The assessment found: “Federal charter effective Jan 2, 2026: 'no longer geographic limitations on who can join' — national FOM unlocked. Digital marketing must now target nationwide. Alternative membership pathways: HVCU” [E-055]. The research report pins the maturity impact at: Digital Marketing ~level 2; Personalization ~level 1.5 — far below national-scale requirement. averages 1.9/5 across its 61 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C3.4.1",
+        "P2C3",
+        "P4C2.1.2",
+        "P2C4.1.1",
+        "P2C2.1.2",
+        "P2C3.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "6f0c8f1f-2626-4a88-b752-525e8ef82234",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-051",
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-045",
+        "E-051",
+        "E-052",
+        "E-067"
+      ],
+      "linked_subcap_id": "P2C3.4.1",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "databricks",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: Salesforce FSC + Service Cloud + Symitar = the missing CRM spine. VP Contact Center Goodwine = natural champion [E-052].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "AI Contact Center + Zero CRM = Agent Gap",
+      "what_text": "Customer Context Visibility (360) is one of Hudson Valley Credit Union's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger, more personalised customer experience [E-051].",
+      "why_text": "The assessment found: “Posh AI Lee (Digital Assistant): saved 200,000+ minutes, 24/7 support. Live chat volume growing without headcount additions — 'handle more with less.' Posh Casey” [E-045]. The research report pins the maturity impact at: contact center ~level 3.5 (strong); Agent 360 = level 1 (critical gap). scores 1.0/5 against a peer median of 2.5 on the current assessment.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C1.1.2",
+        "P2C4.1.1",
+        "P2C4.2.5",
+        "P2C4.8.4",
+        "P2C4.6.RIA2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "902bebd6-e0d7-4cab-b549-4857325d2c69",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-051",
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-067",
+        "E-013",
+        "E-051"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Recommended play: Salesforce Einstein + Data Cloud = competitive leap from basic transaction alerts to AI-driven personalization at national scale [E-013].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Personalization Gap vs. Accelerating Peers",
+      "what_text": "Customer Data Foundation (CDP) is one of Hudson Valley Credit Union's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger, more personalised customer experience [E-067].",
+      "why_text": "The assessment found: “Illuma Shield voice biometric authentication deployed on Avaya Aura contact center platform. COO Rohrmeier: combating account fraud with member-identity verification. Avaya Aura = HVCU contact center” [E-051]. The research report pins the maturity impact at: Personalization ~level 1.5 — lowest Pillar 2 category. averages 1.4/5 across its 53 scored capability (peer median ~ 2.0) on the current assessment.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.4.6",
+        "P2C4",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "0cd9f463-acd9-4827-abcf-1ebbdafc6e81",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-067",
+        "E-002"
+      ],
+      "linked_subcap_id": "P2C4.4.6",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Dynamic Journey Pivoting a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-002].",
+      "source_rec_id": "REC-01",
+      "theme": "CX & Personalization",
+      "title": "Dynamic Journey Pivoting",
+      "what_text": "Dynamic Journey Pivoting is one of Hudson Valley Credit Union's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger, more personalised customer experience [E-067].",
+      "why_text": "scores 1.0/5 against a peer median of 2.0 on the latest assessment; this recommendation targets 6 capabilities [E-061, E-067].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C5.3.2",
+        "P1C5",
+        "P1C5.3.6",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "3c17396c-4d0b-4e11-b41d-a200a4021196",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-055"
+      ],
+      "linked_subcap_id": "P1C5.3.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make this capability a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 1.5 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-061].",
+      "source_rec_id": "REC-02",
+      "theme": "ESG & Sustainability",
+      "title": "Strategy and governance capability",
+      "what_text": "This capability is one of Hudson Valley Credit Union's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-061].",
+      "why_text": "The assessment found: “Federal charter effective Jan 2, 2026: 'no longer geographic limitations on who can join' — national FOM unlocked. Digital marketing must now target nationwide. Alternative membership pathways: HVCU” [E-055]. At 1.5 out of 5, this capability sits 0.8 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.4",
+        "P4C1",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "a58b05b1-dc6e-4fb9-af15-517d90b57eb2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-089"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-039",
+        "E-089"
+      ],
+      "linked_subcap_id": "P4C1.8.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Synthetic Data Generation a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-089].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Synthetic Data Generation",
+      "what_text": "Synthetic Data Generation is one of Hudson Valley Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger data and technology foundation [E-039].",
+      "why_text": "The assessment found: “HVCU provides free FICO® Score in Internet Banking and Mobile Banking for members with checking account or open loan — financial wellness signal confirmed” [E-061]. At 1.5 out of 5, Synthetic Data Generation sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.7.4",
+        "P4C2",
+        "P1C2.3.6",
+        "P1C1.5.1",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "08187ce8-c2e2-4248-8e51-5288fbe8ef2d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-067",
+        "E-061"
+      ],
+      "linked_subcap_id": "P4C2.7.4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Agent Control Plane & Action Governance a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": "REC-04",
+      "theme": "Analytics & AI",
+      "title": "Agent Control Plane & Action Governance",
+      "what_text": "Agent Control Plane & Action Governance is one of Hudson Valley Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger data and technology foundation [E-067].",
+      "why_text": "The assessment found: “HVCU provides free FICO® Score in Internet Banking and Mobile Banking for members with checking account or open loan — financial wellness signal confirmed” [E-061]. At 1.5 out of 5, Agent Control Plane & Action Governance sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.3.2",
+        "P2C1",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "a2c2dad0-0907-4f32-92b0-b5212ffe7eea",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-067",
+        "E-002"
+      ],
+      "linked_subcap_id": "P2C1.3.2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Educational Content a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-002].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Educational Content",
+      "what_text": "Educational Content is one of Hudson Valley Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger, more personalised customer experience [E-067].",
+      "why_text": "scores 1.5/5 against a peer median of 2.5 on the latest assessment; this recommendation targets 6 capabilities [E-061, E-067].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C2",
+        "P4C1.1.2",
+        "P4C2.1.2",
+        "P1C4.1.2",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "5f826d3b-b695-48b9-8198-fb9bdb9f6c1d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-03"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-082",
+        "E-089",
+        "E-067"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: CAIO is the champion. Salesforce Data Cloud = the platform his mandate requires. Zennify delivers CU-specialist implementation [E-067].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "AI Leadership Without Data Foundation",
+      "what_text": "Data Governance Operating Model is one of Hudson Valley Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger data and technology foundation [E-089].",
+      "why_text": "The research report pins the maturity impact at: Data ~level 2; Analytics ~level 2. Strategy is ahead of infrastructure. averages 1.9/5 across its 40 scored capability (peer median ~ 2.0) on the current assessment [E-082, E-089].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.3",
+        "P4C3.6.2",
+        "P2C4.1.1",
+        "P4C3.2.7",
+        "P1C1.5.5",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "5e370b8c-2b1e-4c0a-8096-108dd307b70a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-047"
+      ],
+      "linked_subcap_id": "P4C3.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Land-and-expand. FSC + Data Cloud + Einstein extend the existing MuleSoft investment. No new vendor introduction required [E-047].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Confirms Salesforce Ecosystem Entry",
+      "what_text": "Event-Driven Integration is one of Hudson Valley Credit Union's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger data and technology foundation [E-047].",
+      "why_text": "The assessment found: “HVCU SaaS stack confirmed (Cloud Services Admin job): 'Google Workspaces, Oracle Cloud, MuleSoft Cloud, LogicMonitor Azure' — MuleSoft Cloud = Salesforce's integration/API platform CONFIRMED at HVCU” [E-085]. The research report pins the maturity impact at: Integration ~level 2.5 — professional iPaaS confirmed. averages 2.5/5 across its 7 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3.5",
+        "P3C1.7",
+        "P4C3.6.2",
+        "P3C1.7.2",
+        "P3C1.7.1",
+        "P3C4.4.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "320de484-6a71-4f73-83d8-3bfe6fa4d62a",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-081",
+        "E-064",
+        "E-003"
+      ],
+      "linked_subcap_id": "P2C3.5",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Complex Case & Dispute Handling a near-term focus for Hudson Valley Credit Union: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-003].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Post-Merger Integration Risk Visible",
+      "what_text": "Complex Case & Dispute Handling is one of Hudson Valley Credit Union's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger, more personalised customer experience [E-064].",
+      "why_text": "The assessment found: “HVCU executed Catskill Hudson Bank acquisition (Jan 2024 announcement, 2024 completion) — a major vendor/system exit and integration exercise. Migration of accounts, systems, and documentation” [E-081]. The research report pins the maturity impact at: case management, exception management — both capped by ISS-002. averages 2.7/5 across its 7 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C4.3.2",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "2bef2b4a-dc75-4622-af9f-15a21ef1ac75",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-084",
+        "E-087",
+        "E-090"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Security compliance objection = eliminated. Accelerate procurement timeline. Shield extends existing posture [E-090].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Enterprise Security = Procurement Fast-Track",
+      "what_text": "Zero Trust Architecture Strategy is one of Hudson Valley Credit Union's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Hudson Valley Credit Union's ability to deliver a stronger data and technology foundation [E-087].",
+      "why_text": "The assessment found: “HVCU VP Cybersecurity Engineering & Operations job reveals full security stack: SIEM = Microsoft Sentinel OR CrowdStrike, SOAR confirmed, XDR confirmed, EDR = Microsoft Defender, NDR/NTA, Email” [E-084]. The research report pins the maturity impact at: Cybersecurity ~level 3 — strongest P4 category. averages 3.0/5 across its 30 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-HVCU-20260427-0001"
+}

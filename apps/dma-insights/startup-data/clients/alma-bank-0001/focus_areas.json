@@ -1,0 +1,73 @@
+{
+  "entity_display_id": "alma-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-066",
+          "E-093",
+          "E-092"
+        ],
+        "representative_quote": "Data silos confirmed: FIS core + HubSpot CRM + AML system + lapsed Salesforce \u2014 no CDP or Customer 360.",
+        "source_kind": "heuristic"
+      },
+      "id": "d3a029c7-4798-42eb-ad42-992091df0ad2",
+      "involved_subcap_ids": [
+        "P2C4.1.2",
+        "P2C4.1.5",
+        "P2C4.2.2",
+        "P2C4.2.5",
+        "P2C4.2.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 5 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-044",
+          "E-057",
+          "E-007",
+          "E-099",
+          "E-040",
+          "E-042"
+        ],
+        "representative_quote": "Frangos FVP Marketing piloted AI content generation (2022-2024) but departed Dec 2024 \u2014 capability not sustained.",
+        "source_kind": "heuristic"
+      },
+      "id": "22b2ed93-86ab-4b26-82cf-cc0f87ecc4de",
+      "involved_subcap_ids": [
+        "P1C3.1.4",
+        "P1C3.2.5",
+        "P1C3.3.5",
+        "P1C3.4.5",
+        "P1C3.5.4",
+        "P1C3.6.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 19 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

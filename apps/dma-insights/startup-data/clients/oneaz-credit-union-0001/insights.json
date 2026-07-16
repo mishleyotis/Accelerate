@@ -1,0 +1,132 @@
+{
+  "entity_display_id": "oneaz-credit-union-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.6.3",
+        "P2C4.1.2",
+        "P3C1.6.1",
+        "P2C1.4.6",
+        "P2C2.4.2",
+        "P3C1.8.FC1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "0541426c-3344-4400-bef3-44f939601119",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-110",
+        "E-138",
+        "E-095"
+      ],
+      "linked_subcap_id": "P4C3.6.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make DevOps & Delivery Excellence a near-term focus for OneAZ Credit Union: a scoped investment here would lift it from 2.5 toward the 3.2 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-138].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "OneAZ Credit Union stands at a critical digital inflection point",
+      "what_text": "OneAZ Credit Union stands at a critical digital inflection point. The September 2024 Backbase partnership signals transformational ambition, but execution gaps in CRM depth, integration infrastructure, and automation maturity create a compelling Zennify engagement opportunity. In Zennify's assessment DevOps & Delivery Excellence scores 2.5 out of 5, versus a typical 3.2 at comparable institutions [E-110].",
+      "why_text": "The assessment found: “OneAZ launched strategic partnership with Backbase in September 2024 to modernize technology architecture Backbase integration unifies IT architecture around single platform, improving agility” [E-095]. At 2.5 out of 5, DevOps & Delivery Excellence sits 0.7 points below the 3.2 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Score: 3.02 (level 3)\nWhat We See: OneAZ demonstrates above-peer strategic maturity (3.02 vs 2.90 median), driven by the Backbase digital engagement platform partnership (E-016, E-009, T2) and Filene Research Institute collaboration (E-010, T2). CEO Mike Boden's appointment (E-007, T2) and CPCO Chris Flores's leadership (E-008, T2) provide executive sponsorship. Technology leadership is robust: EVP CTO Sandeep Uthra was recognized as one of the Leading CTOs to Watch 2024 by USA Today and holds Orbie Awards (E-123, E-134, T2); VP CISO Monique Morissette brings enterprise security governance (E-115, E-143, T3); SVP Tom Wilson leads Enterprise Data & Analysis (E-019, E-112, T2); VP Niharika Pilla oversees Enterprise Technology Digital Services. Board governance structures are well-documented (E-042, E-043, T2), with clean NCUA compliance record (E-012, E-004, E-005, T1). Digital Strategy scores 3.49, the institution's strongest category. The Curql Fund II investment (E-018, T2) demonstrates fintech innovation commitment. ESG (2.0) lags the peers's already-low 2.55 median, though this is an industry-wide gap.\nWhy It Matters: The strategy-governance foundation is OneAZ's greatest asset — strong strategic intent coupled with a deep technology C-suite (CTO, CISO, SVP Data, VP Digital Services) provides the organizational mandate for digital transformation. Unlike many mid-size credit unions (TruWest shows minimal governance transparency), OneAZ has dedicated technology leadership at the EVP/VP level. The remaining gap is not leadership absence but formal framework documentation — no published digital transformation roadmap tying Backbase, data lake, and CRM investments into a single strategic narrative visible to stakeholders. The ESG gap, while industry-wide (peer median 2.55), represents a growing regulatory expectation for community institutions.",
+        "heading": "4.1. P1: Strategy, Governance & Culture",
+        "linked_e_ids": [
+          "E-004",
+          "E-005",
+          "E-007",
+          "E-008",
+          "E-009",
+          "E-010",
+          "E-012",
+          "E-016",
+          "E-018",
+          "E-019",
+          "E-042",
+          "E-043",
+          "E-112",
+          "E-115",
+          "E-123",
+          "E-134",
+          "E-143"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Score: 2.67 (level 3)\nWhat We See: Member experience (2.67) falls below peer median (3.03), with dramatic variance across categories. Marketing (3.01) and Onboarding (3.00) are near-peer, reflecting Dynamics CRM operational effectiveness and Backbase's planned digital onboarding capabilities (E-009, E-111, T2). The mobile app (E-014, T3) and branch network (E-003, T2) provide multi-channel presence. Servicing (2.98) benefits from the existing 21-branch network and ADU data lake enabling self-service analytics (E-025, T2). Community engagement via CUInsight grants (E-011, T3) supports member relationship building. However, Personalization (1.68) is the institution's single weakest category — 1.32 points below peer median. Dynamics CRM lacks financial-services-specific member 360-degree view, lifecycle event triggers, and relationship intelligence that Salesforce FSC provides natively. App store reviews (E-014, T3) indicate member friction with digital experience gaps. Peer comparison: Connexus achieves level 3.5 in using Salesforce FSC + Alkami; Bellco also uses Salesforce for member management.\nWhy It Matters: The personalization gap is the highest-impact opportunity in this assessment. Credit unions competing with digital-first banks need proactive, data-driven member engagement — cross-sell recommendations, life-event triggers, financial wellness nudges. OneAZ's Dynamics CRM is a general-purpose platform without credit union-specific data models, whereas peer leaders Connexus and Bellco have adopted Salesforce for member relationship management. The Backbase platform addresses the digital channel layer but not the underlying member intelligence. FSC migration (not a net-new platform — replacing existing Dynamics CRM) connects member data to personalized experiences using pre-built financial services data models.",
+        "heading": "4.2. P2: Member/Customer Experience",
+        "linked_e_ids": [
+          "E-003",
+          "E-009",
+          "E-011",
+          "E-014",
+          "E-025",
+          "E-111"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Score: 2.84 (level 3)\nWhat We See: Operations (2.84) is the most peer-aligned pillar (+0.04 vs median). Process Optimization (3.56) is a relative standout — OneAZ's second-highest category — driven by Experian PowerCurve lending automation (E-116, E-077, T1/T3, 26% funding improvement documented) and UiPath RPA exploration (E-076, E-015, E-114, T3). NCUA Call Report data (E-004, E-005, E-152, T1) confirms strong financial performance metrics. Risk Management (2.79) reflects adequate credit risk analytics through PowerCurve but limited enterprise risk visibility. Wolters Kluwer compliance tools detected (E-113, T3). Compliance (2.86) benefits from clean NCUA enforcement record (E-012, T1). Business Resilience (2.14) is dragged down by 1st Bank Yuma integration risk (ISS-001). Fraud protection resources documented (E-150, T2).\nWhy It Matters: demonstrates what OneAZ can achieve when technology investment aligns with operational needs — the PowerCurve ROI is quantified and impressive. This success pattern should be replicated across other operational domains. The integration risk from the Yuma acquisition (ISS-001) is time-bounded but requires active management. Compliance posture is clean, providing a solid foundation that does not require immediate remediation investment.",
+        "heading": "4.3. P3: Operations, Risk & Compliance",
+        "linked_e_ids": [
+          "E-004",
+          "E-005",
+          "E-012",
+          "E-015",
+          "E-076",
+          "E-077",
+          "E-113",
+          "E-114",
+          "E-116",
+          "E-150",
+          "E-152"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Score: 2.35 (level 2)\nWhat We See: Data & Technology (2.35) is OneAZ's weakest pillar, 0.71 points below peer median. Data Management (2.88) benefits from SVP Tom Wilson's data lake initiative — Azure + Hadoop ADU with self-service analytics, $2.5M projected annual ROI (E-019, E-025, E-066, E-112, T2). Active hiring for Data Governance Lead (E-044, T3) signals formalization intent. However, no published data governance framework, data catalog, or master data management detected — cap raised to 2.5 (from initial 2.0) given data leadership and infrastructure existence (ISS-003 revised). Analytics (1.74) reflects the Experian PowerCurve strength in lending but absence of enterprise BI or AI capabilities beyond that single domain. A Data Engineer job posting (E-118, T3) signals emerging investment. Technology Architecture (2.99) reflects the Backbase platform investment (E-110, E-111) and Dynamics CRM + Azure infrastructure, but is constrained by the no-iPaaS evidence cap (ISS-004, ceiling 2.5) — Backbase-to-core-to-CRM integration is point-to-point with no middleware layer. No peer uses MuleSoft specifically, but OneAZ's multi-vendor stack (Backbase + Dynamics + Azure + core) is uniquely complex vs. peer Fiserv-native architectures. Security (1.77) is suppressed by evidence scarcity — VP CISO Monique Morissette (E-115, E-143, T3) provides dedicated security leadership, but limited public disclosure of security posture, frameworks, or certifications.\nWhy It Matters: P4 is the binding constraint on OneAZ's digital transformation, but the gap is narrower than initial assessment suggested. Data infrastructure exists (Tom Wilson's ADU data lake is operational), security leadership exists (CISO Morissette), and technology leadership is strong (CTO Uthra). The gaps are in formalization (data governance policies, security framework documentation) and integration architecture (middleware for the Backbase multi-vendor stack). Patelco's 2024 ransomware breach ($7.25M settlement) during active digital modernization illustrates that transformation velocity must not outpace governance controls — a lesson directly applicable to OneAZ's Backbase deployment. P4 formalization is prerequisite to unlocking P2 member experience gains.",
+        "heading": "4.4. P4: Data, Analytics & Technology",
+        "linked_e_ids": [
+          "E-019",
+          "E-025",
+          "E-044",
+          "E-066",
+          "E-110",
+          "E-111",
+          "E-112",
+          "E-115",
+          "E-118",
+          "E-143"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Five strategic recommendations are prioritized based on evidence-grounded root cause analysis, peer gap assessment, and Zennify solution alignment. Recommendations are sequenced to address dependency chains — integration before data, data before personalization."
+  },
+  "run_request_id": "DMA-ASM-ONEAZ-20260313-0001"
+}

@@ -1,0 +1,191 @@
+{
+  "entity_display_id": "empower-federal-credit-u-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 2.09 (peer median 2.50)",
+        "dispute hours saved": "2 months",
+        "onboarding moment not": "90 day"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P4C1 score 2.09 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.91",
+          "metric": "P4C1 score 2.09 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.09 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Activate Salesforce Data Cloud as canonical Person Account / Household model across 7-charter consolidation"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.81",
+          "metric": "onboarding moment not 90 day",
+          "outcomes": {
+            "effort": "L",
+            "metric": "onboarding moment not 90 day",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Activate Salesforce Marketing Cloud + Journey Builder triggered by MANTL onboarding events"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.81",
+          "metric": "dispute hours saved 2 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "dispute hours saved 2 months",
+            "peer": null,
+            "time": "2 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Activate Salesforce Einstein across FSC org (Lead/Opportunity Scoring + Einstein Bots + Discovery)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C3 score 2.06 (peer median 2.50)",
+        "internal departments using": "81%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C3 score 2.06 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.94",
+          "metric": "P4C3 score 2.06 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C3 score 2.06 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy MuleSoft Anypoint Platform as integration backbone for MANTL + RPA\u2192Flow handoff"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.87",
+          "metric": "P4C4 score 2.13 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C4 score 2.13 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Activate Salesforce Shield (Platform Encryption + Event Monitoring + Field Audit Trail) \u2014 supports SOC 2 / PCI Level 1 attestation pursuit"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.81",
+          "metric": "internal departments using 81%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "internal departments using 81%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Deploy Service Cloud Einstein for fraud case routing \u2014 extends IllumaSHIELD partnership"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C3, P4C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C3 score 2.06 (peer median 2.50)",
+        "attestation period typically": "12 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C3 score 2.06 (peer median 2.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.94",
+          "metric": "P4C3 score 2.06 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C3 score 2.06 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Migrate AngularJS web stack to Lightning Web Components on Experience Cloud \u2014 resolves I-003 EOL technical debt"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.01",
+          "metric": "P1C1 score 1.89 (peer median 2.92)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 1.89 (peer median 2.92)",
+            "peer": null,
+            "time": "6-8 week"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Activate Salesforce DevOps Center + run Digital Strategy Workshop FY26 \u2014 supports CEO McIntyre 3-yr tenure milestone strategic refresh"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.81",
+          "metric": "attestation period typically 12 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "attestation period typically 12 months",
+            "peer": null,
+            "time": "6-12 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-09",
+          "title": "Pursue SOC 2 Type II + PCI Level 1 attestation \u2014 independent audit body engagement"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C1, P4C3"
+    }
+  ],
+  "run_request_id": "DMA-ASM-EFCU-20260429-0001",
+  "total_duration_months": 12
+}

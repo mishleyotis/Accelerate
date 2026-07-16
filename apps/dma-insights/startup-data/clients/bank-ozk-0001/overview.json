@@ -1,0 +1,989 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "bank-ozk-0001",
+    "domain": null,
+    "hq": null,
+    "id": "bbb366d6-05e2-41c8-9ec3-a6c314d29166",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Bank OZK",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:58.632811Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 43,
+    "undated_count": 43
+  },
+  "evidence_summary": {
+    "claims": {
+      "CEILING_ESTIMATE": 1,
+      "FACT": 36,
+      "INFERENCE": 6
+    },
+    "connectors": {
+      "Glassdoor": 3,
+      "Indeed": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 43
+    },
+    "tiers": {
+      "T1": 1,
+      "T2": 8,
+      "T3": 9,
+      "T4": 12,
+      "T5": 13
+    },
+    "total_facts": 43,
+    "total_items": 43
+  },
+  "financial_trajectory": {
+    "cagr": "9.2%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2023,
+      2024,
+      2025
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        34.24,
+        38.26,
+        40.8
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 40800000000.0,
+    "cagr": "9.5%",
+    "cagr_basis": "derived:financial_highlights",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "business_diversification_adjustment": "-1",
+      "cagr_3yr": "9.5%",
+      "deposits_2024": "$31.0B",
+      "lines": [
+        "Total assets: 2023 $34.2B → 2024 $38.3B → 2025 $40.8B",
+        "Deposits: 2023 $27.4B → 2024 $31.0B",
+        "Deposits: Growing 13.3% YoY",
+        "Net Income: 2024 $700M → 2025 $699M",
+        "Net Income: Stable at ~$700M"
+      ],
+      "net_income": 699300000.0,
+      "net_income_2025": "$699M",
+      "net_market_funding_reliance": "Low",
+      "problem_loans": "0.3",
+      "roaa": "1.7",
+      "series": {
+        "2023": 34240000000.0,
+        "2024": 38260000000.0,
+        "2025": 40800000000.0
+      },
+      "tce_rwa": "11.3",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": null,
+        "events": [],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Arkansas",
+        "headline": "$40.8B assets · FY2025 · +9.2% CAGR",
+        "regulator": "OCC (National Bank)",
+        "series": {
+          "net_income_m": [
+            null,
+            700.0,
+            699.0
+          ],
+          "total_assets": [
+            34.24,
+            38.26,
+            40.8
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Arkansas",
+    "footprint_basis": "derived:geography",
+    "founded": 1981,
+    "geography": "Arkansas",
+    "geography_basis": "nlp:narrative",
+    "headcount": null,
+    "hq": "Little Rock, Arkansas",
+    "hq_address": "Little Rock, Arkansas",
+    "leadership": [
+      {
+        "background": "Chairman and CEO since 1979. One of the longest-tenured bank CEOs in the US, known for conservative credit culture and hands-on management of the RESG portfolio",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "George Gleason II",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": "appointed 2022. Oversees technology strategy including OZK Labs",
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Jason Cathey",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": "leading operational risk transformation with MetricStream platform [E-065",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Arindam Majumdar",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Deputy CRO"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Bank OZK",
+    "license_type": "State-chartered bank",
+    "narrative_md": "Bank OZK (NYSE: OZK) is an Arkansas state-chartered bank headquartered in Little Rock, AR. Founded in 1903 as Bank of the Ozarks, it rebranded to Bank OZK in 2018. The bank operates approximately 230-265 retail branches across 9 states, primarily in the southeastern and south-central United States [E-001].\n\nCEO: George Gleason II, Chairman and CEO since 1979. One of the longest-tenured bank CEOs in the US, known for conservative credit culture and hands-on management of the RESG portfolio.\n\nCIO: Jason Cathey, appointed 2022. Oversees technology strategy including OZK Labs.\n\nDeputy CRO: Arindam Majumdar, leading operational risk transformation with MetricStream platform [E-065].",
+    "primary_regulator": "OCC (National Bank)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.3,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "research_report_prose",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "18",
+          "signal": "Customer Satisfaction (2.04): NPS 18, CSAT 3.3/5 vs peer 35+ NPS",
+          "source": "Net Promoter Score",
+          "trend": "Improving"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": null,
+    "ticker": "NYSE: OZK",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": null,
+    "total_assets": "$40.8B",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "ozk.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.053933+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Bank OZK — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "1. EXECUTIVE SUMMARY (SCQA FRAMEWORK)",
+    "scqa_md": "Bank OZK is a $40.8B in assets regional bank regulated by OCC (National Bank), operating since 1981. A 9.5% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-002]. Zennify's assessment places overall digital maturity at 2.2/5. The deepest capability gap is Security & Compliance Assessment at 1.5/5 against a 2.5 peer median. Next is Tiered-Latency Data Architecture Service Levels at 1.8/5 against a 2.2 peer median.\n\nThird is Automated Incident Response & Playbooks at 1.8/5 against a 2.8 peer median. The issue register adds Capability gap: Resilience Reporting (high severity). The issue register adds Capability gap: BCP Plan Development (high severity). Counter-signal: KPIs & Outcomes already runs at 2.7/5 against a 2.8 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-021, E-007, E-008, E-009, E-010].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Bank OZK is whether to close Security & Compliance Assessment first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Bank OZK should lead with Databricks (72/100 fit) against Self-Service Adoption KPIs, then sequence nCino behind it. Closing Security & Compliance Assessment to the peer median alone is worth 1.0 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.2,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "00_entity_profile/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.609741+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "00_entity_profile/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.610087+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/assessment_manifest.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.610482+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.610742+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/execution_summary_p4_5_6.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.611146+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/gap_prioritization.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.611764+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.612778+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 32 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.613113+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/governance_partial.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.613392+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_qa/PHASE8_EXECUTION_SUMMARY.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.613825+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_qa/phase8_governance_final_report.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.614329+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_qa/qa_failure_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.616404+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_qa/qa_results_critical.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.616797+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_qa/qa_results_partial.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:58.617375+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 3,
+      "INFO": 26
+    },
+    "stage_ms": {
+      "manifest": 119,
+      "parse": 1257,
+      "persist": 316
+    },
+    "structured": [
+      {
+        "code": "synthesized run_manifest from handoff",
+        "detail": "synthesized run_manifest from handoff: source=research_handoff.json, run_id=DMA-RES-OZK-20260306-0001, institution_name=Bank OZK",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_OZ",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_OZK_20260306.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from json variant evidence_index_p1p2.json (60 r",
+        "detail": "evidence loaded from json variant evidence_index_p1p2.json (60 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name', 'primary_regulator', 'ticker'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_baseline_json_filled",
+        "detail": "financial_baseline_json_filled: ['cagr', 'financial_highlights', 'total_assets']",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 16 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 8 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 1",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_from_client_profile_docx",
+        "detail": "timeline_from_client_profile_docx: 9 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "00_entity_profile/peer_set.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "00_entity_profile/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/assessment_manifest.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/execution_summary_p4_5_6.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/gap_prioritization.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 32 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/governance_partial.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_qa/PHASE8_EXECUTION_SUMMARY.md — no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_qa/phase8_governance_final_report.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_qa/qa_failure_analysis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_qa/qa_results_critical.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_qa/qa_results_partial.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 9",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 14",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "synthesized run_manifest from handoff: source=research_handoff.json, run_id=DMA-RES-OZK-20260306-0001, institution_name=Bank OZK",
+      "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_OZK_20260306.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from json variant evidence_index_p1p2.json (60 rows)",
+      "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+      "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name', 'primary_regulator', 'ticker'] leadership=0",
+      "financial_baseline_json_filled: ['cagr', 'financial_highlights', 'total_assets']",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 16 categories",
+      "tech_stack_from_report_prose: 8 vendors mentioned",
+      "insights_from_client_profile_findings: 1",
+      "timeline_from_client_profile_docx: 9 events",
+      "INFO/pattern_gap: 00_entity_profile/peer_set.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 00_entity_profile/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/assessment_manifest.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/execution_summary_p4_5_6.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/gap_prioritization.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 32 generic sections mined",
+      "INFO/pattern_gap: 07_governance/governance_partial.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_qa/PHASE8_EXECUTION_SUMMARY.md — no fingerprint matched (best confidence 0.00); 18 generic sections mined",
+      "INFO/pattern_gap: 08_qa/phase8_governance_final_report.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_qa/qa_failure_analysis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_qa/qa_results_critical.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_qa/qa_results_partial.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "timeline_events_persisted: 9",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 14"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.55,
+      "pillar_id": "P1",
+      "score": 2.35,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.31,
+      "pillar_id": "P2",
+      "score": 2.1,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.5,
+      "pillar_id": "P3",
+      "score": 2.27,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.27,
+      "pillar_id": "P4",
+      "score": 2.06,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-06",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:58.632811Z",
+    "created_at": "2026-07-02T23:11:58.632811Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "83bd0803-818f-43dc-a502-0b458e02356e",
+    "overall_score": null,
+    "request_id": "DMA-RES-OZK-20260306-0001",
+    "started_at": "2026-07-02T23:11:58.632811Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.3,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "research_report_prose",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "OZK Labs as Innovation Engine: Founded in 2012 and acquired via C1 Financial in 2016, OZK Labs employs ~40 staff in St. Petersburg, FL building custom digital banking products including the Bank IQ BaaS platform [E-002, E-072, E-098]. While this positions the bank ahead of most regional peers in innovation culture, the custom-build approach creates integration and governance challenges that Zennify’s Salesforce-native solutions can address.",
+      "evidence": [
+        "E-002",
+        "E-072",
+        "E-098"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "OZK Labs as Innovation Engine",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.53,
+      "so_what": "Prioritize OZK Labs as Innovation Engine in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "OZK Labs as Innovation Engine",
+      "what": "OZK Labs as Innovation Engine: Founded in 2012 and acquired via C1 Financial in 2016, OZK Labs employs ~40 staff in St. Petersburg, FL building custom digital banking products including the Bank IQ BaaS platform. [E-002, E-072, E-098].",
+      "why": "The shortfall is relative, not absolute: 1.53/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "MetricStream GRC Implementation: Bank OZK went live on MetricStream in 2023, now supporting 100+ users for RCSA, issue management, and internal audit integration [E-061, E-062]. Deputy CRO Arindam Majumdar won the 2024 GRC Visionary Award [E-065]. This represents strong operational risk management maturity (P3C2) but highlights that GRC is ahead of other enterprise capabilities like data governance and cybersecurity.",
+      "evidence": [
+        "E-061",
+        "E-062",
+        "E-065"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "MetricStream GRC Implementation",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.53,
+      "so_what": "Prioritize MetricStream GRC Implementation in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "MetricStream GRC Implementation",
+      "what": "MetricStream GRC Implementation: Bank OZK went live on MetricStream in 2023, now supporting 100+ users for RCSA, issue management, and internal audit integration [E-061, E-062]. Deputy CRO Arindam Majumdar won the 2024 GRC Visionary Award. [E-065].",
+      "why": "The shortfall is relative, not absolute: 1.53/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Data Governance Gap: No Chief Data Officer identified. Active hiring of 10+ data governance roles at VP/EVP level in Dallas, TX suggests a framework under development rather than mature [E-077, E-079, E-107]. This is a critical gap for a bank approaching $50B in assets where regulatory expectations for data management are significantly higher.",
+      "evidence": [
+        "E-077",
+        "E-079",
+        "E-107"
+      ],
+      "magnitude": "$50B",
+      "name": "Data Governance Gap",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.53,
+      "so_what": "Prioritize Data Governance Gap in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "Data Governance Gap",
+      "what": "Data Governance Gap. No Chief Data Officer identified. Active hiring of 10+ data governance roles at VP/EVP level in Dallas, TX suggests a framework under development rather than mature [E-077, E-079, E-107]. This is a critical gap for a bank approaching $50B in assets where regulatory expectations for data management are significantly higher.",
+      "why": "The shortfall is relative, not absolute: 1.53/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Cybersecurity Visibility Gap: No CISO publicly identified, no SOC details, and online security describes basic authentication controls [E-082, E-093, E-113]. The 10-K acknowledges AI and cybersecurity risks but specific program details are absent from public evidence [E-068]. For a bank of this size, this represents a significant area where Zennify can drive value through Security Cloud and related offerings.",
+      "evidence": [
+        "E-082",
+        "E-093",
+        "E-113",
+        "E-068"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Cybersecurity Visibility Gap",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.53,
+      "so_what": "Prioritize Cybersecurity Visibility Gap in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "Cybersecurity Visibility Gap",
+      "what": "Cybersecurity Visibility Gap: No CISO publicly identified, no SOC details, and online security describes basic authentication controls [E-082, E-093, E-113]. The 10-K acknowledges AI and cybersecurity risks but specific program details are absent from public evidence [E-068].",
+      "why": "The shortfall is relative, not absolute: 1.53/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "RESG Concentration Risk: Real Estate Specialties Group declining from peak to approximately 62% of portfolio, with goal of ~50% [E-028]. Diversification into CIB group (launched ~18 months ago [E-030]) and other commercial segments creates new digital capability requirements across customer onboarding, analytics, and risk management.",
+      "evidence": [
+        "E-028",
+        "E-030"
+      ],
+      "magnitude": "62%",
+      "name": "RESG Concentration Risk",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.53,
+      "so_what": "Prioritize RESG Concentration Risk in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "RESG Concentration Risk",
+      "what": "RESG Concentration Risk. Real Estate Specialties Group declining from peak to approximately 62% of portfolio, with goal of ~50%. [E-028]. Diversification into CIB group (launched ~18 months ago [E-030]) and other commercial segments creates new digital capability requirements across customer onboarding, analytics, and risk management.",
+      "why": "The shortfall is relative, not absolute: 1.53/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "KPIs & Outcomes averages 2.7/5 over 165 scored subcaps; ceiling 3.2 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Model Risk Management averages 2.3/5 over 217 scored subcaps; ceiling 2.8 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Post-Implementation Optimization averages 2.3/5 over 190 scored subcaps; ceiling 2.8 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Middle Manager Enablement averages 2.2/5 over 205 scored subcaps; ceiling 2.7 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG-Integrated Products averages 2.2/5 over 70 scored subcaps; ceiling 2.8 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Lead Scoring & Qualification averages 2.2/5 over 287 scored subcaps; ceiling 2.7 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Credit Bureau Integration averages 2.0/5 over 287 scored subcaps; ceiling 2.5 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Complex Case & Dispute Handling averages 2.1/5 over 286 scored subcaps; ceiling 2.6 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Contextual Personalization averages 2.0/5 over 255 scored subcaps; ceiling 2.5 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "RPA & Intelligent Automation averages 2.6/5 over 143 scored subcaps; ceiling 3.1 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Emerging Threat Monitoring averages 2.7/5 over 130 scored subcaps; ceiling 3.2 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Report Production averages 2.4/5 over 141 scored subcaps; ceiling 2.9 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Security & Compliance Assessment averages 1.5/5 over 145 scored subcaps; ceiling 2.0 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Tiered-Latency Data Architecture Service Levels averages 1.8/5 over 200 scored subcaps; ceiling 2.2 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Experiment Tracking + Model Registry Operating Model averages 2.2/5 over 270 scored subcaps; ceiling 2.7 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "BI Regression & Metric Consistency Controls averages 2.3/5 over 235 scored subcaps; ceiling 2.8 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Automated Incident Response & Playbooks averages 1.8/5 over 150 scored subcaps; ceiling 2.3 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Active hiring for VP/EVP Data Engineering, Enterprise Analytics in Dallas hub (Jan 2025).",
+      "evidence": [],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Active hiring for VP/EVP Data Engineering, Enterprise…",
+      "metric": null,
+      "peer_context": "Security & Compliance Assessment runs 1.53/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service Adoption KPIs — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Active hiring for VP/EVP Data Engineering, Enterprise Analytics in Dallas hub (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "Active hiring for VP/EVP Data Engineering, Enterprise…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Security & Compliance Assessment scores 1.53/5 vs a typical 2.50 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "evidence": [
+        "E-052",
+        "E-023",
+        "E-034"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Security & Compliance Assessment scores 1.53/5",
+      "metric": "Security & Compliance Assessment 1.53/5 vs peer 2.50",
+      "peer_context": "Security & Compliance Assessment runs 1.53/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service Adoption KPIs — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P3C4",
+      "text": "Security & Compliance Assessment scores 1.53/5 vs a typical 2.50 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Tiered-Latency Data Architecture Service Levels at 1.75/5 is one of Bank OZK's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap. The pattern is corroborated across the assessment's evidence index [E-021, E-007, E-008].",
+      "evidence": [
+        "E-021",
+        "E-007",
+        "E-008"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Tiered-Latency Data Architecture Service Levels at 1.75/5…",
+      "metric": null,
+      "peer_context": "Security & Compliance Assessment runs 1.53/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service Adoption KPIs — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Tiered-Latency Data Architecture Service Levels at 1.75/5 is one of Bank OZK's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

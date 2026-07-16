@@ -1,0 +1,145 @@
+{
+  "entity_display_id": "texas-capital-bancshares-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Cross-brand customer match rate": "0% (no cross-brand CDP) \u2192 75%+ cross-brand identity resolution",
+        "Time from AI PM hire to first production agent": "18-24 months (LangChain + SR 11-7 validation) \u2192 6-9 months (Agentforce governed deployment)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Cross-brand customer match rate: 0% (no cross-brand CDP) \u2192 75%+ cross-brand identity resolution",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Data Cloud",
+          "maturity_lift": "+2.07",
+          "metric": "Cross-brand customer match rate: 0% (no cross-brand CDP) \u2192 75%+ cross-brand identity resolution",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Cross-brand customer match rate: 0% (no cross-brand CDP) \u2192 75%+ cross-brand identity resolution",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Data Cloud \u2014 Displace Bespoke CDP Before Vendor Lock-In"
+        },
+        {
+          "feature": "Einstein Agentforce + Einstein Trust Layer",
+          "maturity_lift": null,
+          "metric": "Time from AI PM hire to first production agent: 18-24 months (LangChain + SR 11-7 validation) \u2192 6-9 months (Agentforce governed deployment)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Time from AI PM hire to first production agent: 18-24 months (LangChain + SR 11-7 validation) \u2192 6-9 months (Agentforce governed deployment)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Einstein Agentforce + Trust Layer \u2014 SR 11-7-Compliant AI Agent Framework for Active Build"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "% of critical APIs governed by MuleSoft": "0% (no API governance platform) \u2192 100% of treasury + core banking APIs governed",
+        "Cross-LOB referrals logged and tracked in CRM": "0 (no system) \u2192 100% of cross-brand referrals logged with outcome tracking"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "% of critical APIs governed by MuleSoft: 0% (no API governance platform) \u2192 100% of treasury + core banking APIs governed",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint Platform",
+          "maturity_lift": "+2.07",
+          "metric": "% of critical APIs governed by MuleSoft: 0% (no API governance platform) \u2192 100% of treasury + core banking APIs governed",
+          "outcomes": {
+            "effort": "L",
+            "metric": "% of critical APIs governed by MuleSoft: 0% (no API governance platform) \u2192 100% of treasury + core banking APIs governed",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "MuleSoft Anypoint Platform \u2014 API Governance for Treasury Fee Income Engine"
+        },
+        {
+          "feature": "Sales Cloud + Financial Services Cloud (FSC)",
+          "maturity_lift": "+2.07",
+          "metric": "Cross-LOB referrals logged and tracked in CRM: 0 (no system) \u2192 100% of cross-brand referrals logged with outcome tracking",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Cross-LOB referrals logged and tracked in CRM: 0 (no system) \u2192 100% of cross-brand referrals logged with outcome tracking",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Sales Cloud + Financial Services Cloud \u2014 Unify 6-Brand Relationship Management on Salesforce Beachhead"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Average time from fraud alert to case resolution": "Days to weeks (3-system coordination) \u2192 <24 hours (unified case with Positive Pay + CSO + Compliance data)",
+        "BI platforms in operation": "2 (Power BI + future CRM Analytics) \u2192 1 unified (Tableau CRM)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "BI platforms in operation: 2 (Power BI + future CRM Analytics) \u2192 1 unified (Tableau CRM)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Industries CRM Analytics + Tableau",
+          "maturity_lift": "+2.07",
+          "metric": "BI platforms in operation: 2 (Power BI + future CRM Analytics) \u2192 1 unified (Tableau CRM)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "BI platforms in operation: 2 (Power BI + future CRM Analytics) \u2192 1 unified (Tableau CRM)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Salesforce Industries CRM Analytics + Tableau \u2014 Migrate Power BI COE to Unified BI+CRM Layer"
+        },
+        {
+          "feature": "Service Cloud + FSC Action Plans",
+          "maturity_lift": "+2.07",
+          "metric": "Average time from fraud alert to case resolution: Days to weeks (3-system coordination) \u2192 <24 hours (unified case with Positive Pay + CSO + Compliance data)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Average time from fraud alert to case resolution: Days to weeks (3-system coordination) \u2192 <24 hours (unified case with Positive Pay + CSO + Compliance data)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Service Cloud + FSC Action Plans \u2014 Unify Fraud & Compliance Case Management"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-TCB-20260511-0001",
+  "total_duration_months": 12
+}

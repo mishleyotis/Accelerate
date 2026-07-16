@@ -1,0 +1,248 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "penderfund-capital-manag-0001",
+  "financials": {
+    "lines": [
+      "PenderFund's AUM grew from approximately $400M to $3B between 2016 and 2024 under CIO Felix Narhi \u2014 a 7.5x increase in 8 years [E-007:F1]. The firm's US 13F portfolio was valued at $592.7M USD in Q3 2025 across 219 holdings [E-008:F1]. Pender Growth Fund (TSXV: PTF) reported FY2024 net income of $55.5M but swung to a net loss of $4.9M in FY2025 [E-011:F5], driven by portfolio performance."
+    ],
+    "metrics": {
+      "net_income": 55473592.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Canada (BC)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "David Barr, CFA",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO & Portfolio Manager"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Greg Taylor, CFA",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Amanda Patterson, CPA CA",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Maria Pacella",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Managing Partner, Pender Ventures"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Teresa Lee, CFA",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Equity Research"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Provincially registered securities firm",
+    "narrative_md": "PenderFund Capital Management Ltd. is an asset manager. It reports $3.0 billion in assets under management and has operated since 2003. It is regulated by BCSC and employs approximately 51 people across 50 branches. Its overall digital maturity is assessed at 1.5 out of 5 across the DMA capability framework.",
+    "primary_regulator": "BCSC",
+    "size_tier": "Small-to-Medium",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "b529fd41-72ed-4c7c-bb59-e2e63f3b239f",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Anti-Generic Content Detection: 6/9 PenderFund-specific terms in synthesis (\u22657 required)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "PenderFund's AUM grew from approximately $400M to $3B between 2016 and 2024 under CIO Felix Narhi \u2014 a 7.5x increase in 8 years [E-007:F1]. The US 13F portfolio was valued at $592.7M USD in Q3 2025 across 219 holdings [E-008:F1]. Pender Growth Fund (TSXV: PTF) reported FY2024 net income of $55.5M but swung to FY2025 net loss of $4.9M [E-011:F5]. Recent milestones include: CIO Greg Taylor joining May 2025 after 11-month gap [E-006:F2, E-020:F1], Teresa Lee appointed Head of Equity Research January 2026 [E-011:F1], Pender Ventures Fund II closing at $100M+ with institutional LPs [E-015:F2], 2025 LSEG Lipper Fund Awards recognition, fee restructuring approved November 2025 [E-023:F1], and Salesforce Admin position posted at $80-100K confirming CRM investment commitment [E-029:F4]."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 2.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 3.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.44,
+      "peer_name": "Leith Wheeler Investment Counsel",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 3.5,
+        "P2C1": 2.5,
+        "P2C2": 1.5,
+        "P2C3": 2.0,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.24,
+      "peer_name": "Genus Capital Management",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.15,
+      "peer_name": "Burgundy Asset Management",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.5,
+        "P1C2": 1.5,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 1.5,
+        "P2C2": 1.5,
+        "P2C3": 1.5,
+        "P2C4": 1.0,
+        "P3C1": 1.5,
+        "P3C2": 1.5,
+        "P3C3": 2.0,
+        "P3C4": 1.5,
+        "P4C1": 1.0,
+        "P4C2": 1.5,
+        "P4C3": 1.5,
+        "P4C4": 1.5
+      },
+      "overall_score": 1.5,
+      "peer_name": "Seymour Investment Management",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-PFCM-20260323-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "4.5/5.0 Glassdoor:F1], 4.9 WLB:F2], Best Workplace BC 2025",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.5
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of PenderFund Capital Management Ltd.. Overall digital maturity scored 1.52/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-03-23",
+      "evidence_e_ids": [],
+      "id": "1d51c30f-8eba-487f-a622-319bc71e6abe",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    },
+    {
+      "body": "PenderFund Capital Management Ltd. was established in 2003.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2003-01-01",
+      "evidence_e_ids": [],
+      "id": "5932407f-4de3-43cf-a9b6-31c71c27f14c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Founded"
+    }
+  ]
+}

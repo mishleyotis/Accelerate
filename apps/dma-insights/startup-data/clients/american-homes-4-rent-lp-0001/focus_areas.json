@@ -1,0 +1,49 @@
+{
+  "entity_display_id": "american-homes-4-rent-lp-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-007",
+          "E-009",
+          "E-059",
+          "E-060",
+          "E-064",
+          "E-065"
+        ],
+        "representative_quote": "[EVIDENCE]: E-007,E-009,E-059,E-060 \u2014 PissedConsumer 1.3/5 (9% resolution, 4K+ complaints); Google 2.9/5",
+        "source_kind": "heuristic"
+      },
+      "id": "8dc94cb6-fd3e-4f17-91a1-101bb9d2fc25",
+      "involved_subcap_ids": [
+        "P2C2.1.1",
+        "P2C2.1.2",
+        "P2C2.1.3",
+        "P2C2.1.4",
+        "P2C2.1.5",
+        "P2C2.1.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

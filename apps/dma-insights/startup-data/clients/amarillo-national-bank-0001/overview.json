@@ -1,0 +1,1242 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 60,
+        "subcaps": 60,
+        "thin": 60
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 60,
+        "subcaps": 60,
+        "thin": 60
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 56,
+        "subcaps": 56,
+        "thin": 56
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 56,
+        "subcaps": 56,
+        "thin": 56
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "amarillo-national-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "46c3762c-2a09-439b-ad14-d66486a77e3d",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Amarillo National Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:47.898344Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 89,
+    "undated_count": 89
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 64,
+      "FACT": 25
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 3,
+      "LinkedIn": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 18,
+      "NEUTRAL": 37,
+      "POSITIVE": 34
+    },
+    "tiers": {
+      "T1": 11,
+      "T2": 28,
+      "T3": 29,
+      "T4": 3,
+      "T5": 10,
+      "T7": 1,
+      "T8": 7
+    },
+    "total_facts": 89,
+    "total_items": 89
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "NIM",
+        "unit": null,
+        "value": 4.13,
+        "year": null
+      },
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 37010000.0,
+        "year": null
+      },
+      {
+        "label": "NIM",
+        "unit": null,
+        "value": 8.5,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 10230000000.0,
+    "branches": 35,
+    "cagr": "50.4%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "cagr_2019_2025_pct_est": 11.0,
+      "efficiency_ratio_pct": 44.11,
+      "net_income": 37010000.0,
+      "nim_pct": 4.13,
+      "regulatory_minimum": 8.5,
+      "roa_pct": 1.52,
+      "roe_pct": 13.9,
+      "tier_1_risk_based_pct": 12.613,
+      "trajectory": {
+        "branches": 35,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 926,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Amarillo National Bank (primary), ANB Trust, ANBPrepaid…"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": null,
+        "headline": "$10.2B net income · FY2026",
+        "regulator": "OCC (Office of the Comptroller of the Currency)",
+        "series": {
+          "net_income_m": [
+            2000.0,
+            10230.0,
+            10230.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "founded": 1892,
+    "headcount": 926,
+    "hq": "410 S Taylor St, Amarillo, TX 79101",
+    "hq_address": "410 S Taylor St, Amarillo, TX 79101",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Richard Ware II",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CHAIRMAN"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "William Ware",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "PRESIDENT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Patrick Ware",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VICE CHAIRMAN"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Liliana Miranda",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Chief Commercial Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Clint Latham",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP GENERAL COUNSEL"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Fields",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP CREDIT ADMIN"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Terri Boswell-Williams",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP OPERATIONS"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Denise Thomas",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP PERSONNEL"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jesse Munoz",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP TREASURY MGMT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Shane Ferrell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP | Assistant IT Director Innovation & Solutions"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "DJ Hunt",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP & Investment Officer (Asset Mgmt division)"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Amarillo National Bank",
+    "license_type": "National Bank",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Amarillo National Bank is a regional bank. It reports $10.2 billion in total assets and has operated since 1892. It is regulated by OCC (Office of the Comptroller of the Currency) and employs approximately 926 people across 35 branches. Its overall digital maturity is assessed at 3.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OCC (Office of the Comptroller of the Currency)",
+    "revenue_usd": null,
+    "sentiment": {
+      "derived_from": "evidence_excerpts",
+      "sources": [
+        {
+          "signal": "**ANB BBB Rating: A+ (highest grade)**",
+          "source": "Better Business Bureau"
+        },
+        {
+          "signal": "searches 2023-2025 of OCC enforcement actions database, CFPB enforcement actions, OCC CRA monthly releases: NO consent orders, civil money penalties, formal agreements, or MRAs publicly identified against Amarillo National Bank (Charter 142",
+          "source": "CFPB complaints"
+        },
+        {
+          "signal": "count-opening failure news; (3) Servicing: **MIXED** — Yelp has 1 negative review calling ANB 'archaic fatigued and outdated business logic, customer service, staff competence and customer related software services' (sample size = 1); BBB h",
+          "source": "Yelp"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-029",
+        "excerpt": "Point Predictive confirmed ANB adopted AutoPass, IEValidate, DealerCheck solutions Sep 2025. Quoted Tim Grace CEO Point Predictive: 'Amarillo National Bank exemplifies how forward-thinking financial institutions can leve",
+        "title": "Point Predictive confirmed DealerCheck solutions",
+        "type": "article",
+        "url": "https://pointpredictive.com/press-releases/amarillo-national-bank-adopts-point-predictives-fraud-solutions/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-053",
+        "excerpt": "Blend publicly features ANB as a reference customer. ANB ADOPTED Blend 2018 for mortgage application, EXPANDED to Blend Close for hybrid closings (post-2020). QUOTED: Lauren Lyons, ANB Senior System Administrator: 'We've",
+        "title": "Blend features ANB",
+        "type": "article",
+        "url": "https://blend.com/customers/amarillo-national-bank/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-067",
+        "excerpt": "**P2C2.3 Digital Abandonment Proxy — Via MANTL platform capability**. Since ANB runs MANTL (E-055), they inherit MANTL's digital abandonment analytics: 'Alkami's data analytics identifies abandoned applications for targe",
+        "title": "Digital Abandonment Proxy",
+        "type": "blog",
+        "url": "https://www.alkami.com/development/mantl-page-plant/"
+      },
+      {
+        "author": "William Ware",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-079",
+        "excerpt": "**P3C4.5 EXCEPTIONAL OPERATIONAL RESILIENCE EVIDENCE**. Smokehouse Creek Fire (largest wildfire in TX history, Feb 2024) — ANB executed rapid multi-pronged community crisis response within days: (1) **Feb 28, 2024 (Day o",
+        "title": "Exceptional Operational Resilience Evidence",
+        "type": "conference",
+        "url": "https://www.anb.com/about-anb/community-involvement/in-the-community.html"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "ANB deploys comprehensive suite of AI fraud detection tools from Point Predictive for lending (reduces risk while streamlining) Tech stack (public signals): AudioEye, Mixpanel (product analytics), reCAPTCHA, Cloudflare W",
+        "title": "ANB deploys comprehensive suite of AI fraud detection tools",
+        "type": "conference",
+        "url": "https://www.zoominfo.com/c/amarillo-national-bank/4442813"
+      },
+      {
+        "author": "William Ware",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "Shane Ferrell career trajectory clarified: 2010-2023 Computer Services Inc. (CSI, banking core vendor) — roles through VP Product Strategy & Innovation; 2023 SVP Strategy & Innovation @ BOC Bank (Amarillo); Feb 2024 prom",
+        "title": "Shane Ferrell career trajectory 2010-2023 Computer Services Inc…",
+        "type": "conference",
+        "url": "https://bankersdigest.com/boc-bank-taps-ferrell-as-chief-technology-officer-jay-as-chief-operating-officer/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "abc7amarillo.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.879118+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Amarillo National Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "Amarillo National Bank is a $10.2B in assets regional bank regulated by OCC (Office of the Comptroller of the Currency), operating since 1892 with 926 employees. A 50.4% multi-year growth rate and fundamentals of ROA 1.52%, ROE 13.90%, efficiency 44.11% give it the balance sheet to fund transformation [E-070, E-002]. Zennify's assessment places overall digital maturity at 3.2/5. The issue register adds P1_Scoring_Detail has 75 rows, expected ~199 (high severity).\n\nThe issue register adds P2_Scoring_Detail has 60 rows, expected ~288 (high severity). Counter-signal: Disclosure Management already runs at 3.8/5 against a 3.0 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-001, E-004, E-024, E-041]. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Amarillo National Bank is whether to close its weakest capability area first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Amarillo National Bank should lead with Twilio (53/100 fit) against Champion Coordination, then sequence Tableau behind it. The analyst's own priority framing: \" Culture & Change Enablement — 3.5 — level 4 Optimized — 2.5 — +1.0 — ±0.39\"."
+  },
+  "overall_score": 3.23,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/leadership_profile.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.154215+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/p1_coverage_matrix.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.154721+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/p2_coverage_matrix.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.155142+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/p3_coverage_matrix.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.155602+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/p4_coverage_matrix.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.156093+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.156447+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/preliminary_tech_footprint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.157081+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.157412+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/client_research_qa_v2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.158370+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.158949+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_1_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.159369+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_2_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.159803+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_3_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.160266+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_4_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.160710+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_5_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.161170+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_6_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.161579+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_7_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.162073+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_8_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.162471+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_batch_9_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.162822+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_evidence_validation_report.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.163386+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_gap_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.164155+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.164482+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_phase_4_5_critic.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.166400+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_priority_scoring.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.168459+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_quick_wins.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.169042+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_recommendations_ranked.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.169686+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer1_solution_mapping.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.170120+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.170709+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_extended_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.171299+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.171711+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_preliminary_issues.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.172186+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:47.172540+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 42
+    },
+    "stage_ms": {
+      "manifest": 29,
+      "parse": 7588,
+      "persist": 407
+    },
+    "structured": [
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+25 rows gained facts[], +64 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/layer1_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=ANB_Client_Research_Report.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 14 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "subcap coverage 36% below 80% threshold (255 of 700 expected for",
+        "detail": "subcap coverage 36% below 80% threshold (255 of 700 expected for unknown)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=11",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/leadership_profile.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/p1_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/p2_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/p3_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/p4_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/preliminary_tech_footprint.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/client_research_qa_v2.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_1_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_2_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_3_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_4_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_5_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_6_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_7_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_8_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_batch_9_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_evidence_validation_report.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_gap_register.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_patch_block.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_phase_4_5_critic.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_priority_scoring.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_quick_wins.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_recommendations_ranked.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer1_solution_mapping.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_extended_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_preliminary_issues.csv — no fingerprint matched (best confidence 0.20); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:23/255 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "INFO/evidence_facts_merged_from_json_twin: +25 rows gained facts[], +64 gained excerpts from the JSON evidence twin",
+      "used variant issue register: 07_governance/layer1_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=ANB_Client_Research_Report.docx count=0",
+      "used docx-extracted recommendations: 14 rec(s) from Assessment_Report.docx §9",
+      "subcap coverage 36% below 80% threshold (255 of 700 expected for unknown)",
+      "insights_derived_from_category_gaps: 4",
+      "firmographics_leadership_healed: count=11",
+      "INFO/pattern_gap: 02_research_workbook/leadership_profile.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/p1_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/p2_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/p3_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/p4_coverage_matrix.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/preliminary_tech_footprint.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 04_reports/client_research_qa_v2.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_1_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_2_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_3_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_4_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_5_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_6_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_7_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_8_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_batch_9_validation.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_evidence_validation_report.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_gap_register.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_patch_block.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_phase_4_5_critic.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_priority_scoring.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_quick_wins.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_recommendations_ranked.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer1_solution_mapping.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_extended_check_results.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_preliminary_issues.csv — no fingerprint matched (best confidence 0.20); 13 generic sections mined",
+      "INFO/pattern_gap: README.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "timeline_events_persisted: 4",
+      "catalogue_unresolved:23/255 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 60,
+      "peer_median": 2.5,
+      "pillar_id": "P1",
+      "score": 3.4,
+      "subcaps_scored": 60
+    },
+    {
+      "peer_benchmarked": 60,
+      "peer_median": 2.38,
+      "pillar_id": "P2",
+      "score": 3.21,
+      "subcaps_scored": 60
+    },
+    {
+      "peer_benchmarked": 56,
+      "peer_median": 2.74,
+      "pillar_id": "P3",
+      "score": 3.38,
+      "subcaps_scored": 56
+    },
+    {
+      "peer_benchmarked": 56,
+      "peer_median": 2.37,
+      "pillar_id": "P4",
+      "score": 3.09,
+      "subcaps_scored": 56
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-20",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:47.898344Z",
+    "created_at": "2026-07-02T23:09:47.898344Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "d7476c23-d137-48f9-9730-91b307ec66b1",
+    "overall_score": 3.23,
+    "request_id": "DMA-ASM-ANB-20260420-0001",
+    "started_at": "2026-07-02T23:09:47.898344Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Reference Data Management scores 2.55/5 against a peer median of 2.0 — at or ahead of the peer benchmark, a relative strength in data and technology that other priorities can build on.",
+      "evidence": [
+        "E-016",
+        "E-042",
+        "E-047",
+        "E-089"
+      ],
+      "magnitude": null,
+      "name": "Reference Data Management",
+      "peer_median": 2.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.55,
+      "so_what": "Protect Reference Data Management as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Reference Data Management",
+      "what": "Reference Data Management scores 2.55/5 against a peer median of 2.0 — at or ahead of the peer benchmark, a relative strength in data and technology that other priorities can build on.",
+      "why": "The linked evidence records: ANB adopted Blend for digital mortgage application in 2018; expanded to Blend Close for hybrid/remote closings End-to-end digital mortgage (application to close); 'faster funding times' reported by Lyons at ANB"
+    },
+    {
+      "body": "Content Marketing & Thought Leadership scores 2.99/5 against a peer median of 2.5 — at or ahead of the peer benchmark, a relative strength in customer experience that other priorities can build on.",
+      "evidence": [
+        "E-013",
+        "E-014",
+        "E-017",
+        "E-019"
+      ],
+      "magnitude": null,
+      "name": "Content Marketing & Thought Leadership",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.99,
+      "so_what": "Protect Content Marketing & Thought Leadership as a proof point: use it to anchor the customer experience story while the true gaps close — Twilio is the platform surface that addresses it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Content Marketing & Thought Leadership",
+      "what": "Content Marketing & Thought Leadership scores 2.99/5 against a peer median of 2.5 — at or ahead of the peer benchmark, a relative strength in customer experience that other priorities can build on.",
+      "why": "The linked evidence records: ANB Mobile app unified personal+business banking in ONE app (recent consolidation); Features: in-app enrollment (NEW), 24/7 access, Touch ID/Face ID, mobile deposit, transfers, bill pay Customer pain points in reviews: Zelle integration UX issue (advertised, hard to find"
+    },
+    {
+      "body": "Life Event Triggers scores 3.02/5 against a peer median of 2.0 — at or ahead of the peer benchmark, a relative strength in customer experience that other priorities can build on.",
+      "evidence": [
+        "E-026"
+      ],
+      "magnitude": null,
+      "name": "Life Event Triggers",
+      "peer_median": 2.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 3.02,
+      "so_what": "Protect Life Event Triggers as a proof point: use it to anchor the customer experience story while the true gaps close — Twilio is the platform surface that addresses it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Life Event Triggers",
+      "what": "Life Event Triggers scores 3.02/5 against a peer median of 2.0 — at or ahead of the peer benchmark, a relative strength in customer experience that other priorities can build on.",
+      "why": "The linked evidence records: Continuous award recognition compilation: Best Bank 2002-2025; Best Mortgage Company 2005-2025; Best Company Culture 2018-2020; Best Employer (100+ employees) 2010-2022; Best Place to Work 2020-2022; Best Innovative Workplace 2018-2019; Overall Leadership 2018-2019"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "71 of 71 subcaps on thin evidence"
+      ],
+      "rationale": "Roadmap & Planning averages 3.5/5 over 71 scored subcaps; ceiling 4.0 reflects thin evidence density (0/71 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Model Risk Management averages 3.2/5 over 75 scored subcaps; ceiling 3.7 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Production Transition averages 3.5/5 over 75 scored subcaps; ceiling 4.0 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Champion Coordination averages 3.5/5 over 75 scored subcaps; ceiling 4.0 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Content Marketing & Thought Leadership averages 3.0/5 over 75 scored subcaps; ceiling 3.5 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Income & Employment Verification averages 3.7/5 over 75 scored subcaps; ceiling 4.2 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Interaction History averages 3.1/5 over 75 scored subcaps; ceiling 3.6 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Life Event Triggers averages 3.0/5 over 75 scored subcaps; ceiling 3.5 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Approval Automation averages 3.4/5 over 70 scored subcaps; ceiling 3.9 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Channel Fraud Controls averages 3.2/5 over 75 scored subcaps; ceiling 3.7 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "60 of 60 subcaps on thin evidence"
+      ],
+      "rationale": "Disclosure Management averages 3.8/5 over 60 scored subcaps; ceiling 4.3 reflects thin evidence density (0/60 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Resilience Governance averages 3.3/5 over 75 scored subcaps; ceiling 3.8 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "Reference Data Management averages 2.5/5 over 75 scored subcaps; ceiling 3.0 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "65 of 65 subcaps on thin evidence"
+      ],
+      "rationale": "Predictive Analytics & Intelligence averages 3.2/5 over 65 scored subcaps; ceiling 3.7 reflects thin evidence density (0/65 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Cloud Strategy & Infrastructure averages 3.3/5 over 70 scored subcaps; ceiling 3.8 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Software Supply Chain Security averages 3.3/5 over 70 scored subcaps; ceiling 3.8 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "financial_highlights",
+      "detail": "Strong fundamentals (ROA 1.52%, ROE 13.90%, efficiency 44.11%) give Amarillo National Bank the balance-sheet capacity to fund a multi-year transformation without external capital.",
+      "evidence": [
+        "E-057",
+        "E-074",
+        "E-079",
+        "E-059"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "FINANCIAL",
+      "label": "Strong fundamentals",
+      "metric": "ROA 1.52%",
+      "peer_context": null,
+      "play": "Prioritize the Twilio conversation against Champion Coordination — highest-fit surface at 53/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Strong fundamentals (ROA 1.52%, ROE 13.90%, efficiency 44.11%) give Amarillo National Bank the balance-sheet capacity to fund a multi-year transformation without external capital.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Reference Data Management at 2.55/5 is one of Amarillo National Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-016",
+        "E-042",
+        "E-047",
+        "E-089"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Reference Data Management at 2.55/5 is one of Amarillo…",
+      "metric": null,
+      "peer_context": null,
+      "play": "Prioritize the Twilio conversation against Champion Coordination — highest-fit surface at 53/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Reference Data Management at 2.55/5 is one of Amarillo National Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Content Marketing & Thought Leadership at 2.99/5 is one of Amarillo National Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-013",
+        "E-014",
+        "E-017",
+        "E-019"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Content Marketing & Thought Leadership at 2.99/5 is one of…",
+      "metric": null,
+      "peer_context": null,
+      "play": "Prioritize the Twilio conversation against Champion Coordination — highest-fit surface at 53/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C1",
+      "text": "Content Marketing & Thought Leadership at 2.99/5 is one of Amarillo National Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

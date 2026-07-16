@@ -1,0 +1,89 @@
+{
+  "entity_display_id": "corporate-america-credit-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "M3+ commercial maturity in pricing innovation; demonstrates board-level product-strategy capability and sales-channel execution for B2B wholesale model",
+        "source_kind": "docx"
+      },
+      "id": "e6c94653-973e-4575-9847-a3903e44cbf8",
+      "involved_subcap_ids": [
+        "P4C4.5.3",
+        "P4C3.4.10",
+        "P4C2.4.13",
+        "P2C3.1.1",
+        "P2C4.2.4",
+        "P2C2.2.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$4,600,000,000",
+          "delta": null,
+          "kpi_label": "Wholesale corporate CU",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Maturity implication",
+      "verbatim_quote": "Maturity implication | M3+ commercial maturity in pricing innovation; demonstrates board-level product-strategy capability and sales-channel execution for B2B wholesale model"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Sales hook for AE: client already runs a tiered, relationship-based pricing program at member-CU level \u2014 proves appetite for advisory work on customer-tier strategy and lifetime-value programs.",
+        "source_kind": "docx"
+      },
+      "id": "de16dac3-82aa-4966-81b9-b196248fe5e8",
+      "involved_subcap_ids": [
+        "P4C4.1.1",
+        "P3C3.5.1",
+        "P3C4.6.1",
+        "P3C3.1.1",
+        "P1C4.3.1",
+        "P4C4.5.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "533",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$4,600,000,000",
+          "delta": null,
+          "kpi_label": "Wholesale corporate CU",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 50,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Zennify relevance",
+      "verbatim_quote": "Zennify relevance | Sales hook for AE: client already runs a tiered, relationship-based pricing program at member-CU level \u2014 proves appetite for advisory work on customer-tier strategy and lifetime-value programs. This is not an early-maturity client; this is a sophisticated B2B model with recurring revenue mechanics."
+    }
+  ]
+}

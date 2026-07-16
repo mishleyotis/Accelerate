@@ -1,0 +1,1585 @@
+{
+  "cards": [
+    {
+      "absent_count": 5,
+      "addressable_subcap_ids": [
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P2C1.2.1",
+        "P2C1.2.8",
+        "P2C3.2.1",
+        "P2C3.2.2",
+        "P2C3.2.3",
+        "P2C3.2.4",
+        "P2C3.2.5",
+        "P2C3.2.6",
+        "P2C3.2.7",
+        "P2C3.2.8",
+        "P2C3.2.IC1",
+        "P2C3.3.4",
+        "P2C3.3.RB1",
+        "P2C3.4.1",
+        "P2C3.4.2",
+        "P2C3.4.3",
+        "P2C3.4.4",
+        "P2C3.5.1",
+        "P2C3.5.2",
+        "P2C3.5.3",
+        "P2C3.5.4",
+        "P2C3.5.5",
+        "P2C3.5.6",
+        "P2C3.5.7",
+        "P2C3.6.1",
+        "P2C3.6.2",
+        "P2C3.6.3",
+        "P2C3.6.4",
+        "P2C3.6.5",
+        "P2C3.6.6",
+        "P2C3.6.7",
+        "P2C3.6.8",
+        "P2C3.7.5",
+        "P2C3.9.1",
+        "P2C3.9.2",
+        "P2C3.9.3",
+        "P2C3.9.4",
+        "P3C1.5.3",
+        "P3C3.2.4",
+        "P3C3.3.1",
+        "P3C3.3.2",
+        "P3C3.3.3",
+        "P3C3.3.4",
+        "P3C3.8.1",
+        "P3C3.8.2",
+        "P3C3.8.3",
+        "P3C3.8.4",
+        "P3C4.1.1",
+        "P3C4.1.2",
+        "P3C4.1.3",
+        "P3C4.1.4",
+        "P3C4.2.1",
+        "P3C4.2.2",
+        "P3C4.2.3",
+        "P3C4.2.4",
+        "P3C4.3.1",
+        "P3C4.3.2",
+        "P3C4.3.3",
+        "P3C4.3.4",
+        "P3C4.5.2",
+        "P3C4.5.3",
+        "P3C4.5.4",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.2.4",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.8.4",
+        "P4C1.8.6",
+        "P4C2.4.1",
+        "P4C2.4.10",
+        "P4C2.4.11",
+        "P4C2.4.12",
+        "P4C2.4.13",
+        "P4C2.4.14",
+        "P4C2.4.15",
+        "P4C2.4.16",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.4.4",
+        "P4C2.4.5",
+        "P4C2.4.6",
+        "P4C2.4.7",
+        "P4C2.4.8",
+        "P4C2.4.9",
+        "P4C2.6.5",
+        "P4C2.7.3",
+        "P4C3.3.2",
+        "P4C3.3.7",
+        "P4C3.4.2",
+        "P4C4.1.1",
+        "P4C4.1.2",
+        "P4C4.2.1",
+        "P4C4.2.2",
+        "P4C4.2.3",
+        "P4C4.2.4",
+        "P4C4.2.5",
+        "P4C4.2.6",
+        "P4C4.4.1",
+        "P4C4.4.2",
+        "P4C4.4.3",
+        "P4C4.4.4",
+        "P4C4.4.5",
+        "P4C4.5.1",
+        "P4C4.5.2",
+        "P4C4.5.3",
+        "P4C4.5.4",
+        "P4C4.5.5",
+        "P4C4.7.1",
+        "P4C4.7.2",
+        "P4C4.7.3",
+        "P4C4.8.1",
+        "P4C4.8.2"
+      ],
+      "conversation_starter": "Salesforce (pillar P2) addresses 117 subcaps, starting with P1C1.4.1; fit is 42/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.4.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.1 (prereq 'Customer data foundation': current no score recorded vs. threshold 3.0, status MISSING).\n3. Sequence: outline a 117-subcap roadmap starting at P1C1.4.1 and extending to 116 additional subcaps.\nNext step: book a Salesforce workshop scoped to P2, covering the 117-subcap addressable surface.",
+      "conversation_starters": [
+        "Zions Bancorporation scores 1.0 on Conversational AI Self-Service (P2C3.2.6) — 1.7 points below the peer median 2.7 [E-007, E-009]. Ask who owns it today, what tooling backs it, and what the review cadence is — Salesforce addresses 117 linked subcaps here and is not ready (prerequisites block deployment) (fit 42/100).",
+        "Probe the blocker first: 'Customer data foundation' (P4C1.1.1) sits at no score recorded vs the 3.0 readiness threshold (MISSING). Their own evidence quantifies the cost: Deposit Balance Inquiry 17% [E-007].",
+        "Peer framing: Bell Bank and Alma Bank are in Zions Bancorporation's benchmark cohort holding the 2.7 median on Conversational AI Self-Service. Sequence Salesforce after Databricks → Tableau; next step is a Salesforce workshop scoped to P2."
+      ],
+      "display_name": "Salesforce",
+      "evidence_ids": [
+        "E-007",
+        "E-009",
+        "E-020",
+        "E-001",
+        "E-010",
+        "E-014",
+        "E-019",
+        "E-030"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.6138,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 37,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 42.6,
+            "value": 0.7105
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -25.7
+          }
+        },
+        "n_addressable": 117,
+        "prereqs": {
+          "P1C2.2.1": {
+            "current_score": null,
+            "name": "Identity & access management",
+            "status": "MISSING",
+            "threshold": 2.5
+          },
+          "P2C1.1.1": {
+            "current_score": null,
+            "name": "Sales process digitization",
+            "status": "MISSING",
+            "threshold": 2.5
+          },
+          "P4C1.1.1": {
+            "current_score": null,
+            "name": "Customer data foundation",
+            "status": "MISSING",
+            "threshold": 3.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks",
+            "tableau",
+            "twilio"
+          ],
+          "rank": 4
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-007",
+              "E-009",
+              "E-020"
+            ],
+            "gap": 3.0,
+            "name": "Conversational AI Self-Service",
+            "opportunity": 0.8576,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.2.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-010",
+              "E-014"
+            ],
+            "gap": 3.0,
+            "name": "Customer Context Visibility (360)",
+            "opportunity": 0.8576,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.4.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-030",
+              "E-038"
+            ],
+            "gap": 3.0,
+            "name": "Knowledge Management",
+            "opportunity": 0.8576,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.6.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-019",
+              "E-034"
+            ],
+            "gap": 3.0,
+            "name": "AI Agent Assist",
+            "opportunity": 0.8576,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.6.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-020",
+              "E-033"
+            ],
+            "gap": 3.0,
+            "name": "Generative AI Strategy & Use Cases",
+            "opportunity": 0.8576,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-026",
+              "E-033"
+            ],
+            "gap": 3.0,
+            "name": "Channel Handoff & Continuity",
+            "opportunity": 0.8415,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.4.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-010",
+              "E-026"
+            ],
+            "gap": 3.0,
+            "name": "Unified Interaction History",
+            "opportunity": 0.8415,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.4.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-020",
+              "E-035",
+              "E-045"
+            ],
+            "gap": 3.0,
+            "name": "Predictive Issue Detection",
+            "opportunity": 0.8415,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.5.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-015",
+              "E-018"
+            ],
+            "gap": 3.0,
+            "name": "Service Process Configuration & Routing",
+            "opportunity": 0.8415,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.5.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-019",
+              "E-044"
+            ],
+            "gap": 3.0,
+            "name": "After-Interaction Wrap-Up Automation",
+            "opportunity": 0.8415,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.6.8",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-027",
+              "E-045"
+            ],
+            "gap": 3.0,
+            "name": "Anticipated Needs Service",
+            "opportunity": 0.8254,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.2.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-010",
+              "E-015"
+            ],
+            "gap": 3.0,
+            "name": "SLA Management",
+            "opportunity": 0.8254,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.5.2",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 41.9,
+      "pillar": "P2",
+      "platform_id": "salesforce",
+      "prereq_checks": [
+        {
+          "current_score": null,
+          "name": "Customer data foundation",
+          "note": "no score recorded for P4C1.1.1",
+          "required_subcap_id": "P4C1.1.1",
+          "status": "MISSING",
+          "threshold": 3.0
+        },
+        {
+          "current_score": null,
+          "name": "Sales process digitization",
+          "note": "no score recorded for P2C1.1.1",
+          "required_subcap_id": "P2C1.1.1",
+          "status": "MISSING",
+          "threshold": 2.5
+        },
+        {
+          "current_score": null,
+          "name": "Identity & access management",
+          "note": "no score recorded for P1C2.2.1",
+          "required_subcap_id": "P1C2.2.1",
+          "status": "MISSING",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 4,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Conversational AI Self-Service",
+        "Customer Context Visibility (360)"
+      ],
+      "opportunity_md": "**Salesforce** at 42/100 fit addresses 117 scored capability gaps in P2, led by Conversational AI Self-Service. Conversational AI Self-Service scores 1.0/5 against a 2.7 peer median; Customer Context Visibility (360) is the next surface."
+    },
+    {
+      "absent_count": 1,
+      "addressable_subcap_ids": [
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.2.4",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.8.4",
+        "P4C1.8.6",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.4.1",
+        "P4C2.4.10",
+        "P4C2.4.11",
+        "P4C2.4.12",
+        "P4C2.4.13",
+        "P4C2.4.14",
+        "P4C2.4.15",
+        "P4C2.4.16",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.4.4",
+        "P4C2.4.5",
+        "P4C2.4.6",
+        "P4C2.4.7",
+        "P4C2.4.8",
+        "P4C2.4.9",
+        "P4C2.6.5",
+        "P4C3.3.2",
+        "P4C3.3.7"
+      ],
+      "conversation_starter": "Databricks (pillar P4) addresses 29 subcaps, starting with P4C1.2.1; fit is 45/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P4C1.2.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.2 (prereq 'Data lake / lakehouse foundation': current no score recorded vs. threshold 2.5, status MISSING).\n3. Sequence: outline a 29-subcap roadmap starting at P4C1.2.1 and extending to 28 additional subcaps.\nNext step: book a Databricks workshop scoped to P4, covering the 29-subcap addressable surface.",
+      "conversation_starters": [
+        "Zions Bancorporation scores 1.0 on Generative AI Strategy & Use Cases (P4C2.4.7) — 1.7 points below the peer median 2.7 [E-009, E-020]. Ask who owns it today, what tooling backs it, and what the review cadence is — Databricks addresses 29 linked subcaps here and is not ready (prerequisites block deployment) (fit 45/100).",
+        "Probe the blocker first: 'Data lake / lakehouse foundation' (P4C1.1.2) sits at no score recorded vs the 2.5 readiness threshold (MISSING). Their own evidence quantifies the cost: Phase CC Innovation 6 months [E-020].",
+        "Peer framing: Bell Bank and Alma Bank are in Zions Bancorporation's benchmark cohort holding the 2.7 median on Generative AI Strategy & Use Cases. Sequence Databricks after Tableau → Twilio; next step is a Databricks workshop scoped to P4."
+      ],
+      "display_name": "Databricks",
+      "evidence_ids": [
+        "E-009",
+        "E-020",
+        "E-033",
+        "E-058",
+        "E-034",
+        "E-023",
+        "E-013",
+        "E-014"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5165,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 37,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 47.0,
+            "value": 0.783
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -27.4
+          }
+        },
+        "n_addressable": 29,
+        "prereqs": {
+          "P3C1.1.1": {
+            "current_score": null,
+            "name": "Cloud infrastructure baseline",
+            "status": "MISSING",
+            "threshold": 2.5
+          },
+          "P4C1.1.2": {
+            "current_score": null,
+            "name": "Data lake / lakehouse foundation",
+            "status": "MISSING",
+            "threshold": 2.5
+          },
+          "P4C2.1.1": {
+            "current_score": null,
+            "name": "Data governance",
+            "status": "MISSING",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "twilio"
+          ],
+          "rank": 3
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-009",
+              "E-020",
+              "E-033"
+            ],
+            "gap": 3.0,
+            "name": "Generative AI Strategy & Use Cases",
+            "opportunity": 0.8576,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-058"
+            ],
+            "gap": 3.0,
+            "name": "Natural Language Processing (NLP)",
+            "opportunity": 0.8254,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "Speech-to-Text & Conversation Intelligence",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.16",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-034"
+            ],
+            "gap": 3.0,
+            "name": "Next Best Actions & Recommendations",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-023"
+            ],
+            "gap": 3.0,
+            "name": "Sentiment Analysis & Voice of Customer",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "AI-Powered Content Generation",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.8",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-013",
+              "E-014",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Synthetic Data Generation",
+            "opportunity": 0.7932,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C1.8.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-009",
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "Feature Store & Feature Lifecycle Management",
+            "opportunity": 0.7932,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.12",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-009",
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "Experiment Tracking + Model Registry Operating Model",
+            "opportunity": 0.7932,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.13",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-009",
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "Model CI/CD & Controlled Promotion",
+            "opportunity": 0.7932,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.14",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-009",
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "Drift Detection (Data Drift + Concept Drift)",
+            "opportunity": 0.7932,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.15",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-009",
+              "E-009",
+              "E-009"
+            ],
+            "gap": 3.0,
+            "name": "Real-Time Personalization",
+            "opportunity": 0.7932,
+            "peer_median": 2.67,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C2.4.3",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 44.6,
+      "pillar": "P4",
+      "platform_id": "databricks",
+      "prereq_checks": [
+        {
+          "current_score": null,
+          "name": "Data lake / lakehouse foundation",
+          "note": "no score recorded for P4C1.1.2",
+          "required_subcap_id": "P4C1.1.2",
+          "status": "MISSING",
+          "threshold": 2.5
+        },
+        {
+          "current_score": null,
+          "name": "Data governance",
+          "note": "no score recorded for P4C2.1.1",
+          "required_subcap_id": "P4C2.1.1",
+          "status": "MISSING",
+          "threshold": 2.5
+        },
+        {
+          "current_score": null,
+          "name": "Cloud infrastructure baseline",
+          "note": "no score recorded for P3C1.1.1",
+          "required_subcap_id": "P3C1.1.1",
+          "status": "MISSING",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 3,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Generative AI Strategy & Use Cases",
+        "Natural Language Processing (NLP)"
+      ],
+      "opportunity_md": "**Databricks** at 45/100 fit addresses 29 scored capability gaps in P4, led by Generative AI Strategy & Use Cases. Generative AI Strategy & Use Cases scores 1.0/5 against a 2.7 peer median; Natural Language Processing (NLP) is the next surface."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P2C3.1.1",
+        "P2C3.1.2",
+        "P2C3.1.3",
+        "P2C3.1.4",
+        "P2C3.1.5",
+        "P2C3.1.6",
+        "P2C3.7.1",
+        "P2C3.7.2",
+        "P2C3.7.3",
+        "P2C3.7.4",
+        "P2C3.8.1",
+        "P2C3.8.2",
+        "P2C3.8.3",
+        "P2C3.8.4",
+        "P2C3.8.5",
+        "P2C3.8.6",
+        "P2C3.9.5",
+        "P3C4.5.1",
+        "P4C2.2.2",
+        "P4C2.2.3"
+      ],
+      "conversation_starter": "Tableau (pillar P4) addresses 23 subcaps, starting with P1C1.4.1; fit is 51/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.4.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C2.1.1 (prereq 'Governed reporting layer': current no score recorded vs. threshold 2.5, status MISSING).\n3. Sequence: outline a 23-subcap roadmap starting at P1C1.4.1 and extending to 22 additional subcaps.\nNext step: book a Tableau workshop scoped to P4, covering the 23-subcap addressable surface.",
+      "conversation_starters": [
+        "Zions Bancorporation scores 1.0 on Service Journey Design (P2C3.1.2) — 1.7 points below the peer median 2.7 [E-026, E-041]. Ask who owns it today, what tooling backs it, and what the review cadence is — Tableau addresses 23 linked subcaps here and is not ready (prerequisites block deployment) (fit 51/100). Tableau is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Governed reporting layer' (P4C2.1.1) sits at no score recorded vs the 2.5 readiness threshold (MISSING). That gap is what keeps Zions Bancorporation from landing Tableau now.",
+        "Peer framing: Bell Bank and Alma Bank are in Zions Bancorporation's benchmark cohort holding the 2.7 median on Service Journey Design. Sequence Tableau; next step is a Tableau workshop scoped to P4."
+      ],
+      "display_name": "Tableau",
+      "evidence_ids": [
+        "E-026",
+        "E-041",
+        "E-020",
+        "E-023",
+        "E-024",
+        "E-036",
+        "E-004",
+        "E-005"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Tableau"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.5668,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 120,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 42.8,
+            "value": 0.7127
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -31.5
+          }
+        },
+        "n_addressable": 23,
+        "prereqs": {
+          "P4C2.1.1": {
+            "current_score": null,
+            "name": "Governed reporting layer",
+            "status": "MISSING",
+            "threshold": 2.5
+          },
+          "P4C3.1.1": {
+            "current_score": null,
+            "name": "BI / analytics literacy",
+            "status": "MISSING",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [],
+          "rank": 1
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-026",
+              "E-041"
+            ],
+            "gap": 3.0,
+            "name": "Service Journey Design",
+            "opportunity": 0.8254,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-020",
+              "E-023"
+            ],
+            "gap": 3.0,
+            "name": "Sentiment Analysis",
+            "opportunity": 0.8254,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.7.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-023"
+            ],
+            "gap": 3.0,
+            "name": "Closed-Loop Action",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.7.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-024"
+            ],
+            "gap": 3.0,
+            "name": "Session Replay & Analysis",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.8.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-041"
+            ],
+            "gap": 3.0,
+            "name": "Journey Friction Scoring",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.8.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-036"
+            ],
+            "gap": 3.0,
+            "name": "Vulnerable Customer Reporting",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.9.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-005",
+              "E-011"
+            ],
+            "gap": 2.5,
+            "name": "Workforce Management",
+            "opportunity": 0.7147,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.8.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-006",
+              "E-021",
+              "E-022"
+            ],
+            "gap": 2.5,
+            "name": "Continuous Improvement",
+            "opportunity": 0.7147,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.8.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-024",
+              "E-047"
+            ],
+            "gap": 2.5,
+            "name": "Quality Assurance Program",
+            "opportunity": 0.7013,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.8.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-002",
+              "E-008"
+            ],
+            "gap": 2.5,
+            "name": "Channel Strategy & Mix",
+            "opportunity": 0.6878,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-011",
+              "E-047"
+            ],
+            "gap": 2.5,
+            "name": "Service Segmentation & Tiers",
+            "opportunity": 0.6878,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-031",
+              "E-057"
+            ],
+            "gap": 2.5,
+            "name": "Assistive Technology Support",
+            "opportunity": 0.6878,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.1.6",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 51.3,
+      "pillar": "P4",
+      "platform_id": "tableau",
+      "prereq_checks": [
+        {
+          "current_score": null,
+          "name": "Governed reporting layer",
+          "note": "no score recorded for P4C2.1.1",
+          "required_subcap_id": "P4C2.1.1",
+          "status": "MISSING",
+          "threshold": 2.5
+        },
+        {
+          "current_score": null,
+          "name": "BI / analytics literacy",
+          "note": "no score recorded for P4C3.1.1",
+          "required_subcap_id": "P4C3.1.1",
+          "status": "MISSING",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 1,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Service Journey Design",
+        "Sentiment Analysis"
+      ],
+      "opportunity_md": "**Tableau** at 51/100 fit addresses 23 scored capability gaps in P4, led by Service Journey Design. Service Journey Design scores 1.0/5 against a 2.7 peer median; Sentiment Analysis is the next surface. The platform family is confirmed absent from the current stack (Tableau) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P2C3.3.1",
+        "P2C3.3.2",
+        "P2C3.3.3",
+        "P2C3.3.5",
+        "P2C3.3.6",
+        "P2C3.3.7"
+      ],
+      "conversation_starter": "Twilio (pillar P2) addresses 9 subcaps, starting with P1C1.4.1; fit is 50/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.4.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P2C3.1.1 (prereq 'Omnichannel CX baseline': current 1.5 vs. threshold 2.5, status UNMET).\n3. Sequence: outline a 9-subcap roadmap starting at P1C1.4.1 and extending to 8 additional subcaps.\nNext step: book a Twilio workshop scoped to P2, covering the 9-subcap addressable surface.",
+      "conversation_starters": [
+        "Zions Bancorporation scores 1.0 on Conversational IVR with GenAI (P2C3.3.7) — 1.7 points below the peer median 2.7 [E-002, E-018]. Ask who owns it today, what tooling backs it, and what the review cadence is — Twilio addresses 9 linked subcaps here and is not ready (prerequisites block deployment) (fit 50/100). Twilio is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Omnichannel CX baseline' (P2C3.1.1) sits at 1.5 vs the 2.5 readiness threshold (UNMET). Their own evidence quantifies the cost: Phase IVR Routing 7.5 months [E-018].",
+        "Peer framing: Bell Bank and Alma Bank are in Zions Bancorporation's benchmark cohort holding the 2.7 median on Conversational IVR with GenAI. Sequence Twilio after Tableau; next step is a Twilio workshop scoped to P2."
+      ],
+      "display_name": "Twilio",
+      "evidence_ids": [
+        "E-002",
+        "E-018",
+        "E-029",
+        "E-008",
+        "E-058",
+        "E-025",
+        "E-003",
+        "E-004"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Twilio"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.5522,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 118,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 41.0,
+            "value": 0.6835
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -30.8
+          }
+        },
+        "n_addressable": 9,
+        "prereqs": {
+          "P1C3.2.1": {
+            "current_score": null,
+            "name": "Communications compliance",
+            "status": "MISSING",
+            "threshold": 3.0
+          },
+          "P2C3.1.1": {
+            "current_score": 1.5,
+            "name": "Omnichannel CX baseline",
+            "status": "UNMET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau"
+          ],
+          "rank": 2
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-002",
+              "E-018",
+              "E-029"
+            ],
+            "gap": 3.0,
+            "name": "Conversational IVR with GenAI",
+            "opportunity": 0.8415,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.3.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-008",
+              "E-058"
+            ],
+            "gap": 3.0,
+            "name": "Digital Messaging & Chat",
+            "opportunity": 0.8254,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.3.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-025"
+            ],
+            "gap": 3.0,
+            "name": "Video Banking",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.3.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-025"
+            ],
+            "gap": 3.0,
+            "name": "Voice-Activated Banking",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.3.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-025"
+            ],
+            "gap": 3.0,
+            "name": "Smart Speaker Integration",
+            "opportunity": 0.8093,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.3.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-002",
+              "E-003",
+              "E-004"
+            ],
+            "gap": 2.0,
+            "name": "Contact Center Excellence",
+            "opportunity": 0.5717,
+            "peer_median": 2.67,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C3.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-051",
+              "E-063"
+            ],
+            "gap": 2.0,
+            "name": "Omnichannel Vision",
+            "opportunity": 0.5307,
+            "peer_median": 3.08,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C1.4.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-039",
+              "E-053",
+              "E-063"
+            ],
+            "gap": 1.5,
+            "name": "Digital Channel Priorities",
+            "opportunity": 0.4288,
+            "peer_median": 3.08,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.4.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-072"
+            ],
+            "gap": 1.0,
+            "name": "Branch/Digital Balance",
+            "opportunity": 0.2607,
+            "peer_median": 3.08,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.4.3",
+            "tier": 3
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 50.2,
+      "pillar": "P2",
+      "platform_id": "twilio",
+      "prereq_checks": [
+        {
+          "current_score": 1.5,
+          "name": "Omnichannel CX baseline",
+          "note": null,
+          "required_subcap_id": "P2C3.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": null,
+          "name": "Communications compliance",
+          "note": "no score recorded for P1C3.2.1",
+          "required_subcap_id": "P1C3.2.1",
+          "status": "MISSING",
+          "threshold": 3.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 2,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Conversational IVR with GenAI",
+        "Digital Messaging & Chat"
+      ],
+      "opportunity_md": "**Twilio** at 50/100 fit addresses 9 scored capability gaps in P2, led by Conversational IVR with GenAI. Conversational IVR with GenAI scores 1.0/5 against a 2.7 peer median; Digital Messaging & Chat is the next surface. The platform family is confirmed absent from the current stack (Twilio) — greenfield rather than displacement. 1 prerequisite gate deployment (e.g. Omnichannel CX baseline: 1.5 vs 2.5 threshold)."
+    },
+    {
+      "absent_count": 0,
+      "addressable_subcap_ids": [
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P2C2.2.7",
+        "P2C2.2.8",
+        "P2C2.3.5",
+        "P2C2.5.2",
+        "P2C2.7.4",
+        "P2C4.2.1",
+        "P2C4.5.6",
+        "P2C4.6.5",
+        "P3C3.8.RB1"
+      ],
+      "conversation_starter": "nCino (pillar P3) addresses 12 subcaps, starting with P1C1.4.1; fit is 37/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.4.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P3C2.1.1 (prereq 'Loan origination digitization': current no score recorded vs. threshold 2.5, status MISSING).\n3. Sequence: outline a 12-subcap roadmap starting at P1C1.4.1 and extending to 11 additional subcaps.\nNext step: book a nCino workshop scoped to P3, covering the 12-subcap addressable surface.",
+      "conversation_starters": [
+        "Zions Bancorporation scores 1.0 on Next Best Action (NBA) (P2C4.2.1) — 1.8 points below the peer median 2.8 [E-019, E-034]. Ask who owns it today, what tooling backs it, and what the review cadence is — nCino addresses 12 linked subcaps here and is not ready (prerequisites block deployment) (fit 37/100).",
+        "Probe the blocker first: 'Loan origination digitization' (P3C2.1.1) sits at no score recorded vs the 2.5 readiness threshold (MISSING). Their own evidence quantifies the cost: Phase Agent Automation 4.5 months [E-019].",
+        "Peer framing: Bell Bank and Alma Bank are in Zions Bancorporation's benchmark cohort holding the 2.8 median on Next Best Action (NBA). Sequence nCino after Salesforce → Databricks; next step is a nCino workshop scoped to P3."
+      ],
+      "display_name": "nCino",
+      "evidence_ids": [
+        "E-019",
+        "E-034",
+        "E-051",
+        "E-063",
+        "E-039",
+        "E-053",
+        "E-072",
+        "E-073"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.2877,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 131,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 34.9,
+            "value": 0.5818
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -22.8
+          }
+        },
+        "n_addressable": 12,
+        "prereqs": {
+          "P3C2.1.1": {
+            "current_score": null,
+            "name": "Loan origination digitization",
+            "status": "MISSING",
+            "threshold": 2.5
+          },
+          "P3C2.2.1": {
+            "current_score": null,
+            "name": "Commercial lending workflow",
+            "status": "MISSING",
+            "threshold": 2.0
+          },
+          "P3C3.1.1": {
+            "current_score": null,
+            "name": "Document management",
+            "status": "MISSING",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "salesforce",
+            "databricks",
+            "tableau",
+            "twilio"
+          ],
+          "rank": 5
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-019",
+              "E-034"
+            ],
+            "gap": 3.0,
+            "name": "Next Best Action (NBA)",
+            "opportunity": 0.8254,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C4.2.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-034"
+            ],
+            "gap": 3.0,
+            "name": "AI Financial Advisor",
+            "opportunity": 0.769,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C4.6.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [],
+            "gap": 2.5,
+            "name": "Cognitive Accessibility",
+            "opportunity": 0.6833,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C2.2.8",
+            "tier": null
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-034"
+            ],
+            "gap": 2.5,
+            "name": "CLV-Based Segmentation",
+            "opportunity": 0.6409,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C4.5.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Accessible Application Design",
+            "opportunity": 0.5467,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C2.2.7",
+            "tier": null
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "AML/Sanctions Screening",
+            "opportunity": 0.5467,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C2.3.5",
+            "tier": null
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Disclosure Delivery",
+            "opportunity": 0.5467,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C2.5.2",
+            "tier": null
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Continuous Improvement Process",
+            "opportunity": 0.5467,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C2.7.4",
+            "tier": null
+          },
+          {
+            "e_ids": [
+              "E-051",
+              "E-063"
+            ],
+            "gap": 2.0,
+            "name": "Omnichannel Vision",
+            "opportunity": 0.5307,
+            "peer_median": 3.08,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C1.4.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-039",
+              "E-053",
+              "E-063"
+            ],
+            "gap": 1.5,
+            "name": "Digital Channel Priorities",
+            "opportunity": 0.4288,
+            "peer_median": 3.08,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.4.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-072"
+            ],
+            "gap": 1.0,
+            "name": "Branch/Digital Balance",
+            "opportunity": 0.2607,
+            "peer_median": 3.08,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.4.3",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-073"
+            ],
+            "gap": 1.0,
+            "name": "Regulatory Report Suite",
+            "opportunity": 0.2607,
+            "peer_median": 2.83,
+            "pillar": "P3",
+            "score": 3.0,
+            "subcap_id": "P3C3.8.RB1",
+            "tier": 3
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 37.1,
+      "pillar": "P3",
+      "platform_id": "ncino",
+      "prereq_checks": [
+        {
+          "current_score": null,
+          "name": "Loan origination digitization",
+          "note": "no score recorded for P3C2.1.1",
+          "required_subcap_id": "P3C2.1.1",
+          "status": "MISSING",
+          "threshold": 2.5
+        },
+        {
+          "current_score": null,
+          "name": "Commercial lending workflow",
+          "note": "no score recorded for P3C2.2.1",
+          "required_subcap_id": "P3C2.2.1",
+          "status": "MISSING",
+          "threshold": 2.0
+        },
+        {
+          "current_score": null,
+          "name": "Document management",
+          "note": "no score recorded for P3C3.1.1",
+          "required_subcap_id": "P3C3.1.1",
+          "status": "MISSING",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 5,
+      "state": "PENDING_REVIEW",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Next Best Action (NBA)",
+        "AI Financial Advisor"
+      ],
+      "opportunity_md": "**nCino** at 37/100 fit addresses 12 scored capability gaps in P3, led by Next Best Action (NBA). Next Best Action (NBA) scores 1.0/5 against a 2.8 peer median; AI Financial Advisor is the next surface."
+    }
+  ],
+  "entity_display_id": "zions-bancorporation-0001",
+  "narrative": {
+    "gap_prioritization_md": "",
+    "recommendations_md": "Gap Addressed: Agent Enablement\nZennify Solution: Salesforce FSC + Service Cloud Voice + Knowledge Management\nEvidence:,,,\nReplace Pega/Pegasus link aggregator with Salesforce FSC unified desktop integrating Genesys SCV for CTI screen pop, centralized knowledge base, and real-time customer 360 view. Directly addresses root cause of AHT inflation (30+ app context switches) and 30% attrition linked to poor agent tooling (E-005, E-049). Phase 1 priority.",
+    "roadmap_md": "The phased approach aligns with Zennify's existing proposal structure (E-018, E-019, E-020) and delivers projected benefits of $29.8M over 5 years (E-022) against a Phase 1-2 investment of $1.27M (E-039)."
+  },
+  "pillar_offerings": {
+    "P1": [],
+    "P2": [],
+    "P3": [],
+    "P4": []
+  },
+  "run_request_id": "DMA-ASM-ZIONS-20260306-0001"
+}

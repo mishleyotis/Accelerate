@@ -1,0 +1,89 @@
+{
+  "entity_display_id": "sound-credit-union-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2.5.2",
+        "P3C1.4.3",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "0ff8fbfb-eca7-4d72-8688-b9fe2a84cb8a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-090",
+        "E-093",
+        "E-041"
+      ],
+      "linked_subcap_id": "P4C2.5.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Model Validation & Testing a near-term focus for Sound Credit Union: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-041].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "[Revised with Explorium T1 technographic validation",
+      "what_text": "Model Validation & Testing is one of Sound Credit Union's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Sound Credit Union's ability to deliver a stronger data and technology foundation [E-093].",
+      "why_text": "The assessment found: “Nancy Sternitzky spoke at CULytics Day 2025 on 'Smart AI Guardrails' panel — Sound CU CIDO presenting on AI governance at premier CU analytics conference CEO requested summarizing months of branch” [E-090]. At 2.5 out of 5, Model Validation & Testing shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture — Score 2.29 vs Median 2.40 (-0.11)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience — Score 2.51 vs Median 2.63 (-0.12)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — Score 2.81 vs Median 2.63 (+0.18)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology — Score 2.92 vs Median 2.63 (+0.29)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "[Every recommendation has: ROOT CAUSE with E-IDs → SOLUTION with Zennify offering → EXPECTED OUTCOMES. All validated against Explorium T1 technographic scan. No investment amounts per R6.]"
+  },
+  "run_request_id": "DMA-ASM-SOUND-20260407-0001"
+}

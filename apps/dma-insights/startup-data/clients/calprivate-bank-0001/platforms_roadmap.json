@@ -1,0 +1,173 @@
+{
+  "entity_display_id": "calprivate-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C3 score 2.54 \u2192 4.0 (peer median 2.50)",
+        "agent": "6 Agent"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "agent 6 Agent",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.98",
+          "metric": "agent 6 Agent",
+          "outcomes": {
+            "effort": "M",
+            "metric": "agent 6 Agent",
+            "peer": "Ponce Bank",
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-001",
+          "title": "Salesforce Financial Services Cloud \u2014 Complete the CRM Architecture"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.46",
+          "metric": "P4C3 score 2.54 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C3 score 2.54 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-002",
+          "title": "MuleSoft Anypoint Platform \u2014 Enterprise Integration Backbone"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+1.48",
+          "metric": "P2C3 score 2.52 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C3 score 2.52 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-003",
+          "title": "Salesforce Service Cloud \u2014 RM Enablement and Service Systematization"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C3, P4C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": "nCino",
+          "maturity_lift": "+1.91",
+          "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "R-004",
+          "title": "nCino Platform Expansion \u2014 Commercial LOS to Full Commercial Banking Suite"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.79",
+          "metric": "P4C1 score 2.21 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.21 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-005",
+          "title": "Salesforce Data Cloud \u2014 Unified Customer Intelligence Layer"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.57",
+          "metric": "P2C1 score 2.43 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 2.43 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-006",
+          "title": "Salesforce Marketing Cloud \u2014 Digital Marketing Automation"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2, P4C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.91",
+          "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-007",
+          "title": "Einstein AI and Agentforce \u2014 AI-Driven Relationship Banking"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+1.91",
+          "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 2.09 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "R-008",
+          "title": "Salesforce Experience Cloud \u2014 HNW Digital Portal and RIA Partner Network"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2"
+    }
+  ],
+  "run_request_id": "DMA-RES-CPB-20260527-0001",
+  "total_duration_months": 12
+}

@@ -1,0 +1,157 @@
+{
+  "entity_display_id": "vno-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.82",
+          "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Tenant Intelligence Platform Priority: 8.6  \u2192  Sales Cloud + Data Cloud"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.82",
+          "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Post-Solomon Internal Controls Platform Priority: 7.8  \u2192  Salesforce Shield + Custom Compliance Workflow"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.82",
+          "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "BMS Operational Unification Priority: 7.7  \u2192  Field Service Lightning"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 2.34 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C1 score 2.34 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Tableau",
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.66",
+          "metric": "P4C1 score 2.34 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.34 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-04",
+          "title": "BI Modernization + AI Execution Platform Priority: 7.6  \u2192  Tableau + Agentforce/Einstein AI"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.82",
+          "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "ESG Reporting Automation Priority: 6.4  \u2192  Net Zero Cloud"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+2.82",
+          "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Unified Tenant Portal Priority: 6.2  \u2192  Experience Cloud"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C3, P4C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.82",
+          "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.18 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Enterprise Integration Layer Priority: 5.5  \u2192  MuleSoft"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C3"
+    }
+  ],
+  "run_request_id": "DMA-ASM-VNO-20260512-0001",
+  "total_duration_months": 12
+}

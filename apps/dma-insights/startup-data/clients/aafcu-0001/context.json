@@ -1,0 +1,719 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "aafcu-0001",
+  "financials": {
+    "metrics": {
+      "net_income": 34906000.0,
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 426,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Aafcu has named role 'Vice President, Enterprise Solutions\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Wings 2024 annual report: mobile app launched April 2024\u2026"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$9.2B assets \u00b7 FY2025 \u00b7 +1.9% CAGR",
+        "regulator": "NCUA (National Credit Union Administration)",
+        "series": {
+          "net_income_m": [
+            50.3,
+            34.9,
+            null
+          ],
+          "total_assets": [
+            null,
+            9.07,
+            9.24
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        9066879000.0,
+        9240000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2024,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          9066879000.0,
+          9240000000.0
+        ]
+      }
+    ],
+    "years": [
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Texas"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gail Enda",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO / CTO / CISO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "AAFCU is a credit union headquartered in Fort Worth, TX. It reports $9.2 billion in total assets and has operated since 1936. It is regulated by NCUA (National Credit Union Administration) and employs approximately 426 people across 47 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (National Credit Union Administration)",
+    "regulatory_standing": {
+      "as_of": "2026-04-01",
+      "e_id": "E-008",
+      "label": "Clean regulatory standing",
+      "note": "NEGATIVE SEARCH RESULT: No formal enforcement orders, administrative orders, civil money penalties, or consent orders identified for American Airlines FCU in NCUA enforcement records search."
+    },
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-099",
+        "excerpt": "DIRECT P2C1.2.7 + P2C1.3.2 VIDEO/WEBINAR EVIDENCE: AAFCU runs 'weekly webinars which are also available on our YouTube channel' (per President's Corner). YouTube channel ID UCEo8aQXrOlU9wSArihD75Aw operating with archive",
+        "title": "Aafcu runs weekly webinars which are also available on our YouTube\u2026",
+        "type": "webinar",
+        "url": "https://www.aacreditunion.org/learning/financial-wellness/ + linkedin.com/company/aacreditunion"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "DIRECT P1C3.1.1 INNOVATION VISION EVIDENCE \u2014 Anthony Fletcher, VP Payments & Digital Strategy at AAFCU, quoted: 'Fintech provides the Credit Union with an opportunity to stay competitive in a rapidly evolving market.",
+        "title": "Anthony Fletcher, VP Payments & Digital Strategy at AAFCU, quoted",
+        "type": "article",
+        "url": "https://www.aacreditunion.org/blog/future-banking-fintech/"
+      },
+      {
+        "author": null,
+        "date": "2010-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-080",
+        "excerpt": "DIRECT DESIGN THINKING EVIDENCE \u2014 Pedro Noda (eMarketing Manager/Webmaster at AAFCU) quoted on 2010 web redesign: 'Working with our stakeholders and member-owners, we studied the behaviors of financial customers to bette",
+        "title": "Pedro Noda (eMarketing Manager/Webmaster at AAFCU) quoted on 2010 web\u2026",
+        "type": "article",
+        "url": "https://www.cutimes.com/2010/aafcu-new-website"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-087",
+        "excerpt": "DIRECT P1C4.4 + P1C4.7 EVIDENCE: AAFCU LinkedIn post: 'Aviation Week has launched! Join us at all 46 of our branches for a week of fun with $1,000 cash prizes, treats and more.' Annual member-engagement programmatic even",
+        "title": "Direct P1C4.4",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/aacreditunion"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-026",
+        "excerpt": "CEO public communication channels: weekly webinars (also available on YouTube channel), Navigator interactive financial guide, online blog, quarterly magazine 'cent$'. Multi-channel content marketing infrastructure alrea",
+        "title": "CEO public communication channels: weekly webinars (also available on\u2026",
+        "type": "webinar",
+        "url": "https://www.aacreditunion.org/about-us/presidents-corner/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-100",
+        "excerpt": "DIRECT P2C1.2.4 SOCIAL MEDIA PRESENCE \u2014 Quantified snapshot (April 2026):",
+        "title": "Direct P2C1.2.4 Social Media Presence",
+        "type": "linkedin-post",
+        "url": "https://www.facebook.com/AmericanAirlinesCreditUnion/ + https://www.instagram.com/aacreditunion/ + https://www.linkedin.com/company/aacreditunion + https://www.youtube.com/channel/UCEo8aQXrOlU9wSArihD75Aw"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "628768eb-355f-41e0-8a8e-136390e0ec3b",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Benchmark section Section 7 contains range-style evidence reference: 'E-015 through E-021'. Peer scoring attribution should use explicit E-ID enumeration per AP-04."
+    },
+    {
+      "id": "fdb2e5f5-a24e-4e5f-b506-173d9958bf25",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "run_manifest.json missing 'evidence_mode' key. RESEARCH_HANDOFF mode confirmed via P1='SKIPPED_RESEARCH_HANDOFF' in phase_complete, report text, and calculation_chain. No data integrity impact."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Value grew from $9.1B (2024) to $9.2B (2025) \u2014 1.9% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 4.0,
+        "P1C5": 3.5,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 4.0,
+        "P3C1": 3.5,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.56,
+      "peer_name": "PenFed Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.79,
+      "peer_name": "Delta Community Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 3.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.0,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.68,
+      "peer_name": "Ent Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.44,
+      "peer_name": "Wings Financial Credit Union",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-AAFCU-20260501-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor: 3.8/5 overall (73 reviews), 72% recommend, 80% positive business outlook",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 73,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": "Indeed AAFCU ratings (Fort Worth TX): Overall 3.8/5; Culture & Values 3.6; Job Security/Advancement 3.6; Management 3.5; Work-Life 3.9; Compensation 3.4",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": "2024 annual report: mobile app launched April 2024, 4.8/5 app store rating; 'differentiator for us'; CEO R",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "App Store",
+        "themes": [],
+        "value": 4.8
+      },
+      {
+        "drilldown": "review: 'highly rated app...close to five stars on both the Google Play store and the Apple app store'; 'impressive array of helpful resources to learn financial skills, build an emergency fund and develop a budget' including financial coac",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "BBB profile exists (Fort Worth TX); complaint themes/volume require deeper search in Batch 2 P2 sentiment work \u2014 placeholder evidence",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "P2C4.3.5 HOUSEHOLD COORDINATION + P2C4.5.7 CLV INVESTMENT: Loan Loyalty discount requires '2 or more loans with active balance within last 2 years' = recognizes multi-product households. Bonus Dividend: 'more you participate as a member, the more you'll receive' = participation-based CLV recognition. Named loan officers: 'My loan officer Derohn is the main reason I use AA Credit Union. I have done business with him for over 20 years' = high-CLV member with personalized relationship maintained over decades. CLV recognition via relationship tenure is informal but functional. INFERENCE: M2 (relationship-depth rewards present; no confirmed household coordination system).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-144",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-144"
+      ],
+      "id": "92c5e9ac-824c-4013-98e1-17132f4eed8d",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "aacreditunion.org/membership/current-offers/ + bankrate.com/reviews + wallethub.com",
+      "subcap_ids": [
+        "P2C4.3.5",
+        "P2C4.5.7"
+      ],
+      "title": "Named loan officers: ' is the main reason I use AA Credit\u2026"
+    },
+    {
+      "body": "DIRECT P3C3.1.1+1.2 COMPLIANCE GOVERNANCE: Brian Kilian, CCUFC, NAFCU NCCO = Compliance Officer at AAFCU (since January 2021, 4+ yrs). NAFCU NCCO = National Association of Federal Credit Unions Certified Compliance Officer = professional regulatory compliance certification. CCUFC = Certified Credit Union Financial Counselor. Named Compliance Officer with dual professional certifications.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-146",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-146"
+      ],
+      "id": "7df176dd-2001-44b3-8f1e-2a341c3dba3e",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "Clay:find-and-enrich-contacts + Exa:web_search_exa(AAFCU risk compliance leadership)",
+      "subcap_ids": [
+        "P3C3.1.1"
+      ],
+      "title": "Named Compliance Officer with dual professional\u2026"
+    },
+    {
+      "body": "AAFCU has named role 'Vice President, Enterprise Solutions and Security' (per RocketReach co-employee directory \u2014 name redacted in source preview but role title confirmed). Combined enterprise solutions + security accountability in single VP \u2014 functional CISO equivalent role. Anti-'no CISO' alternative documented.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-058",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "0abcf765-36ea-43a7-8cc8-353e67df09cb",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://rocketreach.co/jesse-davis-email_24608157",
+      "subcap_ids": [],
+      "title": "Aafcu has named role 'Vice President, Enterprise Solutions\u2026"
+    },
+    {
+      "body": "AAFCU has NAMED COMPLIANCE OFFICER role: 'assisting the Compliance Officer with ensuring the Credit Union is in compliance with all applicable laws and regulations.' Direct evidence of formal Compliance Officer position. Anti-'no Chief Compliance Officer' alternative documented.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-061",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "74a32068-e63c-4d9d-8136-373488979fe8",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://jobs.aa.com/job/Analyst,-AACU-Legal-Compliance/77843-en_US/",
+      "subcap_ids": [],
+      "title": "Aafcu has Named Compliance Officer role: 'assisting the\u2026"
+    },
+    {
+      "body": "Symitar serves 535 credit unions (2025 market share data) \u2014 most-deployed CU core platform; AAFCU is among 60+ Symitar clients with assets >$1B.",
+      "date_precision": "year",
+      "e_id": "E-027",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "6ff1f416-426c-4c6e-9347-ea01f06b19b6",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/american-airlines-federal-credit-union-completes-successful-conversion-to-symitar-core-system-231723711.html",
+      "subcap_ids": [],
+      "title": "Symitar serves 535 credit unions (2025 market share data)\u2026"
+    },
+    {
+      "body": "Wings ($9.6B) + Ent ($10B, 580K members, Colorado, Air Force community roots) merger announced Apr 2025; full systems integration by 2028; combined entity ~$20B, 1M members. Maintains both HQs (Colorado Springs + Apple Valley MN).",
+      "date_precision": "month",
+      "e_id": "E-016",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "446aa9ad-50a3-443c-8720-97c36de45243",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.wingscu.com/newsroom/wings-and-ent-merger-milestone",
+      "subcap_ids": [],
+      "title": "Ent ($10B, 580K members, Colorado, Air Force community\u2026"
+    },
+    {
+      "body": "Wings 2024 annual report: mobile app launched April 2024, 4.8/5 app store rating; 'differentiator for us'; CEO R. Frank Weidner.",
+      "date_precision": "month",
+      "e_id": "E-015",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "976d5d08-4295-41d7-b7f3-58bd96cba227",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.wingscu.com/getmedia/c65cced3-90b1-4ede-9f32-a5f437c19398/2024-annual-report.pdf",
+      "subcap_ids": [],
+      "title": "Wings 2024 annual report: mobile app launched April 2024\u2026"
+    },
+    {
+      "body": "DIRECT P1C3.6.CU1 EVIDENCE: AAFCU is a Velera client (Velera = merged entity of PSCU + Co-op Financial Services as of Jan 2024). Velera CEO Chuck Fagan: 'We have to take our own APIs and build out products, put the credit unions logo and color scheme on it' \u2014 credit-union-branded API products. Velera 'leverages input from technology-leading credit unions to vet potential fintech partners' = AAFCU as PSCU/Velera client benefits from CUSO-driven fintech ecosystem curation. P1C3.6.CU1 PASS via PSCU/Velera membership.",
+      "date_precision": "month",
+      "e_id": "E-095",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "6bca4252-3b56-4ac8-a5e5-31e54a3c477c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.finopotamus.com/post/onsite-at-gac-chuck-fagan-on-velera-s-vision-scale-technology-and-partnership-for-credit-unions",
+      "subcap_ids": [
+        "P1C3.6"
+      ],
+      "title": "Aafcu is a Velera client (Velera = merged entity of PSCU\u2026"
+    },
+    {
+      "body": "DIRECT P1C3.6.CU1 CUSO COLLABORATION EVIDENCE: AAFCU joined CO-OP Financial Services in 2007 for ATM driving and debit card processing. CO-OP is the largest ATM CUSO (now merged with PSCU into Velera as of Jan 2024). 19+ year sustained CUSO collaboration history. P1C3.6.CU1 PASS.",
+      "date_precision": "month",
+      "e_id": "E-083",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-083"
+      ],
+      "id": "77b85924-1a4a-4271-b817-45e0e1c740b9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.cutimes.com/2007/02/27/american-airlines-goes-with-co-op-financial-services/",
+      "subcap_ids": [
+        "P1C3.6"
+      ],
+      "title": "CO is the largest ATM CUSO (now merged with PSCU into\u2026"
+    },
+    {
+      "body": "Additional named exec: Kimberly McDaniel = VP Marketing and Business Development (per 2022 scholarship blog reference video conf with CEO Enda + Hall).",
+      "date_precision": "year",
+      "e_id": "E-033",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "b82e9865-ba3c-4290-95ea-3aa85e3c0b8f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.aacreditunion.org/blog/scholarship-recipients-2023/",
+      "subcap_ids": [],
+      "title": "Additional named exec: Kimberly McDaniel = VP Marketing and\u2026"
+    },
+    {
+      "body": "P2C1.1.1 NAMED MARKETING TEAM SUMMARY (8 confirmed via Clay): (1) Raquel Martinez M.A. \u2014 Brand and Business Development Director (since Mar 2022), (2) Melissa Brown \u2014 Digital Marketing Manager (since May 2023), (3) Ana Galla \u2014 Research & Data Marketing Analyst (since Jun 2015), (4) Christian Hollie \u2014 Marketing Campaign Specialist (since Nov 2022), (5) Sarah Daniel \u2014 Marketing Specialist (since Feb 2014), (6) Sutton James M.S. \u2014 Specialist Brand & Business Development (since Apr 2024), (7) Peggy Presley \u2014 Marketing Coordinator (since Oct 1991), (8) Howard Geffen \u2014 Marketing Analyst (since Apr 1994). Plus alums Todd Camp (formerly mktg) + Eric Miller (Employee Comms). This is a substantial 8-person named marketing function with seniority + analytics + campaigns + brand + digital + content roles.",
+      "date_precision": "month",
+      "e_id": "E-112",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-112"
+      ],
+      "id": "ff4aa6d4-524e-4b76-b5a7-2c39ae9bbaf5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "Clay:find-and-enrich-contacts-at-company(companyIdentifier='aacreditunion.org', filters={job_title_keywords:[Marketing, Brand, Digital Marketing, Social Media, Communications]})",
+      "subcap_ids": [
+        "P2C1.1.1"
+      ],
+      "title": "Named Marketing TEAM Summary ( confirmed via Clay"
+    },
+    {
+      "body": "DIRECT P2C4.8.1+4 ANALYTICS TEAM STRUCTURE: Named analytics team confirmed via Clay: (1) Razi Mohammad = Sr. Business Intelligence and Data Analytics (since Jan 2021, 4+ yrs). (2) Luc Mpangaje = Power BI Developer/Data Analyst (since Nov 2021) \u2014 confirms Power BI as AAFCU's BI visualization tool. (3) Shruti C. = Data Analyst (since Nov 2022). (4) Jordan Bowers = Data Analyst (since Jul 2014, 11+ yrs). (5) Robert Olegario = Data Analyst (new hire Nov 2025). (6) Ana Galla = Research & Data Marketing Analyst (10+ yrs). Total: 6+ named data roles = substantial analytics function.",
+      "date_precision": "month",
+      "e_id": "E-138",
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-138"
+      ],
+      "id": "e3a15d0a-5217-4340-8d17-90bc18467c8b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "Clay:find-and-enrich-contacts-at-company(aacreditunion.org, job_title_keywords=[Analytics, Product, Data, Business Intelligence, Wealth, Financial Advisor, Financial Wellness, Loyalty])",
+      "subcap_ids": [
+        "P2C4.8.1"
+      ],
+      "title": "Direct P2C4.8.1+4 Analytics TEAM STRUCTURE: confirmed via\u2026"
+    },
+    {
+      "body": "Gail Enda named President & CEO Aug 2020 (acting prior). 17yr AAFCU tenure: VP Marketing \u2192 Member Services \u2192 Deposit Programs \u2192 Investment Services \u2192 SVP Lending and Product Management (oversaw Payments Products, Digital Services, Mortgage and Business Lending, Consumer Loan, Account Services, Collections).",
+      "date_precision": "month",
+      "e_id": "E-022",
+      "event_date": "2020-08-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "eaf90185-7beb-445f-9b73-4f5c5c121909",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.cuinsight.com/press-release/gail-enda-was-named-the-president-ceo-of-american-airlines-federal-credit-union/",
+      "subcap_ids": [],
+      "title": "Gail Enda named President & CEO Aug 2020"
+    },
+    {
+      "body": "DIRECT P2C4.2.1 NEXT BEST ACTION + P2C4.5.3 DIGITAL CROSS-SELL: SavvyMoney case study (Oct 2024) \u2014 'American Airlines Federal Credit Union... 231,370 Digital Banking Users, $8.6B+ in Assets. SavvyMoney Partnership: Launched November 2014.' AAFCU was SavvyMoney's FIRST-EVER financial institution partner. SavvyMoney Offers Engine delivers: pre-qualified loan offers, pre-approval marketing, personalized deposit offers = NBA-driven product recommendations within digital banking.",
+      "date_precision": "month",
+      "e_id": "E-136",
+      "event_date": "2014-11-01",
+      "evidence_e_ids": [
+        "E-136"
+      ],
+      "id": "df44930d-0326-4a04-be61-df79ce21dd20",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.savvymoney.com/deposit-growth-case-study-aafcu/",
+      "subcap_ids": [
+        "P2C4.2.1",
+        "P2C4.5.3"
+      ],
+      "title": "SavvyMoney Partnership: Launched November 2014.'"
+    },
+    {
+      "body": "DIRECT P1C3.7.2 EARLY ADOPTER EVIDENCE: 'AAFCU was SavvyMoney's first financial institution partner' (launched November 2014). Pioneering early adopter of credit-monitoring fintech among CUs \u2014 supports P1C3.6.1 Fintech Partnership Strategy.",
+      "date_precision": "month",
+      "e_id": "E-081",
+      "event_date": "2014-11-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "59fdced9-4662-42da-a41d-6f35b247fc46",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.savvymoney.com/case-studies/aafcu",
+      "subcap_ids": [
+        "P1C3.7.2",
+        "P1C3.6.1"
+      ],
+      "title": "Aafcu was SavvyMoney's first financial institution partner'\u2026"
+    },
+    {
+      "body": "DIRECT P3C1.2.1+3.1 ENTERPRISE-WIDE AUTOMATION: Jack Henry press release (March 2012): 'American Airlines Federal Credit Union has selected its Episys core processing system to provide enterprise-wide automation.' Completed November 2013 in-house: 'We converted over a weekend and by Sunday, online banking and IVR were up. On Monday morning we opened all 42 of our branches and our call center at their regularly scheduled times.' = Real-time core banking transaction automation confirmed. In-house deployment (highest control level).",
+      "date_precision": "month",
+      "e_id": "E-152",
+      "event_date": "2013-11-01",
+      "evidence_e_ids": [
+        "E-152"
+      ],
+      "id": "88345ca2-e1dd-4f7c-9f39-fd156328afaf",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "ir.jackhenry.com + prnewswire.com/news-releases/american-airlines-federal-credit-union-selects-symitar",
+      "subcap_ids": [
+        "P3C1.2.1"
+      ],
+      "title": "We converted over a weekend"
+    },
+    {
+      "body": "Current AAFCU org chart per TheOrg includes named roles: President & CEO (Gail Enda), SVP Technology (named role exists at C-tier), SVP & General Counsel (named role exists), Brad Aspgren listed as SVP Operations (CURRENTLY ACTIVE \u2014 same person named in 2012 Symitar announcement as SVP Tech & Innovation; 13+ year tenure, role evolution Tech\u2192Operations).",
+      "date_precision": "year",
+      "e_id": "E-057",
+      "event_date": "2012-07-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "0e3a1601-6357-4c09-83d9-943c330a5bd9",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://theorg.com/org/american-airlines-federal-credit-union",
+      "subcap_ids": [],
+      "title": "Brad Aspgren listed same person named in 2012 Symitar\u2026"
+    },
+    {
+      "body": "Core banking system: Symitar Episys by Jack Henry \u2014 selected March 2012, conversion completed November 2013 (18-month implementation). In-house deployment.",
+      "date_precision": "month",
+      "e_id": "E-027",
+      "event_date": "2012-03-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "1854a130-62c2-48fa-bc2a-ac4cb102c37e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/american-airlines-federal-credit-union-completes-successful-conversion-to-symitar-core-system-231723711.html",
+      "subcap_ids": [],
+      "title": "Core banking system: Symitar Episys by Jack Henry"
+    },
+    {
+      "body": "HISTORICAL P2C2.5.4 RDC PIONEER: American Banker (March 30, 2011): 'American Airlines Federal Credit Union on March 30 announced a remote deposit capture service.' AAFCU launched mobile RDC in 2011 = 15-year+ mobile deposit history = deep mobile banking institutional knowledge. Also launched CUAcce$$ Deposit mobile banking for Android (2011) = early mobile banking adopter.",
+      "date_precision": "day",
+      "e_id": "E-131",
+      "event_date": "2011-03-30",
+      "evidence_e_ids": [
+        "E-131"
+      ],
+      "id": "26e9996e-ccea-443e-9602-67d2a52996d8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "americanbanker.com/news 2011 + apps.apple.com + play.google.com",
+      "subcap_ids": [
+        "P2C2.5.4"
+      ],
+      "title": "American Banker (March 30, 2011): 'American Airlines\u2026"
+    },
+    {
+      "body": "DIRECT P2C4.7.6 SOCIAL PROOF + P2C4.7.4 TENURE RECOGNITION: Dedicated Member Stories page with 11+ named testimonials organized by life events: James W. (extra mile service), Darryl Wyrick (first auto), Kayla (flight attendant, auto), Jacqueline (aviation mechanic), Pramod (immigrant financial journey), Haylee (financial future), Alai (financial hardship support), Brittany (member since 2009), Clifford Clemmer (33-year member \u2014 tenure recognition), Katherine (credit wellness transformation), Tenisha. Multi-life-stage testimonial architecture = formal social proof program.",
+      "date_precision": "year",
+      "e_id": "E-135",
+      "event_date": "2009-07-01",
+      "evidence_e_ids": [
+        "E-135"
+      ],
+      "id": "ff42b44d-63be-40eb-8c21-499305058bdf",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.aacreditunion.org/membership/member-stories/",
+      "subcap_ids": [
+        "P2C4.7.6",
+        "P2C4.7.4"
+      ],
+      "title": "Dedicated Member Stories page with 11+ named testimonials\u2026"
+    },
+    {
+      "body": "DIRECT P2C1.1.1 + P2C1.6.5 + P2C1.2.2 \u2014 Melissa Brown: Digital Marketing Manager at AAFCU since May 2023 (2 years 9 months). LinkedIn: melissa-brown-031728a. Department: Marketing. Level: Manager. PRIOR ROLE: Marketing Analyst at AAFCU Jan 2008-May 2025 (17 years 4 months) \u2014 promoted from analyst to manager. 18+ years total experience. Bachelor's Texas Woman's University (Business Admin/Mgmt 2001-2003). LinkedIn activity: liked 'SEO Cheat Sheet for 2025' (Technical SEO awareness signal).",
+      "date_precision": "month",
+      "e_id": "E-111",
+      "event_date": "2008-01-01",
+      "evidence_e_ids": [
+        "E-111"
+      ],
+      "id": "93034180-2013-4eb5-867f-8e1d55a5506e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "Exa:web_search_exa(query='marketing manager content creator social media specialist American Airlines Federal Credit Union AACU LinkedIn experience category:people')",
+      "subcap_ids": [
+        "P2C1.1.1",
+        "P2C1.6.5",
+        "P2C1.2.2"
+      ],
+      "title": "Marketing Analyst at Aafcu Jan 2008-May 2025 (17 years 4\u2026"
+    },
+    {
+      "body": "DIRECT P1C3.6.CU1 CUSO COLLABORATION EVIDENCE: AAFCU joined CO-OP Financial Services in 2007 for ATM driving and debit card processing. CO-OP is the largest ATM CUSO (now merged with PSCU into Velera as of Jan 2024). 19+ year sustained CUSO collaboration history. P1C3.6.CU1 PASS.",
+      "date_precision": "year",
+      "e_id": "E-083",
+      "event_date": "2007-07-01",
+      "evidence_e_ids": [
+        "E-083"
+      ],
+      "id": "24f203a1-a6a9-482b-b3b9-e364736c86bb",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.cutimes.com/2007/02/27/american-airlines-goes-with-co-op-financial-services/",
+      "subcap_ids": [
+        "P1C3.6"
+      ],
+      "title": "Aafcu joined CO-OP Financial Services"
+    }
+  ]
+}

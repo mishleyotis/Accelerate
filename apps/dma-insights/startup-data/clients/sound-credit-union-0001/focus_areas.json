@@ -1,0 +1,72 @@
+{
+  "entity_display_id": "sound-credit-union-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-062",
+          "E-061",
+          "E-064",
+          "E-033",
+          "E-069",
+          "E-068"
+        ],
+        "representative_quote": "[EVIDENCE]: Online loan application: check loan status link available (loanspq.com integrati.",
+        "source_kind": "heuristic"
+      },
+      "id": "207a15fc-f08f-4f0d-b67c-16fbc4844fc2",
+      "involved_subcap_ids": [
+        "P2C2.9.2",
+        "P2C2.9.3",
+        "P2C2.9.4",
+        "P2C1.6.8",
+        "P2C1.7.CU1",
+        "P2C2.9.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 6 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-049"
+        ],
+        "representative_quote": "No ESG strategy document, sustainability report, TCFD disclosure, o.",
+        "source_kind": "heuristic"
+      },
+      "id": "759553ed-af61-4491-bfe0-97adeebaad95",
+      "involved_subcap_ids": [
+        "P1C5.1.2",
+        "P1C5.1.3",
+        "P1C5.1.4",
+        "P1C5.2.1",
+        "P1C5.2.2",
+        "P1C5.2.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 18 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

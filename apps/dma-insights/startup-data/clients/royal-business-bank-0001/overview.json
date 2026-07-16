@@ -1,0 +1,1037 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "royal-business-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "9b1ef490-d67a-4c66-961b-fefd92ef3719",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Royal Business Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:59.340586Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 64,
+    "undated_count": 64
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 64
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 3,
+      "LinkedIn": 6
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 64
+    },
+    "tiers": {
+      "T1": 14,
+      "T2": 25,
+      "T3": 24,
+      "T5": 1
+    },
+    "total_facts": 64,
+    "total_items": 64
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Deposits",
+        "unit": "B",
+        "value": 3.4,
+        "year": null
+      },
+      {
+        "label": "Net income",
+        "unit": "M",
+        "value": 31.9,
+        "year": null
+      },
+      {
+        "label": "NIM",
+        "unit": null,
+        "value": 2.95,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 4200000000.0,
+    "branches": 25,
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "deposits": "$3.4B",
+      "net_income": "$31.9M",
+      "nim_pct": 2.95
+    },
+    "footprint": "Multi-state (CA, NV, NY, NJ, IL, HI)",
+    "footprint_basis": "derived:geography",
+    "founded": 2008,
+    "geography": "Multi-state (CA, NV, NY, NJ, IL, HI)",
+    "headcount": 201,
+    "hq": "1055 Wilshire Blvd, Ste 1200, Los Angeles, CA 90017",
+    "hq_address": "1055 Wilshire Blvd, Ste 1200, Los Angeles, CA 90017",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Johnny Lee",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 19,
+        "title": "President & CEO (since Dec 2024)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lynn Hopkins",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 31,
+        "title": "EVP/CFO (since Dec 2023)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Erik Grier",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 126,
+        "title": "SVP/CIO (since Jan 2016)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mr. Rizkalla",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 33,
+        "title": "EVP/CRO (since Oct 2023)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Gary Fan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Digital Banking Lead"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Royal Business Bank",
+    "license_type": "State-chartered",
+    "narrative_md": "Legal Name: RBB Bancorp (NASDAQ: RBB). Operating Subsidiary: Royal Business Bank.\n\nFounded: 2008 by Louis Chang. FDIC Certificate: #58816. Charter: NM (Non-member state-chartered).\n\nDesignations: MDI (Yes — Asian American) + CDFI (Yes — certified 2016). Headquarters: 1055 Wilshire Blvd, Ste 1200, Los Angeles, CA 90017.\n\nEvidence: E-001, E-002, E-005, E-009",
+    "primary_regulator": "FDIC",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.6,
+          "source": "App Store"
+        }
+      ],
+      "derived_from": "research_report_prose",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 141,
+          "scale": 5,
+          "score": 3.5,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.5/5",
+          "signal": "Glassdoor: 3.5/5 (141 reviews)",
+          "source": "Glassdoor",
+          "trend": "Improving"
+        },
+        {
+          "signal": "using 7 connectors: web_search, web_fetch, Exa, Tavily, Indeed, Dice, and Vibe Prospecting/Explorium (9 enrichment types: technographics, webstack, website-keywords, challenges, workforce-trends, LinkedIn posts, strategic insights, competit",
+          "source": "Indeed"
+        },
+        {
+          "rating": "3.6/5",
+          "signal": "App Store: 'Worst banking app' — caps at M2",
+          "source": "App Store",
+          "trend": "Declining"
+        },
+        {
+          "rating": "-001",
+          "signal": "8 — would replace SmartAsset/app store proxies with actual NPS/CSAT data E-ID Source Date ERS Facts FDIC BankFind Suite - Royal Business Bank 2026-04-10 4.55 4 SEC 8-K: Consent Order Termination 2024-08-22",
+          "source": "Net Promoter Score",
+          "trend": "Declining"
+        },
+        {
+          "signal": "supported), Microsoft Forms (basic form creation), and Trustpilot (customer review aggregation)",
+          "source": "Trustpilot"
+        },
+        {
+          "signal": "k, LinkedIn Posts, Website Keywords 2026-04-13 4.80 8 CFPB Complaint Database Search — Royal Business Bank 2026-04-13 4.30 1 Vibe Prospecting Webstack — royalbusinessbankusa.com 2026-04-13 4.80 6 CFPB Complaint Database — Royal Business Ban",
+          "source": "CFPB complaints",
+          "trend": "Improving"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": null,
+    "ticker": "NASDAQ: RBB",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": null,
+    "website": "royalbusinessbankusa.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.431467+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Royal Business Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "Priority Score = (0.25 × Gap Size) + (0.20 × Peer Comparison) + (0.15 × Strategic Alignment) + (0.15 × Implementation Complexity) + (0.15 × Investment Efficiency) + (0.10 × Stakeholder Readiness)",
+    "page_number": null,
+    "scqa_heading": "DMA Assessment Report — Synthesis",
+    "scqa_md": "Royal Business Bank is a $4.2B in assets regional bank regulated by FDIC, operating since 2008 with 201 employees. Zennify's assessment places overall digital maturity at 1.9/5. The deepest capability gap is Speech-to-Text & Conversation Intelligence at 1.3/5 against a 2.0 peer median [E-007]. Next is In-Session Personalization at 1.6/5 against a 2.5 peer median [E-056].\n\nThird is Application Intake & Data Capture at 1.7/5 against a 2.5 peer median. The issue register adds Capability gap: Sandbox Environments (high severity). The issue register adds Capability gap: Fail-Fast Culture (high severity). The pattern is corroborated across the assessment's evidence index [E-001, E-003, E-006, E-009].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Royal Business Bank is whether to close Speech-to-Text & Conversation Intelligence first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Royal Business Bank should lead with Databricks (79/100 fit) against Sandbox Environments, then sequence Tableau behind it. Closing Speech-to-Text & Conversation Intelligence to the peer median alone is worth 0.7 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 1.94,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/no_validation_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.704201+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb21_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.704720+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb22_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.705088+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb23_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.705329+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb24_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.705552+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb25_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.705805+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb31_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.706105+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb32_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.706365+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb33_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.706630+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sb34_subcap_coverage.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.706906+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 25 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.708534+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.709371+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.709531+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/csv/A2_pillar_coverage.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.709907+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/csv/A3_subcap_coverage.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.716705+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/csv/A6_coverage_summary.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.717315+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/csv/A7_capability_coverage_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 116 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.718812+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 33
+    },
+    "stage_ms": {
+      "manifest": 8,
+      "parse": 1526,
+      "persist": 685
+    },
+    "structured": [
+      {
+        "code": "used variant scoring CSV location",
+        "detail": "used variant scoring CSV location: 08_appendices/csv/export_scoring_detail.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. 'Wire')",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: Explorium_TechStack_RBB.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name', 'primary_regulator', 'ticker'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_Research_Report.docx count=5",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=27 subcaps=11 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 10 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 6 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/no_validation_register.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb21_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb22_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb23_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb24_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb25_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb31_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb32_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb33_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sb34_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 25 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/README.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/csv/A2_pillar_coverage.csv — no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/csv/A3_subcap_coverage.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/csv/A6_coverage_summary.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/csv/A7_capability_coverage_map.csv — no fingerprint matched (best confidence 0.00); 116 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:RB",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant scoring CSV location: 08_appendices/csv/export_scoring_detail.csv",
+      "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. 'Wire')",
+      "used variant tech stack xlsx: Explorium_TechStack_RBB.xlsx",
+      "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name', 'primary_regulator', 'ticker'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_Research_Report.docx count=5",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=27 subcaps=11 replaced_docx_scqa=True",
+      "used docx-extracted recommendations: 10 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "insights_derived_from_category_gaps: 4",
+      "acquisitions_from_client_profile_docx: 6 events",
+      "INFO/pattern_gap: 01_evidence/no_validation_register.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb21_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb22_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb23_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb24_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb25_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb31_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb32_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb33_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sb34_subcap_coverage.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 25 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_scores.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/README.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/csv/A2_pillar_coverage.csv — no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/csv/A3_subcap_coverage.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/csv/A6_coverage_summary.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/csv/A7_capability_coverage_map.csv — no fingerprint matched (best confidence 0.00); 116 generic sections mined",
+      "subvertical_inferred_from_name:RB",
+      "timeline_events_persisted: 6",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.59,
+      "pillar_id": "P1",
+      "score": 1.98,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.63,
+      "pillar_id": "P2",
+      "score": 1.71,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.87,
+      "pillar_id": "P3",
+      "score": 2.25,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.43,
+      "pillar_id": "P4",
+      "score": 1.81,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-13",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:59.340586Z",
+    "created_at": "2026-07-02T23:10:59.340586Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "b06da211-e2be-42f1-ba66-b228935424c9",
+    "overall_score": null,
+    "request_id": "DMA-RES-RBB-20260413-0001",
+    "started_at": "2026-07-02T23:10:59.340586Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.6,
+        "source": "App Store"
+      }
+    ],
+    "derived_from": "research_report_prose",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 141,
+        "scale": 5,
+        "score": 3.5,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\" — $3.4B deposits (+8.6% YoY)",
+      "evidence": [
+        "E-012",
+        "E-057",
+        "E-046",
+        "E-073"
+      ],
+      "magnitude": "$3.4B",
+      "name": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\"…",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.34,
+      "so_what": "Prioritize SO-4: \"Maintain competitive deposit rates, manage deposit mix\"… in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\"…",
+      "what": "SO-4: \"Maintain competitive deposit rates, manage deposit mix\" — $3.4B deposits (+8.6% YoY).",
+      "why": "The shortfall is relative, not absolute: 1.34/5 sits below the 2.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "SO-3: \"Enhancement of trade finance and international banking services\" — SWIFT + Asia correspondents.",
+      "evidence": [
+        "E-028",
+        "E-022",
+        "E-055",
+        "E-006"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "SO-3",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.59,
+      "so_what": "Prioritize SO-3 in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "SO-3",
+      "what": "SO-3: \"Enhancement of trade finance and international banking services\" — SWIFT + Asia correspondents.",
+      "why": "The shortfall is relative, not absolute: 1.59/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "SO-1: \"Ongoing digital and data processing improvements\" — the only technology reference in 10-K product development.",
+      "evidence": [
+        "E-012",
+        "E-057",
+        "E-046",
+        "E-073"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "SO-1: \"Ongoing digital and data processing improvements\"…",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.34,
+      "so_what": "Prioritize SO-1: \"Ongoing digital and data processing improvements\"… in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "SO-1: \"Ongoing digital and data processing improvements\"…",
+      "what": "SO-1: \"Ongoing digital and data processing improvements\" — the only technology reference in 10-K product development.",
+      "why": "The shortfall is relative, not absolute: 1.34/5 sits below the 2.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "SO-5: \"Established new executive management team\" (FY2024) — CEO Johnny Lee, CRO Rizkalla, CFO Hopkins.",
+      "evidence": [
+        "E-012",
+        "E-057",
+        "E-046",
+        "E-073"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "SO-5: \"Established new executive management team\" (FY2024)…",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.34,
+      "so_what": "Prioritize SO-5: \"Established new executive management team\" (FY2024)… in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "SO-5: \"Established new executive management team\" (FY2024)…",
+      "what": "SO-5: \"Established new executive management team\" (FY2024) — CEO Johnny Lee, CRO Rizkalla, CFO Hopkins.",
+      "why": "The shortfall is relative, not absolute: 1.34/5 sits below the 2.0 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Segment-Specific Journeys averages 2.4/5 over 165 scored subcaps; ceiling 2.9 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Model Governance Framework averages 2.2/5 over 217 scored subcaps; ceiling 2.7 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Rapid Prototyping Capabilities averages 1.7/5 over 190 scored subcaps; ceiling 2.2 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Training & Learning averages 1.7/5 over 205 scored subcaps; ceiling 2.2 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Climate Risk averages 1.7/5 over 70 scored subcaps; ceiling 2.2 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Marketing Automation averages 1.8/5 over 287 scored subcaps; ceiling 2.3 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Application Intake & Data Capture averages 1.7/5 over 287 scored subcaps; ceiling 2.2 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ISS-005: Customer sentiment <3.0 on app → P2 mobile subcaps capped at",
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Portal User Provisioning & Access Management averages 1.7/5 over 286 scored subcaps; ceiling 2.2 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "In-Session Personalization averages 1.6/5 over 255 scored subcaps; ceiling 2.1 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Intelligent Data Extraction averages 1.9/5 over 143 scored subcaps; ceiling 2.4 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Fraud Trend Analysis averages 2.1/5 over 130 scored subcaps; ceiling 2.6 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ISS-001: Consent order terminated Aug 2024 (<24mo) → S2 severity cap",
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Policy & Training Management averages 2.6/5 over 141 scored subcaps; ceiling 3.1 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Concentration Risk Management averages 2.3/5 over 145 scored subcaps; ceiling 2.8 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Data + AI Asset Governance Control Plane averages 1.9/5 over 200 scored subcaps; ceiling 2.4 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ISS-003: End-of-support BI platform → analytics capability constraine",
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Speech-to-Text & Conversation Intelligence averages 1.3/5 over 270 scored subcaps; ceiling 1.8 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "DevOps & Delivery Excellence averages 1.9/5 over 235 scored subcaps; ceiling 2.5 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: ISS-002: End-of-life OS (Jan 2020) = active security vulnerability →",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "API Security Testing & Scanning averages 2.3/5 over 150 scored subcaps; ceiling 2.8 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Speech-to-Text & Conversation Intelligence scores 1.34/5 vs a typical 2.00 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-007"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Speech-to-Text & Conversation Intelligence scores 1.34/5 vs…",
+      "metric": "Speech-to-Text & Conversation Intelligence 1.34/5 vs peer 2.00",
+      "peer_context": "Speech-to-Text & Conversation Intelligence runs 1.34/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Sandbox Environments — highest-fit surface at 79/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C2",
+      "text": "Speech-to-Text & Conversation Intelligence scores 1.34/5 vs a typical 2.00 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "In-Session Personalization at 1.59/5 is one of Royal Business Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-056"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "In-Session Personalization at 1.59/5 is one of Royal…",
+      "metric": null,
+      "peer_context": "Speech-to-Text & Conversation Intelligence runs 1.34/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Sandbox Environments — highest-fit surface at 79/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "In-Session Personalization at 1.59/5 is one of Royal Business Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Application Intake & Data Capture at 1.69/5 is one of Royal Business Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-021",
+        "E-072",
+        "E-073",
+        "E-015"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Application Intake & Data Capture at 1.69/5 is one of Royal…",
+      "metric": null,
+      "peer_context": "Speech-to-Text & Conversation Intelligence runs 1.34/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Sandbox Environments — highest-fit surface at 79/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C2",
+      "text": "Application Intake & Data Capture at 1.69/5 is one of Royal Business Bank's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

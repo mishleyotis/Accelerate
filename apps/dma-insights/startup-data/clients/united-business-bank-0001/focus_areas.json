@@ -1,0 +1,319 @@
+{
+  "entity_display_id": "united-business-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "4 tools purchased, 0 deployed customer-facing",
+        "source_kind": "docx"
+      },
+      "id": "614ed5b8-729f-4200-942d-6723f46fe988",
+      "involved_subcap_ids": [
+        "P2C4.2.1",
+        "P2C4.1.3",
+        "P2C4.1.3",
+        "P2C4.1.1",
+        "P2C1.2.4",
+        "P2C1.2.3",
+        "P2C1.1.1",
+        "P2C1.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "4 tools purchased, 0 deployed customer-facing",
+      "verbatim_quote": "4 tools purchased, 0 deployed customer-facing | NEGATIVE | Eltropy (text/video/chat), Genesys PureCloud, Zendesk Chat, Intercom all detected but invisible to customers. | Activation consulting \u2014 strategy + implementation + integration"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "FIS + Jack Henry + Genesys + Zendesk + Eltropy + Abrigo = point-to-point integration likely.",
+        "source_kind": "docx"
+      },
+      "id": "d1dc13f7-e056-48ca-8dfb-27d453fdefe1",
+      "involved_subcap_ids": [
+        "P1C2.3.2",
+        "P4C3.3.1",
+        "P4C4.1.2",
+        "P2C4.1.3",
+        "P4C3.3.2",
+        "P4C4.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "6 vendors, zero middleware",
+      "verbatim_quote": "6 vendors, zero middleware | NEGATIVE | FIS + Jack Henry + Genesys + Zendesk + Eltropy + Abrigo = point-to-point integration likely. Data silos everywhere. | MuleSoft \u2014 THE missing integration layer"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Banno supports Salesforce data streaming",
+        "source_kind": "docx"
+      },
+      "id": "02221c43-415d-4e7e-a478-aecbd81e07c1",
+      "involved_subcap_ids": [
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.1.4",
+        "P4C1.1.3",
+        "P4C2.1.2",
+        "P4C2.2.1",
+        "P4C2.2.1",
+        "P4C2.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Banno supports Salesforce data streaming",
+      "verbatim_quote": "Banno supports Salesforce data streaming | POSITIVE | Jack Henry's digital platform explicitly integrates with Salesforce. Pre-existing integration path reduces implementation risk. | FSC implementation has lower barrier than typical core-to-CRM integration"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Critical finding: All five CEO strategic objectives are purely financial \u2014 zero mention of technology, digital transformation, customer experience modernization, data/analytics, AI, or employee engagement.",
+        "source_kind": "docx"
+      },
+      "id": "5a6ca1dc-84cf-4fcb-9320-561daf015b7b",
+      "involved_subcap_ids": [
+        "P1C5.2.3",
+        "P1C1.4.2",
+        "P4C3.1.2",
+        "P1C2.2.1",
+        "P1C1.1.1",
+        "P4C4.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 65,
+        "P4": 35
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Critical finding: All five CEO strategic objectives are purely financial\u2026",
+      "verbatim_quote": "Critical finding: All five CEO strategic objectives are purely financial \u2014 zero mention of technology, digital transformation, customer experience modernization, data/analytics, AI, or employee engagement. This is the strongest signal that digital maturity is not a leadership priority, creating both risk (competitive attrition visible in NIB deposit decline) and opportunity (Zennify can frame Salesforce as the execution engine for the CEO's existing financial objectives)."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Glassdoor 2.2/5.0 (41% below industry avg)",
+        "source_kind": "docx"
+      },
+      "id": "0642e55b-6610-408a-94b3-1d4434d5e237",
+      "involved_subcap_ids": [
+        "P1C3.2.2",
+        "P2C3.2.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "21%",
+          "delta": null,
+          "kpi_label": "Only",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Glassdoor 2.2/5.0 (41% below industry avg)",
+      "verbatim_quote": "Glassdoor 2.2/5.0 (41% below industry avg) | NEGATIVE | Culture 1.9/5.0. 'Outdated and uninspiring.' Only 21% recommend. Talent retention crisis. | Slack + Employee Experience consulting"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "In the Q4 2025 earnings release (January 22, 2026), CEO George Guarini articulated five strategic priorities for 2026.",
+        "source_kind": "docx"
+      },
+      "id": "232e43f4-16c0-497e-b402-c1aad84f97c0",
+      "involved_subcap_ids": [
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.3.2",
+        "P1C3.1.1",
+        "P1C1.4.1",
+        "P1C1.1.3",
+        "P1C1.3.1",
+        "P1C1.2.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$28",
+          "delta": null,
+          "kpi_label": "Avg",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "In the Q4 2025 earnings release (January 22, 2026)\u2026",
+      "verbatim_quote": "In the Q4 2025 earnings release (January 22, 2026), CEO George Guarini articulated five strategic priorities for 2026. Analysis of these objectives reveals a critical gap between stated strategy and the institution's technology posture:"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Experience Cloud + digital onboarding implementation",
+        "source_kind": "docx"
+      },
+      "id": "89e729ec-886e-401f-b760-e0620cb06be3",
+      "involved_subcap_ids": [
+        "P1C1.4.3",
+        "P1C1.1.1",
+        "P3C3.2.2",
+        "P1C2.1.1",
+        "P1C1.4.2",
+        "P1C3.2.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "16%",
+          "delta": null,
+          "kpi_label": "NIB deposits declining",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 83,
+        "P3": 17
+      },
+      "source_path": "(unknown)",
+      "title": "No digital account opening",
+      "verbatim_quote": "No digital account opening | NEGATIVE | Online banking enrollment for existing customers only. New-to-bank customers must visit a branch. | Experience Cloud + digital onboarding implementation"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "23-year-old OS, EOL since 2015. Zero security patches for 11 years. Regulatory and compliance time bomb.",
+        "source_kind": "docx"
+      },
+      "id": "56b870db-2778-45ec-a2f2-b1f17146fedc",
+      "involved_subcap_ids": [
+        "P1C1.2.1",
+        "P4C3.2.2",
+        "P2C4.2.2",
+        "P4C4.1.2",
+        "P3C3.1.4",
+        "P3C3.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "0%",
+          "delta": null,
+          "kpi_label": "F2 shows",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 17,
+        "P3": 33,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Windows Server 2003 in production",
+      "verbatim_quote": "Windows Server 2003 in production | CRITICAL | 23-year-old OS, EOL since 2015. Zero security patches for 11 years. Regulatory and compliance time bomb. | Legacy remediation \u2014 URGENT"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "FSC \u2014 GREENFIELD (Banno supports Salesforce data streaming)",
+        "source_kind": "docx"
+      },
+      "id": "cbc0a14d-98aa-4a66-8152-c692225cf27e",
+      "involved_subcap_ids": [
+        "P4C4.1.2",
+        "P4C4.2.2",
+        "P3C3.2.2",
+        "P1C3.2.3",
+        "P1C1.3.1",
+        "P2C4.1.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$28",
+          "delta": null,
+          "kpi_label": "Avg",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Zero CRM in 44+ tool tech stack",
+      "verbatim_quote": "Zero CRM in 44+ tool tech stack | NEGATIVE | No single customer view. Relationships managed in banker heads and spreadsheets. Cross-sell blind. | FSC \u2014 GREENFIELD (Banno supports Salesforce data streaming)"
+    }
+  ]
+}

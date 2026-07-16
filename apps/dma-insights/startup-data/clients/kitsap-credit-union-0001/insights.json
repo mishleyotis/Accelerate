@@ -1,0 +1,1064 @@
+{
+  "entity_display_id": "kitsap-credit-union-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.6.1",
+        "P2C4.3.3",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "9e1d4f07-c046-4be9-b8bd-9906adcd882c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-039"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-039",
+        "E-069",
+        "E-065"
+      ],
+      "linked_subcap_id": "P4C3.6.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: CRM foundation exists but not yet unifying systems of record — LAND-AND-EXPAND anchor — Service/Sales Cloud + Agentforce expansion, not net-new [E-065].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Salesforce FSC deployed & maturing",
+      "what_text": "DevOps & Delivery Excellence is one of Kitsap Credit Union's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Kitsap Credit Union's ability to deliver a stronger data and technology foundation [E-069].",
+      "why_text": "The assessment found: “KIT is Kitsap's virtual-assistant chatbot 'powered by generative AI' (under 'Let's Chat'), a deployed conversational-AI servicing channel Live Chat available via Online Banking Mon-Fri 9am-5pm” [E-039]. At 2.0 out of 5, DevOps & Delivery Excellence sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.5.1",
+        "P2C4.3.3",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "ecf389ab-495f-4dd9-902d-b3fdf5578f90",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-055",
+        "E-080",
+        "E-044"
+      ],
+      "linked_subcap_id": "P2C1.5.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: No golden record / cross-sell engine — Data Cloud (member golden record) + MuleSoft (integration tier) [E-080].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Fragmented best-of-breed stack, no unifying member 360",
+      "what_text": "Marketing Automation is one of Kitsap Credit Union's least developed customer experience capabilities, scoring 1.3 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Kitsap Credit Union's ability to deliver a stronger, more personalised customer experience [E-055].",
+      "why_text": "The assessment found: “Digital Channels Manager (Emma Gao) names upcoming features: 'AI-Empowered Digital Communications' (proactive advice, active offers, tailored follow-ups) and 'Advanced AI-Powered Insights'” [E-044]. At 1.3 out of 5, Marketing Automation sits 1.2 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.6.6",
+        "P2C4.3.3",
+        "P3C1.5.1",
+        "P2C1.4.6",
+        "P1C3.3.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "22137d42-e807-4ddf-b20f-23d01c228d43",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-058",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-058",
+        "E-069",
+        "E-019"
+      ],
+      "linked_subcap_id": "P4C2.6.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong data foundation, not unified to member 360/CRM — Data Cloud + Einstein + Agentforce operationalize AI on a unified 360 [E-069].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "First-mover AI/data — but governed orchestration sits beside, not on, the CRM",
+      "what_text": "Analytics Data Platform is one of Kitsap Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.6 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Kitsap Credit Union's ability to deliver a stronger data and technology foundation [E-058].",
+      "why_text": "The assessment found: “First WA credit union approved by DFI under RCW 31.12.436 (9/15/2025) to make an equity investment in a fintech (D8TAOPS, AI/data orchestration) Platform converts legacy data workflows into governed” [E-019]. At 1.5 out of 5, Analytics Data Platform sits 1.1 points below the 2.6 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.2.3",
+        "P2C2.4.3",
+        "P2C2.3.6",
+        "P3C2.6.IC1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "3b473e7e-ddc5-4d8f-acaf-6d277cceafbb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-041",
+            "E-050",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-050",
+        "E-041"
+      ],
+      "linked_subcap_id": "P3C1.2.3",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Explicit modernization roadmap with budget — Sales Cloud (commercial pipeline) + Service Cloud/Agentforce (centralized servicing) + Einstein/Data Cloud (fraud/income) [E-041].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Execution focus: fraud detection, income verification, refined credit scoring; centralize…",
+      "what_text": "Straight-Through Processing (STP) is one of Kitsap Credit Union's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Kitsap Credit Union's ability to deliver more efficient, dependable operations [E-050].",
+      "why_text": "At 1.5 out of 5, Straight-Through Processing (STP) sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-078, E-050].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.6.6",
+        "P2C4.3.3",
+        "P3C1.2.3",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.1.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "39463f75-a0a3-4b60-8cae-cdc090fb5f34",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-034",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C2.6.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Analytics Data Platform a near-term focus for Kitsap Credit Union: a scoped investment here would lift it from 1.5 toward the 2.6 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Marketing automation + NBA white space",
+      "what_text": "Analytics Data Platform is one of Kitsap Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.6 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Kitsap Credit Union's ability to deliver a stronger data and technology foundation [E-044].",
+      "why_text": "The assessment found: “KCU earned two Diamond Awards from America's Credit Unions Marketing (Apr 2025) — external recognition of marketing capability Received the Economic Development Champion Industry Award (Mar 2020) for” [E-027]. At 1.5 out of 5, Analytics Data Platform sits 1.1 points below the 2.6 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.8.1",
+        "P1C3.4.2",
+        "P3C2.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "85c06026-36f3-4c54-a754-da71d64a59d2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-080",
+        "E-059"
+      ],
+      "linked_subcap_id": "P3C3.8.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Capacity + mandate to invest in modernization — Investment appetite; clear economic buyers (CRO Powley, CDXO Crabtree) [E-059].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "High-growth, well-capitalized, record year",
+      "what_text": "Regulatory Reporting is one of Kitsap Credit Union's developing operations capabilities, scoring 2.8 out of 5 in Zennify's latest assessment, below the 3.1 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Kitsap Credit Union's ability to deliver more efficient, dependable operations [E-080].",
+      "why_text": "At 2.8 out of 5, Regulatory Reporting sits 0.3 points below the 3.1 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-078, E-080].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.2.3",
+        "P3C1.5.3",
+        "P3C3.1.3",
+        "P1C4.6.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "1c732ca1-0a20-4cac-9acd-dc9ab6c2f530",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-083",
+        "E-022"
+      ],
+      "linked_subcap_id": "P3C1.2.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Change-adoption risk for enterprise rollouts — Zennify enablement / change-management / adoption services [E-083].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Soft employee wellbeing = adoption risk",
+      "what_text": "Straight-Through Processing (STP) is one of Kitsap Credit Union's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Kitsap Credit Union's ability to deliver more efficient, dependable operations [E-083].",
+      "why_text": "The assessment found: “Indeed 3.4/5 overall (culture 3.3, mgmt 3.1, work-life 3.5); CEO approval 69.7%” [E-022]. At 1.5 out of 5, Straight-Through Processing (STP) sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C2.6.6",
+        "P2C4.3.3",
+        "P2C1.4.1",
+        "P2C2.5.4",
+        "P3C1.3.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "61842345-955b-47f0-92eb-f8320df6f399",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-039"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-083",
+        "E-042",
+        "E-039"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Assisted Service Channels a near-term focus for Kitsap Credit Union: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-042].",
+      "source_rec_id": "REC-01",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Unify member servicing on Salesforce Service Cloud + Agentforce",
+      "what_text": "Scores 2.46 vs peer median 3.30 (−0.84, the largest competitive gap). Member servicing is fragmented across the contact center, a standalone KIT GenAI chatbot, and vendor digital-banking channels, with documented friction — $15 pay-by-phone fee, loan-payment UX, and no business mobile check deposit (, IS-001). Peers Sound CU (Posh AI omnichannel) and iQ CU (Cresta gen-AI contact center) have unified conversational servicing; KCU has not. Deploy Service Cloud on the EXISTING Financial Services Cloud foundation (already deployed, dedicated Admin+Developer, 'single pane of glass' goal) to consolidate case management, omnichannel routing, and a unified agent desktop; layer Agentforce for autonomous member self-service and agent assist. This converts the aspirational single-pane goal into operational member servicing. In Zennify's assessment Assisted Service Channels scores 1.5 out of 5, versus a typical 3.3 at comparable institutions [E-083].",
+      "why_text": "The assessment found: “KIT is Kitsap's virtual-assistant chatbot 'powered by generative AI' (under 'Let's Chat'), a deployed conversational-AI servicing channel Live Chat available via Online Banking Mon-Fri 9am-5pm” [E-039]. At 1.5 out of 5, Assisted Service Channels sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C2.6.6",
+        "P2C4.3.3",
+        "P2C2.5.4",
+        "P3C1.2.3",
+        "P4C2.4.10"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "59cf269d-eb21-40b2-904f-f2726412ccc2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-041",
+            "E-050",
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-041",
+        "E-050"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Straight-Through Processing (STP) a near-term focus for Kitsap Credit Union: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-050].",
+      "source_rec_id": "REC-02",
+      "theme": "Core Automation",
+      "title": "Automate core lending & fraud processes with Agentforce + Flow",
+      "what_text": "Scores 2.23 vs peer median 3.00 (−0.77). KCU has named automation for fraud detection, income verification, and credit scoring as a 2026 execution priority, and has Zest AI for explainable underwriting, but lacks a workflow-automation layer to operationalize these across the lending and servicing lifecycle. Peer Harborstone deploys Upstart AI lending; KCU's automation is point-solution, not orchestrated. Use Agentforce + Salesforce Flow on FSC to orchestrate the fraud-detection, income-verification, and credit-decisioning workflows KCU has prioritized, integrating Zest AI outputs and Visa Falcon fraud signals into case-driven automation rather than manual hand-offs. In Zennify's assessment Straight-Through Processing (STP) scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-041].",
+      "why_text": "At 1.5 out of 5, Straight-Through Processing (STP) sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-078, E-041].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C4.3.3",
+        "P2C1.4.1",
+        "P3C1.2.3",
+        "P3C3.1.1",
+        "P1C4.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "75a59b1f-ab48-46f7-9be6-e15bf4240c2f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-078",
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-080",
+        "E-078",
+        "E-029"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Account Activation & Fulfillment a near-term focus for Kitsap Credit Union: a scoped investment here would lift it from 1.5 toward the 3.2 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-029].",
+      "source_rec_id": "REC-03",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Orchestrate digital onboarding & lending on FSC (extend Terafina)",
+      "what_text": "Scores 2.63 vs peer median 3.20 (−0.57). KCU has Terafina/Candescent onboarding and added FirstClose for home equity, but onboarding and lending fulfillment are not orchestrated on a single platform, constraining the centralize-lending and business/CRE growth agenda. Extend the deployed FSC to orchestrate member onboarding and lending fulfillment end-to-end — connecting Terafina/Candescent account opening, FirstClose home equity, and business/CRE lending into a unified, compliance-aware lifecycle with KYC/CDD automation. In Zennify's assessment Account Activation & Fulfillment scores 1.5 out of 5, versus a typical 3.2 at comparable institutions [E-078].",
+      "why_text": "At 1.5 out of 5, Account Activation & Fulfillment sits 1.7 points below the 3.2 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-080, E-078].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.3.3",
+        "P3C1.2.3",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "b3f4b17b-ebaf-438a-8a2e-643b9ddaf140",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-079",
+        "E-033",
+        "E-034"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Lead Capture & Management a near-term focus for Kitsap Credit Union: a scoped investment here would lift it from 1.3 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-034].",
+      "source_rec_id": "REC-04",
+      "theme": "Digital Channels",
+      "title": "Stand up marketing automation & journeys with Marketing Cloud",
+      "what_text": "Scores 2.35 vs peer median 2.50 (−0.15) and is a white-space capability: KCU markets data-drivenly under VP Marketing Luke Peterson toward a $5B-asset ambition but has no marketing-automation or journey-orchestration platform, limiting acquisition and lifecycle cross-sell. Deploy Marketing Cloud, natively connected to the deployed FSC, to run segmented acquisition campaigns and lifecycle journeys (onboarding, cross-sell, retention) — giving the marketing team owned automation rather than manual analyst effort. In Zennify's assessment Lead Capture & Management scores 1.3 out of 5, versus a typical 2.5 at comparable institutions [E-079].",
+      "why_text": "The assessment found: “Multi-platform social presence + active content blog (employee highlights, youth-account education, community, financial wellness); SEO-indexed product/education pages Two America's Credit Unions” [E-033]. At 1.3 out of 5, Lead Capture & Management sits 1.2 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P2C4",
+        "P1C1",
+        "P1C3",
+        "P4C1.1.6",
+        "P4C2.6.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "21b0c094-439e-4b9d-924d-4a4ce124458b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-058",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-055",
+        "E-058",
+        "E-069"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Build the member golden record with Data Cloud + Einstein + CRM Analytics — addressable via salesforce [E-069].",
+      "source_rec_id": "REC-05",
+      "theme": "Analytics & AI",
+      "title": "Build the member golden record with Data Cloud + Einstein + CRM Analytics",
+      "what_text": "Scores 2.62 (≈peer median 2.60) and Personalization 2.63 — both parity, not leadership, despite KCU's genuine AI-forward position (D8TAOPS first-mover agentic-AI + private LLM, DFI-approved; //). The AI investment sits BESIDE the CRM, not on it: there is no unified member golden record / CDP, so analytics and personalization cannot be activated at scale across servicing, marketing, and lending. Deploy Data Cloud as the member golden record unifying Symitar core, the deployed FSC, and D8TAOPS outputs; activate Einstein next-best-action and CRM Analytics so the existing AI/data investment is operationalized across every member touchpoint. This is the data foundation that turns KCU's level 3-execution into level 4 differentiation built on its level 4 strategy/innovation strengths ( 3.46, 3.22). In Zennify's assessment Analytics Data Platform scores 1.5 out of 5, versus a typical 2.6 at comparable institutions [E-058].",
+      "why_text": "The assessment found: “Kitsap (equity + design partner) deploys D8TAOPS D8:APPS on the D8:STACK framework providing collect (batch+streaming), discover/classify/catalog with searchable context and lineage” [E-055]. At 1.5 out of 5, Analytics Data Platform sits 1.1 points below the 2.6 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.1",
+        "P2C4.3.3",
+        "P1C1.5.4",
+        "P4C3.3.1",
+        "P4C3.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "f16b7d65-d58c-482e-935b-aa8d6137249f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-065",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-069",
+        "E-065",
+        "E-061"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Architecture Strategy a near-term focus for Kitsap Credit Union: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-061].",
+      "source_rec_id": "REC-06",
+      "theme": "Architecture & Cloud",
+      "title": "Establish the enterprise integration tier with MuleSoft",
+      "what_text": "Scores 2.65 (≈peer median 2.50). KCU integrates point-to-point via FSC data feeds and Azure DevOps/Terraform pipelines, with no enterprise API/integration tier — a structural constraint on unifying Symitar, FSC, D8TAOPS, Terafina, and FirstClose into the single-pane-of-glass and member-360 vision. Introduce MuleSoft Anypoint as the API/integration tier beneath Data Cloud, replacing brittle point-to-point feeds with reusable, governed APIs across the best-of-breed stack. In Zennify's assessment Enterprise Architecture Strategy scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-065].",
+      "why_text": "At 2.0 out of 5, Enterprise Architecture Strategy sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-069, E-065].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P2C4.3.3",
+        "P1C1.5.4",
+        "P1C4.3.1",
+        "P1C4.6.3",
+        "P1C4.1.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "2495c6d3-e994-493d-967d-0ab18cc4e866",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-083",
+        "E-064",
+        "E-034"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Pair the platform rollout with a member-facing change-enablement program — addressable via salesforce [E-034].",
+      "source_rec_id": "REC-07",
+      "theme": "Culture & Change",
+      "title": "Pair the platform rollout with a member-facing change-enablement program",
+      "what_text": "Culture & Change Enablement scores 2.14 vs peer median 2.60 (−0.46), with soft employee wellbeing signals (Indeed 3.4/5, wellbeing 'Low', recommend-to-friend ~49%;, IS-002). This is an adoption risk for the platform initiatives above, not a technology gap. KCU should run a structured change-enablement and adoption program alongside the CRM/Data Cloud rollout — front-line involvement, role-based training, and adoption metrics — to protect the value of the platform investments. (Zennify supports via Digital Strategy Workshop facilitation only; the organizational program is KCU-owned.) [E-083].",
+      "why_text": "The assessment found: “CIO owns strategic technology platforms; IT Manager contributes to IT Governance committee and analyzes business/systems requirements to recommend and implement technology solutions” [E-064]. At 1.3 out of 5, Champions Network sits 1.3 points below the 2.6 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-KCU-20260602-0001"
+}

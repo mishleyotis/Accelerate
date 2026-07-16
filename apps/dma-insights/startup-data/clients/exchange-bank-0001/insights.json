@@ -1,0 +1,1044 @@
+{
+  "entity_display_id": "exchange-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.1.1",
+        "P2C1.4.6",
+        "P1C2.1.5",
+        "P4C3.1.7"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "30486b79-e089-4ac3-b513-2a6bbe509c09",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-094",
+        "E-108",
+        "E-103"
+      ],
+      "linked_subcap_id": "P2C4.1.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Cross-sell is human-driven via Relationship Bankers (tiered levels I/II/VP). Effective at community bank scale but doesn't scale. Existing Salesforce DNA (Desk.com + Quip) lowers adoption barrier. — Sales Cloud: NOT greenfield — migration from Desk.com ecosystem. 7+ BDOs are day-one users. VP Ruppert (24yr) + SVP Daulton (15yr) are adoption champions [E-103].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "No sales CRM — but structured relationship banking infrastructure exists",
+      "what_text": "Customer Data Foundation (CDP) is one of Exchange Bank's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 1.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Exchange Bank's ability to deliver a stronger, more personalised customer experience [E-108].",
+      "why_text": "At 1.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-094, E-108].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.1.3",
+        "P4C2.3.2",
+        "P2C4.1.1",
+        "P3C1.1.2",
+        "P1C3.9.2",
+        "P2C1.5.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "7820c849-9bf1-4df9-bc65-5add327c1525",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-093",
+        "E-123",
+        "E-078"
+      ],
+      "linked_subcap_id": "P3C1.1.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Marketing is people + fragmented-tools driven. Team expanding RAPIDLY (3 hires in 2025, 2 more open). Marketing Data Analyst = analytics capability building. Stack has behavioral data (Crazy Egg, GA) but no journey orchestration [E-078].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "No marketing automation — but a 5+ person team actively building capability",
+      "what_text": "Automation Center of Excellence is one of Exchange Bank's least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Exchange Bank's ability to deliver more efficient, dependable operations [E-123].",
+      "why_text": "The research report pins the maturity impact at: Marketing Cloud: Team exists, data exists, tools fragmented. Consolidation play. Knowlton is champion. Data Analyst role signals analytical maturity for SFMC reporting. scores 1.0/5 against a peer median of 2.5 on the current assessment [E-093, E-123].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.4.1",
+        "P1C2.7.CU1",
+        "P1C4.1.4",
+        "P1C2.5.2",
+        "P1C2.5.5",
+        "P1C2.8.3"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "3c307831-6996-430a-bd62-99271bd36783",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-143",
+            "E-144"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-143",
+        "E-144",
+        "E-023"
+      ],
+      "linked_subcap_id": "P4C1.4.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: The person (Ganame) has the expertise to BUILD a data governance program. The compliance foundation (OneTrust + FDIC reporting) means data quality disciplines exist. Gap is organizational authority (CDO title) and enterprise scope, not capability. — Data Cloud: Ganame IS the champion. She understands platform value from JPMorgan Finance Transformation. Don't pitch 'you need data governance' — pitch 'let's formalize what you're already doing and extend Ganame's mandate.' [E-023].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "No CDO title — but de facto data leadership with world-class credentials + existing governance",
+      "what_text": "MDM Strategy & Golden Record is one of Exchange Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Exchange Bank's ability to deliver a stronger data and technology foundation [E-144].",
+      "why_text": "At 1.0 out of 5, MDM Strategy & Golden Record sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-143, E-144].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.3.2",
+        "P4C3.7.1",
+        "P4C3.3.5",
+        "P4C3.3.4",
+        "P4C3.3.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "3d6a59a0-ea7a-442b-9fe9-2dd597af8639",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-147"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-153",
+            "E-158"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-147"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-158",
+        "E-147",
+        "E-153"
+      ],
+      "linked_subcap_id": "P4C2.3.2",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Integration debt is real but partially mitigated by vendor ecosystems. Fiserv and Q2 provide managed integration for banking-specific functions. MuleSoft gap is most acute for connecting NON-banking systems (CRM, marketing, analytics) to the core. — MuleSoft: Foundation for connecting Salesforce TO the banking core. Fiserv APIs are the bridge. Position: 'MuleSoft connects your Salesforce investment to what Fiserv already exposes.' [E-153].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "No MuleSoft/Apigee/Kong/AWS API Gateway in 129 techs",
+      "what_text": "Data Science Platform & Workbench is one of Exchange Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Exchange Bank's ability to deliver a stronger data and technology foundation [E-147].",
+      "why_text": "At 1.0 out of 5, Data Science Platform & Workbench sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-158, E-147].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4.7.3",
+        "P1C5.6.1",
+        "P1C2.3.7",
+        "P4C4.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "9b86a6ed-e95a-4b5e-86a1-8344a0e6f43f",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-159",
+        "E-132",
+        "E-120"
+      ],
+      "linked_subcap_id": "P3C4.7.3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Defense-in-depth is STRONG at every layer. The monitoring gap is likely vendor-managed (Fiserv/FIS SOC). 3 concurrent IAM platforms (Okta + OneLogin + Azure AD) suggest migration, not redundancy. — Shield: Complement existing defense with Salesforce-specific event monitoring. Don't position as 'you need SIEM' — position as 'extend your strong security posture to the Salesforce layer.' [E-132].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "No standalone SIEM/SOC — but 6-layer defense-in-depth with enterprise products, likely vendor-managed monitoring",
+      "what_text": "Periodic Reassessment is one of Exchange Bank's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Exchange Bank's ability to deliver more efficient, dependable operations [E-159].",
+      "why_text": "The assessment found: “Cisco AMP (Advanced Malware Protection) for endpoint threat detection Cisco IronPort for email security/anti-phishing” [E-120]. At 2.0 out of 5, Periodic Reassessment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.3",
+        "P4C2",
+        "P2C3.11.4",
+        "P2C1.11.4",
+        "P2C4.11.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "628dce34-d36e-4ecb-bea6-e101668810df",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-147"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-138",
+            "E-140"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-138",
+            "E-139",
+            "E-140",
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-138",
+        "E-139",
+        "E-147",
+        "E-146",
+        "E-140",
+        "E-149",
+        "E-145",
+        "E-148"
+      ],
+      "linked_subcap_id": "P4C2.1.3",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: DR is battle-tested, not theoretical. This is a DIFFERENTIATOR, not a gap. The bank's ability to launch products under crisis conditions (Community Rebuild Loans, PPP) demonstrates operational agility beyond typical community banks. — Position Salesforce as STRENGTHENING proven resilience. Hyperforce on existing AWS/Azure aligns with dual-cloud strategy. Do NOT pitch DR remediation [E-147].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Wildfire-tested DR proven by 3 real events — not tabletop exercises",
+      "what_text": "Tubbs Fire 2017 (5,300 homes destroyed in EB's market), Kincade 2019, Glass/LNU. It underpins the data and technology foundation the rest of the business is built on, so its current level directly shapes Exchange Bank's ability to deliver a stronger data and technology foundation [E-139].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger data and technology foundation. It builds on the data and technology foundation the rest of the business is built on, so progress here lifts the wider business too [E-138, E-139].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.1.3",
+        "P3C3.6.1",
+        "P3C3.2.7",
+        "P3C3.2.6",
+        "P2C2.3.RB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "dc3126f3-1008-4d5e-9a52-018a5fc63e4b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-130"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-123",
+        "E-130",
+        "E-116"
+      ],
+      "linked_subcap_id": "P3C1.1.3",
+      "platforms": [
+        "salesforce",
+        "twilio",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automation Center of Excellence a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-116].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Kerri Howard (24yr BSA/OFAC Officer)",
+      "what_text": "Automation Center of Excellence is one of Exchange Bank's least developed operations capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Exchange Bank's ability to deliver more efficient, dependable operations [E-123].",
+      "why_text": "The assessment found: “FDIC-regulated banks MUST have BSA/AML compliance program with designated BSA officer, employee training, independent testing, and internal controls Exchange Bank has designated BSA/OFAC Officer” [E-130]. At 1.0 out of 5, Automation Center of Excellence sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P2C4",
+        "P4C3.7.1",
+        "P2C4.1.1",
+        "P2C2.3.RB1",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-156"
+      ],
+      "ic_id": "INS-REC-01",
+      "id": "f1b0ddd6-85ef-431f-87b9-bbafe8ea0196",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-156"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-153",
+            "E-158"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-150",
+        "E-151",
+        "E-160",
+        "E-152",
+        "E-153",
+        "E-158",
+        "E-154",
+        "E-157"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Quantum Computing Readiness a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-160].",
+      "source_rec_id": "REC-01",
+      "theme": "Architecture & Cloud",
+      "title": "Unified Integration Platform — MuleSoft as Salesforce Foundation",
+      "what_text": "Connected unlock: MuleSoft is prerequisite for Data Cloud, Sales Cloud, Marketing Cloud, and Service Cloud. Without it, each Salesforce cloud is another point-to-point integration. scores improve directly; (personalization) is UNLOCKED because customer data can flow between systems. In Zennify's assessment Quantum Computing Readiness scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-151].",
+      "why_text": "At 1.5 out of 5, Quantum Computing Readiness sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-150, E-151].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C1.4.1",
+        "P4C2.3.2",
+        "P2C4.1.1",
+        "P2C2.3.RB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "31d347e2-76ac-406d-beb3-f0825172996a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-143",
+            "E-144"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-138",
+            "E-140"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-138",
+            "E-140"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-138",
+        "E-143",
+        "E-140",
+        "E-141",
+        "E-142",
+        "E-144"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make MDM Strategy & Golden Record a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-143].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Customer Data Unification — Data Cloud as Enterprise CDP",
+      "what_text": "Connected unlock: Data Cloud is the backbone for Sales Cloud needs customer data, Marketing Cloud needs segments, Service Cloud needs customer context, and Tableau Cloud needs the data lake. scores improve directly; (personalization) becomes possible because customer data is unified. In Zennify's assessment MDM Strategy & Golden Record scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-138].",
+      "why_text": "The assessment found: “Fiserv Premier + Signature = primary transactional data store (core banking data) IBM i (AS/400) = legacy transactional processing platform. COBOL applications still in use” [E-140]. At 1.0 out of 5, MDM Strategy & Golden Record sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.6",
+        "P2C4.5",
+        "P2C4.1.1",
+        "P1C1.5.5",
+        "P1C1.5.8",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-078",
+        "E-094"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "3b5f03cd-f0da-4a8f-bfcc-e825c58f9bb0",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-078",
+            "E-094"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1.6"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-076",
+            "E-077",
+            "E-079",
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-076",
+        "E-088",
+        "E-087",
+        "E-077",
+        "E-079",
+        "E-080",
+        "E-089",
+        "E-091"
+      ],
+      "linked_subcap_id": "P2C1.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Funnel Analytics a near-term focus for Exchange Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-087].",
+      "source_rec_id": "REC-03",
+      "theme": "Digital Channels",
+      "title": "Sales Pipeline Visibility — Sales Cloud for BDO Team",
+      "what_text": "Connected unlock: Sales Cloud + Data Cloud = BDOs see customer's full relationship. Sales Cloud + Marketing Cloud = marketing-generated leads flow to BDOs. scores improve directly; (cross-sell) becomes data-driven. In Zennify's assessment Funnel Analytics scores 2.5 out of 5, versus a typical 2.0 at comparable institutions [E-088].",
+      "why_text": "The assessment found: “Website structured by 4 segments: Personal, Business, Trust & Investment, About Us. Clear product navigation Digital account opening link exists: openaccount.exchangebank.com — dedicated subdomain” [E-076]. At 2.5 out of 5, Funnel Analytics shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P2C4.1.1",
+        "P1C1.5.5",
+        "P1C1.5.8",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-078",
+        "E-086",
+        "E-093",
+        "E-094"
+      ],
+      "ic_id": "INS-REC-04",
+      "id": "05134fc4-0b44-4d3b-a760-24666198cf3b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-078",
+            "E-086",
+            "E-093",
+            "E-094"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-076",
+            "E-077",
+            "E-079",
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-076",
+        "E-088",
+        "E-087",
+        "E-077",
+        "E-079",
+        "E-080",
+        "E-089",
+        "E-091"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Community Bank Positioning a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-087].",
+      "source_rec_id": "REC-04",
+      "theme": "Digital Channels",
+      "title": "Marketing Campaign Orchestration — Marketing Cloud for Growing Team",
+      "what_text": "Connected unlock: Marketing Cloud + Data Cloud = segments for targeted campaigns. Marketing Cloud + Sales Cloud = leads flow to BDOs. scores improve directly; (personalization) advances because marketing can target based on behavior. In Zennify's assessment Community Bank Positioning scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-088].",
+      "why_text": "The assessment found: “Website structured by 4 segments: Personal, Business, Trust & Investment, About Us. Clear product navigation Digital account opening link exists: openaccount.exchangebank.com — dedicated subdomain” [E-076]. At 1.0 out of 5, Community Bank Positioning sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P3C1",
+        "P4C2.3.2",
+        "P2C4.1.1",
+        "P2C2.3.RB1",
+        "P3C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-102",
+        "E-103"
+      ],
+      "ic_id": "INS-REC-05",
+      "id": "39b1bb6f-b39e-4faa-8b72-57326b19600a",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-102",
+            "E-103"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-118"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-118",
+        "E-098",
+        "E-099",
+        "E-100",
+        "E-101",
+        "E-104",
+        "E-106",
+        "E-105"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Resolution Quality & Follow-up a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-099].",
+      "source_rec_id": "REC-05",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Contact Center Consolidation — Service Cloud + Einstein Bot",
+      "what_text": "Connected unlock: Service Cloud + Data Cloud = agents see customer's full relationship. Service Cloud + Sales Cloud = service interactions flag cross-sell opportunities. scores improve directly; (process automation) advances with automated case routing. In Zennify's assessment Resolution Quality & Follow-up scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-118].",
+      "why_text": "The assessment found: “18 locations throughout Sonoma County and North Bay (17 retail branches in Sonoma + 1 Roseville commercial) 55,000 Allpoint ATMs worldwide — major surcharge-free ATM network partnership” [E-098]. At 1.0 out of 5, Resolution Quality & Follow-up sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C1",
+        "P4C1.4.1",
+        "P4C2.3.2",
+        "P1C2.7.CU1",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "7cb0c955-a564-4657-90ce-8c95dcbcbe79",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-147"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-138",
+            "E-139",
+            "E-140",
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-138",
+            "E-140"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-138",
+        "E-139",
+        "E-147",
+        "E-146",
+        "E-140",
+        "E-149",
+        "E-145",
+        "E-148"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Science Platform & Workbench a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-147].",
+      "source_rec_id": "REC-06",
+      "theme": "Analytics & AI",
+      "title": "Analytics Modernization — Tableau Cloud + Einstein AI",
+      "what_text": "Connected unlock: Tableau Cloud + Data Cloud = customer analytics beyond finance. Einstein + Sales Cloud = predictive lead scoring for BDOs. scores improve directly; (data governance) advances because enterprise analytics requires governance. In Zennify's assessment Data Science Platform & Workbench scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-139].",
+      "why_text": "At 1.0 out of 5, Data Science Platform & Workbench sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-138, E-139].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P3C2",
+        "P2C4.1.1",
+        "P2C2.3.RB1",
+        "P3C1.1.2",
+        "P3C3.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "0a285ada-3f9d-41bc-97e8-f2ca3aa8b0d6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-130"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-129",
+        "E-134",
+        "E-130",
+        "E-133",
+        "E-128",
+        "E-135",
+        "E-137"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Exam Preparation a near-term focus for Exchange Bank: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-134].",
+      "source_rec_id": "REC-07",
+      "theme": "Compliance & Surveillance",
+      "title": "Compliance Process Digitization — Financial Services Cloud",
+      "what_text": "Connected unlock: FSC + Data Cloud = compliance sees customer data for suspicious activity. FSC + Service Cloud = compliance cases integrate with service workflow. scores improve directly; (fraud/risk) advances with automated investigation tools. In Zennify's assessment Exam Preparation scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-129].",
+      "why_text": "The assessment found: “FDIC-regulated banks MUST have BSA/AML compliance program with designated BSA officer, employee training, independent testing, and internal controls Exchange Bank has designated BSA/OFAC Officer” [E-130]. At 2.0 out of 5, Exam Preparation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P1C2",
+        "P2C4.1.1",
+        "P2C2.3.RB1",
+        "P3C1.1.2",
+        "P3C3.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "a772500c-020e-4a50-82dc-feb105db68dd",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-118"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-122",
+        "E-118",
+        "E-125",
+        "E-119",
+        "E-123",
+        "E-121",
+        "E-124",
+        "E-126"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automation Governance Framework a near-term focus for Exchange Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-125].",
+      "source_rec_id": "REC-08",
+      "theme": "Core Automation",
+      "title": "Citizen Development Platform — Flow + OmniStudio for BA Team",
+      "what_text": "Connected unlock: Flow + Service Cloud = automated case routing. Flow + FSC = automated compliance workflows. Flow + Sales Cloud = automated lead assignment. scores improve directly; (governance/execution) advances because PMO governs automation. In Zennify's assessment Automation Governance Framework scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-118].",
+      "why_text": "At 1.0 out of 5, Automation Governance Framework sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-122, E-118].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Exchange Bank positions above peers in Strategy & Governance (P1: 2.59 vs median 2.40) and at peer level in Customer Experience (P2: 2.33 vs 2.25). It positions below peers in Operations & Risk (P3: 2.17 vs 2.75) and Data & Technology (P4: 1.99 vs 2.25). This pattern — strong organizational capability with weak technology platforms — defines the Salesforce opportunity.",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience & Engagement — Score 2.33 vs Median 2.25 (+0.08)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations & Risk Management — Score 2.17 vs Median 2.75 (-0.58)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology — Score 1.99 vs Median 2.25 (-0.26)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Eight recommendations are presented in priority order, organized into three transformation phases. Each recommendation follows the mandatory structure: ROOT CAUSE (with evidence IDs confirming the gap) → SOLUTION (with named Zennify product) → EXPECTED OUTCOMES. Every recommendation is validated against Exchange Bank’s strategic objectives and identifies a named executive champion from Clay research."
+  },
+  "run_request_id": "DMA-ASM-EXCH-20260331-0001"
+}

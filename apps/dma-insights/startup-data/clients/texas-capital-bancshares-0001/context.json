@@ -1,0 +1,601 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "texas-capital-bancshares-0001",
+  "financials": {
+    "lines": [
+      "As of Q3 2025: $32.5B total assets (record), $27.5B deposits (record), approximately 1,818 employees \u2014 90% of whom joined since the 2021 transformation began. Workday confirmed as HR and ATS platform (texascapitalbank.wd12.myworkdayjobs.com). TCB employs a talent-first strategy: 50% of commercial and industrial clients are now covered by industry-specialized bankers, up from near-zero in 2021.",
+      "TREND CLASSIFICATION: ACCELERATING \u2014 73 basis points ROAA improvement from FY2021 to Q3 2025; ROATCE from 2.0% to 12.0% (10pp improvement); fee income +84% since Q3 2021; PPNR +30% YoY Q3 2025 (all-time record $150M). Revenue growth forecast: +20% p.a. average next two years vs. 7.2% banking industry benchmark.",
+      "CAGR Estimates: Fee Income CAGR FY2021\u2013FY2025: ~+40%; Tangible Book Value per share CAGR: ~+8% (FY2024 record, then Q3 2025 record $73.02/share). Asset CAGR FY2021\u2013Q3 2025: ~+2% \u2014 reflecting deliberate capital rebalancing (mortgage correspondent exit, BankDirect sale) followed by organic growth acceleration.",
+      "TREND CLASSIFICATION: ACCELERATING. TCB's financial trajectory from FY2021 (transformation start) to Q3 2025 (transformation declared complete) shows a sustained multi-year recovery and acceleration. Key performance targets set at the September 2021 strategic update have been met or exceeded. Q3 2025 results beat analyst estimates by >20% ($2.18 EPS vs $1.81 estimated).",
+      "Key Financial Signals for Salesforce Account Executive: (1) Fee income 84%+ growth since Q3 2021 \u2014 TCB has successfully transformed from a spread-dependent bank to a fee-generating financial services firm. (2) ROATCE target >12.5% \u2014 Q3 2025 hit 12.0%, signaling capital available for platform investment. (3) Revenue forecast +20% p.a. next 2 years vs. 7.2% industry \u2014 aggressive product and technology investment cycle ahead. (4) CET1 12.14% and TCE/TA 10.25% (#1 capitalization vs. peer group) \u2014 balance sheet strength supports technology investment without capital constraints. (5) Treasury Product Fees +23% YoY for 4th consecutive quarter \u2014 each new treasury API product is a MuleSoft use case."
+    ],
+    "metrics": {
+      "accelerating": "73 basis points ROAA improvement from FY20",
+      "as_of_q3_2025": "32.5B total assets (record), $27.5B deposits"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States \u2014 Texas-primary (Dallas HQ",
+      "5 TX metros) + national expansion (CA/"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Tenet Healthcare",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Holmes Feb",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chief Credit",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rob Holmes-hosted",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "Comprehensive organizational context derived from SEC filings (10-K FY2024), FDIC records, and public corporate disclosures. All claims cite evidence IDs. Financial data covers FY2020\u2013Q3 2025 for trend analysis.",
+    "primary_regulator": "SEC",
+    "size_tier": "mid-size",
+    "thought_leadership": [
+      {
+        "author": "Rob Holmes-hosted",
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-126",
+        "excerpt": "'Taking Share: Lessons From Leaders' \u2014 CEO Rob Holmes-hosted thought-leadership podcast with premium guest roster: Condoleezza Rice (Hoover Institution, 66th Secretary of State); Frank Bisignano (SSA Commissioner + IRS C",
+        "title": "'Taking Share: Lessons From Leaders'",
+        "type": "podcast",
+        "url": "https://www.texascapitalbank.com/commercial-banking/insights"
+      }
+    ],
+    "ticker": "NASDAQ: TCBI"
+  },
+  "issue_register": [
+    {
+      "id": "ce18daa7-52d7-4ff1-805a-5ea50e943ec0",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "contradiction_log.csv absent \u2014 Layer 1 v5.5\u2194Layer 2 v2.4 schema drift"
+    },
+    {
+      "id": "366bbe5c-bc88-4c2b-97d4-1b68a024f54a",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "reasoning_chain_log.json absent \u2014 Layer 1 v5.5\u2194Layer 2 v2.4 schema drift"
+    },
+    {
+      "id": "8d883d44-25ec-4f2f-b55c-01d4dee0866b",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Evidence count mismatch: manifest=0, registry=135"
+    },
+    {
+      "id": "3556538c-cf2b-40f5-8022-418e3eaa3065",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "evidence_index.csv absent; evidence_index.json present instead"
+    },
+    {
+      "id": "18ddcba3-d3b4-450d-9f63-377f8dd550e2",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Workbook missing advanced proof sheets (schema drift): ['Calculation_Chain', 'Contradiction_Log', 'QA_Validation_Log', 'Critic_Log']"
+    },
+    {
+      "id": "4dc1248c-89d1-4187-8991-b5c158720901",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "154 NO_EVIDENCE subcaps without proxy search confirmation"
+    },
+    {
+      "id": "dfd1029e-b953-4162-b5a6-452ec2b84229",
+      "issue_id": "GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Proof structure adequate: E-IDs=82%, Maturity refs=100%"
+    },
+    {
+      "id": "ba40db99-a618-4f23-a311-921c176fda1d",
+      "issue_id": "GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Columns R/S/T (Proof_Claims, Proof_Links) absent from workbook (schema drift)"
+    },
+    {
+      "id": "6882b7d9-8d6a-493c-abec-787fe7af9bc4",
+      "issue_id": "GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Executive Summary has zero peer references"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "BORROWED FROM RESEARCH REPORT (DMA-RES-TCB-20260511-0001, Section 5) \u2014 enriched with scoring impact annotations for the assessment layer. No MATERIAL or CRITICAL severity issues were identified. Six MINOR issues create cap triggers that constrain specific capability scores (detailed in Appendix B Handoff Package). Clean regulatory history is documented through negative search evidence.",
+    "trend_md": "BORROWED FROM RESEARCH REPORT (DMA-RES-TCB-20260511-0001, Section 3.3) \u2014 enriched with assessment-layer annotations and maturity signals. The digital evolution timeline establishes the historical context that explains TCB's current maturity profile: a bank that built technology infrastructure before commercializing it."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 3.41,
+        "P1C3": 1.96,
+        "P1C4": 2.45,
+        "P2C1": 2.53,
+        "P2C2": 2.34,
+        "P2C3": 2.78,
+        "P2C4": 1.7,
+        "P3C1": 1.87,
+        "P3C2": 2.71,
+        "P3C3": 2.57,
+        "P3C4": 2.41,
+        "P4C1": 1.81,
+        "P4C2": 1.64,
+        "P4C3": 2.39,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.39,
+      "peer_name": "Exchange Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.45,
+        "P1C2": 2.31,
+        "P1C3": 2.26,
+        "P1C4": 2.09,
+        "P1C5": 2.71,
+        "P2C1": 2.13,
+        "P2C2": 2.19,
+        "P2C3": 2.22,
+        "P2C4": 2.3,
+        "P3C1": 2.26,
+        "P3C2": 2.58,
+        "P3C3": 2.34,
+        "P3C4": 2.19,
+        "P4C1": 2.88,
+        "P4C2": 2.28,
+        "P4C3": 2.72,
+        "P4C4": 2.75
+      },
+      "overall_score": 2.39,
+      "peer_name": "Regions Business Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 3.86,
+        "P1C3": 2.03,
+        "P1C4": 2.66,
+        "P1C5": 1.71,
+        "P2C1": 1.6,
+        "P2C2": 2.15,
+        "P2C3": 2.07,
+        "P2C4": 1.61,
+        "P3C1": 1.98,
+        "P3C2": 2.37,
+        "P3C3": 3.0,
+        "P3C4": 2.28,
+        "P4C1": 1.58,
+        "P4C2": 1.56,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.27,
+      "peer_name": "1st Security Bank of Washington",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 2.3,
+        "P1C3": 2.26,
+        "P1C4": 2.21,
+        "P1C5": 2.25,
+        "P2C1": 2.19,
+        "P2C2": 2.03,
+        "P2C3": 2.13,
+        "P2C4": 2.04,
+        "P3C1": 2.56,
+        "P3C2": 2.67,
+        "P3C3": 2.34,
+        "P3C4": 1.53,
+        "P4C1": 1.75,
+        "P4C2": 2.19,
+        "P4C3": 2.34,
+        "P4C4": 1.83
+      },
+      "overall_score": 2.2,
+      "peer_name": "Bank OZK",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.56,
+        "P1C2": 1.94,
+        "P1C3": 1.68,
+        "P1C4": 2.49,
+        "P1C5": 1.93,
+        "P2C1": 1.94,
+        "P2C2": 1.94,
+        "P2C3": 1.9,
+        "P2C4": 1.74,
+        "P3C1": 2.0,
+        "P3C2": 3.0,
+        "P3C3": 4.0,
+        "P3C4": 3.0,
+        "P4C1": 1.8,
+        "P4C2": 1.75,
+        "P4C3": 1.88,
+        "P4C4": 1.92
+      },
+      "overall_score": 2.2,
+      "peer_name": "East West Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TCB-20260511-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Overall",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Culture & Values",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Job Security & Advancement",
+        "themes": [],
+        "value": 3.6
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Management",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Work-Life Balance",
+        "themes": [],
+        "value": 4.1
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Compensation & Benefits",
+        "themes": [],
+        "value": 4.1
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CEO Approval (Rob Holmes)",
+        "themes": [],
+        "value": 4145.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Recommend to a Friend",
+        "themes": [],
+        "value": 52.5
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Salary Satisfaction",
+        "themes": [],
+        "value": 68.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Interview Process",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Data Source",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Technology strategy explicit: 'agile, cloud-native technology infrastructure'; AI/automation/data named as 2026 'leading investment priorities'.",
+      "date_precision": "year",
+      "e_id": "E-102",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "90bf52f4-ac30-497e-b3a3-bcebe2a8b7f8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://texascapitalbank.com/insights/look-ahead-rob-c-holmes-2026",
+      "subcap_ids": [],
+      "title": "AI/automation/data named as 2026 'leading investment\u2026"
+    },
+    {
+      "body": "Geographic strategy expansion: LA office opened 2025; Chicago + NYC offices planned 2026 \u2014 'Y'all Street to Wall Street'.",
+      "date_precision": "year",
+      "e_id": "E-102",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "c303f22d-7fe2-4884-b43d-45b7288d8a64",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://texascapitalbank.com/insights/look-ahead-rob-c-holmes-2026",
+      "subcap_ids": [],
+      "title": "LA office opened 2025"
+    },
+    {
+      "body": "Director Ranjana B. Clark (joined 2025): former Head of Global Transaction Banking at MUFG \u2014 deep financial-services and treasury expertise; serves on Audit + Technology committees.",
+      "date_precision": "year",
+      "e_id": "E-106",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-106"
+      ],
+      "id": "13d22f2d-cdf3-4740-a297-c9a6106b51d1",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1077428/000107742826000040/tcbi-20260309.htm",
+      "subcap_ids": [],
+      "title": "Director Ranjana B. Clark joined 2025"
+    },
+    {
+      "body": "Texas Capital Initio launched June 27, 2023 \u2014 internally developed, proprietary cloud-native software application for commercial digital onboarding. Cuts account opening from industry-standard ~40 days to a few days. Built under CIO Don Goin + Nancy McDonnell (MD - Head of Treasury Solutions, joined 2021).",
+      "date_precision": "day",
+      "e_id": "E-127",
+      "event_date": "2023-06-27",
+      "evidence_e_ids": [
+        "E-127"
+      ],
+      "id": "bad54457-294a-48fe-813f-e74995c8b561",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://texascapitalbank.com/who-we-are/newsroom/news/2023/06/27/texas-capital-launches-innovative-onboarding-technology-solution-commercial",
+      "subcap_ids": [],
+      "title": "Texas Capital Initio launched internally developed\u2026"
+    },
+    {
+      "body": "Product portfolio: (1) Mileage Savings Account \u2014 1.75 AAdvantage miles per $1 saved annually; (2) Interest Savings Account \u2014 3.75% APY (launched Feb 2022, started 0.70% APY); (3) Interest Checking Account \u2014 1% APY with Zelle, Visa debit; (4) Certificates of Deposit \u2014 3-24 month terms, up to 3.85% APY, $1K min. All accounts: no monthly fees, no minimum balance.",
+      "date_precision": "month",
+      "e_id": "E-124",
+      "event_date": "2022-02-01",
+      "evidence_e_ids": [
+        "E-124"
+      ],
+      "id": "65913025-f0a7-41a3-8e1a-71b43ab2761b",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://baskbank.com/about-us",
+      "subcap_ids": [],
+      "title": "Interest Savings Account \u2014 3.75% APY (launched Feb 2022\u2026"
+    },
+    {
+      "body": "Bask Bank President: Matt Quale (named in Feb 2022 product launch PR).",
+      "date_precision": "month",
+      "e_id": "E-124",
+      "event_date": "2022-02-01",
+      "evidence_e_ids": [
+        "E-124"
+      ],
+      "id": "d0282be9-7cdb-480e-914f-45f3a9749231",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://baskbank.com/about-us",
+      "subcap_ids": [],
+      "title": "Matt Quale (named in Feb 2022 product launch PR)"
+    },
+    {
+      "body": "CEO declared the 2021-launched transformation 'completed' in 2026 letter \u2014 formal strategic milestone communication.",
+      "date_precision": "year",
+      "e_id": "E-102",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-102"
+      ],
+      "id": "1fefbf64-557d-4177-a652-f6dae38dbc3a",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://texascapitalbank.com/insights/look-ahead-rob-c-holmes-2026",
+      "subcap_ids": [],
+      "title": "CEO declared the 2021-launched transformation 'completed'\u2026"
+    },
+    {
+      "body": "Texas Capital Initio launched June 27, 2023 \u2014 internally developed, proprietary cloud-native software application for commercial digital onboarding. Cuts account opening from industry-standard ~40 days to a few days. Built under CIO Don Goin + Nancy McDonnell (MD - Head of Treasury Solutions, joined 2021).",
+      "date_precision": "year",
+      "e_id": "E-127",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-127"
+      ],
+      "id": "aef3ba69-ea28-413e-8c6e-4e4af444ec5c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://texascapitalbank.com/who-we-are/newsroom/news/2023/06/27/texas-capital-launches-innovative-onboarding-technology-solution-commercial",
+      "subcap_ids": [],
+      "title": "Nancy McDonnell (MD - Head of Treasury Solutions, joined"
+    },
+    {
+      "body": "M&A activity: 2020 merger with Independent Bank Group collapsed (CEO stepped down); 2022 BankDirect Capital Finance sold to Truist for $3.4B; 2021 mortgage correspondent business divested ($14B portfolio). Board has standing M&A Committee per 2026 proxy.",
+      "date_precision": "year",
+      "e_id": "E-105",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-105"
+      ],
+      "id": "475c2850-1ffe-4304-b2c8-e9cb25b45f0a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Texas_Capital_Bank",
+      "subcap_ids": [],
+      "title": "M&A activity: collapsed"
+    },
+    {
+      "body": "Mobile Financial Center deployed with Financial Instructional Tools (FIT) curriculum for financial literacy education. Deployed: Hurricane Harvey (Houston), Parkland Hospital COVID mobile testing site (March 2020 \u2014 Southern Dallas underserved area).",
+      "date_precision": "month",
+      "e_id": "E-118",
+      "event_date": "2020-03-01",
+      "evidence_e_ids": [
+        "E-118"
+      ],
+      "id": "9b78ad28-59bd-4621-8293-c8317df16ee3",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://texascapitalbank.com/who-we-are/our-company/community-impact",
+      "subcap_ids": [],
+      "title": "Deployed: Hurricane Harvey (Houston), Parkland Hospital\u2026"
+    },
+    {
+      "body": "\ud83c\udfaf VoC PROGRAM CONFIRMED: Alana Gast = former AVP, Client Experience Manager at TCB (Jun 2017-Oct 2021). Per recommender: 'go-to for the VOC program, designing surveys and managing the closed feedback loop. She is my partner in mapping client journeys.' Certified Customer Experience Professional (CXPA) + CustomerGauge Account Experience B2B CX Platinum certification. Confirms TCB has had a structured VoC + journey mapping + closed-loop feedback program since at least 2017.",
+      "date_precision": "year",
+      "e_id": "E-145",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-145"
+      ],
+      "id": "648332d2-1742-41a6-8807-9234938581d0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/brian-maksymowicz-362b0710",
+      "subcap_ids": [],
+      "title": "Confirms has had a structured VoC + journey mapping\u2026"
+    }
+  ]
+}

@@ -1,0 +1,466 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Global Federal Credit Union",
+      "amount": "$228.7M",
+      "announced_on": null,
+      "body": "New asset classes, Nov 2025 conversion",
+      "closed_on": null,
+      "details": "New asset classes, Nov 2025 conversion",
+      "e_id": null,
+      "event_date": "2024-04-01",
+      "id": "30176395-5c73-4b14-b1e5-265eda810473",
+      "source_url": null,
+      "status": null,
+      "target": "FFNW",
+      "title": "FFNW Acquisition ($228.7M)"
+    }
+  ],
+  "entity_display_id": "global-federal-credit-un-0001",
+  "financials": {
+    "lines": [
+      "Trend classification: ACCELERATING. GCU is growing through both organic expansion (CEO targeting $13B+) and strategic acquisition (FFNW $228.7M). Transaction volume at 747M annually [E-002] indicates high operational throughput. The Arizona market represents a strategic growth vector, with active hiring in Mesa, AZ [E-038] and branch expansion in the Phoenix metro area."
+    ],
+    "metrics": {
+      "net_income": 22000000.0,
+      "trajectory": {
+        "branches": 70,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 2000,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "FFNW Acquisition ($228.7M)"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Rebrand: Alaska USA to Global FCU"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "Washington State (primary), OR",
+        "headline": "$300M net income \u00b7 FY2024",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            66000.0,
+            300.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Washington State (primary)",
+      "OR"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Geoff Lundfelt",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Sasena",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CSO / Board Vice Chair"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "David Vanzant",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Enterprise Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "David Foger",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, Data & Analytics"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dana Gonderzik",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, Info Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Matt Reed",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, IT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Echternacht",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, IT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Bridenbaugh",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, IT"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Global Federal Credit Union (formerly Alaska USA FCU until April 2023) is a $12.066B federal credit union headquartered in Anchorage, Alaska, serving approximately 795,000 members across five states and three military installations in Italy. As one of the top 20 US credit unions by membership, GCU occupies the Large tier ($10B\u2013$50B) within the SV2 Credit Union sub-vertical at 95% confidence. The institution is in an active digital transformation cycle \u2014 cloud-first since 2019, AI operations saving 62,000 hours annually, and a MuleSoft integration platform processing 300 million transactions per year. However, the absence of a CDO, CTO, or CIO at the executive level, combined with very low member satisfaction scores (Yelp 1.7/5), creates a paradox: significant back-office digital investment that is not yet translating into member-facing value.\n\nGlobal Federal Credit Union was established in 1948 as Elmendorf Air Force Base Federal Credit Union, serving military personnel in Alaska [E-003]. The institution has grown through multiple mergers to become one of the nation's largest credit unions, rebranding from Alaska USA Federal Credit Union to Global Federal Credit Union in April 2023 [E-001]. As a federally chartered credit union regulated by NCUA, GCU is member-owned with operations spanning five US states (Alaska, Arizona, California, Washington, Idaho) and three military installations in Italy [E-001, E-042].",
+    "primary_regulator": "NCUA",
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "7e027a2d-19f1-4db7-9657-c800b31aa27f",
+      "issue_id": "GAP-1-P1C3.2.2",
+      "linked_subcap_ids": [
+        "P1C3.2.2"
+      ],
+      "opened_on": "2026-03-09",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CU peer median (3.0/5). [EVIDENCE]: E-013, E-014 \u00e2\u20ac\u201d Security culture shifted from 'no' to 'yes, here's how securely.' Glassdoor 3.7/5 culture, 77% recom. [Via CAP_PROXY from related subcaps] [SOURCE]: FinTech Mag; DEI Press Release; Glassdoor. [MATURITY MATCH]: Maps to M1.5 (developing/basic) \u00e2\u20ac\u201d evidence shows early-stage capability for Employee Ideation. [GAP TO NEXT]: Basic implementation with documented processes needed. [SO WHAT]: For GFCU, this represents a priority build-out area. [DIFF: Reduced \u00e2\u20ac\u201d less direct evidence alignment for this specific subcapability.]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Employee Ideation"
+    },
+    {
+      "id": "2a713058-4428-47f2-af72-fca54ecfe10e",
+      "issue_id": "GAP-2-P1C3.2.5",
+      "linked_subcap_ids": [
+        "P1C3.2.5"
+      ],
+      "opened_on": "2026-03-09",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the CU peer median (3.0/5). [EVIDENCE]: E-013, E-014 \u00e2\u20ac\u201d Security culture shifted from 'no' to 'yes, here's how securely.' Glassdoor 3.7/5 culture, 77% recom. [Via CAP_PROXY from related subcaps] [SOURCE]: FinTech Mag; DEI Press Release; Glassdoor. [MATURITY MATCH]: Maps to M1.5 (developing/basic) \u00e2\u20ac\u201d evidence shows early-stage capability for Idea Prioritization. [GAP TO NEXT]: Basic implementation with documented processes needed. [SO WHAT]: For GFCU, this represents a priority build-out area. [DIFF: Reduced \u00e2\u20ac\u201d less direct evidence alignment for this specific subcapability.]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Idea Prioritization"
+    },
+    {
+      "id": "aed77518-15fd-4fbf-aaad-28ae3c6e7329",
+      "issue_id": "GAP-3-P1C5.1.1",
+      "linked_subcap_ids": [
+        "P1C5.1.1"
+      ],
+      "opened_on": "2026-03-09",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the CU peer median (2.5/5). [EVIDENCE]: No direct public evidence found for ESG Strategy Document at P1C5.1.1. [CATEGORY CONTEXT]: Category P1C5 baseline is 1.5 based on research ceiling estimates. [MATURITY MATCH]: Estimated M1 based on overall category evidence suggesting developing capability at this institution. [GAP TO NEXT]: Direct evidence of ESG Strategy Document implementation needed. [COUNTER]: Absence of public evidence may reflect documentation gaps rather than capability absence \u00e2\u20ac\u201d GFCU operates 78 branches across 6 states suggesting operational maturity. [SO WHAT]: For GFCU, internal validation during discovery could reveal stronger capability than public evidence suggests.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: ESG Strategy Document"
+    },
+    {
+      "id": "654df30d-ee72-48c5-9247-afb68dbfc22a",
+      "issue_id": "GAP-4-P1C5.1.2",
+      "linked_subcap_ids": [
+        "P1C5.1.2"
+      ],
+      "opened_on": "2026-03-09",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the CU peer median (2.5/5). [EVIDENCE]: No direct public evidence found for Materiality Assessment at P1C5.1.2. [CATEGORY CONTEXT]: Category P1C5 baseline is 1.5 based on research ceiling estimates. [MATURITY MATCH]: Estimated M1 based on overall category evidence suggesting developing capability at this institution. [GAP TO NEXT]: Direct evidence of Materiality Assessment implementation needed. [COUNTER]: Absence of public evidence may reflect documentation gaps rather than capability absence \u00e2\u20ac\u201d GFCU operates 78 branches across 6 states suggesting operational maturity. [SO WHAT]: For GFCU, internal validation during discovery could reveal stronger capability than public evidence suggests.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Materiality Assessment"
+    },
+    {
+      "id": "bfd6af48-099f-4a99-989a-3a13f39ad00b",
+      "issue_id": "GAP-5-P1C5.1.4",
+      "linked_subcap_ids": [
+        "P1C5.1.4"
+      ],
+      "opened_on": "2026-03-09",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the CU peer median (2.5/5). [EVIDENCE]: No direct public evidence found for ESG Roadmap at P1C5.1.4. [CATEGORY CONTEXT]: Category P1C5 baseline is 1.5 based on research ceiling estimates. [MATURITY MATCH]: Estimated M1 based on overall category evidence suggesting developing capability at this institution. [GAP TO NEXT]: Direct evidence of ESG Roadmap implementation needed. [COUNTER]: Absence of public evidence may reflect documentation gaps rather than capability absence \u00e2\u20ac\u201d GFCU operates 78 branches across 6 states suggesting operational maturity. [SO WHAT]: For GFCU, internal validation during discovery could reveal stronger capability than public evidence suggests.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: ESG Roadmap"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Most recent reported financials: $300M net income as of FY2024, within a series tracked FY2023 to FY2024. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 4.0,
+        "P2C1": 3.5,
+        "P2C2": 4.0,
+        "P2C3": 4.0,
+        "P2C4": 4.0,
+        "P2C5": 4.0,
+        "P3C1": 3.0,
+        "P3C2": 3.5,
+        "P3C3": 4.0,
+        "P3C4": 3.5,
+        "P4C1": 3.5,
+        "P4C2": 4.0,
+        "P4C3": 4.0,
+        "P4C4": 3.5
+      },
+      "overall_score": 3.68,
+      "peer_name": "BECU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.5,
+        "P2C1": 2.0,
+        "P2C2": 4.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P2C5": 3.5,
+        "P3C1": 4.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 4.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.21,
+      "peer_name": "America First CU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.5,
+        "P2C1": 2.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.0,
+        "P2C5": 4.0,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 3.5,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 3.15,
+      "peer_name": "Idaho Central CU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P2C1": 2.0,
+        "P2C2": 3.5,
+        "P2C3": 2.0,
+        "P2C4": 2.5,
+        "P2C5": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.76,
+      "peer_name": "Mountain America FCU",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P2C1": 2.0,
+        "P2C2": 3.0,
+        "P2C3": 3.5,
+        "P2C4": 2.0,
+        "P2C5": 3.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.71,
+      "peer_name": "Desert Financial CU",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-GFCU-20260309-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "executives added Sept 2022 including 5 from GCU merger BBB long-term rating, outlook revised Negative\u2192Stable Net worth ratio 9.4%, ~40bps above well-capitalized minimum Yelp rating 1.7/5 from 84 reviews \u2014 low member satisfaction CreditUnion",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 84,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "trend": "Stable",
+        "value": 1.7
+      },
+      {
+        "drilldown": "Net worth ratio 9.4%, ~40bps above well-capitalized minimum Yelp rating 1.7/5 from 84 reviews \u2014 low member satisfaction CreditUnionsOnline rating 1.8/5 \u2014 consistent with Yelp Migrated to Optimizely DXP from on-premise CMS; implementation by",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": 84,
+        "polarity": "neutral",
+        "source": "Yelp",
+        "themes": [],
+        "trend": "Stable",
+        "value": 1.7
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "FFNW acquisition closed April 11, 2025 \u2014 purchase price $228.7M ($231.2M pre-adjustment)",
+      "date_precision": "day",
+      "e_id": "E-026",
+      "event_date": "2025-04-11",
+      "evidence_e_ids": [
+        "E-026"
+      ],
+      "id": "8a37f60f-1b24-444d-a317-037bc079f44c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.globalcu.org/s/welcome-ffnwb/",
+      "subcap_ids": [],
+      "title": "FFNW acquisition closed"
+    },
+    {
+      "body": "New asset classes, Nov 2025 conversion",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [],
+      "id": "30176395-5c73-4b14-b1e5-265eda810473",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "FFNW Acquisition ($228.7M)"
+    },
+    {
+      "body": "National growth ambition signal",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2023-04-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "38ff655f-61cb-4db1-b1ee-37b314f8c394",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Rebrand: Alaska USA to Global FCU"
+    },
+    {
+      "body": "7 new executives added Sept 2022 including 5 from GCU merger",
+      "date_precision": "month",
+      "e_id": "E-005",
+      "event_date": "2022-09-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "43c7f505-beaf-4899-9048-c7dbb76efc9a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.globalcu.org/about/news/press-releases/alaska_usa_appoints_new_executive_leadership/",
+      "subcap_ids": [],
+      "title": "7 new executives added Sept 2022"
+    },
+    {
+      "body": "CEO Lundfelt appointed to FRB San Francisco CDIAC \u2014 3-year term effective Jan 1, 2020",
+      "date_precision": "day",
+      "e_id": "E-025",
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "05cbe361-27c0-4f9a-b16a-e09e290bdfd0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.globalcu.org/about/news/press-releases/Alaska-USA-President-CEO-appointed-to-the-FRB-of-San-Francisco-CDIAC/",
+      "subcap_ids": [],
+      "title": "CEO Lundfelt appointed to FRB San Francisco Cdiac \u2014 3-year\u2026"
+    },
+    {
+      "body": "Completed May 2012, $2.31M, on-time and under-budget",
+      "date_precision": "month",
+      "e_id": "E-029",
+      "event_date": "2012-05-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "dac96ede-e18a-482b-8b32-289ba48f7e4e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.mortenson.com/projects/global-credit-union-data-center",
+      "subcap_ids": [],
+      "title": "Completed May 2012, $2.31M, on-time and under-budget"
+    }
+  ]
+}

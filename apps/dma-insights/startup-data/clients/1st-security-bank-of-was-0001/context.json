@@ -1,0 +1,812 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "1st Security Bank of Washington",
+      "amount": "$34.6M",
+      "announced_on": "2026-02-25",
+      "body": "Merger with Pacific West Bancorp announced Feb 25, 2026, $34.6M deal, expected Q3 2026 close",
+      "closed_on": null,
+      "details": "Merger with Pacific West Bancorp announced Feb 25, 2026, $34.6M deal, expected Q3 2026 close",
+      "e_id": "E-004",
+      "event_date": "2026-02-25",
+      "id": "215d9777-2d8c-48f4-8346-f3a2bf41d5ef",
+      "source_url": "https://investorrelations.fsbwa.com/news-releases/news-release-details/fs-bancorp-inc-and-pacific-west-bancorp-merge",
+      "status": "announced",
+      "target": "Pacific West Bancorp",
+      "title": "Merger with Pacific West Bancorp announced"
+    }
+  ],
+  "entity_display_id": "1st-security-bank-of-was-0001",
+  "financials": {
+    "lines": [
+      "1st Security Bank has demonstrated consistent growth driven by organic lending expansion and strategic acquisitions. Total assets grew from $2.286B in 2021 to $3.209B in 2025, representing a four-year CAGR of approximately 8.9% [E-015]. Key financial health indicators remain strong: NIM of 4.3%, NPL ratio of 0.7%, loans-to-assets of 82%, and ROE of 11.8% (FY2024) [E-005, E-002]. The Board has paid 52 consecutive quarterly dividends, most recently increasing to $0.29/share [E-003]. Free cash flow was $49.2M in FY2024 [E-002]. Trend classification: STABLE with upward trajectory."
+    ],
+    "metrics": {
+      "net_income": 36100000.0,
+      "nim": 0.043,
+      "roe": 0.118,
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "tier1_leverage": 0.112,
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 433,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Matt Mullet named CEO"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2025"
+        ],
+        "geography": "WA/OR (Olympia HQ)",
+        "headline": "$3.2B assets \u00b7 FY2025 \u00b7 +8.8% CAGR",
+        "regulator": "Washington State DFI",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            2.29,
+            3.21
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        2286000000.0,
+        3209000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          2286000000.0,
+          3209000000.0
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "WA/OR (Olympia HQ)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joe Adams",
+        "note": "retiring May 2026",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO (HoldCo)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Matthew D. Mullet",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO/President (Bank)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Shana Allen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Erin M. Burr",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO & CRA Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "May-Ling Sowell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Phillip Whittington",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kelli Nielsen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Retail Banking & Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brooke Allan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Digital Products & Services"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jody Serl",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP/Digital Experience Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Justin Gordon",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "InfoSec Manager AVP"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered institution",
+    "narrative_md": "1st Security Bank of Washington is a relationship-focused community bank headquartered in Mountlake Terrace, Washington. It is the wholly-owned subsidiary of FS Bancorp, Inc. (NASDAQ: FSBW), a Washington corporation organized in September 2011 [E-002]. The Bank was originally founded in 1936 as Washington's Credit Union and converted from a mutual to stock savings bank on July 9, 2012 [E-001]. It is regulated by the Washington State Department of Financial Institutions (primary) and the Federal Deposit Insurance Corporation (FDIC Certificate #57633) [E-001, E-002].",
+    "primary_regulator": "Washington State DFI",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-032",
+        "excerpt": "Active LinkedIn presence with community banking themed posts (#CommunityBank, #WomenLeaders, #BusinessBanking) Promoting CD specials, referral programs ($50 bonus), and Customer Appreciation Week",
+        "title": "Active LinkedIn presence with community banking themed posts\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/1st-security-bank-of-washington"
+      }
+    ],
+    "ticker": "FSBW"
+  },
+  "issue_register": [
+    {
+      "id": "156e5d27-32fd-420a-baf2-a88f389b6386",
+      "issue_id": "GAP-1-P4C1.5.1",
+      "linked_subcap_ids": [
+        "P4C1.5.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 1.2 pts below the RB peer median (2.2/5). [EVIDENCE]: E-049 provides limited signal for Enterprise Data Catalog & Discovery. [CONTEXT]: Data governance at 1st Security Bank is nascent \u2014 No CDO or data governance leadership (E-067). DNA's rela",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Enterprise Data Catalog & Discovery"
+    },
+    {
+      "id": "9109cd6c-9ff4-4059-94d1-cba0780cc4dc",
+      "issue_id": "GAP-2-P4C1.6.1",
+      "linked_subcap_ids": [
+        "P4C1.6.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 1.2 pts below the RB peer median (2.2/5). [EVIDENCE]: E-049 provides limited signal for End-to-End Data Lineage. [CONTEXT]: Data governance at 1st Security Bank is nascent \u2014 No CDO or data governance leadership (E-067). DNA's relational model",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: End-to-End Data Lineage"
+    },
+    {
+      "id": "0eb83b32-5383-4b2a-908c-fc28f077b501",
+      "issue_id": "GAP-3-P4C2.6.1",
+      "linked_subcap_ids": [
+        "P4C2.6.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). [EVIDENCE]: E-049 and E-068 address Data Warehouse & Data Lake (2 items total). [CONTEXT]: Analytics at 1st Security Bank relies on Adobe Analytics + Google Analytics + Matomo + DNA Report Writer \u2014 a",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Data Warehouse & Data Lake"
+    },
+    {
+      "id": "b514fe4d-445b-4d03-ace5-795890848775",
+      "issue_id": "GAP-4-P1C3.2.1",
+      "linked_subcap_ids": [
+        "P1C3.2.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.5/5 \u2014 1.2 pts below the RB peer median (2.8/5). [EVIDENCE]: E-004 and E-012 address Idea Sourcing Channels (2 items total). [CONTEXT]: 1st Security Bank shows limited innovation signals \u2014 Hybrid eClosing + RON capability (E-020) represents stronges",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Idea Sourcing Channels"
+    },
+    {
+      "id": "9107c289-ee73-48e7-850f-dbb09b113f26",
+      "issue_id": "GAP-5-P1C3.3.2",
+      "linked_subcap_ids": [
+        "P1C3.3.2"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 1.5/5 \u2014 1.2 pts below the RB peer median (2.8/5). [EVIDENCE]: E-004 and E-012 address Sandbox Environments (2 items total). [CONTEXT]: 1st Security Bank shows limited innovation signals \u2014 Hybrid eClosing + RON capability (E-020) represents strongest",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Sandbox Environments"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Value grew from $2.3B (2021) to $3.2B (2025) \u2014 8.8% CAGR. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.5,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.21,
+      "peer_name": "Pacific Premier Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.12,
+      "peer_name": "First Northwest Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.56,
+      "peer_name": "Heritage Financial Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.0,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.21,
+      "peer_name": "Sound Financial Bancorp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-1SB-20260317-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Recommend",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Culture Values",
+        "themes": [],
+        "value": 4.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Work Life Balance",
+        "themes": [],
+        "value": 4.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Career Opportunities",
+        "themes": [],
+        "value": 3.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Key Themes Positive",
+        "themes": [
+          "culture",
+          "benefits",
+          "coworkers",
+          "community focus"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Key Themes Negative",
+        "themes": [
+          "technology needs updating",
+          "pay below competitors",
+          "departments are silos",
+          "growth strategy unclear"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": "Management positive and supportive, team oriented",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed Positive",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Bbb Accredited",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Failure to respond to 2 complaints",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 2,
+        "polarity": "negative",
+        "source": "Bbb Complaint Note",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "New app launched (app ID: 6740878062)",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "App Ios",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Mixed reviews post-migration (linked accounts dropped, lockout issues)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Depositaccounts Health",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "6th largest bank in Washington",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Depositaccounts State Rank",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Merger with Pacific West Bancorp announced Feb 25, 2026, $34.6M deal, expected Q3 2026 close",
+      "date_precision": "day",
+      "e_id": "E-004",
+      "event_date": "2026-02-25",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "215d9777-2d8c-48f4-8346-f3a2bf41d5ef",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://investorrelations.fsbwa.com/news-releases/news-release-details/fs-bancorp-inc-and-pacific-west-bancorp-merge",
+      "subcap_ids": [],
+      "title": "Merger with Pacific West Bancorp announced"
+    },
+    {
+      "body": "Partnership events: Pacific West Bancorp merger (Feb 2026), Tillamook Bay SBDC $7,500 scholarship (Sep 2025)",
+      "date_precision": "month",
+      "e_id": "E-045",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "56963551-0a7a-4fff-9c27-1820e111604c",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://fsbwa.com",
+      "subcap_ids": [],
+      "title": "Partnership events: Pacific West Bancorp merger (Feb 2026)\u2026"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "defb5b4a-e7a4-4920-ad5e-aa6b6e2a62f4",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Pacific West Bancorp (PENDING)"
+    },
+    {
+      "body": "VP Marketing (Camberly G.) hired Dec 2025 - new marketing leadership",
+      "date_precision": "month",
+      "e_id": "E-029",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "d4aeaffc-f3ff-4fcc-8b61-234bc9224dc9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/1st-security-bank-of-washington",
+      "subcap_ids": [],
+      "title": "VP Marketing (Camberly G.) hired Dec 2025 - new marketing\u2026"
+    },
+    {
+      "body": "Matt Mullet named CEO effective Sept 2025; Joe Adams retiring",
+      "date_precision": "month",
+      "e_id": "E-007",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "47af77c2-2e6b-4ba3-a6f6-aaed37577820",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/1st-security-bank-of-washington/5a1d8a072400002400635f5c",
+      "subcap_ids": [],
+      "title": "Matt Mullet named CEO"
+    },
+    {
+      "body": "May-Ling Sowell promoted to Chief Compliance Officer",
+      "date_precision": "publish_fallback",
+      "e_id": "E-016",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "6c4de321-05eb-4187-b61d-3a08b2489b8e",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.ainvest.com/news/leadership-transition-fs-bancorp-strategic-inflection-point-regional-banking-growth-2508/",
+      "subcap_ids": [],
+      "title": "May-Ling Sowell promoted to Chief Compliance Officer"
+    },
+    {
+      "body": "May-Ling Sowell: Chief Compliance Officer (promoted July 2025), 30+ year banking career, CRCM designation since 2012",
+      "date_precision": "month",
+      "e_id": "E-031",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "27c2b3e8-422a-46e2-9427-dedaecd7062e",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.fsbwa.com/team/meet-the-team",
+      "subcap_ids": [],
+      "title": "Chief Compliance Officer promoted 30+ year banking career\u2026"
+    },
+    {
+      "body": "Phillip Whittington promoted to CFO effective May 2025; CPA, MSc Accounting",
+      "date_precision": "month",
+      "e_id": "E-010",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "2bcb7004-fee2-4fb1-9e8f-6099623cb296",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001530249/000093905725000079/fsbanc8k4125exh991.htm",
+      "subcap_ids": [],
+      "title": "Phillip Whittington promoted to CFO"
+    },
+    {
+      "body": "Sean McCormick promoted Chief Credit Admin Officer; Robert Nesbitt to Chief Credit Ops Officer (May 2024)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-010",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "48fe705e-270e-4c72-a729-0083a08fe0d1",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001530249/000093905725000079/fsbanc8k4125exh991.htm",
+      "subcap_ids": [],
+      "title": "Sean McCormick promoted Chief Credit Admin Officer"
+    },
+    {
+      "body": "Terri Degner appointed to Board effective Sep 30, 2024; proposed by Nominating & ESG Committee",
+      "date_precision": "day",
+      "e_id": "E-019",
+      "event_date": "2024-09-30",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "45b26728-9aac-4dd4-a760-6586634022eb",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001530249/000093905724000276/ex99193024.htm",
+      "subcap_ids": [],
+      "title": "Terri Degner appointed to Board"
+    },
+    {
+      "body": "Compliance Testing & Monitoring Manager hired Aug 2024 (Frances Olaveson) \u2014 suggests active BSA testing program",
+      "date_precision": "month",
+      "e_id": "E-055",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-055"
+      ],
+      "id": "3c8732dd-4546-4153-ba49-762e21fe6e33",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.dnaappstore.com/risk-management/bsa-aml-extract.html",
+      "subcap_ids": [],
+      "title": "Compliance Testing & Monitoring Manager hired Aug 2024\u2026"
+    },
+    {
+      "body": "Feb 2023: acquired 7 branches from Columbia State Bank (2 WA + 5 OR), $431M deposits, $67M loans",
+      "date_precision": "month",
+      "e_id": "E-012",
+      "event_date": "2023-02-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "38fb563f-8da5-4956-94f2-a3b7e5ca2147",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001530249/000093905723000057/ex99182723.htm",
+      "subcap_ids": [],
+      "title": "Feb 2023: acquired 7 branches $431M deposits, $67M loans"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "002dca78-6740-483c-9e70-62cd3a798387",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "7 Columbia State Bank branches (2 WA + 5 OR)"
+    },
+    {
+      "body": "Partnership with Plaid announced April 2022 to enhance online account opening",
+      "date_precision": "month",
+      "e_id": "E-020",
+      "event_date": "2022-04-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "43fcce4c-810e-4b32-8b7a-537a4932d529",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/1st-security-bank-announces-their-partnership-with-plaid-to-simplify-online-account-opening-301532820.html",
+      "subcap_ids": [],
+      "title": "Partnership with Plaid announced"
+    },
+    {
+      "body": "Partnership with StrategyCorps (Nashville fintech) announced Sep 2021 for 1st Rewards mobile app",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2021-09-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "0d7e34be-b1db-4762-bfce-0f2adf5035bf",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/1st-security-bank-partners-with-strategycorps-to-enhance-its-consumer-checking-by-providing-rewards-and-benefits-to-customers-301375806.html",
+      "subcap_ids": [],
+      "title": "Partnership with StrategyCorps (Nashville fintech)\u2026"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [],
+      "id": "36fb06ab-6260-4dfd-9248-42c0e2e0bddb",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Anchor Bancorp/Anchor Bank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2016-01-01",
+      "evidence_e_ids": [],
+      "id": "ed7acd85-81fd-4304-abc2-447605fa0e51",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "4 Bank of America branches (Olympic Peninsula)"
+    },
+    {
+      "body": "Erin M. Burr: Chief Risk Officer AND CRA Officer AND oversees technology, security, PM teams. Joined 2009, CRA Officer 2010, Enterprise Risk Manager 2012, CRO 2018",
+      "date_precision": "year",
+      "e_id": "E-031",
+      "event_date": "2009-07-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "835abdcf-0b27-430e-ab05-ef48f30c7e6f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.fsbwa.com/team/meet-the-team",
+      "subcap_ids": [],
+      "title": "Joined 2009, CRA Officer 2010, Enterprise Risk Manager\u2026"
+    }
+  ]
+}

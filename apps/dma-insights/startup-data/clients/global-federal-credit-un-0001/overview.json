@@ -1,0 +1,1054 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 160
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 225
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 106
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 162
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "global-federal-credit-un-0001",
+    "domain": null,
+    "hq": null,
+    "id": "c8a9b9d4-8b20-4705-a34e-2344f6e68bfe",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Global Federal Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:56.665677Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 22,
+    "current_count": 11,
+    "dated_count": 1,
+    "median_age_months": 25.8,
+    "oldest_published_date": "2012-05-01",
+    "stale_count": 8,
+    "stale_pct": 19.05,
+    "total": 42,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "COMPOSITE": 1,
+      "NEGATIVE": 2,
+      "NEUTRAL": 6,
+      "POSITIVE": 33
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "LinkedIn": 3
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 37,
+      "POSITIVE": 3
+    },
+    "tiers": {
+      "T1": 2,
+      "T2": 8,
+      "T3": 24,
+      "T5": 8
+    },
+    "total_facts": 186,
+    "total_items": 42
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Trend classification: ACCELERATING. GCU is growing through both organic expansion (CEO targeting $13B+) and strategic acquisition (FFNW $228.7M). Transaction volume at 747M annuall",
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 22000000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 12066000000.0,
+    "branches": 70,
+    "clay_synced_at": null,
+    "employees_approx": "~2,000",
+    "financial_highlights": {
+      "lines": [
+        "Trend classification: ACCELERATING. GCU is growing through both organic expansion (CEO targeting $13B+) and strategic acquisition (FFNW $228.7M). Transaction volume at 747M annually [E-002] indicates high operational throughput. The Arizona market represents a strategic growth vector, with active hiring in Mesa, AZ [E-038] and branch expansion in the Phoenix metro area."
+      ],
+      "net_income": 22000000.0,
+      "trajectory": {
+        "branches": 70,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 2000,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "FFNW Acquisition ($228.7M)"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Rebrand: Alaska USA to Global FCU"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "Washington State (primary), OR",
+        "headline": "$300M net income · FY2024",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            66000.0,
+            300.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Washington State (primary), OR",
+    "footprint_basis": "derived:geography",
+    "founded": 1948,
+    "founded_basis": "nlp:narrative",
+    "geography": "Washington State (primary), OR",
+    "headcount": 2000,
+    "hq": "Anchorage, Alaska",
+    "hq_address": "Anchorage, Alaska",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Geoff Lundfelt",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jason Sasena",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CSO / Board Vice Chair"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "David Vanzant",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Enterprise Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "David Foger",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director, Data & Analytics"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dana Gonderzik",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director, Info Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Matt Reed",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director, IT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jason Echternacht",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director, IT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kevin Bridenbaugh",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director, IT"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "Global Federal Credit Union",
+    "license_type": "Federal Credit Union",
+    "members": 795000,
+    "narrative_md": "Global Federal Credit Union (formerly Alaska USA FCU until April 2023) is a $12.066B federal credit union headquartered in Anchorage, Alaska, serving approximately 795,000 members across five states and three military installations in Italy. As one of the top 20 US credit unions by membership, GCU occupies the Large tier ($10B–$50B) within the SV2 Credit Union sub-vertical at 95% confidence. The institution is in an active digital transformation cycle — cloud-first since 2019, AI operations saving 62,000 hours annually, and a MuleSoft integration platform processing 300 million transactions per year. However, the absence of a CDO, CTO, or CIO at the executive level, combined with very low member satisfaction scores (Yelp 1.7/5), creates a paradox: significant back-office digital investment that is not yet translating into member-facing value.\n\nGlobal Federal Credit Union was established in 1948 as Elmendorf Air Force Base Federal Credit Union, serving military personnel in Alaska [E-003]. The institution has grown through multiple mergers to become one of the nation's largest credit unions, rebranding from Alaska USA Federal Credit Union to Global Federal Credit Union in April 2023 [E-001]. As a federally chartered credit union regulated by NCUA, GCU is member-owned with operations spanning five US states (Alaska, Arizona, California, Washington, Idaho) and three military installations in Italy [E-001, E-042].",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "n": 84,
+          "scale": 5,
+          "score": 1.7,
+          "source": "Better Business Bureau"
+        },
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "n": 84,
+          "scale": 5,
+          "score": 1.7,
+          "source": "Yelp"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "1.7/5",
+          "signal": "executives added Sept 2022 including 5 from GCU merger BBB long-term rating, outlook revised Negative→Stable Net worth ratio 9.4%, ~40bps above well-capitalized minimum Yelp rating 1.7/5 from 84 reviews — low member satisfaction CreditUnion",
+          "source": "Better Business Bureau",
+          "trend": "Stable"
+        },
+        {
+          "rating": "1.7/5",
+          "signal": "Net worth ratio 9.4%, ~40bps above well-capitalized minimum Yelp rating 1.7/5 from 84 reviews — low member satisfaction CreditUnionsOnline rating 1.8/5 — consistent with Yelp Migrated to Optimizely DXP from on-premise CMS; implementation by",
+          "source": "Yelp",
+          "trend": "Stable"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": null,
+    "tl_synced_at": null,
+    "total_assets": "$12.066B (Oct 2023)",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "globalcu.org",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.077844+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Global Federal Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "GFCU was benchmarked against 5 peers selected for sub-vertical match (credit union), size tier proximity, and geographic relevance: BECU ($29.5B), Mountain America FCU ($21.2B), America First CU ($22.6B), Idaho Central CU ($12.1B), and Desert Financial CU ($9.4B). Peer median overall: 3.18.\nKey peer findings: BECU represents the aspirational benchmark at 3.71 average, demonstrating what is achievable at scale ($29.5B) in the Pacific Northwest market. Idaho Central (3.46 avg) shows rapid digital advancement is possible at GFCU's asset size ($12.1B). GFCU's security scores match or exceed all peers, providing a foundation for confident digital service expansion.",
+    "gap_prioritization_md": "Gaps are prioritized using Zennify's 6-factor framework: Business Impact (25%), Risk (20%), Competitive Gap (20%), Effort Inverse (15%), Quick Win Potential (10%), and Trend (10%). Priority scores range from 1.0 (low) to 5.0 (critical).",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Global Federal Credit Union is a $12.1B in assets credit union regulated by NCUA, operating since 1948 with 2,000 employees. A trajectory the analyst classifies as accelerating gives it the balance sheet to fund transformation [E-009, E-005]. Zennify's assessment places overall digital maturity at 2.2/5. The deepest capability gap is Green Products Strategy at 1.1/5 against a 2.5 peer median [E-014, E-015]. Next is Proactive Outreach & Alerts at 1.5/5 against a 2.5 peer median [E-016].\n\nThird is Adapted Communication at 1.9/5 against a 3.5 peer median [E-001, E-002]. The issue register adds Capability gap: Employee Ideation (high severity) [E-008]. The issue register adds Capability gap: Idea Prioritization (high severity) [E-012]. Counter-signal: Secure Code Development already runs at 3.1/5 against a 2.5 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Global Federal Credit Union is whether to close Green Products Strategy first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Global Federal Credit Union should lead with nCino (79/100 fit) against Idea Prioritization, then sequence Tableau behind it. Closing Green Products Strategy to the peer median alone is worth 1.4 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Enterprise-Grade Security: SVP Vanzant (ex-FBI), F5 8-product suite, Palo Alto SIEM/SOAR, CISSP-certified Director. — Security maturity de-risks data platform investment proposals.\"."
+  },
+  "overall_score": 2.23,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/evidence_subcap_mapping.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.849167+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/Coverage_Stats.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.849886+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/Run_Metadata.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 31 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.850376+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/Safeguard_Gates.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.850737+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.851796+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_error_log.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.852050+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Coverage_Matrix.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.852799+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/GFCU_DMA_Execution_Plan.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.854574+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/coverage_stats.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.854886+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:55.855333+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 6,
+      "INFO": 21
+    },
+    "stage_ms": {
+      "manifest": 5,
+      "parse": 4066,
+      "persist": 1000
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 707 cap event(s) parsed from 08_appendices/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_scores_AmericaFirst.json",
+        "detail": "peer_scores_AmericaFirst.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_BECU.json",
+        "detail": "peer_scores_BECU.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_DesertFinancial.json",
+        "detail": "peer_scores_DesertFinancial.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_IdahoCentral.json",
+        "detail": "peer_scores_IdahoCentral.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_MountainAmerica.json",
+        "detail": "peer_scores_MountainAmerica.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. 'Distributed Cloud Bot Defense + DDoS Mitigation + WAF + CDN + Network Connect + ; Core Banking; CRM')",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 22 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client Profile_Report_GFCU_20260309.docx count=8",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 2 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/evidence_subcap_mapping.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/Coverage_Stats.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/Run_Metadata.csv — no fingerprint matched (best confidence 0.25); 31 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/Safeguard_Gates.csv — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/GFCU_DMA_Execution_Plan.md — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/coverage_stats.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "caps_applied_log: 707 cap event(s) parsed from 08_appendices/caps_applied_log.csv",
+      "peer_scores_AmericaFirst.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_BECU.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_DesertFinancial.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_IdahoCentral.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_MountainAmerica.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. 'Distributed Cloud Bot Defense + DDoS Mitigation + WAF + CDN + Network Connect + ; Core Banking; CRM')",
+      "tech_stack_from_variant_source: 22 entries",
+      "firmographics_leadership_merged_from_docx: source=Client Profile_Report_GFCU_20260309.docx count=8",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "insights_derived_from_category_gaps: 4",
+      "acquisitions_from_client_profile_docx: 2 events",
+      "INFO/pattern_gap: 01_evidence/evidence_subcap_mapping.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/Coverage_Stats.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/Run_Metadata.csv — no fingerprint matched (best confidence 0.25); 31 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/Safeguard_Gates.csv — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/GFCU_DMA_Execution_Plan.md — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/coverage_stats.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "timeline_events_persisted: 6",
+      "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 3.18,
+      "pillar_id": "P1",
+      "score": 2.07,
+      "subcaps_scored": 173
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.88,
+      "pillar_id": "P2",
+      "score": 1.9,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.9,
+      "pillar_id": "P3",
+      "score": 2.6,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.05,
+      "pillar_id": "P4",
+      "score": 2.36,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-09",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:56.665677Z",
+    "created_at": "2026-07-02T23:11:56.665677Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "62d7c031-11ae-476a-89ca-42d65910fc42",
+    "overall_score": null,
+    "request_id": "DMA-ASM-GFCU-20260309-0001",
+    "started_at": "2026-07-02T23:11:56.665677Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "n": 84,
+        "scale": 5,
+        "score": 1.7,
+        "source": "Better Business Bureau"
+      },
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "n": 84,
+        "scale": 5,
+        "score": 1.7,
+        "source": "Yelp"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Member Experience Disconnect: Yelp 1.7/5, no chatbot, 2FA friction, mobile app 2.68/5. — Service Cloud + Einstein Bots + Experience Cloud opportunity.",
+      "evidence": [
+        "E-009",
+        "E-016",
+        "E-020",
+        "E-021"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Member Experience Disconnect",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.49,
+      "so_what": "Prioritize Member Experience Disconnect in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Member Experience Disconnect",
+      "what": "Member Experience Disconnect: Yelp 1.7/5, no chatbot, 2FA friction, mobile app 2.68/5. Service Cloud + Einstein Bots + Experience Cloud opportunity.",
+      "why": "The linked evidence records: Implemented MX Direct Deposit solution — 40x deposit growth in 72 hours vs previous method Solution identifies members with deposits at external institutions, delivers targeted messaging"
+    },
+    {
+      "body": "Enterprise-Grade Security: SVP Vanzant (ex-FBI), F5 8-product suite, Palo Alto SIEM/SOAR, CISSP-certified Director. — Security maturity de-risks data platform investment proposals.",
+      "evidence": [
+        "E-013",
+        "E-040",
+        "E-035",
+        "E-031"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Enterprise-Grade Security",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.11,
+      "so_what": "Prioritize Enterprise-Grade Security in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Enterprise-Grade Security",
+      "what": "Enterprise-Grade Security: SVP Vanzant (ex-FBI), F5 8-product suite, Palo Alto SIEM/SOAR, CISSP-certified Director. Security maturity de-risks data platform investment proposals.",
+      "why": "The linked evidence records: Dana Gonderzik = Director, Information Security (13 yrs at GCU). CISSP, Security+ Shifted from data centers to cloud — changed cybersecurity approach fundamentally"
+    },
+    {
+      "body": "Deep Salesforce Ecosystem Already In-House: MuleSoft Anypoint 300M txn/yr, Tableau analytics, 5-year Salesforce relationship. No CRM/FSC confirmed. — Highest-probability revenue: extend existing SF infrastructure to member-facing CRM.",
+      "evidence": [
+        "E-004",
+        "E-034"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Deep Salesforce Ecosystem Already In-House",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.11,
+      "so_what": "Prioritize Deep Salesforce Ecosystem Already In-House in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Deep Salesforce Ecosystem Already In-House",
+      "what": "Deep Salesforce Ecosystem Already In-House. MuleSoft Anypoint 300M txn/yr, Tableau analytics, 5-year Salesforce relationship. No CRM/FSC confirmed. Highest-probability revenue: extend existing SF infrastructure to member-facing CRM.",
+      "why": "The linked evidence records: MuleSoft integration platform processes 300M annual transactions, delivering $1.2M value Uses Tableau for data analytics (Salesforce ecosystem)"
+    },
+    {
+      "body": "Cloud-First Since 2019: Hybrid DC, self-healing DR, cost savings realized. — Hyperforce compatible, reduces SF platform migration risk.",
+      "evidence": [
+        "E-037"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Cloud-First Since 2019",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.11,
+      "so_what": "Prioritize Cloud-First Since 2019 in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Cloud-First Since 2019",
+      "what": "Cloud-First Since 2019: Hybrid DC, self-healing DR, cost savings realized. Hyperforce compatible, reduces SF platform migration risk.",
+      "why": "The linked evidence records: GCU operates hybrid data centre structure combining on-premise and cloud since 2019 Cloud-first delivered cost savings contrary to CU industry conventional wisdom"
+    },
+    {
+      "body": "No CDO/CTO/CIO: Digital leadership at Director level only. — Risk (no exec sponsor) + opportunity (advisory on CDO/CTO model).",
+      "evidence": [
+        "E-009"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "No CDO/CTO/CIO",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.11,
+      "so_what": "Prioritize No CDO/CTO/CIO in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "No CDO/CTO/CIO",
+      "what": "No CDO/CTO/CIO. Digital leadership at Director level only. Risk (no exec sponsor). + opportunity (advisory on CDO/CTO model).",
+      "why": "The shortfall is relative, not absolute: 1.11/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025"
+      ],
+      "modifiers": [
+        "142 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Segment-Specific Journeys averages 2.5/5 over 167 scored subcaps; ceiling 3.1 reflects thin evidence density (25/167 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-010"
+      ],
+      "modifiers": [
+        "cap M3 applied: ISS-002 governance cap 3.0 (no CDO/CTO/CIO)",
+        "197 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Exam Readiness averages 2.0/5 over 217 scored subcaps; ceiling 2.5 reflects the binding cap (cap M3 applied: ISS-002 governance cap 3.0 (no CDO/CTO/CIO)); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: ISS-006 ADJ -0.3",
+        "177 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Prioritization averages 2.0/5 over 192 scored subcaps; ceiling 2.5 reflects thin evidence density (15/192 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025"
+      ],
+      "modifiers": [
+        "200 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Recognition Programs averages 2.2/5 over 205 scored subcaps; ceiling 2.8 reflects thin evidence density (5/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 1.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Informed baseline (1.5) discounted 25% for no direct evidence",
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Green Products Strategy averages 1.1/5 over 70 scored subcaps; ceiling 1.6 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-023"
+      ],
+      "modifiers": [
+        "283 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Marketing Analytics & Optimization averages 1.9/5 over 293 scored subcaps; ceiling 2.5 reflects thin evidence density (10/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-026"
+      ],
+      "modifiers": [
+        "271 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Model Bias Monitoring averages 2.2/5 over 291 scored subcaps; ceiling 2.8 reflects thin evidence density (20/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-002"
+      ],
+      "modifiers": [
+        "279 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Adapted Communication averages 1.9/5 over 289 scored subcaps; ceiling 2.4 reflects thin evidence density (10/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-009"
+      ],
+      "modifiers": [
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Proactive Outreach & Alerts averages 1.5/5 over 259 scored subcaps; ceiling 2.0 reflects thin evidence density (0/259 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-026"
+      ],
+      "modifiers": [
+        "cap applied: ISS-004 ADJ -0.3",
+        "131 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "RPA & Intelligent Automation averages 2.3/5 over 146 scored subcaps; ceiling 2.9 reflects thin evidence density (15/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "120 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Investigation Tools averages 2.8/5 over 130 scored subcaps; ceiling 3.4 reflects thin evidence density (10/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-010"
+      ],
+      "modifiers": [
+        "127 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Exam Management averages 3.0/5 over 142 scored subcaps; ceiling 3.6 reflects thin evidence density (15/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-006"
+      ],
+      "modifiers": [
+        "cap applied: ISS-004 ADJ -0.3",
+        "140 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Tiering averages 2.3/5 over 145 scored subcaps; ceiling 2.8 reflects thin evidence density (5/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-031"
+      ],
+      "modifiers": [
+        "195 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Synthetic Data Generation averages 1.9/5 over 200 scored subcaps; ceiling 2.4 reflects thin evidence density (5/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-031"
+      ],
+      "modifiers": [
+        "cap applied: ISS-006 ADJ -0.3",
+        "265 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Experiment Tracking + Model Registry Operating Model averages 1.9/5 over 270 scored subcaps; ceiling 2.4 reflects thin evidence density (5/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-035"
+      ],
+      "modifiers": [
+        "cap applied: ISS-006 ADJ -0.3",
+        "220 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Legacy Modernization Strategy averages 2.8/5 over 235 scored subcaps; ceiling 3.3 reflects thin evidence density (15/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "130 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Secure Code Development averages 3.1/5 over 150 scored subcaps; ceiling 3.7 reflects thin evidence density (20/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "FFNW acquisition closed April 11, 2025 — purchase price $228.7M ($231.2M pre-adjustment) (Apr 2025).",
+      "evidence": [
+        "E-026"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "FFNW acquisition closed",
+      "metric": "April purchase price $228.7M",
+      "peer_context": "Green Products Strategy runs 1.11/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Prioritization — highest-fit surface at 79/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "FFNW acquisition closed April 11, 2025 — purchase price $228.7M ($231.2M pre-adjustment) (Apr 2025).",
+      "timeline": {
+        "date": "2025-04-11",
+        "event": "FFNW acquisition closed"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "FFNW Acquisition ($228.7M). New asset classes, Nov 2025 conversion (Apr 2024).",
+      "evidence": [
+        "E-026"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "FFNW Acquisition ($228.7M)",
+      "metric": "FFNW Acquisition $228.7M",
+      "peer_context": "Green Products Strategy runs 1.11/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Prioritization — highest-fit surface at 79/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "FFNW Acquisition ($228.7M). New asset classes, Nov 2025 conversion (Apr 2024).",
+      "timeline": {
+        "date": "2024-04-01",
+        "event": "FFNW Acquisition ($228.7M)"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Green Products Strategy scores 1.11/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-014",
+        "E-015"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Green Products Strategy scores 1.11/5",
+      "metric": "Green Products Strategy 1.11/5 vs peer 2.50",
+      "peer_context": "Green Products Strategy runs 1.11/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Prioritization — highest-fit surface at 79/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "Green Products Strategy scores 1.11/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

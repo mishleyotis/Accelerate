@@ -1,0 +1,258 @@
+{
+  "entity_display_id": "bank-of-utah-30v2",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "55% headcount growth over 5 years (296\u2192459) with rapid hiring",
+        "source_kind": "docx"
+      },
+      "id": "d0fff92f-4e30-4468-967d-e291d7b441ae",
+      "involved_subcap_ids": [
+        "P1C2.1.4",
+        "P3C2.1.1",
+        "P4C3.1.2",
+        "P3C1.1.1",
+        "P3C1.1.2",
+        "P3C1.1.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "5 days",
+          "delta": null,
+          "kpi_label": "Micro-deposit verification",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$20,000,000",
+          "delta": null,
+          "kpi_label": "Stablecore",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "450",
+          "delta": null,
+          "kpi_label": "Users",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 66,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "55% headcount growth over 5 years (296\u2192459) with rapid\u2026",
+      "verbatim_quote": "7 | 55% headcount growth over 5 years (296\u2192459) with rapid hiring | Growth stress on operations and technology. VP Banking Initiatives role created Aug 2025. | L3.0 \u00b10.5 | Operational efficiency, process automation"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "FDIC Consent Order (Feb 2024) for BSA/AML, TPR, Reg E/DD deficiencies",
+        "source_kind": "docx"
+      },
+      "id": "78a1abbf-ed53-4a0a-aec0-790bd59937d3",
+      "involved_subcap_ids": [
+        "P3C3.1.2",
+        "P3C3.1.4",
+        "P3C3.1.3",
+        "P3C3.1.1",
+        "P3C4.1.2",
+        "P3C1.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "FDIC Consent Order (Feb 2024) for BSA/AML, TPR, Reg E/DD\u2026",
+      "verbatim_quote": "1 | FDIC Consent Order (Feb 2024) for BSA/AML, TPR, Reg E/DD deficiencies | CAPS P1C2 Governance at 3.0 and P3C3 Compliance at 2.5. Remediation in progress. | CAPPED | Compliance remediation consulting"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Dashboard redesigned Aug 2025 (customer survey-driven).",
+        "source_kind": "docx"
+      },
+      "id": "10452aa2-84cf-47c3-8254-ca3cb23c6570",
+      "involved_subcap_ids": [
+        "P2C4.1.1",
+        "P1C1.1.1",
+        "P1C2.1.1",
+        "P2C1.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Mobile app 3.4 rating on Google Play",
+      "verbatim_quote": "6 | Mobile app 3.4\u2605 rating on Google Play | Digital experience gap. Dashboard redesigned Aug 2025 (customer survey-driven). | L2.5\u2013L3.0 | UX/CX transformation, Pendo optimization"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Q2+Stablecore digital asset partnership (March 2026)",
+        "source_kind": "docx"
+      },
+      "id": "5f098baf-473d-49f5-bf8b-1205b2d1e85b",
+      "involved_subcap_ids": [
+        "P3C1.1.3",
+        "P3C1.1.3",
+        "P3C1.1.3",
+        "P3C1.1.3",
+        "P3C3.1.4",
+        "P3C3.1.4",
+        "P3C3.1.3",
+        "P3C3.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "5 days",
+          "delta": null,
+          "kpi_label": "Micro-deposit verification",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Q2+Stablecore digital asset partnership (March 2026)",
+      "verbatim_quote": "3 | Q2+Stablecore digital asset partnership (March 2026) | First mover in digital custody for community banks. Innovation signal but regulatory risk. | L3.5 \u00b10.5 | Salesforce FSC + Q2 integration"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Salesforce detected but utilization unknown (URF-01)",
+        "source_kind": "docx"
+      },
+      "id": "c143985d-09f6-45a4-8946-f95d309a0eb6",
+      "involved_subcap_ids": [
+        "P2C1.1.1",
+        "P2C3.1.3",
+        "P2C3.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Salesforce detected",
+      "verbatim_quote": "4 | Salesforce detected but utilization unknown (URF-01) | CRM may be underutilized. No FSC, Marketing Cloud, or Service Cloud evidence. | L2.0\u2013L3.0 | Salesforce optimization/FSC rollout"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "VP AI + BI Analyst hired (Sept 2024\u2013Sept 2025) with Snowflake/Tableau/SAS stack",
+        "source_kind": "docx"
+      },
+      "id": "512f2599-aa23-4808-a52d-10780b1ac918",
+      "involved_subcap_ids": [
+        "P4C1.1.2",
+        "P4C1.1.2",
+        "P4C1.1.2",
+        "P4C1.1.2",
+        "P4C3.1.3",
+        "P4C3.1.2",
+        "P4C3.1.2",
+        "P4C3.1.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "450",
+          "delta": null,
+          "kpi_label": "Users",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "VP AI + BI Analyst hired with Snowflake/Tableau/SAS stack",
+      "verbatim_quote": "2 | VP AI + BI Analyst hired (Sept 2024\u2013Sept 2025) with Snowflake/Tableau/SAS stack | Analytics infrastructure present but NO data governance framework. P4C1 ceiling L2.0. | L2.5 \u00b10.5 | Databricks/Snowflake governance implementation"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Zero data breaches (2023\u20132026) with layered security stack",
+        "source_kind": "docx"
+      },
+      "id": "a5ce7350-74f2-47dd-8ee4-0943958d7167",
+      "involved_subcap_ids": [
+        "P4C1.1.2",
+        "P4C1.1.2",
+        "P4C1.1.2",
+        "P4C1.1.2",
+        "P4C3.1.3",
+        "P4C3.1.2",
+        "P4C3.1.2",
+        "P4C3.1.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "450",
+          "delta": null,
+          "kpi_label": "Users",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Zero data breaches (2023\u20132026) with layered security stack",
+      "verbatim_quote": "5 | Zero data breaches (2023\u20132026) with layered security stack | Strong defensive posture. Sophos+Barracuda+Mimecast+Cloudflare. No SOC2 certification. | L3.0 \u00b10.5 | Security assessment/certification support"
+    }
+  ]
+}

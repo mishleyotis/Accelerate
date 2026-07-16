@@ -1,0 +1,21 @@
+{
+  "active_run_id": "e1546c17-bbbd-4c97-94e3-96ed77dcea69",
+  "items": [
+    {
+      "assessment_date": "2026-04-12",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:13.207457Z",
+      "created_at": "2026-07-02T23:11:13.207457Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "e1546c17-bbbd-4c97-94e3-96ed77dcea69",
+      "overall_score": 2.395231213872832,
+      "request_id": "DMA-ASM-MFCU-20260412-0001",
+      "started_at": "2026-07-02T23:11:13.207457Z",
+      "status": "ACTIVE",
+      "subcap_count": 692,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

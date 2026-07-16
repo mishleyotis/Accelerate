@@ -1,0 +1,2472 @@
+{
+  "alerts": [
+    {
+      "age_days": 1,
+      "body": "43 subcaps in P2C2 are supported by fewer than 2 evidence rows in the active run (15 with none). Recommended action: PROXY_ESCALATION.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 0,
+      "id": "945dadde-8fc9-4f62-82b9-51a475f7d0d7",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C2.7.5",
+        "P2C2.7.5",
+        "P2C2.7.5",
+        "P2C2.7.5",
+        "P2C2.7.5",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.1.CL1",
+        "P2C2.1.CL1",
+        "P2C2.1.CL1",
+        "P2C2.6.4",
+        "P2C2.6.4",
+        "P2C2.6.4",
+        "P2C2.6.4",
+        "P2C2.6.4",
+        "P2C2.8.1",
+        "P2C2.8.1",
+        "P2C2.8.1",
+        "P2C2.8.1",
+        "P2C2.8.1",
+        "P2C2.2.7",
+        "P2C2.2.7",
+        "P2C2.2.7",
+        "P2C2.2.7",
+        "P2C2.2.7",
+        "P2C2.3.7",
+        "P2C2.3.7",
+        "P2C2.3.7",
+        "P2C2.3.7",
+        "P2C2.3.7",
+        "P2C2.8.2",
+        "P2C2.8.2",
+        "P2C2.8.2",
+        "P2C2.8.2",
+        "P2C2.8.2",
+        "P2C2.5.5",
+        "P2C2.5.5",
+        "P2C2.5.5",
+        "P2C2.5.5",
+        "P2C2.5.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "PROXY_ESCALATION",
+      "resolution": null,
+      "severity": "high",
+      "title": "Thin evidence across 43 subcaps in P2C2",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "43 subcaps in P2C3 are supported by fewer than 2 evidence rows in the active run (5 with none). Recommended action: PROXY_ESCALATION.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 0,
+      "id": "dc7c3030-9990-48f8-901f-b0ab803e3555",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C3.5.CL2",
+        "P2C3.5.CL2",
+        "P2C3.5.CL2",
+        "P2C3.6.7",
+        "P2C3.6.7",
+        "P2C3.6.7",
+        "P2C3.6.7",
+        "P2C3.6.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.3",
+        "P2C3.3.3",
+        "P2C3.3.3",
+        "P2C3.3.3",
+        "P2C3.3.3",
+        "P2C3.2.6",
+        "P2C3.2.6",
+        "P2C3.2.6",
+        "P2C3.2.6",
+        "P2C3.2.6",
+        "P2C3.5.6",
+        "P2C3.5.6",
+        "P2C3.5.6",
+        "P2C3.5.6",
+        "P2C3.5.6",
+        "P2C3.3.6",
+        "P2C3.3.6",
+        "P2C3.3.6",
+        "P2C3.3.6",
+        "P2C3.3.6",
+        "P2C3.1.5",
+        "P2C3.1.5",
+        "P2C3.1.5",
+        "P2C3.1.5",
+        "P2C3.1.5",
+        "P2C3.2.IC1",
+        "P2C3.2.IC1",
+        "P2C3.2.IC1",
+        "P2C3.2.IC1",
+        "P2C3.2.IC1"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "PROXY_ESCALATION",
+      "resolution": null,
+      "severity": "high",
+      "title": "Thin evidence across 43 subcaps in P2C3",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C3.2.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "4406cbd4-f857-4bf7-a03d-dd30a1cd6c84",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C3.2.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Idea Evaluation Criteria",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C3.2.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "4e6cdbbc-f01f-48bf-935e-12617657d630",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C3.2.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Idea Evaluation Criteria",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C3.2.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "53b1cff7-9549-4df4-a769-d4123ebe8cc8",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C3.2.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Idea Evaluation Criteria",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "19 subcaps in P1C5 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "ef87afa9-0db7-4e1f-b1cf-778080eaa8c5",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.7.1",
+        "P1C5.7.1",
+        "P1C5.7.1",
+        "P1C5.7.1",
+        "P1C5.1.2",
+        "P1C5.1.2",
+        "P1C5.1.2",
+        "P1C5.1.2",
+        "P1C5.1.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 19 subcaps in P1C5",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C1.5.5 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "8c909d4f-8eed-4e8c-bbf9-823ef7fbc40c",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.5.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Technology Strategy",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C1.5.5 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "284d9b19-bc50-4818-8cd0-67f502155a73",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.5.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Cloud Strategy",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C1.5.5 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "bdfae122-ed28-4087-bf8e-f2dc61f0dcdc",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.5.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Cloud Strategy",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C1.5.5 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "0ab5aaae-57c5-4247-8417-aeb396eb4fc2",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.5.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Cloud Strategy",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C1.5.5 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "f52d2a01-b915-4567-a190-8d68170ed682",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.5.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Cloud Strategy",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "35 subcaps in P1C2 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "4f2e2866-e49b-4aa7-aac4-e3c574305aae",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.2.5",
+        "P1C2.2.5",
+        "P1C2.2.5",
+        "P1C2.2.5",
+        "P1C2.2.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.6",
+        "P1C2.3.6",
+        "P1C2.3.6",
+        "P1C2.3.6",
+        "P1C2.3.6",
+        "P1C2.5.5",
+        "P1C2.5.5",
+        "P1C2.5.5",
+        "P1C2.5.5",
+        "P1C2.5.5",
+        "P1C2.5.3",
+        "P1C2.5.3",
+        "P1C2.5.3",
+        "P1C2.5.3",
+        "P1C2.5.3",
+        "P1C2.4.2",
+        "P1C2.4.2",
+        "P1C2.4.2",
+        "P1C2.4.2",
+        "P1C2.4.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 35 subcaps in P1C2",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "53 subcaps in P2C1 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "fe164641-16b2-4fcc-86e9-f8cce3a0145c",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C1.8.4",
+        "P2C1.8.4",
+        "P2C1.8.4",
+        "P2C1.8.4",
+        "P2C1.8.4",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.7.5",
+        "P2C1.7.5",
+        "P2C1.7.5",
+        "P2C1.7.5",
+        "P2C1.7.5",
+        "P2C1.2.2",
+        "P2C1.2.2",
+        "P2C1.2.2",
+        "P2C1.2.2",
+        "P2C1.2.2",
+        "P2C1.2.6",
+        "P2C1.2.6",
+        "P2C1.2.6",
+        "P2C1.2.6",
+        "P2C1.2.6",
+        "P2C1.2.5",
+        "P2C1.2.5",
+        "P2C1.2.5",
+        "P2C1.2.5",
+        "P2C1.2.5",
+        "P2C1.6.6",
+        "P2C1.6.6",
+        "P2C1.6.6",
+        "P2C1.6.6",
+        "P2C1.6.6",
+        "P2C1.4.CL1",
+        "P2C1.4.CL1",
+        "P2C1.4.CL1",
+        "P2C1.1.6",
+        "P2C1.1.6"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 53 subcaps in P2C1",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "35 subcaps in P2C4 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "7b8469af-a349-49c5-b6f2-147282ea7219",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.6.5",
+        "P2C4.6.5",
+        "P2C4.6.5",
+        "P2C4.6.5",
+        "P2C4.6.5",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.4.5",
+        "P2C4.4.5",
+        "P2C4.4.5",
+        "P2C4.4.5",
+        "P2C4.4.5",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.7.2",
+        "P2C4.1.6",
+        "P2C4.1.6",
+        "P2C4.1.6",
+        "P2C4.1.6",
+        "P2C4.1.6",
+        "P2C4.6.3",
+        "P2C4.6.3",
+        "P2C4.6.3",
+        "P2C4.6.3",
+        "P2C4.6.3"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 35 subcaps in P2C4",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P4C3.4.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "fcddb712-0744-4bb9-83f0-08505a96ad4b",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P4C3.4.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Cloud Strategy & Infrastructure",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P4C3.4.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "efb33227-5480-4d85-8282-893da36f775b",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P4C3.4.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Serverless & Functions",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P4C3.4.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "bfcffbef-a5b8-48e6-b3bb-04105f5033a5",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P4C3.4.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Serverless & Functions",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P4C3.4.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "5bde4c5a-94a9-40ca-8e7b-cbbfee9d09b2",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P4C3.4.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Serverless & Functions",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C3.2.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "857b2871-bb7a-4c9e-8c9a-fa577dd39eca",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C3.2.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Idea Management",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P4C3.4.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "d0ffc80e-83f3-4898-b737-2443f096eee6",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P4C3.4.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Serverless & Functions",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "Only 1 evidence row(s) support P1C3.2.4 in the active run. Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "7b25eea1-6e2e-472a-960d-67f2dd1ecc03",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C3.2.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence: Idea Evaluation Criteria",
+      "waive_note": null
+    }
+  ],
+  "audit_logs": null,
+  "caps_applied": [],
+  "entity_display_id": "farm-credit-mid-america--0001",
+  "evidence_age": [
+    {
+      "e_id": "E-049",
+      "freshness_band": "stale",
+      "published_date": "2006-01-01",
+      "recency_months": 243,
+      "source_name": "Purdue University IAMA \u2014 CRM at Farm Credit Services of Mid-America (2006)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-160",
+      "freshness_band": "stale",
+      "published_date": "2006-01-01",
+      "recency_months": 243,
+      "source_name": "Purdue Academic Case Study \u2014 'CRM at Farm Credit Services of Mid-America: Working towards a SingleView' (Martens + Akridge 2006)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-050",
+      "freshness_band": "stale",
+      "published_date": "2013-02-01",
+      "recency_months": 158,
+      "source_name": "PR Newswire \u2014 FCMA selects EMC VNX storage (2013)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-187",
+      "freshness_band": "stale",
+      "published_date": "2013-02-13",
+      "recency_months": 158,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA EMC VNX + RecoverPoint DR Infrastructure (2013 Historical \u2014 12yr DR maturity)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-095",
+      "freshness_band": "stale",
+      "published_date": "2017-05-01",
+      "recency_months": 107,
+      "source_name": "Global AgInvesting \u2014 Innova Ag Innovation Fund IV Closing (with FCMA as LP)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-006",
+      "freshness_band": "stale",
+      "published_date": "2017-06-01",
+      "recency_months": 106,
+      "source_name": "FCA Information Memorandum \u2014 Reporting Security Incidents to FCA (6/22/2017)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-189",
+      "freshness_band": "stale",
+      "published_date": "2017-10-31",
+      "recency_months": 102,
+      "source_name": "\ud83d\udea8 Farmer Mac ProcessUnity TPRM \u2014 FCS Peer TPRM Precedent",
+      "tier": 2
+    },
+    {
+      "e_id": "E-135",
+      "freshness_band": "stale",
+      "published_date": "2020-07-01",
+      "recency_months": 69,
+      "source_name": "Blend Case Study \u2014 Rural 1st / Farm Credit Mid-America (Quantified Results + Kevin Geron Quote)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-099",
+      "freshness_band": "stale",
+      "published_date": "2020-11-01",
+      "recency_months": 65,
+      "source_name": "FCMA Advocate Council + Customer Connect (formal VoC + feedback)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-194",
+      "freshness_band": "stale",
+      "published_date": "2021-02-24",
+      "recency_months": 62,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCS COVID-19 Crisis Response Track Record \u2014 PS-71 Disaster Relief + Critical Infrastructure Designation",
+      "tier": 1
+    },
+    {
+      "e_id": "E-118",
+      "freshness_band": "stale",
+      "published_date": "2021-06-01",
+      "recency_months": 58,
+      "source_name": "Delta Farms Solar Case Study (FCMA Customer Stories, Jun 2021)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-032",
+      "freshness_band": "stale",
+      "published_date": "2021-07-01",
+      "recency_months": 57,
+      "source_name": "Zippia \u2014 Farm Credit Mid-America Executives page",
+      "tier": 3
+    },
+    {
+      "e_id": "E-035",
+      "freshness_band": "stale",
+      "published_date": "2021-07-01",
+      "recency_months": 57,
+      "source_name": "Zippia FCMA Executives (Mark Hanna specific)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-009",
+      "freshness_band": "stale",
+      "published_date": "2022-02-01",
+      "recency_months": 50,
+      "source_name": "Lane Report \u2014 Farm Credit Mid-America new Executive Committee structure announcement",
+      "tier": 3
+    },
+    {
+      "e_id": "E-067",
+      "freshness_band": "stale",
+      "published_date": "2022-02-01",
+      "recency_months": 50,
+      "source_name": "FCMA 2022 Leadership Restructure Announcement",
+      "tier": 1
+    },
+    {
+      "e_id": "E-177",
+      "freshness_band": "stale",
+      "published_date": "2022-02-18",
+      "recency_months": 50,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA Criminal Referral System \u2014 BL-073 + 12 CFR Part 612 Subpart B \u2014 FCMA Mandated Crime Reporting",
+      "tier": 1
+    },
+    {
+      "e_id": "E-102",
+      "freshness_band": "stale",
+      "published_date": "2022-03-01",
+      "recency_months": 49,
+      "source_name": "FCMA 2021 Forward Thinker Award + Know to Grow Conference Infrastructure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-136",
+      "freshness_band": "stale",
+      "published_date": "2022-05-18",
+      "recency_months": 47,
+      "source_name": "SunStream Business Services + Fiserv DNA Core Loan Accounting (May 2022 Press Release)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-165",
+      "freshness_band": "stale",
+      "published_date": "2022-05-18",
+      "recency_months": 47,
+      "source_name": "\ud83d\udea8 SunStream Business Services Fiserv DNA Core Migration \u2014 $82B Shared Services Platform",
+      "tier": 1
+    },
+    {
+      "e_id": "E-091",
+      "freshness_band": "stale",
+      "published_date": "2023-01-01",
+      "recency_months": 39,
+      "source_name": "FCA Enforcement of Fair Lending (ECOA+FHAct) for FCS Institutions",
+      "tier": 1
+    },
+    {
+      "e_id": "E-097",
+      "freshness_band": "stale",
+      "published_date": "2023-01-01",
+      "recency_months": 39,
+      "source_name": "SunStream Business Services \u2014 FCS Service Corp + FCMA shareholder",
+      "tier": 1
+    },
+    {
+      "e_id": "E-124",
+      "freshness_band": "stale",
+      "published_date": "2023-01-01",
+      "recency_months": 39,
+      "source_name": "SunStream Business Services + OneStream Modern Cloud EPM (FCS Green IT Proxy)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-066",
+      "freshness_band": "stale",
+      "published_date": "2023-03-01",
+      "recency_months": 37,
+      "source_name": "FCMA 2022 Annual Report \u2014 Pre-Merger Strategic Context",
+      "tier": 1
+    },
+    {
+      "e_id": "E-001",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Farm Credit Mid-America 2024 Annual Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-043",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "ServiceNow Customer Case Study \u2014 FCMA",
+      "tier": 1
+    },
+    {
+      "e_id": "E-051",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "NewRocket \u2014 FCMA ServiceNow case study article",
+      "tier": 2
+    },
+    {
+      "e_id": "E-059",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Compeer Financial \u2014 nCino + Salesforce deployment evidence (aggregated)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-169",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "\ud83d\udea8 nCino Agriculture Lending Solution \u2014 Commercial Lending Automation Capabilities",
+      "tier": 3
+    },
+    {
+      "e_id": "E-186",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA Borrower Rights Framework \u2014 Credit Review Committee + Adverse Action Notice Framework",
+      "tier": 1
+    },
+    {
+      "e_id": "E-048",
+      "freshness_band": "dated",
+      "published_date": "2023-04-01",
+      "recency_months": 36,
+      "source_name": "FCMA News \u2014 Merger with Farm Credit Midsouth Completed (April 3, 2023)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-111",
+      "freshness_band": "dated",
+      "published_date": "2023-04-01",
+      "recency_months": 36,
+      "source_name": "FCMA Midsouth Merger Timeline (Public News Releases)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-204",
+      "freshness_band": "dated",
+      "published_date": "2023-04-04",
+      "recency_months": 36,
+      "source_name": "\ud83d\udea8\ud83d\udea8 nCino IQ + Banking Advisor Gen AI Platform Specs (benchmarks for FCMA)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-171",
+      "freshness_band": "dated",
+      "published_date": "2023-07-12",
+      "recency_months": 33,
+      "source_name": "FCA Regulatory Framework \u2014 Mandated Reconciliation + Audit + Model Risk Controls",
+      "tier": 1
+    },
+    {
+      "e_id": "E-178",
+      "freshness_band": "dated",
+      "published_date": "2023-10-05",
+      "recency_months": 30,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA Final Rule on Cyber Risk Management (Oct 5 2023) \u2014 12 CFR Part 609 Effective Jan 1 2025",
+      "tier": 1
+    },
+    {
+      "e_id": "E-192",
+      "freshness_band": "dated",
+      "published_date": "2023-10-05",
+      "recency_months": 30,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA Examination Manual 31.6 Business Continuity \u2014 FFIEC + NIST Alignment + Exercise/Test Mandate",
+      "tier": 1
+    },
+    {
+      "e_id": "E-196",
+      "freshness_band": "dated",
+      "published_date": "2023-11-30",
+      "recency_months": 29,
+      "source_name": "\ud83d\udea8 FCMA TheOrg.com Historical Org Chart \u2014 Board 2023 + extended leadership",
+      "tier": 2
+    },
+    {
+      "e_id": "E-011",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "OSU AEDE \u2014 FCMA Condition and Performance (academic analysis)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-017",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "Justia \u2014 Wilson v. Farm Credit Mid-America, ACA et al., 3:2024cv00061",
+      "tier": 2
+    },
+    {
+      "e_id": "E-024",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "Apple App Store \u2014 Farm Credit Mid-America app",
+      "tier": 1
+    },
+    {
+      "e_id": "E-030",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "Federal Register \u2014 FCA CMP Inflation Adjustment (Jan 2024 final rule)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-120",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "Farm Credit System Climate Risk + Sustainability Work Group (FCS AIS)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-125",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "Peer Farm Credit Sustainability Reports (AgFirst + FCSAmerica Benchmark)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-127",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "Zennify FCMA Case Study \u2014 Salesforce Marketing Cloud Results (T1 Customer Quote)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-131",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "FCMA Growing Forward Program + Know to Grow Conference Content Channel",
+      "tier": 1
+    },
+    {
+      "e_id": "E-159",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "FCMA AI Roadmap Signals \u2014 MC Personalization In Place + Data Cloud + Agentforce Gap",
+      "tier": 1
+    },
+    {
+      "e_id": "E-197",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA-Zennify Case Study Data Architecture Specifics \u2014 360-Degree View + Anonymous/Known Matching",
+      "tier": 1
+    },
+    {
+      "e_id": "E-203",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 27,
+      "source_name": "\ud83d\udea8\ud83d\udea8 ServiceNow FCMA Customer Story + Now Assist Gen AI Roadmap",
+      "tier": 1
+    },
+    {
+      "e_id": "E-200",
+      "freshness_band": "dated",
+      "published_date": "2024-01-15",
+      "recency_months": 27,
+      "source_name": "\ud83d\udea8\ud83d\udea8 Neurealm AgriBank Data Quality Case + FCMA Oreate Blog Quotes (Rebecca Mark + Fred Gordon)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-162",
+      "freshness_band": "dated",
+      "published_date": "2024-01-20",
+      "recency_months": 27,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA iOS Mobile App Confirmed \u2014 4.8\u2b50 917 Ratings + Balance Sheet Basics Financial Wellness Tools",
+      "tier": 1
+    },
+    {
+      "e_id": "E-172",
+      "freshness_band": "dated",
+      "published_date": "2024-02-22",
+      "recency_months": 26,
+      "source_name": "\ud83d\udea8 FCMA Financial Security Tips \u2014 Formal Fraud Education + Consumer Protection Content",
+      "tier": 1
+    },
+    {
+      "e_id": "E-012",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "FCMA 2024 Q1 Quarterly Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-065",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "FCMA 2023 Annual Report (post-Midsouth merger)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-093",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "FCMA 2023 AR \u2014 Shared Services + Concentration Detail",
+      "tier": 1
+    },
+    {
+      "e_id": "E-116",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "FCMA 2023 AR Sustainability Journey Section + 2024 AR Environmental Commentary",
+      "tier": 1
+    },
+    {
+      "e_id": "E-134",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "FCMA Competitive Intelligence via Portfolio Distribution Tracking",
+      "tier": 1
+    },
+    {
+      "e_id": "E-100",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "FCMA 2024 Intern Program + Purdue Student Success Story",
+      "tier": 2
+    },
+    {
+      "e_id": "E-121",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Farm Credit System Climate-Smart Agriculture Positioning (farmcredit.com)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-143",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Farm Credit System WCAG 2.0 AA Accessibility Commitment + Farmcreditmidsouth 96/100 Score",
+      "tier": 2
+    },
+    {
+      "e_id": "E-206",
+      "freshness_band": "aging",
+      "published_date": "2024-06-17",
+      "recency_months": 22,
+      "source_name": "\ud83d\udea8\ud83d\udea8 nCino Banking Advisor Gen AI GA (June 17 2024) + nCino IQ Platform Technical Specs",
+      "tier": 1
+    },
+    {
+      "e_id": "E-153",
+      "freshness_band": "aging",
+      "published_date": "2024-06-24",
+      "recency_months": 22,
+      "source_name": "FCMA Ag for All \u2014 Hancock County Poss-Abilities + Formal Inclusive-Accessibility Program",
+      "tier": 1
+    },
+    {
+      "e_id": "E-220",
+      "freshness_band": "aging",
+      "published_date": "2024-07-09",
+      "recency_months": 21,
+      "source_name": "\ud83d\udea8 FCA 12 CFR Part 609 Subpart C + D \u2014 Complete Cyber Regulation + Business Plan + Records Retention",
+      "tier": 1
+    },
+    {
+      "e_id": "E-163",
+      "freshness_band": "aging",
+      "published_date": "2024-07-10",
+      "recency_months": 21,
+      "source_name": "Banking CLV/Churn AI Industry Benchmarks \u2014 Context for FCMA Scoring",
+      "tier": 3
+    },
+    {
+      "e_id": "E-068",
+      "freshness_band": "aging",
+      "published_date": "2024-08-01",
+      "recency_months": 20,
+      "source_name": "FCMA 2024 Q2 Quarterly Report \u2014 Industry Trend Monitoring",
+      "tier": 1
+    },
+    {
+      "e_id": "E-119",
+      "freshness_band": "aging",
+      "published_date": "2024-08-01",
+      "recency_months": 20,
+      "source_name": "Purdue-CME Group Ag Economy Barometer + FCMA Solar Lease Data",
+      "tier": 1
+    },
+    {
+      "e_id": "E-062",
+      "freshness_band": "aging",
+      "published_date": "2024-09-01",
+      "recency_months": 19,
+      "source_name": "nCino Customer Case Study \u2014 American AgCredit",
+      "tier": 1
+    },
+    {
+      "e_id": "E-096",
+      "freshness_band": "aging",
+      "published_date": "2024-09-01",
+      "recency_months": 19,
+      "source_name": "FCA Artificial Intelligence Guidance Page (Innovation Philosophy Statement Jan 2024)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-107",
+      "freshness_band": "aging",
+      "published_date": "2024-09-01",
+      "recency_months": 19,
+      "source_name": "TalentSmartEQ \u2014 FCMA Client Success Story (Mastering EQ Training)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-113",
+      "freshness_band": "aging",
+      "published_date": "2024-09-01",
+      "recency_months": 19,
+      "source_name": "Stephanie Shaikun \u2014 Head of Organizational Development FCMA",
+      "tier": 1
+    },
+    {
+      "e_id": "E-208",
+      "freshness_band": "aging",
+      "published_date": "2024-09-13",
+      "recency_months": 19,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA AI Innovation Philosophy Statement (Jan 2024) + AI Governance Framework",
+      "tier": 1
+    },
+    {
+      "e_id": "E-087",
+      "freshness_band": "aging",
+      "published_date": "2024-10-01",
+      "recency_months": 18,
+      "source_name": "FCMA Code of Ethics (Board Approved Oct 2024)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-181",
+      "freshness_band": "aging",
+      "published_date": "2024-11-04",
+      "recency_months": 17,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Code of Ethics Oct 2024 (Board Approved) \u2014 SOC Program Infrastructure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-182",
+      "freshness_band": "aging",
+      "published_date": "2024-12-11",
+      "recency_months": 16,
+      "source_name": "\ud83d\udea8 FCA Examination Manuals 22.3 (Credit Administration) + 31.9 (SOC/Whistleblower/Criminal Referral)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-218",
+      "freshness_band": "aging",
+      "published_date": "2024-12-20",
+      "recency_months": 16,
+      "source_name": "\ud83d\udea8 Peer FCS Digital Identity + KYC Patterns (AgSouth Evident + FCC DocuSign + FCSC VeriSign/SSL)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-044",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "ZoomInfo \u2014 Farm Credit Mid-America Employee Directory",
+      "tier": 3
+    },
+    {
+      "e_id": "E-052",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Talent.com \u2014 FCMA Salesforce Administrator job posting",
+      "tier": 2
+    },
+    {
+      "e_id": "E-073",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCA Examination Manual EM-31.7 \u2014 Information Technology & Security",
+      "tier": 1
+    },
+    {
+      "e_id": "E-075",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Rural 1st \u2014 Our Story page (segment strategy)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-077",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Growing Forward + Forward Thinker Award (innovation program)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-081",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Capital Markets + Food & Agribusiness team page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-084",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Zennify \u2014 FCMA Salesforce Marketing Cloud Case Study",
+      "tier": 1
+    },
+    {
+      "e_id": "E-090",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Zennify Technology Portfolio + Banking Customer Stories",
+      "tier": 2
+    },
+    {
+      "e_id": "E-101",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "NewRocket Knowledge 2024 \u2014 AI adoption market context",
+      "tier": 2
+    },
+    {
+      "e_id": "E-103",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Careers \u2014 Our Culture + Values (Glassdoor corroborated)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-104",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Farm Credit University \u2014 FCS-Shared Learning Management System",
+      "tier": 1
+    },
+    {
+      "e_id": "E-106",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "ServiceNow Official Customer Success Page \u2014 FCMA",
+      "tier": 1
+    },
+    {
+      "e_id": "E-108",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Chuck Millhollan Leadership Page + COO Credential Stack",
+      "tier": 1
+    },
+    {
+      "e_id": "E-109",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Daro Mott \u2014 VP Process Improvement & Execution (TheOrg + KY SHRM podcast)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-114",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Advocate Council Detail + Community Excellence Award",
+      "tier": 1
+    },
+    {
+      "e_id": "E-128",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Lindsey Bridges \u2014 Head of Brand Experience (CMO-equivalent Role)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-144",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Customer Connect Document Portal (3-Portal Architecture Detail)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-145",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Open Banking \u2014 Plaid Aggregator Integration + CFPB 1033 Context",
+      "tier": 2
+    },
+    {
+      "e_id": "E-146",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "NewRocket Full FCMA ServiceNow AI Platform Case Study \u2014 FSO + IRM + Legal + Now Assist",
+      "tier": 1
+    },
+    {
+      "e_id": "E-149",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Advocate Council \u2014 Formal VoC Channel (320 Customer Advisory Board)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-158",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "FCMA Forward Thinker Award \u2014 $5K Milestone Recognition + Derrick Stalbaum 2023 Winner",
+      "tier": 1
+    },
+    {
+      "e_id": "E-167",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Fiserv DNA Platform Brochure \u2014 STP Capabilities Inventory",
+      "tier": 3
+    },
+    {
+      "e_id": "E-168",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 15,
+      "source_name": "Hyland OnBase Advanced Capture \u2014 Document Intelligence Capability Context",
+      "tier": 3
+    },
+    {
+      "e_id": "E-193",
+      "freshness_band": "aging",
+      "published_date": "2025-01-17",
+      "recency_months": 15,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA 12 CFR 609.930(c)(5) Vendor Management Requirements + Exam Manual 31.7 IT & Security",
+      "tier": 1
+    },
+    {
+      "e_id": "E-170",
+      "freshness_band": "aging",
+      "published_date": "2025-01-21",
+      "recency_months": 15,
+      "source_name": "\ud83d\udea8 PEER BENCHMARK \u2014 Farm Credit West + GreenStone + Texas Farm Credit nCino Deployments",
+      "tier": 1
+    },
+    {
+      "e_id": "E-037",
+      "freshness_band": "aging",
+      "published_date": "2025-02-01",
+      "recency_months": 14,
+      "source_name": "FCMA News \u2014 Kevin Kuper Joins as Chief Credit Officer (Feb 27, 2025)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-055",
+      "freshness_band": "aging",
+      "published_date": "2025-02-01",
+      "recency_months": 14,
+      "source_name": "AgriBank, FCB 2024 Annual Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-098",
+      "freshness_band": "aging",
+      "published_date": "2025-02-01",
+      "recency_months": 14,
+      "source_name": "FCMA Ag Digital World Insights article + Natasha Cox Podcast",
+      "tier": 1
+    },
+    {
+      "e_id": "E-147",
+      "freshness_band": "aging",
+      "published_date": "2025-02-19",
+      "recency_months": 14,
+      "source_name": "Consortium for Service Innovation \u2014 KCS in Action at FCMA (Janice Smith + Rebecca Mark, Feb 2025)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-060",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "AgCountry 2024 Annual Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-064",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FCMA 2024 Annual Report \u2014 Strategic Direction & Looking Ahead",
+      "tier": 1
+    },
+    {
+      "e_id": "E-088",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FCMA 2024 AR \u2014 Vendor Services + Concentration Risk",
+      "tier": 1
+    },
+    {
+      "e_id": "E-089",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FCMA 2024/2023 AR \u2014 CECL Credit Model Framework",
+      "tier": 1
+    },
+    {
+      "e_id": "E-115",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FCMA Best Places to Work Kentucky \u2014 12-13 Consecutive Years",
+      "tier": 1
+    },
+    {
+      "e_id": "E-176",
+      "freshness_band": "aging",
+      "published_date": "2025-03-13",
+      "recency_months": 13,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA 2024 Annual Report \u2014 ACL/Cybersecurity Risk/CECL Model Governance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-205",
+      "freshness_band": "aging",
+      "published_date": "2025-03-13",
+      "recency_months": 13,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Stress Testing + CECL Methodology + Capital Adequacy (2024 AR)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-082",
+      "freshness_band": "current",
+      "published_date": "2025-04-01",
+      "recency_months": 12,
+      "source_name": "ProPartners Financial \u2014 Farm Credit System shared platform",
+      "tier": 2
+    },
+    {
+      "e_id": "E-174",
+      "freshness_band": "current",
+      "published_date": "2025-04-24",
+      "recency_months": 12,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA Regulatory Framework \u2014 FCMA Clean Enforcement Record + 3-Tier Supervision",
+      "tier": 1
+    },
+    {
+      "e_id": "E-002",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "Morning Ag Clips \u2014 Farm Credit Mid-America Releases 2024 Impact Report",
+      "tier": 3
+    },
+    {
+      "e_id": "E-045",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "FCMA News \u2014 Adam Howard Appointed to Board (May 5, 2025)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-054",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "FCMA \u2014 Navigating the Ag Digital World (May 12, 2025)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-078",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "FCMA Inaugural 2024 Impact Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-083",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "FCMA Data Architecture + Data Integration Engineer job (Talentify + Wiza)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-117",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "FCMA 2024 Impact Report Full Metrics Breakdown",
+      "tier": 1
+    },
+    {
+      "e_id": "E-130",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "Rural 1st \u2014 Dedicated Brand + iOS/Android Apps (Multi-channel Digital)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-164",
+      "freshness_band": "current",
+      "published_date": "2025-05-19",
+      "recency_months": 11,
+      "source_name": "\ud83d\udea8 FCMA RPA DEVELOPER JOB POSTING \u2014 UiPath RPA Platform Confirmed (May 2025)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-214",
+      "freshness_band": "current",
+      "published_date": "2025-05-21",
+      "recency_months": 11,
+      "source_name": "\ud83d\udea8 Emerging Tech Landscape \u2014 Blockchain + Post-Quantum + IoT in Agriculture",
+      "tier": 3
+    },
+    {
+      "e_id": "E-003",
+      "freshness_band": "current",
+      "published_date": "2025-06-01",
+      "recency_months": 10,
+      "source_name": "FCMA 2025 Q2 Quarterly Report \u2014 Management's Discussion & Analysis",
+      "tier": 1
+    },
+    {
+      "e_id": "E-029",
+      "freshness_band": "current",
+      "published_date": "2025-06-01",
+      "recency_months": 10,
+      "source_name": "FCMA \u2014 Black Soil KY Partnership Renewal",
+      "tier": 2
+    },
+    {
+      "e_id": "E-031",
+      "freshness_band": "current",
+      "published_date": "2025-06-01",
+      "recency_months": 10,
+      "source_name": "FCMA \u2014 2025 Election Results (Board of Directors)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-042",
+      "freshness_band": "current",
+      "published_date": "2025-06-01",
+      "recency_months": 10,
+      "source_name": "LinkedIn profiles \u2014 Joe E. Martinez + Marc Miles related",
+      "tier": 1
+    },
+    {
+      "e_id": "E-105",
+      "freshness_band": "current",
+      "published_date": "2025-06-01",
+      "recency_months": 10,
+      "source_name": "NewRocket ServiceNow Knowledge Conference + Crossfuze Webinar (FCMA public speaking)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-215",
+      "freshness_band": "current",
+      "published_date": "2025-06-14",
+      "recency_months": 10,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Security Team \u2014 Joe Martinez Director InfoSec (CISSP+CEH) + Tiffany Smith CSO full bio",
+      "tier": 1
+    },
+    {
+      "e_id": "E-016",
+      "freshness_band": "current",
+      "published_date": "2025-07-01",
+      "recency_months": 9,
+      "source_name": "CourtListener \u2014 Farm Credit Mid-America, PCA v. Uncle Nearest, Inc., 4:25-cv-00038",
+      "tier": 1
+    },
+    {
+      "e_id": "E-157",
+      "freshness_band": "current",
+      "published_date": "2025-07-01",
+      "recency_months": 9,
+      "source_name": "FCMA Scholars Program 2025-26 \u2014 45 Students + $5K \u00d7 2yrs + DC/Louisville Experiences",
+      "tier": 1
+    },
+    {
+      "e_id": "E-141",
+      "freshness_band": "current",
+      "published_date": "2025-07-08",
+      "recency_months": 9,
+      "source_name": "Fortimize: nCino + FSC Pattern (Peer/Industry Validation for FCMA Stack)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-142",
+      "freshness_band": "current",
+      "published_date": "2025-07-24",
+      "recency_months": 9,
+      "source_name": "FCMA Bylaws (July 24, 2025, Kristie Phillips) \u2014 Legal Structure + Lending Authority",
+      "tier": 1
+    },
+    {
+      "e_id": "E-015",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 8,
+      "source_name": "Distillery Trail \u2014 FCMA v Uncle Nearest $100M suit coverage",
+      "tier": 3
+    },
+    {
+      "e_id": "E-069",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 8,
+      "source_name": "FCMA 2025 Q2 Quarterly Report \u2014 Moody's + USDA Policy Monitoring",
+      "tier": 1
+    },
+    {
+      "e_id": "E-072",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 8,
+      "source_name": "FCMA Bylaws (rev Aug 7, 2025 + Sep 5, 2024 base)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-185",
+      "freshness_band": "current",
+      "published_date": "2025-08-06",
+      "recency_months": 8,
+      "source_name": "\ud83d\udea8 FCMA Q2 2024 + Q2 2025 Quarterly Reports \u2014 Audit Committee Oversight Certification",
+      "tier": 1
+    },
+    {
+      "e_id": "E-202",
+      "freshness_band": "current",
+      "published_date": "2025-08-13",
+      "recency_months": 8,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Privacy Notice Aug 13 2025 + California Privacy Notice \u2014 CPRA + Opt-Out + GPC Compliance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-140",
+      "freshness_band": "current",
+      "published_date": "2025-08-14",
+      "recency_months": 8,
+      "source_name": "FCMA Terms of Use (Aug 14 2025) \u2014 Mobile Carrier IDV + Fraud Avoidance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-184",
+      "freshness_band": "current",
+      "published_date": "2025-08-14",
+      "recency_months": 8,
+      "source_name": "\ud83d\udea8 FCMA Terms of Use Aug 14 2025 + FCA Exam Manual 33.1 Federal Lending Regulations",
+      "tier": 1
+    },
+    {
+      "e_id": "E-217",
+      "freshness_band": "current",
+      "published_date": "2025-08-26",
+      "recency_months": 8,
+      "source_name": "\ud83d\udea8 Supply Chain Attack Landscape 2025 \u2014 Farmers Insurance Salesforce Breach Relevance",
+      "tier": 2
+    },
+    {
+      "e_id": "E-201",
+      "freshness_band": "current",
+      "published_date": "2025-08-28",
+      "recency_months": 8,
+      "source_name": "\ud83d\udea8 FCMA Salesforce+nCino Pattern Validation \u2014 Root Capital + AgCountry + Compeer Integration Benchmarks",
+      "tier": 3
+    },
+    {
+      "e_id": "E-129",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 7,
+      "source_name": "Kendall Shelton \u2014 AVP Marketing (Salesforce Expert)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-191",
+      "freshness_band": "current",
+      "published_date": "2025-09-02",
+      "recency_months": 7,
+      "source_name": "\ud83d\udea8 AWS Core Banking DR Guidance + Land of Lincoln CU DRaaS Benchmark",
+      "tier": 3
+    },
+    {
+      "e_id": "E-216",
+      "freshness_band": "current",
+      "published_date": "2025-09-09",
+      "recency_months": 7,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCA 12 CFR 609.930 Cyber Risk Management \u2014 Detailed Program Requirements",
+      "tier": 1
+    },
+    {
+      "e_id": "E-212",
+      "freshness_band": "current",
+      "published_date": "2025-09-20",
+      "recency_months": 7,
+      "source_name": "\ud83d\udea8 AWS FinOps Cost Allocation Industry Standards + FCMA Implied Capability",
+      "tier": 3
+    },
+    {
+      "e_id": "E-161",
+      "freshness_band": "current",
+      "published_date": "2025-09-29",
+      "recency_months": 7,
+      "source_name": "FCMA Succession Planning Content Hub \u2014 Household Coordination Proxy",
+      "tier": 1
+    },
+    {
+      "e_id": "E-047",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "Jobright.ai \u2014 FCMA Salesforce Platform Developer job (Nov 2025)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-074",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "FCA FY2025 Performance and Accountability Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-123",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "FCS Financial Institution Rating System (FIRS) \u2014 FCMA Ratings Management Analog",
+      "tier": 1
+    },
+    {
+      "e_id": "E-126",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "FCMA LinkedIn Company + Social Media Footprint",
+      "tier": 1
+    },
+    {
+      "e_id": "E-198",
+      "freshness_band": "current",
+      "published_date": "2025-11-05",
+      "recency_months": 5,
+      "source_name": "\ud83d\udea8 Peer Data Architecture \u2014 AgCountry Salesforce LMS + Compeer ActiveDocs+nCino+Salesforce",
+      "tier": 2
+    },
+    {
+      "e_id": "E-004",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Newsroom \u2014 Corporate Media Center",
+      "tier": 2
+    },
+    {
+      "e_id": "E-007",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Leadership Team page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-008",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Leadership \u2014 Dan Wagner biography",
+      "tier": 1
+    },
+    {
+      "e_id": "E-010",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Financial Reports index page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-021",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Glassdoor \u2014 Farm Credit Mid-America Reviews",
+      "tier": 3
+    },
+    {
+      "e_id": "E-022",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Indeed \u2014 Farm Credit Mid-America Employee Reviews",
+      "tier": 3
+    },
+    {
+      "e_id": "E-023",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "LinkedIn \u2014 Farm Credit Mid-America Company Page",
+      "tier": 2
+    },
+    {
+      "e_id": "E-025",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Google Play \u2014 Farm Credit Mid-America app",
+      "tier": 2
+    },
+    {
+      "e_id": "E-026",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA myAccount portal \u2014 Services page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-028",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Newsroom & Company News",
+      "tier": 1
+    },
+    {
+      "e_id": "E-033",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Kevin Geron LinkedIn (via Exa)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-034",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "The Org \u2014 FCMA IT and Development team directory",
+      "tier": 2
+    },
+    {
+      "e_id": "E-036",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "SignalHire \u2014 Farm Credit Mid-America Management Team",
+      "tier": 3
+    },
+    {
+      "e_id": "E-038",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Daniel Brittain LinkedIn (via Exa)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-039",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Tiffany Smith FCMA bio page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-040",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "The Org \u2014 Tiffany Smith profile",
+      "tier": 2
+    },
+    {
+      "e_id": "E-041",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Tiffany Smith LinkedIn (via Exa)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-057",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Kara Neppl LinkedIn \u2014 FCSA Salesforce Admin (5x certified)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-070",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Corporate Governance Page \u2014 Board Committee Structure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-071",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Governance Committee Page",
+      "tier": 1
+    },
+    {
+      "e_id": "E-076",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA myAccount + Online Banking Pages (channel strategy)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-079",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Comparably Peer NPS Benchmark (Farm Credit System)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-085",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Kevin Kleinholter LinkedIn",
+      "tier": 1
+    },
+    {
+      "e_id": "E-092",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "The Org \u2014 Full FCMA IT Team Directory (60 people)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-094",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Farm Credit System \u2014 2026 Ag Innovation Challenge Announcement",
+      "tier": 1
+    },
+    {
+      "e_id": "E-110",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Company News + Comms Expense + Leadership Updates",
+      "tier": 1
+    },
+    {
+      "e_id": "E-132",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Privacy Notice (Jan 2026) + AgDirect SMS/MMS Infrastructure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-137",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA myAccount Portal + Online Banking Dual-System Architecture",
+      "tier": 1
+    },
+    {
+      "e_id": "E-138",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA 8 Agricultural Loan Product Types + Customer Connect + Disbursement Card",
+      "tier": 1
+    },
+    {
+      "e_id": "E-148",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Contact Architecture \u2014 86 Offices + Routing Structure + Support Hotlines",
+      "tier": 1
+    },
+    {
+      "e_id": "E-150",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Current Salesforce Hiring + Salesforce Platform Developer Role",
+      "tier": 2
+    },
+    {
+      "e_id": "E-152",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA No Chatbot/Chat/Video Banking + No Smart Speaker \u2014 Confirmed Genuine Gaps",
+      "tier": 1
+    },
+    {
+      "e_id": "E-154",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Branch Architecture \u2014 86 Retail Offices + Detailed Location Directory",
+      "tier": 1
+    },
+    {
+      "e_id": "E-155",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FCMA Session Replay + Sentiment Analysis + Journey Friction \u2014 Confirmed Gaps",
+      "tier": 1
+    },
+    {
+      "e_id": "E-175",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 FCMA Official Leadership Roster (fcma.com/company/leadership) \u2014 Complete C-Suite + Field SVPs",
+      "tier": 1
+    },
+    {
+      "e_id": "E-179",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Dan Robertson GC+CCO Bio \u2014 Career CoBank 2011 \u2192 FCMA GC+CCO",
+      "tier": 1
+    },
+    {
+      "e_id": "E-180",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 FCMA Kevin Kuper CCO Bio \u2014 ex-American AgCredit Executive Head of Commercial Banking",
+      "tier": 1
+    },
+    {
+      "e_id": "E-183",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 FCMA Anonymous Reporting \u2014 EthicsPoint by NAVEX Global + GAO Fair Lending Framework",
+      "tier": 1
+    },
+    {
+      "e_id": "E-199",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 FCA Privacy Program + Federal Privacy Act Framework \u2014 Governing FCMA Privacy Obligations",
+      "tier": 1
+    },
+    {
+      "e_id": "E-210",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 FCMA API & Integration Landscape \u2014 Plaid Aggregator + MuleSoft Industry Pattern",
+      "tier": 2
+    },
+    {
+      "e_id": "E-151",
+      "freshness_band": "current",
+      "published_date": "2026-01-08",
+      "recency_months": 3,
+      "source_name": "FCMA Farmer Bridge Assistance Program \u2014 Vulnerable Customer Support",
+      "tier": 1
+    },
+    {
+      "e_id": "E-195",
+      "freshness_band": "current",
+      "published_date": "2026-01-15",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Daniel Brittain Full Bio + LinkedIn \u2014 16-yr internal data/architecture career arc",
+      "tier": 1
+    },
+    {
+      "e_id": "E-053",
+      "freshness_band": "current",
+      "published_date": "2026-01-22",
+      "recency_months": 3,
+      "source_name": "Oreate AI Blog \u2014 FCMA ServiceNow Digital Transformation",
+      "tier": 3
+    },
+    {
+      "e_id": "E-139",
+      "freshness_band": "current",
+      "published_date": "2026-01-22",
+      "recency_months": 3,
+      "source_name": "ServiceNow FSO \u2014 Full Onboarding Support Story (Rebecca Mark + Fred Gordon Quotes)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-166",
+      "freshness_band": "current",
+      "published_date": "2026-01-22",
+      "recency_months": 3,
+      "source_name": "Oreate AI FCMA ServiceNow AI Platform Journey \u2014 Automation Metrics Validated",
+      "tier": 2
+    },
+    {
+      "e_id": "E-211",
+      "freshness_band": "current",
+      "published_date": "2026-01-22",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 FCMA Observability + Infrastructure Stack \u2014 ELK + Kibana + Grafana + AWS + VMware",
+      "tier": 1
+    },
+    {
+      "e_id": "E-213",
+      "freshness_band": "current",
+      "published_date": "2026-01-24",
+      "recency_months": 3,
+      "source_name": "\ud83d\udea8 Chaos Engineering + Data Pipeline Testing Industry Patterns",
+      "tier": 3
+    },
+    {
+      "e_id": "E-046",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 2,
+      "source_name": "Christin Head LinkedIn \u2014 FCMA Software Systems Engineer",
+      "tier": 1
+    },
+    {
+      "e_id": "E-058",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 2,
+      "source_name": "Exa Company Profile \u2014 Farm Credit Services of America",
+      "tier": 1
+    },
+    {
+      "e_id": "E-086",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 2,
+      "source_name": "Kendall Shelton LinkedIn \u2014 AVP Marketing FCMA",
+      "tier": 1
+    },
+    {
+      "e_id": "E-112",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 2,
+      "source_name": "FCMA Patronage + Cooperative Incentive Alignment (2026 announcement)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-122",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 2,
+      "source_name": "FCMA Farmer Bridge Assistance + Climate Resilience Content Track",
+      "tier": 1
+    },
+    {
+      "e_id": "E-173",
+      "freshness_band": "current",
+      "published_date": "2026-02-07",
+      "recency_months": 2,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Information Security Team \u2014 James Michael Mills Security Architect + Joe Martinez + 7-Person Team",
+      "tier": 2
+    },
+    {
+      "e_id": "E-219",
+      "freshness_band": "current",
+      "published_date": "2026-02-21",
+      "recency_months": 2,
+      "source_name": "\ud83d\udea8 FCMA Zero Trust + Advanced Threat Detection \u2014 Industry Benchmark",
+      "tier": 3
+    },
+    {
+      "e_id": "E-188",
+      "freshness_band": "current",
+      "published_date": "2026-02-22",
+      "recency_months": 2,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA Exa Company Profile + Tech Stack Expansion \u2014 Propel/Octopus/Influential + 7-Country Footprint",
+      "tier": 2
+    },
+    {
+      "e_id": "E-156",
+      "freshness_band": "current",
+      "published_date": "2026-02-23",
+      "recency_months": 2,
+      "source_name": "FCMA $280M Patronage 2026 + 10-Year $1.75B Loyalty Program Results",
+      "tier": 1
+    },
+    {
+      "e_id": "E-190",
+      "freshness_band": "current",
+      "published_date": "2026-02-27",
+      "recency_months": 2,
+      "source_name": "\ud83d\udea8\ud83d\udea8 AgriBank 2025 Annual Report \u2014 FCMA Funding + District Concentration + Joint-Several Liability",
+      "tier": 1
+    },
+    {
+      "e_id": "E-207",
+      "freshness_band": "current",
+      "published_date": "2026-02-27",
+      "recency_months": 2,
+      "source_name": "\ud83d\udea8 Peer FCS BI Stack (Farm Credit Southern Colorado) + Modern Data Stack Benchmarks",
+      "tier": 3
+    },
+    {
+      "e_id": "E-027",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "KPC News (Northeast Indiana) \u2014 FCMA returns $63.4M to Indiana farmers",
+      "tier": 3
+    },
+    {
+      "e_id": "E-056",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "FCSA 2025 Annual Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-061",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "American AgCredit 2025 Annual Report",
+      "tier": 1
+    },
+    {
+      "e_id": "E-063",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "FCMA 2025 Annual Report \u2014 CEO & Board Chair Letter",
+      "tier": 1
+    },
+    {
+      "e_id": "E-080",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "Capital Farm Credit + Techwave AgriNext Partnership (peer-adjacent competitive benchmark)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-133",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "FCMA Video Library + Customer Story Monthly Cadence",
+      "tier": 1
+    },
+    {
+      "e_id": "E-209",
+      "freshness_band": "current",
+      "published_date": "2026-03-31",
+      "recency_months": 1,
+      "source_name": "\ud83d\udea8\ud83d\udea8 FCMA IT/Tech Careers Page (Mar 2026) \u2014 Active Salesforce + ServiceNow + AI Hiring",
+      "tier": 1
+    },
+    {
+      "e_id": "E-005",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Farm Credit Administration (FCA) \u2014 Enforcement Actions page",
+      "tier": 1
+    }
+  ],
+  "narrative": null,
+  "qa_verdict_l1": null,
+  "qa_verdict_l2": {
+    "governance_skill_version": "2.4",
+    "recommendation": "FIX_AND_REAUDIT",
+    "verdict": "FAIL",
+    "verdict_basis": null
+  },
+  "run_request_id": "DMA-ASM-FCMA-20260418-0001",
+  "safeguard_gates": [],
+  "thin_evidence_subcap_ids": [
+    "P1C1.5.5",
+    "P1C2.2.5",
+    "P1C2.3.5",
+    "P1C2.3.6",
+    "P1C2.4.2",
+    "P1C2.5.3",
+    "P1C2.5.5",
+    "P1C2.8.2",
+    "P1C3.2.4",
+    "P1C5.1.2",
+    "P1C5.3.3",
+    "P1C5.3.4",
+    "P1C5.7.1",
+    "P2C1.1.6",
+    "P2C1.2.2",
+    "P2C1.2.5",
+    "P2C1.2.6",
+    "P2C1.4.CL1",
+    "P2C1.6.6",
+    "P2C1.6.8",
+    "P2C1.7.5",
+    "P2C1.8.2",
+    "P2C1.8.4",
+    "P2C1.8.5",
+    "P2C2.1.CL1",
+    "P2C2.2.7",
+    "P2C2.3.7",
+    "P2C2.5.5",
+    "P2C2.6.4",
+    "P2C2.7.5",
+    "P2C2.8.1",
+    "P2C2.8.2",
+    "P2C2.8.4",
+    "P2C3.1.5",
+    "P2C3.2.6",
+    "P2C3.2.IC1",
+    "P2C3.3.3",
+    "P2C3.3.6",
+    "P2C3.3.7",
+    "P2C3.5.6",
+    "P2C3.5.CL2",
+    "P2C3.6.7",
+    "P2C4.1.6",
+    "P2C4.3.6",
+    "P2C4.4.5",
+    "P2C4.6.3",
+    "P2C4.6.5",
+    "P2C4.7.2",
+    "P2C4.8.5",
+    "P4C3.4.4"
+  ]
+}

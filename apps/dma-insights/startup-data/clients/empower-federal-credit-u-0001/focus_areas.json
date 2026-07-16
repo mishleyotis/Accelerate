@@ -1,0 +1,297 @@
+{
+  "entity_display_id": "empower-federal-credit-u-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (1 items, signals: 1P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-THIN-007.",
+        "source_kind": "docx"
+      },
+      "id": "7cfcaeb7-e5ce-4ac7-9114-e233834c819d",
+      "involved_subcap_ids": [
+        "P3C3.2.1",
+        "P4C4.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "BSA Officer + CISO names + Information Security program\u2026",
+      "verbatim_quote": "G-008 | BSA Officer + CISO names + Information Security program documentation | Priority 2 | P3C3.2.1, P4C4.1.1 | BSA Officer name + AML program; CISO name + Information Security Policy"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (2 items, signals: 1P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-P2C2-010, EV-P2C2-017.",
+        "source_kind": "docx"
+      },
+      "id": "bdbe6f62-596b-4475-bf5e-43f1545ac699",
+      "involved_subcap_ids": [
+        "P2C2.5.1",
+        "P4C2.4.1",
+        "P4C2.4.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "Member journey orchestration / NBA / segment-of-one\u2026",
+      "verbatim_quote": "G-009 | Member journey orchestration / NBA / segment-of-one personalization beyond My Credit | Priority 2 | P2C2.5.1, P4C2.4.1, P4C2.4.4 | Member-journey diagram, segmentation strategy, NBA roadmap"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (2 items, signals: 2P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-P3C4-004, EV-P3C4-005.",
+        "source_kind": "docx"
+      },
+      "id": "9db71b6a-4678-4e4f-a083-51b8991d7f49",
+      "involved_subcap_ids": [
+        "P3C4.2.1",
+        "P3C4.3.1",
+        "P3C4.3.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "0%",
+          "delta": null,
+          "kpi_label": "FHLBNY",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No public BCP/DR test results, RTO/RPO targets, or DR\u2026",
+      "verbatim_quote": "G-003 | No public BCP/DR test results, RTO/RPO targets, or DR runbook artifacts | Priority 1 | P3C4.2.1, P3C4.3.1, P3C4.3.2 | Latest BCP/DR test results, RTO/RPO documentation, IR runbook"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (1 items, signals: 1P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-P4C1-004.",
+        "source_kind": "docx"
+      },
+      "id": "6d1005a2-64d5-4fe1-98d5-1043dfce4bfd",
+      "involved_subcap_ids": [
+        "P4C1.1.5",
+        "P4C1.7.1",
+        "P4C1.7.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No public CDO/CDAO + data governance charter publication",
+      "verbatim_quote": "G-004 | No public CDO/CDAO + data governance charter publication | Priority 1 | P4C1.1.5, P4C1.7.1, P4C1.7.2 | Data governance charter, CDO/data-leadership org chart, data quality program"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (2 items, signals: 1P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-CONN-015, EV-P4C2-002.",
+        "source_kind": "docx"
+      },
+      "id": "4ed93472-e2c4-455e-b60d-5b0e41e69868",
+      "involved_subcap_ids": [
+        "P4C2.4.1",
+        "P4C2.6.1",
+        "P2C2.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "No public Salesforce activation feature inventory\u2026",
+      "verbatim_quote": "G-006 | No public Salesforce activation feature inventory (Einstein, Marketing Cloud, Data Cloud) | Priority 1 | P4C2.4.1, P4C2.6.1, P2C2.5.1 | Salesforce org license inventory + activated features audit + roadmap"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "EV-CONN-003"
+        ],
+        "representative_quote": "[EVIDENCE] Direct evidence (6 items, signals: 6P/0M/0N); cited: EV-P1C1-001, EV-P1C1-002, EV-P1C1-003.",
+        "source_kind": "docx"
+      },
+      "id": "b2d26f83-c32a-4be1-bac8-fe2c99f489ca",
+      "involved_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.2.1",
+        "P1C1.5.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Branche",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$4,070,000,000",
+          "delta": null,
+          "kpi_label": "NCUA Sep reports",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No public Strategic Plan FY26 document",
+      "verbatim_quote": "G-001 | No public Strategic Plan FY26 document | Priority 1 | P1C1.1.1, P1C1.2.1, P1C1.5.1 | Strategic Plan FY26 + Board approved digital roadmap"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (1 items, signals: 1P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-P2C4-001.",
+        "source_kind": "docx"
+      },
+      "id": "53607974-b070-4599-899e-0bc02ad13d19",
+      "involved_subcap_ids": [
+        "P2C4.1.1",
+        "P2C4.2.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No public business-banking penetration metrics across 12K\u2026",
+      "verbatim_quote": "G-007 | No public business-banking penetration metrics across 12K SEG companies | Priority 2 | P2C4.1.1, P2C4.2.1 | SEG business-banking penetration rate; commercial deposit/lending volumes"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Direct evidence (4 items, signals: 2P/0M/0N); cited: EV-CONN-014, EV-CONN-015, EV-P4C3-001.",
+        "source_kind": "docx"
+      },
+      "id": "e6326982-62f5-49f7-902d-cfede61b9c3e",
+      "involved_subcap_ids": [
+        "P4C3.4.1",
+        "P4C1.1.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No public cloud architecture diagram or",
+      "verbatim_quote": "G-002 | No public cloud architecture diagram or named cloud provider | Priority 1 | P4C3.4.1, P4C1.1.4 | Cloud architecture diagram, vendor contracts, Azure/AWS/GCP commitments"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Direct evidence (3 items, signals: 2P/0M/0N); cited: EV-CONN-015, EV-P4C4-004, EV-P4C4-008.",
+        "source_kind": "docx"
+      },
+      "id": "fa8b5087-14de-4f5f-a6b6-5cd05bf71ee7",
+      "involved_subcap_ids": [
+        "P4C4.1.1",
+        "P4C4.4.1",
+        "P4C4.7.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No public cybersecurity certifications (SOC 2 Type II, PCI\u2026",
+      "verbatim_quote": "G-005 | No public cybersecurity certifications (SOC 2 Type II, PCI DSS Level 1, NIST CSF) | Priority 1 | P4C4.1.1, P4C4.4.1, P4C4.7.1 | Latest SOC 2 Type II report, PCI DSS Attestation of Compliance, NIST CSF assessment"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "[EVIDENCE] Limited direct evidence (2 items, signals: 2P/0M/0N) supplemented by 0 sibling-capability inferences; cited: EV-P4C2-004, EV-P4C2-005.",
+        "source_kind": "docx"
+      },
+      "id": "c567becc-c914-4b82-bd51-9acb2e5fe319",
+      "involved_subcap_ids": [
+        "P4C2.5.1",
+        "P4C2.5.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "6 months",
+          "delta": null,
+          "kpi_label": "K members enrolled",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Public model risk management framework + AI governance\u2026",
+      "verbatim_quote": "G-010 | Public model risk management framework + AI governance policy | Priority 3 | P4C2.5.1, P4C2.5.2 | Model risk mgmt framework + AI ethics/governance policy"
+    }
+  ]
+}

@@ -1,0 +1,1190 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 185,
+        "subcaps": 185,
+        "thin": 158
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 222,
+        "subcaps": 222,
+        "thin": 218
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 111,
+        "subcaps": 111,
+        "thin": 111
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 156
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "wsfs-financial-corporati-0001",
+    "domain": null,
+    "hq": null,
+    "id": "25782461-cf2c-49ca-8f63-eaa034aa872d",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "WSFS Financial Corporation",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CL",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:27.725448Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 34,
+    "current_count": 49,
+    "dated_count": 14,
+    "median_age_months": 18.5,
+    "oldest_published_date": "2016-10-01",
+    "stale_count": 9,
+    "stale_pct": 8.49,
+    "total": 106,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 8,
+      "NEGATIVE": 6,
+      "NEUTRAL": 5,
+      "POSITIVE": 87
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 2,
+      "LinkedIn": 11
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 7,
+      "NEUTRAL": 85,
+      "POSITIVE": 14
+    },
+    "tiers": {
+      "T1": 49,
+      "T2": 45,
+      "T3": 12
+    },
+    "total_facts": 420,
+    "total_items": 106
+  },
+  "financial_trajectory": {
+    "cagr": "10%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Total assets have grown at approximately 8-10% CAGR over five years, with the single largest step change driven by the Bryn Mawr Trust acquisition (January 1, 2022). Wealth AUM/AUA",
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 7.0,
+        "year": 2022
+      }
+    ],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 22100000000.0,
+    "branches": 87,
+    "cagr": "10%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "cra_rating": "Satisfactory",
+    "employees_approx": "6500+",
+    "financial_highlights": {
+      "lines": [
+        "Total assets have grown at approximately 8-10% CAGR over five years, with the single largest step change driven by the Bryn Mawr Trust acquisition (January 1, 2022). Wealth AUM/AUA is in strong acceleration, growing 35% in two years. Core EPS increased 19% year-over-year in FY2025, placing WSFS in the top quartile of the $15-30B regional bank peer group. [E-002, E-003, E-059]",
+        "WSFS's financial trajectory is classified as ACCELERATING. The five-year asset CAGR of ~8-10% total assets reflects both the step change from the Bryn Mawr Trust acquisition (January 2022, +$7B) and sustained organic growth. Key acceleration signals: Core EPS +19% YoY (2024→2025); ROA improved from 1.22% to 1.39%; Wealth AUM/AUA grew 35% in two years to $97.4B. WSFS is at KRX 80th percentile versus its defined peer group (2023). [E-002, E-003, E-059]"
+      ],
+      "trajectory": {
+        "branches": 87,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 6500,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026)"
+          },
+          {
+            "fy": "FY2025",
+            "label": "NCino Digital Partners launched"
+          },
+          {
+            "fy": "FY2024",
+            "label": "External Wall Street financial strategy expertise added"
+          },
+          {
+            "fy": "FY2022",
+            "label": "Ferrante joined Dec 2022"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Mid-Atlantic — PA, DE, NJ, FL, NV, VA",
+        "headline": "$22.1B net income · FY2026",
+        "regulator": "OCC",
+        "series": {
+          "net_income_m": [
+            7000.0,
+            20600.0,
+            20900.0,
+            21300.0,
+            22100.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Mid-Atlantic — PA, DE, NJ, FL, NV, VA",
+    "footprint_basis": "derived:geography",
+    "founded": 1832,
+    "geography": "Mid-Atlantic — PA, DE, NJ, FL, NV, VA",
+    "headcount": 6500,
+    "hq": "Wilmington, Delaware",
+    "hq_address": "Wilmington, Delaware",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jim Wechsler",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "EVP Chief Commercial Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Frank McGrane",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 480,
+        "title": "EVP Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jim Gise",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "EVP Corporate & Specialty Banking / Deputy CCBO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Allan Matyger",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "EVP Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Rene Gonzales",
+        "recent_hire": true,
+        "tenure": null,
+        "tenure_months": 0,
+        "title": "SVP Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Staszewski",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 24,
+        "title": "Enterprise Architect"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Nick Ferrante",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 60,
+        "title": "VP Enterprise Data Manager (de-facto CDO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Christine Davis",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 276,
+        "title": "EVP Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kate McGlinchey",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "SVP Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Robert Eastwood",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 300,
+        "title": "SVP Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Vennela Kondapally",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "AVP Salesforce App Admin II"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Krishna Chaitanya",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "AVP Salesforce & nCino Admin/Dev + Agentforce Specialist"
+      }
+    ],
+    "legal_name": "WSFS Financial Corporation",
+    "license_type": "National bank charter (OCC)",
+    "narrative_md": "Every data point in this section is anchored to a specific evidence item (E-ID) from the research corpus. Financial data covers the five-year period 2021–2026 to meet the trend analysis requirement.",
+    "primary_regulator": "OCC",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.5,
+          "source": "Culture & Values"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.6,
+          "source": "Work-Life Balance"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.2,
+          "source": "Management Quality"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.2,
+          "source": "Job Security / Advancement"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.4,
+          "source": "Compensation & Benefits"
+        }
+      ],
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.6,
+          "source": "Indeed Overall Rating"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.6/5.0 — based on verified employee reviews",
+          "source": "Indeed Overall Rating"
+        },
+        {
+          "rating": "3.5/5.0",
+          "source": "Culture & Values"
+        },
+        {
+          "rating": "3.6/5.0",
+          "source": "Work-Life Balance"
+        },
+        {
+          "rating": "3.2/5.0 (Note: Above Average wellbeing score for management)",
+          "source": "Management Quality"
+        },
+        {
+          "rating": "3.2/5.0",
+          "source": "Job Security / Advancement"
+        },
+        {
+          "rating": "3.4/5.0 (Note: Below Average for compensation wellbeing)",
+          "source": "Compensation & Benefits"
+        },
+        {
+          "rating": "55.8% (Rodger Levenson)",
+          "source": "CEO Approval Rating"
+        },
+        {
+          "rating": "55% would recommend WSFS as employer",
+          "source": "Recommend to Friend"
+        },
+        {
+          "rating": "Excellent (Difficulty: Medium)",
+          "source": "Interview Experience"
+        },
+        {
+          "rating": "inclusion, satisfaction with role, management quality",
+          "source": "Above-Average Wellbeing"
+        },
+        {
+          "rating": "compensation, flexibility",
+          "source": "Below-Average Wellbeing"
+        },
+        {
+          "rating": "Top-tier national recognition — financial performance and customer satisfaction",
+          "source": "Forbes Best Banks 2025"
+        },
+        {
+          "rating": "8 consecutive years — culture and associate engagement benchmark",
+          "source": "Gallup Exceptional Workplace"
+        },
+        {
+          "rating": "80th percentile among defined peer group (2023)",
+          "source": "KRX Index"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "LARGE_REGIONAL",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-038",
+        "excerpt": "Board diversity: 'As part of our Board refreshment process, we look for diversity of Board tenure and potential Director candidates who bring perspectives from different backgrounds, education, culture, experience, talen",
+        "title": "Board diversity: 'As part of our Board refreshment process, we look…",
+        "type": "article",
+        "url": "https://www.marketscreener.com/quote/stock/WSFS-FINANCIAL-CORPORATIO-11417/news/WSFS-Financial-2024-Environmental-Social-and-Governance-Report-49510848/"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-089",
+        "excerpt": "ARS 2025 (April 2025): 'Advancing how we use data, the deployment of artificial intelligence, and predictive modeling' — formal AI/ML strategy stated at executive level WSFS leveraged Upstart AI platform for consumer cre",
+        "title": "ARS 2025 (April 2025): 'Advancing how we use data, the deployment of…",
+        "type": "webinar",
+        "url": "https://s201.q4cdn.com/286818350/files/doc_financials/2024/ar/wsfsars04-02x2025v2.htm"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "Customer segmentation: commercial clients, SMB, wealth/HNW, consumer — multi-segment marketing model LinkedIn ABM + CFO panels + content syndication for commercial/middle market acquisition — B2B digital marketing active",
+        "title": "Customer segmentation: commercial clients, SMB, wealth/HNW, consumer",
+        "type": "conference",
+        "url": "https://matrixbcg.com/blogs/marketing-strategy/wsfsbank"
+      }
+    ],
+    "ticker": "WSFS",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "22.1B",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "portersfiveforce.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v5.5",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.260412+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# WSFS Financial Corporation — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peer set was locked at Batch 1 of Layer 0 research and is immutable for this assessment. Four peers were selected on criteria of: (a) commercial lending emphasis, (b) asset size proximity, (c) geographic overlap, and (d) known Salesforce/nCino deployments for technology benchmarking contrast.",
+    "gap_prioritization_md": "Prioritization follows the six-factor formula from the DMA framework. Priority Score = (0.25 × Gap Size) + (0.20 × Peer Comparison) + (0.15 × Strategic Alignment) + (0.15 × Implementation Complexity-inverse) + (0.15 × Investment Efficiency) + (0.10 × Stakeholder Readiness). A score of 0.75+ = CRITICAL priority; 0.60-0.75 = HIGH; below 0.60 = MEDIUM.\nNote: Priority Score scale is 0.0 (lowest) to 1.0 (highest). All five gaps scored above 0.55, confirming each is a legitimate priority. The top three gaps (>0.78) are classified CRITICAL and should be addressed in Phase 1-2 of the roadmap.",
+    "page_number": null,
+    "scqa_heading": "1.1 SCQA Framework",
+    "scqa_md": "WSFS Financial Corporation is a $22.1B in assets commercial lender regulated by OCC, operating since 1832 with 6,500 employees. A 10.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-061, E-068]. Zennify's assessment places overall digital maturity at 2.1/5. The deepest capability gap is Efficiency Metrics at 1.8/5 against a 3.2 peer median [E-007, E-008].\n\nNext is Conversational IVR with GenAI at 1.8/5 against a 2.8 peer median [E-013]. Third is GenAI Content Generation at 1.9/5 against a 3.0 peer median [E-023, E-046]. The issue register adds run_manifest missing required fields: {'overall_score', 'pillar_scores'} (critical severity). The issue register adds caps_applied_log.csv absent — caps stored in issue_register.json instead (v5.5/v2.4 schema drift) (high severity).\n\nLeadership is in motion: Rene Gonzales (SVP Chief Technology Officer) is newly in seat, and new executives set platform direction in their first quarters. The question for WSFS Financial Corporation is whether to close Efficiency Metrics first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. WSFS Financial Corporation should lead with Tableau (78/100 fit) against Metadata Management & Data Catalog, then sequence Databricks behind it. Closing Efficiency Metrics to the peer median alone is worth 1.5 maturity points, and the capabilities that depend on it compound the gain.\n\nTiming favors acting inside the new leadership's first two quarters, before platform commitments lock."
+  },
+  "overall_score": 2.07,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/A4_source_url_index.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 92 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.695340+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A2_peer_comparison.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.696660+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A3_subcap_coverage.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.697155+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A7_leadership_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.697594+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/rollup_data.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.698660+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.699322+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results_pass1.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.700024+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results_pass2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.700301+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:27.700571+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 20
+    },
+    "stage_ms": {
+      "manifest": 11,
+      "parse": 8338,
+      "persist": 1209
+    },
+    "structured": [
+      {
+        "code": "research_workbook_evidence",
+        "detail": "research_workbook_evidence: +0 new E-IDs, 13 CSV rows enriched with workbook subcaps (from WSFS_DMA_Research_Workbook.xlsx)",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+106 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. 'Various')",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=WSFS_Client_Profile_Research_Report.docx count=12",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 5 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 14 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 3 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/A4_source_url_index.csv — no fingerprint matched (best confidence 0.00); 92 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A2_peer_comparison.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A3_subcap_coverage.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A7_leadership_map.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/rollup_data.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results_pass1.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results_pass2.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 28",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:19/708 subcaps unresolved against v5.5",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "research_workbook_evidence: +0 new E-IDs, 13 CSV rows enriched with workbook subcaps (from WSFS_DMA_Research_Workbook.xlsx)",
+      "INFO/evidence_facts_merged_from_json_twin: +106 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "DEGRADED:techstack_noise_dropped: 1 candidate(s) rejected by taxonomy (e.g. 'Various')",
+      "firmographics_leadership_merged_from_docx: source=WSFS_Client_Profile_Research_Report.docx count=12",
+      "used docx-extracted recommendations: 5 rec(s) from Assessment_Report.docx §9",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 14 sources",
+      "insights_derived_from_category_gaps: 4",
+      "acquisitions_from_client_profile_docx: 3 events",
+      "INFO/pattern_gap: 01_evidence/A4_source_url_index.csv — no fingerprint matched (best confidence 0.00); 92 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A2_peer_comparison.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A3_subcap_coverage.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A7_leadership_map.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/rollup_data.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results_pass1.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results_pass2.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "timeline_events_persisted: 28",
+      "catalogue_unresolved:19/708 subcaps unresolved against v5.5",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 185,
+      "peer_median": 3.02,
+      "pillar_id": "P1",
+      "score": 2.28,
+      "subcaps_scored": 185
+    },
+    {
+      "peer_benchmarked": 222,
+      "peer_median": 2.94,
+      "pillar_id": "P2",
+      "score": 1.84,
+      "subcaps_scored": 222
+    },
+    {
+      "peer_benchmarked": 111,
+      "peer_median": 2.88,
+      "pillar_id": "P3",
+      "score": 2.05,
+      "subcaps_scored": 111
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.65,
+      "pillar_id": "P4",
+      "score": 2.13,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-19",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v5.5",
+    "completed_at": "2026-07-02T23:11:27.725448Z",
+    "created_at": "2026-07-02T23:11:27.725448Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "43fc971e-7b95-4eb1-810d-fce1a4d97a2d",
+    "overall_score": 2.07,
+    "request_id": "DMA-ASM-WSFS-20260519-0001",
+    "started_at": "2026-07-02T23:11:27.725448Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.5,
+        "source": "Culture & Values"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.6,
+        "source": "Work-Life Balance"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.2,
+        "source": "Management Quality"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.2,
+        "source": "Job Security / Advancement"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.4,
+        "source": "Compensation & Benefits"
+      }
+    ],
+    "derived_from": null,
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.6,
+        "source": "Indeed Overall Rating"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 22 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-045",
+        "E-016",
+        "E-037",
+        "E-038"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.02,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 22 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: CRE portfolio includes hotels (12%), retail (25%), office (14%) — physical climate risk exposure across commercial real estate collateral No TCFD formal climate scenario analysis or climate transition pathway confirmed in 10-K or ARS — formal climate risk framework gap"
+    },
+    {
+      "body": "Efficiency Metrics is a priority capability gap in customer experience, scoring 1.79/5 against a peer median of 3.25. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-007",
+        "E-008",
+        "E-013",
+        "E-015"
+      ],
+      "magnitude": "1.5 pts below peer median",
+      "name": "Efficiency Metrics",
+      "peer_median": 3.25,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.79,
+      "so_what": "Prioritize Efficiency Metrics in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Efficiency Metrics",
+      "what": "Efficiency Metrics is a priority capability gap in customer experience, scoring 1.79/5 against a peer median of 3.25. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: WSFS Bank selected nCino Bank Operating System in Oct 2016 for commercial and small business lending — 9-year deployment nCino deployment objectives: reduce loan onboarding and servicing costs, grow loan book 30% without adding back office personnel"
+    },
+    {
+      "body": "Conversational IVR with GenAI is a priority capability gap in customer experience, scoring 1.82/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-007",
+        "E-013",
+        "E-015",
+        "E-017"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Conversational IVR with GenAI",
+      "peer_median": 2.75,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.82,
+      "so_what": "Prioritize Conversational IVR with GenAI in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Conversational IVR with GenAI",
+      "what": "Conversational IVR with GenAI is a priority capability gap in customer experience, scoring 1.82/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: WSFS Bank selected nCino Bank Operating System in Oct 2016 for commercial and small business lending — 9-year deployment nCino deployment objectives: reduce loan onboarding and servicing costs, grow loan book 30% without adding back office personnel"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "140 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Trend Analysis averages 2.3/5 over 165 scored subcaps; ceiling 2.8 reflects thin evidence density (25/165 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-002"
+      ],
+      "modifiers": [
+        "196 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "Cyber Governance Framework averages 2.6/5 over 221 scored subcaps; ceiling 3.1 reflects thin evidence density (25/221 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "140 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Scaling & Retirement averages 2.1/5 over 190 scored subcaps; ceiling 2.8 reflects thin evidence density (50/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-032"
+      ],
+      "modifiers": [
+        "180 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Planning averages 2.3/5 over 205 scored subcaps; ceiling 2.8 reflects thin evidence density (25/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "116 of 125 subcaps on thin evidence"
+      ],
+      "rationale": "Social Responsibility — Subcap 2 averages 2.0/5 over 125 scored subcaps; ceiling 2.6 reflects thin evidence density (9/125 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-046"
+      ],
+      "modifiers": [
+        "280 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "GenAI Content Generation averages 1.9/5 over 285 scored subcaps; ceiling 2.4 reflects thin evidence density (5/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-050"
+      ],
+      "modifiers": [
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Efficiency Metrics averages 1.8/5 over 285 scored subcaps; ceiling 2.3 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-063"
+      ],
+      "modifiers": [
+        "280 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Conversational IVR with GenAI averages 1.8/5 over 285 scored subcaps; ceiling 2.3 reflects thin evidence density (5/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "245 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Delivery Optimization averages 1.9/5 over 255 scored subcaps; ceiling 2.4 reflects thin evidence density (10/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Reconciliation Automation averages 2.0/5 over 140 scored subcaps; ceiling 2.5 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-071"
+      ],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Check & ACH Fraud averages 1.9/5 over 130 scored subcaps; ceiling 2.4 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-074"
+      ],
+      "modifiers": [
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Consumer Protection Compliance averages 2.1/5 over 140 scored subcaps; ceiling 2.6 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-081"
+      ],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Periodic Reassessment averages 2.1/5 over 145 scored subcaps; ceiling 2.6 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-088"
+      ],
+      "modifiers": [
+        "180 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Governed Federation of External Data Sources averages 1.9/5 over 200 scored subcaps; ceiling 2.5 reflects thin evidence density (20/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-089"
+      ],
+      "modifiers": [
+        "255 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Experiment Tracking + Model Registry Operating Model averages 1.9/5 over 270 scored subcaps; ceiling 2.5 reflects thin evidence density (15/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [
+        "215 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Quantum Computing Readiness averages 2.3/5 over 235 scored subcaps; ceiling 2.9 reflects thin evidence density (20/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-098"
+      ],
+      "modifiers": [
+        "130 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Threat Management & Intelligence averages 2.5/5 over 150 scored subcaps; ceiling 3.0 reflects thin evidence density (20/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026) — reports to CIO Matyger; leads technology strategy, infrastructure, and operations (Mar 2026).",
+      "evidence": [
+        "E-010"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026)…",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.79/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026) — reports to CIO Matyger; leads technology strategy, infrastructure, and operations (Mar 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Rene Gonzales named SVP and CTO of WSFS Bank (March 2026)"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CTO appointment March 2026 — new relationship entry point, likely in technology vendor evaluation mode (Mar 2026).",
+      "evidence": [
+        "E-010"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "CTO appointment March 2026",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.79/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "CTO appointment March 2026 — new relationship entry point, likely in technology vendor evaluation mode (Mar 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "CTO appointment March 2026"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Agentforce CONFIRMED at NewLane Finance (WSFS subsidiary): job posting 'Support emerging technology initiatives including Agentforce (AI)' — production-level Agentforce deployment at NewLane Krishna Chaitanya (AVP, Salesforce & nCino Admin/Dev, WSFS Bank): earned Agentforce Specialist certification",
+      "evidence": [
+        "E-090"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Agentforce Confirmed at NewLane Finance (WSFS subsidiary)…",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.79/5 vs a 3.25 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Agentforce CONFIRMED at NewLane Finance (WSFS subsidiary): job posting 'Support emerging technology initiatives including Agentforce (AI)' — production-level Agentforce deployment at NewLane Krishna Chaitanya (AVP. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "issue_register",
+      "detail": "run_manifest missing required fields: {'overall_score', 'pillar_scores'}",
+      "evidence": [
+        "E-080",
+        "E-084"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Run_manifest missing required fields: {'overall_score'…",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.79/5 vs a 3.25 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "run_manifest missing required fields: {'overall_score', 'pillar_scores'}. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "nCino Digital Partners launched November 2025: 5 role-based AI agents — Analyst, Executive, Service, Processor, Client Digital Partners (Nov 2025).",
+      "evidence": [
+        "E-069"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "NCino Digital Partners launched",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.79/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Metadata Management & Data Catalog — highest-fit surface at 78/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "nCino Digital Partners launched November 2025: 5 role-based AI agents — Analyst, Executive, Service, Processor, Client Digital Partners (Nov 2025).",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "NCino Digital Partners launched"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Analyst Digital Partner (launched Nov 2025): 'credit analyst can ask analyst digital partner to pull a borrower's portfolio data, recent financials, covenant status and peer benchmarks, and then draft a risk summary' — directly addresses WSFS manual credit memo workflow",
+      "evidence": [
+        "E-069"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Credit analyst can ask analyst digital partner",
+      "metric": null,
+      "peer_context": "Efficiency Metrics runs 1.79/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Metadata Management & Data Catalog — highest-fit surface at 78/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Analyst Digital Partner (launched Nov 2025): 'credit analyst can ask analyst digital partner to pull a borrower's portfolio data, recent financials, covenant status and peer benchmarks, and then draft a risk summary'",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Credit analyst can ask analyst digital partner"
+      },
+      "window": null
+    }
+  ]
+}

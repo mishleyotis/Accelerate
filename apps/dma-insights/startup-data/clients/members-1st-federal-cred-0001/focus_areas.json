@@ -1,0 +1,344 @@
+{
+  "entity_display_id": "members-1st-federal-cred-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-078",
+          "E-019",
+          "E-012",
+          "E-079"
+        ],
+        "representative_quote": "Geographic expansion 8\u219211 counties + 3 senior C-suite hires in 12 months = growth-phase capacity strain",
+        "source_kind": "docx"
+      },
+      "id": "2131f791-6e61-40f2-870a-12d9df5bd4fd",
+      "involved_subcap_ids": [
+        "P4C2.4.13",
+        "P2C1.1.CU2",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C3.4.10"
+      ],
+      "kpis": [
+        {
+          "current_value": "12 months",
+          "delta": null,
+          "kpi_label": "Three senior moves",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "12 months",
+          "delta": null,
+          "kpi_label": "senior C-suite hires",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 13,
+        "P4": 87
+      },
+      "source_path": "(unknown)",
+      "title": "Geographic expansion 8\u219211 counties + 3 senior C-suite hires\u2026",
+      "verbatim_quote": "F-003 | Geographic expansion 8\u219211 counties + 3 senior C-suite hires in 12 months = growth-phase capacity strain | Branch network expanded into Lehigh, Lycoming, Northampton counties (E-078). Pavlakovich COO (Feb 2025), Culos SVP Retail (Mar 2026), Balestrini CCLO (2025) \u2014 three senior moves in 12 months [E-019, E-012, E-079]. Wilson: 'preparing for significant expansion across Pennsylvania.' | Operating-model stretch on Salesforce platform: branch onboarding + new-market member acquisition + leadership change-management all converging. P1C4 Culture + P3C1 Process Automation likely strained at scale. | Sales pitch: 'Your platform must scale with your geography.' Salesforce FSC branch-onboarding accelerator + Marketing Cloud SEG segmentation for new-market entry + Service Cloud Mobile for branch-employee enablement = expansion-velocity multiplier."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-076",
+          "E-068",
+          "E-075",
+          "E-067"
+        ],
+        "representative_quote": "MFA + biometrics + dedicated IdP subdomain + passkeys roadmap = mature cyber posture",
+        "source_kind": "docx"
+      },
+      "id": "c207ddec-88c0-4197-80df-945155544de7",
+      "involved_subcap_ids": [
+        "P4C2.2.1",
+        "P4C2.2.1",
+        "P4C2.3.1",
+        "P4C2.3.1",
+        "P4C1.2.1",
+        "P4C1.2.1",
+        "P4C1.7.1",
+        "P4C1.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$10,000,000,000",
+          "delta": null,
+          "kpi_label": "activation against M1FCU's",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "MFA + biometrics + dedicated IdP subdomain + passkeys\u2026",
+      "verbatim_quote": "F-007 | MFA + biometrics + dedicated IdP subdomain + passkeys roadmap = mature cyber posture | MFA stack: SMS + voice + email OTP + TouchID/FaceID biometrics [E-076]. Dedicated sign-in subdomain (signin.members1st.org) suggests separate IdP (likely Salesforce Identity, Okta, or Auth0). Akamai Bot Manager + reCAPTCHA at edge [E-068]. Privacy program comprehensive: GLBA + CCPA + Biometric Privacy + COPPA + Plaid integration + Session Replay disclosure [E-075]. Kelly Hogan = Manager Cybersecurity Operations [E-067]. | P4C4 Cybersecurity scoring HIGH on perimeter + IAM; SIEM/EDR vendor + SOC depth not publicly disclosed = caution flag for cap determination. | Salesforce Shield + Event Monitoring + Trust Layer for AI-driven threat detection; Privacy Center activation; Plaid integration governance via Data Cloud \u2014 full Salesforce-as-trust-platform pitch."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-069",
+          "E-063",
+          "E-054",
+          "E-068"
+        ],
+        "representative_quote": "Modern data platform (M1-360) + IBM Cognos legacy = BI consolidation opportunity",
+        "source_kind": "docx"
+      },
+      "id": "d85a5329-e2a3-4e9e-a457-753773a1bdcb",
+      "involved_subcap_ids": [
+        "P4C2.2.1",
+        "P4C2.2.1",
+        "P4C2.3.1",
+        "P4C2.3.1",
+        "P4C1.2.1",
+        "P4C1.2.1",
+        "P4C1.7.1",
+        "P4C1.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$10,000,000,000",
+          "delta": null,
+          "kpi_label": "activation against M1FCU's",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Modern data platform (M1-360) + IBM Cognos legacy = BI\u2026",
+      "verbatim_quote": "F-006 | Modern data platform (M1-360) + IBM Cognos legacy = BI consolidation opportunity | M1-360 = Azure Databricks lakehouse + Microsoft Fabric overlay + Power BI [E-069]. McAllister VP D&A team of 11 since 2008 [E-063]. Azure DevOps adopted as 'first instance of true cloud CI/CD' [E-054]. IBM Cognos still in environment [E-068, LeadIQ scan]. | P4C1 Data + P4C2 Analytics scoring HIGH on platform modernization; legacy Cognos coexistence = transitional state, likely Cognos\u2192Power BI migration in flight. | Salesforce CRM Analytics (Tableau Cloud) + Data Cloud activation lifts member-experience analytics out of Cognos legacy. Marketing Cloud Personalization grounded on M1-360 = personalization-at-scale opportunity."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-048",
+          "E-049",
+          "E-047"
+        ],
+        "representative_quote": "MyConcierge + 4-tier Loyalty Rewards = differentiated proprietary service stack",
+        "source_kind": "docx"
+      },
+      "id": "fd15242b-b270-4f22-8398-3544af2cf52c",
+      "involved_subcap_ids": [
+        "P4C1.1.8",
+        "P2C4.7.1",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C2.4.13",
+        "P4C1.1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$35,000",
+          "delta": null,
+          "kpi_label": "Gold K-35K Platinum",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$15,000",
+          "delta": null,
+          "kpi_label": "K-15K Gold",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$2,500",
+          "delta": null,
+          "kpi_label": "Loyalty Rewards Silver",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "MyConcierge + 4-tier Loyalty Rewards = differentiated\u2026",
+      "verbatim_quote": "F-004 | MyConcierge + 4-tier Loyalty Rewards = differentiated proprietary service stack | MyConcierge launched July 2020 (E-048): proprietary 1:1 in-house concierge, NOT chatbot, accessible via mobile app + online banking. 4-tier Loyalty Rewards (Silver $2.5K-15K / Gold $15K-35K / Platinum $35K-75K / Titanium $75K+) with monthly automated tier evaluation + Authorized Family Group household aggregation (E-049). 18 specialized contact queues + 24/7 tech support (E-047). | P2C3 Servicing + P2C4 Personalization scoring HIGH on differentiated service-philosophy operationalization. Loyalty + Concierge already exhibit Salesforce-FSC-grade member-360 logic. | MyConcierge becomes a Salesforce-grounded 1:1 personalization engine with Marketing Cloud Engagement Studio + Loyalty Cloud activation. Lift from in-house custom to Salesforce-platformed without losing the brand."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-009",
+          "E-017"
+        ],
+        "representative_quote": "Salesforce trifecta confirmed: FSC + Data 360 + Marketing Cloud \u2014 multi-year transformation",
+        "source_kind": "docx"
+      },
+      "id": "f6291009-b56d-4b66-a58b-7c3dd0150e22",
+      "involved_subcap_ids": [
+        "P1C1.5.5",
+        "P4C3.4.6",
+        "P1C2.1.7",
+        "P4C3.4.1",
+        "P2C1.5.1",
+        "P2C1.8.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "30.4%",
+          "delta": null,
+          "kpi_label": "Preapproval campaign delivered",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$10,000,000,000",
+          "delta": null,
+          "kpi_label": "activation against M1FCU's",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 34,
+        "P2": 33,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Salesforce trifecta confirmed",
+      "verbatim_quote": "F-001 | Salesforce trifecta confirmed: FSC + Data 360 + Marketing Cloud \u2014 multi-year transformation | Atrium-delivered FSC + Data 360 + Marketing Cloud workstreams confirmed via public Atrium webinar (Feb 26, 2026) [E-009]. Atrium account team named (Lauren Marder, Ben Ernstoff). Salesforce ideation workshops co-hosted by CIO Garth Pricer [E-017]. | P2C1 Marketing & P2C3 Servicing have a strong platform foundation but Marketing Cloud Engagement Studio activation depth + Service Cloud Agentforce activation are unconfirmed \u2014 likely L3.0-3.5 ceiling without internal validation. | **The core sales narrative.** M1FCU already owns the Salesforce platform \u2014 Zennify positions as the activation partner: Marketing Cloud Engagement Studio + Service Cloud Agentforce + Data Cloud activation. Atrium delivered transformation; Zennify drives utilization."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-018",
+          "E-036",
+          "E-037",
+          "E-061",
+          "E-065"
+        ],
+        "representative_quote": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit = mature risk org, GRC tool unconfirmed",
+        "source_kind": "docx"
+      },
+      "id": "76a68f91-1331-4ad4-94b3-b211c9b3bc83",
+      "involved_subcap_ids": [
+        "P3C2.8.1",
+        "P3C2.3.4",
+        "P3C2.3.4",
+        "P3C2.1.1",
+        "P3C3.5.1",
+        "P3C3.5.1",
+        "P3C3.8.1",
+        "P3C3.8.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$132,000",
+          "delta": null,
+          "kpi_label": "Experience Consumer Lending",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit\u2026",
+      "verbatim_quote": "F-005 | Three-Lines-of-Defense risk model + 3 RCOs + Internal Audit = mature risk org, GRC tool unconfirmed | Three concurrent Risk & Compliance Officer roles (Marketing, Member Experience, Consumer Lending) at $132K-$214K each [E-018, E-036, E-037, E-061]. Pavlakovich's prior VP ERM role formal [E-065]. Required certifications: CRCM, NCCO, CMCP, CRC. RCSA + Issue Management + Risk Metrics + Change Management explicit. | P3C2 Operational Risk + P3C3 Compliance scoring strong (likely L3.5+); GRC tool identity (Ncontracts/MetricStream/Quantivate/RSA Archer) not publicly disclosed = caution flag. | Salesforce Compliance Cloud + Industries Compliance Sentinel + nCino Compliance can replace/augment GRC tool. Risk-as-Salesforce-platform pitch fits new COO's ERM background."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-064",
+          "E-066",
+          "E-069",
+          "E-070"
+        ],
+        "representative_quote": "Three-pillar AI portfolio with no unified governance layer",
+        "source_kind": "docx"
+      },
+      "id": "f125a60c-3ac3-4424-8093-06d3831dc6e0",
+      "involved_subcap_ids": [
+        "P4C2.2.1",
+        "P4C2.2.1",
+        "P4C2.3.1",
+        "P4C2.3.1",
+        "P4C1.2.1",
+        "P4C1.2.1",
+        "P4C1.7.1",
+        "P4C1.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$27,900,000",
+          "delta": null,
+          "kpi_label": "Lift cards",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "89%",
+          "delta": null,
+          "kpi_label": "on M1-360 lakehouse",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Three-pillar AI portfolio with no unified governance layer",
+      "verbatim_quote": "F-002 | Three-pillar AI portfolio with no unified governance layer | Zest AI strategic investor Nov 2025 (E-064: AI underwriting + Zest Protect fraud + LuLu Pulse GenAI). Tagetik AI Pathfinder finalist 2025 (E-066: finance/CPM AI). Microsoft Fabric early adopter on M1-360 lakehouse with 89% ML run-time reduction (E-069, E-070). 30.4% lift / 3,634 cards / $27.9M card limit measured outcome. | P4C2 Analytics & AI: HIGH activity, MEDIUM governance maturity. Three AI portfolios run on three different platforms \u2014 fragmentation risk. Likely L3.5 ceiling with strong upside if governance unified. | Salesforce Einstein Trust Layer + Agentforce + Data Cloud as AI-grounding source unifies the three portfolios. Zennify AI Governance offering bridges Zest + Tagetik + Microsoft Fabric into one auditable control plane within Salesforce."
+    }
+  ]
+}

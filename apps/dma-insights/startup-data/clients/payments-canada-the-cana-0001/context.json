@@ -1,0 +1,361 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "payments-canada-the-cana-0001",
+  "financials": {
+    "lines": [
+      "ACSS Volume CAGR 2021\u21922025: +5.9%/year | ACSS Value CAGR: +4.5%/year | Trend: STABLE-GROWING",
+      "Sub-trends: POS debits +36% (5yr, fastest growing) | Online transfers +175% volume (5yr) | Cheques -27% (secular decline) | AFT credits +14% | EDI +20%",
+      "STABLE-GROWING trajectory with POS acceleration and cheque secular decline.",
+      "ACSS Volume CAGR (2021\u21922025): +5.9%/year; ACSS Value CAGR: +4.5%/year",
+      "POS debits: +36% (5yr) \u2014 ACCELERATING; Mobile contactless +28% YoY to 3.4B transactions",
+      "Online transfers: +175% volume, +219% value (5yr) \u2014 fastest growing ACSS category",
+      "Cheques: -27% volume (5yr) \u2014 secular DECLINING; MICR processing standard remains",
+      "Revenue model: Member-funded (dues, voting rights, direct clearer fees); supplemental from PFVS subscriptions + API access",
+      "Member investment: 93% of Canadian FIs have payments modernization programs; $19.4M average institution investment [E-222]"
+    ],
+    "metrics": {
+      "member_investment": "93% of Canadian FIs have payments moderniz",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 320,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Canada \u2014 National (federal jurisdiction)",
+        "headline": "$103.0T assets \u00b7 FY2025 \u00b7 +1.2% CAGR",
+        "regulator": "Bank of Canada / OSFI",
+        "series": {
+          "net_income_m": [
+            8420.0,
+            9110.0,
+            9840.0,
+            10300.0,
+            10610.0
+          ],
+          "total_assets": [
+            98000.0,
+            100000.0,
+            102000.0,
+            107000.0,
+            103000.0
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Canada \u2014 National (federal jurisdiction)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Susan Hawkins",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jude Pinto",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Delivery Officer (CDO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Donna Kinoshita",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Payments Officer (CPO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lisa Ford",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Legal & Privacy Officer (CLPO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kristina Logue",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jon Purther",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director, Research"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevan Cowan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Chair-elect (June 17, 2026)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Garry Foster",
+        "recent_hire": true,
+        "tenure_months": 0,
+        "title": "Board Chair (outgoing June 2026)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Federally regulated financial institution (OSFI, Canada)",
+    "narrative_md": "Payments Canada (The Canadian Payments Association) is a corporate & investment bank. It reports $103.00 trillion in total assets. It is regulated by Bank of Canada / OSFI and employs approximately 320 people. Its overall digital maturity is assessed at 3.0 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Bank of Canada / OSFI",
+    "size_tier": "mega",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-234",
+        "excerpt": "SUMMIT 2026 theme: 'Accelerate Economic Growth'. 320+ organizations, 2,000+ delegates. 6 content streams: NEW 'Accelerated payments' + Connected, Data-powered, Digital, Risk resilience, Customer experience. BoC Supervisi",
+        "title": "Summit 2026 theme: 'Accelerate Economic Growth'",
+        "type": "conference",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-240",
+        "excerpt": "Payments Canada is ISO 20022 knowledge leader for Canada. Governance: ISO 20022 Task Force (technical experts from FIs) \u2192 Senior Operational Committee \u2192 Payments Canada Board final approval. Manages Canadian ISO 20022 us",
+        "title": "Payments Canada is ISO 20022 knowledge leader for Canada",
+        "type": "conference",
+        "url": null
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "84d808e8-c812-4d66-8422-a55d671237c8",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "IS-002/IS-003 TPRM Cap Not Enforced on Two P3C4 Subcaps"
+    },
+    {
+      "id": "e4f2fdbd-d2b9-4d93-a0b0-00a96d5cbe75",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "REC-03 and REC-05 \u2014 Evidence Proximity Check Failed (Likely False Positive)"
+    },
+    {
+      "id": "25b4e962-790e-4b2e-8fe9-667e8750716e",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Executive Summary Does Not Explicitly Name Peer Organizations"
+    },
+    {
+      "id": "97b1e7c0-112d-4b67-944b-516d231d3048",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Evidence Items E-001 to E-111 Not Present in JSON Evidence Register"
+    },
+    {
+      "id": "8c1d34c8-e06c-450a-98d4-6aad75ba8fa1",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "$411.9B/day Aggregate Daily Figure Not Cited in Assessment Report"
+    },
+    {
+      "id": "dd976d16-4e5f-4973-a77e-882c01bb42ed",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Standard Layer 1 Artifacts Missing (caps_applied_log, contradiction_log, reasoning_chain_log)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Score Recovery Potential from BoC Remediation: +0.09 to +0.18 overall points upon confirmed closure of IS-001 through IS-004. This makes BoC finding resolution the single highest-ROI governance investment available to Payments Canada.",
+    "trend_md": "Most recent reported financials: $103.0T assets as of FY2025 as of +1.2% CAGR, within a series tracked FY2021 to FY2025. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.02,
+        "P1C2": 3.24,
+        "P1C3": 2.53,
+        "P1C4": 2.98,
+        "P1C5": 4.0,
+        "P2C1": 1.91,
+        "P2C2": 1.85,
+        "P2C3": 2.64,
+        "P2C4": 1.42,
+        "P3C1": 1.49,
+        "P3C2": 2.87,
+        "P3C3": 3.0,
+        "P3C4": 3.41,
+        "P4C1": 1.38,
+        "P4C2": 1.95,
+        "P4C3": 2.23,
+        "P4C4": 3.23
+      },
+      "overall_score": 2.54,
+      "peer_name": "SL Green Realty Corp (NYSE:SLG)",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-PMTCAN-20260511-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "Culture & Change (3.02): Glassdoor 4.9/5 with 100% CEO approval",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.9
+      },
+      {
+        "drilldown": "(3.02): Glassdoor 4.9/5 with 100% CEO approval; Indeed 4.2/5",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 4.9
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "PSP expansion (Wave 1); RTR system-level testing begins",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [],
+      "id": "dcd4cb68-d63c-46a5-98ca-9338fcde75dc",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "RTR system-level testing begins"
+    },
+    {
+      "body": "MVS + PFVS launched; CP Act amendments; Hawkins CEO",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "ef82ce45-4949-4793-8b91-9d8494ad854e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "MVS + PFVS launched CP Act amendments"
+    },
+    {
+      "body": "Lynx ISO 20022 98% MX adoption; AFT ISO 20022 begins",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [],
+      "id": "f1eaa9cc-8c09-4428-b968-0cd91fb61cc4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AFT ISO 20022 begins"
+    },
+    {
+      "body": "+8.2% ACSS volume YoY; RTR procurement begun",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [],
+      "id": "d89d7ec4-99fd-40a4-9a32-e7fad7207da3",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "RTR procurement begun"
+    },
+    {
+      "body": "Lynx RTGS launched; COVID accelerated digital",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "35c14e9a-cef1-4029-999b-f761ca77aafb",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Covid accelerated digital"
+    }
+  ]
+}

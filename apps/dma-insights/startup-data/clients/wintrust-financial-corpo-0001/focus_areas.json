@@ -1,0 +1,71 @@
+{
+  "entity_display_id": "wintrust-financial-corpo-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-023",
+          "E-027",
+          "E-054"
+        ],
+        "representative_quote": "[EVIDENCE]: E-023:F1, E-027:F1, E-027:F3 provide 7 items for Developer Portal & Experience.",
+        "source_kind": "heuristic"
+      },
+      "id": "49272e11-87c0-4ca2-bc8a-a8301c6a80e0",
+      "involved_subcap_ids": [
+        "P2C2.8.4",
+        "P2C4.2.2",
+        "P2C4.2.3",
+        "P2C4.2.6",
+        "P2C4.2.8",
+        "P2C4.2.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 15 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-024",
+          "E-027",
+          "E-031"
+        ],
+        "representative_quote": "[EVIDENCE]: E-024:F1, E-027:F1, E-031:F1 provide 9 items for Innovation Vision.",
+        "source_kind": "heuristic"
+      },
+      "id": "0d8d2712-66ee-44dd-8c59-a360bb29b513",
+      "involved_subcap_ids": [
+        "P1C3.1.1",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.3",
+        "P1C3.5.1",
+        "P1C3.5.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 9 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

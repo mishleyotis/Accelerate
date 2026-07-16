@@ -1,0 +1,34 @@
+{
+  "entity_display_id": "capital-farm-credit-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Conservative baseline score of 1.5 applied as appropriate for large FCS institution without documented capability.",
+        "source_kind": "heuristic"
+      },
+      "id": "21ee4ca8-3041-432c-8d83-1b5fc650d75a",
+      "involved_subcap_ids": [
+        "P1C1.2.5",
+        "P1C1.3.CL1",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

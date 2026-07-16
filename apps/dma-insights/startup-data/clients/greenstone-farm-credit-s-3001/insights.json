@@ -1,0 +1,484 @@
+{
+  "entity_display_id": "greenstone-farm-credit-s-3001",
+  "items": [
+    {
+      "affects": [
+        "P3C3",
+        "P3C1.8.CU1",
+        "P1C1.5.2",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "577b7d3e-3db4-4b17-9c2b-b71967fe06be",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-073"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-09"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-073",
+        "E-056"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Fair Lending Compliance a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "No GRC platform",
+      "what_text": "Fair Lending Compliance is one of GreenStone Farm Credit Services ACA's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes GreenStone Farm Credit Services ACA's ability to deliver more efficient, dependable operations [E-073].",
+      "why_text": "At 2.0 out of 5, Fair Lending Compliance sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-072, E-073].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C2.7.5",
+        "P2C1.5.5",
+        "P2C2.1.1",
+        "P2C3.2.6",
+        "P2C3.13.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "dc130508-7e95-491c-8beb-e3b0111c2977",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-010",
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-091"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Journey Design a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-091].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "No chatbot/virtual assistant",
+      "what_text": "Service Journey Design is one of GreenStone Farm Credit Services ACA's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes GreenStone Farm Credit Services ACA's ability to deliver a stronger, more personalised customer experience [E-091].",
+      "why_text": "At 1.5 out of 5, Service Journey Design sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-010, E-091].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C1.6.3",
+        "P1C3.3.4",
+        "P2C1.13.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "1997b7be-79a9-4119-9526-5976cac447fe",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-056"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 51 a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 1.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "No A/B testing",
+      "what_text": "Capability dimension 51 is one of GreenStone Farm Credit Services ACA's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes GreenStone Farm Credit Services ACA's ability to deliver a stronger, more personalised customer experience [E-056].",
+      "why_text": "At 1.0 out of 5, capability dimension 51 sits 1.3 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-056].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C1.2.4",
+        "P4C2.7.5",
+        "P4C3.1.1",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "56e99847-e469-42ed-ad46-3c52e7527c03",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-085"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-044"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 1.5 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-044].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Build unified member 360 view",
+      "what_text": "No data catalog, no data governance framework, no data quality program. Salesforce/nCino integration is real-time but OnBase ECM and core loan accounting remain fragmented. Databricks + Delta Lake + Unity Catalog emerging as data platform foundation — Data Cloud complements with Salesforce-native member identity resolution. No CDO exists; Data Cloud provides tooling to partially address governance gap. Data Cloud connected unlock: UNLOCK-001: ≥ 2.5 removes Personalization ceiling (currently capped at 3.0); Enables Agentforce (R8) member context for AI agents. In Zennify's assessment Data Mesh Strategy & Domain Ownership scores 1.5 out of 5, versus a typical 2.3 at comparable institutions [E-044].",
+      "why_text": "At 1.5 out of 5, Data Mesh Strategy & Domain Ownership sits 0.8 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-085, E-044].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P4C2.7.5",
+        "P2C4.1.1",
+        "P1C1.1.1",
+        "P1C4.1.3",
+        "P1C1.6.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "4c4609a3-6a16-4331-82f0-5842968e6c54",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-09"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-097"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Strategy Document a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": "REC-03",
+      "theme": "Digital Strategy & Vision",
+      "title": "Define digital roadmap with new CIO and board",
+      "what_text": "CIO transition creates transformation inflection point — Brett Dutcher promoted from SVP Application Services, signaling continuity over transformation. Technology Board Committee newly established under Rick Snyder has appetite but no defined KPIs. Existing modernization roadmap confirmed by Glassdoor HR but described as incremental. No formal digital KPIs reported to board (documented absence from ). Digital Strategy Workshop connected unlock: Aligns executive team on H2/H3 investment priorities; Defines digital KPIs for CRM Analytics dashboards (R4). In Zennify's assessment Digital Strategy Document scores 2.0 out of 5, versus a typical 2.8 at comparable institutions [E-097].",
+      "why_text": "At 2.0 out of 5, Digital Strategy Document sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-001, E-097].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C3.1.1",
+        "P2C4.1.1",
+        "P3C1.1.1",
+        "P4C3.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "b5ec82f5-a5bf-406b-89a4-c2b4d4b60947",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-085"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-085",
+        "E-100"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make EA Framework & Governance a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-100].",
+      "source_rec_id": "REC-05",
+      "theme": "Architecture & Cloud",
+      "title": "Connect systems via API-first integration",
+      "what_text": "No API strategy, no developer portal, no integration middleware detected. Fiserv DNA migration via SunStream creates immediate integration need — new core banking must connect to Salesforce/nCino/DocuSign ecosystem. Tech debt described as 'high and not actively managed'. Legacy frontend includes Backbone.js (2010-era) alongside modern Angular 2. MuleSoft Anypoint connected unlock: UNLOCK-002: ≥ 3.0 secures Automation ceiling (35% weight pillar insurance); Enables real-time data flow for Data Cloud (R2) member 360. In Zennify's assessment EA Framework & Governance scores 2.0 out of 5, versus a typical 2.8 at comparable institutions [E-085].",
+      "why_text": "At 2.0 out of 5, EA Framework & Governance sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-097, E-085].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C2",
+        "P4C2.7.5",
+        "P2C1.5.5",
+        "P4C2.4.7",
+        "P2C4.8.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "0d7c545a-326c-4752-8bf7-6cd0f191f1e8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-010",
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-091",
+        "E-044"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Journey Design a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-044].",
+      "source_rec_id": "REC-08",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Deploy AI-powered member self-service",
+      "what_text": "Google Play 2.6/5 with login failures, password issues, fingerprint authentication failures. Zero AI/ML production use cases while Compeer (Ocrolus AI, 50% capacity gain) and Capital Farm Credit (generative AI) both operate at 3.5. 96% CSAT on relationship channels — members love the people, Agentforce extends that quality to digital. Operating loan auto-renewal uses rules-based criteria — ripe for ML-assisted decisioning. Agentforce connected unlock: UNLOCK-003: Dual-category uplift from single initiative — +1.02 + +0.87 = highest combined ROI of any single recommendation; First production AI at GreenStone — closes the most critical competitive gap [E-091].",
+      "why_text": "At 1.5 out of 5, Service Journey Design sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-010, E-091].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3",
+        "P2C4.1.1",
+        "P1C2.1.7",
+        "P1C1.5.2",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "0a2b5074-0407-4db3-8adb-8959d9ec79d7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-073"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-073",
+        "E-070"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Innovation Horizons a near-term focus for GreenStone Farm Credit Services ACA: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-070].",
+      "source_rec_id": "REC-09",
+      "theme": "Innovation & Investment",
+      "title": "CTC template: 1 deployment = 10 institutions",
+      "what_text": "GreenStone manages CentRIC Technology Collaboration providing shared technology services to 9 FCS associations. DocuSign CLM already serves 1,350+ users across 7 CTC partners. SunStream shareholders represent $82B+ combined assets. This is a platform play that transforms GreenStone from Salesforce customer to FCS digital platform leader. Financial Services Cloud + Platform connected unlock: UNLOCK-004: 1 deployment → 10 institution references; Positions Zennify as Farm Credit System Salesforce partner; Innovation score uplift — shared platform = formal innovation vehicle. In Zennify's assessment Innovation Horizons scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-073].",
+      "why_text": "At 2.0 out of 5, Innovation Horizons sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-001, E-073].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "6.1 P1: Strategy, governance & culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "6.2 P2: Member experience & engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 35% | Score: 2.89 | vs Median: +0.01 | Level: Established",
+        "heading": "6.3 P3: Operations, risk & compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "6.4 P4: Data, analytics & technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Nine evidence-grounded recommendations map identified capability gaps to Zennify solution offerings. Each recommendation has been validated against the Zennify solutions catalog 'When to Recommend' and 'When NOT to Recommend' criteria. Four recommendations require special notation: R4 (Power BI caveat), R7 (modified trigger), R8 (P4 prerequisite), R9 (non-standard positioning)."
+  },
+  "run_request_id": "DMA-ASM-GFCS-20260323-001"
+}

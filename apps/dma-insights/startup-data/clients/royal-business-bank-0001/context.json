@@ -1,0 +1,491 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Royal Business Bank",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "id": "e8d80fb2-2a92-429c-a476-212b0f3ec32e",
+      "source_url": null,
+      "status": null,
+      "target": "Pacific Global Bank",
+      "title": "Pacific Global Bank"
+    },
+    {
+      "acquirer": "Royal Business Bank",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "id": "264c19d1-e4cb-4e9c-a7b5-edf3438f8a51",
+      "source_url": null,
+      "status": null,
+      "target": "First American International Bank",
+      "title": "First American International Bank"
+    },
+    {
+      "acquirer": "Royal Business Bank",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2016-01-01",
+      "id": "9615b21e-5bc1-4fa4-b218-0120855f923b",
+      "source_url": null,
+      "status": null,
+      "target": "TomatoBank",
+      "title": "TomatoBank"
+    },
+    {
+      "acquirer": "Royal Business Bank",
+      "amount": null,
+      "announced_on": null,
+      "body": null,
+      "closed_on": null,
+      "details": null,
+      "e_id": null,
+      "event_date": "2013-01-01",
+      "id": "096704b9-7df3-4b59-8b46-11a9e7097a2c",
+      "source_url": null,
+      "status": null,
+      "target": "Los Angeles National Bank",
+      "title": "Los Angeles National Bank"
+    }
+  ],
+  "entity_display_id": "royal-business-bank-0001",
+  "financials": {
+    "metrics": {
+      "deposits": "$3.4B",
+      "net_income": "$31.9M",
+      "nim_pct": 2.95
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Multi-state (CA",
+      "NV",
+      "NY",
+      "NJ",
+      "IL",
+      "HI)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Johnny Lee",
+        "recent_hire": false,
+        "tenure_months": 19,
+        "title": "President & CEO (since Dec 2024)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lynn Hopkins",
+        "recent_hire": false,
+        "tenure_months": 31,
+        "title": "EVP/CFO (since Dec 2023)"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Erik Grier",
+        "recent_hire": false,
+        "tenure_months": 126,
+        "title": "SVP/CIO (since Jan 2016)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mr. Rizkalla",
+        "recent_hire": false,
+        "tenure_months": 33,
+        "title": "EVP/CRO (since Oct 2023)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gary Fan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Digital Banking Lead"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Legal Name: RBB Bancorp (NASDAQ: RBB). Operating Subsidiary: Royal Business Bank.\n\nFounded: 2008 by Louis Chang. FDIC Certificate: #58816. Charter: NM (Non-member state-chartered).\n\nDesignations: MDI (Yes \u2014 Asian American) + CDFI (Yes \u2014 certified 2016). Headquarters: 1055 Wilshire Blvd, Ste 1200, Los Angeles, CA 90017.\n\nEvidence: E-001, E-002, E-005, E-009",
+    "primary_regulator": "FDIC",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": null,
+    "ticker": "NASDAQ: RBB"
+  },
+  "issue_register": [
+    {
+      "id": "11a78e46-4a4e-4914-a928-18c083864c11",
+      "issue_id": "GAP-1-P1C3.3.2",
+      "linked_subcap_ids": [
+        "P1C3.3.2"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Score 1.0 (LOW). No direct subcap evidence. Inferred from capability coverage: LOW. Banno digital platform rollout as pilot proxy; no public sandbox/experimentation",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Sandbox Environments"
+    },
+    {
+      "id": "21fe457f-d6da-4386-a92e-15f4530e3e42",
+      "issue_id": "GAP-2-P1C3.3.3",
+      "linked_subcap_ids": [
+        "P1C3.3.3"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Score 1.0 (LOW). No direct subcap evidence. Inferred from capability coverage: LOW. Banno digital platform rollout as pilot proxy; no public sandbox/experimentation",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Fail-Fast Culture"
+    },
+    {
+      "id": "25e0ade3-fba3-4271-b325-598e9b2e0aa2",
+      "issue_id": "GAP-3-P1C3.3.4",
+      "linked_subcap_ids": [
+        "P1C3.3.4"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Score 1.0 (LOW). No direct subcap evidence. Inferred from capability coverage: LOW. Banno digital platform rollout as pilot proxy; no public sandbox/experimentation",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: A/B Testing Capabilities"
+    },
+    {
+      "id": "4eeaa049-e67b-4477-b842-266b2cafbb0d",
+      "issue_id": "GAP-4-P1C3.3.5",
+      "linked_subcap_ids": [
+        "P1C3.3.5"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Score 1.0 (LOW). No direct subcap evidence. Inferred from capability coverage: LOW. Banno digital platform rollout as pilot proxy; no public sandbox/experimentation",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Pilot Governance"
+    },
+    {
+      "id": "195cb581-6e80-4290-80ad-ebbd5748ddc6",
+      "issue_id": "GAP-5-P1C3.8.2",
+      "linked_subcap_ids": [
+        "P1C3.8.2"
+      ],
+      "opened_on": "2026-04-13",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the RB peer median (2.5/5). Score 1.0 (LOW). No direct subcap evidence. Inferred from capability coverage: LOW. IBM Cognos 8 (legacy BI); DarkTrace AI security; Abrigo ML credit models; no Gen",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI Use Case Pipeline"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Latest available financials show deposits of $3.4B.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 1.99,
+        "P1C3": 2.0,
+        "P1C4": 2.11,
+        "P1C5": 2.14,
+        "P2C1": 1.86,
+        "P2C2": 1.97,
+        "P2C3": 2.29,
+        "P2C4": 2.45,
+        "P3C1": 1.82,
+        "P3C2": 2.04,
+        "P3C3": 2.07,
+        "P3C4": 2.47,
+        "P4C1": 1.68,
+        "P4C2": 1.69,
+        "P4C3": 1.69,
+        "P4C4": 1.78
+      },
+      "overall_score": 2.01,
+      "peer_name": "Bell Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.06,
+        "P1C2": 2.58,
+        "P1C3": 1.54,
+        "P1C4": 1.54,
+        "P1C5": 2.0,
+        "P2C1": 1.83,
+        "P2C2": 1.84,
+        "P2C3": 1.83,
+        "P2C4": 1.51,
+        "P3C1": 1.86,
+        "P3C2": 2.79,
+        "P3C3": 2.63,
+        "P3C4": 2.48,
+        "P4C1": 1.55,
+        "P4C2": 2.03,
+        "P4C3": 1.0,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.0,
+      "peer_name": "Alma Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P2C1": 2.0,
+        "P2C2": 1.9,
+        "P2C3": 1.37,
+        "P2C4": 1.17,
+        "P3C1": 2.5,
+        "P3C3": 2.65,
+        "P3C4": 2.5,
+        "P4C1": 1.88,
+        "P4C2": 1.25,
+        "P4C3": 2.0,
+        "P4C4": 2.02
+      },
+      "overall_score": 1.98,
+      "peer_name": "Zions Bancorporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.69,
+        "P1C2": 2.0,
+        "P1C3": 1.77,
+        "P1C4": 2.11,
+        "P1C5": 1.84,
+        "P2C1": 1.77,
+        "P2C2": 1.88,
+        "P2C3": 1.79,
+        "P2C4": 1.52,
+        "P3C1": 1.66,
+        "P3C2": 2.19,
+        "P3C3": 2.63,
+        "P3C4": 2.32,
+        "P4C1": 1.46,
+        "P4C2": 1.4,
+        "P4C3": 2.24,
+        "P4C4": 2.81
+      },
+      "overall_score": 1.95,
+      "peer_name": "BOK Financial Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.83,
+        "P1C2": 2.2,
+        "P1C3": 2.0,
+        "P1C4": 1.6,
+        "P1C5": 1.8,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.33,
+        "P3C1": 1.81,
+        "P3C2": 2.17,
+        "P3C3": 2.03,
+        "P3C4": 2.38,
+        "P4C1": 1.44,
+        "P4C2": 1.44,
+        "P4C3": 2.25,
+        "P4C4": 1.89
+      },
+      "overall_score": 1.95,
+      "peer_name": "Sunflower Bank, N.A.",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-RBB-20260413-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "Glassdoor: 3.5/5 (141 reviews)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 141,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [],
+        "trend": "Improving",
+        "value": 3.5
+      },
+      {
+        "drilldown": "using 7 connectors: web_search, web_fetch, Exa, Tavily, Indeed, Dice, and Vibe Prospecting/Explorium (9 enrichment types: technographics, webstack, website-keywords, challenges, workforce-trends, LinkedIn posts, strategic insights, competit",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "App Store: 'Worst banking app' \u2014 caps at M2",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "App Store",
+        "themes": [],
+        "trend": "Declining",
+        "value": 3.6
+      },
+      {
+        "drilldown": "8 \u2014 would replace SmartAsset/app store proxies with actual NPS/CSAT data E-ID Source Date ERS Facts FDIC BankFind Suite - Royal Business Bank 2026-04-10 4.55 4 SEC 8-K: Consent Order Termination 2024-08-22",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Declining",
+        "value": null
+      },
+      {
+        "drilldown": "supported), Microsoft Forms (basic form creation), and Trustpilot (customer review aggregation)",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "LinkedIn Posts, Website Keywords 2026-04-13 4.80 8 CFPB Complaint Database Search \u2014 Royal Business Bank 2026-04-13 4.30 1 Vibe Prospecting Webstack \u2014 royalbusinessbankusa.com 2026-04-13 4.80 6 CFPB Complaint Database \u2014 Royal Business Ban",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "CFPB complaints",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [],
+      "id": "41cf2ae4-4a21-43ef-9793-8954ccedd9ed",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Bank of the Orient (branch) + Gateway Bank FSB"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [],
+      "id": "e8d80fb2-2a92-429c-a476-212b0f3ec32e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Pacific Global Bank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [],
+      "id": "264c19d1-e4cb-4e9c-a7b5-edf3438f8a51",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "First American International Bank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2016-01-01",
+      "evidence_e_ids": [],
+      "id": "9615b21e-5bc1-4fa4-b218-0120855f923b",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "TomatoBank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2013-01-01",
+      "evidence_e_ids": [],
+      "id": "096704b9-7df3-4b59-8b46-11a9e7097a2c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Los Angeles National Bank"
+    },
+    {
+      "body": null,
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2011-01-01",
+      "evidence_e_ids": [],
+      "id": "74e7b66b-3a52-45e1-915c-6f45e6cde114",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "First Asian Bank + Ventura County Business Bank"
+    }
+  ]
+}

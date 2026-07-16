@@ -1,0 +1,264 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "zions-bancorporation-0001",
+  "financials": {
+    "lines": [
+      "tier 1 risk based pct: 17.0"
+    ],
+    "metrics": {
+      "net_income": 824000000.0
+    }
+  },
+  "firmographics": {
+    "entity_type": "Bank Holding Company",
+    "jurisdictions": [
+      "Utah"
+    ],
+    "leadership": [
+      {
+        "background": "10-year BaNCS transformation leadership",
+        "critical_role": false,
+        "name": "Jennifer Smith",
+        "recent_hire": false,
+        "tenure_months": 120,
+        "title": "Chief Information & Operations Officer"
+      },
+      {
+        "background": "ex-Discover, Capital One; appointed approximately two years prior",
+        "critical_role": true,
+        "name": "Margaret Mayor",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": "first CDO; appointed in prior calendar year",
+        "critical_role": true,
+        "name": "Brandon Thomas",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Data Officer"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "National bank charter",
+    "narrative_md": "Zions Bancorporation is a regional bank headquartered in Salt Lake City, Utah. It reports $87.0 billion in total assets. It is regulated by OCC (national bank charter) and employs approximately 10,000 people across 400 branches. Its overall digital maturity is assessed at 1.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OCC (national bank charter)",
+    "size_tier": "Mega (>$50B)",
+    "sub_vertical": "Regional Banks",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "Zennify Proposal Phase 2 (Agent Automation, 4.5 months): Einstein Next Best Action for agents, guided workflows for top call types, knowledge article integration, automated after-call work, real-time agent coaching",
+        "title": "Zennify Proposal Phase 2 (Agent Automation, 4.5 months)",
+        "type": "article",
+        "url": "INTERNAL"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-044",
+        "excerpt": "Zennify proposal includes user stories for: screen pop with customer context, automated case creation from inbound call, guided workflow for top 10 call types, knowledge article surfacing during call, after-call work aut",
+        "title": "Zennify proposal includes user stories for: screen pop with customer\u2026",
+        "type": "article",
+        "url": "INTERNAL"
+      }
+    ],
+    "ticker": "ZION"
+  },
+  "issue_register": [
+    {
+      "id": "23542a80-2f97-4f80-9f00-b980d8eb048f",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Short rationale entries"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Latest available financials show net income of $824.0M.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 1.99,
+        "P1C3": 2.0,
+        "P1C4": 2.11,
+        "P1C5": 2.14,
+        "P2C1": 1.86,
+        "P2C2": 1.97,
+        "P2C3": 2.29,
+        "P2C4": 2.45,
+        "P3C1": 1.82,
+        "P3C2": 2.04,
+        "P3C3": 2.07,
+        "P3C4": 2.47,
+        "P4C1": 1.68,
+        "P4C2": 1.69,
+        "P4C3": 1.69,
+        "P4C4": 1.78
+      },
+      "overall_score": 2.01,
+      "peer_name": "Bell Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.06,
+        "P1C2": 2.58,
+        "P1C3": 1.54,
+        "P1C4": 1.54,
+        "P1C5": 2.0,
+        "P2C1": 1.83,
+        "P2C2": 1.84,
+        "P2C3": 1.83,
+        "P2C4": 1.51,
+        "P3C1": 1.86,
+        "P3C2": 2.79,
+        "P3C3": 2.63,
+        "P3C4": 2.48,
+        "P4C1": 1.55,
+        "P4C2": 2.03,
+        "P4C3": 1.0,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.0,
+      "peer_name": "Alma Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.69,
+        "P1C2": 2.0,
+        "P1C3": 1.77,
+        "P1C4": 2.11,
+        "P1C5": 1.84,
+        "P2C1": 1.77,
+        "P2C2": 1.88,
+        "P2C3": 1.79,
+        "P2C4": 1.52,
+        "P3C1": 1.66,
+        "P3C2": 2.19,
+        "P3C3": 2.63,
+        "P3C4": 2.32,
+        "P4C1": 1.46,
+        "P4C2": 1.4,
+        "P4C3": 2.24,
+        "P4C4": 2.81
+      },
+      "overall_score": 1.95,
+      "peer_name": "BOK Financial Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.24,
+        "P1C3": 1.71,
+        "P1C4": 1.74,
+        "P1C5": 1.71,
+        "P2C1": 1.83,
+        "P2C2": 1.69,
+        "P2C3": 1.72,
+        "P2C4": 1.59,
+        "P3C1": 1.95,
+        "P3C2": 2.13,
+        "P3C3": 2.59,
+        "P3C4": 2.34,
+        "P4C1": 1.9,
+        "P4C2": 1.34,
+        "P4C3": 1.95,
+        "P4C4": 2.3
+      },
+      "overall_score": 1.95,
+      "peer_name": "Royal Business Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.83,
+        "P1C2": 2.2,
+        "P1C3": 2.0,
+        "P1C4": 1.6,
+        "P1C5": 1.8,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.33,
+        "P3C1": 1.81,
+        "P3C2": 2.17,
+        "P3C3": 2.03,
+        "P3C4": 2.38,
+        "P4C1": 1.44,
+        "P4C2": 1.44,
+        "P4C3": 2.25,
+        "P4C4": 1.89
+      },
+      "overall_score": 1.95,
+      "peer_name": "Sunflower Bank, N.A.",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ZIONS-20260306-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "mention of customer feedback collection mechanisms (CSAT, NPS, CES surveys) tied to contact center interactions",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      },
+      {
+        "drilldown": "automated complaint tracking, regulatory classification (CFPB categories), SLA-driven resolution, audit trail for all complaint activities Agentforce deployment planned for Phase 3: virtual agent for tier-1 inquiries (balance, transactio",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of Zions Bancorporation. Overall digital maturity scored 1.76/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-03-06",
+      "evidence_e_ids": [],
+      "id": "c4cbbe63-b075-4f09-a875-b6e3ec69a2d0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    }
+  ]
+}

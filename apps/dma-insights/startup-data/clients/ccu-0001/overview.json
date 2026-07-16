@@ -1,0 +1,1123 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 185,
+        "subcaps": 185,
+        "thin": 81
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 222,
+        "subcaps": 222,
+        "thin": 141
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 111,
+        "subcaps": 111,
+        "thin": 78
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 87
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "ccu-0001",
+    "domain": null,
+    "hq": null,
+    "id": "be00a946-40cc-4984-94a8-65fede8e3b1e",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "CCU",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:09.792497Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 26,
+    "current_count": 161,
+    "dated_count": 16,
+    "median_age_months": 12.1,
+    "oldest_published_date": "2009-03-01",
+    "stale_count": 10,
+    "stale_pct": 4.69,
+    "total": 213,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 1,
+      "POSITIVE": 212
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "Indeed": 2,
+      "LinkedIn": 14
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 12,
+      "NEUTRAL": 175,
+      "POSITIVE": 26
+    },
+    "tiers": {
+      "T1": 13,
+      "T2": 117,
+      "T3": 83
+    },
+    "total_facts": 1231,
+    "total_items": 213
+  },
+  "financial_trajectory": {
+    "cagr": "15%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2017,
+      2026
+    ],
+    "headline": "CCU has grown from $1.2B (2017) to $4.3B (2026) — 258% increase in 9 years driven by organic growth and 11 mergers. The 53% YoY dividend increase ($40.32M → $61.51M, 2023→2024) [E-",
+    "series": {
+      "net_income_m": [
+        1.2,
+        4.3
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 4300000000.0,
+    "branches": 22,
+    "cagr": "15%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "CCU has grown from $1.2B (2017) to $4.3B (2026) — 258% increase in 9 years driven by organic growth and 11 mergers. The 53% YoY dividend increase ($40.32M → $61.51M, 2023→2024) [E-007] confirms strong financial health and discretionary investment capacity for platform spending.",
+        "CCU has grown from $1.2B (2017) to $4.3B (2026): 258% asset growth, ~15% CAGR including M&A. Dividends paid grew 53% YoY ($40.3M→$61.5M, 2023→2024), signaling strong net income improvement and investment capacity [E-007]."
+      ],
+      "trajectory": {
+        "branches": 22,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 580,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Rodriguez joins"
+          },
+          {
+            "fy": "FY2020",
+            "label": "Andigo CU merger (~$370M, ~40K members)"
+          }
+        ],
+        "fy": [
+          "FY2017",
+          "FY2020",
+          "FY2023",
+          "FY2024",
+          "FY2026"
+        ],
+        "geography": "Lake Forest, IL — state-chartered, national digital reach (open charter)",
+        "headline": "$4.3B net income · FY2026",
+        "regulator": "Illinois DFPR (state charter) + NCUA (federal insurer)",
+        "series": {
+          "net_income_m": [
+            4300.0,
+            2000.0,
+            3200.0,
+            4000.0,
+            4300.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Lake Forest, IL — state-chartered, national digital reach (open charter)",
+    "footprint_basis": "derived:geography",
+    "founded": 1930,
+    "geography": "Lake Forest, IL — state-chartered, national digital reach (open charter)",
+    "headcount": 580,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sean Rathjen",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO & President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mike Murphy",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Dan Nerroth",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO / CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sean Bowers",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Russ Moore",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Enterprise Data Solutions"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "David Leal",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Information Security & Fraud"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Larry Paull",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Technology Governance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Baron",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Payments"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Charles Smith",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director Data Analytics"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "James Reichart",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sergio Rodriguez",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP IT Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jennifer Evans",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director Member Experience"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "CCU",
+    "license_type": "State-chartered",
+    "members": 274000,
+    "narrative_md": "Consumers Credit Union is the registered trade name of Consumers Cooperative Credit Union, a state-chartered financial cooperative incorporated under Illinois law and supervised by IDFPR. Founded in 1930 (96 years old), CCU operates under the 'people helping people' cooperative philosophy confirmed as the institutional foundation by CEO Sean Rathjen's 2025 annual message [E-195]. CCU's open community charter — anyone may join via a $5 Consumers Cooperative Association fee — enables national member acquisition and amplifies the strategic value of Salesforce Marketing Cloud and Data Cloud beyond geographic constraints.",
+    "primary_regulator": "Illinois DFPR (state charter) + NCUA (federal insurer)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 100,
+          "score": 68.0,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": ", Lake County, Lake Zurich, Schaumburg), Bernie's Book Bank Indeed CEO approval: 72.14%",
+          "source": "Indeed"
+        },
+        {
+          "rating": "68",
+          "signal": "benchmark (QuestionPro Q1 2025): Credit unions average NPS 68, 84% CSAT — well above financial services industry average NPS 41",
+          "source": "Net Promoter Score"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": "Sean Rathjen",
+        "date": "2025-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-003",
+        "excerpt": "2024: 95th Annual Meeting March 12, 2025. Sean Rathjen (CEO) and Scott Drabicki (Chairman) co-authored the CEO/Chairman Report. CEO opening: 'For CCU, 2024 was another year of change and growth, and an unwavering focus o",
+        "title": "2024",
+        "type": "article",
+        "url": "https://www.myconsumers.org/docs/default-source/annual-reports/annualreport_2024_1.pdf?sfvrsn=572d99ab_1"
+      },
+      {
+        "author": null,
+        "date": "2009-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "2008 Board: John Janezic (Chairman), Lou Paparigian (Vice-Chair), Denise Twardy Charts (Secretary), Alice Clements (Treasurer), Ann Campanella, James A. Mahnich Sr. — confirms longstanding board structure with officer ro",
+        "title": "2008 Board: confirms longstanding board structure with officer roles",
+        "type": "conference",
+        "url": "https://www.myconsumers.org/docs/default-source/annual-reports/2008-annual-report.pdf?sfvrsn=272299ab_1"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-022",
+        "excerpt": "Aug 8, 2025 blog post on McKinsey Technology Trends Outlook covering Agentic AI, application-specific semiconductors, autonomous robotics. Suggests CCU monitors industry trend literature and shares with members.",
+        "title": "Aug 8, 2025 blog post on McKinsey Technology Trends Outlook covering…",
+        "type": "blog",
+        "url": "https://www.consumerscu.org/blog/new-and-notable-technology-trends"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-023",
+        "excerpt": "Feb 12, 2026 LinkedIn post: 'Curious how generative AI can boost your small business? 🚀 Join us on February 25 for an engaging workshop full of practical ways AI can support your success. Lunch is on us!' — CCU directly ",
+        "title": "Feb 12, 2026 LinkedIn post: 'Curious how generative AI can boost your…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/consumers-credit-union-illinois"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-070",
+        "excerpt": "CCU maintains active public press release program: 8+ separate press releases visible on website from 2024-2026 covering GPTW certifications (4 separate releases), branch openings, mergers, and workplace awards — systema",
+        "title": "CCU maintains active public press release program",
+        "type": "article",
+        "url": "https://www.myconsumers.org/support/press-releases/press-release-details"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "Board includes Dr. Angela Smith (academic background = diversity of professional perspective) and Melanie Meidel — board diversity evident in gender representation (at least 3 women confirmed: Masi, Mavrothalasitis, Meid",
+        "title": "Board includes Dr. Angela Smith (academic background = diversity of…",
+        "type": "article",
+        "url": "https://www.myconsumers.org/ccu-board-of-directors"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "myconsumers.org",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v2.4",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.391785+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# CCU — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peer set LOCKED in Batch 1 and immutable. Peer scores are category-level estimates from public signals — not full DMA assessments. PenFed added as aspirational outcome benchmark.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "SCQA Framework",
+    "scqa_md": "CCU is a $4.3B in assets credit union regulated by Illinois DFPR (state charter) + NCUA (federal insurer), operating since 1930 with 580 employees. A 15.0% multi-year growth rate gives it the balance sheet to fund transformation [E-002, E-040]. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is Data Lifecycle & Privacy Governance at 1.7/5 against a 3.2 peer median [E-164, E-157].\n\nNext is Natural Language Processing (NLP) at 1.7/5 against a 3.0 peer median [E-168, E-165]. Third is ESG Data Management at 2.0/5 against a 2.5 peer median [E-083]. The issue register adds Capability gap: AI Process Automation (high severity). The issue register adds Capability gap: Model Serving & Continuous Monitoring (high severity).\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for CCU is whether to close Data Lifecycle & Privacy Governance first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. CCU should lead with Tableau (71/100 fit) against Enterprise Data Catalog & Discovery, then sequence nCino behind it. Closing Data Lifecycle & Privacy Governance to the peer median alone is worth 1.5 maturity points, and the capabilities that depend on it compound the gain.\n\nThe analyst's own priority framing: \"Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days → 1 hour [E-173]…\"."
+  },
+  "overall_score": 2.41,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/A6_peer_comparison.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.724919+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_benchmarks_CCUIL_20260504.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.725430+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set_locked.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.725804+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block_CCUIL_20260504.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.726171+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_salesforce_wedge.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.726634+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 2,
+      "INFO": 17
+    },
+    "stage_ms": {
+      "manifest": 10,
+      "parse": 11445,
+      "persist": 4828
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/qa_verdict_CCUIL_20260504.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "institution_name backfilled from folder name",
+        "detail": "institution_name backfilled from folder name: 'CCU'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 707 subcaps from DMA_Assessment_Workbook",
+        "detail": "xlsx fallback extracted 707 subcaps from DMA_Assessment_Workbook_CCUIL_20260504.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from json variant evidence_index_CCUIL_20260504.",
+        "detail": "evidence loaded from json variant evidence_index_CCUIL_20260504.json (213 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Report_CCUIL_20260504.docx leadership=12 focus_areas=18 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 5 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 11 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 4 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/A6_peer_comparison.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_benchmarks_CCUIL_20260504.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set_locked.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block_CCUIL_20260504.md — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_salesforce_wedge.csv — no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 48",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:18/707 subcaps unresolved against v2.4",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 10",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/qa_verdict_CCUIL_20260504.json",
+      "institution_name backfilled from folder name: 'CCU'",
+      "xlsx fallback extracted 707 subcaps from DMA_Assessment_Workbook_CCUIL_20260504.xlsx",
+      "scoring loaded from xlsx fallback (707 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from json variant evidence_index_CCUIL_20260504.json (213 rows)",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Report_CCUIL_20260504.docx leadership=12 focus_areas=18 facts_extracted=0",
+      "used docx-extracted recommendations: 5 rec(s) from Assessment_Report.docx §9",
+      "tech_stack_from_report_prose: 11 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 10",
+      "acquisitions_from_client_profile_docx: 4 events",
+      "INFO/pattern_gap: 06_peers/A6_peer_comparison.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_benchmarks_CCUIL_20260504.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set_locked.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block_CCUIL_20260504.md — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_salesforce_wedge.csv — no fingerprint matched (best confidence 0.20); 8 generic sections mined",
+      "timeline_events_persisted: 48",
+      "catalogue_unresolved:18/707 subcaps unresolved against v2.4",
+      "insight_cards_persisted: 10"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 185,
+      "peer_median": 3.02,
+      "pillar_id": "P1",
+      "score": 2.49,
+      "subcaps_scored": 185
+    },
+    {
+      "peer_benchmarked": 222,
+      "peer_median": 3.51,
+      "pillar_id": "P2",
+      "score": 2.56,
+      "subcaps_scored": 222
+    },
+    {
+      "peer_benchmarked": 111,
+      "peer_median": 3.37,
+      "pillar_id": "P3",
+      "score": 2.57,
+      "subcaps_scored": 111
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.15,
+      "pillar_id": "P4",
+      "score": 2.01,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-04",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v2.4",
+    "completed_at": "2026-07-02T23:11:09.792497Z",
+    "created_at": "2026-07-02T23:11:09.792497Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "062c5b0f-3a77-480d-af74-579536390522",
+    "overall_score": null,
+    "request_id": "DMA-ASM-CCUIL-20260504-0001",
+    "started_at": "2026-07-02T23:11:09.792497Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 100,
+        "score": 68.0,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days → 1 hour [E-173]. Creatio is Phase 1 — FSC is Phase 2 (nCino integration + FSI-native data models + AI).",
+      "evidence": [
+        "E-173",
+        "E-164",
+        "E-157",
+        "E-158"
+      ],
+      "magnitude": "6 days",
+      "name": "Creatio deployed 2024 via Technology Advisors Inc",
+      "peer_median": 3.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.73,
+      "so_what": "Prioritize Creatio deployed 2024 via Technology Advisors Inc in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Creatio deployed 2024 via Technology Advisors Inc",
+      "what": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days → 1 hour. [E-173]. Creatio is Phase 1 — FSC is Phase 2 (nCino integration + FSI-native data models + AI).",
+      "why": "The linked evidence records: Creatio CRM confirmed deployed at Consumers Credit Union via Technology Advisors Inc. (TAI): 'Consumers Credit Union Elevates Member Experience Using Creatio's No-Code Platform.' CCU won the No-Code Leadership Adoption Award at Creatio No-Code Days Florida."
+    },
+    {
+      "body": "Priority 4 — Member Data Unification via Creatio CRM. Priority 4 — Member Data Unification via Creatio CRM is a priority capability gap in data and technology, scoring 1.73/5 against a peer median of 3.25. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-164",
+        "E-157",
+        "E-158",
+        "E-159"
+      ],
+      "magnitude": "1.5 pts below peer median",
+      "name": "Priority 4 — Member Data Unification via Creatio CRM",
+      "peer_median": 3.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.73,
+      "so_what": "Prioritize Priority 4 — Member Data Unification via Creatio CRM in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Priority 4 — Member Data Unification via Creatio CRM",
+      "what": "Priority 4 — Member Data Unification via Creatio CRM. Priority 4 — Member Data Unification via Creatio CRM is a priority capability gap in data and technology, scoring 1.73/5 against a peer median of 3.25. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: Privacy Policy revised March 31, 2025 — active privacy governance with formal review cycle. Policy covers CCPA and GLBA data protection requirements for all member data categories."
+    },
+    {
+      "body": "No CDP — Salesforce Data Cloud Greenfield — Member data across 6+ systems; no unified profile; 278K members [E-159, E-170] — P4C1.4 at M2.0; no real-time member profile — DATA CLOUD: Pure greenfield; zero incumbent CDP. Unifies Creatio + Finastra + Lumin + Marketo + nCino in real time.",
+      "evidence": [
+        "E-159",
+        "E-170",
+        "E-157",
+        "E-158"
+      ],
+      "magnitude": "1.5 pts below peer median",
+      "name": "No CDP",
+      "peer_median": 3.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.73,
+      "so_what": "Prioritize No CDP in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "No CDP",
+      "what": "No CDP — Salesforce Data Cloud Greenfield — Member data across 6+ systems; no unified profile; 278K members [E-159, E-170] — P4C1.4 at M2.0; no real-time member profile — DATA CLOUD: Pure greenfield; zero incumbent CDP. Unifies Creatio + Finastra + Lumin + Marketo + nCino in real time.",
+      "why": "The linked evidence records: Three-layer cloud data architecture confirmed: Snowflake (enterprise data warehouse, cloud-native) + Databricks (ML-ready data platform) + Coalesce (data transformation/ETL pipeline) — modern lakehouse architecture explicitly designed for AI/ML enablement."
+    },
+    {
+      "body": "Zero Production AI — Einstein + Agentforce Greenfield — 2025 intern: 'starting our AI journey in Domo.' Databricks pre-production [E-168] — P4C2.4/P4C2.7 at M1.5–M2; platform ready, execution absent — AGENTFORCE: BCU achieved 82% digital resolution. CCU has no comparable capability. Greenfield Agentforce opportunity — zero competition.",
+      "evidence": [
+        "E-168",
+        "E-165",
+        "E-166",
+        "E-167"
+      ],
+      "magnitude": "82%",
+      "name": "Zero Production AI",
+      "peer_median": 3.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.73,
+      "so_what": "Prioritize Zero Production AI in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Zero Production AI",
+      "what": "Zero Production AI — Einstein + Agentforce Greenfield — 2025 intern: 'starting our AI journey in Domo.'. Databricks pre-production [E-168] — P4C2.4/P4C2.7 at M1.5–M2; platform ready, execution absent — AGENTFORCE. BCU achieved 82% digital resolution. CCU has no comparable capability. Greenfield Agentforce opportunity — zero competition.",
+      "why": "The linked evidence records: Databricks ML platform confirmed in CCU tech stack — Databricks provides: MLflow (experiment tracking/versioning), Unity Catalog (data + ML governance), collaborative notebooks (Python/R/Scala), and MLOps pipeline capabilities."
+    },
+    {
+      "body": "Snowflake EDW under active construction ('making data AI-ready' [E-159]). Databricks ML provisioned, pre-production [E-168]. 2025 intern: 'starting our journey to AI in Domo.' Zero production ML models deployed. Einstein + Agentforce is the enterprise AI execution layer this data investment needs.",
+      "evidence": [
+        "E-159",
+        "E-168",
+        "E-164",
+        "E-157"
+      ],
+      "magnitude": "1.5 pts below peer median",
+      "name": "Snowflake EDW under active construction",
+      "peer_median": 3.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.73,
+      "so_what": "Prioritize Snowflake EDW under active construction in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Snowflake EDW under active construction",
+      "what": "Snowflake EDW under active construction ('making data AI-ready' [E-159]). Databricks ML provisioned, pre-production [E-168]. 2025 intern: 'starting our journey to AI in Domo.'. Zero production ML models deployed. Einstein + Agentforce is the enterprise AI execution layer this data investment needs.",
+      "why": "The linked evidence records: Three-layer cloud data architecture confirmed: Snowflake (enterprise data warehouse, cloud-native) + Databricks (ML-ready data platform) + Coalesce (data transformation/ETL pipeline) — modern lakehouse architecture explicitly designed for AI/ML enablement."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-007"
+      ],
+      "modifiers": [
+        "45 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Fintech Landscape Tracking averages 2.5/5 over 165 scored subcaps; ceiling 3.4 reflects thin evidence density (120/165 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-003"
+      ],
+      "modifiers": [
+        "76 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "NCUA/FFIEC Governance averages 2.6/5 over 221 scored subcaps; ceiling 3.5 reflects thin evidence density (145/221 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.5,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-038"
+      ],
+      "modifiers": [
+        "105 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Customer-Driven Innovation averages 2.3/5 over 190 scored subcaps; ceiling 3.1 reflects thin evidence density (85/190 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-003"
+      ],
+      "modifiers": [
+        "70 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Stakeholder Engagement averages 2.8/5 over 205 scored subcaps; ceiling 3.6 reflects thin evidence density (135/205 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-002"
+      ],
+      "modifiers": [
+        "93 of 125 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Data Management averages 2.0/5 over 125 scored subcaps; ceiling 2.6 reflects thin evidence density (32/125 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-106"
+      ],
+      "modifiers": [
+        "140 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "User Generated Content averages 2.5/5 over 285 scored subcaps; ceiling 3.3 reflects thin evidence density (145/285 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-038"
+      ],
+      "modifiers": [
+        "210 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Ancillary Services Setup averages 2.6/5 over 285 scored subcaps; ceiling 3.2 reflects thin evidence density (75/285 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-109"
+      ],
+      "modifiers": [
+        "220 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Employee Experience Enablement averages 2.8/5 over 285 scored subcaps; ceiling 3.4 reflects thin evidence density (65/285 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-124"
+      ],
+      "modifiers": [
+        "135 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Staff Cross-Sell Enablement averages 2.3/5 over 255 scored subcaps; ceiling 3.0 reflects thin evidence density (120/255 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-203"
+      ],
+      "modifiers": [
+        "120 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Investment & Prioritization averages 2.4/5 over 140 scored subcaps; ceiling 2.9 reflects thin evidence density (20/140 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.5,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-201"
+      ],
+      "modifiers": [
+        "70 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Channel Fraud averages 2.5/5 over 130 scored subcaps; ceiling 3.2 reflects thin evidence density (60/130 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-201"
+      ],
+      "modifiers": [
+        "115 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Compliance Training averages 2.6/5 over 140 scored subcaps; ceiling 3.2 reflects thin evidence density (25/140 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.5,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-204"
+      ],
+      "modifiers": [
+        "85 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "RTO/RPO Achievement averages 2.8/5 over 145 scored subcaps; ceiling 3.5 reflects thin evidence density (60/145 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.5,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-159"
+      ],
+      "modifiers": [
+        "115 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Lifecycle & Privacy Governance averages 1.7/5 over 200 scored subcaps; ceiling 2.4 reflects thin evidence density (85/200 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.5,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-170"
+      ],
+      "modifiers": [
+        "130 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Natural Language Processing (NLP) averages 1.7/5 over 270 scored subcaps; ceiling 2.5 reflects thin evidence density (140/270 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.5,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-182"
+      ],
+      "modifiers": [
+        "100 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Runbooks for Data Pipelines averages 2.1/5 over 235 scored subcaps; ceiling 2.8 reflects thin evidence density (135/235 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.5,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-201"
+      ],
+      "modifiers": [
+        "90 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Application Security averages 2.8/5 over 150 scored subcaps; ceiling 3.5 reflects thin evidence density (60/150 full-evidence cells); band ±0.5 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Lumin Digital go-live (cloud-native DBS). Data Cloud Lumin integration (Aug 2025).",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Lumin Digital go-live (cloud-native DBS)",
+      "metric": null,
+      "peer_context": "Data Lifecycle & Privacy Governance runs 1.73/5 vs a 3.25 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Lumin Digital go-live (cloud-native DBS). Data Cloud Lumin integration (Aug 2025). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2025-08-01",
+        "event": "Lumin Digital go-live (cloud-native DBS)"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "CCU is hiring Data Governance Lead ($103-165K, hybrid, 5+ yrs exp). Responsibilities: 'Lead Data Governance program by defining policies, standards, and best practices... Build governance operating model by establishing roles, decision rights, and escalation paths...",
+      "evidence": [
+        "E-019"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "CCU is hiring Data Governance Lead",
+      "metric": "Data Governance Lead $103",
+      "peer_context": "Data Lifecycle & Privacy Governance runs 1.73/5 vs a 3.25 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CCU is hiring Data Governance Lead ($103-165K, hybrid, 5+ yrs exp). Responsibilities: 'Lead Data Governance program by defining policies, standards, and best practices. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "KCT branches joining; Snowflake EDW building; Gov Lead hiring. ACTIVE NOW: Data Cloud + MuleSoft (Jan 2026).",
+      "evidence": [
+        "E-195",
+        "E-159"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "KCT branches joining Snowflake EDW building",
+      "metric": null,
+      "peer_context": "Data Lifecycle & Privacy Governance runs 1.73/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 71/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "KCT branches joining; Snowflake EDW building; Gov Lead hiring. ACTIVE NOW: Data Cloud + MuleSoft (Jan 2026).",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "KCT branches joining Snowflake EDW building"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Lake in the Hills branch opens. Branch experience via Service Cloud (Jan 2025).",
+      "evidence": [
+        "E-196"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Lake in the Hills branch opens",
+      "metric": null,
+      "peer_context": "Data Lifecycle & Privacy Governance runs 1.73/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 71/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Lake in the Hills branch opens. Branch experience via Service Cloud (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "Lake in the Hills branch opens"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "IMMEDIATE PAIN: KCT integration is the live MuleSoft use case. Sergio Rodriguez is the internal champion (Dec 2024).",
+      "evidence": [
+        "E-014"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "KCT integration is the live MuleSoft use case",
+      "metric": null,
+      "peer_context": "Data Lifecycle & Privacy Governance runs 1.73/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 71/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "IMMEDIATE PAIN: KCT integration is the live MuleSoft use case. Sergio Rodriguez is the internal champion (Dec 2024).",
+      "timeline": {
+        "date": "2024-12-01",
+        "event": "KCT Credit Union (Kane County Teachers, Elgin IL)"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Data Lifecycle & Privacy Governance scores 1.73/5 vs a typical 3.25 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-164",
+        "E-157",
+        "E-158",
+        "E-159"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Data Lifecycle & Privacy Governance scores 1.73/5",
+      "metric": "Data Lifecycle & Privacy Governance 1.73/5 vs peer 3.25",
+      "peer_context": "Data Lifecycle & Privacy Governance runs 1.73/5 vs a 3.25 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 71/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Data Lifecycle & Privacy Governance scores 1.73/5 vs a typical 3.25 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

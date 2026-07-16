@@ -1,0 +1,145 @@
+{
+  "entity_display_id": "first-national-bank-of-o-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "% commercial bankers with 360\u00b0 client view": "0% \u2014 no unified relationship view across nCino + Service Cloud + CCB \u2192 >90% of commercial relationship managers post",
+        "Number of active customer data platforms": "4 fragmented CDPs (Adobe RTCDP, Tealium, Zeta AI, QuickSight) \u2192 1 unified Data Cloud golden record feeding all downstr"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "% commercial bankers with 360\u00b0 client view: 0% \u2014 no unified relationship view across nCino + Service Cloud + CCB \u2192 >90% of commercial relationship managers post",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "FSC Implementation \u2014 Banking: includes Household Data Model, Action Plans, Referral Management, Relationship Intelligenc",
+          "maturity_lift": "+1.44",
+          "metric": "% commercial bankers with 360\u00b0 client view: 0% \u2014 no unified relationship view across nCino + Service Cloud + CCB \u2192 >90% of commercial relationship managers post",
+          "outcomes": {
+            "effort": "M",
+            "metric": "% commercial bankers with 360\u00b0 client view: 0% \u2014 no unified relationship view across nCino + Service Cloud + CCB \u2192 >90% of commercial relationship managers post",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Financial Services Cloud: Deploy FSC as the CCB Integration Platform"
+        },
+        {
+          "feature": "Data Cloud Implementation \u2014 Banking: Customer Data Platform for FSI with pre-built connectors to Service Cloud, nCino, M",
+          "maturity_lift": "+1.44",
+          "metric": "Number of active customer data platforms: 4 fragmented CDPs (Adobe RTCDP, Tealium, Zeta AI, QuickSight) \u2192 1 unified Data Cloud golden record feeding all downstr",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Number of active customer data platforms: 4 fragmented CDPs (Adobe RTCDP, Tealium, Zeta AI, QuickSight) \u2192 1 unified Data Cloud golden record feeding all downstr",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce Data Cloud: Unify FNBO's 4-Platform CDP to Power Existing Marketing Cloud and Enable Agentforce"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "% Ag loan originations initiated digitally": "0% digital Ag origination (relationship-only model) \u2192 >40% of new Ag loans initiated via nCino digital application w",
+        "% vendor AI tools with enterprise-level orchestration visibility": "0% \u2014 5 vendor AI tools operating independently with no cross-tool observability \u2192 100% of FNBO"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "% vendor AI tools with enterprise-level orchestration visibility: 0% \u2014 5 vendor AI tools operating independently with no cross-tool observability \u2192 100% of FNBO",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": "Agentforce Implementation \u2014 FSI: includes Agent Studio, Agent Actions, AI Model Governance, pre-built connectors to Data",
+          "maturity_lift": "+1.44",
+          "metric": "% vendor AI tools with enterprise-level orchestration visibility: 0% \u2014 5 vendor AI tools operating independently with no cross-tool observability \u2192 100% of FNBO",
+          "outcomes": {
+            "effort": "M",
+            "metric": "% vendor AI tools with enterprise-level orchestration visibility: 0% \u2014 5 vendor AI tools operating independently with no cross-tool observability \u2192 100% of FNBO",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Salesforce Agentforce: Enterprise AI Orchestration Layer for FNBO's 5 Production AI Deployments"
+        },
+        {
+          "feature": "nCino Implementation \u2014 Agriculture Lending: includes Ag Loan Origination, Customer Portal, Online Applications, DocMan d",
+          "maturity_lift": "+0.76",
+          "metric": "% Ag loan originations initiated digitally: 0% digital Ag origination (relationship-only model) \u2192 >40% of new Ag loans initiated via nCino digital application w",
+          "outcomes": {
+            "effort": "M",
+            "metric": "% Ag loan originations initiated digitally: 0% digital Ag origination (relationship-only model) \u2192 >40% of new Ag loans initiated via nCino digital application w",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-04",
+          "title": "nCino Agriculture Lending Solution: Defend FNBO's #3 National Ag Rank Against FCSA's Digital Advantage"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "P1C2.7 integration governance score": "P1C2.7: 3.0 (MATERIAL cap ISS-005 \u2014 no CoE during active CCB integration) \u2192 P1C2.7: 4.0 with CoE operating and CCB integrat",
+        "P4C3.7 integration governance score": "P4C3.7: 2.5 (governance gap despite MuleSoft deployment) \u2192 P4C3.7: 4.0 with formal API CoE and CCB migration architecture"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C3.7 integration governance score: P4C3.7: 2.5 (governance gap despite MuleSoft deployment) \u2192 P4C3.7: 4.0 with formal API CoE and CCB migration architecture",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Integration Implementation \u2014 Expansion: API Center of Excellence, Developer Circle integration governance, CCB ",
+          "maturity_lift": "+0.6",
+          "metric": "P4C3.7 integration governance score: P4C3.7: 2.5 (governance gap despite MuleSoft deployment) \u2192 P4C3.7: 4.0 with formal API CoE and CCB migration architecture",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C3.7 integration governance score: P4C3.7: 2.5 (governance gap despite MuleSoft deployment) \u2192 P4C3.7: 4.0 with formal API CoE and CCB migration architecture",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "MuleSoft Expansion: Scale Developer Circle Integration Governance and CCB Migration API Architecture"
+        },
+        {
+          "feature": "Zennify Advisory: SFDC CoE Design & Buildout \u2014 CoE charter, governance model, release management, platform standards, CC",
+          "maturity_lift": "+1.08",
+          "metric": "P1C2.7 integration governance score: P1C2.7: 3.0 (MATERIAL cap ISS-005 \u2014 no CoE during active CCB integration) \u2192 P1C2.7: 4.0 with CoE operating and CCB integrat",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C2.7 integration governance score: P1C2.7: 3.0 (MATERIAL cap ISS-005 \u2014 no CoE during active CCB integration) \u2192 P1C2.7: 4.0 with CoE operating and CCB integrat",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Salesforce Center of Excellence: Govern FNBO's 5-Product SFDC Ecosystem Through CCB Integration and Platform Expansion"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P1C2, P4C3"
+    }
+  ],
+  "run_request_id": "DMA-RES-FNBO-20260518-0001",
+  "total_duration_months": 12
+}

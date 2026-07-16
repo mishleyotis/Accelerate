@@ -1,0 +1,21 @@
+{
+  "active_run_id": "815c5c8f-e344-4820-8bec-722cd7fccc44",
+  "items": [
+    {
+      "assessment_date": "2026-03-04",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:10:56.472010Z",
+      "created_at": "2026-07-02T23:10:56.472010Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "815c5c8f-e344-4820-8bec-722cd7fccc44",
+      "overall_score": 1.7207602339181287,
+      "request_id": "DMA-RES-CATY-20260304-0001",
+      "started_at": "2026-07-02T23:10:56.472010Z",
+      "status": "ACTIVE",
+      "subcap_count": 684,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

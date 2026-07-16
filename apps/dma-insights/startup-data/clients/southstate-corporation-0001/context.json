@@ -1,0 +1,620 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "SouthState Advisory + IBTX's",
+      "amount": null,
+      "announced_on": null,
+      "body": "Private Capital Management LLC formed from merger of SouthState Advisory + IBTX's Private Capital Management (Dec 31, 2025) \u2014 wealth management consolidation",
+      "closed_on": null,
+      "details": "Private Capital Management LLC formed from merger of SouthState Advisory + IBTX's Private Capital Management (Dec 31, 2025) \u2014 wealth management consolidation",
+      "e_id": "E-084",
+      "event_date": "2025-12-31",
+      "id": "50cc431b-3dcb-4c9c-b541-5bf7d0d15baa",
+      "source_url": "https://s201.q4cdn.com/481248838/files/doc_downloads/2026/fbae7cbc-6246-4efc-b168-d76eba4a1152.pdf",
+      "status": null,
+      "target": "Private Capital Management",
+      "title": "Private Capital Management LLC formed wealth management\u2026"
+    }
+  ],
+  "entity_display_id": "southstate-corporation-0001",
+  "financials": {
+    "lines": [
+      "tier 1 risk based pct: 11.4"
+    ],
+    "metrics": {
+      "efficiency_ratio_pct": 48.91,
+      "nim_pct": 3.86,
+      "roa_pct": 1.47,
+      "total_assets": "$34B",
+      "trajectory": {
+        "branches": 342,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 6190,
+        "events": [],
+        "fy": [
+          "FY2024",
+          "FY2026"
+        ],
+        "geography": "FL, TX, SC, GA, NC, CO, AL, VA (8 states, 342 branches)",
+        "headline": "$2.0B net income \u00b7 FY2026",
+        "regulator": "OCC",
+        "series": {
+          "net_income_m": [
+            2.0,
+            2000.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        2000000.0,
+        2000000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2024,
+          2026
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          2000000.0,
+          2000000000.0
+        ]
+      }
+    ],
+    "years": [
+      2024,
+      2026
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "FL",
+      "TX",
+      "SC",
+      "GA",
+      "NC",
+      "CO",
+      "AL",
+      "VA"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Kunal Das",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gabrielle Tyll",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Southern Company",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Wells Fargo",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Rodney Anthony",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Corbett Explorium",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "National bank charter (OCC)",
+    "narrative_md": "SouthState Corporation is a regional bank. It reports $67.0 billion in total assets and has operated since 1934. It is regulated by OCC and employs approximately 6,190 people across 342 branches. Its overall digital maturity is assessed at 2.6 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OCC",
+    "size_tier": "Mega Regional ($67B assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-056",
+        "excerpt": "SSB uses podcasts (Community Bank Podcast), LinkedIn, webinars as permanent B2B marketing channels post-COVID Caleb Stevens, VP Marketing Manager Capital Markets & Correspondent Banking \u2014 dedicated marketing role for B2B",
+        "title": "SSB uses podcasts (Community Bank Podcast), LinkedIn",
+        "type": "podcast",
+        "url": "https://www.travilliannext.com/banking/proven-marketing-strategies/"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-086",
+        "excerpt": "SSB publishes thought leadership on bank technology: Top 10 Tech Trends, AI Talent Roadmap, MCPs in Banking, AutoGPT \u2014 signals internal tech awareness and strategic thinking Chris Nichols (Dir Capital Markets) writes ext",
+        "title": "Top 10 Tech Trends, AI Talent Roadmap, MCPs in Banking, AutoGPT\u2026",
+        "type": "article",
+        "url": "https://southstatecorrespondent.com/banker-to-banker/technology/"
+      },
+      {
+        "author": null,
+        "date": "2023-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-071",
+        "excerpt": "SSB blog describes AI-driven HSA email personalization: auto-segmented CRM customer list, tested subject lines, personalized by current deposit amount + past contributions + rising healthcare costs AI campaign generated ",
+        "title": "SSB blog describes AI-driven HSA email personalization\u2026",
+        "type": "blog",
+        "url": "https://southstatecorrespondent.com/banker-to-banker/innovation/autogpt-will-change-your-bank/"
+      },
+      {
+        "author": null,
+        "date": "2024-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "SSB Correspondent division publishes tech strategy thought leadership: Gen AI is #1 trend for bank tech spending 2025; cybersecurity #2; AI/data #3 Banks expected to spend 4.7% more on tech in 2025 vs 2024 per Gartner",
+        "title": "Gen AI is #1 trend for bank tech spending 2025",
+        "type": "article",
+        "url": "https://southstatecorrespondent.com/banker-to-banker/technology/10-important-bank-technology-trends-and-investments-for-2025/"
+      },
+      {
+        "author": null,
+        "date": "2025-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-010",
+        "excerpt": "Chris Nichols (Dir Capital Markets) publishes thought leadership on MCP, agentic AI, API strategy for banks SSB Correspondent Division acts as community bank advisory; signals digital strategy awareness at leadership lev",
+        "title": "Chris Nichols (Dir Capital Markets) publishes thought",
+        "type": "article",
+        "url": "https://southstatecorrespondent.com/banker-to-banker/technology/mcps-in-banking-what-executives-need-to-know/"
+      }
+    ],
+    "ticker": "NYSE: SSB"
+  },
+  "issue_register": [
+    {
+      "id": "be3816ba-db61-45e0-a126-c551afec2900",
+      "issue_id": "ISS-G001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "edbc2a73-3590-4190-b337-d3b29e06e630",
+      "issue_id": "ISS-G002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "ad266253-c77e-4523-b679-4f62703b43a2",
+      "issue_id": "ISS-G003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "180a5323-ff1d-42e7-b57d-ef18a831f199",
+      "issue_id": "ISS-G004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Value grew from $2.0M (2024) to $2.0B (2026) \u2014 3,062.3% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.3,
+        "P1C2": 2.5,
+        "P1C3": 3.33,
+        "P1C4": 3.25,
+        "P1C5": 2.5,
+        "P2C1": 2.75,
+        "P2C2": 2.5,
+        "P2C3": 2.63,
+        "P2C4": 2.0,
+        "P3C1": 2.33,
+        "P3C2": 2.83,
+        "P3C3": 2.5,
+        "P3C4": 2.67,
+        "P4C1": 2.25,
+        "P4C2": 3.0,
+        "P4C3": 2.83,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.73,
+      "peer_name": "Bank of Utah",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.79,
+        "P1C2": 2.78,
+        "P1C3": 2.78,
+        "P1C4": 2.77,
+        "P1C5": 2.25,
+        "P2C1": 2.77,
+        "P2C2": 2.75,
+        "P2C3": 2.77,
+        "P2C4": 2.76,
+        "P3C1": 2.77,
+        "P3C2": 2.77,
+        "P3C3": 2.76,
+        "P3C4": 2.78,
+        "P4C1": 2.76,
+        "P4C2": 2.75,
+        "P4C3": 2.78,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.71,
+      "peer_name": "Cornerstone Capital Bank, SSB",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.65,
+        "P1C2": 3.14,
+        "P1C3": 2.37,
+        "P1C4": 2.82,
+        "P1C5": 3.44,
+        "P2C1": 2.33,
+        "P2C2": 2.56,
+        "P2C3": 1.9,
+        "P2C4": 2.13,
+        "P3C1": 2.4,
+        "P3C2": 2.46,
+        "P3C3": 2.76,
+        "P3C4": 2.53,
+        "P4C1": 2.88,
+        "P4C2": 2.3,
+        "P4C3": 2.73,
+        "P4C4": 2.73
+      },
+      "overall_score": 2.6,
+      "peer_name": "Amalgamated Financial Corp / Amalgamated Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.77,
+        "P1C2": 1.86,
+        "P1C3": 1.83,
+        "P1C4": 3.16,
+        "P1C5": 1.43,
+        "P2C1": 3.01,
+        "P2C2": 2.56,
+        "P2C3": 3.31,
+        "P2C4": 2.84,
+        "P3C1": 2.35,
+        "P3C2": 2.88,
+        "P3C3": 2.83,
+        "P3C4": 2.64,
+        "P4C1": 2.31,
+        "P4C2": 2.81,
+        "P4C3": 3.1,
+        "P4C4": 3.05
+      },
+      "overall_score": 2.57,
+      "peer_name": "First United Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 3.03,
+        "P1C3": 2.05,
+        "P1C4": 2.46,
+        "P1C5": 2.68,
+        "P2C1": 2.43,
+        "P2C2": 2.02,
+        "P2C3": 2.52,
+        "P2C4": 2.68,
+        "P3C1": 2.81,
+        "P3C2": 2.63,
+        "P3C3": 3.07,
+        "P3C4": 2.84,
+        "P4C1": 2.21,
+        "P4C2": 2.09,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.55,
+      "peer_name": "CalPrivate Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-SSB-20260408-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "\u2014 sophisticated payments innovation for commercial clients Glassdoor 3.8/5 overall (536 reviews); 4.0 work-life balance; 3.8 culture/values; 3.6 career opportunities; 68% recommend to friend; 69% positive outlook Employee complaints: 'train",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 536,
+        "polarity": "negative",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.8
+      },
+      {
+        "drilldown": "at 1% of workforce \u2014 relatively low for a $66B bank Indeed overall rating: 3.3/5; Culture/Values: 3.0; Job Security/Advancement: 2.8; Management: 2.9; Work-Life Balance: 3.4; Compensation: 3.3 CEO (John Corbett) approval: 63%; Recommend to",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.3
+      },
+      {
+        "drilldown": "gy' by customer; complaints about post-breach communication Trustpilot: 20 reviews; complaints about IBTX transition (missing statements, fee errors); some positive branch reviews SSB acknowledged legacy payment infrastructure lacked scalab",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 20,
+        "polarity": "negative",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": ", the incident has not had a material impact on operations' BBB reviews show complaints about online banking reliability, long customer service hold times, IBTX conversion data loss issues Data breach notification letter described as 'feebl",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "surprise: actual $2.58 vs estimated $2.20 \u2014 beat by 17.3% Yelp average 2.3/5 from 97 reviews \u2014 significantly below 4.0/5 Glassdoor employee rating; consumer satisfaction lower than employee satisfaction IBTX conversion complaints: 'switched",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": 97,
+        "polarity": "negative",
+        "source": "Yelp",
+        "themes": [],
+        "value": 2.3
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Private Capital Management LLC formed from merger of SouthState Advisory + IBTX's Private Capital Management (Dec 31, 2025) \u2014 wealth management consolidation",
+      "date_precision": "day",
+      "e_id": "E-084",
+      "event_date": "2025-12-31",
+      "evidence_e_ids": [
+        "E-084"
+      ],
+      "id": "50cc431b-3dcb-4c9c-b541-5bf7d0d15baa",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://s201.q4cdn.com/481248838/files/doc_downloads/2026/fbae7cbc-6246-4efc-b168-d76eba4a1152.pdf",
+      "subcap_ids": [],
+      "title": "Private Capital Management LLC formed wealth management\u2026"
+    },
+    {
+      "body": "SSB named in 'Top 25 Digital Banking Companies of 2025' \u2014 recognized for investing in tech while combining local banking expertise with modern digital tools",
+      "date_precision": "year",
+      "e_id": "E-038",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "7874688f-6d86-45be-b477-3a4068f10248",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://thefinancialtechnologyreport.com/the-top-25-digital-banking-companies-of-2025/",
+      "subcap_ids": [],
+      "title": "SSB named in 'Top 25 Digital Banking Companies of 2025"
+    },
+    {
+      "body": "SSB named Top 3 US bank for Small Business + Middle Market Banking by Crisil Coalition Greenwich (2025); 23 total awards out of 500+ banks evaluated",
+      "date_precision": "year",
+      "e_id": "E-062",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "451edac6-5afd-4816-b6be-afa9f444d1a7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/southstate-named-a-top-3-bank-in-the-nation-for-small-business--middle-market-banking-leads-us-in-best-bank-awards-for-small-business-banking-302412667.html",
+      "subcap_ids": [],
+      "title": "SSB named Top 3 US bank for Small Business + Middle Market\u2026"
+    },
+    {
+      "body": "Hired 1,786 team members in FY2025; voluntary turnover 11.82% (all), 1.49% (management) \u2014 low management turnover signals stability",
+      "date_precision": "year",
+      "e_id": "E-084",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-084"
+      ],
+      "id": "32574998-8bff-4469-92f4-414292ee63ba",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s201.q4cdn.com/481248838/files/doc_downloads/2026/fbae7cbc-6246-4efc-b168-d76eba4a1152.pdf",
+      "subcap_ids": [],
+      "title": "Hired 1,786 team members in FY2025"
+    },
+    {
+      "body": "IBTX TX/CO franchise conversion completed successfully Q2 2025; 35% surge in loan production in new markets",
+      "date_precision": "quarter",
+      "e_id": "E-019",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "6c744024-c94c-44a2-a85f-0a78441c5594",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://pestel-analysis.com/blogs/growth-strategy/southstatebank",
+      "subcap_ids": [],
+      "title": "IBTX TX/CO franchise conversion completed"
+    },
+    {
+      "body": "Kunal Das: EVP/CTO since Feb 2025 (Columbia, SC) \u2014 NEW HIRE coinciding with IBTX merger; signals strategic tech investment",
+      "date_precision": "month",
+      "e_id": "E-022",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "57035e13-eba7-4b8d-b819-1ffcb131f3e6",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/south-state-bank",
+      "subcap_ids": [],
+      "title": "Kunal Das: EVP/CTO since Feb 2025 (Columbia, SC)"
+    },
+    {
+      "body": "SSB closed IBTX acquisition Jan 1 2025; $2B all-stock; expanded to TX+CO; assets ~$65B",
+      "date_precision": "day",
+      "e_id": "E-003",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "f203c2d6-4cbb-4a01-80e1-cc6535d9e9ce",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://finance.yahoo.com/news/south-state-closes-merger-independent-130531235.html",
+      "subcap_ids": [],
+      "title": "SSB closed IBTX acquisition"
+    },
+    {
+      "body": "SSB crossed >$50B assets Jan 1 2025; OCC heightened standards effective Q4 2026 \u2014 requires written governance framework, risk appetite statement, concentration limits, stress testing",
+      "date_precision": "day",
+      "e_id": "E-036",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "2cfa96a9-cf98-4ae8-a484-21f654fa322e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s201.q4cdn.com/481248838/files/doc_downloads/2026/fbae7cbc-6246-4efc-b168-d76eba4a1152.pdf",
+      "subcap_ids": [],
+      "title": "SSB crossed $50B assets"
+    },
+    {
+      "body": "IBTX conversion (Jan 2025) required CRA assessment area expansion to TX + CO \u2014 compliance complexity increased post-merger",
+      "date_precision": "month",
+      "e_id": "E-098",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-098"
+      ],
+      "id": "9663d718-3cf0-4af1-bc3b-2eef7fecb912",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.occ.gov/topics/laws-and-regulations/enforcement-actions/index-enforcement-actions.html",
+      "subcap_ids": [],
+      "title": "IBTX conversion (Jan 2025) required CRA assessment area\u2026"
+    },
+    {
+      "body": "SSB selected AFSVision as modern commercial lending platform (announced Nov 2024) \u2014 adds to existing nCino loan origination; confirms commercial lending modernization",
+      "date_precision": "month",
+      "e_id": "E-081",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "233cdffc-28dc-48c0-9f27-46fb6a9d882d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2025/02/21/3030240/0/en/Commercial-loan-software-market-size-to-reach-USD-16-9-billion-by-2034-Says-Global-Market-Insights-inc.html",
+      "subcap_ids": [],
+      "title": "SSB selected AFSVision as modern commercial lending\u2026"
+    },
+    {
+      "body": "Named 'Best Banks to Work For' by American Banker 2024; TIME America's Best Midsize Companies; S&P Global #2 Top 50 Public Banks",
+      "date_precision": "year",
+      "e_id": "E-028",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "447e76bc-1456-4713-9178-83d860a77e7d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://prd.ssbcdn.com/ssbweb/media/pdf/csrreport2025_spreadwithlinks_040425.pdf",
+      "subcap_ids": [],
+      "title": "Named 'Best Banks to Work For' by American Banker 2024"
+    },
+    {
+      "body": "Consumer Online/Mobile Platform: Q2 Holdings \u2014 migration completed late 2020/mid-2021; confirmed SEC filing",
+      "date_precision": "year",
+      "e_id": "E-077",
+      "event_date": "2020-10-15",
+      "evidence_e_ids": [
+        "E-077"
+      ],
+      "id": "0716f7d0-669f-4f34-9fe9-c6072f30b601",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001461755/000110465921095494/tm2123108d3_425seq.htm",
+      "subcap_ids": [],
+      "title": "Q2 Holdings \u2014 migration completed late 2020/mid-2021"
+    }
+  ]
+}

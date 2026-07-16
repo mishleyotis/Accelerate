@@ -1,0 +1,110 @@
+{
+  "entity_display_id": "aafcu-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-147",
+          "E-137",
+          "E-110",
+          "E-161",
+          "E-159",
+          "E-162"
+        ],
+        "representative_quote": "[Model Inventory & Documentation] Analytics and AI at early maturity: all 'AI-enabled platforms' are vendor-provided (Genesys AI Agent Copilot \u2014 Genesys's AI; SavvyMoney credit AI \u2014 SavvyMoney's engine; Velera fraud AI \u2014 Velera's platform).",
+        "source_kind": "heuristic"
+      },
+      "id": "5db5a484-df72-4182-b04a-3b7c2a18d734",
+      "involved_subcap_ids": [
+        "P4C2.5.1",
+        "P4C2.5.3",
+        "P4C2.5.4",
+        "P4C2.5.5",
+        "P4C2.5.6",
+        "P4C2.5.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 6 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-001",
+          "E-062",
+          "E-127",
+          "E-132"
+        ],
+        "representative_quote": "AAFCU operates under a federal CU charter (NCUA #23957) with aviation industry FOM restriction.",
+        "source_kind": "heuristic"
+      },
+      "id": "a1a73241-1377-4bbf-93f2-8c4d26b4117c",
+      "involved_subcap_ids": [
+        "P2C2.8.1",
+        "P2C2.8.3",
+        "P2C2.9.1",
+        "P2C2.9.2",
+        "P2C2.9.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 5 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-001",
+          "E-062",
+          "E-040",
+          "E-045",
+          "E-046",
+          "E-050"
+        ],
+        "representative_quote": "[Competitive Analysis] AAFCU digital strategy assessed through Anthony Fletcher (VP Payments & Digital Strategy, CUDE, Filene i3 member) first-mover actions \u2014 SavvyMoney first-ever FI partner (Nov 2014), NeuralPayments Zelle replacement (Apr 2025).",
+        "source_kind": "heuristic"
+      },
+      "id": "084b4600-08fa-40f7-8714-89d2f2da31c0",
+      "involved_subcap_ids": [
+        "P1C1.7.1",
+        "P1C1.7.2",
+        "P1C1.7.4",
+        "P1C1.8.1",
+        "P1C1.8.3",
+        "P1C1.3.CU1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 13 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

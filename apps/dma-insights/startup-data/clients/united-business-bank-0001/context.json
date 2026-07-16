@@ -1,0 +1,362 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "united-business-bank-0001",
+  "financials": {
+    "lines": [
+      "Sales narrative: The NIB deposit decline (-16% YoY, $111M lost) is the most commercially actionable data point. It maps directly to the CEO's stated objective of 'enhancing shareholder value' \u2014 you cannot enhance shareholder value while losing your cheapest funding source. Marketing Cloud deposit retention campaigns and FSC relationship visibility are the direct answer."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 256,
+        "events": [
+          {
+            "fy": "FY2010",
+            "label": "10 strategic acquisitions completed since 2010, with\u2026"
+          }
+        ],
+        "fy": [
+          "FY2010",
+          "FY2024"
+        ],
+        "geography": "CA, CO, NM, WA, NV",
+        "headline": "$578M net income \u00b7 FY2024",
+        "regulator": "Federal Reserve Board (state member bank)",
+        "series": {
+          "net_income_m": [
+            2300.0,
+            578.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "CA",
+      "CO",
+      "NM",
+      "WA",
+      "NV"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "George J. Guarini",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO (founder)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Janet L. King",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SEVP & COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Keary L. Colwell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SEVP, CFO & Corp Secretary"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Izabella Zhu Mitchell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Terry Curley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Wallace",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BSA Officer (CAMS)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lloyd W. Kendall Jr.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Chairman"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "United Business Bank (UBB), a subsidiary of BayCom Corp (NASDAQ: BCML), is a $2.6 billion-asset community commercial bank headquartered in Walnut Creek, California. Founded in 2004 by CEO George Guarini, UBB operates 34 branches across five Western states (CA, CO, NM, WA, NV) and has completed 10 acquisitions since 2010, absorbing approximately $2.3 billion in assets. The bank's loan portfolio is heavily concentrated in commercial real estate (85.5% of total loans), serving small and mid-sized businesses, professional firms, labor unions, and real estate investors. UBB holds a Bauer Financial 5-Star rating and maintains a clean regulatory record with no enforcement actions.",
+    "primary_regulator": "Federal Reserve Board (state member bank)",
+    "size_tier": "T3_MID_COMMUNITY",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-022",
+        "excerpt": "CEO Guarini LinkedIn shows speaking at West Coast AML Forum \u2014 compliance/risk topic, NOT technology/digital LinkedIn description emphasizes 'best in class' offerings and 'dynamic business climate' \u2014 relationship banking ",
+        "title": "CEO Guarini LinkedIn shows relationship banking language, zero\u2026",
+        "type": "conference",
+        "url": "https://www.linkedin.com/in/george-guarini-803801120/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "NO_EVIDENCE: Zero results for UBB + Salesforce/nCino/Alkami/FIS/Fiserv/Jack Henry vendor searches NO_EVIDENCE: Zero results for UBB + FinTech partnership press releases from primary sources",
+        "title": "NO_EVIDENCE",
+        "type": "article",
+        "url": "N/A \u2014 no evidence found"
+      }
+    ],
+    "ticker": "NASDAQ: BCML"
+  },
+  "issue_register": [
+    {
+      "id": "2b54b285-de44-49bb-a6da-7654a35de9e6",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "2 categories with <2 unique scores (P1C3 expected \u2014 all M1 due to T5 cap)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Most recent reported financials: $578M net income as of FY2024, within a series tracked FY2010 to FY2024.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 3.0,
+        "P1C5": 1.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.41,
+      "peer_name": "Five Star Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 1.5,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 1.5,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.18,
+      "peer_name": "Heritage Commerce Corp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.5,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 1.5,
+        "P2C2": 1.5,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.82,
+      "peer_name": "1st Capital / West Coast Community Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.5,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 1.5,
+        "P2C1": 1.5,
+        "P2C2": 1.5,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.82,
+      "peer_name": "Commercial Bank of California",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-UBB-20260401-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "banking language, zero technology/digital mentions Glassdoor overall rating 2.2/5.0 from 48 reviews \u2014 41% below Financial Services industry average of 3.7 Only 21% of employees would recommend UBB to a friend LinkedIn followers: 3,565 \u2014 ver",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 48,
+        "polarity": "negative",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 2.2
+      },
+      {
+        "drilldown": "Industry classified as Banking on LinkedIn, Public Company Indeed overall rating 3.8/5.0 for US/CA location Compensation & Benefits rated highest at 3.9; Culture/Values, Job Security, Management all at 3.7 Bank reportedly integrating techno",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Indeed",
+        "themes": [],
+        "trend": "Improving",
+        "value": 3.8
+      },
+      {
+        "drilldown": "reported as intermittent \u2014 works for ~1 month then stops Google Play reviews describe app as one of worst mobile bank apps \u2014 check deposit disables flash, doesn't recognize handwritten checks Users report need to frequently uninstall/reinst",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "chat, AI agents (virtual assistants), AI assistants for CFPB explicitly states: 'We do not publish complaints referred to other regulators, such as complaints about depository institutions with less than $10 billion in assets.' UBB has $2.6",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "FIS launched Bank Modernization Framework (Sep 2025) with 4 pillars: Digital, Open Banking/APIs, Platform Transformation, Data/AI",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "1b641f23-8b85-4370-8b4e-fd00a865f185",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fisglobal.com/products/fis-horizon-banking-system",
+      "subcap_ids": [],
+      "title": "FIS launched Bank Modernization Framework (Sep 2025)"
+    },
+    {
+      "body": "Opened de novo branch in Las Vegas NV in August 2023 for geographic expansion",
+      "date_precision": "month",
+      "e_id": "E-001",
+      "event_date": "2023-08-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "e6c4f85d-0109-4f43-b293-e56de096e53f",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001730984/000173098426000016/bcml-20251231x10k.htm",
+      "subcap_ids": [],
+      "title": "Opened de novo branch in Las Vegas NV in August 2023 for\u2026"
+    },
+    {
+      "body": "10 strategic acquisitions completed since 2010, with aggregate total assets acquired of ~$2.3B and deposits assumed of ~$1.9B",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2010-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "407c77bc-95df-4cde-95b2-18f883894038",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001730984/000173098426000016/bcml-20251231x10k.htm",
+      "subcap_ids": [],
+      "title": "10 strategic acquisitions completed since 2010, with\u2026"
+    }
+  ]
+}

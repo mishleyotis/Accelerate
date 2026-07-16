@@ -1,0 +1,160 @@
+{
+  "entity_display_id": "united-business-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "NIB deposits declining": "16%",
+        "Outcome": "P1C1 score 1.03 \u2192 4.0 (peer median 1.75)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P1C1 score 1.03 \u2192 4.0 (peer median 1.75)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.97",
+          "metric": "P1C1 score 1.03 \u2192 4.0 (peer median 1.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 1.03 \u2192 4.0 (peer median 1.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Deploy Financial Services Cloud as enterprise CRM"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.87",
+          "metric": "P4C1 score 1.13 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.13 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Implement MuleSoft as enterprise integration platform"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "NIB deposits declining 16%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "NIB deposits declining 16%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Deploy Marketing Cloud for deposit retention"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C1, P4C1"
+    },
+    {
+      "customer_impact": {
+        "Only": "21%",
+        "Outcome": "P2C3 score 1.25 \u2192 4.0 (peer median 2.25)",
+        "outcome": "0%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C3 score 1.25 \u2192 4.0 (peer median 2.25)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.75",
+          "metric": "P2C3 score 1.25 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.25 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Activate purchased engagement tools (Eltropy, Genesys)"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+3.0",
+          "metric": "outcome 0%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome 0%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Establish Data Cloud as unified data platform"
+        },
+        {
+          "feature": "Slack",
+          "maturity_lift": null,
+          "metric": "Only 21%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Only 21%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Deploy Slack for digital culture transformation"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.00 \u2192 4.0 (peer median 1.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 1.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+3.0",
+          "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.00 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Remediate Windows Server 2003 [CLIENT responsibility]"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-UBB-20260401-0001",
+  "total_duration_months": 12
+}

@@ -1,0 +1,562 @@
+{
+  "entity_display_id": "bridgecrest-30v3",
+  "items": [
+    {
+      "affects": [
+        "P2C3",
+        "P2C1.15.5",
+        "P2C3.15.5",
+        "P3C3.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-061"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "07a4355d-7da8-4080-8921-d55043001012",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-089",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-089",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-012",
+        "E-014",
+        "E-090",
+        "E-005",
+        "E-089",
+        "E-092",
+        "E-009",
+        "E-013"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Service Segmentation & Tiers a near-term focus for Bridgecrest: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-090].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Customer experience crisis",
+      "what_text": "Service Segmentation & Tiers is one of Bridgecrest's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Bridgecrest's ability to deliver a stronger, more personalised customer experience [E-014].",
+      "why_text": "The research report pins the maturity impact at: Caps at level 2.5 — most impactful constraint. averages 2.3/5 across its 75 scored capability (peer median ~ 2.8) on the current assessment [E-012, E-014].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.6.1",
+        "P1C2.1.7",
+        "P2C1.2.5",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-012",
+        "E-013"
+      ],
+      "ic_id": "CP-F-003",
+      "id": "2125c05b-e218-4610-88d9-02672c46aeae",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-012",
+            "E-013"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4.6.1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-089",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-089",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-089",
+        "E-090",
+        "E-063"
+      ],
+      "linked_subcap_id": "P2C4.6.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Existing SFCRM foundation for extension — EXTENSION opportunity — not greenfield. Service Cloud + Data Cloud to Bridgecrest ops [E-063].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Salesforce in corporate family",
+      "what_text": "Personalized Insights is one of Bridgecrest's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Bridgecrest's ability to deliver a stronger, more personalised customer experience [E-090].",
+      "why_text": "At 2.0 out of 5, Personalized Insights sits 0.3 points below the 2.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-089, E-090].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2.6.IB1",
+        "P3C2",
+        "P1C4.1.2",
+        "P3C1.8.5",
+        "P3C2.8.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-081"
+      ],
+      "ic_id": "CP-F-004",
+      "id": "0036a4c6-dd5b-49d6-b31e-027899e85a71",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-081"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P3C2.6.IB1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-090",
+        "E-005",
+        "E-002",
+        "E-003",
+        "E-004",
+        "E-007",
+        "E-018",
+        "E-087"
+      ],
+      "linked_subcap_id": "P3C2.6.IB1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Bridgecrest: invest to move it toward best practice. Because it underpins the core processes that keep the institution running, the improvement reaches well beyond this single capability [E-002].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Parent enterprise IT stack",
+      "what_text": "275 premium techs at DriveTime: ServiceNow BCM/ITSM, Collibra, Alation, Okta, Splunk, Pega. It underpins the core processes that keep the institution running, so its current level directly shapes Bridgecrest's ability to deliver more efficient, dependable operations [E-005].",
+      "why_text": "The research report pins the maturity impact at: Shared services raise effective maturity across P3/P4. averages 2.0/5 across its 40 scored capability (peer median ~ 3.0) on the current assessment [E-090, E-005].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.2.6",
+        "P1C3.9.2",
+        "P4C1.1.8",
+        "P4C4.5.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "3ee82dc6-1df8-45be-8ebe-d182cc8717fe",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-087",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-087",
+        "E-090",
+        "E-072"
+      ],
+      "linked_subcap_id": "P4C4.2.6",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: CISO-equivalent exists; entity SOC2 gap remains — Shield + GRC for entity-level SOC2 readiness (security capability exists) [E-072].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Parent-level InfoSec team",
+      "what_text": "Policy-Driven Access by Persona + Purpose is one of Bridgecrest's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Bridgecrest's ability to deliver a stronger data and technology foundation [E-090].",
+      "why_text": "At 2.0 out of 5, Policy-Driven Access by Persona + Purpose sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-087, E-090].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.13",
+        "P4C2.4.9",
+        "P2C4.8.5",
+        "P1C1.5.2",
+        "P4C3.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "5b2d614d-c30e-400f-8f4a-a3f1e7e36fad",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-020",
+            "E-070",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-089",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-017",
+        "E-090",
+        "E-089",
+        "E-020",
+        "E-009",
+        "E-086",
+        "E-088",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C2.4.13",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Experiment Tracking + Model Registry Operating Model a near-term focus for Bridgecrest: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-089].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "GoFi AI/ML lending platform",
+      "what_text": "Experiment Tracking + Model Registry Operating Model is one of Bridgecrest's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Bridgecrest's ability to deliver a stronger data and technology foundation [E-090].",
+      "why_text": "The research report pins the maturity impact at: level 3+ Innovation capability. scores 2.0/5 against a peer median of 2.8 on the current assessment [E-017, E-090].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C1.1.1",
+        "P4C2.4.9",
+        "P1C2.5.2",
+        "P1C4.1.4",
+        "P1C2.5.5",
+        "P1C2.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [
+        "E-007"
+      ],
+      "ic_id": "CP-F-005",
+      "id": "28cc548d-3077-4ded-a033-5d08818fae67",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1.1.1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-086",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-086",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-086",
+        "E-088",
+        "E-069"
+      ],
+      "linked_subcap_id": "P4C1.1.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Enterprise Data Strategy & Roadmap a near-term focus for Bridgecrest: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Distributed CDO function",
+      "what_text": "Enterprise Data Strategy & Roadmap is one of Bridgecrest's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, ahead of the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Bridgecrest's ability to deliver a stronger data and technology foundation [E-088].",
+      "why_text": "The assessment found: “Clay discovered 20 senior leaders at Bridgecrest including: CEO Mary Leigh Phillips (since 2021), VP Product & Engineering Adam Swofford (since May 2025), MD Software & Data Engineering Brian Burke” [E-086]. The research report pins the maturity impact at: level 3 data governance via 4 senior leaders. scores 3.0/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C2.4.13",
+        "P4C3.4.4",
+        "P1C4.1.2",
+        "P3C3.1.3",
+        "P1C2.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "48929d1f-3234-4a06-b1a2-f70f57e3f495",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-020",
+            "E-070",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-089",
+            "E-090"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-089",
+        "E-090",
+        "E-020",
+        "E-009",
+        "E-086",
+        "E-088",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C2.4.13",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Make Experiment Tracking + Model Registry Operating Model a near-term focus for Bridgecrest: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-090].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Legacy tech debt coexists with modern stack",
+      "what_text": "Experiment Tracking + Model Registry Operating Model is one of Bridgecrest's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Bridgecrest's ability to deliver a stronger data and technology foundation [E-089].",
+      "why_text": "The research report pins the maturity impact at: level 3 architecture but fragility risk from dual-track. scores 2.0/5 against a peer median of 2.8 on the current assessment [E-073, E-089].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Bridgecrest positions between Exeter Finance (closest peer) and Credit Acceptance Corporation in the specialty auto finance landscape. It EXCEEDS peers in: P1 Strategy (+0.02 vs median, driven by GoFi innovation and Phillips' leadership). It LAGS in: P2 Customer Experience (-0.24, CX crisis), P3 Operations (-0.16, regulatory caps). It is AT PARITY in: P4 Data & Technology (-0.02, strong tech investment offset by governance gaps).",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience (P2) — Score 2.54 vs Median 2.69 (-0.15)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 2.66 vs Median 2.88 (-0.22)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 2.88 vs Median 2.81 (+0.07)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-BCREST-20260330-V3"
+}

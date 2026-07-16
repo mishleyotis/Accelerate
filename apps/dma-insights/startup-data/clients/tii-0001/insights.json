@@ -1,0 +1,938 @@
+{
+  "entity_display_id": "tii-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.2.7",
+        "P4C2.2.1",
+        "P2C4.2.1",
+        "P2C1.8.2",
+        "P1C4.4.2",
+        "P3C1.3.RB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "a9453ced-1e1c-46c5-acac-212c829c0399",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-003"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-145",
+        "E-019",
+        "E-197"
+      ],
+      "linked_subcap_id": "P2C4.2.7",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make In-Session Personalization a near-term focus for TII: a scoped investment here would lift it from 1.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-197].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Zennify Implication: Salesforce PRM Partner Community: multi-channel commission management, affiliate onboarding, and pe",
+      "what_text": "In-Session Personalization is one of TII's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TII's ability to deliver a stronger, more personalised customer experience [E-019].",
+      "why_text": "At 1.0 out of 5, In-Session Personalization sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-145, E-019].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.1",
+        "P2C4.2.1",
+        "P1C2.1.7",
+        "P4C4.2.1",
+        "P1C1.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-003",
+      "id": "9b0e6cd0-be6c-4833-8d8c-6405a00865f0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-188",
+        "E-042",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C1.8.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Data Lifecycle Management a near-term focus for TII: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-011].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Zennify Implication: Salesforce Identity + External Identity platform: security governance supports Salesforce platform",
+      "what_text": "Data Lifecycle Management is one of TII's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TII's ability to deliver a stronger data and technology foundation [E-042].",
+      "why_text": "The assessment found: “C&F uses Salesforce Marketing Cloud with Interaction Studio (from prior research etc.) = CDP/customer data platform providing audience segmentation and activation” [E-188]. At 1.0 out of 5, Data Lifecycle Management sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.2.7",
+        "P1C3.6.1",
+        "P1C3.6.4",
+        "P2C1.1.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-003",
+      "id": "d33a70c0-f25c-4b36-82f2-e9d03bbc134e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-145",
+        "E-064",
+        "E-084"
+      ],
+      "linked_subcap_id": "P2C4.2.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make In-Session Personalization a near-term focus for TII: a scoped investment here would lift it from 1.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-084].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "SO-003: Channel Partnership Expansion  (Jan 2026)  [ep_profile]",
+      "what_text": "In-Session Personalization is one of TII's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes TII's ability to deliver a stronger, more personalised customer experience [E-064].",
+      "why_text": "At 1.0 out of 5, In-Session Personalization sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-145, E-064].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C3.3.2",
+        "P4C1.1.1",
+        "P4C2.2.1",
+        "P2C4.2.1",
+        "P1C4.1.1",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "6b69b61b-6d8e-4357-b4cb-c65274531b2f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-013"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-013",
+        "E-NO-P1C3.3.2",
+        "E-136"
+      ],
+      "linked_subcap_id": "P1C3.3.2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-136].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"C&F job post requires '2+ years' development experience working with Salesforce Marketing Cloud' AND '1+ year(s) experience with Interaction Studio or another CDP / rules engine platform' — confirms parent C&F operates Marketing Cloud + Interaction Studio CDP.\". In Zennify's assessment Sandbox Environments scores 1.0 out of 5, versus a typical 3.5 at comparable institutions [E-NO-] [E-NO-] [E-NO-P1C3.3.2].",
+      "why_text": "The client's own stated priority — \"Zennify Implication: Salesforce PRM Partner Community: multi-channel commission management, affiliate onboarding, and performance analytics.\" — needs the Databricks capability that is currently absent. scores 1.0/5 on the current assessment [, E-NO-] [, E-NO-] [, E-NO-] [E-013, E-NO-P1C3.3.2].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.2.1",
+        "P2C4.2.1",
+        "P2C2.1.1",
+        "P3C1.2.1",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-006",
+      "id": "e73f58f2-1deb-4512-baeb-fad10a941692",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-005"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-001"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-063",
+        "E-190",
+        "E-142"
+      ],
+      "linked_subcap_id": "P4C2.2.1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for TII: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-142].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Zennify Implication: Service Cloud + Agentforce Claims AI: first-touch automation + SLA tracking. Tool activation — TII",
+      "what_text": "Enterprise Reporting Platform is one of TII's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TII's ability to deliver a stronger data and technology foundation [E-190].",
+      "why_text": "At 1.5 out of 5, Enterprise Reporting Platform sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-063, E-190].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.1",
+        "P2C1.4.IC1",
+        "P2C3.1.7",
+        "P3C2.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-008",
+      "id": "69e21ae9-b2ac-4118-8cf4-8a5c1142303d",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-192",
+        "E-187",
+        "E-097"
+      ],
+      "linked_subcap_id": "P4C3.6.1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make CI/CD Pipeline & Automation a near-term focus for TII: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Denise Bialek appointed VP, Business Development & Partnerships (January 2026). This hire signals active channel expansi",
+      "what_text": "Denise Bialek appointed VP, Business Development & Partnerships (January 2026). This hire signals active channel expansion beyond TII's existing portfolio (USAA 14M-member affinity, Squaremouth aggregator, direct agency distribution). The January 2025 launch of the 3-tier product suite (Essential/Deluxe/Platinum) was specifically designed with flexible channel deployment in mind — providing the product architecture to support new distribution relationships at scale. In Zennify's assessment CI/CD Pipeline & Automation scores 1.5 out of 5, versus a typical 3.5 at comparable institutions [E-187].",
+      "why_text": "At 1.5 out of 5, CI/CD Pipeline & Automation sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-192, E-187].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.1",
+        "P3C1.2.1",
+        "P1C1.2.2",
+        "P1C4.1.1",
+        "P1C1.8.1",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-009",
+      "id": "fb0c8173-1b6e-4ae3-80b9-7a6c60ce5674",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-005"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-063",
+        "E-190",
+        "E-003"
+      ],
+      "linked_subcap_id": "P4C2.2.1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for TII: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-190].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Jared Ionin appointed Chief Digital Officer, C&F A&H Division (November 21, 2025). His mandate: 'strengthening digital i",
+      "what_text": "Jared Ionin appointed Chief Digital Officer, C&F A&H Division (November 21, 2025). His mandate: 'strengthening digital infrastructure and establishing a roadmap for continued innovation and scalability.' This marks the first time a dedicated CDO has been appointed to the A&H division — signalling a formally funded digital transformation programme at the TII level. The appointment follows S&S Division's proven AI success (S&S UP, 35% turnaround reduction, Datos Insights 2025 Award) and Brizzi CDO's December 2025 statement that AI's most tangible impact is underwriting productivity. In Zennify's assessment Enterprise Reporting Platform scores 1.5 out of 5, versus a typical 3.5 at comparable institutions [E-063].",
+      "why_text": "The assessment found: “Jared Ionin appointed Chief Digital Officer of C&F Accident & Health (A&H) Division on Nov 21, 2025 — 'oversee the Division's technology strategy and operations, strengthening its digital” [E-003]. At 1.5 out of 5, Enterprise Reporting Platform sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.3.IC2",
+        "P1C1",
+        "P1C1.3.IC1",
+        "P2C2.5.IC2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-010",
+      "id": "29781480-e7f0-4504-bcdd-f9d7e9af03df",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-013"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "XS-DATABRICKS"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-010",
+        "E-001",
+        "E-003",
+        "E-028",
+        "E-002",
+        "E-041",
+        "E-013"
+      ],
+      "linked_subcap_id": "P1C1.3.IC2",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for TII: invest to move it toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the improvement reaches well beyond this single capability [E-001].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "AM Best upgraded C&F Insurance Group (including United States Fire Insurance Company, TII's underwriter) to A+ Superior",
+      "what_text": "AM Best upgraded C&F Insurance Group (including United States Fire Insurance Company, TII's underwriter) to A+ Superior on August 28, 2025 — upgrading from A Excellent. C&F GWP reached $6.2B in 2025 (vs $5.7B in 2024, +8.8% YoY). The 4-year CAGR from 2021-2025 is approximately 13%. This financial strength upgrade at an accelerating growth trajectory indicates investment headroom for technology programmes and directly supports platform expansion budget approvals [E-010].",
+      "why_text": "The assessment found: “Ahmed Yaknour — SVP & Chief Technology Officer (CTO) at C&F: Enterprise Technology Executive, Architecture. THIS IS THE TARGET-STATE TECHNOLOGY ARCHITECTURE OWNER for the parent group that owns TII” [E-029]. Strengthening this capability matters because it shapes sharper strategic direction and stronger oversight. It builds on the planning and oversight the rest of the business relies on, so progress here lifts the wider business too.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.2.2",
+        "P2C3.5.IB1",
+        "P3C1.8.IC3",
+        "P3C2.6.IC1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-011",
+      "id": "c850760a-f329-401d-a8e4-29bc26649a17",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-061",
+        "E-023"
+      ],
+      "linked_subcap_id": "P1C1.2.2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Initiative Prioritization a near-term focus for TII: a scoped investment here would lift it from 2.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-023].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "C&F's EVP issued a public statement in March 2026: 'On-Demand Coverage, Digital Claims Redefine Travel Insurance.' This",
+      "what_text": "C&F's EVP issued a public statement in March 2026: 'On-Demand Coverage, Digital Claims Redefine Travel Insurance.' This represents a board-level strategic commitment to transforming the claims experience — directly acknowledging TII's most visible customer pain point (months-long claim waits, BBB complaints, Trustpilot 4.4★ with claims speed as the primary driver of negative reviews). Digital claims transformation is now an explicitly stated corporate objective. In Zennify's assessment Initiative Prioritization scores 2.0 out of 5, versus a typical 3.5 at comparable institutions [E-005].",
+      "why_text": "The assessment found: “March 18, 2026 AM Best: C&F EVP commentary on 'On-Demand Coverage, Digital Claims Redefine Travel Insurance' — confirms TII digital transformation is active and being measured at EVP level” [E-061]. At 2.0 out of 5, Initiative Prioritization sits 1.5 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.1",
+        "P2C4.2.1",
+        "P1C1.2.6",
+        "P4C1.1.1",
+        "P1C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-012",
+      "id": "488a2358-7dc2-4428-bb29-5f0dc4f90c40",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-145"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-003"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-063",
+        "E-190",
+        "E-145"
+      ],
+      "linked_subcap_id": "P4C2.2.1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for TII: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-145].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Zennify Implication: Salesforce Data Cloud + Einstein AI: Ionin's roadmap is the engagement entry point. Zennify must en",
+      "what_text": "Enterprise Reporting Platform is one of TII's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TII's ability to deliver a stronger data and technology foundation [E-190].",
+      "why_text": "At 1.5 out of 5, Enterprise Reporting Platform sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-063, E-190].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.1",
+        "P4C3.4.6",
+        "P4C3.4.1",
+        "P4C3.4.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-001",
+      "id": "03c64d45-3366-4642-a7ae-d169ff35c62c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-065",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-005"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-063",
+        "E-190"
+      ],
+      "linked_subcap_id": "P4C2.2.1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for TII: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-190].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO-001: Data & AI Infrastructure Buildout  (Nov 2025)  [E-065]",
+      "what_text": "Enterprise Reporting Platform is one of TII's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TII's ability to deliver a stronger data and technology foundation [E-063].",
+      "why_text": "At 1.5 out of 5, Enterprise Reporting Platform sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-065, E-063].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.2.1",
+        "P1C1.2.2",
+        "P2C4.8.5",
+        "P1C3.8.3",
+        "P4C2.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-005",
+      "id": "3805662d-19ff-4e35-917e-814109e58469",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-065",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-SO-001"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-190"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-063",
+        "E-065",
+        "E-190"
+      ],
+      "linked_subcap_id": "P4C2.2.1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for TII: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-190].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "SO-005: AI/ML Extension from S&S Division to A&H  (Late 2024–2025)  [E-063, E-065]",
+      "what_text": "Enterprise Reporting Platform is one of TII's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes TII's ability to deliver a stronger data and technology foundation [E-065].",
+      "why_text": "At 1.5 out of 5, Enterprise Reporting Platform sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-063, E-065].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4.3.1",
+        "P1C2.1.7",
+        "P3C4.1.2",
+        "P3C4.1.1",
+        "P3C4.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-SO-007",
+      "id": "46e5c004-7fea-4af0-9207-56b7c793b7c3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-182",
+        "E-172",
+        "E-181"
+      ],
+      "linked_subcap_id": "P3C4.3.1",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make DR Architecture a near-term focus for TII: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-181].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "SO-007: Enterprise Security & Resilience Governance Uplift  (Mar 2025)  [E-182]",
+      "what_text": "DR Architecture is one of TII's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes TII's ability to deliver more efficient, dependable operations [E-172].",
+      "why_text": "The assessment found: “Direct quote (PR Newswire, March 19, 2025): 'instrumental in developing and onboarding a world-class cloud and applications security program and an exceptional third-party risk management program.'” [E-182]. At 2.0 out of 5, DR Architecture sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "TII's positioning: BELOW peer median in P1 (−1.00), P2 (−2.10, largest), and P4 (−1.17). ABOVE peer in Compliance (+0.59). Closest to peers in P3 (−0.36). The P2 gap is structurally driven by two MATERIAL issues (ISS-001, ISS-002) — not by strategic intent gap.",
+        "heading": "7.2 Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "MANDATORY ANTI-GENERIC PROTOCOL: Each recommendation verified against confirmed TII tech stack. Specificity test applied. Forbidden phrases: NONE. Investment amounts: NONE. All 6 recommendations map to named Zennify solutions and confirmed capability gaps.\nAll 6 recommendations activate capabilities within TII's existing Salesforce platform. The core narrative: TII already owns the platform — Zennify accelerates the activation. Phased sequencing follows architectural dependencies: +06 first (foundation), +03 second (channel+data), +05 third (intelligence+scale)."
+  },
+  "run_request_id": "DMA-ASM-TII-20260427-0001"
+}

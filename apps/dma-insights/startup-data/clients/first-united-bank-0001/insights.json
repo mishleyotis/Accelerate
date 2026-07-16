@@ -1,0 +1,327 @@
+{
+  "entity_display_id": "first-united-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C1",
+        "P1C2",
+        "P2C4.4.1",
+        "P1C2.1.4",
+        "P1C4.1.1",
+        "P2C3.3.RIA1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "7650e137-0532-44e8-ae05-78b3eb1a9d5e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-003",
+        "E-008",
+        "E-901"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Salesforce advisory board = warm relationship. FSC optimization, MuleSoft integration, Data Cloud, and Agentforce are natural expansion plays [E-901].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Technology Leadership Maturity",
+      "what_text": "Digital Strategy Document is one of First United Bank's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes First United Bank's ability to deliver sharper strategic direction and stronger oversight [E-008].",
+      "why_text": "The assessment found: “First United Bank announced net income of $20.6 million ($3.15 per diluted share) in 2024 compared to $15.1 million ($2.25 per share) in 2023, indicating strong execution of growth strategy” [E-003]. The research report pins the maturity impact at: Ceiling L3.5+ for strategy and governance subcaps. averages 1.8/5 across its 33 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.1.1",
+        "P1C4.8.3",
+        "P1C4.1.7",
+        "P1C3.4.7"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "044643e2-7e90-41e6-a868-d575da247ab4",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-908",
+        "E-905",
+        "E-919"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong culture = higher adoption likelihood for new Salesforce implementations. Change management risk is LOW. Leverage culture infrastructure for user adoption strategy [E-919].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Culture & Employee Investment",
+      "what_text": "Gallup Exceptional Workplace Award 2024 with 70% employee engagement (vs. 33% national avg). 9 consecutive years on American Banker Best Banks to Work For. Dedicated Chief Culture Officer (Melissa Perrin). Spend Life Wisely 4-pillar wellness program. In Zennify's assessment Change Methodology scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-908].",
+      "why_text": "The assessment found: “First United Bank established Chief Culture & Communications Officer role (Melissa Perrin) and implemented values-driven culture change process involving employee engagement and organizational” [E-905]. The research report pins the maturity impact at: Culture ceiling L3.5–4.0 (above average for $16B regional banks). averages 3.2/5 across its 41 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "2502b53e-8c16-4d51-b3f7-e44f4178964d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-608",
+        "E-016",
+        "E-600"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Multi-cloud creates integration complexity. MuleSoft + Salesforce Data Cloud can unify data layer. Cloud strategy advisory + MuleSoft implementation consulting opportunity [E-016].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Google Cloud Strategic Partnership",
+      "what_text": "Real-Time API Development is one of First United Bank's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First United Bank's ability to deliver a stronger data and technology foundation [E-608].",
+      "why_text": "The assessment found: “First United Bank established a $100 million Google Cloud partnership advancing AI/ML technologies and digital transformation” [E-600]. The research report pins the maturity impact at: cloud ceiling elevated to L3.0+, but multi-cloud complexity risk applies. averages 3.1/5 across its 47 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.4",
+        "P4C2.1.1",
+        "P1C2.1.4",
+        "P1C4.1.1",
+        "P1C2.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "dad179c7-9a9d-4a75-8f12-12ede99d5481",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-137"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-019",
+        "E-135",
+        "E-137"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Greenfield: data governance strategy, CDO advisory, Salesforce Data Cloud as governance platform, data quality program, BCBS 239 readiness [E-137].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "No CDO or Formal Data Governance",
+      "what_text": "Data Products & Data as a Product is one of First United Bank's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, roughly in line with the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First United Bank's ability to deliver a stronger data and technology foundation [E-135].",
+      "why_text": "The assessment found: “First United Bank employs Data Analysts specializing in reporting and Business Intelligence using Power BI and Excel, developing dashboards and collaborating on strategic insights” [E-019]. The research report pins the maturity impact at: Data Governance capped at level 2 for organizational subcaps. Impact across 40+ capability. averages 2.3/5 across its 40 scored capability (peer median ~ 2.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P4C4",
+        "P3C3.2.3",
+        "P4C4.8.1",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "582b94b7-edee-454b-9566-f4367ce834d9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-137"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-804",
+        "E-805",
+        "E-102",
+        "E-137",
+        "E-138"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Security stack is vendor-managed. Opportunity for Salesforce Shield integration, security posture assessment, and identity governance optimization [E-805].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Fraud & Security Tooling Confirmed",
+      "what_text": "Risk Identification & Assessment is one of First United Bank's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes First United Bank's ability to deliver more efficient, dependable operations [E-804].",
+      "why_text": "The assessment found: “Arctic Wolf SIEM platform deployed for cybersecurity governance with AJ Tasker (VP/Director of IT) leading oversight and alert management” [E-102]. The research report pins the maturity impact at: fraud ceiling L3.0+; security tooling ceiling L3.0+. averages 2.9/5 across its 26 scored capability (peer median ~ 2.5) on the current assessment.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.11",
+        "P2C4.4.1",
+        "P2C2.1.2",
+        "P1C1.5.5",
+        "P4C3.2.7",
+        "P4C3.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "46ab4e9f-80e4-4606-8791-dd4c0e1000ed",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-005",
+        "E-014",
+        "E-037"
+      ],
+      "linked_subcap_id": "P4C3.6.11",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Existing multi-cloud Salesforce customer with expansion potential: Data Cloud, Einstein AI, Industry Cloud optimization, Agentforce. High-value account [E-014].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Salesforce Ecosystem Depth",
+      "what_text": "Operational Runbooks for Data Pipelines is one of First United Bank's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes First United Bank's ability to deliver a stronger data and technology foundation [E-005].",
+      "why_text": "The assessment found: “First United Bank emphasized that ensuring employees are fully aligned with business goals is critical for 2025, indicating strategic refresh alignment focus” [E-004]. The research report pins the maturity impact at: level 3+ for CRM-adjacent subcaps across P2 and P4. scores 2.0/5 against a peer median of 2.5 on the current assessment.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C4.4.1",
+        "P2C1.6.7",
+        "P2C2.1.2",
+        "P2C1.2.8",
+        "P2C3.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "5c0389e7-bec2-4d1a-9876-ae42292ad9a6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-500",
+        "E-510",
+        "E-423"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Service Cloud optimization, case management automation, knowledge base deployment, and Agentforce for service. Process consulting wrapped around platform tuning [E-423].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Service Quality Disconnect",
+      "what_text": "Strong tech stack (Salesforce Service Cloud, Banno 4.5-star apps) but CFPB complaint data and app reviews reveal process gaps: slow response times, poor inter-department communication, payment processing delays. In Zennify's assessment Service Journey Design scores 3.0 out of 5, versus a typical 2.5 at comparable institutions [E-510].",
+      "why_text": "The research report pins the maturity impact at: omnichannel ceiling capped at level 3.5 by operational execution despite technology presence. averages 3.3/5 across its 58 scored capability (peer median ~ 2.5) on the current assessment [E-500, E-510].",
+      "pillar": "P2",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": null,
+    "recommendations_md": "The following 10 recommendations are structured around a central thesis: First United Bank has already invested in the right platforms (Salesforce, nCino, MuleSoft, Jack Henry). The path to maturity improvement requires consolidating to a single system integrator, rationalizing competing tools, and deepening utilization of already-owned capabilities. No recommendation proposes deploying a platform that First United Bank does not already own or license."
+  },
+  "run_request_id": "DMA-ASM-FUB-20260312-0001"
+}

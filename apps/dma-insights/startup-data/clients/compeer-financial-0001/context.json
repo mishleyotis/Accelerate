@@ -1,0 +1,358 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "compeer-financial-0001",
+  "financials": {
+    "lines": [
+      "tier 1 risk based pct: 12.0"
+    ],
+    "metrics": {
+      "total_assets": "$34.3B",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 1300,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Upper Midwest \u2014 144 counties in Illinois, Minnesota, Wisconsin",
+        "headline": "$34.3B assets \u00b7 FY2025 \u00b7 +3.8% CAGR",
+        "regulator": "Farm Credit Administration (FCA)",
+        "series": {
+          "net_income_m": [
+            385.0,
+            420.0,
+            455.0,
+            null,
+            null
+          ],
+          "total_assets": [
+            29.5,
+            30.8,
+            32.1,
+            0.48,
+            34.3
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        385000000.0,
+        420000000.0,
+        455000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2022,
+          2023
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          385000000.0,
+          420000000.0,
+          455000000.0
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2022,
+      2023
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Upper Midwest \u2014 144 counties in Illinois",
+      "Minnesota",
+      "Wisconsin"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jase Wagner",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "appointed 2022, former CFO, with org since 2009"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Betsy Horton",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Bill Moore",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Matt Ginder",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Marketplace Development Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stephanie Wise",
+        "recent_hire": false,
+        "tenure_months": 24,
+        "title": "elected Feb 2024"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dan Erickson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BOARD VICE CHAIR"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_md": "Compeer Financial is a lending institution headquartered in Sun Prairie, Wisconsin. It reports $34.3 billion in total assets. It is regulated by Farm Credit Administration (FCA) and employs approximately 1,300 people. Its overall digital maturity is assessed at 2.4 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "size_tier": "Large ($10-50B)",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "2191d5b2-26f9-4431-b7bd-408e3e091ec9",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Assessment report initially existed only in .docx format; Excel export recommended for standardization"
+    },
+    {
+      "id": "78a22eb3-0beb-492e-9833-a18e36e0588c",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Proof structure columns (S/T) partially populated in detail sheets"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Value grew from $385.0M (2021) to $455.0M (2023) \u2014 8.7% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.76,
+        "P1C2": 2.75,
+        "P1C3": 3.0,
+        "P1C4": 2.5,
+        "P1C5": 3.06,
+        "P2C1": 2.59,
+        "P2C2": 2.81,
+        "P2C3": 2.34,
+        "P2C4": 2.43,
+        "P3C1": 3.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 3.19,
+        "P4C2": 2.66,
+        "P4C3": 2.98,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.63,
+      "peer_name": "Bridgecrest",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.92,
+        "P1C4": 2.0,
+        "P1C5": 1.28,
+        "P2C1": 2.54,
+        "P2C2": 2.96,
+        "P2C3": 2.71,
+        "P2C4": 1.73,
+        "P3C1": 2.55,
+        "P3C2": 1.75,
+        "P3C3": 2.56,
+        "P3C4": 1.81,
+        "P4C1": 2.05,
+        "P4C2": 2.05,
+        "P4C3": 2.75,
+        "P4C4": 2.32
+      },
+      "overall_score": 2.29,
+      "peer_name": "loanDepot, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.16,
+        "P1C2": 2.08,
+        "P1C3": 2.26,
+        "P1C4": 1.83,
+        "P1C5": 1.7,
+        "P2C1": 2.0,
+        "P2C2": 2.27,
+        "P2C3": 2.03,
+        "P2C4": 1.87,
+        "P3C1": 2.67,
+        "P3C2": 2.23,
+        "P3C3": 3.57,
+        "P3C4": 2.45,
+        "P4C1": 1.86,
+        "P4C2": 2.15,
+        "P4C3": 1.96,
+        "P4C4": 2.6
+      },
+      "overall_score": 2.22,
+      "peer_name": "Guaranteed Rate, Inc. (dba Rate)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.82,
+        "P1C2": 1.82,
+        "P1C3": 1.51,
+        "P1C4": 1.82,
+        "P2C1": 2.5,
+        "P2C2": 2.52,
+        "P2C3": 2.39,
+        "P2C4": 2.01,
+        "P3C1": 2.5,
+        "P3C2": 2.38,
+        "P3C3": 2.41,
+        "P3C4": 1.93,
+        "P4C1": 2.54,
+        "P4C2": 1.84,
+        "P4C3": 2.88,
+        "P4C4": 2.58
+      },
+      "overall_score": 2.22,
+      "peer_name": "Security Finance Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.26,
+        "P1C2": 2.6,
+        "P1C3": 2.14,
+        "P1C4": 2.26,
+        "P1C5": 2.02,
+        "P2C1": 1.86,
+        "P2C2": 1.79,
+        "P2C3": 1.82,
+        "P2C4": 1.89,
+        "P3C1": 2.02,
+        "P3C2": 1.9,
+        "P3C3": 2.14,
+        "P3C4": 2.12,
+        "P4C1": 1.91,
+        "P4C2": 1.94,
+        "P4C3": 2.32,
+        "P4C4": 2.48
+      },
+      "overall_score": 2.09,
+      "peer_name": "WSFS Financial Corporation",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-COMPEER-20260305-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "wever, employee engagement metrics show 79% satisfaction on Glassdoor (Source:, Tier 3), indicating strong internal culture alignment despite external customer experience challenges",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      },
+      {
+        "drilldown": "ophistication, behavioral targeting, engagement automation, NPS lift",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 22,
+        "polarity": "negative",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Declining",
+        "value": null
+      },
+      {
+        "drilldown": "Debt Ratings KBRA A-, S&P BBB+ Sub-Vertical Classification Commercial Lender Size Tier Large ($10B-$50B) Evidence Mode PUBLIC Component Description Assessment Framework 17-Capability maturity model for Commercial Lending vertical Scoring Sc",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of Compeer Financial. Overall digital maturity scored 2.42/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-03-05",
+      "evidence_e_ids": [],
+      "id": "3fd8afa1-0e3d-4d80-a1c0-ad58cb0670a5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    }
+  ]
+}

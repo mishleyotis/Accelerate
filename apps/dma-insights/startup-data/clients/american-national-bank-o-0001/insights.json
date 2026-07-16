@@ -1,0 +1,425 @@
+{
+  "entity_display_id": "american-national-bank-o-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.5.IB1",
+        "P2C4",
+        "P3C3.1.3",
+        "P1C5.6.1",
+        "P1C2.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "05c2fb95-6bd6-4bc4-a94d-18b80b272a0e",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-087"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-061",
+            "E-075",
+            "E-076",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-092",
+        "E-078",
+        "E-077",
+        "E-076",
+        "E-061",
+        "E-075",
+        "E-091",
+        "E-087"
+      ],
+      "linked_subcap_id": "P2C4.5.IB1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for American National Bank of Texas: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-077].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Evidence gaps and assumptions that affect assessment accuracy",
+      "what_text": "Evidence gaps and assumptions that affect assessment accuracy. These feed directly into the Handoff Package (Appendix B) and guide internal discovery priorities. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes American National Bank of Texas's ability to deliver a stronger, more personalised customer experience [E-078].",
+      "why_text": "Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too [E-092, E-078].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.1.1",
+        "P1C2.1.7",
+        "P4C1.2.3",
+        "P1C2.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "c4cb3f23-212f-4089-9371-3950f1d51c85",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-087"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-087"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-074",
+        "E-087",
+        "E-083"
+      ],
+      "linked_subcap_id": "P2C4.1.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for American National Bank of Texas: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-083].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Modern Data Platform Deployed = Salesforce Data Cloud Bridge Opportunity",
+      "what_text": "Customer Data Foundation (CDP) is one of American National Bank of Texas's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes American National Bank of Texas's ability to deliver a stronger, more personalised customer experience [E-087].",
+      "why_text": "At 1.5 out of 5, Customer Data Foundation (CDP) sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-074, E-087].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.1.5",
+        "P4C3.1.2",
+        "P4C1.10.5",
+        "P2C3.10.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "40364c1e-c9cd-435b-a193-3273595ef14f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-117"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-032",
+        "E-117"
+      ],
+      "linked_subcap_id": "P1C1.1.5",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Digital Strategy & Vision discovery conversation — the finding is documented in the client's research report [E-117].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "5-Year Technology Transformation Roadmap with 50+ Initiatives",
+      "what_text": "Board Engagement is one of American National Bank of Texas's solid strategy and governance capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, below the 3.1 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes American National Bank of Texas's ability to deliver sharper strategic direction and stronger oversight [E-032].",
+      "why_text": "At 3.0 out of 5, Board Engagement sits 0.1 points below the 3.1 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-004, E-032].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.2.2",
+        "P4C3.1.7",
+        "P4C3.1.6",
+        "P2C2.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "af87f49a-31f0-4971-9869-e25f81437555",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-117"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-117",
+        "E-118",
+        "E-122"
+      ],
+      "linked_subcap_id": "P4C3.2.2",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Legacy Modernization Strategy a near-term focus for American National Bank of Texas: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-122].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Core Banking Modernization in Flight = MuleSoft API-Led Connectivity Opportunity",
+      "what_text": "Legacy Modernization Strategy is one of American National Bank of Texas's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes American National Bank of Texas's ability to deliver a stronger data and technology foundation [E-118].",
+      "why_text": "The assessment found: “SRM Capability Maturity Assessment + 5-Year Technology Strategy Roadmap: 'team's deliverables included deep dives into bank structure, strategy, goals, ambitions, business capability maturity levels” [E-117]. At 2.0 out of 5, Legacy Modernization Strategy sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C2.7.2",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "395ddddb-4cac-4bff-80ba-cd64d66c31ea",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-061",
+            "E-075",
+            "E-076",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-087"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-092",
+        "E-078",
+        "E-077",
+        "E-076",
+        "E-061",
+        "E-075",
+        "E-091",
+        "E-087"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for American National Bank of Texas: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": "REC-05",
+      "theme": "CX & Personalization",
+      "title": "Customer Data Foundation (CDP)",
+      "what_text": "Customer Data Foundation (CDP) is one of American National Bank of Texas's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes American National Bank of Texas's ability to deliver a stronger, more personalised customer experience [E-078].",
+      "why_text": "At 1.5 out of 5, Customer Data Foundation (CDP) sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-092, E-078].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P1C1.5.5",
+        "P1C1.5.8",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "4773098a-88c7-4cf8-98b7-317817ca6c65",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-111",
+        "E-114",
+        "E-112",
+        "E-115",
+        "E-116",
+        "E-124"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for American National Bank of Texas: a scoped investment here would lift it from 2.5 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-114].",
+      "source_rec_id": "REC-07",
+      "theme": "Analytics & AI",
+      "title": "Enterprise Reporting Platform",
+      "what_text": "Enterprise Reporting Platform is one of American National Bank of Texas's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes American National Bank of Texas's ability to deliver a stronger data and technology foundation [E-111].",
+      "why_text": "The assessment found: “Jack Yang CTO, SRM Perspectives Live (Jan 2026): 'technology is no longer a back-office function; it is a strategic catalyst' — technology strategy explicitly linked to business growth Jack Yang:” [E-115]. At 2.5 out of 5, Enterprise Reporting Platform sits 0.2 points below the 2.7 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.1.1",
+        "P1C2.1.7",
+        "P1C1.5.1",
+        "P2C4.6.RIA3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "0f85b7d5-7448-4f84-86ae-9a36e6ed8b66",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-061"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-062",
+        "E-063",
+        "E-058",
+        "E-059",
+        "E-082",
+        "E-089",
+        "E-060"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Marketing Strategy Document a near-term focus for American National Bank of Texas: a scoped investment here would lift it from 1.5 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-063].",
+      "source_rec_id": "REC-08",
+      "theme": "Digital Channels",
+      "title": "Digital Marketing Strategy Document",
+      "what_text": "Digital Marketing Strategy Document is one of American National Bank of Texas's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes American National Bank of Texas's ability to deliver a stronger, more personalised customer experience [E-062].",
+      "why_text": "At 1.5 out of 5, Digital Marketing Strategy Document sits 1.4 points below the 2.9 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-061, E-062].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "ANBTX's position by pillar relative to all four peers:",
+        "heading": "7.2  Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "P2: Customer Experience & Digital Banking",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "P3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "P4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Each recommendation follows the mandatory anti-generic protocol: ROOT CAUSE (E-IDs confirming the gap is real) → SOLUTION (specific Zennify offering) → EXPECTED OUTCOMES (metrics). The specificity test was applied to every recommendation: if the text could apply unchanged to a different institution, it was rewritten with ANBTX-specific data. Technology validation (connector searches) confirmed all 8 recommendations address greenfield gaps — MuleSoft is the only exception, reframed as EXPAND not introduce.\n Expand Salesforce from nCino Commercial to FSC Retail Banking [ZENNIFY]\n Implement Marketing Cloud Engagement + Account Engagement [ZENNIFY]\n Activate Salesforce Data Cloud over Snowflake for Customer 360 [ZENNIFY]\n Evaluate and Deploy Salesforce Agentforce + Einstein AI [ZENNIFY]\n Implement Service Cloud + Digital Engagement for Omnichannel [ZENNIFY]\n Expand MuleSoft API-Led Connectivity as Core-Agnostic Integration Backbone [ZENNIFY]\n Implement Salesforce Experience Cloud for Digital Self-Service + CRA Service Test [ZENNIFY]\n Deploy Salesforce Shield for OCC/FFIEC Cybersecurity Compliance [ZENNIFY]"
+  },
+  "run_request_id": "DMA-RES-ANBTX-20260512-0001"
+}

@@ -1,0 +1,209 @@
+{
+  "entity_display_id": "haventree-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "P1C1 Maturity Score": "2.78 \u2192 3.20-3.40",
+        "P2C1 Maturity Score": "2.40 \u2192 3.30-3.50",
+        "P2C2 Maturity Score": "2.52 \u2192 3.30-3.50 (post-cap expiry)",
+        "P2C3 Maturity Score": "2.49 \u2192 3.20-3.40 (M3+ post-DTC)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C3 Maturity Score: 2.49 \u2192 3.20-3.40 (M3+ post-DTC)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Service Cloud (4-6mo pilot, 8-12mo full deployment)",
+          "maturity_lift": "+0.71",
+          "metric": "P2C3 Maturity Score: 2.49 \u2192 3.20-3.40 (M3+ post-DTC)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 Maturity Score: 2.49 \u2192 3.20-3.40 (M3+ post-DTC)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Service Cloud \u2014 Omnichannel Servicing transformation for DTC + broker workflows"
+        },
+        {
+          "feature": "Salesforce Marketing Cloud full activation + Data Cloud customer 360 (6-9mo)",
+          "maturity_lift": "+0.9",
+          "metric": "P2C1 Maturity Score: 2.40 \u2192 3.30-3.50",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 Maturity Score: 2.40 \u2192 3.30-3.50",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce Marketing Cloud + Personalization activation \u2014 Digital Marketing uplift for DTC"
+        },
+        {
+          "feature": "Salesforce Financial Services Cloud + Auth0 CIAM extension (6-9mo)",
+          "maturity_lift": "+0.78",
+          "metric": "P2C2 Maturity Score: 2.52 \u2192 3.30-3.50 (post-cap expiry)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C2 Maturity Score: 2.52 \u2192 3.30-3.50 (post-cap expiry)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Salesforce Financial Services Cloud \u2014 DTC Onboarding journey design + KYC automation"
+        },
+        {
+          "feature": "Digital Strategy Workshop (1-2mo facilitated) \u2014 outputs: integrated 18mo roadmap, OKR framework, dependencies map",
+          "maturity_lift": "+0.42",
+          "metric": "P1C1 Maturity Score: 2.78 \u2192 3.20-3.40",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P1C1 Maturity Score: 2.78 \u2192 3.20-3.40",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Digital Strategy Workshop \u2014 Haventree 2.0 milestone alignment + DTC operating model"
+        }
+      ],
+      "target": "M2 \u2192 M3 in P2C1, P2C2"
+    },
+    {
+      "customer_impact": {
+        "P1C4 Maturity Score": "2.49 \u2192 3.00 (cap-bound until Indeed >3.0)",
+        "P4C1 Data Governance Score": "3.06 \u2192 3.50 (cap-bound) or 3.80+ post-CDO",
+        "P4C3 Maturity Score": "3.04 \u2192 3.50 (cap-bound) or 3.80+ post-Temenos",
+        "P4C4 Cybersecurity Score": "3.52 \u2192 3.80+"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C1 Data Governance Score: 3.06 \u2192 3.50 (cap-bound) or 3.80+ post-CDO",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Data Cloud + CRM Analytics (Tableau) (8-12mo)",
+          "maturity_lift": "+0.44",
+          "metric": "P4C1 Data Governance Score: 3.06 \u2192 3.50 (cap-bound) or 3.80+ post-CDO",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C1 Data Governance Score: 3.06 \u2192 3.50 (cap-bound) or 3.80+ post-CDO",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Salesforce Data Cloud + CRM Analytics \u2014 Data foundation + analytics modernization"
+        },
+        {
+          "feature": "MuleSoft Anypoint Platform (6-9mo) \u2014 API governance + integration runtime",
+          "maturity_lift": "+0.46",
+          "metric": "P4C3 Maturity Score: 3.04 \u2192 3.50 (cap-bound) or 3.80+ post-Temenos",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C3 Maturity Score: 3.04 \u2192 3.50 (cap-bound) or 3.80+ post-Temenos",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "MuleSoft Anypoint \u2014 API governance + Open Banking (Bill C-15) compliance"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+0.51",
+          "metric": "P1C4 Maturity Score: 2.49 \u2192 3.00 (cap-bound until Indeed >3.0)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 Maturity Score: 2.49 \u2192 3.00 (cap-bound until Indeed >3.0)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Cultural Health Programme \u2014 Retention during Haventree 2.0 transformation"
+        },
+        {
+          "feature": "Salesforce Shield + GRC Platform (4-6mo)",
+          "maturity_lift": "+0.28",
+          "metric": "P4C4 Cybersecurity Score: 3.52 \u2192 3.80+",
+          "outcomes": {
+            "effort": "S",
+            "metric": "P4C4 Cybersecurity Score: 3.52 \u2192 3.80+",
+            "peer": null,
+            "time": "0\u20136 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "Salesforce Shield + GRC Platform \u2014 OSFI B-13 + Privacy compliance modernization"
+        }
+      ],
+      "target": "M2 \u2192 M3 in P1C4, P4C3"
+    },
+    {
+      "customer_impact": {
+        "P2C4 Personalization Score": "2.57 \u2192 3.40+",
+        "P4C1 Data Governance Score": "3.06 \u2192 4.00+ (post-CDO + Data Cloud)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C1 Data Governance Score: 3.06 \u2192 4.00+ (post-CDO + Data Cloud)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+0.94",
+          "metric": "P4C1 Data Governance Score: 3.06 \u2192 4.00+ (post-CDO + Data Cloud)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 Data Governance Score: 3.06 \u2192 4.00+ (post-CDO + Data Cloud)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "Chief Data Officer recruitment \u2014 Data leadership accountability"
+        },
+        {
+          "feature": "Salesforce Experience Cloud (broker portal v2) + Slack (broker community) (6-9mo)",
+          "maturity_lift": "+0.83",
+          "metric": "P2C4 Personalization Score: 2.57 \u2192 3.40+",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C4 Personalization Score: 2.57 \u2192 3.40+",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-10",
+          "title": "Slack + Experience Cloud \u2014 Broker Channel deepening (Elite Loyalty modernization)"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C1, P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-HAVENTREE-20260429-0001",
+  "total_duration_months": 12
+}

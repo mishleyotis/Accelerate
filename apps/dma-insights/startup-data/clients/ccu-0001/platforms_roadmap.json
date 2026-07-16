@@ -1,0 +1,127 @@
+{
+  "entity_display_id": "ccu-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.69",
+          "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Financial Services Cloud (FSC)"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.69",
+          "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce Data Cloud"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 1.73 \u2192 4.0 (peer median 3.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C1 score 1.73 \u2192 4.0 (peer median 3.25)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.27",
+          "metric": "P4C1 score 1.73 \u2192 4.0 (peer median 3.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.73 \u2192 4.0 (peer median 3.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Einstein Agentforce"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.69",
+          "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "MuleSoft Anypoint Platform"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.69",
+          "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.31 \u2192 4.0 (peer median 3.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Salesforce Marketing Cloud (SFMC)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CCUIL-20260504-0001",
+  "total_duration_months": 12
+}

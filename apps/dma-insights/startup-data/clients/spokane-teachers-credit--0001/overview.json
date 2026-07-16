@@ -1,0 +1,1040 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 74
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 119
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 58
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 162
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "spokane-teachers-credit--0001",
+    "domain": null,
+    "hq": null,
+    "id": "abd020e4-46a5-4bf9-a2b5-436492f1cdfe",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Spokane Teachers Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:18.704975Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 14,
+    "current_count": 82,
+    "dated_count": 1,
+    "median_age_months": 12.1,
+    "oldest_published_date": "2010-01-01",
+    "stale_count": 2,
+    "stale_pct": 2.02,
+    "total": 99,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "POSITIVE": 99
+    },
+    "connectors": {
+      "Indeed": 1,
+      "LinkedIn": 7
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 13,
+      "NEUTRAL": 73,
+      "POSITIVE": 13
+    },
+    "tiers": {
+      "T1": 3,
+      "T2": 10,
+      "T3": 75,
+      "T5": 11
+    },
+    "total_facts": 1085,
+    "total_items": 99
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 4535368.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 5840000000.0,
+    "branches": 51,
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Classified as VARIABLE. $64.5M provision drove 90.2% income decline, but NWR remains healthy at 10.55% [E-034, E-011]."
+      ],
+      "net_income": 4535368.0,
+      "roa": 0.0007,
+      "trajectory": {
+        "branches": 51,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1000,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "CEO Lindsey Myhre: 25yr tenure, integral to shaping…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "STCU acquired Community Bank ($550M assets, 10 branches in…"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Here for Good Foundation launched 2023"
+          }
+        ],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Eastern & Central WA, Northern ID, Eastern OR",
+        "headline": "$550M net income · FY2025",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            5840.0,
+            680.0,
+            550.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Eastern & Central WA, Northern ID, Eastern OR",
+    "footprint_basis": "derived:geography",
+    "founded": 1934,
+    "geography": "Eastern & Central WA, Northern ID, Eastern OR",
+    "headcount": 1000,
+    "hq": "1620 N Signal Dr, Liberty Lake, WA 99019",
+    "hq_address": "1620 N Signal Dr, Liberty Lake, WA 99019",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lindsey Myhre",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO & President"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Nicole T.",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CISO (C-Suite)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jody Gentemann",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Risk Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Greg Mitchell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "IT Application Admin Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tim Mewhinney",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Senior ETL Developer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "James Bogley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Business Intelligence Analyst"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Cassandra Slagg",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Senior IT Portfolio Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ryan Timmons",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "IT GRC Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Scott Rabe",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Software Development Lead"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Richard Breitenberg",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director of Facilities & Support Services"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Debra Jackson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Contact Center Operations Manager"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Spokane Teachers Credit Union",
+    "license_type": "Credit union (NCUA-regulated)",
+    "members": 309000,
+    "narrative_md": "Field of membership: Washington state, North Idaho (Benewah, Bonner, Boundary, Kootenai, Latah, Lewis, Nez Perce, Shoshone counties), Eastern Oregon (Baker, Crook, Gilliam, Grant, Harney, Hood River, Malheur, Morrow, Sherman, Umatilla, Union, Wallowa, Wasco, Wheeler counties) [E-001]",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 5.0,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "5.0/5",
+          "signal": "to Work recognition — national culture benchmark achieved Indeed 5.0/5.0 overall rating (Spokane) — culture, management, work-life balance, compensation all 5.0 Community Bank integration: all employees retained, rebranded branches staffed ",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large ($5B-$10B)",
+    "thought_leadership": [
+      {
+        "author": "Greg Mitchell",
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-099",
+        "excerpt": "CONFIRMED UTILIZATION — Illumio: full case study, >90% enforcement, podcast interview with Greg Mitchell (Illumio blog Sep 2025) CONFIRMED UTILIZATION — Alkami: case study (digital banking platform since 2014), shared ro",
+        "title": "Illumio: full case study, >90% enforcement, podcast interview with…",
+        "type": "podcast",
+        "url": "https://www.stcu.org"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "VARIABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "stcu.org",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.286808+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Spokane Teachers Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Four peers were selected and locked during the research phase based on geographic overlap, asset size, and strategic trajectory. Peer technology stacks were validated through Explorium Vibe Prospecting technographics enrichment, providing machine-verified tech stack data rather than estimates. Peer scores at the category level were computed from publicly observable evidence and Explorium-validated technology deployments. The peer median serves as the primary benchmark for gap analysis and priority scoring.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "SCQA context",
+    "scqa_md": "Spokane Teachers Credit Union is a $5.8B in assets credit union regulated by NCUA, operating since 1934 with 1,000 employees. A trajectory the analyst classifies as variable gives it the balance sheet to fund transformation [E-069, E-003]. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is Financial Distress Early Warning at 2.0/5 against a 2.9 peer median [E-055, E-011].\n\nNext is RPA Platform & Bot Management at 2.2/5 against a 2.4 peer median [E-072, E-076]. Third is Digital Strategy Document at 2.3/5 against a 2.6 peer median [E-001, E-002]. The issue register adds Capability gap: Digital Strategy Document (high severity). The issue register adds Capability gap: Predictive Issue Detection (high severity).\n\nCounter-signal: Application Security already runs at 3.0/5 against a 2.5 peer median — a strength to build on, not rebuild. The roster shows no CTO / CIO — a named ownership gap for the capabilities below. The question for Spokane Teachers Credit Union is whether to close Financial Distress Early Warning first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Spokane Teachers Credit Union should lead with Tableau (59/100 fit) against Digital Strategy Document, then sequence Twilio behind it.\n\nClosing Financial Distress Early Warning to the peer median alone is worth 0.9 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.42,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.356819+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sentiment.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.357181+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/stcu_solution_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.357690+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.359245+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.365107+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.365498+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.365905+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.371652+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:18.372669+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 22
+    },
+    "stage_ms": {
+      "manifest": 11,
+      "parse": 8868,
+      "persist": 629
+    },
+    "structured": [
+      {
+        "code": "institution_name derived from report artifacts",
+        "detail": "institution_name derived from report artifacts: 'Spokane Teachers Credit Union'",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'Credit Unions'",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=STCU_Client_Profile_Research_Report.docx count=11",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 4 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sentiment.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/stcu_solution_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 18",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 11",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "institution_name derived from report artifacts: 'Spokane Teachers Credit Union'",
+      "subvertical derived from report artifacts: 'Credit Unions'",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS' (2-stage QA escalation captured)",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "firmographics_from_entity_profile_json: fields=['founded', 'hq', 'legal_name'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=STCU_Client_Profile_Research_Report.docx count=11",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 12",
+      "acquisitions_from_client_profile_docx: 4 events",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sentiment.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/stcu_solution_validation.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 18",
+      "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 11"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 2.7,
+      "pillar_id": "P1",
+      "score": 2.42,
+      "subcaps_scored": 173
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.62,
+      "pillar_id": "P2",
+      "score": 2.27,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.47,
+      "pillar_id": "P3",
+      "score": 2.44,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.57,
+      "pillar_id": "P4",
+      "score": 2.53,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-13",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:18.704975Z",
+    "created_at": "2026-07-02T23:11:18.704975Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "5b6e5935-3282-42fa-88ab-1a9345c65234",
+    "overall_score": null,
+    "request_id": "DMA-ASM-STCU-20260413-0001",
+    "started_at": "2026-07-02T23:11:18.704975Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 5.0,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Seven findings emerged from 99 public evidence items. Seven findings emerged from 99 public evidence items is a priority capability gap in customer experience, scoring 2.03/5 against a peer median of 2.9. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Seven findings emerged from 99 public evidence items",
+      "peer_median": 2.9,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.03,
+      "so_what": "Prioritize Seven findings emerged from 99 public evidence items in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Seven findings emerged from 99 public evidence items",
+      "what": "Seven findings emerged from 99 public evidence items. Seven findings emerged from 99 public evidence items is a priority capability gap in customer experience, scoring 2.03/5 against a peer median of 2.9. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The shortfall is relative, not absolute: 2.03/5 sits below the 2.9 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "This research was conducted in PUBLIC evidence mode. The following gaps represent priority areas for internal discovery.",
+      "evidence": [],
+      "magnitude": "0.9 pts below peer median",
+      "name": "This research was conducted in PUBLIC evidence mode",
+      "peer_median": 2.9,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.03,
+      "so_what": "Prioritize This research was conducted in PUBLIC evidence mode in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "This research was conducted in PUBLIC evidence mode",
+      "what": "This research was conducted in PUBLIC evidence mode. The following gaps represent priority areas for internal discovery.",
+      "why": "The shortfall is relative, not absolute: 2.03/5 sits below the 2.9 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "STCU’s strategic direction under CEO Lindsey Myhre centers on geographic expansion, technology modernization, and deepening member relationships [E-011].",
+      "evidence": [
+        "E-011",
+        "E-089",
+        "E-088",
+        "E-090"
+      ],
+      "magnitude": "0.2 pts below peer median",
+      "name": "STCU’s strategic direction under CEO Lindsey Myhre centers on",
+      "peer_median": 2.55,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.33,
+      "so_what": "Prioritize STCU’s strategic direction under CEO Lindsey Myhre centers on in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "STCU’s strategic direction under CEO Lindsey Myhre centers on",
+      "what": "STCU’s strategic direction under CEO Lindsey Myhre centers on geographic expansion, technology modernization, and deepening member relationships [E-011].",
+      "why": "The linked evidence records: Annual report published yearly with strategic priorities and financial metrics — implies at minimum annual strategy review cadence Non-interest expense $164.2M (2024) with specific breakdowns by category — indicates budget tracking aligned to functions"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-003"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "cap M2.5 applied: Single tier-type (T5) cap 2.5; T5-only cap 2.0",
+        "105 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Strategy Document averages 2.3/5 over 167 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.3,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-035"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5"
+      ],
+      "rationale": "Data Classification averages 2.6/5 over 217 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.3 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.3,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-040"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "2 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Retirement Criteria averages 2.3/5 over 192 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.3 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-067"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "cap M2.5 applied: Single tier-type (T5) cap 2.5; T5-only cap 2.0",
+        "200 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Two-Way Communication averages 2.3/5 over 205 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-058"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "cap M2.5 applied: Single tier-type (T5) cap 2.5; T5-only cap 2.0",
+        "60 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Social Responsibility — Subcap 4 averages 2.6/5 over 70 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.3,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-063"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "cap M2.5 applied: Single tier-type (T5) cap 2.5; T5-only cap 2.0",
+        "8 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Educational Content averages 2.4/5 over 293 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.3 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.3,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-062"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "cap M2.5 applied: Single tier-type (T5) cap 2.5; T5-only cap 2.0",
+        "6 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Eligibility Transparency averages 2.3/5 over 291 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.3 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "cap M2.5 applied: Single tier-type (T5) cap 2.5; T5-only cap 2.0",
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Financial Distress Early Warning averages 2.0/5 over 289 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Recommendations & Decisioning averages 2.3/5 over 259 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.3,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5"
+      ],
+      "rationale": "RPA Platform & Bot Management averages 2.2/5 over 146 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.3 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.3,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-077"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5"
+      ],
+      "rationale": "Operational Risk Modeling averages 2.6/5 over 130 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.3 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-084"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Compliance Governance averages 2.5/5 over 142 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-085"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Resilience Reporting averages 2.5/5 over 145 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-089"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "170 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Enterprise Data Catalog & Discovery averages 2.3/5 over 200 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-092"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Embedding Model Governance & Versioning averages 2.5/5 over 270 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-094"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "225 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Real-Time API Development averages 2.5/5 over 235 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-098"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Single tier-type (T3) cap 2.5",
+        "145 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Application Security averages 3.0/5 over 150 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Single tier-type (T3) cap 2.5); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "regulatory",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Absence of NCUA enforcement actions — positive compliance examination track record (Dec 2025).",
+      "evidence": [
+        "E-083"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Absence of NCUA enforcement actions",
+      "metric": null,
+      "peer_context": "Financial Distress Early Warning runs 2.03/5 vs a 2.90 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Absence of NCUA enforcement actions — positive compliance examination track record (Dec 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-12-01",
+        "event": "Clean regulatory standing"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "NCUA established AI Compliance Plan and hired 3 AI officers (2025-2026) — regulatory framework supporting CU AI adoption (Jul 2025).",
+      "evidence": [
+        "E-092"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "NCUA established AI Compliance Plan",
+      "metric": null,
+      "peer_context": "Financial Distress Early Warning runs 2.03/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "NCUA established AI Compliance Plan and hired 3 AI officers (2025-2026) — regulatory framework supporting CU AI adoption (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "NCUA established AI Compliance Plan"
+      },
+      "window": null
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CEO Lindsey Myhre: 25yr tenure, integral to shaping strategic direction, named CEO Jul 2025",
+      "evidence": [
+        "E-004"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "CEO Lindsey Myhre: 25yr tenure, integral to shaping…",
+      "metric": null,
+      "peer_context": "Financial Distress Early Warning runs 2.03/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CEO Lindsey Myhre: 25yr tenure, integral to shaping strategic direction, named CEO Jul 2025",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "CEO Lindsey Myhre: 25yr tenure, integral to shaping…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Community Bank (Community Bancshares Inc.) (May 2025).",
+      "evidence": [
+        "E-003",
+        "E-055"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Community Bank (Community Bancshares Inc.) (May 2025)",
+      "metric": null,
+      "peer_context": "Financial Distress Early Warning runs 2.03/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Strategy Document — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Community Bank (Community Bancshares Inc.) (May 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-05-01",
+        "event": "Community Bank (Community Bancshares Inc.)"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Financial Distress Early Warning scores 2.03/5 vs a typical 2.90 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-055",
+        "E-011"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Financial Distress Early Warning scores 2.03/5",
+      "metric": "Financial Distress Early Warning 2.03/5 vs peer 2.90",
+      "peer_context": "Financial Distress Early Warning runs 2.03/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Strategy Document — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C3",
+      "text": "Financial Distress Early Warning scores 2.03/5 vs a typical 2.90 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,359 @@
+{
+  "entity_display_id": "ima-financial-group-inc-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C4.5.5",
+        "P4C1.6.2",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "4f1d3a2e-f038-4ee6-b7ba-9850c0234bbb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-160",
+        "E-153"
+      ],
+      "linked_subcap_id": "P4C4.5.5",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Prioritize a Cybersecurity & Privacy discovery conversation — the finding is documented in the client's research report [E-153].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "The seven findings below represent the highest-signal discoveries from the 164-item…",
+      "what_text": "The seven findings below represent the highest-signal discoveries from the 164-item evidence corpus (– public; E-INT-001–004 internal). Severity reflects: (a) likelihood of materially affecting the DMA score, (b) strategic risk to IMA's core value proposition, and (c) immediacy of Zennify engagement opportunity. CRITICAL = immediate impact; HIGH = significant medium-term risk; MEDIUM = important for completeness. In Zennify's assessment Tokenization / Format-Preserving Protection for High-Risk Fields scores 2.5 out of 5, versus a typical 2.4 at comparable institutions [E-160].",
+      "why_text": "At 2.5 out of 5, Tokenization / Format-Preserving Protection for High-Risk Fields shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-001, E-160].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.2.2",
+        "P1C4.1.1",
+        "P1C4.4.7",
+        "P1C4.4.6",
+        "P1C4.4.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "d1999764-4748-4f3e-900b-89d80397ae42",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-119",
+        "E-151"
+      ],
+      "linked_subcap_id": "P4C2.2.2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-119].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"'Communications & Engagement Specialist - Employee Benefits' open role — dedicated communications and engagement function for change management June Taylor = Director of Diversity, Equity & Inclusion (LinkedIn: IMA Women's History Month spotlight) — formal DEI\". In Zennify's assessment Self-Service BI & Analytics scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-119].",
+      "why_text": "The assessment found: “AI in use at IMA (confirmed): (1) Pardot Einstein Behavior Scoring — predictive lead scoring/segmentation; (2) IMA People Analytics — predictive health risk identification” [E-151]. The client's own stated priority — \"The following six strategic objectives have been validated through online searches, press releases, CEO public statements, Inc. 5000 filings, and cross-confirmed against internal discovery session transcripts (E-INT-002)\" — needs the Databricks capability that is currently absent. scores 1.5/5 on the current assessment.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.5.IB1",
+        "P2C4.5",
+        "P3C3.1.3",
+        "P1C2.3.7",
+        "P1C5.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "52ca71e1-4de9-4d99-a918-ca9a7f05ae22",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-074",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-141",
+        "E-074"
+      ],
+      "linked_subcap_id": "P2C4.5.IB1",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Coverage Gap Analysis a near-term focus for IMA Financial Group, Inc.: a scoped investment here would lift it from 2.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-074].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "The seven gaps below affect assessment accuracy or",
+      "what_text": "The seven gaps below affect assessment accuracy or signal significant digital maturity limitations. Each is prioritised by its likelihood of causing scoring inaccuracy if unresolved, or presenting a Zennify service expansion opportunity. Internal evidence (E-INT-001–004) has materially enriched this register beyond what public sources alone would reveal. In Zennify's assessment Coverage Gap Analysis scores 2.0 out of 5, versus a typical 2.3 at comparable institutions [E-074].",
+      "why_text": "At 2.0 out of 5, Coverage Gap Analysis sits 0.3 points below the 2.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-141, E-074].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C1.5.4",
+        "P4C2.2.2",
+        "P2C4.3.1",
+        "P2C4.5.3",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-081",
+        "E-082",
+        "E-083"
+      ],
+      "ic_id": "INS-REC-003",
+      "id": "d506e1c9-95f1-469b-85e9-c68dedeb4d1f",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-081",
+            "E-082",
+            "E-083"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-074",
+            "E-141"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-075",
+        "E-141",
+        "E-140",
+        "E-144",
+        "E-074",
+        "E-INT-004",
+        "E-143",
+        "E-142"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Build the Personalisation Engine — FSC Account 360 + Agentforce Cross-Sell + Data Cloud — addressable via salesforce [E-140].",
+      "source_rec_id": "REC-003",
+      "theme": "CX & Personalization",
+      "title": "Build the Personalisation Engine — FSC Account 360 + Agentforce Cross-Sell + Data Cloud",
+      "what_text": "IMA's Personalization score (2.02) reflects the gap between its EB capability (People Analytics, semi-annual benchmarking, rising risk identification) and commercial P&C (relationship-driven, no system-driven personalisation). No CDP deployed, no CLV model, no 1:1 digital personalisation beyond Pardot Einstein email scoring. Salesforce Data Cloud (CDP foundation) | Agentforce Cross-Sell Agent | FSC Account 360 Configuration | Einstein Analytics Expansion (licence procurement). In Zennify's assessment Proactive Financial Guidance scores 1.5 out of 5, versus a typical 2.3 at comparable institutions [E-141].",
+      "why_text": "At 1.5 out of 5, Proactive Financial Guidance sits 0.8 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-075, E-141].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C2.2.2",
+        "P2C4.3.1",
+        "P2C1.2.1",
+        "P1C1.4.1",
+        "P2C3.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-005",
+      "id": "32c68dd9-7504-4bfd-965e-cd628f93e2fc",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-INT-001",
+        "E-075",
+        "E-070",
+        "E-136",
+        "E-067",
+        "E-132",
+        "E-INT-002",
+        "E-135"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Establish Omnichannel Service Excellence — Upgrade Amazon Connect + Activate FSC Service Console — addressable via salesforce [E-070].",
+      "source_rec_id": "REC-005",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Establish Omnichannel Service Excellence — Upgrade Amazon Connect + Activate FSC Service Console",
+      "what_text": "Omnichannel (2.51) is constrained by: (1) Amazon Connect outdated (v5.21.1 vs latest — E-INT-001), (2) FSC Service Console not yet live (in build), (3) Glassdoor sentiment cap (3.3★ compensation declining — ISS-002). The portal (CSR24) works but is not differentiated. Client interaction is still primarily phone-based with a portal overlay, not true omnichannel. FSC Service Console Activation | Amazon Connect v5.26 Upgrade + Einstein Conversation Insights | Omnichannel Case Management Configuration | Service Analytics Dashboard (Tableau CRM). In Zennify's assessment Channel Strategy & Mix scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-075].",
+      "why_text": "At 2.5 out of 5, Channel Strategy & Mix shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business [E-INT-001, E-075].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Five categories evaluated across 184 capability. P1 scores above peer median in 4 of 5 categories, with Innovation leading the entire peer set by a full maturity level.",
+        "heading": "Pillar 1 — What We See",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Four categories evaluated across 228 capability — the largest capability count of any pillar. P2 carries the highest Weighting (35%) because client experience quality IS the commercial differentiator in a fee-for-advice broker model.",
+        "heading": "Pillar 2 — What We See",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Four categories across 116 capability. P3 leads peers in three of four categories. Business Resilience is the only below-peer category and creates the most commercially consequential internal gap given the CVRM advisory practice.",
+        "heading": "Pillar 3 — What We See",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Four categories across 174 capability. P4 has the narrowest peer advantage (+0.05) but contains both IMA's strongest architecture foundation (, 2.97) and the most strategically consequential gap in the assessment ( Analytics & AI, 2.02).",
+        "heading": "Pillar 4 — What We See",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Anti-Generic Protocol: Each recommendation is grounded in specific E-IDs confirming the gap exists. No recommendation uses forbidden phrases (no \"appoint a CDO\", \"create a CoE\", \"establish a data governance committee\" without specific evidence). Every recommendation maps to a named Zennify solution from the 12-solution catalog. Specificity test applied: none of these recommendations could appear unchanged for a different institution.\n[EXPECTED OUTCOMES]\n[EXPECTED OUTCOMES]\n[EXPECTED OUTCOMES]\n[EXPECTED OUTCOMES]\n[EXPECTED OUTCOMES]\n[EXPECTED OUTCOMES]\nSub-Batch R5 Complete | Sections 8-9 of 12 | DMA-ASM-IMA-20260416-0001 | Next: R6 — Roadmap + Evidence Sources + Appendices"
+  },
+  "run_request_id": "DMA-ASM-IMA-20260416-0001"
+}

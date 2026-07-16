@@ -1,0 +1,233 @@
+{
+  "entity_display_id": "first-citizens-bancshare-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "CiZi virtual assistant: 44% call reduction",
+        "source_kind": "docx"
+      },
+      "id": "f0a2eb6a-745a-4642-a1b7-258455465845",
+      "involved_subcap_ids": [
+        "P4C2.7.2",
+        "P4C2.4.11",
+        "P4C2.6.6",
+        "P4C2.8.4",
+        "P4C1.8.8",
+        "P4C1.3.7",
+        "P4C1.7.2",
+        "P4C1.1.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "5-Year GenAI Strategy",
+      "verbatim_quote": "F-005 | 5-Year GenAI Strategy | AI Council + board oversight. CiZi virtual assistant: 44% call reduction [E-P4C2] | P4C2 ceiling M2-M3, accelerating | Einstein AI / Agentforce advisory \u2014 AI strategy exists but CRM-AI gap"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "CISO Marco Maiurano (EVP) grew team 14\u2192500.",
+        "source_kind": "docx"
+      },
+      "id": "ee0cfa10-6fb7-450e-a41e-66535617e1a2",
+      "involved_subcap_ids": [
+        "P1C2.6.2",
+        "P2C3.3.4",
+        "P1C3.9.2",
+        "P1C3.6.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 75,
+        "P2": 25
+      },
+      "source_path": "(unknown)",
+      "title": "500-Person CISO Org",
+      "verbatim_quote": "F-003 | 500-Person CISO Org | CISO Marco Maiurano (EVP) grew team 14\u2192500. FS-ISAC/FBI/DHS partnerships [E-P4C3] | P4C3 ceiling M3-M4, highest maturity area | Shield + MuleSoft for security tool integration"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "P4C1 ceiling M2-M3, ideal engagement window",
+        "source_kind": "docx"
+      },
+      "id": "40de3d48-0bd5-4962-9055-f8b0f1904781",
+      "involved_subcap_ids": [
+        "P1C1.5.5",
+        "P4C3.4.1",
+        "P4C3.4.6",
+        "P4C3.4.7",
+        "P4C1.1.1",
+        "P4C3.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "CDAO Inflection Point",
+      "verbatim_quote": "F-007 | CDAO Inflection Point | Scott Richardson appointed Oct 2024. Informatica Cloud MDM deployed [E-P4C1] | P4C1 ceiling M2-M3, ideal engagement window | Data Cloud + Tableau for enterprise data strategy"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "No CRM identified across 294 evidence items and 482+ searches",
+        "source_kind": "docx"
+      },
+      "id": "2c7b3ea8-0f3b-4ed8-9306-62ceb12b78f9",
+      "involved_subcap_ids": [
+        "P4C2.7.2",
+        "P4C2.4.11",
+        "P4C2.6.6",
+        "P4C2.8.4",
+        "P4C1.8.8",
+        "P4C1.3.7",
+        "P4C1.7.2",
+        "P4C1.1.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "CRM Platform Absence",
+      "verbatim_quote": "F-001 | CRM Platform Absence | No CRM identified across 294 evidence items and 482+ searches | Caps P2C1-P2C4 front-office at M2-M3 | Financial Services Cloud + Data Cloud \u2014 highest-priority greenfield opportunity"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Cloud-native Fusion Phoenix. Only super-regional to fully migrate AWS/Azure",
+        "source_kind": "docx"
+      },
+      "id": "fcc09170-8160-40cb-9bd0-fee9f1e1069a",
+      "involved_subcap_ids": [
+        "P3C1.3.1",
+        "P1C3.7.1",
+        "P2C3.3.3",
+        "P2C1.4.6",
+        "P4C3.4.2",
+        "P2C3.3.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 49,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Finastra Core Banking",
+      "verbatim_quote": "F-004 | Finastra Core Banking | Cloud-native Fusion Phoenix. Only super-regional to fully migrate AWS/Azure [E-P4C4] | P4C4 ceiling M3-M4 | MuleSoft integration layer for core-to-CRM connectivity"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Google Play 2.4 vs. 3.8-4.2 peer benchmark.",
+        "source_kind": "docx"
+      },
+      "id": "40526198-2e71-46da-ba6e-b66fb4fcee50",
+      "involved_subcap_ids": [
+        "P2C3.2.2",
+        "P2C1.2.8",
+        "P2C1.2.6",
+        "P2C3.2.IC1",
+        "P4C2.2.2",
+        "P2C3.2.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 83,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Mobile App CX Gap",
+      "verbatim_quote": "F-006 | Mobile App CX Gap | Google Play 2.4\u2605 vs. 3.8-4.2 peer benchmark. 9 self-service categories but poor UX [E-P2C3] | Caps P2C3 omnichannel, creates CX urgency | Service Cloud + Mobile SDK for app experience upgrade"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "First bank on Pega Cloud: 23+ processes, 65+ workflows, 100% IDP accuracy, 6x faster account opening",
+        "source_kind": "docx"
+      },
+      "id": "c2ed6ed2-555e-48a2-b674-798ee8f52ee9",
+      "involved_subcap_ids": [
+        "P1C1.5.5",
+        "P4C3.4.1",
+        "P4C3.4.6",
+        "P4C3.4.7",
+        "P4C3.4.2",
+        "P2C2.5.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "100%",
+          "delta": null,
+          "kpi_label": "Processes workflows",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "6x",
+          "delta": null,
+          "kpi_label": "workflows IDP accuracy",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "Pega Cloud Pioneer",
+      "verbatim_quote": "F-002 | Pega Cloud Pioneer | First bank on Pega Cloud: 23+ processes, 65+ workflows, 100% IDP accuracy, 6x faster account opening [E-P3C1] | P3C1 ceiling M2-M3 with strong M3 execution | MuleSoft for Pega-Salesforce integration layer"
+    }
+  ]
+}

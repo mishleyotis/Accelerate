@@ -1,0 +1,413 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "bok-financial-corporatio-0001",
+  "financials": {
+    "metrics": {
+      "AUM/AUA ($B)": "126.6 (2025)",
+      "Branches": "115 (2025)",
+      "Cyber Incidents": "0 material (2025)",
+      "Dividend/Share ($)": "2.28 (2025)",
+      "EPS ($)": "9.17 (2025)",
+      "Employees": "6,719 (2025)",
+      "NIM (%)": "2.98 (2025)",
+      "Net Income ($M)": "578 (2025)",
+      "Total Assets ($B)": "52.2 (2025)",
+      "efficiency_ratio_pct": 66.7,
+      "net_income": 578000000.0,
+      "trajectory": {
+        "branches": 115,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 6719,
+        "events": [],
+        "fy": [
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Tulsa, OK \u2014 8-state footprint (OK, TX, NM, AR, CO, AZ, KS, MO)",
+        "headline": "$52.2B assets \u00b7 FY2025 \u00b7 +2.9% CAGR",
+        "regulator": "OCC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            49.3,
+            50.0,
+            52.2
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        49.3,
+        50.0,
+        52.2
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2023,
+          2024,
+          2025
+        ],
+        "metric": "total_assets_b",
+        "unit": "unknown",
+        "values": [
+          49.3,
+          50.0,
+          52.2
+        ]
+      }
+    ],
+    "years": [
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Tulsa",
+      "OK \u2014 8-state footprint (OK",
+      "TX",
+      "NM",
+      "AR",
+      "CO",
+      "AZ",
+      "KS"
+    ],
+    "leadership": [
+      {
+        "background": "since 2022); Chairman George Kaiser (~59% ownership",
+        "critical_role": false,
+        "name": "Stacy Kymes",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "CEO"
+      }
+    ],
+    "license_type": "National bank charter (OCC)",
+    "narrative_md": "BOK Financial Corporation is a regional bank. It reports $52.2 billion in total assets and has operated since 1910. It is regulated by OCC and employs approximately 6,719 people across 115 branches. Its overall digital maturity is assessed at 1.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OCC",
+    "size_tier": "Mega (>$50B assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2022-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "Derek Martin named CIO Sept 2022 \u2014 'varied perspectives and experience' valued in leadership (CEO Kymes) Kelley Weil named Consumer Banking exec simultaneously \u2014 former CHRO, cross-functional leadership rotation",
+        "title": "Derek Martin named CIO Sept 2022 \u2014 'varied perspectives and\u2026",
+        "type": "article",
+        "url": "https://investor.bokf.com/news-events/news-details/2022/BOK-Financial-names-new-"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-079",
+        "excerpt": "CISO Paul Tucker title: 'Chief Information and Privacy Officer' \u2014 combined CISO + privacy role = converged security/privacy governance BOKF produces cybersecurity thought leadership: 'Cybersecurity Essentials' content hu",
+        "title": "CISO Paul Tucker title: 'Chief Information and Privacy Officer'",
+        "type": "article",
+        "url": "https://www.bankofoklahoma.com/commercial/cybersecurity-essentials"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "Glassdoor: 4.0/5 stars (526 reviews), 70% recommend to friend, 70% positive interview experience Accelerated Career Track (ACT) programs: internship + full-time rotational program across business lines incl IT",
+        "title": "4.0/5 stars (526 reviews), 70% recommend to friend, 70% positive\u2026",
+        "type": "article",
+        "url": "https://www.glassdoor.com/Overview/Working-at-BOK-Financial-EI_IE4759.11,24.htm"
+      }
+    ],
+    "ticker": "BOKF"
+  },
+  "issue_register": [
+    {
+      "id": "737b0aff-6ab3-46d3-997b-d5a85f140ad0",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Proof completeness 54.3% (target \u226595%)"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Total assets b grew from 49.3 (2023) to 52.2 (2025) \u2014 2.9% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 1.99,
+        "P1C3": 2.0,
+        "P1C4": 2.11,
+        "P1C5": 2.14,
+        "P2C1": 1.86,
+        "P2C2": 1.97,
+        "P2C3": 2.29,
+        "P2C4": 2.45,
+        "P3C1": 1.82,
+        "P3C2": 2.04,
+        "P3C3": 2.07,
+        "P3C4": 2.47,
+        "P4C1": 1.68,
+        "P4C2": 1.69,
+        "P4C3": 1.69,
+        "P4C4": 1.78
+      },
+      "overall_score": 2.01,
+      "peer_name": "Bell Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.06,
+        "P1C2": 2.58,
+        "P1C3": 1.54,
+        "P1C4": 1.54,
+        "P1C5": 2.0,
+        "P2C1": 1.83,
+        "P2C2": 1.84,
+        "P2C3": 1.83,
+        "P2C4": 1.51,
+        "P3C1": 1.86,
+        "P3C2": 2.79,
+        "P3C3": 2.63,
+        "P3C4": 2.48,
+        "P4C1": 1.55,
+        "P4C2": 2.03,
+        "P4C3": 1.0,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.0,
+      "peer_name": "Alma Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P2C1": 2.0,
+        "P2C2": 1.9,
+        "P2C3": 1.37,
+        "P2C4": 1.17,
+        "P3C1": 2.5,
+        "P3C3": 2.65,
+        "P3C4": 2.5,
+        "P4C1": 1.88,
+        "P4C2": 1.25,
+        "P4C3": 2.0,
+        "P4C4": 2.02
+      },
+      "overall_score": 1.98,
+      "peer_name": "Zions Bancorporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.24,
+        "P1C3": 1.71,
+        "P1C4": 1.74,
+        "P1C5": 1.71,
+        "P2C1": 1.83,
+        "P2C2": 1.69,
+        "P2C3": 1.72,
+        "P2C4": 1.59,
+        "P3C1": 1.95,
+        "P3C2": 2.13,
+        "P3C3": 2.59,
+        "P3C4": 2.34,
+        "P4C1": 1.9,
+        "P4C2": 1.34,
+        "P4C3": 1.95,
+        "P4C4": 2.3
+      },
+      "overall_score": 1.95,
+      "peer_name": "Royal Business Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.83,
+        "P1C2": 2.2,
+        "P1C3": 2.0,
+        "P1C4": 1.6,
+        "P1C5": 1.8,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.33,
+        "P3C1": 1.81,
+        "P3C2": 2.17,
+        "P3C3": 2.03,
+        "P3C4": 2.38,
+        "P4C1": 1.44,
+        "P4C2": 1.44,
+        "P4C3": 2.25,
+        "P4C4": 1.89
+      },
+      "overall_score": 1.95,
+      "peer_name": "Sunflower Bank, N.A.",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-BOKF-20260330-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "engaged vs 33% US average and 23% global average Glassdoor: 4.0/5 stars (526 reviews), 70% recommend to friend, 70% positive interview experience Accelerated Career Track (ACT) programs: internship + full-time rotational program across busi",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 526,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.0
+      },
+      {
+        "drilldown": "Indeed salary data returned NULL for 'Data Scientist' at BOKF Model Risk Management: independent staff validates models, enforces governance program [from MRM includes risk scores, validation frequency determinati",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "6B as of 12/31/2025 S&P A- (OS), Fitch A (OS) for BOKF NA; BBB+/A for holding company 6,719 employees, HQ 101 E 2nd St Tulsa OK, annual revenue $1B-$10B SVP Director of Consumer Digital Origination Strategy hired Jan 2025 (Tasha Vandal) Ove",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": 3.6
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "SVP Director Strategic Communications named to Ragan's Top Women in Communications 2025 \u2014 brand investment signal",
+      "date_precision": "year",
+      "e_id": "E-044",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "2ca92891-cbda-41a7-a966-6710e3bf9f38",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.bokfinancial.com/",
+      "subcap_ids": [],
+      "title": "SVP Director Strategic Communications named to Ragan's Top\u2026"
+    },
+    {
+      "body": "Named official bank partner of Colorado Athletics June 2025 \u2014 sports marketing activation",
+      "date_precision": "month",
+      "e_id": "E-044",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "c9ec43e5-d1fd-4720-a752-740486af75e0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.bokfinancial.com/",
+      "subcap_ids": [],
+      "title": "Named official bank partner of Colorado Athletics June 2025"
+    },
+    {
+      "body": "SVP Director of Consumer Digital Origination Strategy hired Jan 2025 (Tasha Vandal)",
+      "date_precision": "month",
+      "e_id": "E-005",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-005",
+        "E-049"
+      ],
+      "id": "73acac54-8768-4320-b46c-78580f291337",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/bok-financial",
+      "subcap_ids": [],
+      "title": "SVP Director of Consumer Digital Origination Strategy hired"
+    },
+    {
+      "body": "Wealth platform modernization completed 2024 \u2014 described as redefining how wealth clients served",
+      "date_precision": "year",
+      "e_id": "E-031",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-031"
+      ],
+      "id": "0cce5775-d45b-4811-8b09-1507a13b8f9e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://matrixbcg.com/blogs/growth-strategy/bokf",
+      "subcap_ids": [],
+      "title": "Wealth platform modernization completed"
+    },
+    {
+      "body": "Derek Martin named CIO Sept 2022 \u2014 'varied perspectives and experience' valued in leadership (CEO Kymes)",
+      "date_precision": "month",
+      "e_id": "E-028",
+      "event_date": "2022-09-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "073d9d73-dd28-4f40-9a5c-ade464e44e10",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://investor.bokf.com/news-events/news-details/2022/BOK-Financial-names-new-CIO-Consumer-banking-executive/default.aspx",
+      "subcap_ids": [],
+      "title": "Derek Martin named CIO Sept 2022 \u2014 'varied perspectives and\u2026"
+    },
+    {
+      "body": "CIO Derek Martin appointed 2022 (previously EVP Tech & Ops) \u2014 technology leadership exists [from E-028]",
+      "date_precision": "year",
+      "e_id": "E-078",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-078",
+        "E-028"
+      ],
+      "id": "fe2839e7-f144-4d80-9b2e-05cc0601e868",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.bokfinancial.com/",
+      "subcap_ids": [],
+      "title": "CIO Derek Martin appointed 2022"
+    },
+    {
+      "body": "George Kaiser owns >50%, acquired bank from FDIC in 1991",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "1991-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "35061c2b-7753-481c-8733-081a45f95830",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/BOK_Financial_Corporation",
+      "subcap_ids": [],
+      "title": "George Kaiser owns 50%"
+    }
+  ]
+}

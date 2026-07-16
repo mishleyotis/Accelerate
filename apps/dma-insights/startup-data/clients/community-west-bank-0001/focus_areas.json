@@ -1,0 +1,648 @@
+{
+  "entity_display_id": "community-west-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-072",
+          "E-062"
+        ],
+        "representative_quote": "Vendor-managed IT. CTO + PM = entire tech team.",
+        "source_kind": "docx"
+      },
+      "id": "6ccd68ff-b7c3-41aa-93af-7d522192a6b0",
+      "involved_subcap_ids": [
+        "P4C1.1.2",
+        "P4C1.3.5",
+        "P4C1.3.3",
+        "P4C1.1.3",
+        "P4C2.6.2",
+        "P4C2.4.16",
+        "P4C2.4.10",
+        "P4C2.2.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "0%",
+          "delta": null,
+          "kpi_label": "Technologies",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "E-072, E-062",
+      "title": "90+ Technologies, 0% Engineering",
+      "verbatim_quote": "#3 | 90+ Technologies, 0% Engineering | Vendor-managed IT. CTO + PM = entire tech team. | Managed services + staff augmentation | P4C3: L2.0 \u00b10.5 | E-072, E-062"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-070"
+        ],
+        "representative_quote": "Change management during leadership transition",
+        "source_kind": "docx"
+      },
+      "id": "f68d4d4e-e13c-42e1-97e7-ced59fc9c582",
+      "involved_subcap_ids": [
+        "P1C4.8.1",
+        "P1C4.8.3",
+        "P1C4.8.4",
+        "P1C3.3.3",
+        "P4C1.1.8",
+        "P3C2.7.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 66,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "E-070, CTR-06",
+      "title": "COO Retiring + Culture 1.0/5",
+      "verbatim_quote": "#5 | COO Retiring + Culture 1.0/5 | Lauhon retiring Dec 2026. Fresno Culture 1.0. | Change management during leadership transition | P1C4: L2.0 \u00b10.5 | E-070, CTR-06"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-080",
+          "E-086"
+        ],
+        "representative_quote": "Regulatory compliance exemplary \u2014 strongest capability",
+        "source_kind": "docx"
+      },
+      "id": "8c0cf91b-e31f-46ec-8a9b-0ac784584c45",
+      "involved_subcap_ids": [
+        "P2C2.4.RB1",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P2C2.2.5",
+        "P4C2.4.13"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 30,
+        "P4": 70
+      },
+      "source_path": "E-080, E-086",
+      "title": "CRA Outstanding + Bauer 5-Star",
+      "verbatim_quote": "#1 | CRA Outstanding + Bauer 5-Star | Regulatory compliance exemplary \u2014 strongest capability | Trust anchor for consulting engagement | P3C3: L3.0 \u00b10.3 | E-080, E-086"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Community West Bank is pursuing a multi-pronged growth strategy anchored in acquisitive expansion, relationship banking, and digital modernization.",
+        "source_kind": "docx"
+      },
+      "id": "071a4d9c-38ab-4bd2-9199-925a0c9afa3b",
+      "involved_subcap_ids": [
+        "P1C3.2.5",
+        "P1C3.7.2",
+        "P1C3.4.1",
+        "P1C3.3.1",
+        "P1C4.1.5",
+        "P1C4.1.5",
+        "P1C4.1.5",
+        "P1C4.1.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Community West Bank is pursuing a multi-pronged growth strategy anchored in acquisitive\u2026",
+      "verbatim_quote": "Community West Bank is pursuing a multi-pronged growth strategy anchored in acquisitive expansion, relationship banking, and digital modernization. The following strategic objectives are documented across public filings and corporate communications:"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-077",
+          "E-102"
+        ],
+        "representative_quote": "Annual Report roadmap + Summer 2026 USB conversion",
+        "source_kind": "docx"
+      },
+      "id": "9174fdca-f0af-4961-8f5f-2a950ae10c11",
+      "involved_subcap_ids": [
+        "P2C2.7.1",
+        "P4C1.1.1",
+        "P4C1.1.8",
+        "P1C1.2.1",
+        "P4C3.1.2",
+        "P1C3.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P4": 50
+      },
+      "source_path": "E-077, E-102",
+      "title": "Digital Roadmap + Systems Conversion",
+      "verbatim_quote": "#7 | Digital Roadmap + Systems Conversion | Annual Report roadmap + Summer 2026 USB conversion | Executive buy-in + decision window = accelerate NOW | P1C1: L2.5 \u00b10.3 | E-077, E-102"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-101"
+        ],
+        "representative_quote": "Data siloed across 6+ vendors. No analytics strategy.",
+        "source_kind": "docx"
+      },
+      "id": "ce640fcf-f7be-400d-9178-2731cca55bde",
+      "involved_subcap_ids": [
+        "P4C1.1.2",
+        "P4C1.3.5",
+        "P4C1.3.3",
+        "P4C1.1.3",
+        "P4C2.6.2",
+        "P4C2.4.16",
+        "P4C2.4.10",
+        "P4C2.2.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "E-101",
+      "title": "No Data Warehouse /",
+      "verbatim_quote": "#6 | No Data Warehouse / No AI/ML | Data siloed across 6+ vendors. No analytics strategy. | Data Cloud + MuleSoft + Tableau = data modernization | P4C2: L1.5 \u00b10.5 | E-101"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-016",
+          "E-102"
+        ],
+        "representative_quote": "SO1: M&A Growth Engine: 7 acquisitions since 2005, including USB merger completed April 1, 2026 ($185.5M all-stock).",
+        "source_kind": "docx"
+      },
+      "id": "98bfce7d-152a-4670-abb0-f16142961381",
+      "involved_subcap_ids": [
+        "P2C1.6.6",
+        "P1C5.4.1",
+        "P1C5.3.1",
+        "P2C1.2.2",
+        "P4C2.7.3",
+        "P4C4.7.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Combined entity",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$185,500,000",
+          "delta": null,
+          "kpi_label": "merger completed April",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 27,
+        "P2": 37,
+        "P4": 36
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO1: M&A Growth Engine: 7 acquisitions since 2005, including USB merger completed April 1\u2026",
+      "verbatim_quote": "SO1: M&A Growth Engine: 7 acquisitions since 2005, including USB merger completed April 1, 2026 ($185.5M all-stock). Combined entity ~$5B total assets. CWB's proven M&A playbook is its primary growth driver. [E-016, E-102]"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-102",
+          "E-077"
+        ],
+        "representative_quote": "Geographic Expansion: Expanded from single Fresno office (1980) to 31 communities across 13 Central California counties.",
+        "source_kind": "docx"
+      },
+      "id": "47a78692-134c-4071-875f-3e272322a112",
+      "involved_subcap_ids": [
+        "P2C1.1.CU2",
+        "P1C5.2.2",
+        "P2C4.7.6",
+        "P2C1.1.RB1",
+        "P2C1.2.CU1",
+        "P4C1.1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 15,
+        "P2": 65,
+        "P4": 20
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO2: Geographic Expansion: Expanded from single Fresno office (1980) to 31 communities across\u2026",
+      "verbatim_quote": "SO2: Geographic Expansion: Expanded from single Fresno office (1980) to 31 communities across 13 Central California counties. Post-USB footprint spans Sacramento to Central Coast. [E-102, E-077]"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-102",
+          "E-092"
+        ],
+        "representative_quote": "SO3: Relationship Banking: CEO Kim: 'focused on thoughtful integration and ensuring seamless experience for clients.'",
+        "source_kind": "docx"
+      },
+      "id": "634737a7-035b-4c49-9777-658bdce3b5c9",
+      "involved_subcap_ids": [
+        "P4C1.9.CIB1",
+        "P4C3.8.CIB1",
+        "P3C1.8.RIA2",
+        "P2C3.3.3",
+        "P2C3.3.CIB1",
+        "P2C1.4.CIB1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 52,
+        "P3": 16,
+        "P4": 32
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO3: Relationship Banking: CEO Kim: 'focused on thoughtful integration and ensuring seamless\u2026",
+      "verbatim_quote": "SO3: Relationship Banking: CEO Kim: 'focused on thoughtful integration and ensuring seamless experience for clients.' Core values: Teamwork, Caring, Inclusivity, Excellence, Accountability. [E-102, E-092]"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-077"
+        ],
+        "representative_quote": "SO4: Digital Roadmap (DELAYED): 2024 Annual Report committed to online deposit opening and online SBA lending for 2025.",
+        "source_kind": "docx"
+      },
+      "id": "231fd88a-f6cd-478b-9cc2-a3da595ee3da",
+      "involved_subcap_ids": [
+        "P3C4.5.1",
+        "P3C4.5.1",
+        "P3C4.1.2",
+        "P3C4.5.2",
+        "P3C1.7.1",
+        "P3C1.7.2",
+        "P3C1.4.1",
+        "P3C1.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO4: Digital Roadmap (DELAYED): 2024 Annual Report committed to online deposit opening and\u2026",
+      "verbatim_quote": "SO4: Digital Roadmap (DELAYED): 2024 Annual Report committed to online deposit opening and online SBA lending for 2025. As of April 2026, NEITHER has launched. Digital execution lagging intent. [E-077, CTR-05]"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": "Efficiency (%): 61.6 (2025)",
+      "grounding": {
+        "evidence_e_ids": [
+          "E-016",
+          "E-017",
+          "E-102"
+        ],
+        "representative_quote": "FY2025: NIM 4.04%, efficiency 61.6%, EPS $2.00.",
+        "source_kind": "docx"
+      },
+      "id": "0b978079-5179-470b-a67f-697bb514c326",
+      "involved_subcap_ids": [
+        "P1C2.8.1",
+        "P2C2.7.3",
+        "P1C1.6.5",
+        "P3C4.4.4",
+        "P1C3.4.5",
+        "P3C4.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$2",
+          "delta": null,
+          "kpi_label": "EPS",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "61.6%",
+          "delta": null,
+          "kpi_label": "Efficiency",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "4.04%",
+          "delta": null,
+          "kpi_label": "NIM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 17,
+        "P3": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO5: Financial Performance: FY2025: NIM 4.04%, efficiency 61.6%, EPS $2.00\u2026",
+      "verbatim_quote": "SO5: Financial Performance: FY2025: NIM 4.04%, efficiency 61.6%, EPS $2.00. Post-USB: projected $60.2M combined earnings, EPS accretion 10.2-19.1%. [E-016, E-017, E-102]"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-080",
+          "E-093"
+        ],
+        "representative_quote": "SO6: Community Investment: CRA OUTSTANDING rating.",
+        "source_kind": "docx"
+      },
+      "id": "f289984a-11f4-44f0-a2c7-7716deb625d2",
+      "involved_subcap_ids": [
+        "P1C5.2.2",
+        "P3C1.1.4",
+        "P3C1.8.AM1",
+        "P2C2.4.RB1",
+        "P2C1.3.AM1",
+        "P4C3.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 15,
+        "P2": 30,
+        "P3": 35,
+        "P4": 20
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO6: Community Investment: CRA OUTSTANDING rating. $1.975M affordable housing grant (Visalia)\u2026",
+      "verbatim_quote": "SO6: Community Investment: CRA OUTSTANDING rating. $1.975M affordable housing grant (Visalia). Tribal Nations grant. Housing Trust Fund investment. [E-080, E-093]"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-102"
+        ],
+        "representative_quote": "SO7: Systems Conversion (CRITICAL): Summer 2026 systems conversion planned for USB integration.",
+        "source_kind": "docx"
+      },
+      "id": "971b9937-62be-445d-b82f-2d001f4ef9c7",
+      "involved_subcap_ids": [
+        "P2C2.7.1",
+        "P4C3.8.AM1",
+        "P4C3.8.CIB2",
+        "P3C3.8.3",
+        "P4C3.8.IB1",
+        "P4C3.8.IC1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Combined",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 20,
+        "P3": 20,
+        "P4": 60
+      },
+      "source_path": "docx:strategic_section",
+      "title": "SO7: Systems Conversion (CRITICAL): Summer 2026 systems conversion planned for USB integration\u2026",
+      "verbatim_quote": "SO7: Systems Conversion (CRITICAL): Summer 2026 systems conversion planned for USB integration. THIS IS THE TECHNOLOGY DECISION WINDOW for the combined $5B bank. [E-102]"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-098"
+        ],
+        "representative_quote": "Greenfield FSC implementation \u2014 $$$$ opportunity",
+        "source_kind": "docx"
+      },
+      "id": "929c551f-f8d0-46c2-aca0-fa9dd90a55c3",
+      "involved_subcap_ids": [
+        "P2C1.4.6",
+        "P4C4.1.2",
+        "P2C4.1.5",
+        "P4C4.2.2",
+        "P4C1.3.3",
+        "P1C2.1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "360",
+          "delta": null,
+          "kpi_label": "Customer",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P4": 50
+      },
+      "source_path": "E-098",
+      "title": "Zero CRM / Zero Salesforce",
+      "verbatim_quote": "#4 | Zero CRM / Zero Salesforce | No CRM platform. No 360 customer view. | Greenfield FSC implementation \u2014 $$$$ opportunity | P2C4: L1.0 \u00b10.5 | E-098"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-068"
+        ],
+        "representative_quote": "HIGHEST IMPACT \u2014 Zennify accelerates delayed DAO",
+        "source_kind": "docx"
+      },
+      "id": "834d0b7f-d629-45f3-8548-706c5529b9ad",
+      "involved_subcap_ids": [
+        "P2C2.2.RIA1",
+        "P1C1.4.3",
+        "P2C1.4.RB1",
+        "P2C2.5.6",
+        "P4C4.1.2",
+        "P2C4.1.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,000,000,000",
+          "delta": null,
+          "kpi_label": "Post-USB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 18,
+        "P2": 64,
+        "P4": 18
+      },
+      "source_path": "E-068, CTR-05",
+      "title": "Zero Digital Account Opening",
+      "verbatim_quote": "#2 | Zero Digital Account Opening \u2014 DELAYED | Every customer must visit branch. 2025 roadmap NOT met. | HIGHEST IMPACT \u2014 Zennify accelerates delayed DAO | P2C2: L1.0 \u00b10.3 | E-068, CTR-05"
+    }
+  ]
+}

@@ -1,0 +1,735 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 3,
+        "subcaps": 3,
+        "thin": 1
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 68,
+        "subcaps": 68,
+        "thin": 30
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 27,
+        "subcaps": 27,
+        "thin": 25
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 61,
+        "subcaps": 61,
+        "thin": 46
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "zions-bancorporation-0001",
+    "domain": null,
+    "hq": null,
+    "id": "e39a8bd0-140b-4d9c-b54f-b2e68786b0f8",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Zions Bancorporation",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:33.869117Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 74,
+    "undated_count": 74
+  },
+  "evidence_summary": {
+    "claims": {
+      "ABSENCE": 9,
+      "CONTRADICTION": 1,
+      "EXPLICIT": 58,
+      "IMPLICIT": 6
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 3,
+      "NEUTRAL": 65,
+      "POSITIVE": 6
+    },
+    "tiers": {
+      "T2": 50,
+      "T3": 23,
+      "T4": 1
+    },
+    "total_facts": 253,
+    "total_items": 74
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 824000000.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 87000000000.0,
+    "branches": "~400 across 11 western US states",
+    "clay_synced_at": null,
+    "efficiency_ratio": "61%",
+    "employees_approx": "~10,000",
+    "entity_type": "Bank Holding Company",
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "net_income": 824000000.0,
+      "tier_1_risk_based_pct": 17.0
+    },
+    "financials_as_of": "Q4 2024 (approximate)",
+    "footprint": "Utah",
+    "footprint_basis": "derived:geography",
+    "geography": "Utah",
+    "geography_basis": "nlp:narrative",
+    "headcount": 10000,
+    "hq": "Salt Lake City, Utah",
+    "hq_address": "Salt Lake City, Utah",
+    "key_context": "Contact centers currently spread across affiliate banks. Seeking consolidation onto single FSC experience. RFP for Contact Center SI.",
+    "leadership": [
+      {
+        "background": "10-year BaNCS transformation leadership",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jennifer Smith",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Information & Operations Officer"
+      },
+      {
+        "background": "ex-Discover, Capital One; appointed approximately two years prior",
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Margaret Mayor",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": "first CDO; appointed in prior calendar year",
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Brandon Thomas",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Data Officer"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "Zions Bancorporation, N.A.",
+    "license_type": "National bank charter",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Zions Bancorporation is a regional bank headquartered in Salt Lake City, Utah. It reports $87.0 billion in total assets. It is regulated by OCC (national bank charter) and employs approximately 10,000 people across 400 branches. Its overall digital maturity is assessed at 1.8 out of 5 across the DMA capability framework.",
+    "net_income": "$824M (2024)",
+    "primary_regulator": "OCC (national bank charter)",
+    "revenue_usd": null,
+    "roe": "14.5%",
+    "sentiment": {
+      "derived_from": "evidence_excerpts",
+      "sources": [
+        {
+          "signal": "mention of customer feedback collection mechanisms (CSAT, NPS, CES surveys) tied to contact center interactions",
+          "source": "Net Promoter Score",
+          "trend": "Improving"
+        },
+        {
+          "signal": "s: automated complaint tracking, regulatory classification (CFPB categories), SLA-driven resolution, audit trail for all complaint activities Agentforce deployment planned for Phase 3: virtual agent for tier-1 inquiries (balance, transactio",
+          "source": "CFPB complaints"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mega (>$50B)",
+    "sub_vertical": "Regional Banks",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "Zennify Proposal Phase 2 (Agent Automation, 4.5 months): Einstein Next Best Action for agents, guided workflows for top call types, knowledge article integration, automated after-call work, real-time agent coaching",
+        "title": "Zennify Proposal Phase 2 (Agent Automation, 4.5 months)",
+        "type": "article",
+        "url": "INTERNAL"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-044",
+        "excerpt": "Zennify proposal includes user stories for: screen pop with customer context, automated case creation from inbound call, guided workflow for top 10 call types, knowledge article surfacing during call, after-call work aut",
+        "title": "Zennify proposal includes user stories for: screen pop with customer…",
+        "type": "article",
+        "url": "INTERNAL"
+      }
+    ],
+    "ticker": "ZION",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$87B (as of Q4 2024)",
+    "total_deposits": "$73B",
+    "website": "https://www.zionsbancorporation.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.914473+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Zions Bancorporation — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "SO WHAT: Zions is the only bank in its peer set with no conversational AI, no digital messaging, and no self-service containment. KeyBank's MyKey has reduced AI-handled interaction costs to $0.35 (vs. Zions' $9/call), representing a 97% cost advantage per interaction. The competitive gap is not merely a feature difference — it is a structural cost disadvantage that compounds with each quarter of delay.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "SCQA Context",
+    "scqa_md": "Zions Bancorporation is a $87.0B in assets regional bank regulated by OCC (national bank charter) with 10,000 employees. Fundamentals of Tier-1 17.00% gives it the balance sheet to fund transformation [E-036, E-038]. Zennify's assessment places overall digital maturity at 2.1/5. The deepest capability gap is Next Best Action (NBA) at 1.2/5 against a 2.8 peer median [E-019, E-034].\n\nNext is Experiment Tracking + Model Registry Operating Model at 1.2/5 against a 2.7 peer median [E-009, E-012]. Third is Assisted Service Channels at 1.4/5 against a 2.7 peer median [E-025, E-001]. The issue register adds Short rationale entries. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Zions Bancorporation is whether to close Next Best Action (NBA) first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Zions Bancorporation should lead with Databricks (54/100 fit) against Generative AI Strategy & Use Cases, then sequence Tableau behind it. Closing Next Best Action (NBA) to the peer median alone is worth 1.6 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.\"."
+  },
+  "overall_score": 2.06,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "00_entity_profile/subcap_scope.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:33.858315+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "00_entity_profile/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:33.858767+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/gap_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:33.859354+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:33.859652+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:33.859928+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 16
+    },
+    "stage_ms": {
+      "manifest": 138,
+      "parse": 2937,
+      "persist": 190
+    },
+    "structured": [
+      {
+        "code": "xlsx fallback extracted 159 subcaps from Zions_DMA_Scoring_Workb",
+        "detail": "xlsx fallback extracted 159 subcaps from Zions_DMA_Scoring_Workbook.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (159 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (159 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "evidence loaded from json variant evidence_index.json (74 rows)",
+        "detail": "evidence loaded from json variant evidence_index.json (74 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peers loaded from variant peer_set.json (4 peers)",
+        "detail": "peers loaded from variant peer_set.json (4 peers)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['affiliate_banks', 'entity_type', 'hq', 'key_context', 'legal_name', 'primary_regulator', 'size_tier', 'sub_vertical', 'ticker', 'total_assets', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_baseline_json_filled",
+        "detail": "financial_baseline_json_filled: ['branches', 'efficiency_ratio', 'employees_approx', 'financials_as_of', 'net_income', 'roe', 'total_deposits']",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 6 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "subcap coverage 23% below 80% threshold (159 of 700 expected for",
+        "detail": "subcap coverage 23% below 80% threshold (159 of 700 expected for unknown)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 12 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 5 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "00_entity_profile/subcap_scope.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "00_entity_profile/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/gap_analysis.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx fallback extracted 159 subcaps from Zions_DMA_Scoring_Workbook.xlsx",
+      "scoring loaded from xlsx fallback (159 subcaps, dir=03_scoring_workbook)",
+      "evidence loaded from json variant evidence_index.json (74 rows)",
+      "peers loaded from variant peer_set.json (4 peers)",
+      "firmographics_from_entity_profile_json: fields=['affiliate_banks', 'entity_type', 'hq', 'key_context', 'legal_name', 'primary_regulator', 'size_tier', 'sub_vertical', 'ticker', 'total_assets', 'website'] leadership=0",
+      "financial_baseline_json_filled: ['branches', 'efficiency_ratio', 'employees_approx', 'financials_as_of', 'net_income', 'roe', 'total_deposits']",
+      "used docx-extracted recommendations: 6 rec(s) from Assessment_Report.docx §9",
+      "subcap coverage 23% below 80% threshold (159 of 700 expected for unknown)",
+      "category_scores_derived_from_subcaps: 12 categories (mean rollup)",
+      "tech_stack_from_report_prose: 5 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_derived_from_category_gaps: 4",
+      "INFO/pattern_gap: 00_entity_profile/subcap_scope.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 00_entity_profile/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 04_reports/gap_analysis.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 3,
+      "peer_median": 3.08,
+      "pillar_id": "P1",
+      "score": 2.5,
+      "subcaps_scored": 3
+    },
+    {
+      "peer_benchmarked": 68,
+      "peer_median": 2.69,
+      "pillar_id": "P2",
+      "score": 1.42,
+      "subcaps_scored": 68
+    },
+    {
+      "peer_benchmarked": 27,
+      "peer_median": 2.83,
+      "pillar_id": "P3",
+      "score": 2.56,
+      "subcaps_scored": 27
+    },
+    {
+      "peer_benchmarked": 61,
+      "peer_median": 2.8,
+      "pillar_id": "P4",
+      "score": 1.75,
+      "subcaps_scored": 61
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-06",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:33.869117Z",
+    "created_at": "2026-07-02T23:09:33.869117Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "hybrid",
+    "id": "2b8a02d2-30fa-4c49-9025-f77a99457396",
+    "overall_score": null,
+    "request_id": "DMA-ASM-ZIONS-20260306-0001",
+    "started_at": "2026-07-02T23:09:33.869117Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-026",
+        "E-041",
+        "E-001",
+        "E-002"
+      ],
+      "magnitude": "1.3 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.67,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.35,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Pega/Pegasus desktop has zero data persistence between sessions — implies no unified interaction history, no customer context carryover between calls, no longitudinal view of customer journey"
+    },
+    {
+      "body": "Next Best Action (NBA) is a priority capability gap in customer experience, scoring 1.17/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-019",
+        "E-034"
+      ],
+      "magnitude": "1.6 pts below peer median",
+      "name": "Next Best Action (NBA)",
+      "peer_median": 2.75,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.17,
+      "so_what": "Prioritize Next Best Action (NBA) in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Next Best Action (NBA)",
+      "what": "Next Best Action (NBA) is a priority capability gap in customer experience, scoring 1.17/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Zennify Proposal Phase 2 (Agent Automation, 4.5 months): Einstein Next Best Action for agents, guided workflows for top call types, knowledge article integration, automated after-call work, real-time agent coaching"
+    },
+    {
+      "body": "Experiment Tracking + Model Registry Operating Model is a priority capability gap in data and technology, scoring 1.25/5 against a peer median of 2.67. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-009",
+        "E-012",
+        "E-016",
+        "E-020"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Experiment Tracking + Model Registry Operating Model",
+      "peer_median": 2.67,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.25,
+      "so_what": "Prioritize Experiment Tracking + Model Registry Operating Model in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Experiment Tracking + Model Registry Operating Model",
+      "what": "Experiment Tracking + Model Registry Operating Model is a priority capability gap in data and technology, scoring 1.25/5 against a peer median of 2.67. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: No AI/chatbot/virtual assistant mentioned in current state. No conversational AI, no NLP processing, no GenAI agent assist in existing platform"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-039"
+      ],
+      "modifiers": [
+        "5 of 15 subcaps on thin evidence"
+      ],
+      "rationale": "Omnichannel Vision averages 2.5/5 over 15 scored subcaps; ceiling 3.3 reflects thin evidence density (10/15 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "10 of 10 subcaps on thin evidence"
+      ],
+      "rationale": "Website Quality averages 2.0/5 over 10 scored subcaps; ceiling 2.5 reflects thin evidence density (0/10 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "25 of 25 subcaps on thin evidence"
+      ],
+      "rationale": "Cognitive Accessibility averages 1.9/5 over 25 scored subcaps; ceiling 2.4 reflects thin evidence density (0/25 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-004"
+      ],
+      "modifiers": [
+        "101 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Assisted Service Channels averages 1.4/5 over 286 scored subcaps; ceiling 2.2 reflects thin evidence density (185/286 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-034"
+      ],
+      "modifiers": [
+        "10 of 15 subcaps on thin evidence"
+      ],
+      "rationale": "Next Best Action (NBA) averages 1.2/5 over 15 scored subcaps; ceiling 1.8 reflects thin evidence density (5/15 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "5 of 5 subcaps on thin evidence"
+      ],
+      "rationale": "Approval Automation averages 2.5/5 over 5 scored subcaps; ceiling 3.0 reflects thin evidence density (0/5 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-032"
+      ],
+      "modifiers": [
+        "46 of 46 subcaps on thin evidence"
+      ],
+      "rationale": "Disclosure Management averages 2.6/5 over 46 scored subcaps; ceiling 3.1 reflects thin evidence density (0/46 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-050"
+      ],
+      "modifiers": [
+        "70 of 80 subcaps on thin evidence"
+      ],
+      "rationale": "Plan Maintenance averages 2.5/5 over 80 scored subcaps; ceiling 3.1 reflects thin evidence density (10/80 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "30 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "Synthetic Data Generation averages 1.9/5 over 40 scored subcaps; ceiling 2.5 reflects thin evidence density (10/40 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-009"
+      ],
+      "modifiers": [
+        "70 of 100 subcaps on thin evidence"
+      ],
+      "rationale": "Experiment Tracking + Model Registry Operating Model averages 1.2/5 over 100 scored subcaps; ceiling 1.9 reflects thin evidence density (30/100 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.3,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-017"
+      ],
+      "modifiers": [],
+      "rationale": "Reverse ETL & SaaS Activation Patterns averages 2.0/5 over 15 scored subcaps; ceiling 3.0 reflects solid evidence density (15/15 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-003"
+      ],
+      "modifiers": [
+        "130 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "SBOM Management & Vulnerability Tracking averages 2.0/5 over 150 scored subcaps; ceiling 2.6 reflects thin evidence density (20/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Zions Wealth Management uses Salesforce FSC for service request management (per current job posting). Indicates partial FSC footprint already exists within the organization.",
+      "evidence": [
+        "E-055"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Zions Wealth Management uses Salesforce FSC",
+      "metric": null,
+      "peer_context": "Next Best Action (NBA) runs 1.17/5 vs a 2.75 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Zions Wealth Management uses Salesforce FSC for service request management (per current job posting). Indicates partial FSC footprint already exists within the organization. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of Zions Bancorporation. Overall digital maturity scored 1.76/5.0 (Mar 2026).",
+      "evidence": [
+        "E-052",
+        "E-072"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of Zions…",
+      "metric": null,
+      "peer_context": "Next Best Action (NBA) runs 1.17/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Generative AI Strategy & Use Cases — highest-fit surface at 54/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of Zions Bancorporation. Overall digital maturity scored 1.76/5.0 (Mar 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-06",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Next Best Action (NBA) scores 1.17/5 vs a typical 2.75 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-019",
+        "E-034"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Next Best Action (NBA) scores 1.17/5",
+      "metric": "Next Best Action (NBA) 1.17/5 vs peer 2.75",
+      "peer_context": "Next Best Action (NBA) runs 1.17/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Generative AI Strategy & Use Cases — highest-fit surface at 54/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Next Best Action (NBA) scores 1.17/5 vs a typical 2.75 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

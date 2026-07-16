@@ -1,0 +1,205 @@
+{
+  "entity_display_id": "fulton-bank-national-ass-8001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+        "Overby": "-Seawell vendor breach $750K",
+        "outcome": "3 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.19",
+          "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Activate SFMC Personalization (igodigital) Full Mode + Mobile Studio + Feedback Management for NPS Close-Loop"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+2.14",
+          "metric": "P1C3 score 1.86 \u2192 4.0 (peer median 2.65)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C3 score 1.86 \u2192 4.0 (peer median 2.65)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Deploy Service Cloud + Agentforce on Digital Channels (Web, Mobile, Lending) \u2014 Without Displacing NICE Mpower in the Contact Center"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.03",
+          "metric": "outcome 3 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome 3 months",
+            "peer": "Fulton",
+            "time": "3 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Layer Salesforce Data Cloud (Data 360) on Top of Reltio MDM as Activation Layer for Dearwester CDAO Data-Products Mandate"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.72",
+          "metric": "Overby-Seawell vendor breach $750K",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Overby-Seawell vendor breach $750K",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy Salesforce Shield + Privacy Center as SF-Org-Specific Security Layer (Splunk + ServiceNow Remain Enterprise SIEM/GRC)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P1C3"
+    },
+    {
+      "customer_impact": {
+        "AUM $": "17B",
+        "Outcome": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "AUM $17B",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.03",
+          "metric": "AUM $17B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "AUM $17B",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Expand FSC for Wealth Access ($17B AUM) + Republic First/Blue Foundry Onboarding + Section 1033 Developer Portal via Experience Cloud"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+2.19",
+          "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Digital Strategy Workshop to Sequence FultonFirst Phase 2 Roadmap with Brett Gagnon (Chief Enterprise Architect) + Dearwester (CDAO) + Sargent (CIO) + Gremer (COTO)"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.73",
+          "metric": "P3C2 score 2.27 \u2192 4.0 (peer median 2.95)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C2 score 2.27 \u2192 4.0 (peer median 2.95)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Deploy Agentforce for Real-Time Fraud Triage + CrowdStrike Falcon Shield Integration for AI-Agent Monitoring"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.03",
+          "metric": "P2C3 score 1.97 \u2192 4.0 (peer median 2.75)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.97 \u2192 4.0 (peer median 2.75)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "MuleSoft Anypoint for Section 1033 Open Banking API Layer (Boomi Remains for Internal Integration)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.19",
+          "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-09",
+          "title": "Activate Marketing Cloud Personalization Full Mode + Data Cloud Activation Layer for Lifecycle Engagement"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.19",
+          "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.81 \u2192 4.0 (peer median 2.70)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-10",
+          "title": "Consolidate Tableau + Looker + QlikView into CRM Analytics + Tableau Cloud with Data Cloud as Single Activation Source"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-FULT-20260508-001",
+  "total_duration_months": 12
+}

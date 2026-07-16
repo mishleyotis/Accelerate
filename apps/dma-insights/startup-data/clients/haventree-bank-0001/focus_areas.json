@@ -1,0 +1,272 @@
+{
+  "entity_display_id": "haventree-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-002",
+          "E-007",
+          "E-078"
+        ],
+        "representative_quote": "Indeed culture rating 2.1/5; CEO approval 16.15%",
+        "source_kind": "docx"
+      },
+      "id": "aafd0b9e-f0cf-47c2-9d06-fad3f6782509",
+      "involved_subcap_ids": [
+        "P3C2.7.4",
+        "P3C3.5.4",
+        "P1C2.7.1",
+        "P1C4.1.5",
+        "P1C4.1.1",
+        "P1C4.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "16.15%",
+          "delta": null,
+          "kpi_label": "CEO approval",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$1,500,000",
+          "delta": null,
+          "kpi_label": "Class action settlement",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P3": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Cultural and management ratings depress people/change\u2026",
+      "verbatim_quote": "F-005 | Cultural and management ratings depress people/change capability\n\nObservation: Indeed culture rating 2.1/5; CEO approval 16.15% [E-002, E-007]. Glassdoor sentiment likely similar (proxy). Class action settlement $1.5M (July 2024) [E-078] for auto-renewal without consent \u2014 conduct risk signal. | ISS-001 caps P1C4 Culture & Change Management at M3; ISS-005 caps P2C3 Omnichannel at M3. | Change Management advisory, Customer Experience design, Servicing transformation | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-081",
+          "E-093",
+          "E-027",
+          "E-090",
+          "E-016"
+        ],
+        "representative_quote": "Cybersecurity posture is strong but lacks public CISO Observation: Director Infrastructure Network & Security Zoran",
+        "source_kind": "docx"
+      },
+      "id": "d5d4daac-8c23-4854-887d-669ee0a69853",
+      "involved_subcap_ids": [
+        "P4C4.1.1",
+        "P3C4.6.3",
+        "P1C2.7.2",
+        "P1C2.6.1",
+        "P4C4.3.1",
+        "P1C2.6.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Cybersecurity posture is strong",
+      "verbatim_quote": "F-006 | Cybersecurity posture is strong but lacks public CISO\n\nObservation: Director Infrastructure Network & Security Zoran Rakic CISSP/CISM/CCSK [E-081]. 2x IAM Security Engineers [E-081]. Microsoft Sentinel SIEM, NIST framework adopted [E-093]. OSFI B-13 Cyber compliance documented [E-027, E-090]. Auth0 CIAM in production [E-016]. | P4C4 Cybersecurity ceiling M3-M4; absence of public CISO role limits P1C2 Governance evidence. | Identity & Access (Auth0/Okta), Cybersecurity Governance, OSFI B-13 compliance | MEDIUM"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-095",
+          "E-041",
+          "E-017",
+          "E-011"
+        ],
+        "representative_quote": "DTC + Payments roadmap signals fundamental business model evolution Observation",
+        "source_kind": "docx"
+      },
+      "id": "4a83a5fb-6c9f-4405-aa31-cc1ba82d6222",
+      "involved_subcap_ids": [
+        "P3C1.1.4",
+        "P3C1.7.4",
+        "P3C1.1.4",
+        "P3C1.2.4",
+        "P3C4.4.4",
+        "P3C4.5.3",
+        "P3C4.3.3",
+        "P3C4.6.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "DTC + Payments roadmap signals",
+      "verbatim_quote": "F-002 | DTC + Payments roadmap signals fundamental business model evolution\n\nObservation: /deposits dummy page (Sept 2025) [E-095], DTC + payment products in Director PM job posting (Apr 2026) [E-041], DTC explicitly tagged in Senior Analyst role [E-017]. CEO's prior role: CEO Merrco Payments [E-011]. | Lifts P2C1 Digital Marketing and P2C2 Onboarding ceilings (NEW capability). Triggers P3C2 Fraud cap re-assessment for new transaction types. Aligns with P4C2 personalization investments. | Salesforce DTC portal, Customer Experience, Payments platform, Onboarding automation | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-097",
+          "E-091",
+          "E-093"
+        ],
+        "representative_quote": "NO Chief Data Officer publicly identified.",
+        "source_kind": "docx"
+      },
+      "id": "9968acb0-c988-4156-a461-68f003596cba",
+      "involved_subcap_ids": [
+        "P4C2.8.4",
+        "P4C2.8.4",
+        "P4C2.8.4",
+        "P4C2.8.4",
+        "P4C3.2.1",
+        "P4C3.6.11",
+        "P4C3.1.1",
+        "P4C3.6.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Data and Analytics maturity is leading capability gap\u2026",
+      "verbatim_quote": "F-004 | Data and Analytics maturity is leading capability gap\n\nObservation: NO Chief Data Officer publicly identified [E-097, ISS-002]. Data Governance Working Group confirmed but no enterprise data catalog / MDM evidence [E-091]. Data lifecycle policy exists but limited automation evidence [E-093]. | P4C1 Data Governance capped at M3 absent CDO; P4C2 Analytics stuck at descriptive (Power BI/Tableau) \u2014 limited evidence of predictive/MLOps despite Temenos Explainable AI module. | Salesforce Data Cloud + Snowflake Data Vault + MDM + Data Governance \u2014 high-value greenfield | MEDIUM-HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-008",
+          "E-015",
+          "E-097",
+          "E-081",
+          "E-082"
+        ],
+        "representative_quote": "Haventree 2.0 transformation programme is core strategic anchor Observation",
+        "source_kind": "docx"
+      },
+      "id": "a3d4b3ce-87f6-41ab-a7bf-ce49511cc59f",
+      "involved_subcap_ids": [
+        "P3C1.1.4",
+        "P3C1.7.4",
+        "P3C1.1.4",
+        "P3C1.2.4",
+        "P3C4.4.4",
+        "P3C4.5.3",
+        "P3C4.3.3",
+        "P3C4.6.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Haventree 2.0 transformation programme is core strategic\u2026",
+      "verbatim_quote": "F-001 | Haventree 2.0 transformation programme is core strategic anchor\n\nObservation: Temenos cloud-native SaaS migration on Microsoft Azure announced June 2024 [E-008]; CEO frames as 'expansion of product suite and digital transformation towards Haventree 2.0' [E-008]. AI integration roadmap stated on careers page [E-015]. 8-person C-suite with CPIO and dedicated tech directors [E-097, E-081, E-082]. | P4C3 Tech Architecture ceiling lifted; P1C1 Digital Strategy moves from M2 to M3+. Migration risk caps short-term P3C1 Automation at M3 until utilization confirmed. | Cloud Architecture Modernization + Data Migration + API Strategy \u2014 top 3 of 12 Zennify solutions | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-016",
+          "E-029",
+          "E-090",
+          "E-092"
+        ],
+        "representative_quote": "Multi-cloud architecture (Azure + AWS) addresses OSFI cloud concentration risk Observation",
+        "source_kind": "docx"
+      },
+      "id": "f12ed7a3-6430-48fa-950b-d3affcfdd1ca",
+      "involved_subcap_ids": [
+        "P4C3.4.6",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P4C3.4.1",
+        "P4C3.4.7",
+        "P4C3.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "Multi-cloud architecture (Azure + AWS) addresses OSFI cloud\u2026",
+      "verbatim_quote": "F-007 | Multi-cloud architecture (Azure + AWS) addresses OSFI cloud concentration risk\n\nObservation: Tech stack confirmed: Azure (primary, hosts Temenos) + AWS via Freestone integrator [E-016, E-029]. OSFI B-10 Feb 2024 update emphasizes multi-cloud design for cloud concentration risk [E-090]. Director Integration Architecture role [E-092] supports portability. | P4C3 Tech Architecture lifts; P3C4 Resilience strong against B-10 expectations. | Multi-cloud architecture, Resilience design, OSFI compliance | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-005",
+          "E-001",
+          "E-018",
+          "E-085",
+          "E-088",
+          "E-003"
+        ],
+        "representative_quote": ", OSFI Schedule I supervised, Pillar III ERM Framework with three lines of defense, BCP across all business units, ICAAP annual stress testing.",
+        "source_kind": "docx"
+      },
+      "id": "65297b1c-fdd1-4204-b702-ace97a2472d5",
+      "involved_subcap_ids": [
+        "P1C5.8.1",
+        "P1C5.8.1",
+        "P1C5.8.1",
+        "P1C5.8.1",
+        "P1C3.6.2",
+        "P1C3.3.2",
+        "P1C3.5.3",
+        "P1C3.8.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Strong regulatory posture with zero Fintrac penalties\u2026",
+      "verbatim_quote": "F-003 | Strong regulatory posture with zero FINTRAC penalties + comprehensive Pillar III ERM framework\n\nObservation: FINTRAC zero administrative penalties [E-005], OSFI Schedule I supervised [E-001/E-018], Pillar III ERM Framework with three lines of defense, BCP across all business units, ICAAP annual stress testing [E-085, E-088, E-003]. CCO Tanya Graham-Smith CAMS/CFCS/FIS [E-089]. CRO Brent Bishop with 35+ years in financial services [E-087]. | P3C2/P3C3/P3C4 ceilings strong (M3-M4 base); regulatory excellence is institutional moat. | Compliance Automation, Risk Modernization, Regulatory Reporting | HIGH"
+    }
+  ]
+}

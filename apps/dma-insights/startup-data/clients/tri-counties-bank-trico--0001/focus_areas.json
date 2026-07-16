@@ -1,0 +1,34 @@
+{
+  "entity_display_id": "tri-counties-bank-trico--0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "No public evidence identified for Adoption Metrics.",
+        "source_kind": "heuristic"
+      },
+      "id": "695463bb-dccc-4615-bb8c-30d911d18399",
+      "involved_subcap_ids": [
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C1.8.2",
+        "P1C1.8.3",
+        "P1C1.8.4",
+        "P1C2.2.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

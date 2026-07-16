@@ -1,0 +1,2252 @@
+{
+  "cards": [
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.2.6",
+        "P1C1.2.7",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.3.6",
+        "P1C1.3.7",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.5.6",
+        "P1C1.5.7",
+        "P1C1.5.8",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C1.6.6",
+        "P1C1.7.1",
+        "P1C1.7.2",
+        "P1C1.7.3",
+        "P1C1.7.4",
+        "P1C1.8.1",
+        "P1C1.8.2",
+        "P1C1.8.3",
+        "P1C1.8.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.1.5",
+        "P1C4.1.6",
+        "P1C4.10.1",
+        "P1C4.10.2",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.3.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.4.4",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.5.6",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P1C4.7.1",
+        "P1C4.7.2",
+        "P1C4.7.3",
+        "P1C4.8.1",
+        "P1C4.8.2",
+        "P1C4.8.3",
+        "P1C4.8.4",
+        "P1C4.8.5",
+        "P1C4.8.6",
+        "P1C4.9.1",
+        "P1C4.9.2",
+        "P1C4.9.3",
+        "P2C1.1.6",
+        "P2C1.2.1",
+        "P2C1.2.2",
+        "P2C1.2.3",
+        "P2C1.2.4",
+        "P2C1.2.5",
+        "P2C1.2.7",
+        "P2C1.2.8",
+        "P2C1.3.1",
+        "P2C1.3.2",
+        "P2C1.3.3",
+        "P2C1.3.4",
+        "P2C1.3.5",
+        "P2C1.3.6",
+        "P2C1.4.1",
+        "P2C1.4.2",
+        "P2C1.4.3",
+        "P2C1.4.4",
+        "P2C1.4.5",
+        "P2C1.4.6",
+        "P2C1.4.7",
+        "P2C1.4.8",
+        "P2C1.5.7",
+        "P2C1.8.1",
+        "P2C1.8.2",
+        "P2C1.8.3",
+        "P2C1.8.4",
+        "P2C1.8.5",
+        "P2C1.8.6",
+        "P2C1.8.7",
+        "P2C2.4.7",
+        "P2C3.2.1",
+        "P2C3.2.2",
+        "P2C3.2.3",
+        "P2C3.2.4",
+        "P2C3.2.5",
+        "P2C3.2.6",
+        "P2C3.2.7",
+        "P2C3.2.8",
+        "P2C3.3.4",
+        "P2C3.4.1",
+        "P2C3.4.2",
+        "P2C3.4.3",
+        "P2C3.4.4",
+        "P2C3.5.1",
+        "P2C3.5.2",
+        "P2C3.5.3",
+        "P2C3.5.4",
+        "P2C3.5.5",
+        "P2C3.5.6",
+        "P2C3.5.7",
+        "P2C3.6.1",
+        "P2C3.6.2",
+        "P2C3.6.3",
+        "P2C3.6.4",
+        "P2C3.6.5",
+        "P2C3.6.6",
+        "P2C3.6.7",
+        "P2C3.6.8",
+        "P2C3.7.5",
+        "P2C3.9.1",
+        "P2C3.9.2",
+        "P2C3.9.3",
+        "P2C3.9.4",
+        "P2C4.2.6",
+        "P2C4.3.2",
+        "P2C4.7.3",
+        "P3C1.1.1",
+        "P3C1.1.2",
+        "P3C1.1.3",
+        "P3C1.1.4",
+        "P3C1.2.1",
+        "P3C1.2.2",
+        "P3C1.2.3",
+        "P3C1.2.4",
+        "P3C1.2.5",
+        "P3C1.3.2",
+        "P3C1.4.1",
+        "P3C1.4.2",
+        "P3C1.4.3",
+        "P3C1.4.4",
+        "P3C1.5.2",
+        "P3C1.5.3",
+        "P3C1.5.4",
+        "P3C1.5.5",
+        "P3C1.6.1",
+        "P3C1.6.2",
+        "P3C1.6.3",
+        "P3C1.6.4",
+        "P3C1.7.1",
+        "P3C1.7.2",
+        "P3C1.7.3",
+        "P3C1.7.4",
+        "P3C2.1.1",
+        "P3C2.1.3",
+        "P3C2.2.2",
+        "P3C2.2.3",
+        "P3C2.3.1",
+        "P3C2.3.2",
+        "P3C2.3.3",
+        "P3C2.3.4",
+        "P3C2.4.1",
+        "P3C2.4.2",
+        "P3C2.4.3",
+        "P3C2.5.2",
+        "P3C2.5.3",
+        "P3C2.5.4",
+        "P3C2.7.2",
+        "P3C2.7.3",
+        "P3C2.8.1",
+        "P3C2.8.2",
+        "P3C2.8.3",
+        "P3C2.8.4",
+        "P3C4.1.1",
+        "P3C4.1.2",
+        "P3C4.1.3",
+        "P3C4.1.4",
+        "P3C4.2.1",
+        "P3C4.2.2",
+        "P3C4.2.3",
+        "P3C4.2.4",
+        "P3C4.3.1",
+        "P3C4.3.2",
+        "P3C4.3.3",
+        "P3C4.3.4",
+        "P3C4.4.1",
+        "P3C4.4.2",
+        "P3C4.4.3",
+        "P3C4.4.4",
+        "P3C4.5.2",
+        "P3C4.5.3",
+        "P3C4.5.4",
+        "P3C4.6.1",
+        "P3C4.6.2",
+        "P3C4.6.3",
+        "P3C4.7.1",
+        "P3C4.7.2",
+        "P3C4.7.3",
+        "P3C4.8.1",
+        "P3C4.8.2",
+        "P3C4.8.3",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.10",
+        "P4C2.4.11",
+        "P4C2.4.12",
+        "P4C2.4.13",
+        "P4C2.4.14",
+        "P4C2.4.15",
+        "P4C2.4.16",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.4.4",
+        "P4C2.4.5",
+        "P4C2.4.6",
+        "P4C2.4.7",
+        "P4C2.4.8",
+        "P4C2.4.9",
+        "P4C2.5.1",
+        "P4C2.5.2",
+        "P4C2.5.3",
+        "P4C2.5.4",
+        "P4C2.5.5",
+        "P4C2.5.6",
+        "P4C2.5.7",
+        "P4C2.5.8",
+        "P4C2.6.1",
+        "P4C2.6.2",
+        "P4C2.6.3",
+        "P4C2.6.4",
+        "P4C2.6.5",
+        "P4C2.6.6",
+        "P4C2.7.1",
+        "P4C2.7.2",
+        "P4C2.7.3",
+        "P4C2.7.4",
+        "P4C2.8.1",
+        "P4C2.8.2",
+        "P4C2.8.3",
+        "P4C2.8.4",
+        "P4C2.8.5",
+        "P4C2.8.6",
+        "P4C4.1.1",
+        "P4C4.1.2",
+        "P4C4.2.1",
+        "P4C4.2.2",
+        "P4C4.2.3",
+        "P4C4.2.4",
+        "P4C4.2.5",
+        "P4C4.2.6",
+        "P4C4.4.1",
+        "P4C4.4.2",
+        "P4C4.4.3",
+        "P4C4.4.4",
+        "P4C4.4.5",
+        "P4C4.5.1",
+        "P4C4.5.2",
+        "P4C4.5.3",
+        "P4C4.5.4",
+        "P4C4.5.5",
+        "P4C4.7.1",
+        "P4C4.7.2",
+        "P4C4.7.3",
+        "P4C4.8.1",
+        "P4C4.8.2"
+      ],
+      "conversation_starter": "Salesforce (pillar P2) addresses 295 subcaps, starting with P1C1.1.1; fit is 47/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 295-subcap roadmap starting at P1C1.1.1 and extending to 294 additional subcaps.\nNext step: book a Salesforce workshop scoped to P2, covering the 295-subcap addressable surface.",
+      "conversation_starters": [
+        "Wescom Financial (Wescom Central Credit Union) scores 2.5 on Digital Strategy Document (P1C1.1.1) — 0.0 points above the peer median 2.5 [E-018, E-019]. Ask who owns it today, what tooling backs it, and what the review cadence is — Salesforce addresses 295 linked subcaps here and is ready to land now (fit 47/100).",
+        "Prerequisites are MET, so move to value: their own evidence shows pillar Net earnings $18M [E-018] — confirm Wescom Financial (Wescom Central Credit Union)'s appetite to close the Digital Strategy Document gap (currently 2.5/5) this fiscal year and open scoping.",
+        "Peer framing: Members 1st Federal Credit Union and iQ Credit Union are in Wescom Financial (Wescom Central Credit Union)'s benchmark cohort holding the 2.5 median on Digital Strategy Document. Sequence Salesforce after Databricks → Tableau; next step is a Salesforce workshop scoped to P2."
+      ],
+      "display_name": "Salesforce",
+      "evidence_ids": [
+        "E-018",
+        "E-019",
+        "E-020",
+        "E-047",
+        "E-037",
+        "E-048",
+        "E-049",
+        "E-001"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.7451,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 376,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 22.1,
+            "value": 0.3677
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 295,
+        "prereqs": {
+          "P1C2.2.1": {
+            "current_score": 4.0,
+            "name": "Identity & access management",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P2C1.1.1": {
+            "current_score": 2.5,
+            "name": "Sales process digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C1.1.1": {
+            "current_score": 4.0,
+            "name": "Customer data foundation",
+            "status": "MET",
+            "threshold": 3.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks",
+            "tableau",
+            "twilio"
+          ],
+          "rank": 4
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-018",
+              "E-019",
+              "E-020"
+            ],
+            "gap": 1.5,
+            "name": "Digital Strategy Document",
+            "opportunity": 0.4725,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018",
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Vision Communication",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-047"
+            ],
+            "gap": 1.5,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-037",
+              "E-048",
+              "E-049"
+            ],
+            "gap": 1.5,
+            "name": "Partner Marketing Strategy",
+            "opportunity": 0.4553,
+            "peer_median": 3.0,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C1.8.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Business Alignment",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Digital KPI Framework",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.6.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Competitive Analysis",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.7.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Board Engagement",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Strategy Document",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Materiality Assessment",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Commitments",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.8",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 47.1,
+      "pillar": "P2",
+      "platform_id": "salesforce",
+      "prereq_checks": [
+        {
+          "current_score": 4.0,
+          "name": "Customer data foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.1",
+          "status": "MET",
+          "threshold": 3.0
+        },
+        {
+          "current_score": 2.5,
+          "name": "Sales process digitization",
+          "note": null,
+          "required_subcap_id": "P2C1.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 4.0,
+          "name": "Identity & access management",
+          "note": null,
+          "required_subcap_id": "P1C2.2.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 4,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Vision Communication"
+      ],
+      "opportunity_md": "**Salesforce** at 47/100 fit addresses 295 scored capability gaps in P2, led by Digital Strategy Document. Digital Strategy Document scores 2.5/5 against a 2.5 peer median; Vision Communication is the next surface."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.2.6",
+        "P1C1.2.7",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.3.6",
+        "P1C1.3.7",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.5.6",
+        "P1C1.5.7",
+        "P1C1.5.8",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C1.6.6",
+        "P1C1.7.1",
+        "P1C1.7.2",
+        "P1C1.7.3",
+        "P1C1.7.4",
+        "P1C1.8.1",
+        "P1C1.8.2",
+        "P1C1.8.3",
+        "P1C1.8.4",
+        "P1C4.10.1",
+        "P1C4.10.2",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.4.4",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.5.6",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C1.5.1",
+        "P2C1.5.2",
+        "P2C1.5.3",
+        "P2C1.5.4",
+        "P2C1.5.5",
+        "P2C1.5.6",
+        "P2C1.6.7",
+        "P2C1.7.1",
+        "P2C1.7.2",
+        "P2C1.7.3",
+        "P2C1.7.4",
+        "P2C1.7.5",
+        "P2C1.7.6",
+        "P2C1.7.7",
+        "P2C4.1.1",
+        "P2C4.1.2",
+        "P2C4.1.3",
+        "P2C4.1.5",
+        "P2C4.2.7",
+        "P2C4.2.8",
+        "P2C4.4.1",
+        "P2C4.4.3",
+        "P2C4.4.5",
+        "P3C2.2.1",
+        "P3C2.7.1",
+        "P3C2.7.4",
+        "P4C2.2.1",
+        "P4C2.2.10",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.2.4",
+        "P4C2.2.5",
+        "P4C2.2.6",
+        "P4C2.2.7",
+        "P4C2.2.8",
+        "P4C2.2.9",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.10",
+        "P4C2.4.11",
+        "P4C2.4.12",
+        "P4C2.4.13",
+        "P4C2.4.14",
+        "P4C2.4.15",
+        "P4C2.4.16",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.4.4",
+        "P4C2.4.5",
+        "P4C2.4.6",
+        "P4C2.4.7",
+        "P4C2.4.8",
+        "P4C2.4.9",
+        "P4C2.5.1",
+        "P4C2.5.2",
+        "P4C2.5.3",
+        "P4C2.5.4",
+        "P4C2.5.5",
+        "P4C2.5.6",
+        "P4C2.5.7",
+        "P4C2.5.8",
+        "P4C2.6.1",
+        "P4C2.6.2",
+        "P4C2.6.3",
+        "P4C2.6.4",
+        "P4C2.6.5",
+        "P4C2.6.6",
+        "P4C2.8.1",
+        "P4C2.8.2",
+        "P4C2.8.3",
+        "P4C2.8.4",
+        "P4C2.8.5",
+        "P4C2.8.6"
+      ],
+      "conversation_starter": "Databricks (pillar P4) addresses 141 subcaps, starting with P1C1.1.1; fit is 61/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 141-subcap roadmap starting at P1C1.1.1 and extending to 140 additional subcaps.\nNext step: book a Databricks workshop scoped to P4, covering the 141-subcap addressable surface.",
+      "conversation_starters": [
+        "Wescom Financial (Wescom Central Credit Union) scores 2.5 on Digital Strategy Document (P1C1.1.1) — 0.0 points above the peer median 2.5 [E-018, E-019]. Ask who owns it today, what tooling backs it, and what the review cadence is — Databricks addresses 141 linked subcaps here and is ready to land now (fit 61/100). Databricks is confirmed absent from their detected stack — a greenfield entry.",
+        "Prerequisites are MET, so move to value: their own evidence shows pillar Net earnings $18M [E-018] — confirm Wescom Financial (Wescom Central Credit Union)'s appetite to close the Digital Strategy Document gap (currently 2.5/5) this fiscal year and open scoping.",
+        "Peer framing: Members 1st Federal Credit Union and iQ Credit Union are in Wescom Financial (Wescom Central Credit Union)'s benchmark cohort holding the 2.5 median on Digital Strategy Document. Sequence Databricks after Tableau; next step is a Databricks workshop scoped to P4."
+      ],
+      "display_name": "Databricks",
+      "evidence_ids": [
+        "E-018",
+        "E-019",
+        "E-020",
+        "E-047",
+        "E-001",
+        "E-003"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Databricks"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.7379,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 324,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 20.7,
+            "value": 0.3451
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 141,
+        "prereqs": {
+          "P3C1.1.1": {
+            "current_score": 2.5,
+            "name": "Cloud infrastructure baseline",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C1.1.2": {
+            "current_score": 4.0,
+            "name": "Data lake / lakehouse foundation",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C2.1.1": {
+            "current_score": 3.5,
+            "name": "Data governance",
+            "status": "MET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau"
+          ],
+          "rank": 2
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-018",
+              "E-019",
+              "E-020"
+            ],
+            "gap": 1.5,
+            "name": "Digital Strategy Document",
+            "opportunity": 0.4725,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018",
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Vision Communication",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-047"
+            ],
+            "gap": 1.5,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Business Alignment",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Digital KPI Framework",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.6.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Competitive Analysis",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.7.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Board Engagement",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Strategy Document",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Materiality Assessment",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Commitments",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.8",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Multi-Year Roadmap",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.1",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 60.7,
+      "pillar": "P4",
+      "platform_id": "databricks",
+      "prereq_checks": [
+        {
+          "current_score": 4.0,
+          "name": "Data lake / lakehouse foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.2",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.5,
+          "name": "Data governance",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.5,
+          "name": "Cloud infrastructure baseline",
+          "note": null,
+          "required_subcap_id": "P3C1.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 2,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Vision Communication"
+      ],
+      "opportunity_md": "**Databricks** at 61/100 fit addresses 141 scored capability gaps in P4, led by Digital Strategy Document. Digital Strategy Document scores 2.5/5 against a 2.5 peer median; Vision Communication is the next surface. The platform family is confirmed absent from the current stack (Databricks) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.2.6",
+        "P1C1.2.7",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.3.6",
+        "P1C1.3.7",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.5.6",
+        "P1C1.5.7",
+        "P1C1.5.8",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C1.6.6",
+        "P1C1.7.1",
+        "P1C1.7.2",
+        "P1C1.7.3",
+        "P1C1.7.4",
+        "P1C1.8.1",
+        "P1C1.8.2",
+        "P1C1.8.3",
+        "P1C1.8.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.1.5",
+        "P1C4.1.6",
+        "P1C4.10.1",
+        "P1C4.10.2",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.5.6",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P1C4.7.1",
+        "P1C4.7.2",
+        "P1C4.7.3",
+        "P1C4.8.1",
+        "P1C4.8.2",
+        "P1C4.8.3",
+        "P1C4.8.4",
+        "P1C4.8.5",
+        "P1C4.8.6",
+        "P2C1.1.1",
+        "P2C1.1.5",
+        "P2C1.6.1",
+        "P2C1.6.2",
+        "P2C1.6.3",
+        "P2C1.6.4",
+        "P2C1.6.5",
+        "P2C1.6.6",
+        "P2C1.6.8",
+        "P2C3.1.1",
+        "P2C3.1.2",
+        "P2C3.1.3",
+        "P2C3.1.4",
+        "P2C3.1.5",
+        "P2C3.1.6",
+        "P2C3.7.1",
+        "P2C3.7.2",
+        "P2C3.7.3",
+        "P2C3.7.4",
+        "P2C3.8.1",
+        "P2C3.8.2",
+        "P2C3.8.3",
+        "P2C3.8.4",
+        "P2C3.8.5",
+        "P2C3.8.6",
+        "P2C3.9.5",
+        "P3C4.5.1",
+        "P4C2.1.1",
+        "P4C2.1.2",
+        "P4C2.2.1",
+        "P4C2.2.10",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.2.4",
+        "P4C2.2.5",
+        "P4C2.2.6",
+        "P4C2.2.7",
+        "P4C2.2.8",
+        "P4C2.2.9"
+      ],
+      "conversation_starter": "Tableau (pillar P4) addresses 117 subcaps, starting with P1C1.1.1; fit is 62/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 117-subcap roadmap starting at P1C1.1.1 and extending to 116 additional subcaps.\nNext step: book a Tableau workshop scoped to P4, covering the 117-subcap addressable surface.",
+      "conversation_starters": [
+        "Wescom Financial (Wescom Central Credit Union) scores 2.5 on Digital Strategy Document (P1C1.1.1) — 0.0 points above the peer median 2.5 [E-018, E-019]. Ask who owns it today, what tooling backs it, and what the review cadence is — Tableau addresses 117 linked subcaps here and is ready to land now (fit 62/100). Tableau is confirmed absent from their detected stack — a greenfield entry.",
+        "Prerequisites are MET, so move to value: their own evidence shows pillar Net earnings $18M [E-018] — confirm Wescom Financial (Wescom Central Credit Union)'s appetite to close the Digital Strategy Document gap (currently 2.5/5) this fiscal year and open scoping.",
+        "Peer framing: Members 1st Federal Credit Union and iQ Credit Union are in Wescom Financial (Wescom Central Credit Union)'s benchmark cohort holding the 2.5 median on Digital Strategy Document. Sequence Tableau; next step is a Tableau workshop scoped to P4."
+      ],
+      "display_name": "Tableau",
+      "evidence_ids": [
+        "E-018",
+        "E-019",
+        "E-020",
+        "E-047",
+        "E-001",
+        "E-003"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Tableau"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.7379,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 349,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 22.2,
+            "value": 0.3697
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 117,
+        "prereqs": {
+          "P4C2.1.1": {
+            "current_score": 3.5,
+            "name": "Governed reporting layer",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C3.1.1": {
+            "current_score": 4.0,
+            "name": "BI / analytics literacy",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [],
+          "rank": 1
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-018",
+              "E-019",
+              "E-020"
+            ],
+            "gap": 1.5,
+            "name": "Digital Strategy Document",
+            "opportunity": 0.4725,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018",
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Vision Communication",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-047"
+            ],
+            "gap": 1.5,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Business Alignment",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Digital KPI Framework",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.6.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Competitive Analysis",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.7.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Board Engagement",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Strategy Document",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Materiality Assessment",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Commitments",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.8",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Multi-Year Roadmap",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.1",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 62.2,
+      "pillar": "P4",
+      "platform_id": "tableau",
+      "prereq_checks": [
+        {
+          "current_score": 3.5,
+          "name": "Governed reporting layer",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 4.0,
+          "name": "BI / analytics literacy",
+          "note": null,
+          "required_subcap_id": "P4C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 1,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Vision Communication"
+      ],
+      "opportunity_md": "**Tableau** at 62/100 fit addresses 117 scored capability gaps in P4, led by Digital Strategy Document. Digital Strategy Document scores 2.5/5 against a 2.5 peer median; Vision Communication is the next surface. The platform family is confirmed absent from the current stack (Tableau) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.2.6",
+        "P1C1.2.7",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.3.6",
+        "P1C1.3.7",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.8.1",
+        "P1C1.8.2",
+        "P1C1.8.3",
+        "P1C1.8.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.1.5",
+        "P1C4.1.6",
+        "P1C4.10.1",
+        "P1C4.10.2",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.3.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.4.4",
+        "P1C4.5.1",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.5.6",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P1C4.7.1",
+        "P1C4.7.2",
+        "P1C4.7.3",
+        "P1C4.8.1",
+        "P1C4.8.2",
+        "P1C4.8.3",
+        "P1C4.8.4",
+        "P1C4.8.5",
+        "P1C4.8.6",
+        "P1C4.9.1",
+        "P1C4.9.2",
+        "P1C4.9.3",
+        "P2C1.2.6",
+        "P2C3.3.1",
+        "P2C3.3.2",
+        "P2C3.3.3",
+        "P2C3.3.5",
+        "P2C3.3.6",
+        "P2C3.3.7"
+      ],
+      "conversation_starter": "Twilio (pillar P2) addresses 78 subcaps, starting with P1C1.1.1; fit is 59/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 78-subcap roadmap starting at P1C1.1.1 and extending to 77 additional subcaps.\nNext step: book a Twilio workshop scoped to P2, covering the 78-subcap addressable surface.",
+      "conversation_starters": [
+        "Wescom Financial (Wescom Central Credit Union) scores 2.5 on Digital Strategy Document (P1C1.1.1) — 0.0 points above the peer median 2.5 [E-018, E-019]. Ask who owns it today, what tooling backs it, and what the review cadence is — Twilio addresses 78 linked subcaps here and is ready to land now (fit 59/100). Twilio is confirmed absent from their detected stack — a greenfield entry.",
+        "Prerequisites are MET, so move to value: their own evidence shows pillar Net earnings $18M [E-018] — confirm Wescom Financial (Wescom Central Credit Union)'s appetite to close the Digital Strategy Document gap (currently 2.5/5) this fiscal year and open scoping.",
+        "Peer framing: Members 1st Federal Credit Union and iQ Credit Union are in Wescom Financial (Wescom Central Credit Union)'s benchmark cohort holding the 2.5 median on Digital Strategy Document. Sequence Twilio after Databricks → Tableau; next step is a Twilio workshop scoped to P2."
+      ],
+      "display_name": "Twilio",
+      "evidence_ids": [
+        "E-018",
+        "E-019",
+        "E-020",
+        "E-001",
+        "E-003"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Twilio"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.7188,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 333,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 19.4,
+            "value": 0.3231
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 78,
+        "prereqs": {
+          "P1C3.2.1": {
+            "current_score": 4.0,
+            "name": "Communications compliance",
+            "status": "MET",
+            "threshold": 3.0
+          },
+          "P2C3.1.1": {
+            "current_score": 3.0,
+            "name": "Omnichannel CX baseline",
+            "status": "MET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks",
+            "tableau"
+          ],
+          "rank": 3
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-018",
+              "E-019",
+              "E-020"
+            ],
+            "gap": 1.5,
+            "name": "Digital Strategy Document",
+            "opportunity": 0.4725,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018",
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Vision Communication",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Business Alignment",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Board Engagement",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Strategy Document",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.6",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Materiality Assessment",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.7",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "ESG Commitments",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.8",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Multi-Year Roadmap",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Resource Planning",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Dependency Management",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.4",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 59.4,
+      "pillar": "P2",
+      "platform_id": "twilio",
+      "prereq_checks": [
+        {
+          "current_score": 3.0,
+          "name": "Omnichannel CX baseline",
+          "note": null,
+          "required_subcap_id": "P2C3.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 4.0,
+          "name": "Communications compliance",
+          "note": null,
+          "required_subcap_id": "P1C3.2.1",
+          "status": "MET",
+          "threshold": 3.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 3,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Vision Communication"
+      ],
+      "opportunity_md": "**Twilio** at 59/100 fit addresses 78 scored capability gaps in P2, led by Digital Strategy Document. Digital Strategy Document scores 2.5/5 against a 2.5 peer median; Vision Communication is the next surface. The platform family is confirmed absent from the current stack (Twilio) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 0,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.1.6",
+        "P1C1.1.7",
+        "P1C1.1.8",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.2.6",
+        "P1C1.2.7",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.3.6",
+        "P1C1.3.7",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.5.6",
+        "P1C1.5.7",
+        "P1C1.5.8",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C1.6.6",
+        "P1C1.7.1",
+        "P1C1.7.2",
+        "P1C1.7.3",
+        "P1C1.7.4",
+        "P1C1.8.1",
+        "P1C1.8.2",
+        "P1C1.8.3",
+        "P1C1.8.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.1.5",
+        "P1C4.1.6",
+        "P1C4.10.1",
+        "P1C4.10.2",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C2.1.1",
+        "P2C2.1.2",
+        "P2C2.1.3",
+        "P2C2.1.4",
+        "P2C2.1.5",
+        "P2C2.2.1",
+        "P2C2.2.10",
+        "P2C2.2.2",
+        "P2C2.2.3",
+        "P2C2.2.4",
+        "P2C2.2.5",
+        "P2C2.2.6",
+        "P2C2.2.7",
+        "P2C2.2.8",
+        "P2C2.2.9",
+        "P2C2.3.1",
+        "P2C2.3.2",
+        "P2C2.3.3",
+        "P2C2.3.4",
+        "P2C2.3.5",
+        "P2C2.3.6",
+        "P2C2.3.7",
+        "P2C2.4.1",
+        "P2C2.4.2",
+        "P2C2.4.3",
+        "P2C2.4.4",
+        "P2C2.4.5",
+        "P2C2.4.6",
+        "P2C2.4.8",
+        "P2C2.4.9",
+        "P2C2.5.1",
+        "P2C2.5.2",
+        "P2C2.5.3",
+        "P2C2.5.4",
+        "P2C2.5.5",
+        "P2C2.5.6",
+        "P2C2.6.1",
+        "P2C2.6.2",
+        "P2C2.6.3",
+        "P2C2.6.4",
+        "P2C2.6.5",
+        "P2C2.6.6",
+        "P2C2.7.1",
+        "P2C2.7.2",
+        "P2C2.7.3",
+        "P2C2.7.4",
+        "P2C2.7.5",
+        "P2C2.7.6",
+        "P2C2.8.1",
+        "P2C2.8.2",
+        "P2C2.8.3",
+        "P2C2.8.4",
+        "P2C2.9.1",
+        "P2C2.9.2",
+        "P2C2.9.3",
+        "P2C2.9.4",
+        "P2C4.1.4",
+        "P2C4.1.6",
+        "P2C4.2.1",
+        "P2C4.2.2",
+        "P2C4.2.3",
+        "P2C4.2.4",
+        "P2C4.2.5",
+        "P2C4.2.9",
+        "P2C4.3.1",
+        "P2C4.3.3",
+        "P2C4.3.4",
+        "P2C4.3.5",
+        "P2C4.3.6",
+        "P2C4.4.2",
+        "P2C4.4.4",
+        "P2C4.4.6",
+        "P2C4.5.1",
+        "P2C4.5.2",
+        "P2C4.5.3",
+        "P2C4.5.4",
+        "P2C4.5.5",
+        "P2C4.5.6",
+        "P2C4.5.7",
+        "P2C4.6.1",
+        "P2C4.6.2",
+        "P2C4.6.3",
+        "P2C4.6.4",
+        "P2C4.6.5",
+        "P2C4.6.6",
+        "P2C4.7.1",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.7.5",
+        "P2C4.7.6",
+        "P2C4.8.1",
+        "P2C4.8.2",
+        "P2C4.8.3",
+        "P2C4.8.4",
+        "P2C4.8.5",
+        "P3C1.3.1",
+        "P3C1.5.1",
+        "P3C2.1.2",
+        "P3C2.1.4",
+        "P3C2.5.1"
+      ],
+      "conversation_starter": "nCino (pillar P3) addresses 163 subcaps, starting with P1C1.1.1; fit is 47/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 163-subcap roadmap starting at P1C1.1.1 and extending to 162 additional subcaps.\nNext step: book a nCino workshop scoped to P3, covering the 163-subcap addressable surface.",
+      "conversation_starters": [
+        "Wescom Financial (Wescom Central Credit Union) scores 2.5 on Digital Strategy Document (P1C1.1.1) — 0.0 points above the peer median 2.5 [E-018, E-019]. Ask who owns it today, what tooling backs it, and what the review cadence is — nCino addresses 163 linked subcaps here and is ready to land now (fit 47/100).",
+        "Prerequisites are MET, so move to value: their own evidence shows pillar Net earnings $18M [E-018] — confirm Wescom Financial (Wescom Central Credit Union)'s appetite to close the Digital Strategy Document gap (currently 2.5/5) this fiscal year and open scoping.",
+        "Peer framing: Members 1st Federal Credit Union and iQ Credit Union are in Wescom Financial (Wescom Central Credit Union)'s benchmark cohort holding the 2.5 median on Digital Strategy Document. Sequence nCino after Salesforce → Databricks; next step is a nCino workshop scoped to P3."
+      ],
+      "display_name": "nCino",
+      "evidence_ids": [
+        "E-018",
+        "E-019",
+        "E-020",
+        "E-044",
+        "E-045",
+        "E-050",
+        "E-047",
+        "E-046"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.7695,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 379,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 21.7,
+            "value": 0.3623
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 163,
+        "prereqs": {
+          "P3C2.1.1": {
+            "current_score": 3.5,
+            "name": "Loan origination digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P3C2.2.1": {
+            "current_score": 3.5,
+            "name": "Commercial lending workflow",
+            "status": "MET",
+            "threshold": 2.0
+          },
+          "P3C3.1.1": {
+            "current_score": 4.0,
+            "name": "Document management",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "salesforce",
+            "databricks",
+            "tableau",
+            "twilio"
+          ],
+          "rank": 5
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-018",
+              "E-019",
+              "E-020"
+            ],
+            "gap": 1.5,
+            "name": "Digital Strategy Document",
+            "opportunity": 0.4725,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044",
+              "E-045",
+              "E-050"
+            ],
+            "gap": 1.5,
+            "name": "Personalized Insights",
+            "opportunity": 0.4725,
+            "peer_median": 2.0,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C4.6.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018",
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Vision Communication",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019",
+              "E-047"
+            ],
+            "gap": 1.5,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.461,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044",
+              "E-046"
+            ],
+            "gap": 1.5,
+            "name": "Proactive Financial Guidance",
+            "opportunity": 0.461,
+            "peer_median": 2.0,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C4.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Business Alignment",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Digital KPI Framework",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.6.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-019"
+            ],
+            "gap": 1.5,
+            "name": "Competitive Analysis",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.7.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 1.5,
+            "name": "Goal Setting & Tracking",
+            "opportunity": 0.4495,
+            "peer_median": 2.0,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C4.6.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-029",
+              "E-039"
+            ],
+            "gap": 1.5,
+            "name": "Next Best Action (NBA)",
+            "opportunity": 0.4449,
+            "peer_median": 2.0,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C4.2.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-003",
+              "E-018"
+            ],
+            "gap": 1.5,
+            "name": "Board Engagement",
+            "opportunity": 0.438,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.1.5",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 46.7,
+      "pillar": "P3",
+      "platform_id": "ncino",
+      "prereq_checks": [
+        {
+          "current_score": 3.5,
+          "name": "Loan origination digitization",
+          "note": null,
+          "required_subcap_id": "P3C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.5,
+          "name": "Commercial lending workflow",
+          "note": null,
+          "required_subcap_id": "P3C2.2.1",
+          "status": "MET",
+          "threshold": 2.0
+        },
+        {
+          "current_score": 4.0,
+          "name": "Document management",
+          "note": null,
+          "required_subcap_id": "P3C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 5,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Personalized Insights"
+      ],
+      "opportunity_md": "**nCino** at 47/100 fit addresses 163 scored capability gaps in P3, led by Digital Strategy Document. Digital Strategy Document scores 2.5/5 against a 2.5 peer median; Personalized Insights is the next surface."
+    }
+  ],
+  "entity_display_id": "wescom-financial-wescom--0001",
+  "narrative": {
+    "gap_prioritization_md": "",
+    "recommendations_md": "",
+    "roadmap_md": ""
+  },
+  "pillar_offerings": {
+    "P1": [],
+    "P2": [],
+    "P3": [],
+    "P4": []
+  },
+  "run_request_id": "DMA-ASM-WSCM-20260323-0001"
+}

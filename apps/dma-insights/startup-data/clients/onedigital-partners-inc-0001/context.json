@@ -1,0 +1,1287 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "onedigital-partners-inc-0001",
+  "financials": {
+    "metrics": {
+      "total_assets": "$151.0B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US National"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Adam Bruckman",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Marcia Callejamatsko",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Camry Blaising",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Operations"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Anita Sindhwani",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Business Solutions / CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sara Lamberto",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Platform Solutions R&W"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kiyoshi 'Yoshi' Kidd",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRM privileges owner"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Phil Gilreath",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "PEO Product Owner"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Heather Gould",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "PEO peer to Anita"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Westenskow",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Sr Dir Data Analytics & Integrations"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-licensed insurer",
+    "narrative_md": "OneDigital Partners, Inc. is an insurance broker. It reports $151.0 billion in total assets and has operated since 2000. It is regulated by State Insurance Department (NAIC) and employs approximately 4,671 people. Its overall digital maturity is assessed at 3.1 out of 5 across the DMA capability framework.",
+    "primary_regulator": "State Insurance Department (NAIC)",
+    "size_tier": "Mega",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-087",
+        "excerpt": "Kristen Eskew, VP of Diversity, Equity, Inclusion & Belonging at OneDigital, named a 2025 DEI Award Winner by OnConferences \u2014 Tier-1 external recognition of dedicated DEI&B executive leadership; establishes named account",
+        "title": "Kristen Eskew, VP of Diversity, Equity, Inclusion & Belonging at\u2026",
+        "type": "conference",
+        "url": "https://www.onconferences.com/25-dei-winners"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-218",
+        "excerpt": "\ud83c\udfaf AI/ML STRATEGY + GOVERNANCE FRAMEWORK (P4C2.1.2) \u2014 Vinay Gidwaney CPO on ThoughtSpot Data Chief Podcast Ep129 (Jan 28, 2026): 'AI IS TALENT AND YOU HAVE TO TREAT AI IN THE SAME WAY THAT YOU TREAT THE TALENT WITHIN YOUR",
+        "title": "\ud83c\udfaf AI/ML Strategy + Governance Framework (P4C2.1.2) \u2014 Vinay Gidwaney\u2026",
+        "type": "podcast",
+        "url": "https://www.thoughtspot.com/data-chief/ep129/how-one-digital-Is-reframing-ai-agents-as-coworkers"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-093",
+        "excerpt": "'Fierce Advocates of Health, Success and Financial Security' = consistent brand tagline across website, LinkedIn (62,515 followers), press releases, and investor communications \u2014 customer-advocacy identity operationalize",
+        "title": "Fierce Advocates of Health, Success and Financial Security'\u2026",
+        "type": "article",
+        "url": "https://www.onedigital.com/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-114",
+        "excerpt": "Allyson Smith = SVP Marketing (promoted Jun 22 2023 from VP Marketing, 8-year OneDigital veteran, started as Director of Field Marketing); reports up through COO Bill Carew (now President per Jan 22 2026 press release) =",
+        "title": "Allyson Smith = SVP Marketing promoted Jun 22 2023",
+        "type": "article",
+        "url": "https://www.onedigital.com/blog/onedigital-promotes-allyson-smith-to-senior-vice-president-of-marketing/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-116",
+        "excerpt": "The Great Recalibration 2026 = flagship content-marketing campaign with MULTIPLE VARIANTS: (a) Employer Advisory Session webinar (launch.onedigital.com/federal-policy-updates-for-employers); (b) 'Strategic Solutions for ",
+        "title": "The Great Recalibration 2026 = flagship content-marketing campaign\u2026",
+        "type": "webinar",
+        "url": "https://www.onedigital.com/en-US/articles/the-great-recalibration-2026-imperatives-for-nonprofits-associations--education-leaders/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-122",
+        "excerpt": "Summit26 = annual flagship Marketing + Sales event held in Dallas TX (2026 edition); Summit25 was held in Atlanta for 25th anniversary celebration per Mike Sullivan quote; scale evidenced by Briana Davis LinkedIn post '1",
+        "title": "Agenda includes Employee Benefits",
+        "type": "conference",
+        "url": "https://www.chamberrva.com/onedigitals-onward-the-great-recalibration-is-here/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "ad88a67d-7c1c-425c-b628-c244f30523dc",
+      "issue_id": "I-001",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "Salesforce Drift chatbot compromise named OneDigital in Aug-Sep 2025 breach event list \u2014 3rd party vendor incident, not OD-caused but impacted OD data [E-237, E-295]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Salesforce Drift chatbot compromise named OneDigital in Aug-Sep 2025 breach event list \u2014 3rd party vendor incident, not OD-caused but impacted OD data [E-237, E-295]"
+    },
+    {
+      "id": "4b8bd26e-fec1-46dd-9e66-a51fcf22e3e5",
+      "issue_id": "I-002",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "Salesforce Process Builder retirement deadline Dec 31 2025 \u2014 133 legacy PBs documented in Hubbl scan [E-269, E-286]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Salesforce Process Builder retirement deadline Dec 31 2025 \u2014 133 legacy PBs documented in Hubbl scan [E-269, E-286]"
+    },
+    {
+      "id": "928605f1-cd91-45a7-8569-adf6daaf8989",
+      "issue_id": "I-003",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "1 of 12,191 fields (0.008%) has complianceGroup classification \u2014 regulatory defensibility gap especially post-breach [E-277]",
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "1 of 12,191 fields (0.008%) has complianceGroup classification \u2014 regulatory defensibility gap especially post-breach [E-277]"
+    },
+    {
+      "id": "6a090381-7f11-4c17-80da-3d7db0e1bf53",
+      "issue_id": "I-004",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "2 separate login-as-any-user escalation paths: (1) 'Test Profile' in PROD with full login-as + (2) 'FSC - Log in as Any User' permission set [E-249, E-262] + Security Health Check 55/100",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "2 separate login-as-any-user escalation paths: (1) 'Test Profile' in PROD with full login-as + (2) 'FSC - Log in as Any User' permission set [E-249, E-262] + Security Health Check 55/100"
+    },
+    {
+      "id": "95735e20-124b-4867-82eb-6633d5282099",
+      "issue_id": "I-005",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "473 Apex CRUD violations cross-validated by PMD (505) + Hubbl WA (473) \u2014 two engines same finding [E-273, E-288]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "473 Apex CRUD violations cross-validated by PMD (505) + Hubbl WA (473) \u2014 two engines same finding [E-273, E-288]"
+    },
+    {
+      "id": "e01f4ca7-4897-49c2-a66f-6806d927b067",
+      "issue_id": "I-006",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "3,538 Apex classes \u22659 versions behind + 1,676 classes 3-8 versions behind [E-286]",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "3,538 Apex classes \u22659 versions behind + 1,676 classes 3-8 versions behind [E-286]"
+    },
+    {
+      "id": "a9756fc3-5c22-47d1-903b-8273e82f336c",
+      "issue_id": "I-007",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "PEO Salesforce build sprint 5 of 7 'RED FLAG' per Zennify exec check-in Oct 31 2024 \u2014 scope/requirements instability + 'come to Jesus' meeting [E-294 F3]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "PEO Salesforce build sprint 5 of 7 'RED FLAG' per Zennify exec check-in Oct 31 2024 \u2014 scope/requirements instability + 'come to Jesus' meeting [E-294 F3]"
+    },
+    {
+      "id": "d619603b-db73-41bb-b583-3aa9cd121203",
+      "issue_id": "I-008",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-17",
+      "rationale": "17-person Sara team vs 55-person peer = 3.2\u00d7 capacity gap; hiring contractors nearshore/offshore [E-295 F3]",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "17-person Sara team vs 55-person peer = 3.2\u00d7 capacity gap; hiring contractors nearshore/offshore [E-295 F3]"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "8 formal issues tracked across the assessment, with 1 CRITICAL, 0 HIGH, and 7 MEDIUM/LOW severity. Critical issues apply score caps per governance rule; HIGH and MEDIUM issues inform prioritization without capping.",
+    "trend_md": "OneDigital's digital evolution reflects a 25-year growth trajectory from Atlanta-founded 2000 startup to $7B+-valuation platform [PROXY-002]. Key inflection points anchor the maturity trajectory."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.75,
+        "P1C2": 2.15,
+        "P1C3": 2.45,
+        "P1C4": 3.7,
+        "P2C1": 3.44,
+        "P2C2": 2.76,
+        "P2C3": 2.37,
+        "P2C4": 2.25,
+        "P3C1": 3.85,
+        "P3C2": 4.07,
+        "P3C3": 3.39,
+        "P3C4": 3.76,
+        "P4C1": 2.41,
+        "P4C2": 2.65,
+        "P4C3": 3.49,
+        "P4C4": 4.43
+      },
+      "overall_score": 3.12,
+      "peer_name": "Alliant Insurance Services",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.93,
+        "P1C2": 2.97,
+        "P1C3": 3.5,
+        "P1C4": 2.99,
+        "P1C5": 1.57,
+        "P2C1": 2.99,
+        "P2C2": 2.97,
+        "P2C3": 2.51,
+        "P2C4": 2.02,
+        "P3C1": 2.97,
+        "P3C2": 2.96,
+        "P3C3": 2.98,
+        "P3C4": 2.02,
+        "P4C1": 2.51,
+        "P4C2": 2.02,
+        "P4C3": 2.97,
+        "P4C4": 2.52
+      },
+      "overall_score": 2.67,
+      "peer_name": "IMA Financial Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.84,
+        "P1C2": 2.74,
+        "P1C3": 2.58,
+        "P1C4": 2.84,
+        "P1C5": 2.25,
+        "P2C1": 2.67,
+        "P2C2": 3.0,
+        "P2C3": 2.92,
+        "P2C4": 2.69,
+        "P3C1": 2.6,
+        "P3C2": 2.3,
+        "P3C3": 2.79,
+        "P3C4": 2.55,
+        "P4C1": 2.21,
+        "P4C2": 2.08,
+        "P4C3": 2.29,
+        "P4C4": 2.52
+      },
+      "overall_score": 2.58,
+      "peer_name": "TowneBank Insurance",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.63,
+        "P1C2": 1.5,
+        "P1C3": 1.61,
+        "P1C4": 2.2,
+        "P1C5": 1.57,
+        "P2C1": 2.25,
+        "P2C2": 2.23,
+        "P2C3": 1.6,
+        "P2C4": 1.0,
+        "P3C1": 1.0,
+        "P3C2": 1.96,
+        "P3C3": 2.0,
+        "P3C4": 1.57,
+        "P4C1": 1.0,
+        "P4C2": 1.01,
+        "P4C3": 1.01,
+        "P4C4": 2.2
+      },
+      "overall_score": 1.61,
+      "peer_name": "Virtuity Financial Partners",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-ONED-20260417-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "glassdoor_rating: 3.1, glassdoor_reviews_count: 959, glassdoor_rating_trend_yoy: -6%",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee",
+        "themes": [],
+        "value": 3.1
+      },
+      {
+        "drilldown": "Deeper B2B sentiment (case studies, NPS) deferred to B2 P2 customer experience pillar deep-dive",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Customer",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "WINGS ERG (Women's Initiative for Growth and Success) at OneDigital launched 2026 IWD 'Give to Gain' T-shirt initiative with 'portion of the proceeds will support Nerdy Girl Success because when we lift each other, we all rise' (per LinkedIn Mar 8 2026) = specific named external-nonprofit ERG-driven community investment (P1C5.5.2 Community Development M3 + P1C5.5.3 DEI Integration M3).",
+      "date_precision": "day",
+      "e_id": "E-110",
+      "event_date": "2026-03-08",
+      "evidence_e_ids": [
+        "E-110"
+      ],
+      "id": "02f3e666-bbbf-4b00-9e5b-fac07e54b233",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/weareonedigital",
+      "subcap_ids": [
+        "P1C5.5.2",
+        "P1C5.5.3"
+      ],
+      "title": "Wings ERG (Women's Initiative for Growth and Success) at\u2026"
+    },
+    {
+      "body": "PATH FORWARD PEP SUITE LAUNCH (P2C4.5.1 + P2C4.5.3) \u2014 401k Specialist Mar 2026: 'Ascensus today announced it is launching TWO NEW POOLED EMPLOYER PLANS (PEPs) in collaboration with OneDigital. The Path Forward 401(k) Pooled Employer Plan and The Path Forward 403(b) Pooled Employer Plan is designed to reduce administrative burden while offering streamlined retirement solutions' + 'distributed NATIONALLY through the OneDigital ADVISOR NETWORK' = productized retirement cross-sell pathway (P2C4.5.1 Product Propensity M3-M4 + P2C4.5.3 Digital Cross-Sell M3).",
+      "date_precision": "month",
+      "e_id": "E-158",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-158"
+      ],
+      "id": "3a65323c-db24-43af-be9d-2df5e6788608",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://401kspecialistmag.com/ascensus-onedigital-partner-on-peps/",
+      "subcap_ids": [
+        "P2C4.5.1",
+        "P2C4.5.3"
+      ],
+      "title": "PATH Forward PEP Suite Launch (P2C4.5.1 + P2C4.5.3) \u2014 401k\u2026"
+    },
+    {
+      "body": "PRESIDENT'S CLUB ACHIEVERS (P2C4.7.1 + P2C4.7.2) \u2014 LinkedIn March 2026: 'Join us in celebrating OneDigital's 2025 PRESIDENT'S CLUB ACHIEVERS. At #OneDigitalSummit26, we had the opportunity to recognize our President's Club Achievers; an EXCEPTIONAL GROUP OF LEADERS WHOSE IMPACT, INNOVATION...' = named annual recognition program for top performers = behavior-based reward infrastructure (P2C4.7.1 Loyalty Program M3 + P2C4.7.2 Behavior-Based Rewards M3).",
+      "date_precision": "month",
+      "e_id": "E-162",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-162"
+      ],
+      "id": "c06b08fd-391f-4dc4-89c9-4a32ac69b06c",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/weareonedigital",
+      "subcap_ids": [
+        "P2C4.7.1",
+        "P2C4.7.2"
+      ],
+      "title": "PRESIDENT'S CLUB Achievers (P2C4.7.1 + P2C4.7.2) \u2014 LinkedIn\u2026"
+    },
+    {
+      "body": "CLIENT HEALTH DASHBOARD (P2C2.6.1 Status Visibility + P2C2.6.2 Proactive) \u2014 LinkedIn Mar 2026 post re Summit26 Day 3: 'We explored how technology is scaling impact for our people and our clients, from the continued evolution of Impact Studio to AI-enabled insights and a proactive Client Health Dashboard' = Adam Bruckman + Jarryd Levine (Stone Point Capital) main-stage announcement of proactive dashboard providing real-time client-portfolio status at M3-M4 maturity (announced 2026, rollout TBD).",
+      "date_precision": "month",
+      "e_id": "E-134",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-134"
+      ],
+      "id": "9732edbe-3899-4a92-8840-0230fc11a08e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://onedigital.wd5.myworkdayjobs.com/onedigital/job/remote/client-success-specialist_r8629-1",
+      "subcap_ids": [
+        "P2C2.6.1",
+        "P2C2.6.2"
+      ],
+      "title": "LinkedIn Mar 2026 post re Summit26 Day 3 explored"
+    },
+    {
+      "body": "CLIENT HEALTH DASHBOARD (P2C3.5.5 + P2C3.5.6 + P2C3.8.6) \u2014 Summit26 Day 3 (Mar 2026) announcement: 'technology is scaling impact for our people and our clients, from the continued evolution of Impact Studio to AI-ENABLED INSIGHTS and a PROACTIVE CLIENT HEALTH DASHBOARD' = named predictive-issue-detection + proactive-service-recovery product (P2C3.5.5 Predictive Issue Detection M3-M4 + P2C3.5.6 Proactive Service Recovery M3-M4 + P2C3.8.6 Journey Friction Scoring M3).",
+      "date_precision": "month",
+      "e_id": "E-143",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-143"
+      ],
+      "id": "fa30361d-6b5d-40b2-bd67-018c0900c077",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/blog/expands-impact-studio-nationwide/",
+      "subcap_ids": [
+        "P2C3.5.5",
+        "P2C3.5.6",
+        "P2C3.8.6"
+      ],
+      "title": "Summit26 Day 3 (Mar 2026) announcement: 'technology is\u2026"
+    },
+    {
+      "body": "President's Club Achievers = formal sales-recognition marketing program announced at Summit26 (per Mar 2026 LinkedIn post): 'an exceptional group of leaders whose impact, innovation, and commitment continue to move OneDigital forward. The President's Club Awards recognize employees of OneDigital who achieve qualifying sales and revenue production levels and are awarded annually' = elite-producer recognition marketing drives both internal motivation + external client confidence (P2C1.3.5 User Generated Content M2-M3 for testimonial amplification + P2C1.4.7 Lead Handoff M3 for sales acknowledgment).",
+      "date_precision": "month",
+      "e_id": "E-122",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-122"
+      ],
+      "id": "41d276ef-0fba-4bba-a625-1985142c9566",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.chamberrva.com/onedigitals-onward-the-great-recalibration-is-here/",
+      "subcap_ids": [
+        "P2C1.3.5",
+        "P2C1.4.7"
+      ],
+      "title": "President's Club Achievers = formal sales-recognition\u2026"
+    },
+    {
+      "body": "Most recent deal: Silicon Valley Retirement Services (Feb 26 2026, Buyout/LBO).",
+      "date_precision": "day",
+      "e_id": "E-009",
+      "event_date": "2026-02-26",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "cbefef3a-7b25-47f2-bf40-3ba4f3bb4fa9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://pitchbook.com/profiles/company/60165-37",
+      "subcap_ids": [],
+      "title": "Most recent deal: Silicon Valley Retirement Services (Feb\u2026"
+    },
+    {
+      "body": "PROXY P2C2.7.6 Digital Friction Detection \u2014 Feb 2026 website rebuild launched with 'stronger sales intelligence' + 8-month engineering team (Courtney Peppy MBA backend + Michael Ornelas PMO) + Kassie Cimmino technology lead + Kameron Connors brand experience = modern product engineering practice expected to include session replay/heatmap/funnel analysis; Google Analytics inferred via standard stack; specific vendors (FullStory, Hotjar, Pendo) not publicly confirmed (M2-M3).",
+      "date_precision": "month",
+      "e_id": "E-141",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-141"
+      ],
+      "id": "c4fd73e7-19b3-4ec6-9074-3e580303fb0d",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "MULTI: onedigital.com/en-US/technology-innovation/ + Privacy Notice + industry context",
+      "subcap_ids": [
+        "P2C2.7.6"
+      ],
+      "title": "Feb 2026 website rebuild"
+    },
+    {
+      "body": "Pasito (insurtech) raised $21M in Feb 2026 \u2014 publicly named customers include Reliance Matrix, New York Life (carriers) + OneDigital + Daybright Financial (consulting firms), retirement advisers, recordkeepers \u2014 OneDigital positioned as early-stage strategic adopter of emerging insurtech (P1C3.6.2 accelerator/incubator engagement at M2; P1C3.7.2 early adopter program).",
+      "date_precision": "month",
+      "e_id": "E-064",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-064"
+      ],
+      "id": "c8bc702d-d3c7-45e9-a879-fb98dfb9606f",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://fintech.global/2026/02/04/insurtech-pasito-lands-21m-to-modernise-benefits-operations/",
+      "subcap_ids": [
+        "P1C3.6.2",
+        "P1C3.7.2"
+      ],
+      "title": "Publicly named customers include Reliance Matrix, New York\u2026"
+    },
+    {
+      "body": "NAMED AI AGENT FRAMEWORK (P2C4.2.1 + P2C4.2.6 + P2C4.6.5) \u2014 Planadviser Feb 2026 article: 'On the adviser side, OneDigital has developed MORE THAN A DOZEN \"AI COWORKERS\"\u2014SPECIALIZED PROGRAMS that answer procedural questions and boost productivity in various company verticals' = 12+ named AI agents across verticals = sophisticated AI-coworker architecture at M3-M4 (P2C4.2.1 NBA M3-M4 + P2C4.6.5 AI Financial Advisor adapted M3 + P2C4.6.6 Hybrid M3-M4).",
+      "date_precision": "month",
+      "e_id": "E-156",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-156"
+      ],
+      "id": "dd4a92cb-24fa-4cb1-9fab-48eb9802f0f2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.planadviser.com/exclusives/entering-the-era-of-hyper-personalization/",
+      "subcap_ids": [
+        "P2C4.2.1",
+        "P2C4.2.6",
+        "P2C4.6.5",
+        "P2C4.6.6"
+      ],
+      "title": "Named AI Agent Framework (P2C4.2.1 + P2C4.2.6 + P2C4.6.5)\u2026"
+    },
+    {
+      "body": "\ud83c\udfaf RPA/INTELLIGENT AUTOMATION GOVERNANCE FRAMEWORK (P3C1.6.1 + P3C1.1.2) \u2014 OneDigital AI Coworkers explicit governance model (Jan 28 2026 disclosure): 'Hiring, Training, and Managing AI Like Employees: Vinay walks through OneDigital's INTERN-TO-APPRENTICE MODEL FOR AI, including JOB DESCRIPTIONS, CULTURAL FIT, HUMAN MANAGERS, and ONGOING SUPERVISION' = formal named agent lifecycle + role-based governance framework at M4 (P3C1.6.1 RPA Platform & Bot Management M4 novel governance + P3C1.1.2 Governance Framework M4 + P3C1.1.3 CoE M4).",
+      "date_precision": "day",
+      "e_id": "E-177",
+      "event_date": "2026-01-28",
+      "evidence_e_ids": [
+        "E-177"
+      ],
+      "id": "287822e3-83c4-4e21-b829-b43e3b421ffc",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.thoughtspot.com/data-chief/ep129/how-one-digital-Is-reframing-ai-agents-as-coworkers",
+      "subcap_ids": [
+        "P3C1.6.1",
+        "P3C1.1.2",
+        "P3C1.1.3"
+      ],
+      "title": "Vinay walks named agent lifecycle + role-based governance\u2026"
+    },
+    {
+      "body": "Bill Carew promoted to President Jan 22 2026 (was COO since 2019). Erica Zinkie promoted to EVP Legal & Compliance. Company serves 100,000+ employers (up from 75K in 2023, 50K in 2020).",
+      "date_precision": "day",
+      "e_id": "E-006",
+      "event_date": "2026-01-22",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "d754c5bb-4056-4d6e-85b0-59416d46a4b1",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/onedigital-strengthens-executive-leadership-team-to-drive-growth-and-operational-excellence-302668365.html",
+      "subcap_ids": [],
+      "title": "Bill Carew promoted to President Jan 22 2026"
+    },
+    {
+      "body": "PROXY P2C1.8.6 Partner Compliance \u2014 Erica Zinkie EVP Legal & Compliance (promoted Jan 22 2026, reports to CFO Chuck Ristau) oversees cross-entity marketing compliance including partner co-branded materials; RIA advertising rule (Rule 206(4)-1) + SEC marketing compliance + state insurance marketing laws all apply to partner-generated collateral at OneDigital = mature regulatory oversight infrastructure (P2C1.8.6 Partner Compliance Governance M3).",
+      "date_precision": "day",
+      "e_id": "E-126",
+      "event_date": "2026-01-22",
+      "evidence_e_ids": [
+        "E-126"
+      ],
+      "id": "ea16224c-3ab3-42b5-89a8-93d54e795053",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "MULTI: onedigital.com/about + onedigital.com/privacy-policy + industry benchmarks",
+      "subcap_ids": [
+        "P2C1.8.6"
+      ],
+      "title": "Proxy P2C1.8.6 Partner Compliance \u2014 Erica Zinkie EVP Legal\u2026"
+    },
+    {
+      "body": "Leadership architecture formalized: CEO Bruckman + President Bill Carew (promoted Jan 2026) + COO Camry Blaising + 4 Regional Presidents + Practice Presidents (Vince Morris Financial Services) + National VPs (Frank Anzalone Western Region SVP, 25+ years experience) \u2014 multi-tier leadership cascade supports cascading sponsorship (P1C4.2.1 + P1C4.2.4 M3).",
+      "date_precision": "month",
+      "e_id": "E-083",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-083"
+      ],
+      "id": "6d9b980e-df6b-4f69-8e1d-c1808691985a",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/weareonedigital",
+      "subcap_ids": [
+        "P1C4.2.1",
+        "P1C4.2.4"
+      ],
+      "title": "Leadership architecture formalized"
+    },
+    {
+      "body": "M&A integration dependency framework documented: 4 pillars on M&A page \u2014 (1) operating model, (2) enterprise technology, (3) cultural fit, (4) integrated teams. Each pillar's dependency on others implied by sequence. Bill Carew promoted Jan 2026 from COO \u2192 President specifically to drive 'platform integration' mandate \u2014 operationalized dependency coordination role.",
+      "date_precision": "month",
+      "e_id": "E-040",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-040"
+      ],
+      "id": "e5843122-7c77-4967-bb86-c344513e9f12",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/en-US/mergers-and-acquisitions/|https://www.onedigital.com/en-US/articles/introduces-impact-studio/|https://www.prnewswire.com/news-releases/onedigital-expands-impact-studio-nationwide-302406283.html",
+      "subcap_ids": [],
+      "title": "Bill Carew promoted from COO"
+    },
+    {
+      "body": "LIFE EVENT TRIGGERS (P2C4.4.2 + P2C4.1.4) \u2014 employer-level life events formally recognized: M&A (PEMA playbook), new-hire onboarding, open enrollment, renewal cycles, compliance updates (MAPFML, Washington PFML, NY PFL, CA SDI), workforce planning 5-year roadmap, leadership transitions (Jan 2026 President promotion), succession planning (Financial Services page explicit) = structured life-event trigger taxonomy at employer level (P2C4.4.2 M3 + P2C4.1.4 Life Event Detection M3).",
+      "date_precision": "month",
+      "e_id": "E-159",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-159"
+      ],
+      "id": "dc15524a-b849-47ff-aae1-487815cfcfcb",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://launch.onedigital.com/",
+      "subcap_ids": [
+        "P2C4.4.2",
+        "P2C4.1.4"
+      ],
+      "title": "LIFE Event Triggers employer-level life events formally\u2026"
+    },
+    {
+      "body": "Onex completed sale of majority stake in OneDigital to Stone Point Capital + CPP Investments Dec 4 2025. Onex listed on TSX:ONEX.",
+      "date_precision": "day",
+      "e_id": "E-002",
+      "event_date": "2025-12-04",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "83538782-a1d9-4190-af9e-58cd645c9d25",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onex.com/article/2025NewsRelease-OneDigitalClose-December4",
+      "subcap_ids": [],
+      "title": "Onex completed sale of majority stake in OneDigital to\u2026"
+    },
+    {
+      "body": "Cara McAuley = VP Marketing, Financial Services at OneDigital (joined Nov 10 2025 from CAPTRUST where she served in marketing capacity) = competitive talent acquisition from major $800B+ AUM RIA = signals serious investment in wealth/retirement marketing vertical distinct from employer-benefits core (P2C1.1.1 Strategy M3 + P2C1.1.2 Segmentation M3-M4).",
+      "date_precision": "day",
+      "e_id": "E-123",
+      "event_date": "2025-11-10",
+      "evidence_e_ids": [
+        "E-123"
+      ],
+      "id": "24349d42-178a-4463-b03b-eacdd9eb72e2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/blog/strengthens-financial-services-practice-strategic-hires/",
+      "subcap_ids": [
+        "P2C1.1.1",
+        "P2C1.1.2"
+      ],
+      "title": "Cara McAuley = VP Marketing, Financial Services at\u2026"
+    },
+    {
+      "body": "Cara McAuley = VP Marketing, Financial Services (joined Nov 10 2025 from CAPTRUST) reports to Allyson Smith = vertical-specific marketing leadership layered over horizontal ops = mature segmentation by BU (P2C1.1.2 M3 + P2C1.1.1 M3).",
+      "date_precision": "day",
+      "e_id": "E-114",
+      "event_date": "2025-11-10",
+      "evidence_e_ids": [
+        "E-114"
+      ],
+      "id": "cecd2063-2fdf-43d8-9fc9-03d7bd6fe603",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/blog/onedigital-promotes-allyson-smith-to-senior-vice-president-of-marketing/",
+      "subcap_ids": [
+        "P2C1.1.2",
+        "P2C1.1.1"
+      ],
+      "title": "Cara McAuley = VP Marketing, Financial Services joined from\u2026"
+    },
+    {
+      "body": "Stone Point Capital + CPP Investments announced majority investment in OneDigital Sept 19 2025, transaction valued >$7B, Onex retains significant minority.",
+      "date_precision": "day",
+      "e_id": "E-001",
+      "event_date": "2025-09-19",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "1f865d00-1247-4629-a706-9da6ea66f895",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/onedigital-welcomes-strategic-investment-from-stone-point-capital-and-cpp-investments-302561624.html",
+      "subcap_ids": [],
+      "title": "Onex retains significant minority"
+    },
+    {
+      "body": "OneDigital announced promotion of Bill Carew to President + appointments of other senior leaders coincident with Stone Point/CPP transaction announcement (Sep 2025) \u2014 explicit executive reshuffle signals board-mandated transformation sponsorship at the highest level (P1C2.1.3 M3 evidence).",
+      "date_precision": "month",
+      "e_id": "E-054",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-054"
+      ],
+      "id": "772bf1c1-f9a7-47a2-a92b-18b07986af99",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/onedigital-welcomes-strategic-investment-from-stone-point-capital-and-cpp-investments-302561624.html",
+      "subcap_ids": [
+        "P1C2.1.3"
+      ],
+      "title": "Explicit executive reshuffle signals board-mandated\u2026"
+    },
+    {
+      "body": "PROXY P4C4.7.3 DIGITAL FORENSICS capability (T1 active case): OneDigital Aug 22 2025 notification \u2192 external forensic firm engaged = 'launched a forensic investigation WITH THE ASSISTANCE OF CYBERSECURITY SPECIALISTS to determine the nature and scope of the incident. The investigation found that between Aug. 12 and Aug. 18, 2025, an unauthorized actor potentially accessed and copied certain OneDigital data stored within the Salesforce platform' = 6-day attack window + 10-day detection gap (Aug 22 notification) + months-long forensic analysis to identify 28,414 affected individuals = M3 digital forensics execution (P4C4.7.3 Digital Forensics Capability M3).",
+      "date_precision": "day",
+      "e_id": "E-247",
+      "event_date": "2025-08-22",
+      "evidence_e_ids": [
+        "E-247"
+      ],
+      "id": "33980b1d-ceb7-4fb8-b9a0-41abc48ac452",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "Derived from cumulative E-215 through E-244 + Azure Architecture Center + SOC 2 + HIPAA + Microsoft Learn",
+      "subcap_ids": [
+        "P4C4.7.3"
+      ],
+      "title": "Proxy P4C4.7.3 Digital Forensics capability (T1 active case)"
+    },
+    {
+      "body": "External awards won by named OneDigital leaders in 2025 alone: Kristen Eskew VP DEI&B (DEI Award, OnConferences) + Kenny Cunningham Director IT Security (2025 GeorgiaCISO ORBIE Enterprise) + OneDigital 2025 Fortune 100 Best Companies to Work For + Great Place to Work Certified + 8 consecutive years Best and Brightest Companies to Work For = structural brand-validation engine (P2C1.3.4 Thought Leadership M3 + P2C1.3.5 UGC M3).",
+      "date_precision": "year",
+      "e_id": "E-127",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-127"
+      ],
+      "id": "b40e5135-f2b9-44ff-8e46-052342cb776a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/weareonedigital",
+      "subcap_ids": [
+        "P2C1.3.4",
+        "P2C1.3.5"
+      ],
+      "title": "External awards won by named OneDigital leaders"
+    },
+    {
+      "body": "CRISIS FRAMEWORK ACTIVATION (P3C4.4.1 + P3C4.4.4) \u2014 Active cyber crisis response demonstrated via 2025 breach: 'OneDigital LAUNCHED A FORENSIC INVESTIGATION WITH THE ASSISTANCE OF CYBERSECURITY SPECIALISTS to determine the nature and scope of the incident. The investigation found that between Aug. 12 and Aug. 18, 2025, an unauthorized actor potentially accessed and copied certain OneDigital data stored within the Salesforce platform. Following the initial investigation, OneDigital CONDUCTED A REVIEW OF THE POTENTIALLY AFFECTED DATA TO IDENTIFY what sensitive customer information was involved and TO DETERMINE WHICH INDIVIDUALS NEEDED TO BE NOTIFIED' = formal cyber crisis response playbook with defined activation criteria, forensic procedures, and regulatory notification protocols (P3C4.4.1 Crisis Framework M3 + P3C4.4.4 Post-Incident Review M3).",
+      "date_precision": "year",
+      "e_id": "E-196",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-196"
+      ],
+      "id": "7a795e67-6422-4a7d-a15b-55b7cf70a39d",
+      "kind": "product",
+      "signal": "negative",
+      "source_url": "https://www.claimdepot.com/data-breach/onedigital-investment-advisors-llc-2026",
+      "subcap_ids": [
+        "P3C4.4.1",
+        "P3C4.4.4"
+      ],
+      "title": "Crisis Framework Activation (P3C4.4.1 + P3C4.4.4)"
+    },
+    {
+      "body": "Kristen Eskew, VP of Diversity, Equity, Inclusion & Belonging at OneDigital, named a 2025 DEI Award Winner by OnConferences \u2014 Tier-1 external recognition of dedicated DEI&B executive leadership; establishes named accountable sponsor for champions network (P1C4.3.1 + P1C4.8.1 M3-M4).",
+      "date_precision": "year",
+      "e_id": "E-087",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-087"
+      ],
+      "id": "f5eff970-5363-4cf9-bd3a-4d4a39c643c4",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.onconferences.com/25-dei-winners",
+      "subcap_ids": [
+        "P1C4.3.1",
+        "P1C4.8.1"
+      ],
+      "title": "Kristen Eskew, VP of Diversity, Equity, Inclusion\u2026"
+    },
+    {
+      "body": "Kristen Eskew VP DEI&B 2025 external DEI Award winner + Kenny Cunningham 2025 GeorgiaCISO ORBIE Enterprise winner + Allyson Smith Marketing leader = 3+ named leaders winning external industry awards in 2025 = executive-PR content stream feeding thought leadership pipeline (P2C1.3.4 M3).",
+      "date_precision": "year",
+      "e_id": "E-124",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-124"
+      ],
+      "id": "e51db72b-53a5-44ce-831e-61102f000c2e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/weareonedigital",
+      "subcap_ids": [
+        "P2C1.3.4"
+      ],
+      "title": "Kristen Eskew VP DEI&B 2025 external DEI Award winner\u2026"
+    },
+    {
+      "body": "\ud83c\udfaf\ud83c\udfaf 5-COMPONENT BREAKDOWN reveals security anomaly: Innovation Readiness 96.7% (M4 excellence) | Adoption 96.9% (M4 excellence) | Automation 97.4% (M4 excellence) | UX 99.3% (M4 excellence) | **SECURITY 70.8% (LOWEST \u2014 M2-M3 gap)**. The security dimension is >26 points below the other four components = critical anomaly pattern that aligns DIRECTLY with the Aug 12-18 2025 Drift breach timeline (scan completed 7 days post-notification). This is the structural signal that explains why OneDigital Investment Advisors was susceptible to the Salesforce/Drift supply-chain compromise (P4C4.1.1 Cybersecurity Strategy M2 downgrade from M3, P4C3.1.1 Architecture Maturity M3).",
+      "date_precision": "year",
+      "e_id": "E-248",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-248"
+      ],
+      "id": "4b896c6f-9801-4e94-8d23-7626b57151d5",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "INTERNAL: /hubbl_scan/hubblScore.csv + hubblScoreComponents.csv (OneDigital RW Production Org, Hubbl Diagnostics scan 2025-08-29T22:49:30Z)",
+      "subcap_ids": [
+        "P4C4.1.1",
+        "P4C3.1.1"
+      ],
+      "title": "The security dimension is 26 points below the other four\u2026"
+    },
+    {
+      "body": "Stone Point Capital ($70B AUM, Greenwich CT, financial services specialist PE) and CPP Investments (C$731.7B pension fund at June 30 2025, governed at arm's length from governments, 22M+ Canadian contributors/beneficiaries) closed majority investment Dec 4 2025 at >$7B enterprise valuation.",
+      "date_precision": "day",
+      "e_id": "E-043",
+      "event_date": "2025-06-30",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "fb4441ec-f671-45f1-baab-c98ec29fa242",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2025/12/04/3200251/0/en/Onex-Partners-Announces-Completion-of-Strategic-Investment-in-OneDigital-by-Stone-Point-Capital-and-CPP-Investments.html",
+      "subcap_ids": [],
+      "title": "Stone Point Capital ($70B AUM, Greenwich CT, financial\u2026"
+    },
+    {
+      "body": "\ud83c\udfaf FSC HOUSEHOLD-CENTRIC DATA MODEL CONFIRMED: Account record types include 'Advisor_Office' + 'FinServ__IndustriesBusiness' + **'FinServ__IndustriesHousehold'** \u2014 FSC's household model deployed for wealth management (per Claud's notes Apr 10 2025 'household impact? husband/wife, two primary show up as related list'). Combined with 'Relationship__c' having 30 sharing rules (E-263) = FSC household + relationship graph active in production = M3-M4 customer 360 data model (P2C1.1.1 Customer 360 M3-M4, P4C1.1.1 Data Model M3-M4).",
+      "date_precision": "day",
+      "e_id": "E-266",
+      "event_date": "2025-04-10",
+      "evidence_e_ids": [
+        "E-266",
+        "E-263"
+      ],
+      "id": "20d211cf-7b5b-4956-aa5e-e9e842e6b1f9",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "INTERNAL: /hubbl_scan/recordTypes.csv (scan 2025-08-29)",
+      "subcap_ids": [
+        "P2C1.1.1",
+        "P4C1.1.1"
+      ],
+      "title": "Account record types include + 'FinServIndustriesBusiness'\u2026"
+    },
+    {
+      "body": "Apr 2 2025: OneDigital named to Fortune 100 Best Companies to Work For\u00ae (first time ever on list) based on Great Place to Work\u00ae Trust Index survey data from March 2025; list requires GPTW Certified + 1,000+ US employees + rigorous dual assessment (employee survey + company policies/practices) \u2014 Tier-1 external cultural validation at M3-M4 (P1C4.8.1).",
+      "date_precision": "day",
+      "e_id": "E-084",
+      "event_date": "2025-04-02",
+      "evidence_e_ids": [
+        "E-084"
+      ],
+      "id": "43535727-2d98-4cec-a129-ff376183db8b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/en-US/articles/named-fortune-best-companies-work-2025/",
+      "subcap_ids": [
+        "P1C4.8.1"
+      ],
+      "title": "OneDigital named to Fortune 100 Best Companies"
+    },
+    {
+      "body": "\ud83c\udfaf ENTERPRISE DATA STRATEGY + ROADMAP (P4C1.1.1) \u2014 OneDigital Impact Studio nationally launched March 20, 2025: 'CENTRALIZED PLATFORM that equips companies with real-time visibility and heightened control over their organization's total spending across health & benefits, retirement, wages, and salaries' + 'By INTEGRATING DATA ACROSS BENEFITS, RETIREMENT, AND EMPLOYEE VALUE DATA, Impact Studio enhances productivity, drives data-driven outcomes' = documented enterprise data strategy aligned with business objectives + digital transformation goals at 75,000+ client scale (P4C1.1.1 M4).",
+      "date_precision": "day",
+      "e_id": "E-204",
+      "event_date": "2025-03-20",
+      "evidence_e_ids": [
+        "E-204"
+      ],
+      "id": "547d0c45-d96c-41b1-805d-dfafb128f134",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.prnewswire.com/news-releases/onedigital-expands-impact-studio-nationwide-302406283.html",
+      "subcap_ids": [
+        "P4C1.1.1"
+      ],
+      "title": "\ud83c\udfaf Enterprise DATA Strategy + Roadmap (P4C1.1.1) launched\u2026"
+    },
+    {
+      "body": "Horizon 2 (Adjacent): Impact Studio (75K+ clients Mar 2025), Private Markets in DC plans (Jan 2026), Workplace-to-Wealth (Kyle Bingham initiative), 12+ AI coworkers = recently deployed adjacent innovations (P1C3.1.3 functional H2).",
+      "date_precision": "month",
+      "e_id": "E-072",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-072"
+      ],
+      "id": "0018ec94-da91-49a5-a542-895cb588f9ba",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/en-US/technology-innovation/",
+      "subcap_ids": [
+        "P1C3.1.3"
+      ],
+      "title": "Horizon 2 (Adjacent): Impact Studio (75K+ clients Mar\u2026"
+    },
+    {
+      "body": "PROXY P4C3.6.4 CUTOVER & DECOMMISSION MANAGEMENT (T1 evidence \u2014 M&A context): OneDigital 150+ acquisitions since founding + PEMA (Practice Efficiency & Margin Analysis) integration playbook established for acquired office integration + 'Applied Recon' modernization of carrier statement reconciliation + Cytora 2024 + Indio 2019 acquisitions absorbed into Applied Epic = documented cutover/decommission playbooks = M3 cutover management (P4C3.6.4 Cutover & Decommission M3); P4C3.6.5 Release Management (blue-green/canary) inferred from Azure App Services deployment slots + AKS rolling updates = M2-M3 (P4C3.6.5 M2-M3).",
+      "date_precision": "year",
+      "e_id": "E-236",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-236"
+      ],
+      "id": "bf9fe02d-00dd-40a9-91ae-7461983595e3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "Derived from cumulative prior-batch evidence (E-215 through E-234) + Azure Architecture Center benchmarks + OneDigital corporate structure inferences",
+      "subcap_ids": [
+        "P4C3.6.4",
+        "P4C3.6.5"
+      ],
+      "title": "Documented cutover/decommission playbooks = M3 cutover\u2026"
+    },
+    {
+      "body": "Atlanta HQ 2024: 13-year lease signed at 300 Galleria Parkway (70,400 sq ft across 3 floors) \u2014 LONG-TERM commitment to physical presence. Includes naming rights, signage, LEED Gold certified building, 10,000 SF fitness center, EV charging, 5-acre green space. ~400 Atlanta employees. Move signals 'hub for collaboration and innovation' (Adam Bruckman quote).",
+      "date_precision": "year",
+      "e_id": "E-036",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-036"
+      ],
+      "id": "11fd255a-1244-429e-af1b-7b00dd2cc328",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/locations/|https://www.onedigital.com/en-US/articles/onedigital-elevates-its-presence-in-atlanta-with-headquarters-relocation-and-building-naming-rights/|https://www.stonepoint.com/company/onedigital/",
+      "subcap_ids": [],
+      "title": "Atlanta HQ 2024: 13-year lease signed at 300 Galleria\u2026"
+    },
+    {
+      "body": "Consistent stage-gate pattern across 3 major initiatives: (a) Impact Studio: idea \u2192 5-market beta (Oct 2024) \u2192 25% KPI validation \u2192 national launch with enhancements (Mar 2025); (b) Private Markets: Aug 2025 Trump EO \u2192 Jan 2026 partnership announce \u2192 Q1 2026 CIT rollout; (c) Wintrust: strategic relationship announced Feb 2024 \u2192 retirement benefits advisors team integration (Dan Peluse as lead) \u2014 3 repeated stage-gates = operationalized idea prioritization framework (P1C3.2.4 + P1C3.2.5 + P1C3.5.2 M3).",
+      "date_precision": "month",
+      "e_id": "E-076",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-076"
+      ],
+      "id": "b3b3e7ad-0f65-4123-98bb-85cfa2bc038d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/en-US/mergers-and-acquisitions/",
+      "subcap_ids": [
+        "P1C3.2.4",
+        "P1C3.2.5",
+        "P1C3.5.2"
+      ],
+      "title": "Wintrust: strategic relationship announced \u2192 retirement\u2026"
+    },
+    {
+      "body": "Named 2023 DASH recipient: Elk Hill (Virginia youth services nonprofit) \u2014 specific beneficiary documented; each OneDigital team identifies local charities = 27 nonprofit decisions per year = measurable impact footprint (P1C5.5.2 M3 + P1C5.7.2 metrics framework M2).",
+      "date_precision": "year",
+      "e_id": "E-098",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-098"
+      ],
+      "id": "f587a232-df9f-443a-bd8b-a451461649af",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/blog/onedigital-dash-celebrates-15-years/",
+      "subcap_ids": [
+        "P1C5.5.2",
+        "P1C5.7.2"
+      ],
+      "title": "Specific beneficiary documented"
+    },
+    {
+      "body": "Industry 'Best Places to Work' recognition: Business Insurance annual award (OneDigital named), Glassdoor Employees' Choice 2023, Great Place to Work 2021. Industry benchmarking participation confirms external-facing trend engagement.",
+      "date_precision": "year",
+      "e_id": "E-039",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "ed04863a-c0f8-4300-9b0c-de544708b44a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/en-US/articles/forget-ai-replacing-jobs-talks-forbes-hiring-ai-colleagues-instead|https://www.onedigital.com/en-US/articles/how-organizations-are-rewiring-for-ai-value-what-hr-and-c-suite-leaders-need-to-know",
+      "subcap_ids": [],
+      "title": "Industry 'Best Places to Work' recognition: Business\u2026"
+    },
+    {
+      "body": "Allyson Smith = SVP Marketing (promoted Jun 22 2023 from VP Marketing, 8-year OneDigital veteran, started as Director of Field Marketing); reports up through COO Bill Carew (now President per Jan 22 2026 press release) = C-suite-adjacent marketing leadership with direct growth-executive relationship (P2C1.1.1 Digital Marketing Strategy M3).",
+      "date_precision": "day",
+      "e_id": "E-114",
+      "event_date": "2023-06-22",
+      "evidence_e_ids": [
+        "E-114"
+      ],
+      "id": "601321b1-3617-452a-b6f4-993ae5ae0c62",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/blog/onedigital-promotes-allyson-smith-to-senior-vice-president-of-marketing/",
+      "subcap_ids": [
+        "P2C1.1.1"
+      ],
+      "title": "Allyson Smith = SVP Marketing promoted Jun 22 2023"
+    },
+    {
+      "body": "TECH PARTNER ECOSYSTEM (P2C4.2.3 Contextual) \u2014 wealth launch announcement 2022 named partners: 'BlackRock, Day Hagan/Ned Davis Research (NDR), PIMCO, Avantis Investors, and Newfound Research, along with technology partnerships with Parametric, 55ip' = 7+ investment/tech partners integrated into algorithmic allocation; current $151B AUA (cross-ref E-024 entity profile) across 1,000+ retirement plans + wealth + RIA (P2C4.2.3 Contextual M3 + P2C4.5.5 CLV M3).",
+      "date_precision": "year",
+      "e_id": "E-157",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-157",
+        "E-024"
+      ],
+      "id": "a14fceed-ff31-441c-bcf4-023bd5debb84",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/en-US/solutions/financial-services/wealth-management/",
+      "subcap_ids": [
+        "P2C4.2.3",
+        "P2C4.5.5"
+      ],
+      "title": "TECH Partner Ecosystem (P2C4.2.3 Contextual)"
+    },
+    {
+      "body": "Beata Rogala career progression \u2014 promoted from 'Chief Operating Officer' (May 2022 Centro press release) to 'CHIEF DIGITAL OFFICER' (July 2024 Centro press release) = formal elevation of API/digital function to C-suite level at Centro subsidiary = governance of API platform strategy at M4 (P4C3.3.1 Enterprise Integration Strategy M4).",
+      "date_precision": "month",
+      "e_id": "E-229",
+      "event_date": "2022-05-01",
+      "evidence_e_ids": [
+        "E-229"
+      ],
+      "id": "feae5201-fed8-414b-b6c7-8de52137ff77",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/blog/onedigital-company-continues-broker-carrier-api-connection-momentum-with-addition-of-principal-financial-group/ + https://www.onedigital.com/en-US/articles/continues-expansion-industry-connectivity-with-additionprincipal-rfp-quoting-api/",
+      "subcap_ids": [
+        "P4C3.3.1"
+      ],
+      "title": "Beata Rogala career progression \u2014 promoted from 'Chief\u2026"
+    },
+    {
+      "body": "\ud83c\udfaf Marcia Calleja-Matsko hired April 18 2022 per BusinessWire official OneDigital press release: '30+ years of global IT experience + background in building strong business relationships and executing complex technology and process solutions' + 'Most recently CIO and VP at Avanos Medical responsible for all IT functions worldwide, including strategic planning and execution of global technology services' + 'Prior to Avanos, served as Global Director for IT Data Center Demand and Business Management for SITA' = Fortune-500-scale IT leadership = M4 maturity on EA governance (P4C3.1.2 Technology Roadmap & Investment Planning M4).",
+      "date_precision": "day",
+      "e_id": "E-226",
+      "event_date": "2022-04-18",
+      "evidence_e_ids": [
+        "E-226"
+      ],
+      "id": "fe041108-cd8e-405a-b994-a745eb4ad876",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/en-US/leadership/ + https://www.businesswire.com/news/home/20220418005360/en/OneDigital-Hires-Marcia-Calleja-Matsko-as-Chief-Information-Officer + https://www.linkedin.com/in/marciacallejamatsko/ + https://www.securitymagazine.com/articles/97443-marcia-calleja-matsko-named-cio-at-onedigital",
+      "subcap_ids": [
+        "P4C3.1.2"
+      ],
+      "title": "\ud83c\udfaf hired 'Most recently CIO and VP at Avanos Medical\u2026"
+    },
+    {
+      "body": "SECURE FUTURE PEP (P2C4.5.1 + P2C4.5.3) \u2014 'Secure Future PEP, which launched in 2021 as a regional offering, moved as a NATIONAL FEATURE IN 2025' + partnership with Standard Insurance Company + '2-3 weeks before Path Forward launch' = second PEP product demonstrating multi-year product-deepening + proven regional-to-national rollout playbook (P2C4.5.1 M3 + P2C4.7.1 Loyalty Program Design M3).",
+      "date_precision": "year",
+      "e_id": "E-158",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-158"
+      ],
+      "id": "57f5285b-0105-42dd-bc4e-bd695319a355",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://401kspecialistmag.com/ascensus-onedigital-partner-on-peps/",
+      "subcap_ids": [
+        "P2C4.5.1",
+        "P2C4.5.3",
+        "P2C4.7.1"
+      ],
+      "title": "Secure Future PEP (P2C4.5.1 + P2C4.5.3)"
+    },
+    {
+      "body": "\ud83c\udfaf Applied Systems Cytora acquisition 2024: per Ivans Download page: 'Applied Systems acquires Cytora to extend AI capabilities across the digital roundtrip of insurance' = continued AI-powered enhancement of Applied Epic + IVANS platform benefits OneDigital directly (M4 level AMS platform); Ivans Distribution Platform (IDP) launched 2021 + Ask Kodiak market search + Indio 2019 + Tarmika 2022 + Cytora 2024 = 5 strategic acquisitions over 5 years building integrated digital roundtrip = enterprise M4 AMS integration (P4C3.8.IB1 M4, P4C3.2.1 App Portfolio M4).",
+      "date_precision": "year",
+      "e_id": "E-230",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-230"
+      ],
+      "id": "e5d618fa-251e-439f-aba3-bd5b6a507531",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www1.appliedsystems.com/en-us/solutions/for-agents/agency-management-system/applied-epic/ + https://www.ivans.com/for-agents/products/ivans-download/ + https://www.ivans.com/for-agents/products/ivans-exchange/ + https://www.appliedsystems.com/carrier/installguide.pdf + https://www.tarmika.com/applied-systems/",
+      "subcap_ids": [
+        "P4C3.8",
+        "P4C3.2.1"
+      ],
+      "title": "Ivans Distribution Platform (IDP) launched"
+    },
+    {
+      "body": "500+ P&C PROFESSIONALS + 500+ CARRIERS (P2C4.5.4 + P2C4.5.7) \u2014 P&C practice 'launched in 2021 through the strategic acquisition of three well-established local agencies' + 'more than 500 Property & Casualty professionals spanning the United States' (updated from prior 400+) + 'extensive network of TOP-RATED INSURANCE CARRIERS' + 'over 500 carriers' = scale-proof multi-carrier infrastructure for coverage-gap remediation (P2C4.5.4 Share of Wallet M3-M4 + P2C4.5.7 CLV-Driven Investment M3).",
+      "date_precision": "year",
+      "e_id": "E-161",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-161"
+      ],
+      "id": "bff16698-022a-4dad-a132-a9ab3436c2ee",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/solutions/property-casualty/",
+      "subcap_ids": [
+        "P2C4.5.4",
+        "P2C4.5.7"
+      ],
+      "title": "500+ P&C Professionals + 500+ Carriers (P2C4.5.4 + P2C4.5.7)"
+    },
+    {
+      "body": "Oct 2020 Onex acquired majority from New Mountain Capital, transaction valued OneDigital at $2.65B; Onex Group equity investment ~$960M; Onex + employees own ~83% post-close.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-004",
+      "event_date": "2020-10-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "e2d86421-bcaf-45d9-9ed6-b6076fc3e704",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.globenewswire.com/news-release/2020/10/08/2105580/0/en/Onex-to-Make-a-Majority-Investment-in-OneDigital.html",
+      "subcap_ids": [],
+      "title": "Transaction valued OneDigital"
+    },
+    {
+      "body": "CEO: Adam Bruckman (Chairman & CEO, Co-founder). President: Bill Carew. COO: Camry Blaising. CIO: Marcia Calleja-Matsko (current, joined 2020). CFO: Chuck Ristau. Chief Growth Officer: Mike Sullivan (Co-founder). Chief Product Officer: Vinay Gidwaney. Chief People Officer: Elizabeth Chrane.",
+      "date_precision": "year",
+      "e_id": "E-005",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "102e4a32-7cd1-4e95-84ff-026b1ebbc5b2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/en-US/leadership/",
+      "subcap_ids": [],
+      "title": "Marcia Calleja-Matsko (current, joined"
+    },
+    {
+      "body": "SUBMISSION PROCESSING AUTOMATION (P3C1.8.IB1 + P3C1.2.1) \u2014 OneDigital Centro Benefits Research (fully-owned subsidiary acquired 2020): 'BROKER-CARRIER API (Application Programming Interface) platform with the connection of RFP (Request For Proposal) and quote integration' + 'This next iteration of API connectivity enables Centro and Principal to SEAMLESSLY EXCHANGE RFP DATA allowing both organizations to ELIMINATE MOST OF THE MANUAL DATA ENTRIES and MULTIPLE EMAIL COMMUNICATIONS. As a result, DATA ACCURACY AND TURNAROUND TIMES ARE SIGNIFICANTLY IMPROVED' = automated submission/quoting STP at M3-M4 (P3C1.8.IB1 Submission M3-M4 + P3C1.2.1 STP Architecture M3-M4).",
+      "date_precision": "year",
+      "e_id": "E-167",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-167"
+      ],
+      "id": "6b65966e-8ee3-4c2d-923e-1293d7c05fda",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/blog/onedigital-company-launches-broker-carrier-portal/",
+      "subcap_ids": [
+        "P3C1.8",
+        "P3C1.2.1"
+      ],
+      "title": "Submission Processing Automation (P3C1.8.IB1 + P3C1.2.1)\u2026"
+    },
+    {
+      "body": "Communication Strategy formalized via CPO Chrane's remit including 'internal communications' function (per onedigital.com/we-are-onedigital) \u2014 named function under CPO since 2019; coordinated across external (press, social) and internal (Summit, newsletters, blog) (P1C4.4.1 M3).",
+      "date_precision": "year",
+      "e_id": "E-088",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-088"
+      ],
+      "id": "c8b6396b-da3c-4da9-aaad-54fb453d9c55",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/weareonedigital",
+      "subcap_ids": [
+        "P1C4.4.1"
+      ],
+      "title": "Communication Strategy formalized via CPO Chrane's remit\u2026"
+    },
+    {
+      "body": "\ud83c\udfaf Applied Epic AI + workflow stack integrated: (4) APPLIED RECON \u2014 'brings AI-POWERED EXTRACTION AND INTELLIGENT SIX-SIGNAL MATCHING directly into Applied Epic \u2013 no need for third-party tools or manual data entry. Simply upload carrier statements, and watch as transactions are automatically extracted, matched, and prepared for review'; (5) INDIO \u2014 'Applied acquired Indio Technologies in 2019 for commercial lines submissions + renewal workflow management' + 'data exchange capabilities to connect agencies and brokers to insurers, and automate information exchange throughout the submission process for commercial lines business'; (6) TARMIKA \u2014 real-time commercial lines quoting embedded in Applied Epic; (7) APPLIED BENEFITS DESIGNER \u2014 native Benefits plan modeling + EMPLOYEE NAVIGATOR integration for quote-to-enrollment = 6-layer Applied suite at M4 maturity (P4C3.8.IB1 AMS Integration M4).",
+      "date_precision": "year",
+      "e_id": "E-230",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-230"
+      ],
+      "id": "10bc8184-3578-4721-ba40-7ac2a2d0a2c1",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www1.appliedsystems.com/en-us/solutions/for-agents/agency-management-system/applied-epic/ + https://www.ivans.com/for-agents/products/ivans-download/ + https://www.ivans.com/for-agents/products/ivans-exchange/ + https://www.appliedsystems.com/carrier/installguide.pdf + https://www.tarmika.com/applied-systems/",
+      "subcap_ids": [
+        "P4C3.8"
+      ],
+      "title": "'Applied acquired Indio Technologies"
+    },
+    {
+      "body": "'We don't roll up logos \u2014 we build one company' positioning statement + 65+ direct acquisitions (Tracxn) / 197 total transactions (PitchBook) closed since 2017 \u2014 pace equals ~30 deals/year at peak; sustainable volume implies mature stage-gate discipline (M3 P1C2.8.1) and portfolio management cadence (M3 P1C2.8.2).",
+      "date_precision": "year",
+      "e_id": "E-046",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "a3f9a7cd-f936-44b1-942e-93b2319bb79d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.onedigital.com/en-US/mergers-and-acquisitions/",
+      "subcap_ids": [
+        "P1C2.8.1",
+        "P1C2.8.2"
+      ],
+      "title": "Pace equals deals/year"
+    },
+    {
+      "body": "Historical innovation pedigree: 'first end-to-end CRM in the industry' launched 2007 (B2A-1) + Inc. 5000 for 14 consecutive years (2007-2020) = 20-year innovation track record predating formal 'innovation lab' concept in industry \u2014 innovation is cultural/embedded rather than siloed (P1C3.9.1 M2-M3 functional-equivalent signal).",
+      "date_precision": "year",
+      "e_id": "E-069",
+      "event_date": "2007-07-01",
+      "evidence_e_ids": [
+        "E-069"
+      ],
+      "id": "b8419dbb-dfbf-4134-90c7-63fdf6569c21",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/en-US/leadership/",
+      "subcap_ids": [
+        "P1C3.9.1"
+      ],
+      "title": "Historical innovation pedigree: 'first end-to-end CRM in\u2026"
+    },
+    {
+      "body": "Company-stated: OneDigital 'launched the industry's first end-to-end CRM in 2007' \u2014 signals long-standing proprietary tech investment history, not a late-adopter.",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2007-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "b20c20de-d38e-4056-b955-7e58ed41cd33",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.onedigital.com/en-US/about-us/",
+      "subcap_ids": [],
+      "title": "Company-stated: OneDigital 'launched the industry's first\u2026"
+    }
+  ]
+}

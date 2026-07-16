@@ -1,0 +1,534 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Amarillo National Bank",
+      "amount": null,
+      "announced_on": null,
+      "body": "2019 acquired Lubbock National Bank + Commerce National (late 2020 rebranded as ANB Bank) \u2014 expansion to Austin, Bryan/College Station, Fort Worth",
+      "closed_on": null,
+      "details": "2019 acquired Lubbock National Bank + Commerce National (late 2020 rebranded as ANB Bank) \u2014 expansion to Austin, Bryan/College Station, Fort Worth",
+      "e_id": "E-008",
+      "event_date": "2020-10-15",
+      "id": "bb8753ea-e696-4ae3-9bde-aeb42807f561",
+      "source_url": "https://www.anb.com/about-anb/about-us.html",
+      "status": null,
+      "target": "Bryan/College Station",
+      "title": "2019 acquired expansion to Austin, Bryan/College Station\u2026"
+    }
+  ],
+  "entity_display_id": "amarillo-national-bank-0001",
+  "financials": {
+    "lines": [
+      "tier 1 risk based pct: 12.613",
+      "cagr 2019 2025 pct est: 11.0"
+    ],
+    "metrics": {
+      "efficiency_ratio_pct": 44.11,
+      "net_income": 37010000.0,
+      "nim_pct": 4.13,
+      "regulatory_minimum": 8.5,
+      "roa_pct": 1.52,
+      "roe_pct": 13.9,
+      "trajectory": {
+        "branches": 35,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 926,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Amarillo National Bank (primary), ANB Trust, ANBPrepaid\u2026"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": null,
+        "headline": "$10.2B net income \u00b7 FY2026",
+        "regulator": "OCC (Office of the Comptroller of the Currency)",
+        "series": {
+          "net_income_m": [
+            2000.0,
+            10230.0,
+            10230.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (national)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Richard Ware II",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHAIRMAN"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "William Ware",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "PRESIDENT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Patrick Ware",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VICE CHAIRMAN"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Liliana Miranda",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Chief Commercial Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Clint Latham",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP GENERAL COUNSEL"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Fields",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP CREDIT ADMIN"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Terri Boswell-Williams",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP OPERATIONS"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Denise Thomas",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP PERSONNEL"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jesse Munoz",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP TREASURY MGMT"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Shane Ferrell",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP | Assistant IT Director Innovation & Solutions"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "DJ Hunt",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP & Investment Officer (Asset Mgmt division)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "National Bank",
+    "narrative_md": "Amarillo National Bank is a regional bank. It reports $10.2 billion in total assets and has operated since 1892. It is regulated by OCC (Office of the Comptroller of the Currency) and employs approximately 926 people across 35 branches. Its overall digital maturity is assessed at 3.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OCC (Office of the Comptroller of the Currency)",
+    "regulatory_standing": {
+      "as_of": null,
+      "e_id": "E-072",
+      "label": "Clean regulatory standing",
+      "note": "**Tier 10 contradictory search for BSA/AML findings on ANB**: Searched OCC BSA/AML enforcement databases, FDIC BSA/AML findings, FinCEN regulatory alerts. **NO adverse BSA/AML findings for ANB 2022-2026**. ANB not named\u2026"
+    },
+    "size_tier": "mid-size",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-029",
+        "excerpt": "Point Predictive confirmed ANB adopted AutoPass, IEValidate, DealerCheck solutions Sep 2025. Quoted Tim Grace CEO Point Predictive: 'Amarillo National Bank exemplifies how forward-thinking financial institutions can leve",
+        "title": "Point Predictive confirmed DealerCheck solutions",
+        "type": "article",
+        "url": "https://pointpredictive.com/press-releases/amarillo-national-bank-adopts-point-predictives-fraud-solutions/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-053",
+        "excerpt": "Blend publicly features ANB as a reference customer. ANB ADOPTED Blend 2018 for mortgage application, EXPANDED to Blend Close for hybrid closings (post-2020). QUOTED: Lauren Lyons, ANB Senior System Administrator: 'We've",
+        "title": "Blend features ANB",
+        "type": "article",
+        "url": "https://blend.com/customers/amarillo-national-bank/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-067",
+        "excerpt": "**P2C2.3 Digital Abandonment Proxy \u2014 Via MANTL platform capability**. Since ANB runs MANTL (E-055), they inherit MANTL's digital abandonment analytics: 'Alkami's data analytics identifies abandoned applications for targe",
+        "title": "Digital Abandonment Proxy",
+        "type": "blog",
+        "url": "https://www.alkami.com/development/mantl-page-plant/"
+      },
+      {
+        "author": "William Ware",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-079",
+        "excerpt": "**P3C4.5 EXCEPTIONAL OPERATIONAL RESILIENCE EVIDENCE**. Smokehouse Creek Fire (largest wildfire in TX history, Feb 2024) \u2014 ANB executed rapid multi-pronged community crisis response within days: (1) **Feb 28, 2024 (Day o",
+        "title": "Exceptional Operational Resilience Evidence",
+        "type": "conference",
+        "url": "https://www.anb.com/about-anb/community-involvement/in-the-community.html"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "ANB deploys comprehensive suite of AI fraud detection tools from Point Predictive for lending (reduces risk while streamlining) Tech stack (public signals): AudioEye, Mixpanel (product analytics), reCAPTCHA, Cloudflare W",
+        "title": "ANB deploys comprehensive suite of AI fraud detection tools",
+        "type": "conference",
+        "url": "https://www.zoominfo.com/c/amarillo-national-bank/4442813"
+      },
+      {
+        "author": "William Ware",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "Shane Ferrell career trajectory clarified: 2010-2023 Computer Services Inc. (CSI, banking core vendor) \u2014 roles through VP Product Strategy & Innovation; 2023 SVP Strategy & Innovation @ BOC Bank (Amarillo); Feb 2024 prom",
+        "title": "Shane Ferrell career trajectory 2010-2023 Computer Services Inc\u2026",
+        "type": "conference",
+        "url": "https://bankersdigest.com/boc-bank-taps-ferrell-as-chief-technology-officer-jay-as-chief-operating-officer/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "fc402dd1-2588-49ee-8bcc-b1bfd6e824c9",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P1_Scoring_Detail has 75 rows, expected ~199"
+    },
+    {
+      "id": "beac4d34-0dfb-4f29-9012-7d490ce8be6a",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P2_Scoring_Detail has 60 rows, expected ~288"
+    },
+    {
+      "id": "69e3d8a7-2abc-43bd-aff4-daf60bb2f6db",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P3_Scoring_Detail has 60 rows, expected ~162"
+    },
+    {
+      "id": "acc8641f-b3ad-4dde-84ae-18b3c610f93b",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "P4_Scoring_Detail has 60 rows, expected ~187"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Most recent reported financials: $10.2B net income as of FY2026, within a series tracked FY2022 to FY2026.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.55,
+        "P1C2": 2.92,
+        "P1C3": 2.88,
+        "P1C4": 2.38,
+        "P1C5": 2.61,
+        "P2C1": 2.56,
+        "P2C2": 3.29,
+        "P2C3": 2.94,
+        "P2C4": 2.7,
+        "P3C1": 3.24,
+        "P3C2": 3.96,
+        "P3C3": 3.59,
+        "P3C4": 3.28,
+        "P4C1": 3.05,
+        "P4C2": 3.09,
+        "P4C3": 3.4,
+        "P4C4": 3.65
+      },
+      "overall_score": 3.06,
+      "peer_name": "First National Bank of Omaha",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.16,
+        "P1C2": 3.99,
+        "P1C3": 2.44,
+        "P1C4": 3.05,
+        "P2C1": 2.9,
+        "P2C2": 2.24,
+        "P2C3": 2.49,
+        "P2C4": 1.91,
+        "P3C1": 2.99,
+        "P3C2": 3.95,
+        "P3C3": 3.86,
+        "P3C4": 3.17,
+        "P4C1": 3.1,
+        "P4C2": 2.45,
+        "P4C3": 2.89,
+        "P4C4": 3.98
+      },
+      "overall_score": 3.04,
+      "peer_name": "Wintrust Financial Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.71,
+        "P1C2": 3.1,
+        "P1C3": 2.53,
+        "P1C4": 2.67,
+        "P1C5": 3.0,
+        "P2C1": 3.09,
+        "P2C2": 2.97,
+        "P2C3": 2.51,
+        "P2C4": 3.0,
+        "P3C1": 2.85,
+        "P3C2": 2.15,
+        "P3C3": 2.26,
+        "P3C4": 3.07,
+        "P4C1": 3.19,
+        "P4C2": 2.65,
+        "P4C3": 3.67,
+        "P4C4": 4.37
+      },
+      "overall_score": 2.93,
+      "peer_name": "Beacon Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.2,
+        "P1C2": 3.2,
+        "P1C3": 2.68,
+        "P1C4": 3.16,
+        "P1C5": 2.82,
+        "P2C1": 1.66,
+        "P2C2": 2.78,
+        "P2C3": 2.33,
+        "P2C4": 1.79,
+        "P3C1": 3.0,
+        "P3C2": 3.25,
+        "P3C3": 3.21,
+        "P3C4": 3.12,
+        "P4C1": 3.01,
+        "P4C2": 2.57,
+        "P4C3": 2.85,
+        "P4C4": 3.2
+      },
+      "overall_score": 2.81,
+      "peer_name": "American National Bank of Texas",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.3,
+        "P1C2": 2.5,
+        "P1C3": 3.33,
+        "P1C4": 3.25,
+        "P1C5": 2.5,
+        "P2C1": 2.75,
+        "P2C2": 2.5,
+        "P2C3": 2.63,
+        "P2C4": 2.0,
+        "P3C1": 2.33,
+        "P3C2": 2.83,
+        "P3C3": 2.5,
+        "P3C4": 2.67,
+        "P4C1": 2.25,
+        "P4C2": 3.0,
+        "P4C3": 2.83,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.73,
+      "peer_name": "Bank of Utah",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ANB-20260420-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "**ANB BBB Rating: A+ (highest grade)**",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "searches 2023-2025 of OCC enforcement actions database, CFPB enforcement actions, OCC CRA monthly releases: NO consent orders, civil money penalties, formal agreements, or MRAs publicly identified against Amarillo National Bank (Charter 142",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "count-opening failure news; (3) Servicing: **MIXED** \u2014 Yelp has 1 negative review calling ANB 'archaic fatigued and outdated business logic, customer service, staff competence and customer related software services' (sample size = 1); BBB h",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Yelp",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Multi-app portfolio published: Amarillo National Bank (primary), ANB Trust, ANBPrepaid, ANB Asset Management, Lubbock National Bank Mobile (SEPARATE app, not consolidated) \u2014 signals separate digital stacks for acquired entities",
+      "date_precision": "publish_fallback",
+      "e_id": "E-014",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "b848526c-1379-40fe-9cec-cc517a5f78ee",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://apps.apple.com/us/developer/amarillo-national-bank/id328864337",
+      "subcap_ids": [],
+      "title": "Amarillo National Bank (primary), ANB Trust, ANBPrepaid\u2026"
+    },
+    {
+      "body": "Jesse Munoz joined ANB March 2022 as VP Treasury Management \u2014 recent senior hire",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "662f7e8f-2bea-4408-83d8-bc3e7ea24328",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://bankersdigest.com/tag/shane-ferrell/",
+      "subcap_ids": [],
+      "title": "Jesse Munoz joined ANB"
+    },
+    {
+      "body": "2019 acquired Lubbock National Bank + Commerce National (late 2020 rebranded as ANB Bank) \u2014 expansion to Austin, Bryan/College Station, Fort Worth",
+      "date_precision": "year",
+      "e_id": "E-008",
+      "event_date": "2020-10-15",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "bb8753ea-e696-4ae3-9bde-aeb42807f561",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.anb.com/about-anb/about-us.html",
+      "subcap_ids": [],
+      "title": "2019 acquired expansion to Austin, Bryan/College Station\u2026"
+    },
+    {
+      "body": "Wares named Texas Monthly 'Bankers of the Century' (1999); Richard Ware named American Banker 'Banker of the Year' (2017)",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "548cb1a8-43d4-48e3-8739-a65f3fd13c34",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Amarillo_National_Bank",
+      "subcap_ids": [],
+      "title": "Richard Ware named American Banker 'Banker of the Year'\u2026"
+    },
+    {
+      "body": "Wares named Texas Monthly 'Bankers of the Century' (1999); Richard Ware named American Banker 'Banker of the Year' (2017)",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "1999-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "cbfb70bd-2f0d-4047-9684-e276d06d4434",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Amarillo_National_Bank",
+      "subcap_ids": [],
+      "title": "Wares named Texas Monthly"
+    }
+  ]
+}

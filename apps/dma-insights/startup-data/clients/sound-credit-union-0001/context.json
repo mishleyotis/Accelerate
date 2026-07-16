@@ -1,0 +1,616 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Sound Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": "Completed acquisition of Washington Business Bank June 2025",
+      "closed_on": "2025-06-01",
+      "details": "Completed acquisition of Washington Business Bank June 2025",
+      "e_id": "E-004",
+      "event_date": "2025-06-01",
+      "id": "6f99f9c5-686e-460a-91fc-601e92df01e9",
+      "source_url": "https://www.businesswire.com/news/home/20250701210411/en/Sound-Credit-Union-Completes-Conversion-of-Washington-Business-Bank",
+      "status": "closed",
+      "target": "Washington Business Bank",
+      "title": "Completed acquisition of Washington Business Bank June 2025"
+    },
+    {
+      "acquirer": "Sound Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": "WBB ACQUISITION: completed acquisition of Washington Business Bank, increased Thurston County branch footprint, gained ~800 business clients, expanding business segment support",
+      "closed_on": "2025-05-01",
+      "details": "WBB ACQUISITION: completed acquisition of Washington Business Bank, increased Thurston County branch footprint, gained ~800 business clients, expanding business segment support",
+      "e_id": "E-099",
+      "event_date": "2025-05-01",
+      "id": "6abff8ea-1752-45e8-99a7-9b1d258e3cd1",
+      "source_url": "https://www.soundcu.com/files/2024-SoundCreditUnion-AnnualReport.pdf",
+      "status": "closed",
+      "target": "Washington Business Bank",
+      "title": "Completed acquisition of Washington Business Bank\u2026"
+    }
+  ],
+  "entity_display_id": "sound-credit-union-0001",
+  "financials": {
+    "lines": [
+      "[Explorium addition: 145+ technologies, $6,633/mo estimated web tech spend]",
+      "[UNCHANGED \u2014 Audited financials from E-099]",
+      "ACCELERATING asset growth (~14% CAGR) but DECLINING profitability (NI \u201333%). Deposit cost pressure (+64% interest expense) is the primary margin compressor [E-099:F7-F8]."
+    ],
+    "metrics": {
+      "audited_financials_from_e": "099]",
+      "explorium_addition": "145+ technologies, $6,633/mo estimated web"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Washington State (Puget Sound + Thurston County)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Don Clark Jr.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nancy Sternitzky",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIDO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ryan Zilker",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP/CGO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lyman Williams",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP/CLO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Robyn LaChance",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP/CSO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jamie Mullenix",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP/CPCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Martin Walker",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Innovation"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jennifer Reed",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP PR"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Sound Credit Union is a state-chartered, NCUA-insured cooperative founded in 1940, headquartered in Tacoma, Washington [E-001, E-006]. Serving 178,000+ members across 28 branches in the Puget Sound region and Thurston County. Dual regulatory oversight from NCUA and WA DFI [E-006, E-083]. 9-member board with analytics expertise (Dr. Demirkan) and financial oversight (Griggs CPA, Pentimonti CPA) [E-099:F10-F11]. CUSO: Sound Financial Group LLC [E-044]. CEO Don Clark Jr. (MBA, BI capstone, 73% approval) [E-022].",
+    "primary_regulator": "NCUA",
+    "size_tier": "$3.072B Total Assets",
+    "thought_leadership": [
+      {
+        "author": "Nancy Sternitzky",
+        "date": "2025-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-090",
+        "excerpt": "Nancy Sternitzky spoke at CULytics Day 2025 on 'Smart AI Guardrails' panel \u2014 Sound CU CIDO presenting on AI governance at premier CU analytics conference CEO requested summarizing months of branch visit notes using gener",
+        "title": "Nancy Sternitzky spoke at CULytics Day 2025",
+        "type": "conference",
+        "url": "https://culytics.com/blogs/smart-ai-guardrails"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-076",
+        "excerpt": "Dedicated Fraud Investigator role: conducts thorough investigations, interviews victims/witnesses/suspects, collaborates with internal/external parties Documents findings in CASE MANAGEMENT SYSTEMS \u2014 confirms structured ",
+        "title": "Dedicated Fraud Investigator role: conducts thorough investigations\u2026",
+        "type": "article",
+        "url": "https://to.indeed.com/aansj7vvrsxg"
+      },
+      {
+        "author": null,
+        "date": "2024-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-009",
+        "excerpt": "UW FinTech Pitch Speaker Series partnership AI in fintech webinar with Hari Prasad Josyula (April 2024)",
+        "title": "UW FinTech Pitch Speaker Series partnership AI in fintech webinar\u2026",
+        "type": "webinar",
+        "url": "https://www.linkedin.com/company/soundcreditunion"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-051",
+        "excerpt": "P1C3.1.4 Innovation KPIs: NO direct public KPIs found; proxy: FinTech Incubator has structured evaluation criteria (committee scoring, panel judging) but no published metrics dashboard P1C3.3.5 Pilot Governance:",
+        "title": "Innovation KPIs",
+        "type": "conference",
+        "url": "N/A \u2014 proxy synthesis from existing evidence"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "P1C3.4 Scaling: Zelle integration (E-020) announced but not deployed (E-021/E-026) = demonstrates scaling/retirement challenge; Core10 APIs successfully scaled to production = successful scaling example P1C3.4.4 Knowledg",
+        "title": "Core10 APIs scaled successful scaling example",
+        "type": "article",
+        "url": "N/A \u2014 synthesized from E-044, E-045, E-053"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "NO_EVIDENCE: Innovation idea management tools/platform, innovation portfolio metrics, innovation budget allocation details, and formal scaling criteria are internal operational details not publicly disclosed Proxy: FinTe",
+        "title": "NO_EVIDENCE: are internal operational details",
+        "type": "conference",
+        "url": "N/A \u2014 no evidence found"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "8f7af9e8-57fd-4749-8f41-4fe4dfbbb3b0",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "729ec7c6-6925-45ad-a9d6-634472b85b45",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "79f2f67e-a19c-478d-8e9a-491ca7fe9287",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "94ee7a81-f3f0-43a3-8bb5-7a76f92cc45f",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "[BORROWED from revised Client Profile Report S5.1, enriched with scoring impacts. 6 issues + 6 contradictions.]",
+    "trend_md": "[BORROWED from revised Client Profile Report S3.2 + S3.3, enriched with assessment scoring impacts]"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.4,
+        "P1C2": 2.61,
+        "P1C3": 3.17,
+        "P1C4": 2.14,
+        "P1C5": 2.28,
+        "P2C1": 2.31,
+        "P2C2": 2.63,
+        "P2C3": 2.46,
+        "P2C4": 2.67,
+        "P3C1": 2.19,
+        "P3C2": 2.79,
+        "P3C3": 2.94,
+        "P3C4": 2.25,
+        "P4C1": 2.76,
+        "P4C2": 2.6,
+        "P4C3": 2.71,
+        "P4C4": 2.81
+      },
+      "overall_score": 2.63,
+      "peer_name": "Kitsap Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 2.2,
+        "P1C3": 2.28,
+        "P1C4": 2.29,
+        "P2C1": 2.61,
+        "P2C2": 2.11,
+        "P2C3": 2.69,
+        "P2C4": 2.47,
+        "P3C1": 2.53,
+        "P3C2": 2.83,
+        "P3C3": 2.76,
+        "P3C4": 2.57,
+        "P4C1": 2.48,
+        "P4C2": 2.61,
+        "P4C3": 2.81,
+        "P4C4": 2.62
+      },
+      "overall_score": 2.5,
+      "peer_name": "Financial Partners Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-SOUND-20260407-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "work-life balance, 3.6/5 career opportunities 91 reviews on Glassdoor as of 2025 Best place I've ever worked - supportive environment, quality training, career advancement opportunities (Jan 2025 review) Community focused organization with",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 91,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": "data governance awareness at governance level Overall Indeed rating 3.7/5 Tacoma; Culture 3.7; Work-life 3.8; Management 3.6; Compensation 3.6; Job security 3.5 CEO approval 72.58%; 59% recommend to friend (48 yes / 33 no) Hiring Fraud Inve",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": "Josyula (April 2024) 50K+ downloads, 4.25K reviews on Google Play Features: balances, transfers, bill pay, P2P, mobile deposit, card mgmt, Wear OS Major mobile banking system transition caused member friction - notifications lost, text bank",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "cite poor transition communication 2.5/5 average from 409 Yelp reviews - branch service praised, digital and lending complaints 7th largest CU in WA, 149th nationally, 409 employees, 177,657 members as of Dec 2025, B+ health rating Online p",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Yelp",
+        "themes": [],
+        "value": 2.5
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Jamie Mullenix appointed SVP/Chief People and Culture Officer - dedicated C-suite culture role (E-005)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-048",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-048",
+        "E-005"
+      ],
+      "id": "4a860d04-eaac-45c5-9bba-c721029ca040",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from multiple evidence items",
+      "subcap_ids": [],
+      "title": "Jamie Mullenix appointed SVP/Chief People and Culture\u2026"
+    },
+    {
+      "body": "Completed acquisition of Washington Business Bank June 2025",
+      "date_precision": "month",
+      "e_id": "E-004",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "6f99f9c5-686e-460a-91fc-601e92df01e9",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20250701210411/en/Sound-Credit-Union-Completes-Conversion-of-Washington-Business-Bank",
+      "subcap_ids": [],
+      "title": "Completed acquisition of Washington Business Bank June 2025"
+    },
+    {
+      "body": "Lyman Williams promoted to EVP/Chief Lending & Business Officer - oversees BI",
+      "date_precision": "publish_fallback",
+      "e_id": "E-005",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "ffcc92e5-92b8-438a-a76b-186b83169e2b",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.soundcu.com/blog/sound-credit-union-announces-leadership-promotions-to-drive-growth-and-operational-excellence/",
+      "subcap_ids": [],
+      "title": "Lyman Williams promoted to EVP/Chief Lending & Business\u2026"
+    },
+    {
+      "body": "Robyn LaChance appointed EVP/Chief Strategy Officer - oversees HR, Change Mgmt, Corporate Strategy",
+      "date_precision": "publish_fallback",
+      "e_id": "E-005",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "69912dea-6944-4929-a7b3-b96f86afdf34",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.soundcu.com/blog/sound-credit-union-announces-leadership-promotions-to-drive-growth-and-operational-excellence/",
+      "subcap_ids": [],
+      "title": "Robyn LaChance appointed EVP/Chief Strategy Officer\u2026"
+    },
+    {
+      "body": "WBB ACQUISITION: completed acquisition of Washington Business Bank, increased Thurston County branch footprint, gained ~800 business clients, expanding business segment support",
+      "date_precision": "publish_fallback",
+      "e_id": "E-099",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-099"
+      ],
+      "id": "6abff8ea-1752-45e8-99a7-9b1d258e3cd1",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.soundcu.com/files/2024-SoundCreditUnion-AnnualReport.pdf",
+      "subcap_ids": [],
+      "title": "Completed acquisition of Washington Business Bank\u2026"
+    },
+    {
+      "body": "New work-life balance time rolled out 2024 for volunteering and mental health days",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "0f9ba5c9-7da4-4494-b6ab-52ae446855dc",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.glassdoor.com/Reviews/Sound-Credit-Union-Reviews-E502656.htm",
+      "subcap_ids": [],
+      "title": "New work-life balance time rolled for volunteering and\u2026"
+    },
+    {
+      "body": "AI chat launched 2024 (annual report) - first AI/GenAI production deployment",
+      "date_precision": "year",
+      "e_id": "E-047",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "9bc92ee0-f3b4-46f5-babd-e54addb1dd84",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "N/A \u2014 synthesized from multiple evidence items",
+      "subcap_ids": [],
+      "title": "Chat launched"
+    },
+    {
+      "body": "Work-life balance time (40hrs) rolled out 2024 for volunteering/mental health (E-022)",
+      "date_precision": "year",
+      "e_id": "E-048",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-048",
+        "E-022"
+      ],
+      "id": "10753991-98ce-48e8-a970-23ad629a716d",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from multiple evidence items",
+      "subcap_ids": [],
+      "title": "Work-life balance time (40hrs) rolled for\u2026"
+    },
+    {
+      "body": "Zelle integration announced 2020 but NOT deployed - signals scaling/retirement challenges (P1C3.4)",
+      "date_precision": "year",
+      "e_id": "E-047",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "34c30128-42ad-4ea3-a6ee-245f58a865ac",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from multiple evidence items",
+      "subcap_ids": [
+        "P1C3.4"
+      ],
+      "title": "Zelle integration announced 2020"
+    },
+    {
+      "body": "Partnered with ModusBox for PortX Payment Manager to integrate Zelle (2020)",
+      "date_precision": "year",
+      "e_id": "E-020",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "dbd9e4a3-c2f7-4756-903b-a2719691f6ff",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20201110005433/en/ModusBox-Partners-with-Sound-Credit-Union-for-Zelle-Integration",
+      "subcap_ids": [],
+      "title": "Partnered with ModusBox for PortX Payment Manager"
+    },
+    {
+      "body": "CONTRADICTION NOTE: Zelle announced via PortX in 2020 but NOT currently offered per member-facing evidence (E-021, E-026). Integration was attempted/announced but appears not deployed to members \u2014 scaling/retirement gap confirmed",
+      "date_precision": "year",
+      "e_id": "E-095",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-095",
+        "E-021",
+        "E-026"
+      ],
+      "id": "24bc28e5-9007-4a23-b6f9-39819d3e4cac",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20201110005433/en/ModusBox-Partners-with-Sound-Credit-Union-for-Zelle-Integration",
+      "subcap_ids": [],
+      "title": "Zelle announced via PortX in 2020"
+    },
+    {
+      "body": "In 2019, partnered with Open Lending for auto lending solution to expand near-prime borrower access",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "0c5b3faf-7c2a-4393-8bd6-97ace6135794",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.openlending.com/sound-credit-union-uses-open-lending-to-expand-loan-availability-to-underserved-near-prime-borrowers-2/",
+      "subcap_ids": [],
+      "title": "In 2019, partnered with Open Lending for auto lending\u2026"
+    }
+  ]
+}

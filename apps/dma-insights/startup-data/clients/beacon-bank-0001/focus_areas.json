@@ -1,0 +1,87 @@
+{
+  "entity_display_id": "beacon-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-037",
+          "E-029",
+          "E-028",
+          "E-007",
+          "E-027"
+        ],
+        "representative_quote": "Evidence: Evidence items: E-037, E-029, E-028.",
+        "source_kind": "heuristic"
+      },
+      "id": "081496e5-5a7a-4aa0-8fe9-076895fa65d8",
+      "involved_subcap_ids": [
+        "P2C2.3.5",
+        "P2C2.3.RB1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$22,200,000,000",
+          "delta": null,
+          "kpi_label": "Beacon Bank",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 2 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-061",
+          "E-056",
+          "E-059",
+          "E-065",
+          "E-058"
+        ],
+        "representative_quote": "FIU: AML/CFT Officer \u2192 Deputy \u2192 CAMS-certified Manager hierarchy confirmed.",
+        "source_kind": "heuristic"
+      },
+      "id": "2287fa41-40e0-4abd-907e-279cbc93b455",
+      "involved_subcap_ids": [
+        "P3C2.2.2",
+        "P3C2.2.3",
+        "P3C2.3.1",
+        "P3C2.3.2",
+        "P3C2.3.3",
+        "P3C2.3.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$22,200,000,000",
+          "delta": null,
+          "kpi_label": "Beacon Bank",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Operationalize process automation",
+      "verbatim_quote": "Address the 22 P3 capability gaps as one operations + automation programme \u2014 payments, lending ops, and core."
+    }
+  ]
+}

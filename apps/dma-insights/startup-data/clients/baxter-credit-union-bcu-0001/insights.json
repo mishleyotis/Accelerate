@@ -1,0 +1,342 @@
+{
+  "entity_display_id": "baxter-credit-union-bcu-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C1",
+        "P4C1",
+        "P4C3",
+        "P4C1.1.2",
+        "P4C2.2.2",
+        "P4C3.6.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "14fb9be5-2500-4fa3-8b18-3c9eae2e1559",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-061",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-065",
+        "E-071",
+        "E-056",
+        "E-072",
+        "E-027",
+        "E-053",
+        "E-054"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Submission Processing Automation a near-term focus for Baxter Credit Union (BCU): a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-071].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Three capabilities carry ±0.8 uncertainty (the maximum)",
+      "what_text": "Three capabilities carry ±0.8 uncertainty (the maximum) because public evidence cannot determine utilization: Core Automation (3 RPA platforms detected but bot count unknown [URF-02]), Data Governance (strategy mature but infrastructure \"patchwork\" [:F2]), and Technology Architecture (MuleSoft absent, legacy platforms detected [:F9]). These three areas are the highest-priority discovery items for the engagement team and also represent Zennify's largest deal opportunity — Data Cloud, MuleSoft, and CRM Analytics directly address all three. In Zennify's assessment Submission Processing Automation scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-065].",
+      "why_text": "Public evidence cannot determine utilization: Core Automation (3 RPA platforms detected but bot count. averages 2.2/5 across its 41 scored capability (peer median ~ 2.5) on the current assessment [E-061, E-065].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C3.6.3",
+        "P3C1.8.IB1",
+        "P1C1.5.2",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "2b5f0eb5-255d-4717-9f89-8ad2c254a4f4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-006",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-065",
+        "E-004",
+        "E-006"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Infrastructure as Code (IaC) a near-term focus for Baxter Credit Union (BCU): a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-065].",
+      "source_rec_id": "REC-01",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Integration Platform",
+      "what_text": "MuleSoft confirmed absent from 200+ platform profile [:F1-F3]. Azure Logic Apps is sole integration tool handling point-to-point connections across Jack Henry Symitar, Blend, Genesys, Alkami, and 10+ platforms. Pre-built Symitar connectors on AppExchange exist but are not deployed [:F3]. Legacy platforms (Win2000/2003/XP, Citrix, WebSphere) compound integration complexity [:F9]. MuleSoft Anypoint Platform connected unlock: improvement above 2.5 removes cap at 3.0 — unlocking automation maturity. In Zennify's assessment Infrastructure as Code (IaC) scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-066].",
+      "why_text": "The assessment found: “BCU uses Jack Henry Symitar Core since 1999, cloud-migrated, renewed partnership 2025 CTO Scott Zulpo: shifted from infrastructure management to innovation via cloud” [E-004]. At 1.5 out of 5, Infrastructure as Code (IaC) sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C1.1.2",
+        "P2C4.1.1",
+        "P1C4.1.2",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "3f5e4053-d872-4def-a81c-323016419760",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-061",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-006",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-006",
+            "E-010",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-046",
+        "E-065",
+        "E-004",
+        "E-006",
+        "E-010",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Governance Operating Model a near-term focus for Baxter Credit Union (BCU): a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-065].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Data Cloud — Unified Member 360",
+      "what_text": "CDO Sahagian described warehouse as 'patchwork quilt of data sets' requiring refactoring [:F2]. Salesforce Data Cloud NOT deployed despite SF serving as system of record [:F3,:F5]. Tealium CDP creates parallel member data layer [URF-04]. Informatica detected but utilization unknown [URF-01]. Data Cloud connected unlock: improvement above 2.5 removes cap at 3.0 — unlocking personalization maturity. In Zennify's assessment Data Governance Operating Model scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-061].",
+      "why_text": "The assessment found: “BCU deployed Agentforce Financial Services — deeply unified platform for real-time personalized member support 'Freeda' = BCU's Agentforce-powered 'financial freedom assistant' — personalized” [E-046]. At 1.5 out of 5, Data Governance Operating Model sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C2.2.2",
+        "P2C4.1.1",
+        "P1C1.5.5",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "12ca3725-ff5f-4cda-bb84-8db45bd19dfb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-006"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-004",
+            "E-006",
+            "E-010",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-075",
+        "E-004",
+        "E-006",
+        "E-010",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Governance Operating Model a near-term focus for Baxter Credit Union (BCU): a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-004].",
+      "source_rec_id": "REC-08",
+      "theme": "Data Management & Governance",
+      "title": "Agentforce Expansion + Data Cloud Personalization",
+      "what_text": "Agentforce 'Freeda' handles inbound only. SavvyMoney delivers 2.3x profitability [:F2] but personalization layers are fragmented (SavvyMoney + Tealium + Salesforce + ML). Data Cloud gap [URF-04] limits cross-channel unification. connected cap: <2.5 → capped at 3.0. Agentforce + Data Cloud (extends Recs #1 and #3) connected unlock: Data Cloud (Rec #3) removes cap — enabling full personalization potential. In Zennify's assessment Data Governance Operating Model scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-075].",
+      "why_text": "The assessment found: “BCU deployed Agentforce Financial Services — deeply unified platform for real-time personalized member support 'Freeda' = BCU's Agentforce-powered 'financial freedom assistant' — personalized” [E-046]. At 1.5 out of 5, Data Governance Operating Model sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 3.16 | vs Median: +0.26 | Trend: ↑",
+        "heading": "6.1. Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 2.53 | vs Median: -0.17 | Trend: →",
+        "heading": "6.2. Pillar 2: Member/Customer Experience & Engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.66 | vs Median: -0.22 | Trend: →",
+        "heading": "6.3. Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 2.5 | vs Median: -0.38 | Trend: →",
+        "heading": "6.4. Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on 6-factor scoring (business impact, risk exposure, competitive positioning, implementation feasibility, quick win potential, and trend momentum). Each includes institution-specific root cause analysis with evidence citations, expected score outcomes, and risk of inaction."
+  },
+  "run_request_id": "DMA-ASM-BCU-20260330-0001"
+}

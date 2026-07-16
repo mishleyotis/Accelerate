@@ -1,0 +1,286 @@
+{
+  "entity_display_id": "apg-federal-credit-union-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-068",
+          "E-037",
+          "E-063",
+          "E-085",
+          "E-108",
+          "E-042"
+        ],
+        "representative_quote": "EVIDENCE: E-068:F1 Scienaptic AI deployed Nov 2025 \u2014 ML-based credit decisioning with fair-lending monitoring.",
+        "source_kind": "docx"
+      },
+      "id": "6e8b569f-e3b4-4d0d-879b-8835bfcaa284",
+      "involved_subcap_ids": [
+        "P1C3.8.1",
+        "P4C2.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU",
+      "verbatim_quote": "F-005 | AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU | CXO Stehl: MIT Sloan AI cert, ran data/analytics + AI governance + 65+ dashboards at SECU [E-037, E-063]. CEO Smith: doubled digital budget, BBJ Faces to Watch 2026. Both came from SECU. | P1C3.8.1=M3.0 (AI leadership signal); P4C2.1.1=M3.0 (analytics strategy elevated on Stehl hire) | Agentforce + Einstein + Data Cloud: Stehl is the primary champion for ALL Salesforce AI products. Frame Zennify as 'helping Stehl deliver his SECU playbook at APGFCU.' He knows the destination \u2014 Zennify provides the path. [E-037, E-063]"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-099",
+          "E-064",
+          "E-008",
+          "E-002",
+          "E-072",
+          "E-028"
+        ],
+        "representative_quote": "EVIDENCE: E-099:F2 2024 Annual Report explicitly identifies 'Baltimore County and Baltimore City primarily served via digital and remote channels' as intentional segment strategy.",
+        "source_kind": "docx"
+      },
+      "id": "2c23591d-c501-4dfe-8c86-082fc2476b55",
+      "involved_subcap_ids": [
+        "P1C1.3.1",
+        "P1C5.1.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "100%",
+          "delta": null,
+          "kpi_label": "K K members",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Baltimore City Expansion: Digital-First, Now Physical",
+      "verbatim_quote": "F-006 | Baltimore City Expansion: Digital-First, Now Physical | Baltimore City/County grew 13K\u219226K+ members (+100%) 2021\u20132024 via digital-first FOM expansion [E-099]. First Baltimore City physical branch (Canton, The Can Company) announced April 2026, opening early 2027. | P1C1.3.1=M3.0 (geographic expansion strategy); P1C5.1.1=M3.0 (community impact hub) | Marketing Cloud + FSC: New branch = new member acquisition funnels. Canton branch = CEO's 'community hub' model. Digital onboarding for Baltimore City = Q2 + FSC + Marketing Cloud integrated new-member journey. [E-099, E-064]"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-085",
+          "E-108",
+          "E-056",
+          "E-037"
+        ],
+        "representative_quote": "No CDP in tech stack \u2014 confirmed across 6 sources (E-085:F1).",
+        "source_kind": "docx"
+      },
+      "id": "d03fbad6-ef86-418c-a261-0da2e748268d",
+      "involved_subcap_ids": [
+        "P2C4.1.1",
+        "P4C1.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Member Data in 5 Silos \u2014 Identified",
+      "verbatim_quote": "F-003 | Member Data in 5 Silos \u2014 'Missed Loan Opportunities' Self-Identified | 'Identifying missed loan opportunities' explicitly listed as operational challenge [E-108]. Member data spans Corelation, Q2, SavvyMoney, Scienaptic, GA+DMP \u2014 all unlinked. No CDP deployed. | P2C4.1.1=M1.5 (no CDP); P4C2=M1.99 (analytics overall); P4C1.4.2=M3.0 (identity resolution \u2014 LiveRamp + Neustar confirmed Datanyze) | Data Cloud: LiveRamp + Neustar already deployed \u2014 the DMP-to-CDP bridge is pre-built. Position: 'You already have the identity infrastructure; Data Cloud unifies it across all 5 systems.' [E-085, E-108]"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-091",
+          "E-093",
+          "E-085",
+          "E-098",
+          "E-059",
+          "E-087"
+        ],
+        "representative_quote": "Kadince = marketing project management tool, NOT email automation platform (E-091:F1).",
+        "source_kind": "docx"
+      },
+      "id": "32a1134b-54e0-429b-a07d-d03de7eafb1e",
+      "involved_subcap_ids": [
+        "P2C1.5.1",
+        "P2C1.4.4",
+        "P2C1.3.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No Marketing Automation: 183K Members, Periodic Newsletter",
+      "verbatim_quote": "F-002 | No Marketing Automation: 183K Members, Periodic Newsletter | Kadince manages 1,000+ projects/yr [E-091] but is a project tool \u2014 not automation. No email automation platform found in any of 6 tech sources. | P2C1.5.1=M1.5 (marketing automation); P2C1.4.4=M1.5 (lead management); P2C1.3.1=M2.0 (digital content) | Marketing Cloud: VP Jo Anna Shuba (Apr 2025, 30+ yrs, prior credit card portfolio) is the immediate champion. SavvyMoney's 94,672 enrolled members = day-one audience for first automated campaign. [E-091, E-093]"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-085",
+          "E-108",
+          "E-104",
+          "E-056",
+          "E-083",
+          "E-086"
+        ],
+        "representative_quote": "No CRM = no unified agent desktop (E-085:F1).",
+        "source_kind": "docx"
+      },
+      "id": "08f38e3f-bd95-4674-a5d7-afa54e6e944b",
+      "involved_subcap_ids": [
+        "P2C3.6.1",
+        "P2C3.4.1",
+        "P2C3.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "360",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "183,768",
+          "delta": null,
+          "kpi_label": "Members",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "18 months",
+          "delta": null,
+          "kpi_label": "New CEO",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No Salesforce Deployed",
+      "verbatim_quote": "F-001 | GREENFIELD CRM \u2014 No Salesforce Deployed | Zero CRM across 183,768 members & 19 branches; confirmed across 6 tech sources (Datanyze, echoloc.ai, Explorium, Clay, web stack scan, job postings) [E-085, E-108] | P2C3.6.1=M1.5 (unified agent desktop absent); P2C3.4.1=M2.0 (no 360 member view); P2C3.5.x=M1.5 (no case management) | Salesforce FSC: Primary platform opportunity with zero displacement cost. New CEO (<18 months) = open procurement cycle. Optimal first call: Stehl (CXO) + Shuba (VP Marketing)."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-068",
+          "E-101",
+          "E-105",
+          "E-063",
+          "E-083",
+          "E-097"
+        ],
+        "representative_quote": "Scienaptic AI deployed Nov 2025 (E-068:F1): 'AI-powered, regulatory-compliant technology...faster, smarter lending decisions...extending lending to underserved members.'",
+        "source_kind": "docx"
+      },
+      "id": "acddbee7-9d6b-4bb3-89b7-e8ecc80e7a74",
+      "involved_subcap_ids": [
+        "P2C2.4.1",
+        "P4C2.4.7"
+      ],
+      "kpis": [],
+      "page_number": 2,
+      "pillars_weight": {
+        "P2": 50,
+        "P4": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Scienaptic AI Live",
+      "verbatim_quote": "F-007 | Scienaptic AI Live: APGFCU Proved AI in Production | Deployed November 2025. 90% manual underwriting automation [E-101]. Fair lending monitoring under AVP John Golding [E-105]. Chief Consumer Lending Officer Robyn Mannone quoted in press release [E-068]. | P2C2.4.1=M3.5 (AI-powered credit decisioning \u2014 strongest P2 subcap); P4C2.4.7=M2.5 (MLOps via vendor) | Einstein NBA + Agentforce: Scienaptic proves 'APGFCU can govern and operate AI in production.' Now scale from credit \u2192 member service (Agentforce) and cross-sell/retention (Einstein NBA). The governance model is already in place. [E-068, E-101]"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": "net_income: 25500000.0",
+      "grounding": {
+        "evidence_e_ids": [
+          "E-098",
+          "E-068"
+        ],
+        "representative_quote": "Strongest Financial Position in 23 Years",
+        "source_kind": "docx"
+      },
+      "id": "fe1d615e-cf80-4177-bb1a-90576335f4da",
+      "involved_subcap_ids": [
+        "P1C1.2.1",
+        "P4C1.5.4",
+        "P4C3.1.2",
+        "P4C1.1.8",
+        "P1C5.2.2",
+        "P3C1.1.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$250,000,000",
+          "delta": null,
+          "kpi_label": "Assets",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$25,500,000",
+          "delta": null,
+          "kpi_label": "Net income",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "1.03%",
+          "delta": null,
+          "kpi_label": "Years ROA",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 30,
+        "P3": 17,
+        "P4": 53
+      },
+      "source_path": "(unknown)",
+      "title": "Strongest Financial Position in 23 Years",
+      "verbatim_quote": "F-004 | Strongest Financial Position in 23 Years | ROA 1.03% (+34bp YoY). Net income $25.5M (+56% YoY). Assets +$250M (+10.6%). Loan portfolio +$230M (+12%). Professional services $10.5M [E-098]. | Investment capacity at 23-year high. Budget surplus vs. prior years. $10.5M existing tech spend baseline. | Investment conversation: CFO has headroom. Reference loan growth (+$230M) as technology ROI signal. Scienaptic AI's 90% underwriting automation is the proof-of-concept story for Einstein NBA expansion. [E-098, E-068]"
+    }
+  ]
+}

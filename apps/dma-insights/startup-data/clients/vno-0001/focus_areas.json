@@ -1,0 +1,53 @@
+{
+  "entity_display_id": "vno-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-050",
+          "E-049",
+          "E-052"
+        ],
+        "representative_quote": "MatrixBCG \u2014 VNO Sales & Marketing Strate: NYC office leases in 2024: 2.65M SF signed at avg $104/SF starting rent; 18 prem.",
+        "source_kind": "heuristic"
+      },
+      "id": "9c98a41a-6d81-40c7-bb7a-d9c9029a7c2d",
+      "involved_subcap_ids": [
+        "P2C1.1.2",
+        "P2C1.1.5",
+        "P2C1.2.1",
+        "P2C1.2.4",
+        "P2C1.2.7",
+        "P2C1.3.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$104",
+          "delta": null,
+          "kpi_label": "Avg",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

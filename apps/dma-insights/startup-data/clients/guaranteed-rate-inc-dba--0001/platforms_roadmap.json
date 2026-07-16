@@ -1,0 +1,37 @@
+{
+  "entity_display_id": "guaranteed-rate-inc-dba--0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.70 \u2192 4.0 (peer median 2.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P1C5 score 1.70 \u2192 4.0 (peer median 2.25)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.3",
+          "metric": "P1C5 score 1.70 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.70 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "R6",
+          "title": "."
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C5"
+    }
+  ],
+  "run_request_id": "DMA-ASS-GRATE-20260416-0001",
+  "total_duration_months": 4
+}

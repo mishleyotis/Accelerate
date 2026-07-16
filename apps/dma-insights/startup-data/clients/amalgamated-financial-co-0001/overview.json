@@ -1,0 +1,1086 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 165,
+        "subcaps": 165,
+        "thin": 165
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "amalgamated-financial-co-0001",
+    "domain": null,
+    "hq": null,
+    "id": "4a1a96d2-9d6f-4a28-8cad-0482a5c9b2e9",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Amalgamated Financial Corp / Amalgamated Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:38.093273Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 51,
+    "undated_count": 51
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 51
+    },
+    "connectors": {
+      "Clay": 2,
+      "Glassdoor": 1,
+      "Indeed": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 51
+    },
+    "tiers": {
+      "T1": 12,
+      "T2": 20,
+      "T3": 7,
+      "T5": 1,
+      "T6": 3,
+      "T7": 3,
+      "T8": 5
+    },
+    "total_facts": 51,
+    "total_items": 51
+  },
+  "financial_trajectory": null,
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 8900000000.0,
+    "branches": 5,
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "trend_period": "FY2017 - FY2025"
+    },
+    "footprint": "NY, DC, SF, Boston",
+    "footprint_basis": "derived:geography",
+    "founded": 1923,
+    "geography": "NY, DC, SF, Boston",
+    "headcount": 581,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Priscilla Sims Brown",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jason Darby",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Adrian Glace",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Sean Searby",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO / COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ina Narula",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Stephanie Parker",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CCRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Thomas O'Brien",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tye Graham",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dawn Zappetti",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ivan Frishberg",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CSO-Sustainability"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Leanne Ocampo",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Audit Executive"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Phil Armas",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Transformation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Brad Fiery",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Head of Data Governance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Zinoviy L.",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP IT Governance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kent Doren",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP InfoSec Operations"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Amalgamated Bank (Amalgamated Financial Corp)",
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "This section provides a comprehensive profile of Amalgamated Bank across eleven dimensions, anchored in primary regulatory sources, public disclosures, and direct internal evidence from the Zennify engagement. Each subsection cites evidence inline using the [E-xxx:Fy] notation.",
+    "primary_regulator": "FDIC (Cert 413), Federal Reserve (Fed ID 661308), NYSDFS",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 8900000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.7,
+          "source": "iOS App Store - Amalgamated Bank"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.4,
+          "source": "Google Play - Amalgamated Bank"
+        },
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 5,
+          "score": 1.13,
+          "source": "BBB - Amalgamated Bank"
+        }
+      ],
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.7/5",
+          "source": "iOS App Store - Amalgamated Bank",
+          "themes": "Mobile RDC, biometric auth, easy login"
+        },
+        {
+          "rating": "4.4/5",
+          "source": "Google Play - Amalgamated Bank",
+          "themes": "Solid usability"
+        },
+        {
+          "rating": "1.13/5",
+          "source": "BBB - Amalgamated Bank",
+          "themes": "13+ month onboarding, deposit holds, account closures"
+        },
+        {
+          "rating": "Mixed",
+          "source": "TrustPilot",
+          "themes": "CX issues, trust concerns"
+        },
+        {
+          "rating": "Mixed",
+          "source": "WalletHub",
+          "themes": "Service hours, agent training"
+        },
+        {
+          "rating": "—",
+          "source": "Indeed (Employee)",
+          "themes": "Mission alignment positive, growth concerns"
+        },
+        {
+          "rating": "Mixed",
+          "source": "BankTruth (Third-party review)",
+          "themes": "Mission products strong, no spending analytics/round-ups"
+        },
+        {
+          "rating": "Positive",
+          "source": "Kiplinger (Industry)",
+          "themes": "Mission bank, fossil fuel-free portfolio differentiation"
+        },
+        {
+          "rating": "2 Satisfactory",
+          "source": "NYDFS CRA Performance Evaluation",
+          "themes": "Community Development Lending OUTSTANDING, Service Test High Sat"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mid-cap regional ($5-15B)",
+    "thought_leadership": null,
+    "ticker": "NASDAQ: AMAL",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": null,
+    "website": "amalgamatedbank.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.630441+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Amalgamated Financial Corp / Amalgamated Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Amalgamated Financial Corp / Amalgamated Bank is a $8.9B in assets regional bank regulated by FDIC (Cert 413), Federal Reserve (Fed ID 661308), NYSDFS, operating since 1923 with 581 employees. Zennify's assessment places overall digital maturity at 2.6/5. The deepest capability gap is Service Process Configuration & Routing at 1.9/5 against a 2.7 peer median [E-044, E-050]. Next is Behavior-Based Rewards at 2.1/5 against a 2.8 peer median. Third is Document Chunking & Metadata Enrichment Pipelines at 2.3/5 against a 2.7 peer median [E-023].\n\nThe issue register adds 24 subcaps (baseline-scored categories: M&A integration, BaaS, innovation labs, RAG, fraud intelligence) had empty evidence_ids fields (critical severity). The issue register adds 8 evidence IDs cited in scoring subcaps not present in evidence_index.csv (E-034, E-045, E-050, E-051, E-057) (critical severity). Counter-signal: ESG Roadmap already runs at 3.4/5 against a 2.6 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-002, E-006, E-007]. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Amalgamated Financial Corp / Amalgamated Bank is whether to close Service Process Configuration & Routing first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Amalgamated Financial Corp / Amalgamated Bank should lead with nCino (65/100 fit) against Strategic Integration Planning, then sequence Salesforce behind it. Closing Service Process Configuration & Routing to the peer median alone is worth 0.8 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"From the seventeen capability discovery question sets above, the following focus areas are prioritized for internal stakeholder engagement during Layer 1 Assessment:\"."
+  },
+  "overall_score": 2.59,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/A5_Issues_Register.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.072828+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/A6_Sentiment.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.073216+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/INTERNAL_EVIDENCE_MANIFEST.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.073426+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A3_Financials.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.074218+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/PEER_BENCHMARKING_METHODOLOGY_NOTE.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.074695+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.075033+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/l2_check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.075836+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/l2_pass2_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.076204+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block_L2.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.076422+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/APPENDICES_INDEX.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.076836+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:38.077161+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 3,
+      "DEGRADED": 3,
+      "INFO": 26
+    },
+    "stage_ms": {
+      "manifest": 6,
+      "parse": 5662,
+      "persist": 299
+    },
+    "structured": [
+      {
+        "code": "run_manifest_reconciled",
+        "detail": "run_manifest.json: schema drift normalized (ValidationError: 1 validation error for RunManifest\ninstitution_name\n  Input should be a valid string [type=string_type, input_value={'name': 'Amalgamated Fin...tical_confidence)",
+        "severity": "INFO"
+      },
+      {
+        "code": "run_id format",
+        "detail": "run_id format: unrecognized run_id format: 'DMA-ASSESS-AMAL-20260428-0001'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_Am",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_Amalgamated_2026-04-28.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from variant A1_Evidence_Inventory.csv (01_evide",
+        "detail": "evidence loaded from variant A1_Evidence_Inventory.csv (01_evidence)",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=29 contradictions=4",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 17 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "peers loaded from variant peer_set.json (6 peers)",
+        "detail": "peers loaded from variant peer_set.json (6 peers)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Research_Report_Amalgamated_Bank_2026-04-28.docx count=15",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 7 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 9 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_derived_from_scores",
+        "detail": "scqa_derived_from_scores",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/A5_Issues_Register.csv — no fingerprint matched (best confidence 0.25); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/A6_Sentiment.csv — no fingerprint matched (best confidence 0.25); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/INTERNAL_EVIDENCE_MANIFEST.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A3_Financials.csv — no fingerprint matched (best confidence 0.25); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/PEER_BENCHMARKING_METHODOLOGY_NOTE.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/l2_check_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/l2_pass2_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block_L2.md — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/APPENDICES_INDEX.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:20/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "INFO/run_manifest_reconciled: run_manifest.json: schema drift normalized (ValidationError: 1 validation error for RunManifest\ninstitution_name\n  Input should be a valid string [type=string_type, input_value={'name': 'Amalgamated Fin...tical_confidence)",
+      "run_id format: unrecognized run_id format: 'DMA-ASSESS-AMAL-20260428-0001'",
+      "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_Amalgamated_2026-04-28.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from variant A1_Evidence_Inventory.csv (01_evidence)",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=29 contradictions=4",
+      "caps_applied_log: 17 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "peers loaded from variant peer_set.json (6 peers)",
+      "firmographics_leadership_merged_from_docx: source=DMA_Research_Report_Amalgamated_Bank_2026-04-28.docx count=15",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "tech_stack_from_report_prose: 7 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 9 sources",
+      "scqa_derived_from_scores",
+      "insights_from_client_profile_findings: 10",
+      "INFO/pattern_gap: 01_evidence/A5_Issues_Register.csv — no fingerprint matched (best confidence 0.25); 10 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/A6_Sentiment.csv — no fingerprint matched (best confidence 0.25); 9 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/INTERNAL_EVIDENCE_MANIFEST.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A3_Financials.csv — no fingerprint matched (best confidence 0.25); 6 generic sections mined",
+      "INFO/pattern_gap: 06_peers/PEER_BENCHMARKING_METHODOLOGY_NOTE.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/l2_check_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/l2_pass2_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block_L2.md — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/APPENDICES_INDEX.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: README.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "catalogue_unresolved:20/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 10",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 165,
+      "peer_median": 2.86,
+      "pillar_id": "P1",
+      "score": 2.8,
+      "subcaps_scored": 165
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.77,
+      "pillar_id": "P2",
+      "score": 2.23,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.85,
+      "pillar_id": "P3",
+      "score": 2.54,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.74,
+      "pillar_id": "P4",
+      "score": 2.63,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-28",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:38.093273Z",
+    "created_at": "2026-07-02T23:10:38.093273Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "hybrid",
+    "id": "23e7b7f7-fa08-475d-80d7-e37be833335d",
+    "overall_score": 2.59,
+    "request_id": "DMA-ASSESS-AMAL-20260428-0001",
+    "started_at": "2026-07-02T23:10:38.093273Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.7,
+        "source": "iOS App Store - Amalgamated Bank"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.4,
+        "source": "Google Play - Amalgamated Bank"
+      },
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 5,
+        "score": 1.13,
+        "source": "BBB - Amalgamated Bank"
+      }
+    ],
+    "derived_from": null,
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "P1C3 Data Strategy (highest uncertainty ±1.50): MDM operating model, Unity Catalog deployment, data domain ownership matrix, and data product portfolio definition. Engage Brad Fiery (Head of Data Governance) plus Databricks/Zeb.",
+      "evidence": [
+        "E-070",
+        "E-071",
+        "E-064",
+        "E-002"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Recommended Internal Engagement Focus Areas",
+      "peer_median": 2.67,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.91,
+      "so_what": "Prioritize Recommended Internal Engagement Focus Areas in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what": "P1C3 Data Strategy (highest uncertainty ±1.50): MDM operating model, Unity Catalog deployment, data domain ownership matrix, and data product portfolio definition. Engage Brad Fiery (Head of Data Governance) plus Databricks/Zeb.",
+      "why": "The shortfall is relative, not absolute: 1.91/5 sits below the 2.67 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "P4C2 AI Enablement (lowest ceiling M1.5): SR 11-7 model governance framework, ML model inventory, Agentforce production rollout, AI risk tiering rubric. Engage CTO Adrian Glace, COO/CIO Sean Searby, CFO Jason Darby.",
+      "evidence": [
+        "E-070",
+        "E-071",
+        "E-064",
+        "E-065"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Recommended Internal Engagement Focus Areas",
+      "peer_median": 2.67,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.91,
+      "so_what": "Prioritize Recommended Internal Engagement Focus Areas in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what": "P4C2 AI Enablement (lowest ceiling M1.5). SR 11-7 model governance framework, ML model inventory, Agentforce production rollout, AI risk tiering rubric. Engage CTO Adrian Glace, COO/CIO Sean Searby, CFO Jason Darby.",
+      "why": "The shortfall is relative, not absolute: 1.91/5 sits below the 2.67 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Mission Alignment Preservation. Workers United retains ~38% ownership; Delaware Public Benefit Corp; B Corp score 155.3; founding signatory NZBA, PRB, PCAF, SBTi. Climate strategy operational with named leadership across community impact, climate partnerships, sustainability advisory [E-002:F1, E-021:F1, E-025:F1].",
+      "evidence": [
+        "E-002",
+        "E-021",
+        "E-025"
+      ],
+      "magnitude": "~38%",
+      "name": "Mission Alignment Preservation",
+      "peer_median": 2.67,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.3,
+      "so_what": "Prioritize Mission Alignment Preservation in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Mission Alignment Preservation",
+      "what": "Mission Alignment Preservation. Workers United retains ~38% ownership; Delaware Public Benefit Corp; B Corp score 155.3; founding signatory NZBA, PRB, PCAF, SBTi. Climate strategy operational with named leadership across community impact, climate partnerships, sustainability advisory [E-002:F1, E-021:F1, E-025:F1].",
+      "why": "The shortfall is relative, not absolute: 2.3/5 sits below the 2.67 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "P3C2 Operational Risk & Fraud (vendor unknown): Fraud detection platform vendor identification, transaction fraud KRIs, operational loss event database trend. Engage CRO Ina Narula, BSA/AML Mark Fernandez.",
+      "evidence": [
+        "E-070",
+        "E-071"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Recommended Internal Engagement Focus Areas",
+      "peer_median": 2.67,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.91,
+      "so_what": "Prioritize Recommended Internal Engagement Focus Areas in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Recommended Internal Engagement Focus Areas",
+      "what": "P3C2 Operational Risk & Fraud (vendor unknown): Fraud detection platform vendor identification, transaction fraud KRIs, operational loss event database trend. Engage CRO Ina Narula, BSA/AML Mark Fernandez.",
+      "why": "The shortfall is relative, not absolute: 1.91/5 sits below the 2.67 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Integration Architecture Expansion. MuleSoft as integration fabric extending to CreditLens (Moody’s pilot customer), MANTL, and Horizon Core with bi-directional sync planned. Phase 2 integration scope $450K in pipeline. Master Data Management strategy explicitly “formative” [E-072:F4, E-058:F8].",
+      "evidence": [
+        "E-072",
+        "E-058"
+      ],
+      "magnitude": "$450K",
+      "name": "Integration Architecture Expansion",
+      "peer_median": 2.67,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.91,
+      "so_what": "Prioritize Integration Architecture Expansion in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Integration Architecture Expansion",
+      "what": "Integration Architecture Expansion. MuleSoft as integration fabric extending to CreditLens (Moody’s pilot customer), MANTL, and Horizon Core with bi-directional sync planned. Phase 2 integration scope $450K in pipeline. Master Data Management strategy explicitly “formative”. [E-072:F4, E-058:F8].",
+      "why": "The shortfall is relative, not absolute: 1.91/5 sits below the 2.67 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Planning averages 2.6/5 over 165 scored subcaps; ceiling 3.1 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "AI Ethics & Fairness averages 3.1/5 over 217 scored subcaps; ceiling 3.6 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Lab/Center averages 2.4/5 over 190 scored subcaps; ceiling 2.9 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Planning averages 2.8/5 over 205 scored subcaps; ceiling 3.3 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "40 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Roadmap averages 3.4/5 over 40 scored subcaps; ceiling 3.9 reflects thin evidence density (0/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Partner Compliance Governance averages 2.3/5 over 287 scored subcaps; ceiling 2.8 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Aggregator Integration averages 2.5/5 over 287 scored subcaps; ceiling 3.0 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Service Process Configuration & Routing averages 1.9/5 over 286 scored subcaps; ceiling 2.4 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Behavior-Based Rewards averages 2.1/5 over 255 scored subcaps; ceiling 2.6 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Workflow & Task Automation averages 2.4/5 over 143 scored subcaps; ceiling 2.9 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Collaboration averages 2.5/5 over 130 scored subcaps; ceiling 3.0 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Disclosure Management averages 2.8/5 over 141 scored subcaps; ceiling 3.2 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Exit & Contingency averages 2.5/5 over 145 scored subcaps; ceiling 3.0 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Domain Data Ownership Model averages 2.9/5 over 200 scored subcaps; ceiling 3.4 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Document Chunking & Metadata Enrichment Pipelines averages 2.3/5 over 270 scored subcaps; ceiling 2.8 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Architecture & API averages 2.7/5 over 235 scored subcaps; ceiling 3.2 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Continuous Trust Verification averages 2.7/5 over 150 scored subcaps; ceiling 3.2 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "issue_register",
+      "detail": "24 subcaps (baseline-scored categories: M&A integration, BaaS, innovation labs, RAG, fraud intelligence) had empty evidence_ids fields",
+      "evidence": [
+        "E-038",
+        "E-029"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "M&A integration, BaaS, innovation labs, RAG, fraud…",
+      "metric": null,
+      "peer_context": "Service Process Configuration & Routing runs 1.91/5 vs a 2.67 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "24 subcaps (baseline-scored categories: M&A integration, BaaS, innovation labs, RAG, fraud intelligence) had empty evidence_ids fields. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of Amalgamated Financial Corp / Amalgamated Bank. Overall digital maturity scored 2.52/5.0 (Apr 2026).",
+      "evidence": [
+        "E-071",
+        "E-002",
+        "E-026",
+        "E-027"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of…",
+      "metric": null,
+      "peer_context": "Service Process Configuration & Routing runs 1.91/5 vs a 2.67 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategic Integration Planning — highest-fit surface at 65/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of Amalgamated Financial Corp / Amalgamated Bank. Overall digital maturity scored 2.52/5.0 (Apr 2026). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2026-04-28",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Service Process Configuration & Routing scores 1.91/5 vs a typical 2.67 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-044",
+        "E-050"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Service Process Configuration & Routing scores vs a typical…",
+      "metric": "Service Process Configuration & Routing 1.91/5 vs peer 2.67",
+      "peer_context": "Service Process Configuration & Routing runs 1.91/5 vs a 2.67 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategic Integration Planning — highest-fit surface at 65/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C3",
+      "text": "Service Process Configuration & Routing scores 1.91/5 vs a typical 2.67 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

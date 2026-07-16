@@ -1,0 +1,319 @@
+{
+  "entity_display_id": "mission-federal-credit-u-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Additional strategic signals include",
+        "source_kind": "docx"
+      },
+      "id": "938d4222-30f0-44fb-b948-c02a43585b63",
+      "involved_subcap_ids": [
+        "P1C5.2.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.2.4",
+        "P1C2.4.5",
+        "P1C2.4.4",
+        "P1C2.4.5",
+        "P1C2.8.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Additional strategic signals include:",
+      "verbatim_quote": "Additional strategic signals include:"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-020"
+        ],
+        "representative_quote": "ongoing evolution of data analytics and process improvement",
+        "source_kind": "docx"
+      },
+      "id": "1ee1ac5c-986c-4f62-ab5a-d56c16acfd77",
+      "involved_subcap_ids": [
+        "P4C1.5.6",
+        "P4C1.5.6",
+        "P4C1.5.6",
+        "P4C1.5.6",
+        "P4C3.6.11",
+        "P4C3.4.12",
+        "P4C3.3.5",
+        "P4C3.6.11"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics and process improvement\" and\u2026",
+      "verbatim_quote": "\u2022 CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics and process improvement\" and \"increasing efficiencies through the use of technology\" [E-020]."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-020"
+        ],
+        "representative_quote": "\u2022 CIO Jojo Seva expertise: Recognized leader in AI, core banking, enterprise digital transformation, and information security \u2014 AI sponsorship at C-suite level.",
+        "source_kind": "docx"
+      },
+      "id": "6e395a3b-d18f-4fe9-8a31-ef98f50b75f4",
+      "involved_subcap_ids": [
+        "P1C4.2.2",
+        "P3C1.3.1",
+        "P4C4.5.3",
+        "P2C3.3.3",
+        "P1C3.7.1",
+        "P4C1.3.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 17,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "CIO Jojo Seva expertise: Recognized leader in AI, core banking\u2026",
+      "verbatim_quote": "\u2022 CIO Jojo Seva expertise: Recognized leader in AI, core banking, enterprise digital transformation, and information security \u2014 AI sponsorship at C-suite level [E-020]."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-060",
+          "E-067",
+          "E-068"
+        ],
+        "representative_quote": "3. Deepening community impact \u2014 Evidenced by $1.2M+ community giving, Juntos Avanzamos designation (first SD-based CU), Girl Scouts San Diego Official CU partnership (1,400 new accounts), San Diego Padres brand partnership, and SD Symphony 10-year naming deal.",
+        "source_kind": "docx"
+      },
+      "id": "4f833caf-11ab-4666-85b7-e3896336bcb1",
+      "involved_subcap_ids": [
+        "P1C5.2.2",
+        "P2C4.7.6",
+        "P2C4.5.CU1",
+        "P2C1.2.CU1",
+        "P4C1.1.7",
+        "P1C3.6.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$1,200,000",
+          "delta": null,
+          "kpi_label": "community impact Evidenced",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 48,
+        "P4": 19
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Deepening community impact \u2014 Evidenced by $1.2M+ community giving\u2026",
+      "verbatim_quote": "3. Deepening community impact \u2014 Evidenced by $1.2M+ community giving, Juntos Avanzamos designation (first SD-based CU), Girl Scouts San Diego Official CU partnership (1,400 new accounts), San Diego Padres brand partnership, and SD Symphony 10-year naming deal [E-060, E-067, E-068]."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-065"
+        ],
+        "representative_quote": "Enhancing member services \u2014 Evidenced by 4.8/5 member satisfaction score, 20,000 personalized consultations in 2024, SavvyMoney credit assistance for 44,000+ members, Quick-Switch Direct Deposit, and Digital Member ID Card launch",
+        "source_kind": "docx"
+      },
+      "id": "6a5f87e5-2653-40f8-9033-30be9d7b5c2e",
+      "involved_subcap_ids": [
+        "P2C1.1.6",
+        "P2C1.1.6",
+        "P2C1.2.8",
+        "P2C1.2.8",
+        "P2C4.5.6",
+        "P2C4.5.6",
+        "P2C4.5.7",
+        "P2C4.5.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Enhancing member services \u2014 Evidenced by 4.8/5 member satisfaction score\u2026",
+      "verbatim_quote": "2. Enhancing member services \u2014 Evidenced by 4.8/5 member satisfaction score, 20,000 personalized consultations in 2024, SavvyMoney credit assistance for 44,000+ members, Quick-Switch Direct Deposit, and Digital Member ID Card launch [E-065, Annual Report 2024]."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Mission Fed's stated 2025 strategic priorities center on three pillars",
+        "source_kind": "docx"
+      },
+      "id": "dcb8a5ae-5198-40cc-bc47-93b0d7295c60",
+      "involved_subcap_ids": [
+        "P1C1.4.2",
+        "P1C1.8.2",
+        "P4C4.7.1",
+        "P3C1.1.3",
+        "P1C3.9.1",
+        "P2C3.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$7,000,000,000",
+          "delta": null,
+          "kpi_label": "Detected common for",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 49,
+        "P2": 17,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Mission Fed's stated 2025 strategic priorities center on three pillars:",
+      "verbatim_quote": "Mission Fed's stated 2025 strategic priorities center on three pillars:"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-015"
+        ],
+        "representative_quote": "\u2022 Record financial performance: $73.2M net income, $5.8B deposits, $4.6B loans, 34,188 new accounts in 2024 \u2014 financial capacity for multi-year technology investment.",
+        "source_kind": "docx"
+      },
+      "id": "49dda269-1299-47c0-ab8f-0298a332da2f",
+      "involved_subcap_ids": [
+        "P1C5.2.3",
+        "P3C4.6.2",
+        "P2C4.6.5",
+        "P2C4.3.CU1",
+        "P2C4.6.3",
+        "P2C4.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$5,800,000,000",
+          "delta": null,
+          "kpi_label": "Deposits",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$4,600,000,000",
+          "delta": null,
+          "kpi_label": "Loans",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 14,
+        "P2": 68,
+        "P3": 18
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Record financial performance: $73.2M net income, $5.8B deposits, $4.6B loans\u2026",
+      "verbatim_quote": "\u2022 Record financial performance: $73.2M net income, $5.8B deposits, $4.6B loans, 34,188 new accounts in 2024 \u2014 financial capacity for multi-year technology investment [E-015]."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-040",
+          "E-113",
+          "E-021",
+          "E-022"
+        ],
+        "representative_quote": "Fresh Design. Smarter Features. Easier Access",
+        "source_kind": "docx"
+      },
+      "id": "ab0044cc-b982-4231-8b30-8d5ad1247631",
+      "involved_subcap_ids": [
+        "P2C3.3.3",
+        "P3C3.8.3",
+        "P1C2.1.7",
+        "P2C3.3.5",
+        "P4C2.2.10",
+        "P4C1.2.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$102",
+          "delta": null,
+          "kpi_label": "BA Information Management",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$120",
+          "delta": null,
+          "kpi_label": "for Data Architect",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Reinvesting in technology \u2014 Evidenced by September 2025 digital banking platform redesign\u2026",
+      "verbatim_quote": "1. Reinvesting in technology \u2014 Evidenced by September 2025 digital banking platform redesign (\"Fresh Design. Smarter Features. Easier Access\"), Las Vegas data center upgrades in 2024, and active hiring for Data Architect ($120\u2013140K) and Senior BA\u2013Information Management ($102\u2013128K) [E-040, E-113, E-021, E-022]."
+    }
+  ]
+}

@@ -1,0 +1,1168 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 158,
+        "subcaps": 158,
+        "thin": 158
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 232,
+        "subcaps": 232,
+        "thin": 232
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 118
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 172
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "security-finance-corpora-0001",
+    "domain": null,
+    "hq": null,
+    "id": "3eb5896e-e998-448e-8665-dde033e608be",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Security Finance Corporation",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CL",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:01.962706Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 20,
+    "current_count": 7,
+    "dated_count": 0,
+    "median_age_months": 19.9,
+    "oldest_published_date": "2018-01-01",
+    "stale_count": 1,
+    "stale_pct": 1.64,
+    "total": 61,
+    "undated_count": 33
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 61
+    },
+    "connectors": {
+      "Glassdoor": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 61
+    },
+    "tiers": {
+      "T1": 21,
+      "T2": 19,
+      "T3": 12,
+      "T4": 7,
+      "T5": 2
+    },
+    "total_facts": 61,
+    "total_items": 61
+  },
+  "financial_trajectory": null,
+  "firmographics": {
+    "aum_basis": "size_tier",
+    "aum_usd": 1000000000.0,
+    "branches": "905",
+    "clay_synced_at": null,
+    "employees_approx": "1001-5000",
+    "financial_highlights": {
+      "lines": [
+        "Financial Trajectory: As a private entity, Security Finance provides limited public financial disclosure, which constrains trend analysis to indirect indicators rather than audited financials. Nevertheless, three convergent data points support a STABLE trajectory classification. First, the 905-branch footprint has remained consistent across multiple data sources [E-B1-001, E-P1C1-006], with no evidence of branch closures or rapid expansion—suggesting the company is maintaining operational scale rather than contracting or over-extending. Second, the ongoing multi-million-dollar investment in Salesforce ecosystem deployment (FSC, MCE, MuleSoft, CRMA) combined with the Zennify consulting partnership formalized in December 2024 [E-P1C1-007] signals that management is allocating capital toward digital modernization, which would be unlikely during a period of financial distress. Third, Security Finance's positioning in the underserved consumer lending segment provides a structural revenue advantage: renewal customers carry estimated 70%+ margins compared to 40% on new originations, and MCE evidence documents automated 90-day pre-maturity renewal campaigns designed to maximize this high-margin revenue stream [E-P2C4-020].",
+        "Growth Drivers: The most significant near-term growth lever is renewal rate optimization. Evidence shows that Security Finance has built sophisticated MCE automation around the renewal lifecycle—including 90-day pre-maturity notifications, personalized renewal offers with dynamic content, and behavioral triggers that detect engagement drop-off [E-P2C4-019, E-P2C4-020]. Because renewals carry substantially higher margins than new originations, even a 3–5% improvement in renewal conversion could translate to $15–25M in incremental revenue. The secondary growth lever is tax preparation cross-sell: MCE campaigns document bundled messaging (\"One stop: loan + tax prep from one trusted partner\") [E-P2C4-034], but evidence suggests limited A/B testing and attribution tracking, meaning this $25–40M revenue opportunity remains under-optimized. Digital channel expansion also contributes by reducing cost-per-acquisition relative to the branch-only model, though the current hybrid handoff process (online start → phone/branch completion) limits the full cost benefit of digital origination [E-B1-004, E-P2C2-001].",
+        "Headwinds: The most consequential headwind is competitive disruption from digital-first lenders who operate without branch overhead. LendingClub ($787M revenue, zero branches, marketplace model), Elevate Credit/RISE ($417M+, AI-powered underwriting), and OppFi/OppLoans ($500M, embedded finance pioneer) demonstrate that consumer lending at scale no longer requires physical locations [E-P1C1-010]. This threatens Security Finance's unit economics: a branch-based lender carrying real estate, staffing, and operational costs for 905 locations faces structurally higher cost-to-serve than a digital competitor. The regulatory headwind compounds this pressure—the CFPB junk fees rule (effective March 30, 2025) constrains fee-based revenue, while the CFPB Section 1033 open banking rule (compliance deadline April 2026 for the largest institutions) will require data portability APIs that Security Finance has not yet begun developing [E-P3C3-017]. Perhaps most concerning, the 2.6/5 PissedConsumer rating (203 reviews citing aggressive collections) [E-B1-006] creates churn risk precisely on the renewal revenue that constitutes Security Finance's highest-margin business line. If dissatisfied customers choose not to renew—or worse, switch to a digital competitor offering a frictionless experience—the impact on revenue quality could be substantial.",
+        "Because Security Finance is a private entity, traditional financial trajectory analysis using audited revenue, EBITDA, or CAGR is not possible. Instead, the following assessment triangulates six indirect indicators—revenue trend, branch network stability, digital investment acceleration, employee base consistency, competitive position, and regulatory burden—to construct a composite trajectory view. Each indicator is supported by specific evidence and assigned a directional classification. The overall picture that emerges is one of an organization whose core business remains stable, but whose competitive environment and regulatory obligations are accelerating faster than its current digital capabilities can match—creating the urgency that makes the Zennify engagement strategically critical.",
+        "Growth Drivers: The strongest growth lever is renewal revenue optimization. Renewal customers carry estimated 70%+ margins versus approximately 40% on new originations, and MCE evidence shows that Security Finance has invested in automated renewal campaign infrastructure—90-day pre-maturity notifications, personalized renewal offers, and lifecycle milestone celebrations [E-P2C4-019, E-P2C4-020, E-P2C4-033]. However, the current renewal campaigns lack AI-driven propensity scoring (no evidence of Einstein predictive models), meaning the campaigns target customers uniformly rather than prioritizing those most likely to renew. Data Cloud integration with CLV prediction could transform this from a broadcast approach into a precision engagement strategy. The tax preparation adjacency offers a $25–40M incremental revenue opportunity through MCE optimization [E-P2C4-034], though this requires A/B testing, attribution tracking, and segment-based pricing analysis that are not yet in evidence.",
+        "Headwinds: The competitive headwind is structural rather than cyclical: pure-digital lenders like LendingClub, Elevate Credit, and OppFi have demonstrated that consumer lending at Security Finance's revenue scale ($500M+) can be achieved without any branch infrastructure, fundamentally undercutting the cost-to-serve of a 905-branch operation. The regulatory headwind compounds this through CFPB tightening on both fees (junk fees rule, March 2025) and data portability (Section 1033, April 2026), which increases compliance costs at exactly the moment when competitive pressure demands investment in digital capabilities [E-P3C3-017]. Most critically, the customer satisfaction gap (2.6/5 PissedConsumer, 203 reviews) threatens the renewal revenue stream that constitutes Security Finance's most valuable business line—each percentage point of renewal churn caused by poor customer experience directly erodes the high-margin revenue base that funds digital transformation investment."
+      ]
+    },
+    "footprint": "US multi-state",
+    "footprint_basis": "derived:geography",
+    "founded": 1955,
+    "geography": "US multi-state",
+    "headcount": 1001,
+    "hq": "Spartanburg, Sou",
+    "hq_address": "Spartanburg, Sou",
+    "hq_city": "Spartanburg",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Assad",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ray Biggs",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Judy Perkins",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Victor Barr",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jennifer Meyer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "Security Finance Corporation",
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "Security Finance Corporation is a private consumer installment lending company headquartered in Spartanburg, South Carolina, operating as a subsidiary of Security Group Inc. [E-B1-001]. Founded in 1955, the company has built a 71-year track record in branch-based lending, growing to 905 locations across 15+ states under a multi-brand portfolio that includes Security Finance (the primary consumer-facing brand), Sunbelt Credit, and PFS (Personal Finance Services) [E-P1C1-006, E-B1-001]. This multi-brand structure is significant because it suggests either historical acquisitions or deliberate state-level market segmentation—a question that could not be resolved through public evidence alone and should be validated during internal discovery (see Assumption A-005).\n\nThe company's core market positioning centers on serving underserved consumers with limited credit history, articulated through a value proposition of \"Quick, Simple Loan Process\" that emphasizes no perfect credit score requirement and flexible loan amounts ($615–$2,015 in South Carolina) [E-P2C1-003]. This positioning is strategically important for two reasons. First, it places Security Finance squarely in the non-prime consumer lending segment, which provides resilience during economic cycles because demand for alternative credit actually increases when traditional bank lending tightens. Second, it also means Security Finance competes not only against traditional branch-based peers like World Acceptance Corp (1,025 branches) and Lendmark Financial (520+ branches), but increasingly against digital-first disruptors like LendingClub ($787M revenue, zero branches) and OppFi ($500M, embedded finance model) who can undercut branch economics with lower origination costs [E-P1C1-010].\n\nSecurity Finance's response to this competitive pressure is a hybrid branch-digital model that represents a deliberate transitional strategy rather than a fully digital pivot. The company maintains five customer-facing channels: the primary website securityfinance.com with a conversion-optimized loan application flow [E-P2C1-005]; a native iOS mobile app (updated January 2025 with Auto Pay forthcoming) [E-P1C1-001]; a native Android app [E-P1C1-003]; a customer self-service portal at mysecurityfinance.com for payment tracking and account management [E-B1-005]; and the 905-branch network itself, which remains the primary touchpoint for loan origination and collections [E-P1C1-006]. Critically, the application process follows a handoff model where customers initiate online but complete via phone or branch visit [E-B1-004, E-P2C2-001]. This hybrid approach signals that Security Finance has not yet achieved full digital straight-through processing—a gap that MuleSoft API integration and Agentforce could directly address by enabling end-to-end digital origination without requiring branch intervention.\n\nThe strategic context for digital transformation became concrete in December 2024, when Security Finance formalized a partnership with Zennify through a Statement of Work encompassing Phase 2 Discovery, Phase 2 Build, and Phase 1 Production Support workstreams [E-P1C1-007]. Internal documents reveal executive steering committee governance with RACI workstream views and multi-phase roadmap planning [E-P1C3-004, E-P1C4-004, E-P1C4-005], indicating that digital transformation has executive sponsorship and structured program management. This matters for scoring because it means the organization has moved beyond ad hoc technology adoption into deliberate, governed modernization—a P1C2 Governance maturity indicator that distinguishes Security Finance from peers who deploy technology without formal transformation governance.",
+    "primary_regulator": "CFPB",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 787000000.0,
+    "sentiment": {
+      "derived_from": "research_report_prose",
+      "sources": [
+        {
+          "signal": "portal integrated with 500+ branch locations; AskNicely NPS feedback loop drives continuous CX improvement Elevate Credit: 3.5 RISE brand provides fully online lending experience with real-time approval and automated servicing; Hadoop-scale",
+          "source": "Net Promoter Score",
+          "trend": "Improving"
+        },
+        {
+          "signal": "Mixed sentiment indicators from BBB and consumer review sites confirm inconsistent service experiences across the 905-branch network",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Direct",
+    "sub_vertical": "Consumer Lending",
+    "thought_leadership": null,
+    "tl_synced_at": null,
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "securityfinance.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.836760+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Security Finance Corporation — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Security Finance was benchmarked against 6 consumer lending institutions spanning three tiers: 3 direct peers (similar branch-based models), 1 bridge peer (digital-first with traditional elements), and 2 aspirational peers (fully digital-native). This tiered approach contextualizes Security Finance’s scores against both comparable institutions and the frontier of digital maturity in consumer lending.\n*Overall calculated with Consumer Lending weights: P1=20%, P2=20%, P3=35%, P4=25%",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Security Finance Corporation DMA",
+    "scqa_md": "Security Finance Corporation is a $1.0B in assets commercial lender regulated by CFPB, operating since 1955 with 1,001 employees. A trajectory the analyst classifies as accelerating gives it the balance sheet to fund transformation [E-P1C4-002, E-P1C5-001]. Zennify's assessment places overall digital maturity at 2.0/5. The deepest capability gap is Innovation Ecosystem at 1.5/5 against a 2.8 peer median. Next is Multi-Year Roadmap at 1.8/5 against a 3.5 peer median [E-P1C1-014].\n\nThird is Model Governance Framework at 1.8/5 against a 3.0 peer median [E-P1C1-015, E-P1C1-019]. The issue register adds HYBRID mode but evidence_index.csv lacks source_type column. (high severity). The issue register adds P3 73% at 2.0. Evidence-justified but consider additional proxy searches..\n\nThe pattern is corroborated across the assessment's evidence index [E-B1-003]. The roster shows no CISO — a named ownership gap for the capabilities below. The question for Security Finance Corporation is whether to close Innovation Ecosystem first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Security Finance Corporation should lead with nCino (78/100 fit) against Multi-Year Roadmap, then sequence Tableau behind it. Closing Innovation Ecosystem to the peer median alone is worth 1.2 maturity points, and the capabilities that depend on it compound the gain.\n\nThe analyst's own priority framing: \"Hybrid digital-branch model with complete omnichannel execution across 5 channels — Integrated online application (web start → phone completion)…\"."
+  },
+  "overall_score": 2.02,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/BATCH2_EXECUTIVE_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.038769+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/BATCH2_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.039092+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/BATCH6_COMPLETION_REPORT.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.039363+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/BATCH6_DELIVERABLES_INDEX.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.043701+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/BATCH_3_SUMMARY.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.044229+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/EXTRACTION_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.044470+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P1C1_BATCH2_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.044721+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P1C2_P1C5_BATCH2_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.045020+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P4_BATCH3_COMPLETION_REPORT.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 28 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.045354+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/P4_EVIDENCE_GENERATION_REPORT.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.045647+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/batch1_web_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.046011+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1c1_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.046802+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1c2_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.047194+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1c3_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.047483+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1c4_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.052014+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1c5_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.052371+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p2c1_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.053605+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p2c2_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.054628+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p2c3_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.059678+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p2c4_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.060874+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3c1_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.061737+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3c2_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.062629+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3c3_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.067695+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3c4_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.068885+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.069255+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4c1_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.069887+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4c2_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.070509+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4c3_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.071223+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4c4_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.076023+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/internal_evidence_catalog.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 181 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:59.078877+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 1,
+      "INFO": 44
+    },
+    "stage_ms": {
+      "manifest": 99,
+      "parse": 6582,
+      "persist": 2583
+    },
+    "structured": [
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from misplaced 03_scoring_workbook/evidence_inde",
+        "detail": "evidence loaded from misplaced 03_scoring_workbook/evidence_index.csv (75 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=708 contradictions=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 199 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 118 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'legal_name', 'sub_vertical', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_Security_Finance_2026-03-11.docx count=5",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=0 subcaps=10 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:hq,primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_from_client_profile_docx",
+        "detail": "timeline_from_client_profile_docx: 8 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/BATCH2_EXECUTIVE_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/BATCH2_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/BATCH6_COMPLETION_REPORT.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/BATCH6_DELIVERABLES_INDEX.md — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/BATCH_3_SUMMARY.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/EXTRACTION_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P1C1_BATCH2_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P1C2_P1C5_BATCH2_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P4_BATCH3_COMPLETION_REPORT.md — no fingerprint matched (best confidence 0.00); 28 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/P4_EVIDENCE_GENERATION_REPORT.md — no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/batch1_web_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1c1_evidence.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1c2_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1c3_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1c4_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1c5_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p2c1_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p2c2_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p2c3_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p2c4_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3c1_evidence.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3c2_evidence.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3c3_evidence.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3c4_evidence.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4_evidence.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4c1_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4c2_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4c3_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4c4_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/internal_evidence_catalog.csv — no fingerprint matched (best confidence 0.00); 181 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 8",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:28/708 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 17",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from misplaced 03_scoring_workbook/evidence_index.csv (75 rows)",
+      "governance_audit_logs: reasoning_chain=708 contradictions=0",
+      "caps_applied_log: 199 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+      "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+      "tech_stack_from_variant_source: 118 entries",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'legal_name', 'sub_vertical', 'website'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_Security_Finance_2026-03-11.docx count=5",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=0 subcaps=10 replaced_docx_scqa=True",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:hq,primary_regulator",
+      "insights_from_client_profile_findings: 12",
+      "timeline_from_client_profile_docx: 8 events",
+      "INFO/pattern_gap: 01_evidence/BATCH2_EXECUTIVE_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/BATCH2_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/BATCH6_COMPLETION_REPORT.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/BATCH6_DELIVERABLES_INDEX.md — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/BATCH_3_SUMMARY.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/EXTRACTION_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P1C1_BATCH2_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P1C2_P1C5_BATCH2_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P4_BATCH3_COMPLETION_REPORT.md — no fingerprint matched (best confidence 0.00); 28 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/P4_EVIDENCE_GENERATION_REPORT.md — no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/batch1_web_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1c1_evidence.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1c2_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1c3_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1c4_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1c5_evidence.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p2c1_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p2c2_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p2c3_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p2c4_evidence.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3c1_evidence.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3c2_evidence.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3c3_evidence.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3c4_evidence.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4_evidence.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4c1_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4c2_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4c3_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4c4_evidence.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/internal_evidence_catalog.csv — no fingerprint matched (best confidence 0.00); 181 generic sections mined",
+      "timeline_events_persisted: 8",
+      "catalogue_unresolved:28/708 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 17"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 158,
+      "peer_median": 3.05,
+      "pillar_id": "P1",
+      "score": 1.75,
+      "subcaps_scored": 158
+    },
+    {
+      "peer_benchmarked": 232,
+      "peer_median": 3.33,
+      "pillar_id": "P2",
+      "score": 2.37,
+      "subcaps_scored": 232
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 3.28,
+      "pillar_id": "P3",
+      "score": 2.31,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 3.08,
+      "pillar_id": "P4",
+      "score": 2.42,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-11",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:01.962706Z",
+    "created_at": "2026-07-02T23:10:01.962706Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "hybrid",
+    "id": "9cb3d3dd-f6fc-49fc-92e0-2cd5edd22ce9",
+    "overall_score": 2.02,
+    "request_id": "DMA-ASM-SF-20260311-0001",
+    "started_at": "2026-07-02T23:10:01.962706Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Hybrid digital-branch model with complete omnichannel execution across 5 channels — Integrated online application (web start → phone completion), iOS mobile app (App Store id1135450123, updated Jan 2025 with Auto Pay coming soon), Android app, customer portal (mysecurityfinance.com), and 905 physical branches; MuleSoft provides real-time data sync enabling seamless channel switching.",
+      "evidence": [
+        "E-B1-004",
+        "E-B1-005",
+        "E-P1C1-001",
+        "E-P1C1-002"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Hybrid digital-branch model",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.01,
+      "so_what": "Prioritize Hybrid digital-branch model in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Hybrid digital-branch model",
+      "what": "Hybrid digital-branch model with complete omnichannel execution across 5 channels — Integrated online application (web start → phone completion), iOS mobile app (App Store id1135450123, updated Jan 2025 with Auto Pay coming soon), Android app, customer portal (mysecurityfinance.com), and 905 physical branches; MuleSoft provides real-time data sync enabling",
+      "why": "The shortfall is relative, not absolute: 2.01/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Customer acquisition pipeline automated through MCE with 42 documented evidence items across digital marketing subcapabilities — MCE implements persona-based segmentation with defined behavioral attributes [E-P2C1-002]; structured campaign cadence mapping for solicitations and engagement [E-P2C1-004]; email marketing with segmented journeys (New Manager, Tax Prep, Renewal templates) [E-P2C1-009]; SMS and mobile push with opt-in management [E-P2C1-010]",
+      "evidence": [
+        "E-P2C1-002",
+        "E-P2C1-004",
+        "E-P2C1-009",
+        "E-P2C1-010"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Customer acquisition pipeline automated through MCE",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.01,
+      "so_what": "Prioritize Customer acquisition pipeline automated through MCE in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Customer acquisition pipeline automated through MCE",
+      "what": "Customer acquisition pipeline automated through MCE with 42 documented evidence items across digital marketing subcapabilities — MCE implements persona-based segmentation with defined behavioral attributes [E-P2C1-002]; structured campaign cadence mapping for solicitations and engagement. [E-P2C1-004].",
+      "why": "The shortfall is relative, not absolute: 2.01/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Technology leadership vacuum: No identified CDO/CTO/CIO despite 127-technology ecosystem — Leadership identified: CEO Mark Assad, President Ray Biggs, COOs Judy Perkins & Victor Barr, CFO Jennifer Meyer [E-B1-007, E-P1C2-002, E-P1C4-004]; zero publicly identified Chief Data Officer, Chief Technology Officer, or Chief Information Security Officer.",
+      "evidence": [
+        "E-B1-007",
+        "E-P1C2-002",
+        "E-P1C4-004",
+        "E-P1C1-005"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "Technology leadership vacuum: No identified CDO/CTO/CIO…",
+      "peer_median": 3.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.84,
+      "so_what": "Prioritize Technology leadership vacuum: No identified CDO/CTO/CIO… in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Technology leadership vacuum: No identified CDO/CTO/CIO…",
+      "what": "Technology leadership vacuum: No identified CDO/CTO/CIO despite 127-technology ecosystem — Leadership identified: CEO Mark Assad, President Ray Biggs, COOs Judy Perkins & Victor Barr. CFO Jennifer Meyer. [E-B1-007, E-P1C2-002, E-P1C4-004]; zero publicly identified Chief Data Officer, Chief Technology Officer, or Chief Information Security Officer.",
+      "why": "The shortfall is relative, not absolute: 1.84/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Comprehensive MuleSoft integration architecture with 65+ documented error handling scenarios — Error Handling & Fault Tolerance Matrix (INT-156) provides 7-phase integration architecture: SFTP ingestion → File Parsing/Validation → Salesforce Query → Data Transformation → Marketing Cloud Push → Reporting → Monitoring [E-P3C1-002, E-P3C1-005]",
+      "evidence": [
+        "INT-156",
+        "E-P3C1-002",
+        "E-P3C1-005",
+        "INT-064"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "Comprehensive MuleSoft integration architecture",
+      "peer_median": 2.75,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.51,
+      "so_what": "Prioritize Comprehensive MuleSoft integration architecture in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Comprehensive MuleSoft integration architecture",
+      "what": "Comprehensive MuleSoft integration architecture with 65+ documented error handling scenarios — Error Handling & Fault Tolerance Matrix (INT-156) provides 7-phase integration architecture: SFTP ingestion → File Parsing/Validation → Salesforce Query → Data Transformation → Marketing Cloud Push → Reporting → Monitoring [E-P3C1-002, E-P3C1-005].",
+      "why": "The shortfall is relative, not absolute: 1.51/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "CFPB 2018 consent order resolved with demonstrated multi-layer compliance governance — CFPB consent order ($5M penalty) for improper collection attempts (physically preventing customers from leaving homes) and FCRA violations (inaccurate credit reporting) [E-B1-003, E-P1C2-001]; post-settlement: written policies covering debt collection, FCRA furnisher compliance, fair lending [E-P3C3-001]; Chief Compliance Officer or equivalent role mandated [E-P3C3-002]",
+      "evidence": [
+        "E-B1-003",
+        "E-P1C2-001",
+        "E-P3C3-001",
+        "E-P3C3-002"
+      ],
+      "magnitude": "$5M",
+      "name": "CFPB 2018 consent order resolved",
+      "peer_median": 2.75,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.51,
+      "so_what": "Prioritize CFPB 2018 consent order resolved in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "CFPB 2018 consent order resolved",
+      "what": "CFPB 2018 consent order resolved with demonstrated multi-layer compliance governance — CFPB consent order ($5M penalty) for improper collection attempts (physically preventing customers from leaving homes) and FCRA violations (inaccurate credit reporting).",
+      "why": "The shortfall is relative, not absolute: 1.51/5 sits below the 2.75 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "168 of 168 subcaps on thin evidence"
+      ],
+      "rationale": "Multi-Year Roadmap averages 1.8/5 over 168 scored subcaps; ceiling 2.3 reflects thin evidence density (0/168 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Model Governance Framework averages 1.8/5 over 217 scored subcaps; ceiling 2.3 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Ecosystem averages 1.5/5 over 190 scored subcaps; ceiling 2.0 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.5 (T3+T5)",
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Adoption Management averages 1.8/5 over 205 scored subcaps; ceiling 2.3 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Cookie-Less Tracking Strategy averages 2.5/5 over 291 scored subcaps; ceiling 3.0 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "294 of 294 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Data Sharing Consent averages 2.5/5 over 294 scored subcaps; ceiling 3.0 reflects thin evidence density (0/294 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "300 of 300 subcaps on thin evidence"
+      ],
+      "rationale": "Vulnerable Customer Support averages 2.4/5 over 300 scored subcaps; ceiling 2.9 reflects thin evidence density (0/300 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Behavior-Based Rewards averages 2.0/5 over 255 scored subcaps; ceiling 2.5 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "161 of 161 subcaps on thin evidence"
+      ],
+      "rationale": "Task Assignment & Routing averages 2.5/5 over 161 scored subcaps; ceiling 3.0 reflects thin evidence density (0/161 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Development Standards averages 2.4/5 over 130 scored subcaps; ceiling 2.9 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M3 applied: Evidence ceiling 3.0 (T2+T3); Severity cap 3.0",
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Reporting averages 2.4/5 over 140 scored subcaps; ceiling 2.9 reflects the binding cap (cap M3 applied: Evidence ceiling 3.0 (T2+T3); Severity cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Contingency Arrangements averages 1.9/5 over 145 scored subcaps; ceiling 2.4 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Self-Service Adoption KPIs averages 2.5/5 over 200 scored subcaps; ceiling 3.0 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "273 of 273 subcaps on thin evidence"
+      ],
+      "rationale": "AI Vision & Image Recognition averages 1.8/5 over 273 scored subcaps; ceiling 2.3 reflects thin evidence density (0/273 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Cloud Strategy & Infrastructure averages 2.9/5 over 235 scored subcaps; ceiling 3.4 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Application Security Testing averages 2.6/5 over 150 scored subcaps; ceiling 3.1 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "core_migration",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Open banking compliance (CFPB Section 1033); advanced AI/ML predictive scoring (churn, CLV, cross-sell); Agentforce deployment for branch agent assistance; Data Cloud unified CDP. MuleSoft API strategy for open banking; Data Cloud implementation; Agentforce rollout; Einstein AI enablement (Jan 2026).",
+      "evidence": [
+        "E-P1C1-010",
+        "E-P1C1-008",
+        "E-P1C1-021"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Data Cloud unified CDP",
+      "metric": null,
+      "peer_context": "Innovation Ecosystem runs 1.51/5 vs a 2.75 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Open banking compliance (CFPB Section 1033); advanced AI/ML predictive scoring (churn, CLV, cross-sell); Agentforce deployment for branch agent assistance; Data Cloud unified CDP. Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Data Cloud unified CDP"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "core_migration",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Sprint plan execution: API development (Payments API, Budget API, Charges/Fees API) via MuleSoft; Error Handling Matrix (65+ failure scenarios) deployed. MuleSoft API optimization; STP rate improvement; advanced monitoring and alerting (Jan 2025).",
+      "evidence": [
+        "E-P1C3-005",
+        "E-P1C1-028"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Sprint plan execution: API development",
+      "metric": null,
+      "peer_context": "Innovation Ecosystem runs 1.51/5 vs a 2.75 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Sprint plan execution: API development (Payments API, Budget API, Charges/Fees API) via MuleSoft; Error Handling Matrix (65+ failure scenarios) deployed.",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "API development"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "iOS app update with Auto Pay coming soon; ongoing mobile app evolution. Mobile experience optimization; in-app personalization via MCE SDK (Jan 2025).",
+      "evidence": [
+        "E-P1C1-002",
+        "E-P1C1-022"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "IOS app update with Auto Pay coming soon",
+      "metric": null,
+      "peer_context": "Innovation Ecosystem runs 1.51/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Multi-Year Roadmap — highest-fit surface at 78/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "iOS app update with Auto Pay coming soon; ongoing mobile app evolution. Mobile experience optimization; in-app personalization via MCE SDK (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "IOS app update with Auto Pay coming soon"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Newsweek America's Greatest Workplaces 2025 recognition for Financial Services. Employee brand leverage for digital transformation change management (Jan 2025).",
+      "evidence": [
+        "E-P1C4-003",
+        "E-P1C4-002",
+        "E-P1C5-001",
+        "E-P1C5-004"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Newsweek America's Greatest Workplaces 2025 recognition for…",
+      "metric": null,
+      "peer_context": "Innovation Ecosystem runs 1.51/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Multi-Year Roadmap — highest-fit surface at 78/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Newsweek America's Greatest Workplaces 2025 recognition for Financial Services. Employee brand leverage for digital transformation change management (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "Newsweek America's Greatest Workplaces 2025 recognition for…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Innovation Ecosystem scores 1.51/5 vs a typical 2.75 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-P1C1-021"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Innovation Ecosystem scores 1.51/5",
+      "metric": "Innovation Ecosystem 1.51/5 vs peer 2.75",
+      "peer_context": "Innovation Ecosystem runs 1.51/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Multi-Year Roadmap — highest-fit surface at 78/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C3",
+      "text": "Innovation Ecosystem scores 1.51/5 vs a typical 2.75 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

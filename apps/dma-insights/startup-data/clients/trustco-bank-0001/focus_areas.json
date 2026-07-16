@@ -1,0 +1,34 @@
+{
+  "entity_display_id": "trustco-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Recommended discovery focus: (1) Salesforce CRM utilization audit \u2014 what does the bank actually use it for? Who are the users? Is there an admin? (2) Tealium CDP activation review \u2014 are any audiences/segments created? What downstream systems consume the data? (3) Fiserv feature inventory \u2014 which Architect and Signature features are active vs available but unused? (4) Telephony consolidation \u2014 whic",
+        "source_kind": "docx"
+      },
+      "id": "01a8c069-1382-4fa0-8bbb-f331398087c3",
+      "involved_subcap_ids": [
+        "P4C2.1.4",
+        "P4C3.1.4",
+        "P4C4.1.4",
+        "P4C1.5.3",
+        "P4C1.6.2",
+        "P4C1.5.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Recommended Discovery Focus Areas",
+      "verbatim_quote": "Recommended discovery focus: (1) Salesforce CRM utilization audit \u2014 what does the bank actually use it for? Who are the users? Is there an admin? (2) Tealium CDP activation review \u2014 are any audiences/segments created? What downstream systems consume the data? (3) Fiserv feature inventory \u2014 which Architect and Signature features are active vs available but unused? (4) Telephony consolidation \u2014 which of the 4 vendors are active vs legacy remnants?"
+    }
+  ]
+}

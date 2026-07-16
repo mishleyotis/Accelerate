@@ -1,0 +1,231 @@
+{
+  "entity_display_id": "guaranteed-rate-inc-dba--0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4",
+        "P1C4.1.1",
+        "P1C4.8.3",
+        "P3C2.7.4",
+        "P1C4.1.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [
+        "E-062"
+      ],
+      "ic_id": "GAP-P1C4",
+      "id": "5ba77101-1369-46b8-8104-48f0b1fac8af",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-062"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-006",
+        "E-020",
+        "E-027",
+        "E-028",
+        "E-060",
+        "E-031",
+        "E-044",
+        "E-063"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Close the Culture & Change gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-027].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Culture & Change trails peers by 1.1",
+      "what_text": "Change Methodology is one of Guaranteed Rate, Inc. (dba Rate)'s least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Guaranteed Rate, Inc. (dba Rate)'s ability to deliver sharper strategic direction and stronger oversight [E-020].",
+      "why_text": "Culture & Change trails the peers by 1.1 points — a competitive maturity gap that compounds across the pillars it feeds [E-006, E-020].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.2.4",
+        "P1C3.1.1",
+        "P1C1.1.4",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P1C1",
+      "id": "8bf9cd8a-9645-408a-8419-e0d26d05be9f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-142"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P4C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-145",
+        "E-034",
+        "E-142",
+        "E-037",
+        "E-068",
+        "E-058",
+        "E-059",
+        "E-012"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize Digital Strategy & Vision: recovering the 1.0-point deficit against the cohort moves overall maturity more than any at-parity category can [E-142].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy & Vision trails peers by 1.0",
+      "what_text": "Board Engagement is one of Guaranteed Rate, Inc. (dba Rate)'s least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Guaranteed Rate, Inc. (dba Rate)'s ability to deliver sharper strategic direction and stronger oversight [E-034].",
+      "why_text": "The peer benchmark for Digital Strategy & Vision is 3.1; at 2.2 this institution operates 1.0 points behind the peers it competes with for the same customers [E-145, E-034].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C1.1.5",
+        "P2C1.2.3",
+        "P2C1.2.1",
+        "P2C1.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-077",
+        "E-082"
+      ],
+      "ic_id": "GAP-P2C1",
+      "id": "4087adf8-340e-4a61-8511-f77bbca7f16a",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-077",
+            "E-082"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-070",
+        "E-072",
+        "E-069",
+        "E-080",
+        "E-079",
+        "E-071",
+        "E-078"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Start with Digital Channels — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-072].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Digital Channels trails peers by 0.9",
+      "what_text": "Budget Allocation & ROI is one of Guaranteed Rate, Inc. (dba Rate)'s least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Guaranteed Rate, Inc. (dba Rate)'s ability to deliver a stronger, more personalised customer experience [E-070].",
+      "why_text": "Peers score 2.9 on Digital Channels against this institution's 2.0 — the 0.9-point shortfall shows up in every capability rolled into this category [E-073, E-070].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.3",
+        "P1C1.5.5",
+        "P1C1.5.8",
+        "P1C5.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P4C3",
+      "id": "c3f956e8-7269-4b34-9a8c-d6610818e2ad",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-142"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P1C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-133",
+        "E-041",
+        "E-142",
+        "E-100"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Sequence Architecture & Cloud into the near-term roadmap: the 0.8-point peer gap is measurable, so progress is provable quarter over quarter [E-142].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Architecture & Cloud trails peers by 0.8",
+      "what_text": "API Lifecycle Management is one of Guaranteed Rate, Inc. (dba Rate)'s least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Guaranteed Rate, Inc. (dba Rate)'s ability to deliver a stronger data and technology foundation [E-041].",
+      "why_text": "At 2.0/5, Architecture & Cloud is the widest measured deficit vs the peer median (2.8) among this run's remaining categories [E-133, E-041].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Category-by-category comparison across Rate and 4 peers. Status: ▲ = Rate ABOVE this peer | ▼ = Rate BELOW this peer | ● = Rate at par (±0.25).",
+        "heading": "7.2  Strategic Positioning Matrix — Rate vs All Peers",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Six recommendations were independently validated against Rate's confirmed technology stack (Explorium Vibe Prospecting, April 2026 technographic search: rate.com). All 6 solutions confirmed NOT currently in deployment — validating these as genuine open development opportunities. Each recommendation follows the three-part structure: ROOT CAUSE (evidence-grounded) → ZENNIFY SOLUTION (specific Salesforce offering) → EXPECTED OUTCOMES (observable success indicators). No investment amounts per assessment protocol Rule R6.\nSection 10 TRANSFORMATION ROADMAP"
+  },
+  "run_request_id": "DMA-ASS-GRATE-20260416-0001"
+}

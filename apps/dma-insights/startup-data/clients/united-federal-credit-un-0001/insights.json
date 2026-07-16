@@ -1,0 +1,957 @@
+{
+  "entity_display_id": "united-federal-credit-un-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.1.4",
+        "P2C3.3.CL2",
+        "P2C3.3.CL1",
+        "P1C1.3.CL1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "810d0f62-1292-444f-a014-6cd514994b0f",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-022",
+        "E-070",
+        "E-079",
+        "E-086",
+        "E-044",
+        "E-075"
+      ],
+      "linked_subcap_id": "P2C4.1.4",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Business-member experience depends on manual coordination; ambition exceeds the system of record to scale it — Salesforce Financial Services Cloud (commercial/business banking) + Data Cloud business-member 360 — Directly operationalizes the stated 'elevate the business-member experience and drive personalized engagement' mandate, layered above core/treasury (non-displacing) [E-079].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Commercial/SBA growth cornerstone outpaces relationship infrastructure (→OBJ-1, HIGH)",
+      "what_text": "Commercial & SBA lending named the growth cornerstone — CCO→SLT (Jul 2025), EVP CCO (Nov 2024), SBA Preferred Lender, ~$25M Battle Creek deal, full treasury suite — yet no publicly-named CRM-based commercial relationship/opportunity management or unified business-member view. In Zennify's assessment Customer Intelligence Foundation scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-070].",
+      "why_text": "The assessment found: “CCO Renee Johnson (Nov 2024) joins Strategic Leadership Team; owns Commercial Ops/Sales + SBA lending; ex-Citizens Bank (launched virtual channel 11 states/375 branches)” [E-022]. At 1.5 out of 5, Customer Intelligence Foundation sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P1C2.1.7",
+        "P1C2.4.2",
+        "P4C2.5.3",
+        "P1C2.4.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "cbb4325f-6705-4821-976a-054bf447378f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-042",
+            "E-047",
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-035",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-047",
+        "E-035",
+        "E-049",
+        "E-037",
+        "E-042"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: UFCU has the data and governance for AI but no production surface to put models into the flow of work — Salesforce Einstein + Agentforce, governed by the existing AI Council — Gives the AI Council an auditable production surface for next-best-action and agentic service on top of Snowflake (zero-copy via Data Cloud) [E-047].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "AI governance is in place; activation surface is missing (→OBJ-2, HIGH)",
+      "what_text": "Newly-created Director of AI & Data Science + AI Council govern model risk; Copilot/ChatGPT approved; predictive models already triple conversion on a mature Qlik/Snowflake foundation — but model outputs are manually exported into the CRM/marketing layer. In Zennify's assessment AI & Machine Learning scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-046].",
+      "why_text": "The assessment found: “Q2 Composable Dashboard quantified outcomes: +$5M/month approved loans; 120% growth commercial accounts; 44M retail+treasury logins; $4.8M fraud stopped; 80% decrease admin costs; 35% YoY payments” [E-035]. At 1.5 out of 5, AI & Machine Learning sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P3C1.1.3",
+        "P2C4.4.3",
+        "P2C1.5.1",
+        "P2C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "7741c533-f1c4-4d06-9451-6415b63431c5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-035",
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-035",
+        "E-019",
+        "E-085",
+        "E-037"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Personalization wins are confined to the banking app; there is no always-on cross-channel lifecycle engine — Salesforce Marketing Cloud + Data Cloud activation — Extends proven in-app personalization into orchestrated cross-channel member journeys, fed by the same Qlik/Snowflake data [E-019].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Proven in-app personalization, but no enterprise journey orchestration (→OBJ-3, HIGH)",
+      "what_text": "Q2 Composable Dashboard tripled engagement (+$5M/mo approved loans; fraud stopped); dedicated Director of Digital Marketing & Personalization — but no publicly-named marketing-automation/journey platform; engagement remains campaign/manual. In Zennify's assessment AI & Machine Learning scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-035].",
+      "why_text": "The assessment found: “UFCU on Q2 digital banking platform since 2011; implemented Q2 Composable Dashboard (Q2 Engage), tripled member engagement in 12mo; Skip-a-Payment +379% via Q2 Innovation Studio SDK. Uses Q2” [E-004]. At 1.5 out of 5, AI & Machine Learning sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.4.5",
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P3C1.1.3",
+        "P1C2.1.7",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "c54422bf-e82f-4189-93ab-9c91515c4b8b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-037",
+            "E-042",
+            "E-047",
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-034",
+        "E-047",
+        "E-048",
+        "E-049",
+        "E-057",
+        "E-037",
+        "E-042"
+      ],
+      "linked_subcap_id": "P4C3.4.5",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: The hard part (clean, governed, real-time data) is done; the missing layer is turning it into orchestrated member action — Salesforce Data Cloud (zero-copy on Snowflake) as the activation layer — Non-displacing; sits above the existing Microsoft/Snowflake estate and makes governed data actionable in journeys, service, and AI [E-048].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Data/analytics leadership means the wedge is activation, not capability (→OBJ-2, HIGH)",
+      "what_text": "Qlik Replicate CDC + Qlik Sense/Cloud + Snowflake + Azure hybrid; VP Enterprise Analytics (2x Qlik Luminary) with data-governance + data-literacy programs; RPA 35,000 hrs saved — but analytics outputs are manually exported into CRM. In Zennify's assessment Cloud Strategy & Infrastructure scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-047].",
+      "why_text": "The assessment found: “UFCU REPLACED its core banking platform and built a real-time data foundation: Qlik Replicate (CDC) + Snowflake (warehouse) on Azure + Qlik Cloud Analytics. Replaced nightly batch with” [E-034]. At 2.0 out of 5, Cloud Strategy & Infrastructure sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.1.4",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "d1a8c2cb-ba01-44bc-a521-78b018b77bc6",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-075",
+        "E-051"
+      ],
+      "linked_subcap_id": "P2C4.1.4",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Determines whether this is pure Salesforce land-and-expand or a layer-above/consolidation play — Confirm CRM system of record in discovery — If Salesforce → expand FSC+Data Cloud+Marketing Cloud (Zennify sweet spot); if Dynamics → position Salesforce data/engagement layer above it for member-360 unification [E-051].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "CRM system-of-record is ambiguous — the highest-value discovery item (→OBJ-1, MEDIUM)",
+      "what_text": "Conflicting public signals: ex-Head of Emerging Tech managed 'Salesforce (CRM)' 2020-22 and CMO led 'CRM implementations' (plural), vs current 2026 engineer postings preferring 'MS Dynamics familiarity'. In Zennify's assessment Customer Intelligence Foundation scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-075].",
+      "why_text": "At 1.5 out of 5, Customer Intelligence Foundation sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-072, E-075].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P2C3.6.1",
+        "P3C2.5.1",
+        "P2C3.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "ccca0928-c131-48d3-94c5-1724689c9c63",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-010"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-041",
+        "E-074",
+        "E-044",
+        "E-083",
+        "E-084"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Agents likely swivel-chair across systems; service friction surfaces in non-app sentiment — Salesforce Service Cloud + Agentforce unified agent desktop — Consolidates the member view for the contact center and gives 'Mya' a governed escalation surface, closing the service-sentiment gap [E-044].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "No unified agent desktop / case management — a service-experience gap (→OBJ-3, MEDIUM)",
+      "what_text": "Live chat on LivePerson with Finn AI/Glia 'Mya' (51% containment); no publicly-named CRM-based unified agent desktop or case management; service sentiment mixed (WalletHub 3.0 / Trustpilot 2.9) vs strong app (4.7/4.6). In Zennify's assessment AI & Machine Learning scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-074].",
+      "why_text": "The assessment found: “AI chatbot 'Mya' launched Mar 2021, powered by Finn AI (NLP; Finn AI later acquired by Glia); on UnitedFCU.com + mobile app; ~5,000 engaged sessions/month; 51% containment rate; seamless handoff to” [E-041]. At 1.5 out of 5, AI & Machine Learning sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.3.CU2",
+        "P3C1.3",
+        "P1C1.3.CU1",
+        "P1C1.3.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "f9508986-7739-4d9a-9f73-39b378f21280",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-077",
+        "E-078",
+        "E-081",
+        "E-080"
+      ],
+      "linked_subcap_id": "P3C1.3.CU2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Each integration multiplies the cost of a fragmented member view; data unification becomes a growth enabler — Data Cloud + FSC as the post-merger member system of record — One golden member profile accelerates integration value capture; peers DFCU/Advia are also bank-acquirers (competitive parity) [E-078].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "M&A and multi-state expansion raise the bar for a unified member system of record (→OBJ-4, HIGH)",
+      "what_text": "Transaction Processing Automation is one of United Federal Credit Union's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes United Federal Credit Union's ability to deliver more efficient, dependable operations [E-077].",
+      "why_text": "The assessment found: “NCUA 5300 (Q4 2025, NCUA #6288): Total Assets $4.242B; Shares & Deposits $3.484B; Net Worth $495.95M; NET WORTH RATIO 11.69% = WELL CAPITALIZED (>7% statutory). Members 190,227 (potential 475,568)” [E-081]. At 2.5 out of 5, Transaction Processing Automation sits 0.3 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P1C4.1.3",
+        "P1C4.1.7",
+        "P1C4.1.8",
+        "P1C1.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-008",
+      "id": "a9b2fb51-bacc-4d2b-a700-35503849d02f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-046",
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-019"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-065",
+        "E-019",
+        "E-046",
+        "E-047"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Change-adoption risk is low; the org structure to own a Salesforce platform already exists — Land-and-expand with named functional owners — Existing roles map cleanly to Salesforce clouds (Marketing→Glupker, Service→Knight, Data/AI→Speer/Benassi, Commercial→Beason/Johnson) [E-019].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "People-first culture + dedicated digital roles = strong platform-adoption runway (→OBJ-5, HIGH)",
+      "what_text": "#10 Top Inspiring Workplaces NA 2025 (only CU); American Banker Best CU to Work For; dedicated Digital Marketing & Personalization, Digital Experience, AI&DS, Enterprise Analytics functions. In Zennify's assessment AI & Machine Learning scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-065].",
+      "why_text": "At 1.5 out of 5, AI & Machine Learning sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-066, E-065].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C4.4.2",
+        "P3C3.2.3",
+        "P4C2.1.1",
+        "P3C1.3.CU2",
+        "P4C1.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-009",
+      "id": "b486dd26-1713-47d6-8697-b7e4b7eb460d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-088",
+        "E-054",
+        "E-053"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: scoring should respect the regulatory floor — this is a governance enabler, not a sales gap — Salesforce Shield / FSC compliance posture as an enabler for the Data Cloud/AI expansion — Addresses the model-risk/governance concerns the AI Council already owns (secondary alignment, not a primary play) [E-054].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Strong member-facing security floor; enterprise InfoSec internals non-public (→OBJ-2, MEDIUM)",
+      "what_text": "Application Security is one of United Federal Credit Union's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes United Federal Credit Union's ability to deliver a stronger data and technology foundation [E-088].",
+      "why_text": "The assessment found: “REGULATORY FLOOR (mandatory for federally-insured CU): NCUA” [E-053]. At 2.0 out of 5, Application Security sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.8.RIA3",
+        "P3C1",
+        "P3C3.3.1",
+        "P3C3.3.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-010",
+      "id": "8c25c5ef-39d0-4cfe-90e6-1b8744ab5012",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-059",
+        "E-032",
+        "E-084"
+      ],
+      "linked_subcap_id": "P3C1.8.RIA3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Reputational sensitivity around fees/communication; proactive transparent engagement is a risk mitigant — Marketing Cloud proactive comms + Service Cloud transparency — Converts a historical liability into a proactive-engagement differentiator (factual settlement disclosure only; no projections) [E-084].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Consumer-protection history signals demand for proactive, transparent engagement (→OBJ-3, MEDIUM)",
+      "what_text": "$1.75M overdraft-fee class action settled (Gunter v. UFCU; 2010–2018 practices; settled with denial of wrongdoing); mixed fee/service sentiment. It underpins the core processes that keep the institution running, so its current level directly shapes United Federal Credit Union's ability to deliver more efficient, dependable operations [E-032].",
+      "why_text": "The assessment found: “UFCU settled a $1.75M overdraft-fee class action (Gunter v. UFCU) over 2010-2018 practices assessing OD fees on 'available' vs 'ledger' balance, alleged inconsistent with disclosures; UFCU denied” [E-059]. Strengthening this capability matters because it shapes more efficient, dependable operations. It builds on the core processes that keep the institution running, so progress here lifts the wider business too.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C1",
+        "P2C4.1.4",
+        "P1C1.5.5",
+        "P1C1.3.2",
+        "P2C4.4.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "ed857238-c246-4513-8030-d8d88ff4da63",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-090",
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-090",
+        "E-094",
+        "E-034"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Intelligence Foundation a near-term focus for United Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-094].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Orchestrate lifecycle journeys with Salesforce Marketing Cloud",
+      "what_text": "Salesforce Marketing Cloud + Journey Builder, fed by R1 Data Cloud segments; orchestrates above Q2 across email/SMS/in-app/push. connected unlock: Consumes R1; lifts and; turns the Qlik 'shadow game' into governed real-time journeys. In Zennify's assessment Customer Intelligence Foundation scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-090].",
+      "why_text": "The assessment found: “UFCU REPLACED its core banking platform and built a real-time data foundation: Qlik Replicate (CDC) + Snowflake (warehouse) on Azure + Qlik Cloud Analytics. Replaced nightly batch with” [E-034]. At 1.5 out of 5, Customer Intelligence Foundation sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C3.6.3",
+        "P2C4.1.4",
+        "P2C2.1.2",
+        "P1C1.5.5",
+        "P3C1.8.CL4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "bc6795ab-e5fe-4ebe-a079-495f93c79160",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-090",
+            "E-094"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-094",
+        "E-090",
+        "E-070"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Unify commercial & business banking on Salesforce Financial Services Cloud — addressable via salesforce [E-070].",
+      "source_rec_id": "REC-03",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Unify commercial & business banking on Salesforce Financial Services Cloud",
+      "what_text": "Salesforce Financial Services Cloud (commercial/business relationship 360, householding, Action Plans), integrated to Fiserv DNA via MuleSoft. connected unlock: FSC + R1 Data Cloud -> commercial 360; supports servicing; directly serves the #1 stated growth objective. In Zennify's assessment Eligibility & Pre-Qualification scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-090].",
+      "why_text": "At 1.5 out of 5, Eligibility & Pre-Qualification sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-094, E-090].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P3C3",
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P2C2.1.2",
+        "P3C1.3.CU2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "0e6ebf53-f3a7-4e98-a239-3080ae4d7793",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-010"
+        },
+        {
+          "e_ids": [
+            "E-044"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-059",
+        "E-044",
+        "E-095"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Stand up a unified member-service desktop with Service Cloud + Agentforce (above TeamDynamix) — addressable via salesforce [E-095].",
+      "source_rec_id": "REC-04",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Stand up a unified member-service desktop with Service Cloud + Agentforce (above TeamDynamix)",
+      "what_text": "Salesforce Service Cloud (member case management, unified agent desktop, Knowledge) + Agentforce (AI service agents), deployed above TeamDynamix, which remains the internal ESM. connected unlock: Consumes R1 (member 360); lifts; relieves consumer-protection/complaint handling (overdraft ADJ context, ). In Zennify's assessment Eligibility & Pre-Qualification scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [E-059].",
+      "why_text": "The assessment found: “No publicly-named CRM-based UNIFIED AGENT DESKTOP, case-management system, or structured VoC platform; agents operate across Q2 + core + Member Service Center; secure-messaging case SLA 1 business” [E-044]. At 1.5 out of 5, Eligibility & Pre-Qualification sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P4C1.5.2",
+        "P4C2.4.4",
+        "P2C4.1.4",
+        "P1C1.5.4",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "a80dc328-1f2c-4586-be68-22cbfdd115a3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-075",
+        "E-093",
+        "E-048"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Confirm CRM system-of-record + instrument activation-layer governance (gating discovery item) — addressable via salesforce [E-048].",
+      "source_rec_id": "REC-06",
+      "theme": "Governance & Risk",
+      "title": "Confirm CRM system-of-record + instrument activation-layer governance (gating discovery item)",
+      "what_text": "Zennify Digital Strategy Workshop (CRM-identity + sequencing decision) + Salesforce GRC/Shield-class governance instrumentation (consent, data governance, audit trail) for the activation layer. CRM-identity confirmation is a discovery step. connected unlock: governance underpins all P2/P4 activation (consent, data ethics for AI); resolving CRM identity sequences the entire roadmap. In Zennify's assessment Governance Structure scores 1.5 out of 5, versus a typical 2.8 at comparable institutions [E-075].",
+      "why_text": "The assessment found: “UFCU's named data platform = Qlik Replicate (CDC) + Qlik Cloud Analytics on Snowflake/Azure — a BI/analytics+visualization layer, NOT a CDP/activation layer” [E-093]. At 1.5 out of 5, Governance Structure sits 1.3 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-RES-UFCU-20260604-0001"
+}

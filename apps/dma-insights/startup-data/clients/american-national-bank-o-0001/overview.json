@@ -1,0 +1,952 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 108
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 210
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 97
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 162
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "american-national-bank-o-0001",
+    "domain": null,
+    "hq": null,
+    "id": "30e8dd1f-0ff2-408c-b310-2d326a2aac13",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "American National Bank of Texas",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:47.280196Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 24,
+    "current_count": 64,
+    "dated_count": 33,
+    "median_age_months": 18.5,
+    "oldest_published_date": "2018-08-01",
+    "stale_count": 4,
+    "stale_pct": 3.2,
+    "total": 125,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "NEUTRAL": 16,
+      "POSITIVE": 109
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "Indeed": 8,
+      "LinkedIn": 17
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 7,
+      "NEUTRAL": 97,
+      "POSITIVE": 21
+    },
+    "tiers": {
+      "T1": 37,
+      "T2": 67,
+      "T3": 21
+    },
+    "total_facts": 840,
+    "total_items": 125
+  },
+  "financial_trajectory": {
+    "cagr": "8.9%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "The bank's asset base has compounded at approximately 8.9% CAGR since 1999 (when the Bank of Van Zandt acquisition brought assets to approximately $650 million), reflecting a strat",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 5500000000.0,
+    "branches": 28,
+    "cagr": "8.9%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "760",
+    "financial_highlights": {
+      "lines": [
+        "ANBTX reported $5.5 billion in total assets as of September 30, 2025, ranking it 19th among all banks headquartered in Texas by asset size — a milestone that places it firmly within the mid-tier community bank segment ($5–10B) while positioning it well ahead of its early-2000s scale of approximately $2 billion. The bank operates 28+ banking centers across eight Texas counties (Collin, Dallas, Hunt, Johnson, Kaufman, Rockwall, Tarrant, and Van Zandt), supplemented by two specialized loan production offices serving the South Dallas and Frisco markets. [E-020, E-010]",
+        "The bank's asset base has compounded at approximately 8.9% CAGR since 1999 (when the Bank of Van Zandt acquisition brought assets to approximately $650 million), reflecting a strategy of disciplined acquisition activity through 2018 followed by sustained organic growth. Post-2018 organic CAGR is estimated at approximately 3.5% annually — consistent with a community bank deepening its North Texas market penetration rather than expanding geographically. Revenue is estimated at approximately $240 million on a net interest margin-driven model typical of community banking institutions in this asset range. [E-020]",
+        "Workforce scale stands at approximately 750–760 employees based on the most recent technographic intelligence, consistent with a banking institution of this asset size. ANBTX's 16-time recognition as a Top Workplaces DFW honoree by The Dallas Morning News (2009, 2011–2025, 16 total) — including its most recent recognition in the large company category in 2025 — signals sustained employee engagement metrics that reduce talent acquisition costs and support customer-facing service quality. [E-016, E-038]",
+        "Two strategic subsidiaries extend ANBTX's revenue diversification beyond core banking: ANBTX Insurance Services Inc. (operating as Sleeper, Sewell & Company, acquired 2006) provides personal insurance, commercial insurance, group and individual health coverage, and risk management services through a Dallas-based office; and ANBTX Wealth Management offers asset management, financial planning, investment advisory, and trust and estate planning services, leveraging an Ameriprise Financial platform integration implemented in 2022. [E-020, E-035]",
+        "ANBTX's asset trajectory over 26 years reflects a consistent compounding of acquisition-led and organic growth. From approximately $650 million at year-end 1999 (post-Bank of Van Zandt acquisition) to $5.5 billion as of September 2025, the bank has grown at an estimated 8.9% compound annual growth rate (CAGR) — a rate that places it among the more consistent growers in the Texas community banking sector. The post-2018 period, during which ANBTX completed its last acquisition (G-6 Corporation / First State Bank in Mesquite), marks a deliberate shift to organic growth and technology-led scale expansion. [E-020]",
+        "Post-2018 organic asset CAGR is estimated at approximately 3.5% annually, consistent with disciplined net interest margin management in a competitive Texas banking market. Revenue is estimated at approximately $240 million — reflecting a classic community banking model where net interest income from loans and deposits constitutes the primary revenue stream, supplemented by fee income from treasury management, wealth management, insurance services, and mortgage origination. The January 2026 addition of seven commercial banking associates — under Chief Strategy Officer Steve White's C&I diversification mandate — signals that the loan book expansion strategy is accelerating into 2026. [E-002, E-016]",
+        "Financial trend classification: STABLE-GROWING. ANBTX has delivered consistent year-over-year asset growth without material contraction periods. Its 19th-largest Texas bank ranking as of September 2025 represents a gain from prior-year positions, confirming continued relative growth within the Texas banking sector. As the bank approaches the $7–8B range over the next 3–5 years, the $10B regulatory threshold — at which CFPB direct supervision, enhanced Durbin Amendment provisions, and full DFAST stress testing apply — will become a strategic planning driver that meaningfully increases technology and compliance investment requirements. [E-020, E-010]"
+      ],
+      "post": "2018 organic CAGR is estimated at approximat",
+      "trajectory": {
+        "branches": 28,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 750,
+        "events": [
+          {
+            "fy": "FY2018",
+            "label": "G-6 Corporation / First State Bank"
+          }
+        ],
+        "fy": [
+          "FY2018",
+          "FY2025"
+        ],
+        "geography": "North Texas (Dallas-Fort Worth Metropolitan Area + East Texas)",
+        "headline": "$5.5B net income · FY2025",
+        "regulator": "OCC",
+        "series": {
+          "net_income_m": [
+            4000.0,
+            5500.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "North Texas (Dallas-Fort Worth Metropolitan Area + East Texas)",
+    "footprint_basis": "derived:geography",
+    "founded": 1875,
+    "geography": "North Texas (Dallas-Fort Worth Metropolitan Area + East Texas)",
+    "headcount": 750,
+    "hq": "Texas by asset size",
+    "hq_address": "Texas by asset size",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Senior Leadership",
+        "recent_hire": false,
+        "tenure": null,
+        "title": ""
+      }
+    ],
+    "legal_name": "American National Bank of Texas",
+    "license_type": "National Bank",
+    "narrative_md": "Comprehensive organizational context. Every claim is linked to evidence IDs. Financial data is sourced from the most recent available Statement of Condition, OCC regulatory filings, and technographic intelligence sources.\n\nAmerican National Bank of Texas (ANBTX) traces its origins to November 22, 1875, when Waters, Bivins & Corley Bank opened in Terrell, Texas — making it one of the oldest independently operated financial institutions in the state. The bank has operated continuously under federal charter since July 1, 1981, when the current commercial bank charter (OCC Charter No. 17043) was established. The institution's current legal name was adopted in 1995, when it transitioned from American National Bank of Terrell — its identity since 1903 — to reflect its expanded North Texas footprint. [E-010, E-020]\n\nANBTX is independently owned and privately held, a structural characteristic that has defined its strategy across multiple leadership generations. Robert A. Hulsey has served as President & Chief Executive Officer since 1989 — a 37-year tenure that has presided over the bank's growth from a sub-$200M community institution to a $5.5B North Texas banking enterprise. Hulsey's long tenure signals continuity, deep local market knowledge, and a deliberate resistance to acquisition by larger regional or national banks — a governance stance reinforced by ANBTX's consistent independence messaging: 'Your Bank for Life,' 'EmpoweringPossible,' and 'Making communities stronger by making businesses stronger.' [E-020, E-035]\n\nThe board of directors reflects ANBTX's dual mandate of community heritage and forward-looking innovation. The 2023 appointment of Dennis Cail (co-founder and CEO of Zirtue, an AI-first relationship-based lending fintech) and Suzanne Cruz-Sewell (Assistant Vice President of Business Diversity at DFW International Airport) signals deliberate infusion of AI competency and diversity strategy at the highest governance level. Robert Messer (SEVP & CFO) serves concurrently as Chairman of the Risk Management Association (RMA) Community Bank Council and as a board member — providing ANBTX direct access to industry-leading risk management intelligence and peer benchmarking. [E-035, E-015]\n\nANBTX is supervised by the Office of the Comptroller of the Currency (OCC) as a federally chartered national bank, subject to OCC examination cycles of 12–18 months. The bank is a member of the Federal Deposit Insurance Corporation (FDIC) with all deposits backed by the full faith and credit of the U.S. Government. ANBTX's federal charter, combined with its OCC supervisory relationship, means its compliance obligations span the full FFIEC examination framework — including IT, cybersecurity, BSA/AML, consumer protection, and third-party risk management. [E-010]",
+    "primary_regulator": "OCC",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.5,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.5/5",
+          "signal": "5) — employee survey-based CX proxy with annual measurement Indeed: CEO approval 90.48%, recommend to friend 62.5%, overall 3.5/5, work-life balance 3.7/5 — measurable workforce experience metrics SRM delivered: (1) Capability Maturity Asse",
+          "source": "Indeed"
+        },
+        {
+          "signal": "get your personalized recommendations.' Mobile app iOS (App Store ID 860053826) and Android (Google Play com.fi8217.godough) — dual-platform mobile presence Mobile app features: account balances, transaction history, account alerts, transfe",
+          "source": "App Store"
+        },
+        {
+          "signal": "ions.' Mobile app iOS (App Store ID 860053826) and Android (Google Play com.fi8217.godough) — dual-platform mobile presence Mobile app features: account balances, transaction history, account alerts, transfers, bill pay — core digital banki",
+          "source": "Google Play"
+        },
+        {
+          "signal": "90.48%; recommend to friend 40/24 (63% recommend) — NPS-proxy at employee/customer ANBTX Live ITMs deployed: Interactive Teller Machines enabling check balances, transfers, withdrawals, deposits — enhanced ATM self-service Video Banker Assi",
+          "source": "Net Promoter Score"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "Knowledge Center: 150+ financial education articles (budgeting, saving, retirement, mortgage, business) with calculators — digital financial wellness platform Homebuyer seminars (instructor-led, free, multiple locations)",
+        "title": "Knowledge Center: 150+ financial education articles (budgeting…",
+        "type": "article",
+        "url": "https://knowledge.anbtx.com/"
+      },
+      {
+        "author": null,
+        "date": "2024-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-041",
+        "excerpt": "SRM previously engaged for vendor contract optimization (debit card portfolio) AND M&A assistance — multi-year innovation advisory partnership SRM engagement in Jan 2026 webinar (Jack Yang) demonstrates ongoing strategic",
+        "title": "SRM engaged for vendor contract optimization (debit card portfolio)",
+        "type": "webinar",
+        "url": "https://srmcorp.com/american-national-bank-of-texas-entrusts-srm-with-business-capability-maturity-assessment-technology-strategy-roadmap/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "Jack Yang (CTO) addressed AI/automation as part of technology strategy at SRM Perspectives Live (Jan 2026) — AI in CTO's strategic agenda Gail Mason (CDO) published about 'The Reprompt Threat: Is Your AI Agent an Informa",
+        "title": "Jack Yang (CTO) addressed AI/automation",
+        "type": "article",
+        "url": "https://srmcorp.com/technology-as-a-catalyst-for-growth-in-community-banking/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-115",
+        "excerpt": "Jack Yang CTO, SRM Perspectives Live (Jan 2026): 'technology is no longer a back-office function; it is a strategic catalyst' — technology strategy explicitly linked to business growth Jack Yang: 'thoughtful architecture",
+        "title": "It is a strategic catalyst' — technology strategy explicitly linked…",
+        "type": "article",
+        "url": "https://srmcorp.com/technology-as-a-catalyst-for-growth-in-community-banking/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-001",
+        "excerpt": "Jack Yang (CTO ANBTX) stated: 'technology is no longer a back-office function; it is a strategic catalyst' at SRM Perspectives Live webinar (Jan 2026) ANBTX framing technology leadership as tightly connected to business ",
+        "title": "Jack Yang (CTO ANBTX) stated",
+        "type": "webinar",
+        "url": "https://srmcorp.com/technology-as-a-catalyst-for-growth-in-community-banking/"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-025",
+        "excerpt": "Gail Mason (CDO, CGEIT): published LinkedIn post titled 'The Reprompt Threat: Is Your AI Agent an Information Security Liability?' (2026) — active engagement with AI security and governance risks CGEIT (Certified in Gove",
+        "title": "Your AI Agent Is an Information Security Liability",
+        "type": "linkedin-post",
+        "url": "https://linkedin.com/in/gailgodwinmason"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.132664+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# American National Bank of Texas — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "Six-factor prioritization applied to all 17 categories. Gaps are ranked by composite priority score. Top 3-5 gaps receive root cause analysis below the register.",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "SCQA FRAMEWORK\nSITUATION\nAmerican National Bank of Texas (ANBTX) is a $5.5 billion independently owned national bank founded in 1875 — celebrating its 150th anniversary in 2025 — serving communities across 8 North Texas counties through 30 banking centers and specialized divisions that include Emerging Markets, Wealth Management, and Insurance Services [E-020, Wikipedia Dec 2025]. Under the ownership of President and CEO Robert A. Hulsey (since 1989), ANBTX has grown from approximately $650 million in assets in 1999 to $5.5 billion as of September 30, 2025 — the 19th largest bank in Texas — achieving a compound annual growth rate of approximately 8.9 percent over 26 years, with 3.5 percent organic CAGR in the post-2018 period [E-020]. The bank enters 2026 at a documented technology inflection point. In December 2024, SRM (Strategic Resource Management) delivered ANBTX's first formal 5-Year Technology Strategy Roadmap following a comprehensive Capability Maturity Assessment and 50+ hours of executive workshops — identifying 50+ technology and operational initiatives with customer experience explicitly placed at the center [E-032, E-050]. Chief Technology Officer Jack Yang — who publicly stated in January 2026 at SRM Perspectives Live that \"technology is no longer a back-office function; it is a strategic catalyst\" — owns the living roadmap [E-001].\n\nChief Data Officer Gail Mason (CGEIT) has overseen a multi-year Snowflake data warehouse migration, deployment of Alteryx, Tableau, Validatar, and establishment of a formal Data Governance Center of Excellence through the Resultant partnership [E-111, E-112]. Most critically, ANBTX's nCino Bank Operating System — a platform built natively on Salesforce — is confirmed active in commercial lending, with a dedicated nCino Business Application Owner hired in 2024 to manage the deployment [E-059]. COMPLICATION\nAgainst this foundation of strategic, governance, and data investment, the 2026 DMA reveals a defining asymmetry: ANBTX's back office is above peer median across P1 (Strategy: 3.05 vs. 2.54 median), P3 (Operations: 3.14 vs. 2.69), and P4 (Data/Technology: 2.90 vs. 2.30), yet its customer-facing P2 pillar (Customer Experience: 2.13 vs.\n\n2.29 median) represents the single largest maturity gap and the only pillar below peer median. This is not a failure of leadership intent — ANBTX's CMO is actively building internal Marketing Cloud capability [E-116] and Hyland's published case study explicitly confirms \"next steps include a Salesforce integration\" [ISSI/Hyland T2, Sep 2025]. The complication is sequencing: ANBTX invested in back-office infrastructure first; the front-office activation is confirmed as the next strategic priority. Within P2, Digital Marketing and Acquisition (: 1.66 vs. 2.25 peer median, −0.59) and Personalization (: 1.79 vs. 2.05 median, −0.26) are the two lowest-scoring categories across the entire 17-category assessment — confirming a structural absence of consumer relationship management capability for the bank's estimated 150,000+ retail customers across 30 branches."
+  },
+  "overall_score": 2.8,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_Governance_Report_ANBTX_20260512.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:47.247162+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_IssueRegister_ANBTX_20260512.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:47.247786+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_PatchBlock_ANBTX_20260512.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:47.248501+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_Leadership_Map_ANBTX_20260512.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 20 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:47.249132+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Peer_Set_ANBTX_20260512.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:47.249418+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:47.249581+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 2,
+      "INFO": 20
+    },
+    "stage_ms": {
+      "manifest": 31,
+      "parse": 8146,
+      "persist": 959
+    },
+    "structured": [
+      {
+        "code": "run_manifest from case-insensitive verdict fallback",
+        "detail": "run_manifest from case-insensitive verdict fallback: 07_governance/DMA_GovernanceVerdict_ANBTX_20260512.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_AN",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_ANBTX_20260512.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from non-canonical layout ANBTX_Evidence_Index_2",
+        "detail": "evidence loaded from non-canonical layout ANBTX_Evidence_Index_20260512.json (125 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_ANBTX_20260512.docx leadership=1 focus_areas=9 facts_extracted=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 8 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 13 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:employees_approx,hq",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 8 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_Governance_Report_ANBTX_20260512.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_IssueRegister_ANBTX_20260512.csv — no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_PatchBlock_ANBTX_20260512.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_Leadership_Map_ANBTX_20260512.csv — no fingerprint matched (best confidence 0.00); 20 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Peer_Set_ANBTX_20260512.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:RB",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 23",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "run_manifest from case-insensitive verdict fallback: 07_governance/DMA_GovernanceVerdict_ANBTX_20260512.json",
+      "xlsx fallback extracted 698 subcaps from DMA_Scoring_Workbook_ANBTX_20260512.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from non-canonical layout ANBTX_Evidence_Index_20260512.json (125 rows)",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_ANBTX_20260512.docx leadership=1 focus_areas=9 facts_extracted=1",
+      "used docx-extracted recommendations: 8 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "tech_stack_from_report_prose: 13 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:employees_approx,hq",
+      "insights_from_client_profile_findings: 12",
+      "acquisitions_from_client_profile_docx: 8 events",
+      "INFO/pattern_gap: 07_governance/DMA_Governance_Report_ANBTX_20260512.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_IssueRegister_ANBTX_20260512.csv — no fingerprint matched (best confidence 0.25); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_PatchBlock_ANBTX_20260512.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_Leadership_Map_ANBTX_20260512.csv — no fingerprint matched (best confidence 0.00); 20 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Peer_Set_ANBTX_20260512.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: README.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "subvertical_inferred_from_name:RB",
+      "timeline_events_persisted: 23",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 12"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.85,
+      "pillar_id": "P1",
+      "score": 3.04,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.77,
+      "pillar_id": "P2",
+      "score": 2.15,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.85,
+      "pillar_id": "P3",
+      "score": 3.14,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.74,
+      "pillar_id": "P4",
+      "score": 2.86,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-12",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:47.280196Z",
+    "created_at": "2026-07-02T23:11:47.280196Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "c36eac98-7ae1-484f-b484-a8621b10402b",
+    "overall_score": null,
+    "request_id": "DMA-RES-ANBTX-20260512-0001",
+    "started_at": "2026-07-02T23:11:47.280196Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.5,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "F-001 nCino Salesforce-Native Platform CONFIRMED LIVE. F-001 nCino Salesforce-Native Platform CONFIRMED LIVE is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-058",
+        "E-059",
+        "E-060",
+        "E-061"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "F-001 nCino Salesforce-Native Platform CONFIRMED LIVE",
+      "peer_median": 2.92,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize F-001 nCino Salesforce-Native Platform CONFIRMED LIVE in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "F-001 nCino Salesforce-Native Platform CONFIRMED LIVE",
+      "what": "F-001 nCino Salesforce-Native Platform CONFIRMED LIVE. F-001 nCino Salesforce-Native Platform CONFIRMED LIVE is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at Plano Balloon Festival — integrated physical + digital"
+    },
+    {
+      "body": "F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield. F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-058",
+        "E-059",
+        "E-060",
+        "E-061"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield",
+      "peer_median": 2.92,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield",
+      "what": "F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield. F-002 Consumer CRM Gap = Primary Salesforce FSC Greenfield is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at Plano Balloon Festival — integrated physical + digital"
+    },
+    {
+      "body": "F-003 Modern Data Platform Deployed = Salesforce Data Cloud Bridge Opportunity. F-003 Modern Data Platform Deployed = Salesforce Data Cloud is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-058",
+        "E-059",
+        "E-060",
+        "E-061"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "F-003 Modern Data Platform Deployed = Salesforce Data Cloud",
+      "peer_median": 2.92,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize F-003 Modern Data Platform Deployed = Salesforce Data Cloud in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "F-003 Modern Data Platform Deployed = Salesforce Data Cloud",
+      "what": "F-003 Modern Data Platform Deployed = Salesforce Data Cloud Bridge Opportunity. F-003 Modern Data Platform Deployed = Salesforce Data Cloud is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at Plano Balloon Festival — integrated physical + digital"
+    },
+    {
+      "body": "F-004 GenAI Governance Evaluation Active = Agentforce Entry Window. F-004 GenAI Governance Evaluation Active = Agentforce Entry Window is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-058",
+        "E-059",
+        "E-060",
+        "E-061"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "F-004 GenAI Governance Evaluation Active = Agentforce Entry Window",
+      "peer_median": 2.92,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize F-004 GenAI Governance Evaluation Active = Agentforce Entry Window in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "F-004 GenAI Governance Evaluation Active = Agentforce Entry Window",
+      "what": "F-004 GenAI Governance Evaluation Active = Agentforce Entry Window. F-004 GenAI Governance Evaluation Active = Agentforce Entry Window is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at Plano Balloon Festival — integrated physical + digital"
+    },
+    {
+      "body": "F-005 CMO Marketing Cloud Hiring Signal = Near-Term Activation. F-005 CMO Marketing Cloud Hiring is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-058",
+        "E-059",
+        "E-060",
+        "E-061"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "F-005 CMO Marketing Cloud Hiring",
+      "peer_median": 2.92,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.67,
+      "so_what": "Prioritize F-005 CMO Marketing Cloud Hiring in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "F-005 CMO Marketing Cloud Hiring",
+      "what": "F-005 CMO Marketing Cloud Hiring Signal = Near-Term Activation. F-005 CMO Marketing Cloud Hiring is a priority capability gap in customer experience, scoring 1.67/5 against a peer median of 2.92. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at Plano Balloon Festival — integrated physical + digital"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.5,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-021"
+      ],
+      "modifiers": [
+        "100 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Channel Priorities averages 3.2/5 over 165 scored subcaps; ceiling 3.9 reflects thin evidence density (65/165 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-019"
+      ],
+      "modifiers": [
+        "125 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Steering Committee averages 3.2/5 over 217 scored subcaps; ceiling 3.9 reflects thin evidence density (92/217 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "120 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation KPIs averages 2.7/5 over 190 scored subcaps; ceiling 3.4 reflects thin evidence density (70/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-038"
+      ],
+      "modifiers": [
+        "135 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Collaboration Culture averages 3.2/5 over 205 scored subcaps; ceiling 3.8 reflects thin evidence density (70/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-048"
+      ],
+      "modifiers": [
+        "60 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Governance averages 2.8/5 over 70 scored subcaps; ceiling 3.4 reflects thin evidence density (10/70 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-063"
+      ],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Campaign Planning & Calendar averages 1.7/5 over 287 scored subcaps; ceiling 2.2 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-085"
+      ],
+      "modifiers": [
+        "267 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "1033/Open Banking API Compliance averages 2.8/5 over 287 scored subcaps; ceiling 3.3 reflects thin evidence density (20/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-091"
+      ],
+      "modifiers": [
+        "236 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Feedback Collection averages 2.3/5 over 286 scored subcaps; ceiling 2.9 reflects thin evidence density (50/286 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-078"
+      ],
+      "modifiers": [
+        "240 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Ethical AI in Personalization averages 1.8/5 over 255 scored subcaps; ceiling 2.3 reflects thin evidence density (15/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-094"
+      ],
+      "modifiers": [
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Multi-Channel Transaction Orchestration averages 3.0/5 over 143 scored subcaps; ceiling 3.5 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-097"
+      ],
+      "modifiers": [
+        "100 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Collaboration averages 3.2/5 over 130 scored subcaps; ceiling 3.9 reflects thin evidence density (30/130 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.5,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-103"
+      ],
+      "modifiers": [
+        "86 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Policy Attestation averages 3.2/5 over 141 scored subcaps; ceiling 3.9 reflects thin evidence density (55/141 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-109"
+      ],
+      "modifiers": [
+        "140 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Post-Incident Review averages 3.1/5 over 145 scored subcaps; ceiling 3.6 reflects thin evidence density (5/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-111"
+      ],
+      "modifiers": [
+        "195 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Unstructured Data Support averages 3.0/5 over 200 scored subcaps; ceiling 3.5 reflects thin evidence density (5/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-115"
+      ],
+      "modifiers": [
+        "230 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Embedding Model Governance & Versioning averages 2.6/5 over 270 scored subcaps; ceiling 3.1 reflects thin evidence density (40/270 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-119"
+      ],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Container & Kubernetes Orchestration averages 2.9/5 over 235 scored subcaps; ceiling 3.4 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-120"
+      ],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Security Operations & Incident Response averages 3.2/5 over 150 scored subcaps; ceiling 3.7 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at Plano Balloon Festival — integrated physical + digital brand campaign",
+      "evidence": [
+        "E-058"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Andrew Yenne (CMO) confirmed",
+      "metric": null,
+      "peer_context": "Campaign Planning & Calendar runs 1.67/5 vs a 2.92 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Andrew Yenne (CMO) confirmed; actively hiring digital marketers — dedicated digital marketing function building EmpoweringPossible brand campaign: 150th anniversary experiential marketing tour with hot air balloon at. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Campaign Planning & Calendar scores 1.67/5 vs a typical 2.92 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-082",
+        "E-058",
+        "E-059",
+        "E-060"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Campaign Planning & Calendar scores 1.67/5",
+      "metric": "Campaign Planning & Calendar 1.67/5 vs peer 2.92",
+      "peer_context": "Campaign Planning & Calendar runs 1.67/5 vs a 2.92 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Ethical AI in Personalization — highest-fit surface at 51/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C1",
+      "text": "Campaign Planning & Calendar scores 1.67/5 vs a typical 2.92 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Ethical AI in Personalization at 1.79/5 is one of American National Bank of Texas's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-087",
+        "E-061",
+        "E-075",
+        "E-074"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Ethical AI in Personalization at 1.79/5 is one of American…",
+      "metric": null,
+      "peer_context": "Campaign Planning & Calendar runs 1.67/5 vs a 2.92 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Ethical AI in Personalization — highest-fit surface at 51/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Ethical AI in Personalization at 1.79/5 is one of American National Bank of Texas's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

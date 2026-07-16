@@ -1,0 +1,984 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 128
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 220
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 106
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 139
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "regions-business-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "d91d86fa-2864-4acd-9115-942255c4378b",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Regions Business Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:23.403533Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 27,
+    "current_count": 39,
+    "dated_count": 4,
+    "median_age_months": 20.4,
+    "oldest_published_date": "2015-04-01",
+    "stale_count": 16,
+    "stale_pct": 17.58,
+    "total": 91,
+    "undated_count": 5
+  },
+  "evidence_summary": {
+    "claims": {
+      "FACT": 5,
+      "MIXED": 1,
+      "NEUTRAL": 3,
+      "POSITIVE": 82
+    },
+    "connectors": {
+      "Indeed": 1,
+      "LinkedIn": 12
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 8,
+      "NEUTRAL": 71,
+      "POSITIVE": 12
+    },
+    "tiers": {
+      "T1": 32,
+      "T2": 35,
+      "T3": 23,
+      "T4": 1
+    },
+    "total_facts": 553,
+    "total_items": 91
+  },
+  "financial_trajectory": {
+    "cagr": "14%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Key operational metrics: 1,253 branches | 1,850+ ATMs | ~23,000 associates | 56% efficiency ratio (best-in-class regional bank) | 200K hours saved through process centralization | ",
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": "B",
+        "value": 1.9,
+        "year": 2025
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 200000000000.0,
+    "branches": "253",
+    "cagr": "16.2%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "capital_markets_revenue": "14% CAGR since 2019. Evidence: E-035, E-05",
+      "efficiency_ratio": "56% (best-in-class regional bank). Technol",
+      "key_operational_metrics": "1,253 branches | 1,850+ ATMs | ~23,000 as",
+      "lines": [
+        "Regions Bank operates at super-regional bank scale across five key dimensions:",
+        "Key operational metrics: 1,253 branches | 1,850+ ATMs | ~23,000 associates | 56% efficiency ratio (best-in-class regional bank) | 200K hours saved through process centralization | 30%+ organic deposit growth 5-year CAGR vs. peers (top-quartile) | New native mobile app launched July 2025. Evidence: E-035, E-058, E-059, E-084.",
+        "5-year CAGR (net income 2020–2025): +16.2%. Efficiency ratio: 56% (best-in-class regional bank). Technology investment sustained at 9–11% of revenue (~$400–500M annually) through 2027. Q2 2025: $1.9B total revenue | $0.60 adjusted EPS | +12% YoY net income. 30%+ organic deposit growth vs. peers over 5 years (top quartile). Capital markets revenue: 14% CAGR since 2019. Evidence: E-035, E-058, E-059, E-084."
+      ],
+      "q2_2025": "1.9B total revenue | $0.60 adjusted EPS | +1",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 23000,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Manav Misra named Chief Analytics Officer of the Year"
+          },
+          {
+            "fy": "FY2024",
+            "label": "CashFlowIQ launched"
+          },
+          {
+            "fy": "FY2023",
+            "label": "NSight 2023 (nCino's annual user conference, 1,700…"
+          },
+          {
+            "fy": "FY2022",
+            "label": "Regions Bank appointed Scott Peters"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "South, Midwest, Texas (15–16 states)",
+        "headline": "$160.0B assets · FY2025 · +0.6% CAGR",
+        "regulator": "Federal Reserve",
+        "series": {
+          "net_income_m": [
+            990.0,
+            2400.0,
+            2150.0,
+            1980.0,
+            1770.0,
+            2100.0
+          ],
+          "total_assets": [
+            155.2,
+            162.8,
+            163.2,
+            152.2,
+            157.3,
+            160.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "South, Midwest, Texas (15–16 states)",
+    "footprint_basis": "derived:geography",
+    "founded": 1971,
+    "founded_basis": "nlp:narrative",
+    "geography": "South, Midwest, Texas (15–16 states)",
+    "headcount": 23000,
+    "hq": "Birmingham, Alabama",
+    "hq_address": null,
+    "hq_basis": "nlp:evidence+narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Engagement Access",
+        "recent_hire": false,
+        "tenure": null,
+        "title": ""
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Regions Business Bank",
+    "license_type": "State-chartered",
+    "narrative_md": "Regions Financial Corporation (NYSE: RF) is a publicly traded bank holding company incorporated in Delaware and headquartered at 1900 Fifth Avenue North, Birmingham, Alabama. Founded in 1971, Regions Financial Corporation is the parent company of Regions Bank — an Alabama state-chartered commercial bank and member of the Federal Reserve System. As a Bank Holding Company (BHC) supervised by the Federal Reserve under the Bank Holding Company Act, Regions Financial submits annual 10-K filings and CCAR stress test results to the Federal Reserve.\n\nRegions Bank holds FDIC deposit insurance and is jointly examined by the Federal Reserve and Alabama Banking Department. Dan Massey (Chief Enterprise Operations and Technology Officer) joined from Truist Bank in May 2022 and reports directly to CEO John Turner. As of March 31, 2026, Anil Chadha serves as Chief Financial Officer, succeeding David Turner who retired after 20 years. Evidence: E-001, E-007, E-009, E-058.",
+    "primary_regulator": "Federal Reserve",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 1900000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "Regions Bank Indeed ratings (Birmingham, AL): Overall 3.7/5; Culture & Values 3.5/5; Work-Life Balance 3.8/5; Job Security & Advancement 3.3/5; Management 3.3/5",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "large",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2022-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "Contact center wait times reduced by more than 30% per Dan Massey early accomplishments (DoingMoreToday Feb 2023). Reggie handled 1.5M calls + 1.4M banker questions (IBM press release). 50 FTE equivalent from automation.",
+        "title": "Contact center wait times reduced by more than 30% per Dan Massey",
+        "type": "article",
+        "url": "https://thefinancialbrand.com/news/digital-transformation-banking/inside-regions-banks-cloud-driven-digital-transformation-strategy-147818"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "nSight 2023 (nCino's annual user conference, 1,700+ attendees) launched Banking Advisor closed beta testing Product Design Program — demonstrating nCino's early adopter program for AI capabilities. As a 9-year nCino cust",
+        "title": "NSight 2023 (nCino's annual user conference, 1,700+ attendees)…",
+        "type": "conference",
+        "url": "https://www.ncino.com/en-US/news/ncino-kicks-off-annual-user-conference-nsight-advancing-modernization-financial-services"
+      },
+      {
+        "author": null,
+        "date": "2026-05-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-056",
+        "excerpt": "Social media presence confirmed: Twitter/X @askRegions (social customer service), Facebook regionsbank, Instagram regionsbank, Pinterest regionsbank, LinkedIn Regions Financial Corporation — multi-channel social presence",
+        "title": "Social media presence confirmed : Twitter/X @askRegions (social…",
+        "type": "linkedin-post",
+        "url": "https://doingmoretoday.com"
+      }
+    ],
+    "ticker": "NYSE: RF",
+    "ticker_basis": "prose:entity-scoped",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "ir.regions.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.267466+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Regions Business Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Regions Business Bank is a $200.0B in assets regional bank regulated by Federal Reserve, operating since 1971 with 23,000 employees. A 16.2% multi-year growth rate gives it the balance sheet to fund transformation [E-001, E-012]. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is Change Management Framework at 2.1/5 against a 3.0 peer median [E-007, E-014]. Next is Abandonment Recovery at 2.1/5 against a 3.5 peer median [E-002].\n\nThird is RTO/RPO Achievement at 2.2/5 against a 3.0 peer median [E-058, E-065]. The issue register adds Run ID found fewer than 2 times in report (high severity). The issue register adds 4 range-style E-ID references: ['E-001 to E-091', 'E-001 to E-091'] (high severity). Counter-signal: Governance & Ethics — a lower-scoring capability area already runs at 2.7/5 against a 2.5 peer median — a strength to build on, not rebuild. The roster shows no CDO — a named ownership gap for the capabilities below.\n\nThe question for Regions Business Bank is whether to close Change Management Framework first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Regions Business Bank should lead with Databricks (73/100 fit) against Data Quality Governance, then sequence nCino behind it. Closing Change Management Framework to the peer median alone is worth 0.9 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Customer CIAM roadmap exists — no platform confirmed — Jeff Kennedy confirmed CIAM strategy and roadmap; no vendor named. SailPoint/CyberArk workforce-only…\"."
+  },
+  "overall_score": 2.37,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/all_proxy_labels.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:23.368374+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:23.369497+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/governance_patch_block_RegionsBank_20260518.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:23.369815+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_Leadership_Registry.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 22 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:23.379519+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 1,
+      "INFO": 17
+    },
+    "stage_ms": {
+      "manifest": 6,
+      "parse": 7868,
+      "persist": 1935
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/governance_qa_verdict_RegionsBank_20260518.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "institution_name backfilled from folder name",
+        "detail": "institution_name backfilled from folder name: 'Regions Business Bank'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +698 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/governance_issue_register_RegionsBank_20260518.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 52 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_RegionsBank_20260518.docx leadership=1 focus_areas=7 facts_extracted=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:branches",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_derived_from_scores",
+        "detail": "scqa_derived_from_scores",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/all_proxy_labels.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/governance_patch_block_RegionsBank_20260518.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_Leadership_Registry.csv — no fingerprint matched (best confidence 0.00); 22 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:RB",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 22",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/governance_qa_verdict_RegionsBank_20260518.json",
+      "institution_name backfilled from folder name: 'Regions Business Bank'",
+      "xlsx_name_enrichment: +698 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "used variant issue register: 07_governance/governance_issue_register_RegionsBank_20260518.csv",
+      "tech_stack_from_variant_source: 52 entries",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_RegionsBank_20260518.docx leadership=1 focus_areas=7 facts_extracted=1",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:branches",
+      "scqa_derived_from_scores",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 01_evidence/all_proxy_labels.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/governance_patch_block_RegionsBank_20260518.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_Leadership_Registry.csv — no fingerprint matched (best confidence 0.00); 22 generic sections mined",
+      "subvertical_inferred_from_name:RB",
+      "timeline_events_persisted: 22",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 12",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.17,
+      "pillar_id": "P1",
+      "score": 2.31,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 3.26,
+      "pillar_id": "P2",
+      "score": 2.21,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 3.13,
+      "pillar_id": "P3",
+      "score": 2.33,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.71,
+      "pillar_id": "P4",
+      "score": 2.62,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-18",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:23.403533Z",
+    "created_at": "2026-07-02T23:11:23.403533Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "8d36a799-37c5-4c09-a2e3-d306e89214a6",
+    "overall_score": null,
+    "request_id": "DMA-ASM-REGIONS-20260518-0001",
+    "started_at": "2026-07-02T23:11:23.403533Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "$400M–$500M annual tech budget through 2027 — multi-year partner window — CEO: no M&A interest; all capital in technology. 9–11% tech spend. Three simultaneous platform programs. 200K hours saved. [E-035, E-059, E-084] — P1C1 Digital Strategy ceiling L4.0 ±0.3 — executive mandate confirmed. — Full Zennify engagement: nCino + Salesforce FSC + Data Cloud + Agentforce + MuleSoft. — 🟢 STRATEGIC.",
+      "evidence": [
+        "E-035",
+        "E-059",
+        "E-084",
+        "E-003"
+      ],
+      "magnitude": "$400M",
+      "name": "$400M–$500M annual tech budget through 2027",
+      "peer_median": 4.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.28,
+      "so_what": "Prioritize $400M–$500M annual tech budget through 2027 in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "$400M–$500M annual tech budget through 2027",
+      "what": "$400M–$500M annual tech budget through 2027 — multi-year partner window — CEO: no M&A interest; all capital in technology. 9–11% tech spend. Three simultaneous platform programs. 200K hours saved. [E-035, E-059, E-084] — P1C1 Digital Strategy ceiling L4.0 ±0.3 — executive mandate confirmed.",
+      "why": "The linked evidence records: Regions reserves approximately 9-11% of revenue for technology spend — explicitly confirmed in investor materials across 2025. With ~$7.4B FY2025 revenue, this represents approximately $665M-$815M annual technology investment."
+    },
+    {
+      "body": "ROSIE–Salesforce NBA integration PLANNED but NOT deployed — ROSIE = 22 ML models on IBM Interact across all channels. Roadmap confirmed: 'Regions will integrate ROSIE with Salesforce for commercial call center NBA.' 700+ bankers on IBM Banker Assist — NOT Salesforce. [E-050, E-075] — P2C4 ceiling L3.0 ±0.4 — backend strong; Salesforce delivery layer missing. — Einstein Next Best Action via Salesforce FSC — #1 highest-probability net-new Salesforce deployment.",
+      "evidence": [
+        "E-050",
+        "E-075",
+        "E-001",
+        "E-002"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Rosie = 22 ML models on IBM Interact across all channels",
+      "peer_median": 3.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 2.12,
+      "so_what": "Prioritize Rosie = 22 ML models on IBM Interact across all channels in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Rosie = 22 ML models on IBM Interact across all channels",
+      "what": "ROSIE–Salesforce NBA integration PLANNED but NOT deployed — ROSIE = 22 ML models on IBM Interact across all channels. Roadmap confirmed: 'Regions will integrate ROSIE with Salesforce for commercial call center NBA.'. 700+ bankers on IBM Banker Assist — NOT Salesforce.",
+      "why": "The linked evidence records: ROSIE (Regions Optimal Solutions Intelligence Engine): 22 models, 350+ data elements per customer (transactions, balances, demographics, web browsing behavior), next-best-action delivered in milliseconds. 7-8% incremental revenue per customer."
+    },
+    {
+      "body": "No Salesforce Data Cloud — consumer C360 gap at $157B scale — RCLIQ covers commercial clients (350+ data elements, 100% adoption) but consumer C360 absent. Consumer Banking = 58.8% of revenue. [E-016, E-068, E-072] — P2C5 consumer analytics ceiling L2.5 ±0.5. — Salesforce Data Cloud for consumer segment — greenfield at largest revenue LOB. — 🟡 HIGH.",
+      "evidence": [
+        "E-016",
+        "E-068",
+        "E-072",
+        "E-003"
+      ],
+      "magnitude": "$157B",
+      "name": "No Salesforce Data Cloud",
+      "peer_median": 4.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.28,
+      "so_what": "Prioritize No Salesforce Data Cloud in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No Salesforce Data Cloud",
+      "what": "No Salesforce Data Cloud — consumer C360 gap at $157B scale — RCLIQ covers commercial clients (350+ data elements, 100% adoption) but consumer C360 absent. Consumer Banking = 58.8% of revenue. [E-016, E-068, E-072] — P2C5 consumer analytics ceiling L2.5 ±0.5. — Salesforce Data Cloud for consumer segment — greenfield at largest revenue LOB. 🟡 HIGH.",
+      "why": "The linked evidence records: Manav Misra has served as Chief Data and Analytics Officer (CDAO) at Regions Bank since September 2018 (7+ years). EVP-level role. He established the data product management function and data product partner role."
+    },
+    {
+      "body": "Customer CIAM roadmap exists — no platform confirmed — Jeff Kennedy confirmed CIAM strategy and roadmap; no vendor named. SailPoint/CyberArk workforce-only. New native mobile app launched July 2025. [E-048, E-081] — P4C4.4 CIAM at L2.0 ±0.5 — roadmap without platform. — Salesforce Customer Identity Cloud — open specification, no incumbent. — 🟡 HIGH.",
+      "evidence": [
+        "E-048",
+        "E-081",
+        "E-080",
+        "E-082"
+      ],
+      "magnitude": "1.7 pts below peer median",
+      "name": "Customer CIAM roadmap exists",
+      "peer_median": 4.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.28,
+      "so_what": "Prioritize Customer CIAM roadmap exists in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Customer CIAM roadmap exists",
+      "what": "Customer CIAM roadmap exists — no platform confirmed — Jeff Kennedy confirmed CIAM strategy and roadmap; no vendor named. SailPoint/CyberArk workforce-only. New native mobile app launched July 2025. [E-048, E-081] — P4C4.4 CIAM at L2.0 ±0.5 — roadmap without platform. Salesforce Customer Identity Cloud — open specification, no incumbent. 🟡 HIGH.",
+      "why": "The linked evidence records: J.D. Power 2025 U.S. Online Banking Satisfaction Study: Regions Bank ranked #1 in Customer Satisfaction among Regional Bank Websites for the SECOND CONSECUTIVE YEAR. Head of Digital Kristen Rankin confirmed by Banking Dive (Dec 2025)."
+    },
+    {
+      "body": "nCino since 2016 — customization debt blocks standard releases — SAFe ART confirmed; CEO confirmed commercial loan system cloud upgrade Q2 2025. Deep custom features block standard releases. [E-019, E-022, E-084] — P4C2 ceiling L2.5 — standard nCino releases blocked; IQ Agents inaccessible. — nCino Standard Release Adoption + nCino Banking Advisor — PRIMARY engagement lever. Stated client objective. — 🔴 CRITICAL.",
+      "evidence": [
+        "E-019",
+        "E-022",
+        "E-084",
+        "E-007"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "nCino since 2016",
+      "peer_median": 3.0,
+      "platforms": [
+        "Databricks",
+        "nCino"
+      ],
+      "score": 2.09,
+      "so_what": "Prioritize nCino since 2016 in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "nCino since 2016",
+      "what": "NCino since 2016 — customization debt blocks standard releases — SAFe ART confirmed; CEO confirmed commercial loan system cloud upgrade Q2 2025. Deep custom features block standard releases. [E-019, E-022, E-084] — P4C2 ceiling L2.5 — standard nCino releases blocked; IQ Agents inaccessible.",
+      "why": "The linked evidence records: Matt Wiginton: nCino Product Owner (2019-2021), Salesforce & nCino Business Analyst on 'Commercial Lending Agile Release Train' (2022-2023), Salesforce Product Owner for Customer Engagement Platform (2023-2025). SAFe 6 PO/PM certified."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025"
+      ],
+      "modifiers": [
+        "135 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Channel Strategy averages 2.5/5 over 165 scored subcaps; ceiling 3.0 reflects thin evidence density (30/165 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-032"
+      ],
+      "modifiers": [
+        "161 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Project/Program Governance averages 2.3/5 over 217 scored subcaps; ceiling 2.9 reflects thin evidence density (56/217 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "140 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Sourcing Channels averages 2.3/5 over 190 scored subcaps; ceiling 2.9 reflects thin evidence density (50/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "cap M3 applied: Sentiment cap 3.0",
+        "160 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Management Framework averages 2.1/5 over 205 scored subcaps; ceiling 2.7 reflects the binding cap (cap M3 applied: Sentiment cap 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.5,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "40 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Governance & Ethics — Subcap 2 averages 2.7/5 over 70 scored subcaps; ceiling 3.4 reflects thin evidence density (30/70 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "cap applied: Critic downgrade: proxy-only at 3.0",
+        "282 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Abandonment Recovery averages 2.1/5 over 287 scored subcaps; ceiling 2.6 reflects thin evidence density (5/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-053"
+      ],
+      "modifiers": [
+        "277 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Open Banking & Data Portability averages 2.2/5 over 287 scored subcaps; ceiling 2.7 reflects thin evidence density (10/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-049"
+      ],
+      "modifiers": [
+        "276 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Agent Enablement & Productivity averages 2.2/5 over 286 scored subcaps; ceiling 2.7 reflects thin evidence density (10/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: ISS cap 2.5",
+        "245 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Financial Guidance & Wellness averages 2.3/5 over 255 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: ISS cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "cap M3 applied: XP: P1C2<2.5 → P3 cap 3.0",
+        "137 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Unattended Automation averages 2.2/5 over 143 scored subcaps; ceiling 2.7 reflects the binding cap (cap M3 applied: XP: P1C2<2.5 → P3 cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-061"
+      ],
+      "modifiers": [
+        "125 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Key Risk Indicators averages 2.6/5 over 130 scored subcaps; ceiling 3.1 reflects thin evidence density (5/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "cap M3 applied: XP: P1C2<2.5 → P3 cap 3.0",
+        "130 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Regulator Relationship averages 2.3/5 over 141 scored subcaps; ceiling 2.9 reflects the binding cap (cap M3 applied: XP: P1C2<2.5 → P3 cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-058"
+      ],
+      "modifiers": [
+        "130 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "RTO/RPO Achievement averages 2.2/5 over 145 scored subcaps; ceiling 2.7 reflects thin evidence density (15/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-074"
+      ],
+      "modifiers": [
+        "155 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Unstructured Data Support averages 2.9/5 over 200 scored subcaps; ceiling 3.5 reflects thin evidence density (45/200 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "205 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "BYOLLM (Bring Your Own LLM) averages 2.3/5 over 270 scored subcaps; ceiling 2.9 reflects thin evidence density (65/270 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-084"
+      ],
+      "modifiers": [
+        "225 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Data Product SLO/SLA Definition & Error Budgets averages 2.7/5 over 235 scored subcaps; ceiling 3.2 reflects thin evidence density (10/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-080"
+      ],
+      "modifiers": [
+        "110 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Secure Code Development averages 2.8/5 over 150 scored subcaps; ceiling 3.4 reflects thin evidence density (40/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Forbes named Regions Financial #103 of Top 200 Most Cybersecure Companies 2023. Deputy CISO Charles Carter appointed November 2025 (Nov 2025).",
+      "evidence": [
+        "E-018"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Forbes named Regions Financial",
+      "metric": null,
+      "peer_context": "Change Management Framework runs 2.09/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Forbes named Regions Financial #103 of Top 200 Most Cybersecure Companies 2023. Deputy CISO Charles Carter appointed November 2025 (Nov 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Deputy CISO Charles Carter appointed"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "regulatory",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CFPB Consent Order (2022-CFPB-0008) for overdraft fee violations was TERMINATED July 21, 2025. Regions Bank fulfilled obligations including $50M civil money penalty and consumer redress (Jul 2025).",
+      "evidence": [
+        "E-010"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "CFPB Consent Order (2022-CFPB-0008) for overdraft fee…",
+      "metric": "fulfilled obligations including $50M",
+      "peer_context": "Change Management Framework runs 2.09/5 vs a 3.00 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "CFPB Consent Order (2022-CFPB-0008) for overdraft fee violations was TERMINATED July 21, 2025. Regions Bank fulfilled obligations including $50M civil money penalty and consumer redress (Jul 2025). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2025-07-21",
+        "event": "CFPB Consent Order (2022-CFPB-0008) for overdraft fee…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Jacob Kosoff named Head of Model Risk Management and Validation at Regions Bank. Elizabeth Scribner (PhD, Senior Model Risk Analyst/Model Risk Manager, Aug 2023-present) confirms: 'Oversees validation activities for the bank's portfolio of models across Wealth Management, BSA/AML, Fraud, Marketing, Operations, Consumer Lending.' (May 2026).",
+      "evidence": [
+        "E-076"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Jacob Kosoff named Head of Model Risk Management and…",
+      "metric": null,
+      "peer_context": "Change Management Framework runs 2.09/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Jacob Kosoff named Head of Model Risk Management and Validation at Regions Bank. Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-05-01",
+        "event": "Jacob Kosoff named Head of Model Risk Management and…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Regions Bank fully resolved 2022 CFPB Consent Order on overdraft fees (July 2025 termination, $50M penalty paid, consumer redress complete). Resolution demonstrates active regulatory compliance remediation capability and exam readiness process (Jul 2025).",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Regions Bank resolved 2022 CFPB Consent Order on overdraft…",
+      "metric": "fees July termination $50M",
+      "peer_context": "Change Management Framework runs 2.09/5 vs a 3.00 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Regions Bank fully resolved 2022 CFPB Consent Order on overdraft fees (July 2025 termination, $50M penalty paid, consumer redress complete).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Regions Bank resolved 2022 CFPB Consent Order on overdraft…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Change Management Framework scores 2.09/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-007",
+        "E-014",
+        "E-021",
+        "E-026"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Change Management Framework scores 2.09/5",
+      "metric": "Change Management Framework 2.09/5 vs peer 3.00",
+      "peer_context": "Change Management Framework runs 2.09/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Data Quality Governance — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C4",
+      "text": "Change Management Framework scores 2.09/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

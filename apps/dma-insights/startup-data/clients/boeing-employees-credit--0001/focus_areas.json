@@ -1,0 +1,275 @@
+{
+  "entity_display_id": "boeing-employees-credit--0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-075"
+        ],
+        "representative_quote": "Purpose-built GenAI counselor, 150 employee-member pilot, AI Council governance",
+        "source_kind": "docx"
+      },
+      "id": "76ae09f0-cbd9-4161-8388-6eb413375725",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.5.1",
+        "P4C1.2.2",
+        "P4C1.2.1",
+        "P4C3.5.1",
+        "P4C3.4.2",
+        "P4C3.2.2",
+        "P4C3.5.8"
+      ],
+      "kpis": [
+        {
+          "current_value": "150",
+          "delta": null,
+          "kpi_label": "Employee",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Becca GenAI Advisor Pilot",
+      "verbatim_quote": "F-003 | Becca GenAI Advisor Pilot | Purpose-built GenAI counselor, 150 employee-member pilot, AI Council governance [E-075:F1] | Advanced AI maturity for CU sector | Einstein/Agentforce complement for scaling AI across channels"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-069"
+        ],
+        "representative_quote": "188 in 2025, 123 in 2024, 841 total",
+        "source_kind": "docx"
+      },
+      "id": "a304c729-9eba-4aa2-be3e-85e00ee586f7",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.5.1",
+        "P4C1.2.2",
+        "P4C1.2.1",
+        "P4C3.5.1",
+        "P4C3.4.2",
+        "P4C3.2.2",
+        "P4C3.5.8"
+      ],
+      "kpis": [
+        {
+          "current_value": "172%",
+          "delta": null,
+          "kpi_label": "F-007 CFPB Complaints",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "CFPB Complaints +172%",
+      "verbatim_quote": "F-007 | CFPB Complaints +172% | 188 in 2025, 123 in 2024, 841 total [E-069:F2] | Board-level regulatory risk | Service Cloud + case management consulting"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-085"
+        ],
+        "representative_quote": "Both SFMC and Adobe (Analytics, Target, Launch, AAM) detected",
+        "source_kind": "docx"
+      },
+      "id": "d5727160-13cb-492e-aae0-e629901af062",
+      "involved_subcap_ids": [
+        "P2C1.6.5",
+        "P2C1.5.1",
+        "P2C1.2.5",
+        "P2C1.8.1",
+        "P2C1.7.CU1",
+        "P2C1.1.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$100",
+          "delta": null,
+          "kpi_label": "F1 BECU operates",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Dual SF+Adobe Marketing Stacks",
+      "verbatim_quote": "F-004 | Dual SF+Adobe Marketing Stacks | Both SFMC and Adobe (Analytics, Target, Launch, AAM) detected [E-085:F1] | Cost duplication, data fragmentation | HIGH \u2014 Stack consolidation to unified SFMC"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-061"
+        ],
+        "representative_quote": "BECU uses Salesforce Marketing Cloud via Amplero for ML-powered member marketing",
+        "source_kind": "docx"
+      },
+      "id": "78f4afc3-a304-4d41-9deb-ab6acfffba7d",
+      "involved_subcap_ids": [
+        "P2C3.5.2",
+        "P2C3.3.CU1",
+        "P2C3.7.1",
+        "P2C3.7.2",
+        "P2C1.2.8",
+        "P2C1.6.6",
+        "P2C1.4.8",
+        "P2C1.2.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Existing SFMC Customer",
+      "verbatim_quote": "F-001 | Existing SFMC Customer | BECU uses Salesforce Marketing Cloud via Amplero for ML-powered member marketing [E-061:F1] | Established Salesforce footprint with proven ROI | CRITICAL \u2014 expand Journey Builder, Einstein AI, Data Cloud. Consolidate Adobe stack."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-073",
+          "E-085"
+        ],
+        "representative_quote": "Glia+LivePerson+Zendesk; 14% phone resolution",
+        "source_kind": "docx"
+      },
+      "id": "2f9bf7cc-bf5d-4918-b043-2b648e4ec81b",
+      "involved_subcap_ids": [
+        "P2C3.5.2",
+        "P2C3.3.CU1",
+        "P2C3.7.1",
+        "P2C3.7.2",
+        "P2C1.2.8",
+        "P2C1.6.6",
+        "P2C1.4.8",
+        "P2C1.2.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "172%",
+          "delta": null,
+          "kpi_label": "CFPB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Fragmented Service Stack",
+      "verbatim_quote": "F-005 | Fragmented Service Stack | Glia+LivePerson+Zendesk; 14% phone resolution [E-073:F1, E-085:F3] | Service quality risk; CFPB +172% | HIGH \u2014 Service Cloud unification"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-103"
+        ],
+        "representative_quote": "20+ systems point-to-point; no iPaaS evidence",
+        "source_kind": "docx"
+      },
+      "id": "02fe678a-ade9-4626-a271-1afc267d7d28",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.5.1",
+        "P4C1.2.2",
+        "P4C1.2.1",
+        "P4C3.5.1",
+        "P4C3.4.2",
+        "P4C3.2.2",
+        "P4C3.5.8"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No Integration Platform",
+      "verbatim_quote": "F-006 | No Integration Platform | 20+ systems point-to-point; no iPaaS evidence [E-103:F5] | Integration debt; merger amplifies | CRITICAL \u2014 MuleSoft API layer foundational"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-051"
+        ],
+        "representative_quote": "Merger announced Nov 2025, close early 2027, Jefferies advisor",
+        "source_kind": "docx"
+      },
+      "id": "ec50a26a-bbc0-4af3-8eb2-7b66d95c9125",
+      "involved_subcap_ids": [
+        "P2C1.4.6",
+        "P2C2.9.4",
+        "P4C3.3.1",
+        "P2C4.1.3",
+        "P2C4.6.5",
+        "P1C1.8.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$33,000,000,000",
+          "delta": null,
+          "kpi_label": "F-002 SAFE Merger",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 66,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "SAFE Merger ($33B+ combined)",
+      "verbatim_quote": "F-002 | SAFE Merger ($33B+ combined) | Merger announced Nov 2025, close early 2027, Jefferies advisor [E-051:F1] | Largest CU integration in WA; massive system consolidation | CRITICAL \u2014 MuleSoft system integration, FSC unified member migration"
+    }
+  ]
+}

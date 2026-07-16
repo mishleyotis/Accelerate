@@ -1,0 +1,512 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "everbank-n-a-0001",
+  "financials": {
+    "lines": [
+      "ACCELERATING: $36.8B\u2192$45B+ (Aug 2023\u2013Dec 2025). Sterling $261M, +$2B deposits [E-003,E-004]. GOBankingRates Gold 2025+2026 [E-069]. BauerFinancial 5-Star 69Q [E-001]."
+    ],
+    "metrics": {
+      "accelerating": "36.8B\u2192$45B+ (Aug 2023\u2013Dec 2025). Sterling $26",
+      "net_income": 66300000.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "National (FL",
+      "CA",
+      "NY financial centers",
+      "digital nationwide)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Greg Seibly",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "David DePillo",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lindsay Lawrence",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Stephen Sullivan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Pat Rusnak",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Milind Zodge",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDAIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Ryan Ritz",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cayla Elrod",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Colby Mangers",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Digital Innovation"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Andy Marsh",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Strategic Execution"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joyce Kennedy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP IT Chief of Staff"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Patrick McDade",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Fraud Risk Mgmt"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "Nationally chartered bank",
+    "narrative_md": "EverBank, N.A. is a nationally chartered bank (OCC Charter #25290, FDIC #34775) headquartered at 301 W Bay St, Jacksonville, FL 32202 [E-001]. Acquired from TIAA in August 2023 by PE consortium (Stone Point, Warburg Pincus, Reverence, Sixth Street, Bayview) [E-003]. Converted from FSA to national bank charter simultaneously.",
+    "primary_regulator": "OCC",
+    "size_tier": "Mid-Large Regional ($30-50B)",
+    "thought_leadership": null,
+    "ticker": "HWC"
+  },
+  "issue_register": [
+    {
+      "id": "6d7a2c0c-73ab-481f-b85d-71154635904b",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "OCC mortgage servicing consent order \u2014 91/95 items completed, terminated, $1.6M remediated"
+    },
+    {
+      "id": "2f43d0b1-f076-4740-bbce-ec1644b07a72",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Chief BSA/AML Officer Iris Smith departed Oct 2025; no confirmed replacement"
+    },
+    {
+      "id": "7d1591b3-f124-437e-9c66-c0c832aaf035",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Windows 7 (EOL Jan 2020) still detected in production environment"
+    },
+    {
+      "id": "57d8407b-7405-4d80-89a3-2efd19dd04d7",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Bill Bell (15yr data governance leader) departed Mar 2025"
+    },
+    {
+      "id": "4277062e-f34c-4810-9523-2416cb648cd5",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "IBM Lotus Notes still detected as messaging platform alongside Teams/Slack"
+    },
+    {
+      "id": "bcba0357-82df-40c5-9792-fc28e7643121",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Mobile app mixed reviews (2.3-3.5 App Store); UX quality complaints post-TIAA migration"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "ACCELERATING: $36.8B\u2192$45B+ (Aug 2023\u2013Dec 2025). Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.69,
+        "P1C2": 2.0,
+        "P1C3": 1.77,
+        "P1C4": 2.11,
+        "P1C5": 1.84,
+        "P2C1": 1.77,
+        "P2C2": 1.88,
+        "P2C3": 1.79,
+        "P2C4": 1.52,
+        "P3C1": 1.66,
+        "P3C2": 2.19,
+        "P3C3": 2.63,
+        "P3C4": 2.32,
+        "P4C1": 1.46,
+        "P4C2": 1.4,
+        "P4C3": 2.24,
+        "P4C4": 2.81
+      },
+      "overall_score": 1.95,
+      "peer_name": "BOK Financial Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.24,
+        "P1C3": 1.71,
+        "P1C4": 1.74,
+        "P1C5": 1.71,
+        "P2C1": 1.83,
+        "P2C2": 1.69,
+        "P2C3": 1.72,
+        "P2C4": 1.59,
+        "P3C1": 1.95,
+        "P3C2": 2.13,
+        "P3C3": 2.59,
+        "P3C4": 2.34,
+        "P4C1": 1.9,
+        "P4C2": 1.34,
+        "P4C3": 1.95,
+        "P4C4": 2.3
+      },
+      "overall_score": 1.95,
+      "peer_name": "Royal Business Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.83,
+        "P1C2": 2.2,
+        "P1C3": 2.0,
+        "P1C4": 1.6,
+        "P1C5": 1.8,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.33,
+        "P3C1": 1.81,
+        "P3C2": 2.17,
+        "P3C3": 2.03,
+        "P3C4": 2.38,
+        "P4C1": 1.44,
+        "P4C2": 1.44,
+        "P4C3": 2.25,
+        "P4C4": 1.89
+      },
+      "overall_score": 1.95,
+      "peer_name": "Sunflower Bank, N.A.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.29,
+        "P1C2": 2.85,
+        "P1C3": 2.37,
+        "P1C4": 2.56,
+        "P2C1": 1.82,
+        "P2C2": 2.13,
+        "P2C3": 2.44,
+        "P2C4": 1.94,
+        "P3C1": 2.18,
+        "P3C2": 1.6,
+        "P3C3": 1.0,
+        "P3C4": 1.0,
+        "P4C1": 1.44,
+        "P4C2": 1.12,
+        "P4C3": 1.66,
+        "P4C4": 1.67
+      },
+      "overall_score": 1.88,
+      "peer_name": "Rockland Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.65,
+        "P1C2": 2.6,
+        "P1C3": 2.5,
+        "P1C4": 1.99,
+        "P2C1": 1.34,
+        "P2C2": 1.24,
+        "P2C3": 1.17,
+        "P2C4": 1.41,
+        "P3C1": 1.9,
+        "P3C2": 1.63,
+        "P3C3": 2.45,
+        "P3C4": 2.5,
+        "P4C1": 1.54,
+        "P4C2": 1.42,
+        "P4C3": 1.68,
+        "P4C4": 1.78
+      },
+      "overall_score": 1.86,
+      "peer_name": "First Citizens BancShares, Inc.",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-EVER-20260413-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "alerts for accounts, transactions, debit card activity App Store reviews indicate mixed onboarding experience \u2014 some users report issues with CD funding and account setup One reviewer noted 'UI is horrible' with 'rendering problems' \u2014 sugge",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "OCC consent order for mortgage servicing remediated \u2014 91/95 items completed, order terminated, $1.6M borrower payments made",
+      "date_precision": "publish_fallback",
+      "e_id": "E-087",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-087",
+        "E-097"
+      ],
+      "id": "d6abd7a9-01d0-4344-bf88-d0554fb423fe",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "N/A - composite",
+      "subcap_ids": [],
+      "title": "OCC consent order for mortgage servicing remediated 91/95\u2026"
+    },
+    {
+      "body": "Milind Zodge appointed Chief Data Officer (CDAIO) Jan 2026; served as Interim CDO Sep-Dec 2025 \u2014 30yr experience",
+      "date_precision": "publish_fallback",
+      "e_id": "E-107",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-107"
+      ],
+      "id": "45e75782-f967-499b-a9cb-6c733187e644",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/milindzodge",
+      "subcap_ids": [],
+      "title": "Milind Zodge appointed Chief Data Officer (CDAIO"
+    },
+    {
+      "body": "Dondra Benjamin VP Commercial Operations Leader named Monitor Top 50 Women in Equipment Finance (Nov 2025)",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "1d7e1f2e-25ea-4d36-b791-5d6cd1dca613",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "N/A - Vibe Events",
+      "subcap_ids": [],
+      "title": "Dondra Benjamin VP Commercial Operations Leader named\u2026"
+    },
+    {
+      "body": "$261M Sterling Bank & Trust acquisition completed April 2025; 25 locations rebranded",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-003",
+        "E-102"
+      ],
+      "id": "8ce01c8b-efd1-4844-857c-9b2391c4573a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://labusinessjournal.com/special-reports/banking-and-finance-quarterly-branching-out/",
+      "subcap_ids": [],
+      "title": "$261M Sterling Bank & Trust acquisition completed"
+    },
+    {
+      "body": "CTO Stephen Sullivan joined Consumer Bankers Association AI Working Group (Mar 2025)",
+      "date_precision": "month",
+      "e_id": "E-027",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "468ebe69-bdd3-497f-8ac9-7bf3bcc2fcb9",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/jaxsully",
+      "subcap_ids": [],
+      "title": "CTO Stephen Sullivan joined Consumer Bankers Association AI\u2026"
+    },
+    {
+      "body": "Jacquie Binnie Manager of Bank Fraud Operations (Jan 2025) \u2014 promoted from Fraud Investigator (2020) \u2192 Detection Lead (2023) \u2192 Manager",
+      "date_precision": "month",
+      "e_id": "E-090",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-090"
+      ],
+      "id": "87bd2025-1d92-4e5c-ad2d-6e9a8e20c8f1",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "N/A - Exa composite",
+      "subcap_ids": [],
+      "title": "Jacquie Binnie Manager of Bank Fraud Operations (Jan 2025)\u2026"
+    },
+    {
+      "body": "OCC CRA evaluation completed Nov 2024 \u2014 Satisfactory rating demonstrates successful exam preparation",
+      "date_precision": "month",
+      "e_id": "E-097",
+      "event_date": "2024-11-01",
+      "evidence_e_ids": [
+        "E-097"
+      ],
+      "id": "874e9d9a-4e01-45ab-9be7-bb7b88a0e356",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "N/A - composite",
+      "subcap_ids": [],
+      "title": "Satisfactory rating demonstrates successful exam preparation"
+    },
+    {
+      "body": "Promoted Aug 2024: SVP Bank Deposit & Commercial Lending Operations Business Process Management & Controls",
+      "date_precision": "month",
+      "e_id": "E-106",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-106"
+      ],
+      "id": "4e5c370b-12b6-4195-8ee9-2b23e8e2c3a7",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/darlene-hurt-mba-dfss-gb-6690b356",
+      "subcap_ids": [],
+      "title": "Promoted Aug 2024: SVP Bank Deposit & Commercial Lending\u2026"
+    },
+    {
+      "body": "Promoted Aug 2024 to AVP Process Improvement & Automation (from AVP Business Management)",
+      "date_precision": "month",
+      "e_id": "E-136",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-136"
+      ],
+      "id": "46232929-56fa-4264-8d4a-48d46bf83d68",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/logan-doan-98b92388",
+      "subcap_ids": [],
+      "title": "Promoted Aug 2024 to AVP Process Improvement & Automation\u2026"
+    },
+    {
+      "body": "CTO since Oct 2023, internal promotion from SVP Infrastructure Technologies",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2023-10-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "399c23f2-90ea-4e7b-acfd-b9f6f4fe571c",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://linkedin.com/in/jaxsully",
+      "subcap_ids": [],
+      "title": "CTO since Oct 2023, internal promotion from SVP\u2026"
+    },
+    {
+      "body": "Splunk Enterprise deployed across 2000+ Windows servers \u2014 enterprise-wide log management and SIEM",
+      "date_precision": "year",
+      "e_id": "E-123",
+      "event_date": "2000-07-01",
+      "evidence_e_ids": [
+        "E-123"
+      ],
+      "id": "a480f4a4-7f84-4c9e-a65b-4906e42c8380",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "N/A - composite",
+      "subcap_ids": [],
+      "title": "Splunk Enterprise deployed across 2000+ Windows servers\u2026"
+    }
+  ]
+}

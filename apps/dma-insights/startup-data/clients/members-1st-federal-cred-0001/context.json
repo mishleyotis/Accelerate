@@ -1,0 +1,671 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "members-1st-federal-cred-0001",
+  "financials": {
+    "lines": [
+      "sg06 3yr trend check: PASS \u2014 assets, members, net income trends documented across Q1 2024 \u2192 Q3 2025",
+      "industry context q1 2025: CU system avg net worth ratio 10.95%; CU system avg ROA 63bps for FY2024 (per NCUA Q4 2024 summary)",
+      "yoy asset growth q1 2025: 6%"
+    ],
+    "metrics": {
+      "fiscal_year_end": "Dec 31",
+      "net_income": 127000000.0,
+      "trajectory": {
+        "branches": 61,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 1001,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Pavlakovich promoted to COO Feb 2025 (per E-019"
+          },
+          {
+            "fy": "FY2022",
+            "label": "SimpleNexus rebranded to nCino Mortgage Suite (acquired by\u2026"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Pennsylvania (11 counties: Adams, Berks, Cumberland, Dauphin, Lancaster, Lebanon",
+        "headline": "$8.3B assets \u00b7 FY2025",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": [
+            7000.0,
+            10000.0,
+            5000.0
+          ],
+          "total_assets": [
+            null,
+            null,
+            8.3
+          ]
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Pennsylvania (11 counties: Adams",
+      "Berks",
+      "Cumberland",
+      "Dauphin",
+      "Lancaster",
+      "Lebanon"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael Wilson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Garth Pricer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO (Chief Information Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Christine Pavlakovich",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO (Chief Operating Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Karen Roland",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CMO (Chief Marketing Officer)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stuart Bretz",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Revenue Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jeff Balestrini",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Consumer Lending Officer (CCLO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joseph Culos",
+        "recent_hire": true,
+        "tenure_months": 4,
+        "title": "SVP Retail (joined March 2026)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ryan Riley",
+        "recent_hire": true,
+        "tenure_months": 5,
+        "title": "SVP Marketing (joined Feb 2026)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Anita McAllister",
+        "recent_hire": false,
+        "tenure_months": 216,
+        "title": "VP Data & Analytics (since 2008)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kelly Hogan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Manager, Cybersecurity Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Greg Lowe",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Data Architect"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sara Firestone",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Community Engagement & PR + ED Foundation"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Angela Wiley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Principal Project Manager (Enterprise PMO)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Members 1st Federal Credit Union is a credit union. It reports $8.3 billion in total assets. It is regulated by NCUA and employs approximately 1,001 people across 61 branches. Its overall digital maturity is assessed at 2.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "size_tier": "Medium ($2B-$10B); approaching Large threshold; CEO publicly targeting $10B regulatory milestone",
+    "thought_leadership": [
+      {
+        "author": "Karen Roland",
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-045",
+        "excerpt": "CMO Karen Roland prior career: PSECU AVP Marketing & Communications 10+ years (one of M1FCU's locked peers); SECU NC Associate EVP Marketing/Communications/Outreach Roland recognized as Central Penn Business Journal Woma",
+        "title": "CMO Karen Roland prior career: Psecu AVP Marketing & Communications\u2026",
+        "type": "article",
+        "url": "https://www.members1st.org/newsroom/articles/former-members-1st-federal-credit-union-associate-returns-home-to-take-on-a-new-leadership-role"
+      },
+      {
+        "author": "Michael Wilson",
+        "date": "2025-11-05",
+        "derived_from": "evidence_index",
+        "e_id": "E-004",
+        "excerpt": "Members 1st FCU is a customer AND investor in Zest AI (AI-powered lending/underwriting platform) \u2014 invested in oversubscribed round alongside SchoolsFirst, ORNL, Truliant, and Citi Ventures CEO Michael Wilson quoted: ins",
+        "title": "SchoolsFirst, ORNL, Truliant, and Citi Ventures CEO Michael Wilson\u2026",
+        "type": "article",
+        "url": "https://pulse2.com/zest-ai-strategic-investment-raised-from-major-credit-unions-and-citi-in-oversubscribed-round/amp/"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-023",
+        "excerpt": "Matt Christen (Principal PM) and Jeff Bitner (Scrum Master) at M1FCU are volunteer co-facilitators of TCCP Agile Peer Learning Group \u2014 external thought leadership Bitner credentials: PSM 1, PSPO 1, SAFe Agilist; 15+ year",
+        "title": "Matt Christen (Principal PM) and Jeff Bitner (Scrum Master) at M1FCU\u2026",
+        "type": "article",
+        "url": "https://www.tccp.org/agile-peer-learning-group/"
+      },
+      {
+        "author": null,
+        "date": "2026-02-26",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "Atrium webinar describes 'automating case management' as one of three Salesforce workstreams \u2014 Service Cloud likely tier-1 platform Workstream specifics: case management + incentives + knowledge access + mobile workflows",
+        "title": "Atrium webinar describes",
+        "type": "webinar",
+        "url": "https://atrium.ai/events/members-1st-financial-services-cloud-transformation/"
+      },
+      {
+        "author": "Angela Wiley",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-074",
+        "excerpt": "Christen + Bitner (M1FCU) co-facilitate Tech Council of Central PA Agile Peer Learning Group \u2014 formal Agile maturity + community-of-practice involvement Angela Wiley = Principal Project Manager (PMP+MBA) \u2014 Enterprise PMO",
+        "title": "Christen + Bitner (M1FCU) co-facilitate Tech Council of Central PA\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/technology-council-of-central-pennsylvania"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "024aa204-9bea-430a-a656-a5f802b12efb",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [
+        "P2C3.5",
+        "P2C3.7"
+      ],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "645dda5e-9ba2-4f1d-b502-f147401283fd",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [
+        "P1C4"
+      ],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "baaae239-f458-40c2-b84a-e45916a07115",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [
+        "P4C2",
+        "P3C3",
+        "P1C2"
+      ],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "ba20e92d-2d93-49d7-adcd-1bc4a727becf",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [
+        "P3C1",
+        "P1C4",
+        "P2C3"
+      ],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology. Four active issues were identified; no enforcement actions, consent orders, or MRAs were found (negative search confirmed in research Phase 0 across NCUA, CFPB, PA AG, PA DoBS, BBB).",
+    "trend_md": "Most recent reported financials: $8.3B assets as of FY2025, within a series tracked FY2022 to FY2025.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.28,
+        "P1C2": 3.26,
+        "P1C3": 2.96,
+        "P1C4": 3.09,
+        "P1C5": 3.28,
+        "P2C1": 3.3,
+        "P2C2": 2.99,
+        "P2C3": 3.14,
+        "P2C4": 3.27,
+        "P3C1": 1.87,
+        "P3C2": 2.5,
+        "P3C3": 2.72,
+        "P3C4": 2.5,
+        "P4C1": 2.99,
+        "P4C2": 2.02,
+        "P4C3": 2.21,
+        "P4C4": 1.82
+      },
+      "overall_score": 2.78,
+      "peer_name": "iQ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-MFCU-20260429-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "E behaviors via peer-rec rewards platform), and a third 144 Glassdoor reviews; HR responds publicly with structured rebuttals/acknowledgements \u2014 engagement maturity signal Positives: culture of WE, faM1ly, benefits, training, leadership CIO",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "PP lender in CU space during pandemic; SBA 7(a) participant Indeed Overall 3.7/5; Culture 3.4; Job Security 3.3; Mgmt 3.0; WorkLifeBalance 3.5; Comp 3.9; CEO approval 57.81%; Recommend friend 124y/64n (66%) Matthew Christen (Principal Proje",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": "marketing experience and $60M philanthropy track record BBB complaint themes: auto-payment system errors, overdraft fee disputes, credit reporting disputes \u2014 typical service-failure individual cases (no systemic pattern) Complaint investiga",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "11-member Board with named officers: Colquhoun Chair, Kirssin First VC, Scheid Second VC, Fisher Treasurer, Langletz Secretary, Dandy Asst Secretary; 5 directors at large",
+      "date_precision": "publish_fallback",
+      "e_id": "E-010",
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "ac0c1348-2e58-4856-8ca4-f7762d673fd2",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.members1st.org/about-us/meet-members-1st/leadership/",
+      "subcap_ids": [],
+      "title": "11-member Board with named officers: Colquhoun Chair\u2026"
+    },
+    {
+      "body": "Joseph Culos joined as SVP Retail (March 2026) from First Commonwealth Bank where he led 750-person/127-branch division + 2 call centers + L&D",
+      "date_precision": "month",
+      "e_id": "E-012",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "dcb16e8c-246f-4285-907e-1c6016db4840",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.members1st.org/newsroom/articles/members-1st-federal-credit-union-welcomes-joseph-culos-as-senior-vice-president-of-retail/",
+      "subcap_ids": [],
+      "title": "Joseph Culos joined 2 call centers + L&D"
+    },
+    {
+      "body": "Joseph Culos joined as SVP Retail (March 2026, E-012) + Balestrini CCLO + Pavlakovich COO Feb 2025 = three major executive moves in 12 months \u2014 accelerated leadership build",
+      "date_precision": "month",
+      "e_id": "E-079",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-079",
+        "E-012"
+      ],
+      "id": "7e6693ce-16f8-4942-b6ef-7637fa83a4fa",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.zoominfo.com/c/members-1st-federal-credit-union/1142334405",
+      "subcap_ids": [],
+      "title": "Joseph Culos joined Balestrini CCLO + Pavlakovich COO Feb\u2026"
+    },
+    {
+      "body": "Ryan Riley (SVP Marketing) joined Feb 2026 with 20+ yrs higher-ed/nonprofit marketing experience and $60M philanthropy track record",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "c38a7873-1478-476e-b983-d987624e0e0d",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.members1st.org/careers",
+      "subcap_ids": [],
+      "title": "Ryan Riley (SVP Marketing) joined with 20+ yrs\u2026"
+    },
+    {
+      "body": "M1FCU named investor in Zest AI customer-led financing round (Nov 2025) alongside SchoolsFirst, ORNL, Truliant CUs and Citi Ventures",
+      "date_precision": "month",
+      "e_id": "E-020",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "633ff3be-2e45-4fcc-ae1d-62d50c9a4324",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.zest.ai/company/announcements/zest-ai-secures-strategic-investment-from-customers-in-oversubscribed-round",
+      "subcap_ids": [],
+      "title": "M1FCU named investor in Zest AI customer-led financing\u2026"
+    },
+    {
+      "body": "Sept 2025 government shutdown contingency program announced \u2014 proactive member-support program for affected federal employees demonstrates SEG-aware strategic empathy posture",
+      "date_precision": "month",
+      "e_id": "E-079",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "79d18def-74a1-484b-b662-80696039e246",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.zoominfo.com/c/members-1st-federal-credit-union/1142334405",
+      "subcap_ids": [],
+      "title": "Sept 2025 government shutdown contingency program announced"
+    },
+    {
+      "body": "Christy Pavlakovich promoted CPO\u2192COO; Karen Roland promoted SVP Marketing\u2192CMO (Feb 2025)",
+      "date_precision": "month",
+      "e_id": "E-019",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "1006dac7-7e67-40e6-8d9e-bc89285a18d7",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.cuinsight.com/press-release/members-1st-federal-credit-union-announces-promotions-to-strengthen-leadership/",
+      "subcap_ids": [],
+      "title": "Karen Roland promoted SVP Marketing\u2192CMO (Feb 2025"
+    },
+    {
+      "body": "Pavlakovich promoted to COO Feb 2025 (per E-019) \u2014 career trajectory from Risk \u2192 Operations leadership signals risk-discipline-driven operations",
+      "date_precision": "month",
+      "e_id": "E-065",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-065",
+        "E-019"
+      ],
+      "id": "5ca484e1-7ce8-4984-a5cb-e0b4d1d2ec2c",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.zoominfo.com/p/Anita-Mcallister/9068440380",
+      "subcap_ids": [],
+      "title": "Pavlakovich promoted to COO Feb 2025 (per E-019"
+    },
+    {
+      "body": "Jeff Balestrini appointed Chief Consumer Lending Officer (CCLO) \u2014 net-new C-suite role created/elevated; signals strategic consumer-lending emphasis",
+      "date_precision": "publish_fallback",
+      "e_id": "E-079",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "1f5d791f-5e21-4784-887b-6ba3f585a200",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.zoominfo.com/c/members-1st-federal-credit-union/1142334405",
+      "subcap_ids": [],
+      "title": "Jeff Balestrini appointed Chief Consumer Lending Officer\u2026"
+    },
+    {
+      "body": "SimpleNexus rebranded to nCino Mortgage Suite (acquired by nCino in Jan 2022); software is cornerstone of approximately 25% of US mortgage originations",
+      "date_precision": "month",
+      "e_id": "E-029",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "b99f8b21-247c-40d4-9776-13f001589fce",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://play.google.com/store/apps/details?id=com.simplenexus.loans.client.s__64819",
+      "subcap_ids": [],
+      "title": "SimpleNexus rebranded to nCino Mortgage Suite (acquired by\u2026"
+    },
+    {
+      "body": "Charitable Foundation launched 2021 (ESG signal)",
+      "date_precision": "year",
+      "e_id": "E-005",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "1a36ca41-04e5-4404-81f9-e15c4639af46",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.congress.gov/118/meeting/house/115483/witnesses/HHRG-118-SM27-Wstate-WilsonM-20230328.pdf",
+      "subcap_ids": [],
+      "title": "Charitable Foundation launched"
+    },
+    {
+      "body": "MyConcierge launched July 2020 \u2014 5+ year mature program; one-to-one match: 'matched with a personal concierge\u2014your go-to financial expert'",
+      "date_precision": "month",
+      "e_id": "E-048",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "caaebf0b-640c-4fb5-92e0-9450eed82c3f",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.members1st.org/about-us/why-members-1st/myconcierge",
+      "subcap_ids": [],
+      "title": "MyConcierge launched"
+    },
+    {
+      "body": "Data analytics team launched 2018; first project = monthly branch performance reports automation (4-month effort to replace manual process with Power BI dashboards)",
+      "date_precision": "year",
+      "e_id": "E-063",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-063"
+      ],
+      "id": "cb7191ee-5c62-4a0d-9226-a1c3fc072c87",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://biztechmagazine.com/article/2022/03/how-advanced-analytics-helps-companies-deliver-better-customer-experiences",
+      "subcap_ids": [],
+      "title": "Data analytics team launched"
+    },
+    {
+      "body": "Member testimonials with names + counties + member-since dates published publicly \u2014 Sara B (1995), Connie W (2011), Linda (Dauphin Co), Tyler (named CSR)",
+      "date_precision": "year",
+      "e_id": "E-051",
+      "event_date": "1995-07-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "dd633db3-e2f1-42d6-8a8d-a76d4d945768",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.members1st.org/member-stories",
+      "subcap_ids": [],
+      "title": "Member testimonials with names + counties + member"
+    }
+  ]
+}

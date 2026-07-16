@@ -1,0 +1,1173 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 165,
+        "subcaps": 165,
+        "thin": 79
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 74
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 90
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 119
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "cornerstone-capital-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "ad8c573e-9a81-4170-af98-20ca1ac73801",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Cornerstone Capital Bank, SSB",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:39.268389Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 19,
+    "current_count": 62,
+    "dated_count": 1,
+    "median_age_months": 13.2,
+    "oldest_published_date": "2011-08-01",
+    "stale_count": 7,
+    "stale_pct": 7.78,
+    "total": 90,
+    "undated_count": 1
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 6,
+      "NEGATIVE": 2,
+      "NEUTRAL": 9,
+      "POSITIVE": 73
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "Indeed": 1,
+      "LinkedIn": 6
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 71,
+      "POSITIVE": 17
+    },
+    "tiers": {
+      "T1": 7,
+      "T2": 44,
+      "T3": 36,
+      "T4": 1,
+      "T5": 2
+    },
+    "total_facts": 1474,
+    "total_items": 90
+  },
+  "financial_trajectory": {
+    "cagr": "26%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Asset trajectory: ACCELERATING (26% CAGR since formation via organic growth + M&A). Four data points available 2022–2026.",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 3800000000.0,
+    "branches": 400,
+    "cagr": "26%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "four_data_points_available_2022": "2026.",
+      "lines": [
+        "Asset trajectory: ACCELERATING (26% CAGR since formation via organic growth + M&A). Four data points available 2022–2026.",
+        "Asset CAGR: ~26% (formation to Mar 2026 via M&A). Mortgage volume VARIABLE (market-cycle dependent). [E-007, E-074]"
+      ],
+      "trajectory": {
+        "branches": 400,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 6500,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Peoples Bancorp / Peoples Bank (Lubbock, TX"
+          },
+          {
+            "fy": "FY2022",
+            "label": "The Roscoe State Bank (Roscoe, TX; est. 1906)"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Houston TX (HQ) + National (45 states + DC) + Texas community banking (17 branch",
+        "headline": "$1.5B net income · FY2026",
+        "regulator": "Federal Reserve",
+        "series": {
+          "net_income_m": [
+            3400.0,
+            2200.0,
+            1500.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Houston TX (HQ) + National (45 states + DC) + Texas community banking (17 branch",
+    "footprint_basis": "derived:geography",
+    "founded": 1988,
+    "founded_basis": "nlp:narrative",
+    "geography": "Houston TX (HQ) + National (45 states + DC) + Texas community banking (17 branch",
+    "headcount": 6500,
+    "hq": "Arlington TX",
+    "hq_address": null,
+    "hq_basis": "nlp:evidence+narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Scott Almy",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 240,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Tom Clark",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 36,
+        "title": "EVP & Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jason Bartels",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 72,
+        "title": "SVP Information Technology"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Paul Woo",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Adam Laird",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 432,
+        "title": "Vice Chairman / CEO Mortgage Bank"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Marc Laird",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mary Clouthier",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP & Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kelly Zitlow",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Sales & Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Heather Woods",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director Marketing Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dan Cooper",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Capital Markets & Servicing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Neil Merritt",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 24,
+        "title": "SVP Product Strategy & Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Vanessa Bustos Sanchez",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Treasury Client Onboarding"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Toby Gallegos",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Servicing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jennifer Creger",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director FaRB"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Rocky Flores",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 288,
+        "title": "Director Business App Development"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Brennan Cropper",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tony Taveekanjana",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "VP Growth & Market Expansion"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lonnie Jenkins",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "VP Builder Division"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Cornerstone Capital Bank, SSB",
+    "license_type": "State Savings Bank",
+    "narrative_md": "Comprehensive organizational context. Every claim cites evidence IDs. Financial data covers formation through March 2026.\n\nCornerstone Capital Bank, SSB (CCB) is the operating subsidiary of Cornerstone Capital Bancorp, Inc. — a privately held, family-owned Texas corporation. CCB was chartered as a Texas State Savings Bank (SSB) on October 3, 2022, upon regulatory approval by the Federal Reserve Board and the Texas Department of Savings and Mortgage Lending for the merger of Cornerstone Home Lending, Inc. (founded 1988 by Marc and Adam Laird) and The Roscoe State Bank (founded 1906). At formation, CCB was recognized as the highest-capitalized new bank in Texas history, with equity exceeding $200 million on day one — a testament to the combined financial strength of its predecessor organizations.\n\nIn March 2026, CCB completed the acquisition of Peoples Bank (Lubbock, TX, ~$1.5B assets), its second major bank acquisition since formation. This brought total assets to $3.80B, deposits to $2.57B, and equity to $431.5M — strengthening CCB's Texas banking franchise across the Houston-Lubbock corridor while adding commercial and agricultural banking capabilities to complement CCB's dominant mortgage origination engine. [E-004, E-008]",
+    "primary_regulator": "Federal Reserve",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "n": 905,
+          "scale": 5,
+          "score": 4.5,
+          "source": "Better Business Bureau"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 666,
+          "scale": 5,
+          "score": 4.4,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.4/5",
+          "signal": "DIC-insured (granular deposit base, low concentration risk) Glassdoor 4.4/5 (666 reviews); 90% would recommend; 4.5 work-life; 4.5 culture; 4.3 career opp; 22% above Financial Services avg USA TODAY Top Workplaces 2025: #26 of 1,526 nationw",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "ry-certified compliance leadership for servicing Active CCB Indeed job posting: Director Mortgage Originations MODEL RISK MGMT alternative-surfacing: Black Knight RAP (Rapid Analytics Platform) deployed supports ML model training; Erin John",
+          "source": "Indeed"
+        },
+        {
+          "rating": "4.5/5",
+          "signal": "BBB accredited since 1997 / A+ rating — longest-standing professional accreditation in BBB system; formal commitment to BBB Standards for Trust BirdEye: 4.5 stars (905 reviews) — high-volume consumer aggregation; most re",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-074",
+        "excerpt": "ASSET CORRECTION: CCB press release (March 2, 2026) states \"more than $3.4 billion in assets\" post-Peoples. Earlier sources cited $3.80B — likely reflects later FDIC data or system differences. Authoritative figure from ",
+        "title": "CCB press release (March 2, 2026) states more than $3.4 billion in…",
+        "type": "article",
+        "url": "https://www.cornerstonecapital.com/cornerstone-capital-bank-completes-another-milestone-acquisition-combining-with-peoples-bank/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-041",
+        "excerpt": "Cornerstone Home Lending LinkedIn: 29,470 followers — major professional presence; active daily posting (team welcome posts, industry thought leadership, holiday messaging) Cornerstone Capital Bank LinkedIn: active accou",
+        "title": "Cornerstone Home Lending LinkedIn: 29,470 followers",
+        "type": "podcast",
+        "url": "https://www.linkedin.com/company/cornerstone-home-lending"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$1.5B",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "cornerstonecapital.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.625110+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Cornerstone Capital Bank, SSB — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "gap_prioritization_md": "The six-factor prioritization formula assigns a Priority Score (1-5 scale) to each of the 17 categories. All 17 categories are ranked. Tier 1 (Act Now) identifies gaps where Zennify has immediate product solutions, peer gap is large, and stakeholder readiness is confirmed. Priority Score = (0.25 × Gap Size) + (0.20 × Peer Comparison) + (0.15 × Strategic Alignment) + (0.15 × Implementation Complexity) + (0.15 × Investment Efficiency) + (0.10 × Stakeholder Readiness).",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Cornerstone Capital Bank, SSB is a $3.8B in assets regional bank regulated by Federal Reserve, operating since 1988 with 6,500 employees. A 26.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-006, E-015]. Zennify's assessment places overall digital maturity at 2.7/5. The deepest capability gap is ESG metrics at 2.2/5 against a 3.0 peer median [E-021, E-023].\n\nNext is Zero Trust Architecture Strategy at 2.3/5 against a 3.0 peer median [E-071, E-072]. Third is Analytics Data Platform at 2.8/5 against a 3.0 peer median [E-068, E-007]. The issue register adds Capability gap: Materiality Assessment. The issue register adds Capability gap: ESG Roadmap [E-026].\n\nCounter-signal: Innovation Team already runs at 2.8/5 against a 2.5 peer median — a strength to build on, not rebuild. The roster shows no CDO — a named ownership gap for the capabilities below. The question for Cornerstone Capital Bank, SSB is whether to close ESG metrics first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Cornerstone Capital Bank, SSB should lead with Twilio (67/100 fit) against Business Alignment, then sequence Databricks behind it.\n\nClosing ESG metrics to the peer median alone is worth 0.8 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.71,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.208519+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_Calibration_Results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.209499+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_Patch_Block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.209819+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A2_Peer_Benchmark_Comparison.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.210348+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A4_ERS_Scoring_Detail.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.228096+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Salesforce_Platform_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.228715+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Leadership_Contact_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 18 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.229211+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A8_Scoring_Guidance_Notes.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.229651+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A9_Cap_Triggers_Register.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.229973+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:39.230150+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 2,
+      "INFO": 22
+    },
+    "stage_ms": {
+      "manifest": 22,
+      "parse": 7657,
+      "persist": 1726
+    },
+    "structured": [
+      {
+        "code": "xlsx fallback extracted 698 subcaps from CCB_Assessment_Workbook",
+        "detail": "xlsx fallback extracted 698 subcaps from CCB_Assessment_Workbook.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from json variant evidence_index_E001_E090.json ",
+        "detail": "evidence loaded from json variant evidence_index_E001_E090.json (90 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=CCB_Client_Profile_Research_Report.docx leadership=18 focus_areas=2 facts_extracted=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 4 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 9",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 3 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_Calibration_Results.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_Patch_Block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A2_Peer_Benchmark_Comparison.csv — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A4_ERS_Scoring_Detail.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Salesforce_Platform_Map.csv — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Leadership_Contact_Map.csv — no fingerprint matched (best confidence 0.20); 18 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A8_Scoring_Guidance_Notes.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A9_Cap_Triggers_Register.csv — no fingerprint matched (best confidence 0.25); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 37",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:20/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 9",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx fallback extracted 698 subcaps from CCB_Assessment_Workbook.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from json variant evidence_index_E001_E090.json (90 rows)",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "firmographics_from_client_profile_docx: source=CCB_Client_Profile_Research_Report.docx leadership=18 focus_areas=2 facts_extracted=2",
+      "used docx-extracted recommendations: 4 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 9",
+      "acquisitions_from_client_profile_docx: 3 events",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_Calibration_Results.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_Patch_Block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A2_Peer_Benchmark_Comparison.csv — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A4_ERS_Scoring_Detail.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Salesforce_Platform_Map.csv — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Leadership_Contact_Map.csv — no fingerprint matched (best confidence 0.20); 18 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A8_Scoring_Guidance_Notes.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A9_Cap_Triggers_Register.csv — no fingerprint matched (best confidence 0.25); 8 generic sections mined",
+      "INFO/pattern_gap: README.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "timeline_events_persisted: 37",
+      "catalogue_unresolved:20/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 9"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 165,
+      "peer_median": 2.88,
+      "pillar_id": "P1",
+      "score": 2.75,
+      "subcaps_scored": 165
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.76,
+      "pillar_id": "P2",
+      "score": 2.76,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 3.0,
+      "pillar_id": "P3",
+      "score": 2.77,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.0,
+      "pillar_id": "P4",
+      "score": 2.68,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-04",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:39.268389Z",
+    "created_at": "2026-07-02T23:10:39.268389Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "71276b8d-ab23-4fa2-8ca6-659a543e808a",
+    "overall_score": 2.71,
+    "request_id": "DMA-ASM-CCB-20260504-0001",
+    "started_at": "2026-07-02T23:10:39.268389Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "n": 905,
+        "scale": 5,
+        "score": 4.5,
+        "source": "Better Business Bureau"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 666,
+        "scale": 5,
+        "score": 4.4,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 11 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-021",
+        "E-023",
+        "E-026",
+        "E-027"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Databricks"
+      ],
+      "score": 2.25,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 11 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: Documented CRA program with 4 Pillars of Community Development: Affordable Housing, Community Services, Economic Development, Revitalization/Stabilization CRA program scope: low- and moderate-income communities; community development through \"lending, investing and"
+    },
+    {
+      "body": "Treat the 13 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "evidence": [
+        "E-071",
+        "E-072",
+        "E-009",
+        "E-010"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Build the data foundation",
+      "peer_median": 3.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.28,
+      "so_what": "Prioritize Build the data foundation in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "Build the data foundation",
+      "what": "Treat the 13 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "why": "The linked evidence records: CYBERSECURITY LEADERSHIP: Ionel Chila = SVP CISO (CISSP/CISM/CRISC — three top certifications). Note: Adapt.io shows possible move to Chevron; current status uncertain. Nickesh P. = IT Security Engineer at CCB (since May 2022, 3+ years)."
+    },
+    {
+      "body": "Analytics Data Platform is a priority capability gap in data and technology, scoring 2.75/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-068",
+        "E-007",
+        "E-069",
+        "E-083"
+      ],
+      "magnitude": "0.2 pts below peer median",
+      "name": "Analytics Data Platform",
+      "peer_median": 3.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.75,
+      "so_what": "Prioritize Analytics Data Platform in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Analytics Data Platform",
+      "what": "Analytics Data Platform is a priority capability gap in data and technology, scoring 2.75/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: ANALYTICS PLATFORM STACK: Tableau confirmed (Toby Gallegos VP Servicing: \"client risk score modeling\") + Salesforce Data Cloud (active personalization engine build per Dev II JD) + Black Knight RAP (ML mortgage analytics) +"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.3,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-023"
+      ],
+      "modifiers": [
+        "20 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "AI/ML Strategy averages 2.8/5 over 165 scored subcaps; ceiling 3.7 reflects thin evidence density (145/165 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-023"
+      ],
+      "modifiers": [
+        "45 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Data Governance averages 2.8/5 over 217 scored subcaps; ceiling 3.7 reflects thin evidence density (172/217 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "155 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Team averages 2.8/5 over 190 scored subcaps; ceiling 3.4 reflects thin evidence density (35/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "155 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Middle Manager Enablement averages 2.8/5 over 205 scored subcaps; ceiling 3.4 reflects thin evidence density (50/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-023"
+      ],
+      "modifiers": [
+        "20 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "ESG metrics averages 2.2/5 over 40 scored subcaps; ceiling 3.0 reflects thin evidence density (20/40 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-055"
+      ],
+      "modifiers": [
+        "97 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Partner Compliance Governance averages 2.8/5 over 287 scored subcaps; ceiling 3.6 reflects thin evidence density (190/287 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.5,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "152 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Account Activation Speed averages 2.8/5 over 287 scored subcaps; ceiling 3.5 reflects thin evidence density (135/287 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.3,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-052"
+      ],
+      "modifiers": [
+        "6 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Resolution Quality & Follow-up averages 2.8/5 over 286 scored subcaps; ceiling 3.8 reflects thin evidence density (280/286 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-053"
+      ],
+      "modifiers": [
+        "95 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Staff Cross-Sell Enablement averages 2.8/5 over 255 scored subcaps; ceiling 3.6 reflects thin evidence density (160/255 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.5,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-006"
+      ],
+      "modifiers": [
+        "57 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Investment & Prioritization averages 2.8/5 over 143 scored subcaps; ceiling 3.6 reflects thin evidence density (86/143 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-006"
+      ],
+      "modifiers": [
+        "95 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Collaboration averages 2.8/5 over 130 scored subcaps; ceiling 3.4 reflects thin evidence density (35/130 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-005"
+      ],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Exam Management averages 2.8/5 over 141 scored subcaps; ceiling 3.2 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Response Procedures averages 2.8/5 over 145 scored subcaps; ceiling 3.3 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-067"
+      ],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Identity Resolution & Unified Customer Profile averages 2.8/5 over 200 scored subcaps; ceiling 3.3 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-068"
+      ],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Analytics Data Platform averages 2.8/5 over 270 scored subcaps; ceiling 3.2 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.3,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-072"
+      ],
+      "modifiers": [
+        "25 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "CDC/Replication Operations averages 2.8/5 over 235 scored subcaps; ceiling 3.7 reflects thin evidence density (210/235 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-072"
+      ],
+      "modifiers": [
+        "100 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Zero Trust Architecture Strategy averages 2.3/5 over 150 scored subcaps; ceiling 2.9 reflects thin evidence density (50/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Peoples Bank acquisition completed ($1.5B assets); combined $3.4B+ [E-004, E-074]. Integration planning window: MuleSoft + Salesforce as unification layer NOW (Mar 2026).",
+      "evidence": [
+        "E-004",
+        "E-074"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Peoples Bank acquisition completed $1.5B assets",
+      "metric": "assets $1.5B",
+      "peer_context": "ESG metrics runs 2.25/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Business Alignment — highest-fit surface at 67/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Peoples Bank acquisition completed ($1.5B assets); combined $3.4B+ [E-004, E-074]. Integration planning window: MuleSoft + Salesforce as unification layer NOW (Mar 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Peoples Bank acquisition completed $1.5B assets"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Active LLM deployment in contact center; CEO commits to AI/ML/process automation investment [E-009, E-068]. AgentForce: 'You built the foundation; this is the platform' (Dec 2025).",
+      "evidence": [
+        "E-009",
+        "E-068"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "CEO commits to AI/ML/process automation investment",
+      "metric": null,
+      "peer_context": "ESG metrics runs 2.25/5 vs a 3.00 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Active LLM deployment in contact center; CEO commits to AI/ML/process automation investment [E-009, E-068]. AgentForce: 'You built the foundation; this is the platform' (Dec 2025). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-12-01",
+        "event": "CEO commits to AI/ML/process automation investment"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Peoples Bancorp / Peoples Bank (Lubbock, TX; 13 branches; small business + agricultural focus). Added ~$1.5B assets; combined $3.4B+; entered West Texas + DFW markets; Larry Allen joins CCB Board; Todd McKee (Area Vice Chairman) + Tim Farris (Area President) retained; deposit cost reduced ~68bps; CCB enters top-20 TX banks under $10B (Oct 2025).",
+      "evidence": [
+        "E-004"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Peoples Bancorp / Peoples Bank",
+      "metric": "branches 13 branches",
+      "peer_context": "ESG metrics runs 2.25/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Business Alignment — highest-fit surface at 67/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Peoples Bancorp / Peoples Bank (Lubbock, TX; 13 branches; small business + agricultural focus). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-10-01",
+        "event": "Peoples Bancorp / Peoples Bank"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "CCB actively hiring Salesforce Developer II — confirms Salesforce platform DEPLOYED at Cornerstone Capital Bank Stack: Apex (classes/triggers/async), LWC, SOQL, Flow, Git/CI-CD, Salesforce DX, scratch orgs, unlocked packages",
+      "evidence": [
+        "E-007"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Salesforce platform Deployed at Cornerstone Capital Bank…",
+      "metric": null,
+      "peer_context": "ESG metrics runs 2.25/5 vs a 3.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CCB actively hiring Salesforce Developer II — confirms Salesforce platform DEPLOYED at Cornerstone Capital Bank Stack: Apex (classes/triggers/async), LWC, SOQL, Flow, Git/CI-CD, Salesforce DX, scratch orgs, unlocked. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Peoples Bank acquisition announced; Ironcrest Mortgage JV launched (Stone Martin Builders, Alabama) [E-004, E-015]. MuleSoft + Salesforce as integration/unification layer (Nov 2025).",
+      "evidence": [
+        "E-004",
+        "E-015"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Peoples Bank acquisition announced",
+      "metric": null,
+      "peer_context": "ESG metrics runs 2.25/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Business Alignment — highest-fit surface at 67/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Peoples Bank acquisition announced; Ironcrest Mortgage JV launched (Stone Martin Builders, Alabama) [E-004, E-015]. MuleSoft + Salesforce as integration/unification layer (Nov 2025).",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Ironcrest Mortgage JV launched"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "ESG metrics scores 2.25/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-021",
+        "E-023",
+        "E-026",
+        "E-027"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "ESG metrics scores 2.25/5 vs a typical 3.00 at similar…",
+      "metric": "ESG metrics 2.25/5 vs peer 3.00",
+      "peer_context": "ESG metrics runs 2.25/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Business Alignment — highest-fit surface at 67/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "ESG metrics scores 2.25/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

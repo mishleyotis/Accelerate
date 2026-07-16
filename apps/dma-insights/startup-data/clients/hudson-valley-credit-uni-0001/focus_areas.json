@@ -1,0 +1,280 @@
+{
+  "entity_display_id": "hudson-valley-credit-uni-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-045",
+          "E-051",
+          "E-052",
+          "E-067"
+        ],
+        "representative_quote": "No CRM confirmed in any public source \u2014 LeadIQ tech stack = 8 basic tools.",
+        "source_kind": "docx"
+      },
+      "id": "5ddc5360-5533-4ee7-a07d-c7111728620b",
+      "involved_subcap_ids": [
+        "P2C3.4.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "150",
+          "delta": null,
+          "kpi_label": "Agents",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "89%",
+          "delta": null,
+          "kpi_label": "ROI",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "AI Contact Center + Zero CRM = Agent Gap",
+      "verbatim_quote": "F-004 | AI Contact Center + Zero CRM = Agent Gap | Posh Casey: 201% ROI, 89% FCR, 150 agents [E-045]. Illuma: 17.1s auth [E-051, E-052]. No CRM in any source [E-067]. | P2C3 contact center ~M3.5 (strong); P2C3.4.1 Agent 360 = M1 (critical gap). | Salesforce FSC + Service Cloud + Symitar = the missing CRM spine. VP Contact Center Goodwine = natural champion."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-082",
+          "E-089",
+          "E-067"
+        ],
+        "representative_quote": "CAIO Kausar (MIT AI, ex-Citi CTO) hired Aug 2025",
+        "source_kind": "docx"
+      },
+      "id": "3b41436f-c42a-4650-bbbb-3cc702795bb3",
+      "involved_subcap_ids": [
+        "P4C1.8.4",
+        "P4C1.7.2",
+        "P4C1.3.6",
+        "P4C1.3.4",
+        "P4C2.7.4",
+        "P4C2.8.2",
+        "P4C2.1.2",
+        "P4C2.4.8"
+      ],
+      "kpis": [
+        {
+          "current_value": "$7,950,000,000",
+          "delta": null,
+          "kpi_label": "For HVCU",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "AI Leadership Without Data Foundation",
+      "verbatim_quote": "F-001 | AI Leadership Without Data Foundation | CAIO Kausar (MIT AI, ex-Citi CTO) hired Aug 2025 [E-082]. Data stack: SQL Server + S3 + GCP; no data warehouse or CDP confirmed [E-089, E-067]. | P4C1 Data ~M2; P4C2 Analytics ~M2. Strategy is ahead of infrastructure. | CAIO is the champion. Salesforce Data Cloud = the platform his mandate requires. Zennify delivers CU-specialist implementation."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-084",
+          "E-087"
+        ],
+        "representative_quote": "Entra ID + SailPoint + CyberArk + Palo Alto + 24/7 SOC confirmed.",
+        "source_kind": "docx"
+      },
+      "id": "4d916f31-629d-4ee6-afe3-ad92ae26e07e",
+      "involved_subcap_ids": [
+        "P3C4.6.3",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.5.3",
+        "P4C4.2.6",
+        "P1C3.3.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$7,950,000,000",
+          "delta": null,
+          "kpi_label": "For HVCU",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": 4,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "Enterprise Security = Procurement Fast-Track",
+      "verbatim_quote": "F-006 | Enterprise Security = Procurement Fast-Track | Entra ID + SailPoint + CyberArk + Palo Alto + 24/7 SOC confirmed [E-084]. NYDFS Part 500 all Nov 2025 deadlines met [E-087]. | P4C4 Cybersecurity ~M3 \u2014 strongest P4 category. | Security compliance objection = eliminated. Accelerate procurement timeline. Shield extends existing posture."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-055",
+          "E-049",
+          "E-067"
+        ],
+        "representative_quote": "Marketing = HubSpot analytics + single agency; no CDP.",
+        "source_kind": "docx"
+      },
+      "id": "84a6a948-dede-495a-b896-6826458fcd7b",
+      "involved_subcap_ids": [
+        "P1C2.1.1",
+        "P1C3.4.1",
+        "P2C1.1.1",
+        "P2C1.6.5",
+        "P2C1.5.1",
+        "P2C1.2.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$7,950,000,000",
+          "delta": null,
+          "kpi_label": "For HVCU",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 67
+      },
+      "source_path": "(unknown)",
+      "title": "Federal Charter = National Scale Digital Gap",
+      "verbatim_quote": "F-003 | Federal Charter = National Scale Digital Gap | National FOM effective Jan 2, 2026 [E-055]. Marketing = HubSpot analytics + single agency; no CDP [E-049, E-067]. | P2C1 Digital Marketing ~M2; P2C4 Personalization ~M1.5 \u2014 far below national-scale requirement. | Marketing Cloud + FSC = national-scale capability urgently needed NOW. Federal charter is live."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-085"
+        ],
+        "representative_quote": "SaaS stack via Cloud Services Admin job posting.",
+        "source_kind": "docx"
+      },
+      "id": "3fa56ec3-d4d4-459c-8e60-559e37d8c4f3",
+      "involved_subcap_ids": [
+        "P4C3.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "MuleSoft Confirms Salesforce Ecosystem Entry",
+      "verbatim_quote": "F-002 | MuleSoft Confirms Salesforce Ecosystem Entry | MuleSoft Cloud confirmed in HVCU SaaS stack via Cloud Services Admin job posting [E-085]. MuleSoft is a Salesforce product. | P4C3.3 Integration ~M2.5 \u2014 professional iPaaS confirmed. | Land-and-expand. FSC + Data Cloud + Einstein extend the existing MuleSoft investment. No new vendor introduction required."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-067"
+        ],
+        "representative_quote": "No CDP, no NBA, no propensity models.",
+        "source_kind": "docx"
+      },
+      "id": "ec030148-503e-4f58-8ffe-1939f04d88e4",
+      "involved_subcap_ids": [
+        "P2C4.2.5",
+        "P2C4.2.9",
+        "P2C4.2.7",
+        "P2C4.2.3",
+        "P2C4.8.1",
+        "P4C2.4.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$7,950,000,000",
+          "delta": null,
+          "kpi_label": "For HVCU",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 83,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Personalization Gap vs. Accelerating Peers",
+      "verbatim_quote": "F-007 | Personalization Gap vs. Accelerating Peers | No CDP, no NBA, no propensity models [E-067]. Peer Jovia FCU just adopted Illuma Shield (Feb 2026) \u2014 HVCU had it since 2022. MHV FCU deployed Spiral personalization. | P2C4 Personalization ~M1.5 \u2014 lowest Pillar 2 category. | Salesforce Einstein + Data Cloud = competitive leap from basic transaction alerts to AI-driven personalization at national scale."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-081",
+          "E-064",
+          "E-003"
+        ],
+        "representative_quote": "P2C3.5 case management, P3C1.7 exception management \u2014 both capped by ISS-002.",
+        "source_kind": "docx"
+      },
+      "id": "0afe3ad9-f545-4944-a7a4-79bb8496a8e4",
+      "involved_subcap_ids": [
+        "P2C3.5",
+        "P3C1.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "-75%",
+          "delta": null,
+          "kpi_label": "H1 earnings",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P3": 50
+      },
+      "source_path": "(unknown)",
+      "title": "Post-Merger Integration Risk Visible",
+      "verbatim_quote": "F-005 | Post-Merger Integration Risk Visible | Catskill Hudson Bank acquisition 2024 [E-081]. BBB: service collapsed post-acquisition [E-064]. H1 2025 earnings -75% [E-003]. | P2C3.5 case management, P3C1.7 exception management \u2014 both capped by ISS-002. | Salesforce Service Cloud case management = immediate post-merger stabilization opportunity."
+    }
+  ]
+}

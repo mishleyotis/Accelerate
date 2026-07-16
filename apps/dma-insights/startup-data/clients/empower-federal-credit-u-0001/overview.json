@@ -1,0 +1,986 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 159,
+        "subcaps": 159,
+        "thin": 159
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 233
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "empower-federal-credit-u-0001",
+    "domain": null,
+    "hq": null,
+    "id": "cef4106b-91fb-47ce-8bdd-5e6490c70143",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Empower Federal Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:50.073569Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 60,
+    "current_count": 30,
+    "dated_count": 8,
+    "median_age_months": 17.4,
+    "oldest_published_date": "2020-01-01",
+    "stale_count": 6,
+    "stale_pct": 5.13,
+    "total": 117,
+    "undated_count": 13
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 8,
+      "NEGATIVE": 3,
+      "NEUTRAL": 8,
+      "POSITIVE": 98
+    },
+    "connectors": {
+      "Clay": 1,
+      "Explorium": 1,
+      "Glassdoor": 1,
+      "Indeed": 7,
+      "LinkedIn": 3
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 117
+    },
+    "tiers": {
+      "T1": 10,
+      "T2": 78,
+      "T3": 26,
+      "T4": 3
+    },
+    "total_facts": 21,
+    "total_items": 117
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Deposits",
+        "unit": "M",
+        "value": 419.1,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "M"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 4070000000.0,
+    "branches": 24,
+    "cagr": "8.5%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "2021": 939000000000.0,
+      "2025": 4070000000.0000005,
+      "deposits": "$419.1M",
+      "trajectory": {
+        "branches": 24,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 501,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2025"
+        ],
+        "geography": "Central New York and 8 surrounding counties; HQ Syracuse NY",
+        "headline": "$4.1B net income · FY2025",
+        "regulator": "NCUA (NCUSO ID 3025)",
+        "series": {
+          "net_income_m": [
+            939000.0,
+            4070.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Central New York and 8 surrounding counties; HQ Syracuse NY",
+    "footprint_basis": "derived:geography",
+    "geography": "Central New York and 8 surrounding counties; HQ Syracuse NY",
+    "headcount": 501,
+    "hq": "Syracuse NY",
+    "hq_address": null,
+    "hq_basis": "nlp:narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ryan McIntyre",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Jin Gwak",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Chris Keller",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Marketing Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lori Verzillo",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP / Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Erin Fuller",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Keri Zavaglia",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "General Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jen Wolfe",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP / Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Patrick Piscitelli",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Board Chair"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jeffrey Lamb",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Fraud Operations Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Bob Padula",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Mortgage Lending"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Empower Federal Credit Union",
+    "license_type": "Federal Credit Union",
+    "members": 300000,
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Empower Federal Credit Union is a credit union. It reports $4.1 billion in total assets. It is regulated by NCUA (NCUSO ID 3025) and employs approximately 501 people across 24 branches. Its overall digital maturity is assessed at 2.1 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (NCUSO ID 3025)",
+    "revenue_usd": null,
+    "sentiment": {
+      "derived_from": "research_report_prose",
+      "sources": [
+        {
+          "signal": "O approval at 39.43% (slipped from 40.5% B2.1 baseline) and Indeed wellbeing dimensions trending downward",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": null,
+    "tl_synced_at": null,
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "invest.empowerfcu.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.872400+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Empower Federal Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peer benchmarking uses a 5-peer set locked at Layer 0 Batch 1 and immutable per Rule R7: Visions FCU ($5.49B), AmeriCU ($2.5B), Hudson Valley CU ($7.95B), CFCU Community CU ($1.5B), and ESL FCU ($8.5B). The set deliberately brackets Empower's $4.07B mid-Medium tier position with both upward (ESL, Hudson Valley) and lateral / downward (CFCU, AmeriCU) benchmarks. All peers are NCUA-supervised consumer-financial-services credit unions; geographic overlap weighted toward Central / Upstate NY where possible.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "Empower Federal Credit Union is a $4.1B in assets credit union regulated by NCUA (NCUSO ID 3025) with 501 employees. A 8.5% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [EV--013, EV--007]. Zennify's assessment places overall digital maturity at 2.1/5. The deepest capability gap is Customer-Centric Culture at 1.9/5 against a 3.0 peer median [EV--002]. Next is Model CI/CD & Controlled Promotion at 1.9/5 against a 2.5 peer median [EV--007].\n\nThird is Idea Management at 2.0/5 against a 2.5 peer median [EV--006]. The issue register adds Range-style citation 'EV--001 through EV--008' in report — violates explicit enumeration requirement (high severity). The issue register adds Score clustering: 78.7% of P1 subcaps scored 1.5 (exceeds 60%). Driven by 148 inherited level 1.5 defaults…. The pattern is corroborated across the assessment's evidence index [EV-CONN-001].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Empower Federal Credit Union is whether to close Customer-Centric Culture first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Empower Federal Credit Union should lead with Twilio (82/100 fit) against Video Banking, then sequence Tableau behind it. Closing Customer-Centric Culture to the peer median alone is worth 1.1 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"G-007 — No public business-banking penetration metrics across 12K SEG companies — Priority 2 —, — SEG business-banking penetration rate…\"."
+  },
+  "overall_score": 2.11,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/coverage_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.018245+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/calculation_chain.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.018871+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.020316+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/layer2_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.020666+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A1_Subcap_Roster.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.036937+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A4_Coverage_Statistics.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.038126+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Peer_Set.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.038528+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:50.038728+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 23
+    },
+    "stage_ms": {
+      "manifest": 31,
+      "parse": 6957,
+      "persist": 305
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: run_manifest_v2.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_index.json",
+        "detail": "evidence_index.json: 1 validation error for EvidenceRow\nfacts.0\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"$3.8B in assets (per fac...s, 2022 Reader's Choice\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence loaded from variant evidence_index_contract4.csv (01_ev",
+        "detail": "evidence loaded from variant evidence_index_contract4.csv (01_evidence)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/layer2_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=707 contradictions=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 6 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=Empower_FCU_Client_Profile_Research_Report.docx leadership=10 focus_areas=10 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 9 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 9 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_from_client_profile_docx",
+        "detail": "timeline_from_client_profile_docx: 19 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/coverage_validation.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/calculation_chain.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/layer2_patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A1_Subcap_Roster.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A4_Coverage_Statistics.csv — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Peer_Set.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 19",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:29/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: run_manifest_v2.json",
+      "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "evidence_index.json: 1 validation error for EvidenceRow\nfacts.0\n  Input should be a valid dictionary or instance of FactItem [type=model_type, input_value=\"$3.8B in assets (per fac...s, 2022 Reader's Choice\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.9/v/model_type",
+      "evidence loaded from variant evidence_index_contract4.csv (01_evidence)",
+      "used variant issue register: 07_governance/layer2_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=707 contradictions=0",
+      "caps_applied_log: 6 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+      "firmographics_from_client_profile_docx: source=Empower_FCU_Client_Profile_Research_Report.docx leadership=10 focus_areas=10 facts_extracted=0",
+      "used docx-extracted recommendations: 9 rec(s) from Assessment_Report.docx §9",
+      "tech_stack_from_report_prose: 9 vendors mentioned",
+      "insights_derived_from_category_gaps: 4",
+      "timeline_from_client_profile_docx: 19 events",
+      "INFO/pattern_gap: 02_research_workbook/coverage_validation.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/calculation_chain.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 07_governance/layer2_patch_block.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A1_Subcap_Roster.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A4_Coverage_Statistics.csv — no fingerprint matched (best confidence 0.00); 24 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Peer_Set.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: README.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "timeline_events_persisted: 19",
+      "catalogue_unresolved:29/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 159,
+      "peer_median": 2.88,
+      "pillar_id": "P1",
+      "score": 1.94,
+      "subcaps_scored": 159
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 3.0,
+      "pillar_id": "P2",
+      "score": 2.32,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 3.13,
+      "pillar_id": "P3",
+      "score": 2.15,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.59,
+      "pillar_id": "P4",
+      "score": 2.04,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-29",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:50.073569Z",
+    "created_at": "2026-07-02T23:09:50.073569Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "e6cb71dd-eb56-4a7e-8219-c9e3099f10c9",
+    "overall_score": null,
+    "request_id": "DMA-ASM-EFCU-20260429-0001",
+    "started_at": "2026-07-02T23:09:50.073569Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "G-007 — No public business-banking penetration metrics across 12K SEG companies — Priority 2 — P2C4.1.1, P2C4.2.1 — SEG business-banking penetration rate; commercial deposit/lending volumes.",
+      "evidence": [
+        "EV-P2C4-010",
+        "EV-P2C4-013"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "No public business-banking penetration metrics across 12K…",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.2,
+      "so_what": "Prioritize No public business-banking penetration metrics across 12K… in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "No public business-banking penetration metrics across 12K…",
+      "what": "G-007 — No public business-banking penetration metrics across 12K SEG companies — Priority 2 — P2C4.1.1, P2C4.2.1 — SEG business-banking penetration rate; commercial deposit/lending volumes.",
+      "why": "The shortfall is relative, not absolute: 2.2/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "G-004 — No public CDO/CDAO + data governance charter publication — Priority 1 — P4C1.1.5, P4C1.7.1, P4C1.7.2 — Data governance charter, CDO/data-leadership org chart, data quality program.",
+      "evidence": [],
+      "magnitude": "0.6 pts below peer median",
+      "name": "No public CDO/CDAO + data governance charter publication",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.94,
+      "so_what": "Prioritize No public CDO/CDAO + data governance charter publication in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No public CDO/CDAO + data governance charter publication",
+      "what": "G-004 — No public CDO/CDAO + data governance charter publication — Priority 1 — P4C1.1.5, P4C1.7.1, P4C1.7.2 — Data governance charter, CDO/data-leadership org chart, data quality program.",
+      "why": "The shortfall is relative, not absolute: 1.94/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "G-006 — No public Salesforce activation feature inventory (Einstein, Marketing Cloud, Data Cloud) — Priority 1 — P4C2.4.1, P4C2.6.1, P2C2.5.1 — Salesforce org license inventory + activated features audit + roadmap.",
+      "evidence": [
+        "EV-P4C2-007",
+        "EV-P2C2-022"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "No public Salesforce activation feature inventory…",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.94,
+      "so_what": "Prioritize No public Salesforce activation feature inventory… in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "No public Salesforce activation feature inventory…",
+      "what": "G-006 — No public Salesforce activation feature inventory (Einstein, Marketing Cloud, Data Cloud) — Priority 1 — P4C2.4.1, P4C2.6.1, P2C2.5.1 — Salesforce org license inventory + activated features audit + roadmap.",
+      "why": "The shortfall is relative, not absolute: 1.94/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "G-008 — BSA Officer + CISO names + Information Security program documentation — Priority 2 — P3C3.2.1, P4C4.1.1 — BSA Officer name + AML program; CISO name + Information Security Policy.",
+      "evidence": [],
+      "magnitude": "0.9 pts below peer median",
+      "name": "BSA Officer + CISO names + Information Security program…",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.09,
+      "so_what": "Prioritize BSA Officer + CISO names + Information Security program… in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "BSA Officer + CISO names + Information Security program…",
+      "what": "G-008 — BSA Officer + CISO names + Information Security program documentation — Priority 2 — P3C3.2.1, P4C4.1.1 — BSA Officer name + AML program; CISO name + Information Security Policy.",
+      "why": "The shortfall is relative, not absolute: 2.09/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "G-003 — No public BCP/DR test results, RTO/RPO targets, or DR runbook artifacts — Priority 1 — P3C4.2.1, P3C4.3.1, P3C4.3.2 — Latest BCP/DR test results, RTO/RPO documentation, IR runbook.",
+      "evidence": [
+        "EV-P3C4-005"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "No public BCP/DR test results, RTO/RPO targets, or DR…",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.09,
+      "so_what": "Prioritize No public BCP/DR test results, RTO/RPO targets, or DR… in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "No public BCP/DR test results, RTO/RPO targets, or DR…",
+      "what": "G-003 — No public BCP/DR test results, RTO/RPO targets, or DR runbook artifacts — Priority 1 — P3C4.2.1, P3C4.3.1, P3C4.3.2 — Latest BCP/DR test results, RTO/RPO documentation, IR runbook.",
+      "why": "The shortfall is relative, not absolute: 2.09/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-CONN-001"
+      ],
+      "modifiers": [
+        "167 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Channel Strategy averages 2.0/5 over 167 scored subcaps; ceiling 2.5 reflects thin evidence density (0/167 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-THIN-002"
+      ],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Exit Planning averages 2.0/5 over 217 scored subcaps; ceiling 2.5 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P1C3-006"
+      ],
+      "modifiers": [
+        "192 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Management averages 2.0/5 over 192 scored subcaps; ceiling 2.5 reflects thin evidence density (0/192 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P1C4-002"
+      ],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Customer-Centric Culture averages 1.9/5 over 205 scored subcaps; ceiling 2.4 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P2C1-021"
+      ],
+      "modifiers": [
+        "293 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Search Engine Optimization (SEO) averages 2.3/5 over 293 scored subcaps; ceiling 2.8 reflects thin evidence density (0/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P2C2-022"
+      ],
+      "modifiers": [
+        "cap applied: CROSS_PILLAR_P3C3_low(2.17)_caps_P2C2_3.0",
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Onboarding Measurement & Analytics averages 2.3/5 over 291 scored subcaps; ceiling 2.8 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-CONN-009"
+      ],
+      "modifiers": [
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Complaint Management averages 2.4/5 over 289 scored subcaps; ceiling 2.9 reflects thin evidence density (0/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P2C4-013"
+      ],
+      "modifiers": [
+        "cap applied: CROSS_PILLAR_P4C1_low(2.09)_caps_P2C4_3.0",
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "CLV-Based Segmentation averages 2.2/5 over 259 scored subcaps; ceiling 2.7 reflects thin evidence density (0/259 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Data Validation & Enrichment averages 2.2/5 over 146 scored subcaps; ceiling 2.7 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CROSS_PILLAR_P1C2_low(1.97)_caps_P3_3.0",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Risk Governance averages 2.1/5 over 130 scored subcaps; ceiling 2.6 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Issue Management averages 2.2/5 over 142 scored subcaps; ceiling 2.7 reflects thin evidence density (0/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P3C4-005"
+      ],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Exit & Contingency averages 2.1/5 over 145 scored subcaps; ceiling 2.6 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Strategy & Vision averages 2.1/5 over 200 scored subcaps; ceiling 2.6 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "EV-P4C2-007"
+      ],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Model CI/CD & Controlled Promotion averages 1.9/5 over 270 scored subcaps; ceiling 2.4 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Environment Promotion for Data Pipelines averages 2.1/5 over 235 scored subcaps; ceiling 2.6 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Microsegmentation & SDP averages 2.1/5 over 150 scored subcaps; ceiling 2.6 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CFO transition (D.M. → S.T.). New CFO = budget-cycle conversation fresh start (Feb 2026).",
+      "evidence": [],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "CFO transition (D.M. → S.T.)",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.88/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CFO transition (D.M. → S.T.). New CFO = budget-cycle conversation fresh start (Feb 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-02-01",
+        "event": "CFO transition (D.M. → S.T.)"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Empower Mobile Banking App update released (Android/iOS). DevOps cadence demonstrates platform readiness for additional FSC-side delivery (Apr 2026).",
+      "evidence": [
+        "EV-P4C3-007",
+        "EV-P4C3-002"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Empower Mobile Banking App update released (Android/iOS)",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.88/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Video Banking — highest-fit surface at 82/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Empower Mobile Banking App update released (Android/iOS). DevOps cadence demonstrates platform readiness for additional FSC-side delivery (Apr 2026). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2026-04-06",
+        "event": "Empower Mobile Banking App update released (Android/iOS)"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "**MANTL Onboarding & Account Opening Suite launch** — <5 min online, <10 min branch, retail + business banking full STP. **LIVE STRATEGIC INFLECTION** — every onboarding event creates an FSC sync requirement at 15-min intervals; Marketing Cloud journey activation immediate (Mar 2026).",
+      "evidence": [
+        "EV-P2C2-022",
+        "EV-P2C2-019",
+        "EV-P4C3-002"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Mantl Onboarding & Account Opening Suite launch",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.88/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Video Banking — highest-fit surface at 82/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "**MANTL Onboarding & Account Opening Suite launch** — <5 min online, <10 min branch, retail + business banking full STP. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-12",
+        "event": "Mantl Onboarding & Account Opening Suite launch"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Assets reach $4.07B; member count ~290K. Crossing $4B = mid-Medium tier pressure for advanced digital maturity (Sep 2025).",
+      "evidence": [
+        "EV-P1C4-002",
+        "EV-P2C1-002"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Assets member count ~290K. reach $4.07B",
+      "metric": "Assets reach $4.07B",
+      "peer_context": "Customer-Centric Culture runs 1.88/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Video Banking — highest-fit surface at 82/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Assets reach $4.07B; member count ~290K. Crossing $4B = mid-Medium tier pressure for advanced digital maturity (Sep 2025).",
+      "timeline": {
+        "date": "2025-09-01",
+        "event": "Assets reach $4.07B"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Customer-Centric Culture scores 1.88/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "EV-P1C4-002"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Customer-Centric Culture scores 1.88/5",
+      "metric": "Customer-Centric Culture 1.88/5 vs peer 3.00",
+      "peer_context": "Customer-Centric Culture runs 1.88/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Video Banking — highest-fit surface at 82/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C4",
+      "text": "Customer-Centric Culture scores 1.88/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

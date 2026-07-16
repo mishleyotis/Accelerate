@@ -1,0 +1,209 @@
+{
+  "entity_display_id": "frost-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "BI tool count": "5+ (SSRS, SAS, Tableau, Cognos, Alteryx) \u2192 2-3 consolidated platforms",
+        "Customer profile completeness": "Fragmented across systems \u2192 Single unified profile",
+        "First-contact resolution": "Unknown (Zendesk) \u2192 +10-15 percentage points",
+        "Payment integration time": "Weeks (per-rail custom) \u2192 Days (API-led reuse)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Payment integration time: Weeks (per-rail custom) \u2192 Days (API-led reuse)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.23",
+          "metric": "Payment integration time: Weeks (per-rail custom) \u2192 Days (API-led reuse)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Payment integration time: Weeks (per-rail custom) \u2192 Days (API-led reuse)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "API-Led Payment & Integration Modernization"
+        },
+        {
+          "feature": "Service Cloud + Agentforce",
+          "maturity_lift": "+2.23",
+          "metric": "First-contact resolution: Unknown (Zendesk) \u2192 +10-15 percentage points",
+          "outcomes": {
+            "effort": "L",
+            "metric": "First-contact resolution: Unknown (Zendesk) \u2192 +10-15 percentage points",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Omnichannel Agent Augmentation Platform"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.23",
+          "metric": "Customer profile completeness: Fragmented across systems \u2192 Single unified profile",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Customer profile completeness: Fragmented across systems \u2192 Single unified profile",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Enterprise Data Strategy & Unified Data Platform"
+        },
+        {
+          "feature": "Agentforce + CRM Analytics",
+          "maturity_lift": null,
+          "metric": "BI tool count: 5+ (SSRS, SAS, Tableau, Cognos, Alteryx) \u2192 2-3 consolidated platforms",
+          "outcomes": {
+            "effort": "L",
+            "metric": "BI tool count: 5+ (SSRS, SAS, Tableau, Cognos, Alteryx) \u2192 2-3 consolidated platforms",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "AI/ML Enablement for Employee Productivity"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Account opening time": "Branch-dependent \u2192 Digital-first with branch support",
+        "Cloud governance framework": "Informal multi-cloud \u2192 Documented workload placement policy",
+        "Email platform count": "2+ (MailChimp + Acoustic) \u2192 1 consolidated (Marketing Cloud)",
+        "GRC automation coverage": "Manual/spreadsheet-based \u2192 Automated risk assessment + monitoring"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "Email platform count: 2+ (MailChimp + Acoustic) \u2192 1 consolidated (Marketing Cloud)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.23",
+          "metric": "Email platform count: 2+ (MailChimp + Acoustic) \u2192 1 consolidated (Marketing Cloud)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Email platform count: 2+ (MailChimp + Acoustic) \u2192 1 consolidated (Marketing Cloud)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Marketing Automation & Campaign Intelligence"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": null,
+          "metric": "Account opening time: Branch-dependent \u2192 Digital-first with branch support",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Account opening time: Branch-dependent \u2192 Digital-first with branch support",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Customer 360 & Financial Services Lifecycle Management"
+        },
+        {
+          "feature": "Shield + GRC Platform",
+          "maturity_lift": null,
+          "metric": "GRC automation coverage: Manual/spreadsheet-based \u2192 Automated risk assessment + monitoring",
+          "outcomes": {
+            "effort": "L",
+            "metric": "GRC automation coverage: Manual/spreadsheet-based \u2192 Automated risk assessment + monitoring",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Security Posture Validation & GRC Modernization"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": null,
+          "metric": "Cloud governance framework: Informal multi-cloud \u2192 Documented workload placement policy",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Cloud governance framework: Informal multi-cloud \u2192 Documented workload placement policy",
+            "peer": null,
+            "time": "2-3 week"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "Cloud Migration Strategy & Platform Engineering Acceleration"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Active BI platforms": "5+ (fragmented) \u2192 2 (CRM Analytics + legacy Teradata reporting)",
+        "Open tech positions": "~50 gap (CEO estimate) \u2192 Gap closed through hire + augmentation"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Open tech positions: ~50 gap (CEO estimate) \u2192 Gap closed through hire + augmentation",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Tableau",
+      "recommendations": [
+        {
+          "feature": "[CLIENT] \u2014 Zennify Digital Strategy Workshop (advisory only)",
+          "maturity_lift": null,
+          "metric": "Open tech positions: ~50 gap (CEO estimate) \u2192 Gap closed through hire + augmentation",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Open tech positions: ~50 gap (CEO estimate) \u2192 Gap closed through hire + augmentation",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "Digital Talent & Change Enablement Program"
+        },
+        {
+          "feature": "CRM Analytics (Tableau)",
+          "maturity_lift": "+2.15",
+          "metric": "Active BI platforms: 5+ (fragmented) \u2192 2 (CRM Analytics + legacy Teradata reporting)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Active BI platforms: 5+ (fragmented) \u2192 2 (CRM Analytics + legacy Teradata reporting)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-10",
+          "title": "BI Consolidation on Unified Analytics Platform"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-FROST-20260323-0001",
+  "total_duration_months": 12
+}

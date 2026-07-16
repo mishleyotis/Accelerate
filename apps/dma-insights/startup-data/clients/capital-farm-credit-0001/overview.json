@@ -1,0 +1,921 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 172
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 232,
+        "subcaps": 232,
+        "thin": 232
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 118
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 172
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "capital-farm-credit-0001",
+    "domain": null,
+    "hq": null,
+    "id": "a6919739-a80f-4ca3-8655-a6785339f6f0",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Capital Farm Credit",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "FC",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:33.689614Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 139,
+    "undated_count": 139
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 139
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 3,
+      "NEUTRAL": 117,
+      "POSITIVE": 19
+    },
+    "tiers": {
+      "T1": 37,
+      "T2": 31,
+      "T3": 53,
+      "T5": 18
+    },
+    "total_facts": 139,
+    "total_items": 139
+  },
+  "financial_trajectory": null,
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 11000000000.0,
+    "branches": 67,
+    "clay_synced_at": null,
+    "employees_approx": "600+",
+    "financial_highlights": {
+      "generated_at": "2026-03-05T09:13:30.849757",
+      "size_tier": "Large ($10B-$50B)",
+      "trend_data_gap": "Need CFC-specific 5-year asset/income/ROA trend. Will attempt extraction in Batch 2-3 or flag for internal validation."
+    },
+    "footprint": "Texas",
+    "footprint_basis": "derived:geography",
+    "founded": 1917,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "Texas",
+    "geography_basis": "nlp:narrative",
+    "headcount": 600,
+    "hq": "Bryan, Texas",
+    "hq_address": "Bryan, Texas",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jeff Norte",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jennifer Thompson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP CAO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kenton Kimball",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "BOARD CHAIR"
+      }
+    ],
+    "legal_name": "Capital Farm Credit, ACA",
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Capital Farm Credit is a farm-credit institution headquartered in Bryan, Texas. It reports $11.0 billion in total assets. It is regulated by Farm Credit Administration (FCA) and employs approximately 600 people across 67 branches. Its overall digital maturity is assessed at 1.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "revenue_usd": null,
+    "sentiment": {
+      "sources": [
+        {
+          "source": "Public Sources"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "401(k) with up to 9% employer match; full medical/dental/vision; culture: collaboration, empathy, respect, diverse perspectives; Rock Star employee recognition",
+        "title": "401with up to 9% employer match",
+        "type": "article",
+        "url": "https://www.capitalfarmcredit.com/careers/benefits-culture/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-059",
+        "excerpt": "Content marketing: regular news posts, ag insights, market updates, patronage announcements, community stories. Blog cadence: 2-4 posts/month.",
+        "title": "Content marketing: regular news posts, ag insights, market updates…",
+        "type": "blog",
+        "url": "https://www.capitalfarmcredit.com/news/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "capitalfarmcredit.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.176616+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Capital Farm Credit — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "SECTION 1: EXECUTIVE SUMMARY",
+    "scqa_md": "Capital Farm Credit is a $11.0B in assets farm-credit institution regulated by Farm Credit Administration (FCA) with 600 employees. Zennify's assessment places overall digital maturity at 1.9/5. The deepest capability gap is GenAI Strategy at 1.6/5 against a 3.0 peer median [E-118, E-126]. Next is Synthetic Data Generation at 1.6/5 against a 2.2 peer median.\n\nThird is User Generated Content at 1.6/5 against a 2.2 peer median [E-059, E-054]. The issue register adds SENT-001 (app sentiment cap) and DATA-CAP-001 (governance foundation cap) magnitude rationale could be more explicit. The issue register adds strategy score (2.0) based on CDO tenure <6 months; monitor for execution wins. The pattern is corroborated across the assessment's evidence index [E-004, E-005].\n\nThe question for Capital Farm Credit is whether to close GenAI Strategy first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Capital Farm Credit should lead with Tableau (81/100 fit) against Budget Alignment, then sequence nCino behind it. Closing GenAI Strategy to the peer median alone is worth 1.4 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.\"."
+  },
+  "overall_score": 1.9,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "00_entity_profile/safeguard_precheck.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.523512+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "00_entity_profile/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.523836+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1_ceilings.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.524126+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p2_ceilings.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.524343+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3_ceilings.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.524525+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4_ceilings.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.524816+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/AgCountry_Farm_Credit_Services_research.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.525296+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/American_AgCredit_research.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.525499+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/Compeer_Financial_research.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.525772+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/Farm_Credit_Mid-America_research.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.526032+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/Farm_Credit_Services_of_America_research.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.526255+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/Northwest_Farm_Credit_Services_research.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.526462+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_score_table.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.527118+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_selection.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.527552+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.527885+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.528962+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.529593+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A6_Sentiment_Analysis.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.530325+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/ASSESSMENT_SUMMARY.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 21 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:30.530599+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 34
+    },
+    "stage_ms": {
+      "manifest": 9,
+      "parse": 10828,
+      "persist": 1251
+    },
+    "structured": [
+      {
+        "code": "xlsx fallback extracted 708 subcaps from DMA_Assessment_Workbook",
+        "detail": "xlsx fallback extracted 708 subcaps from DMA_Assessment_Workbook_CFC.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "evidence_index.json",
+        "detail": "evidence_index.json: 1 validation error for EvidenceRow\ne_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence loaded from variant A1_Evidence_Inventory.csv (08_appen",
+        "detail": "evidence loaded from variant A1_Evidence_Inventory.csv (08_appendices)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=17 contradictions=10",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 10 cap event(s) parsed from 08_appendices/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. \"US banking sector: stable outlook, technology inve; Glassdoor: 3.9/5 stars (51 reviews). Technology de; Employee reviews: 'technology is extremely outdate\")",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 19 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 3 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 1 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=3",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "00_entity_profile/safeguard_precheck.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "00_entity_profile/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1_ceilings.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p2_ceilings.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3_ceilings.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4_ceilings.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/AgCountry_Farm_Credit_Services_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/American_AgCredit_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/Compeer_Financial_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/Farm_Credit_Mid-America_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/Farm_Credit_Services_of_America_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/Northwest_Farm_Credit_Services_research.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_score_table.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_selection.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A6_Sentiment_Analysis.csv — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/ASSESSMENT_SUMMARY.md — no fingerprint matched (best confidence 0.00); 21 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/708 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx fallback extracted 708 subcaps from DMA_Assessment_Workbook_CFC.xlsx",
+      "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_workbook)",
+      "evidence_index.json: 1 validation error for EvidenceRow\ne_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+      "evidence loaded from variant A1_Evidence_Inventory.csv (08_appendices)",
+      "governance_audit_logs: reasoning_chain=17 contradictions=10",
+      "caps_applied_log: 10 cap event(s) parsed from 08_appendices/caps_applied_log.csv",
+      "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. \"US banking sector: stable outlook, technology inve; Glassdoor: 3.9/5 stars (51 reviews). Technology de; Employee reviews: 'technology is extremely outdate\")",
+      "tech_stack_from_variant_source: 19 entries",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator'] leadership=0",
+      "used docx-extracted recommendations: 3 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 1 sources",
+      "insights_derived_from_category_gaps: 4",
+      "firmographics_leadership_healed: count=3",
+      "INFO/pattern_gap: 00_entity_profile/safeguard_precheck.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 00_entity_profile/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1_ceilings.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p2_ceilings.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3_ceilings.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4_ceilings.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/AgCountry_Farm_Credit_Services_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/American_AgCredit_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/Compeer_Financial_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/Farm_Credit_Mid-America_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/Farm_Credit_Services_of_America_research.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 06_peers/Northwest_Farm_Credit_Services_research.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_score_table.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_selection.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A6_Sentiment_Analysis.csv — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/ASSESSMENT_SUMMARY.md — no fingerprint matched (best confidence 0.00); 21 generic sections mined",
+      "catalogue_unresolved:14/708 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.72,
+      "pillar_id": "P1",
+      "score": 1.7,
+      "subcaps_scored": 172
+    },
+    {
+      "peer_benchmarked": 232,
+      "peer_median": 2.51,
+      "pillar_id": "P2",
+      "score": 1.64,
+      "subcaps_scored": 232
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 2.94,
+      "pillar_id": "P3",
+      "score": 2.02,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.63,
+      "pillar_id": "P4",
+      "score": 1.86,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-05",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:33.689614Z",
+    "created_at": "2026-07-02T23:11:33.689614Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "175f9252-63f1-460d-babd-2921e11a4585",
+    "overall_score": 1.9,
+    "request_id": "DMA-ASM-CFC-20260305-0001",
+    "started_at": "2026-07-02T23:11:33.689614Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-003",
+        "E-015",
+        "E-018",
+        "E-006"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Twilio"
+      ],
+      "score": 1.83,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: March 2025: $111.5M cash patronage + $78.1M allocated equities = $189.6M total for 2024. $2.9B returned since 2006. [KB-US-FCA-003]"
+    },
+    {
+      "body": "GenAI Strategy is a priority capability gap in strategy and governance, scoring 1.55/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "evidence": [
+        "E-022",
+        "E-039",
+        "E-058",
+        "E-081"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "GenAI Strategy",
+      "peer_median": 3.0,
+      "platforms": [
+        "Tableau",
+        "Twilio"
+      ],
+      "score": 1.55,
+      "so_what": "Prioritize GenAI Strategy in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "GenAI Strategy",
+      "what": "GenAI Strategy is a priority capability gap in strategy and governance, scoring 1.55/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "why": "The linked evidence records: CDO leads digital transformation/strategy, oversees IT infrastructure/support and information security teams; awarded 2022 Nintex Solution Innovation Award; nominated for Houston CIO ORBIE Award"
+    },
+    {
+      "body": "Synthetic Data Generation is a priority capability gap in data and technology, scoring 1.58/5 against a peer median of 2.25. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-031",
+        "E-045",
+        "E-056",
+        "E-080"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Synthetic Data Generation",
+      "peer_median": 2.25,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.58,
+      "so_what": "Prioritize Synthetic Data Generation in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Synthetic Data Generation",
+      "what": "Synthetic Data Generation is a priority capability gap in data and technology, scoring 1.58/5 against a peer median of 2.25. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: YBS programs: Beginning & Small Producer Loans, NextGen Loan Program; flexible terms; financial literacy, business planning, mentoring"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "168 of 168 subcaps on thin evidence"
+      ],
+      "rationale": "M&A Integration Strategy averages 1.8/5 over 168 scored subcaps; ceiling 2.3 reflects thin evidence density (0/168 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Role Definitions averages 1.7/5 over 217 scored subcaps; ceiling 2.2 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "GenAI Strategy averages 1.6/5 over 190 scored subcaps; ceiling 2.0 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Cultural Foundation averages 1.7/5 over 205 scored subcaps; ceiling 2.2 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Net Zero Pathway averages 2.1/5 over 70 scored subcaps; ceiling 2.6 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "User Generated Content averages 1.6/5 over 291 scored subcaps; ceiling 2.1 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "294 of 294 subcaps on thin evidence"
+      ],
+      "rationale": "KYC/CIP Compliance averages 1.6/5 over 294 scored subcaps; ceiling 2.1 reflects thin evidence density (0/294 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "300 of 300 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Interaction History averages 1.7/5 over 300 scored subcaps; ceiling 2.2 reflects thin evidence density (0/300 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "AI/ML Model Performance Monitoring averages 1.7/5 over 255 scored subcaps; ceiling 2.2 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "161 of 161 subcaps on thin evidence"
+      ],
+      "rationale": "Action Plan Template Library & Configuration averages 2.2/5 over 161 scored subcaps; ceiling 2.7 reflects thin evidence density (0/161 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Performance Monitoring averages 2.0/5 over 130 scored subcaps; ceiling 2.5 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Procedure Documentation averages 1.9/5 over 140 scored subcaps; ceiling 2.4 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Due Diligence Program averages 2.0/5 over 145 scored subcaps; ceiling 2.5 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Synthetic Data Generation averages 1.6/5 over 200 scored subcaps; ceiling 2.1 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "273 of 273 subcaps on thin evidence"
+      ],
+      "rationale": "Natural Language Processing (NLP) averages 1.8/5 over 273 scored subcaps; ceiling 2.3 reflects thin evidence density (0/273 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Blockchain & Distributed Ledger averages 2.1/5 over 235 scored subcaps; ceiling 2.6 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Security & Compliance averages 2.0/5 over 150 scored subcaps; ceiling 2.5 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Azure cloud usage indicated by LinkedIn job postings and CDO roadmap references. Cloud migration part of 3-year IT plan. Evidence Level L2, Utilization MEDIUM.",
+      "evidence": [
+        "E-103"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Azure cloud usage indicated by LinkedIn job postings and…",
+      "metric": null,
+      "peer_context": "GenAI Strategy runs 1.55/5 vs a 3.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Azure cloud usage indicated by LinkedIn job postings and CDO roadmap references. Cloud migration part of 3-year IT plan. Evidence Level L2, Utilization MEDIUM. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of Capital Farm Credit. Overall digital maturity scored 1.77/5.0 (Mar 2026).",
+      "evidence": [
+        "E-004",
+        "E-016",
+        "E-052",
+        "E-066"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of Capital…",
+      "metric": null,
+      "peer_context": "GenAI Strategy runs 1.55/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Budget Alignment — highest-fit surface at 81/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of Capital Farm Credit. Overall digital maturity scored 1.77/5.0 (Mar 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-05",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "GenAI Strategy scores 1.55/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-022",
+        "E-039",
+        "E-058",
+        "E-081"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "GenAI Strategy scores 1.55/5",
+      "metric": "GenAI Strategy 1.55/5 vs peer 3.00",
+      "peer_context": "GenAI Strategy runs 1.55/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Budget Alignment — highest-fit surface at 81/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C3",
+      "text": "GenAI Strategy scores 1.55/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

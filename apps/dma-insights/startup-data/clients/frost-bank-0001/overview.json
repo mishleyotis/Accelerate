@@ -1,0 +1,1141 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 157,
+        "subcaps": 157,
+        "thin": 157
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "frost-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "9cbb19f2-2776-4c1e-9379-3a0b20d50b4c",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Frost Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:11.339969Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 19,
+    "current_count": 127,
+    "dated_count": 2,
+    "median_age_months": 8.8,
+    "oldest_published_date": "2018-03-01",
+    "stale_count": 2,
+    "stale_pct": 1.27,
+    "total": 157,
+    "undated_count": 7
+  },
+  "evidence_summary": {
+    "claims": {
+      "CEILING_ESTIMATE": 48,
+      "EVIDENCE": 1,
+      "FACT": 100,
+      "INFERENCE": 8
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 23,
+      "NEUTRAL": 116,
+      "POSITIVE": 18
+    },
+    "tiers": {
+      "T1": 16,
+      "T2": 6,
+      "T3": 53,
+      "T5": 25,
+      "T6": 57
+    },
+    "total_facts": 157,
+    "total_items": 157
+  },
+  "financial_trajectory": {
+    "cagr": "5.1%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2023,
+      2024
+    ],
+    "headline": "Frost exhibits stable organic growth with a 5-year asset CAGR of 5.1% and deposit CAGR of 4.1% [E-002]. Net income peaked at $592M in 2023 before compressing to $516M in 2024 due t",
+    "series": {
+      "net_income_m": [
+        592.0,
+        516.0
+      ]
+    },
+    "trend": "ACCELERATING",
+    "unit": "M"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 53000000000.0,
+    "branches": 194,
+    "cagr": "5.1%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Frost exhibits stable organic growth with a 5-year asset CAGR of 5.1% and deposit CAGR of 4.1% [E-002]. Net income peaked at $592M in 2023 before compressing to $516M in 2024 due to NIM pressure. The efficiency ratio improved from 58.7% (2020) to 55.8% (2024), though Q4 2024 showed a slight reversion. CET1 capital at 13.3% provides substantial headroom above well-capitalized minimums. Non-interest expense has grown at 5.7% annually, with technology spending accelerating to 14-15% year-over-year growth driven by cloud services [E-085, E-138]."
+      ],
+      "trajectory": {
+        "branches": 194,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 5059,
+        "events": [],
+        "fy": [
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "Texas (7 metros)",
+        "headline": "$516M net income · FY2024",
+        "regulator": "TX DOB + Federal Reserve + FDIC",
+        "series": {
+          "net_income_m": [
+            592.0,
+            516.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Texas (7 metros)",
+    "footprint_basis": "derived:geography",
+    "founded": 1977,
+    "founded_basis": "nlp:narrative",
+    "geography": "Texas (7 metros)",
+    "headcount": 5059,
+    "hq": "San Antonio, TX",
+    "hq_address": "San Antonio, TX",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Phil Green",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Bill Perotti",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Dan Geddes",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Blair McGrain",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Capability Leader",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Data Warehouse",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Carol Severyn",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Frost Bank (Cullen/Frost Bankers, Inc.)",
+    "license_type": "State-chartered",
+    "narrative_md": "Cullen/Frost Bankers, Inc. (NYSE: CFR) is a Texas-based financial holding company incorporated in 1977, with banking roots dating to 1868 [E-001]. Its primary subsidiary, Frost Bank, is a Texas state-chartered commercial bank headquartered at 111 W. Houston Street, San Antonio, TX 78205. The bank is publicly traded, FDIC-insured, and a member of the Federal Reserve System. Frost operates exclusively within Texas across seven major metropolitan areas.",
+    "primary_regulator": "TX DOB + Federal Reserve + FDIC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 1080000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.2,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.2/5",
+          "signal": "Glassdoor: 4.2/5 work-life balance, 4.5/5 culture & values, 4.0/5 career opportunities",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "Power + Coalition Greenwich awards = NPS/CSAT equivalent measurement in place",
+          "source": "Net Promoter Score"
+        },
+        {
+          "signal": "BBB complaint responses show structured investigation: specific dates, call transcript review, transaction details, written findings",
+          "source": "Better Business Bureau"
+        },
+        {
+          "signal": "imary) + Federal Reserve Board + FDIC (deposit insurance) + CFPB (consumer protection) + SEC (public company) + FINRA (brokerage) FinCEN BSA/AML: CRA lending: $309.1M community development lending, $232M SBA portfolio, $184.2M community sec",
+          "source": "CFPB complaints"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large Regional",
+    "thought_leadership": null,
+    "ticker": "NYSE: CFR",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": null,
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "frostbank.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.801418+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Frost Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "Priority Score = (0.25 x Gap Size) + (0.20 x Peer Comparison) + (0.15 x Strategic Alignment) + (0.15 x Implementation Complexity Inverse) + (0.15 x Investment Efficiency) + (0.10 x Stakeholder Readiness)",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Frost Bank DMA Assessment",
+    "scqa_md": "Frost Bank is a $53.0B in assets regional bank regulated by TX DOB + Federal Reserve + FDIC, operating since 1977 with 5,059 employees. A 5.1% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-021, E-033]. Zennify's assessment places overall digital maturity at 2.1/5. The deepest capability gap is Experience Measurement (NPS/CSAT) at 1.8/5 against a 2.5 peer median [E-076]. Next is Data Residency & Sovereignty Controls at 1.9/5 against a 2.5 peer median [E-077, E-164].\n\nThird is Delivery Optimization at 1.9/5 against a 2.0 peer median [E-134]. The issue register adds =2.24<2.5 but 6 P3 subcaps >3.0 (high severity). The issue register adds Report has 22 unique E-IDs (target ≥30). Exec: 10. All 4 pillars + 10 recs cite evidence.\n\nProse integration vs inline.. The roster shows no CDO — a named ownership gap for the capabilities below. The question for Frost Bank is whether to close Experience Measurement (NPS/CSAT) first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Frost Bank should lead with nCino (76/100 fit) against Idea Sourcing Channels, then sequence Tableau behind it. Closing Experience Measurement (NPS/CSAT) to the peer median alone is worth 0.7 maturity points, and the capabilities that depend on it compound the gain.\n\nThe analyst's own priority framing: \"NIST CSF security program — 9 InfoSec functions, Sr.EVP CISO, clean enforcement [E-141] — Mature security posture — Security assessment + zero trust roadmap advisory\"."
+  },
+  "overall_score": 2.06,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/clay_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.275920+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.277966+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.279375+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/benchmarks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.279862+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.280417+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/cross_pillar_caps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.280734+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.281176+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/pre_scoring_caps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.297822+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase0_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.298550+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase2_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.298806+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase3_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.299056+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase45_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.299289+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase4_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.299534+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase5_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.299802+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase7_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.300185+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/qa_error_log.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.300702+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/cross_pillar_links.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.301085+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/pattern_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.301278+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/peer_gap_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.301715+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.301970+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:11.302431+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 33
+    },
+    "stage_ms": {
+      "manifest": 20,
+      "parse": 6660,
+      "persist": 1329
+    },
+    "structured": [
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+202 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=698 contradictions=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 93 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_Report_Frost_Bank_20260323.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=7 subcaps=12 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 7 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/clay_validation.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/benchmarks.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/cross_pillar_caps.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/pre_scoring_caps.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase0_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase2_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase3_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase45_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase4_checkpoint.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase5_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase7_checkpoint.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/qa_error_log.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/cross_pillar_links.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/pattern_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/peer_gap_analysis.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:28/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "INFO/evidence_facts_merged_from_json_twin: +202 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=698 contradictions=1",
+      "caps_applied_log: 93 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 03_scoring_workbook/recommendations.json",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_Report_Frost_Bank_20260323.docx count=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=7 subcaps=12 replaced_docx_scqa=True",
+      "tech_stack_from_report_prose: 7 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_derived_from_category_gaps: 4",
+      "INFO/pattern_gap: 01_evidence/clay_validation.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+      "INFO/pattern_gap: 06_peers/benchmarks.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/cross_pillar_caps.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/pre_scoring_caps.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase0_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase2_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase3_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase45_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase4_checkpoint.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase5_checkpoint.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase7_checkpoint.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/qa_error_log.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/cross_pillar_links.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/pattern_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/peer_gap_analysis.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "timeline_events_persisted: 6",
+      "catalogue_unresolved:28/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 157,
+      "peer_median": 2.61,
+      "pillar_id": "P1",
+      "score": 2.24,
+      "subcaps_scored": 157
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.39,
+      "pillar_id": "P2",
+      "score": 1.94,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.5,
+      "pillar_id": "P3",
+      "score": 2.17,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.64,
+      "pillar_id": "P4",
+      "score": 2.04,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-23",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:11.339969Z",
+    "created_at": "2026-07-02T23:10:11.339969Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "2f29edb2-6ac5-43b0-853e-13d0839fc307",
+    "overall_score": 2.06,
+    "request_id": "DMA-ASM-FROST-20260323-0001",
+    "started_at": "2026-07-02T23:10:11.339969Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.2,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "NIST CSF security program — 9 InfoSec functions, Sr.EVP CISO, clean enforcement [E-141] — Mature security posture — Security assessment + zero trust roadmap advisory.",
+      "evidence": [
+        "E-141",
+        "E-021",
+        "E-031",
+        "E-034"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "NIST CSF security program",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.78,
+      "so_what": "Prioritize NIST CSF security program in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "NIST CSF security program",
+      "what": "NIST CSF security program — 9 InfoSec functions, Sr.EVP CISO, clean enforcement [E-141] — Mature security posture — Security assessment + zero trust roadmap advisory.",
+      "why": "The linked evidence records: Program 'designed around NIST Cybersecurity Framework, regulatory guidance, and other industry standards.' Employs 'security by design' philosophy."
+    },
+    {
+      "body": "Employee-first AI strategy — LivePerson Copilot + KnowledgeAI, 250K convos/yr, 91% CSAT [E-131] — Strong augmentation, no customer-facing AI — Einstein GPT / Data Cloud for predictive agent enablement.",
+      "evidence": [
+        "E-131",
+        "E-156",
+        "E-028",
+        "E-039"
+      ],
+      "magnitude": "91%",
+      "name": "Employee-first AI strategy",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.85,
+      "so_what": "Prioritize Employee-first AI strategy in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Employee-first AI strategy",
+      "what": "Employee-first AI strategy — LivePerson Copilot + KnowledgeAI, 250K convos/yr, 91% CSAT [E-131] — Strong augmentation, no customer-facing AI — Einstein GPT / Data Cloud for predictive agent enablement.",
+      "why": "The linked evidence records: Jimmy Stead (Banking Dive Jan 2025): 'We've absolutely avoided fronting conversations with a customer using a bot. It's something I don't think we'll ever do.' LivePerson Copilot: auto-summarizes conversations + adds to customer history. KnowledgeAI:"
+    },
+    {
+      "body": "Finzly FedNow+RTP go-live — Phase 1 live July 2025, 550 monthly RTP transactions [E-145] — \"First step in enterprise modernization\" — MuleSoft API-led payment rail consolidation.",
+      "evidence": [
+        "E-145",
+        "E-021",
+        "E-031",
+        "E-034"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Finzly FedNow+RTP go-live",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.78,
+      "so_what": "Prioritize Finzly FedNow+RTP go-live in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Finzly FedNow+RTP go-live",
+      "what": "Finzly FedNow+RTP go-live — Phase 1 live July 2025, 550 monthly RTP transactions. [E-145] — \"First step in enterprise modernization\" — MuleSoft API-led payment rail consolidation.",
+      "why": "The linked evidence records: Phase 1 go-live July 23, 2025. Receive-only for FedNow + RTP instant payments. 24/7/365 availability. Eligible use cases: refunds, payroll disbursements, insurance payouts, P2P transfers. ~550 RTP transactions monthly (American Banker Oct 2024)."
+    },
+    {
+      "body": "KubeCon platform engineering — OpenShift since 2021, presented at KubeCon NA 2024 [E-135] — Container-native shift underway — Cloud migration strategy + DevOps maturity consulting.",
+      "evidence": [
+        "E-135",
+        "E-156",
+        "E-028",
+        "E-039"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "KubeCon platform engineering",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.85,
+      "so_what": "Prioritize KubeCon platform engineering in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "KubeCon platform engineering",
+      "what": "KubeCon platform engineering — OpenShift since 2021, presented at KubeCon NA 2024. [E-135] — Container-native shift underway — Cloud migration strategy + DevOps maturity consulting.",
+      "why": "The linked evidence records: Presented at OpenShift Commons Gathering, KubeCon NA 2024, Salt Lake City, Nov 12 2024. Session: 'Lessons learned from rolling out OpenShift at Frost Bank.' Jason Moody = Capability Leader of Platform Engineering."
+    },
+    {
+      "body": "Data governance without CDO — Head of DG (CDMP certified) but federated model [E-128] — Governance exists but fragmented — Data Cloud + unified data strategy + CDO advisory.",
+      "evidence": [
+        "E-128",
+        "E-156",
+        "E-028",
+        "E-039"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Data governance",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.85,
+      "so_what": "Prioritize Data governance in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Data governance",
+      "what": "Data governance without CDO — Head of DG (CDMP certified) but federated model [E-128] — Governance exists but fragmented — Data Cloud + unified data strategy + CDO advisory.",
+      "why": "The linked evidence records: Brandon Wiemers = Head of Data Governance. CDMP + CIMP + CDS certified. DAMA SA chapter president. Ex-USAA 12 years (Data Governance Lead). Sathish Kamireddy = SVP, Capability Leader Data & Analytics (formerly SVP Data Warehouse Program Manager)."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Strategy Refresh Cadence averages 2.7/5 over 165 scored subcaps; ceiling 3.2 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "cap applied: Evidence ceiling 2.7",
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Data Governance Framework averages 2.2/5 over 217 scored subcaps; ceiling 2.7 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Sourcing Channels averages 2.2/5 over 190 scored subcaps; ceiling 2.7 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "M&A Cultural Integration averages 1.9/5 over 205 scored subcaps; ceiling 2.4 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "cap applied: Evidence ceiling 2.7",
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Speed to Lead averages 2.0/5 over 287 scored subcaps; ceiling 2.5 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "cap applied: Evidence ceiling 1.7",
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Experience Measurement (NPS/CSAT) averages 1.8/5 over 287 scored subcaps; ceiling 2.3 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "WCAG Compliance Program averages 2.1/5 over 286 scored subcaps; ceiling 2.6 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Delivery Optimization averages 1.9/5 over 255 scored subcaps; ceiling 2.4 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Cross-pillar: P4C3 < 2.5 caps at 3.0",
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Document & Data Processing averages 2.1/5 over 143 scored subcaps; ceiling 2.6 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Channel Fraud averages 2.4/5 over 130 scored subcaps; ceiling 2.9 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Policy Governance averages 2.1/5 over 141 scored subcaps; ceiling 2.6 reflects thin evidence density (0/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Due Diligence Program averages 2.0/5 over 145 scored subcaps; ceiling 2.5 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Residency & Sovereignty Controls averages 1.9/5 over 200 scored subcaps; ceiling 2.4 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "cap applied: Evidence ceiling 3.0",
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Model Serving & Continuous Monitoring averages 1.9/5 over 270 scored subcaps; ceiling 2.4 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Data Product Telemetry & Value Management averages 2.2/5 over 235 scored subcaps; ceiling 2.7 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: CRITIC: SINGLE_SOURCE (was 3.0)",
+        "cap applied: Evidence ceiling 2.7",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Attack Surface Management averages 2.3/5 over 150 scored subcaps; ceiling 2.8 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CFO succession: Jerry Salinas (38 years at Frost, since 1986) retired end of 2024. Dan Geddes (27-year Frost commercial banker, led Houston expansion) appointed CFO Jan 2025",
+      "evidence": [
+        "E-039"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "CFO succession: Jerry Salinas",
+      "metric": null,
+      "peer_context": "Experience Measurement (NPS/CSAT) runs 1.78/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "CFO succession: Jerry Salinas (38 years at Frost, since 1986) retired end of 2024. Dan Geddes (27-year Frost commercial banker, led Houston expansion) appointed CFO Jan 2025",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "Dan Geddes"
+      },
+      "window": null
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Matt Henson (21 years in Frost accounting) appointed Chief Accounting Officer Jan 2025. Multiple planned, orderly transitions.",
+      "evidence": [
+        "E-039"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Matt Henson (21 years in Frost accounting) appointed Chief…",
+      "metric": null,
+      "peer_context": "Experience Measurement (NPS/CSAT) runs 1.78/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Matt Henson (21 years in Frost accounting) appointed Chief Accounting Officer Jan 2025. Multiple planned, orderly transitions.",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "Matt Henson (21 years in Frost accounting) appointed Chief…"
+      },
+      "window": null
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Risk analytics: Quant Risk Modeling Analysts hiring (I+II levels). DFAST-style internal stress testing implied by well-capitalized status. Risk Committee quarterly reporting. Marketing analytics: SFMC + attribution modeling confirmed (MatrixBCG).",
+      "evidence": [
+        "E-149"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Risk analytics: Quant Risk Modeling Analysts hiring",
+      "metric": null,
+      "peer_context": "Experience Measurement (NPS/CSAT) runs 1.78/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Risk analytics: Quant Risk Modeling Analysts hiring (I+II levels). DFAST-style internal stress testing implied by well-capitalized status. Risk Committee quarterly reporting. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Disruption from competitor M&A driving new relationships — twice as many from acquired banks in Q4 vs prior quarters (Jan 2026).",
+      "evidence": [
+        "E-021"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Disruption from competitor M&A driving new relationships",
+      "metric": null,
+      "peer_context": "Experience Measurement (NPS/CSAT) runs 1.78/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Sourcing Channels — highest-fit surface at 76/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Disruption from competitor M&A driving new relationships — twice as many from acquired banks in Q4 vs prior quarters (Jan 2026). Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Disruption from competitor M&A driving new relationships"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Experience Measurement (NPS/CSAT) scores 1.78/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-021",
+        "E-031",
+        "E-034",
+        "E-035"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Experience Measurement (NPS/CSAT) scores 1.78/5",
+      "metric": "Experience Measurement (NPS/CSAT) 1.78/5 vs peer 2.50",
+      "peer_context": "Experience Measurement (NPS/CSAT) runs 1.78/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Sourcing Channels — highest-fit surface at 76/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C2",
+      "text": "Experience Measurement (NPS/CSAT) scores 1.78/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

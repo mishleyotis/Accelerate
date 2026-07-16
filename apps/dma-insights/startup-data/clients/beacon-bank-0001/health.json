@@ -1,0 +1,3153 @@
+{
+  "alerts": [
+    {
+      "age_days": 1,
+      "body": "110 subcaps in P1C3 are supported by fewer than 2 evidence rows in the active run (70 with none). Recommended action: PROXY_ESCALATION.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 0,
+      "id": "8c25f0fa-9482-495c-8a6f-e00f056262c7",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C3.1.3",
+        "P1C3.1.3",
+        "P1C3.1.3",
+        "P1C3.1.3",
+        "P1C3.1.3",
+        "P1C3.9.3",
+        "P1C3.9.3",
+        "P1C3.9.3",
+        "P1C3.9.3",
+        "P1C3.9.3",
+        "P1C3.5.1",
+        "P1C3.5.1",
+        "P1C3.5.1",
+        "P1C3.5.1",
+        "P1C3.5.1",
+        "P1C3.5.3",
+        "P1C3.5.3",
+        "P1C3.5.3",
+        "P1C3.5.3",
+        "P1C3.5.3",
+        "P1C3.9.4",
+        "P1C3.9.4",
+        "P1C3.9.4",
+        "P1C3.9.4",
+        "P1C3.9.4",
+        "P1C3.5.2",
+        "P1C3.5.2",
+        "P1C3.5.2",
+        "P1C3.5.2",
+        "P1C3.5.2",
+        "P1C3.3.3",
+        "P1C3.3.3",
+        "P1C3.3.3",
+        "P1C3.3.3",
+        "P1C3.3.3",
+        "P1C3.6.4",
+        "P1C3.6.4",
+        "P1C3.6.4",
+        "P1C3.6.4",
+        "P1C3.6.4",
+        "P1C3.2.1",
+        "P1C3.2.1",
+        "P1C3.2.1",
+        "P1C3.2.1",
+        "P1C3.2.1",
+        "P1C3.4.1",
+        "P1C3.4.1",
+        "P1C3.4.1",
+        "P1C3.4.1",
+        "P1C3.4.1"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "PROXY_ESCALATION",
+      "resolution": null,
+      "severity": "high",
+      "title": "Thin evidence across 110 subcaps in P1C3",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "45 subcaps in P1C4 are supported by fewer than 2 evidence rows in the active run (20 with none). Recommended action: PROXY_ESCALATION.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 0,
+      "id": "466dc7de-adea-461c-a855-fb056cf57e67",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C4.6.4",
+        "P1C4.6.4",
+        "P1C4.6.4",
+        "P1C4.6.4",
+        "P1C4.6.4",
+        "P1C4.2.4",
+        "P1C4.2.4",
+        "P1C4.2.4",
+        "P1C4.2.4",
+        "P1C4.2.4",
+        "P1C4.3.3",
+        "P1C4.3.3",
+        "P1C4.3.3",
+        "P1C4.3.3",
+        "P1C4.3.3",
+        "P1C4.7.3",
+        "P1C4.7.3",
+        "P1C4.7.3",
+        "P1C4.7.3",
+        "P1C4.7.3",
+        "P1C4.3.4",
+        "P1C4.3.4",
+        "P1C4.3.4",
+        "P1C4.3.4",
+        "P1C4.3.4",
+        "P1C4.1.4",
+        "P1C4.1.4",
+        "P1C4.1.4",
+        "P1C4.1.4",
+        "P1C4.1.4",
+        "P1C4.1.6",
+        "P1C4.1.6",
+        "P1C4.1.6",
+        "P1C4.1.6",
+        "P1C4.1.6",
+        "P1C4.1.3",
+        "P1C4.1.3",
+        "P1C4.1.3",
+        "P1C4.1.3",
+        "P1C4.1.3",
+        "P1C4.1.5",
+        "P1C4.1.5",
+        "P1C4.1.5",
+        "P1C4.1.5",
+        "P1C4.1.5"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "PROXY_ESCALATION",
+      "resolution": null,
+      "severity": "high",
+      "title": "Thin evidence across 45 subcaps in P1C4",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "166 subcaps in P2C3 are supported by fewer than 2 evidence rows in the active run (5 with none). Recommended action: PROXY_ESCALATION.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 0,
+      "id": "026b2184-b889-426a-8569-d4ba36b3e1ca",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C3.3.4",
+        "P2C3.3.4",
+        "P2C3.3.4",
+        "P2C3.3.4",
+        "P2C3.3.4",
+        "P2C3.8.4",
+        "P2C3.8.4",
+        "P2C3.8.4",
+        "P2C3.8.4",
+        "P2C3.8.4",
+        "P2C3.7.4",
+        "P2C3.7.4",
+        "P2C3.7.4",
+        "P2C3.7.4",
+        "P2C3.7.4",
+        "P2C3.7.2",
+        "P2C3.7.2",
+        "P2C3.7.2",
+        "P2C3.7.2",
+        "P2C3.7.2",
+        "P2C3.8.2",
+        "P2C3.8.2",
+        "P2C3.8.2",
+        "P2C3.8.2",
+        "P2C3.8.2",
+        "P2C3.5.7",
+        "P2C3.5.7",
+        "P2C3.5.7",
+        "P2C3.5.7",
+        "P2C3.5.7",
+        "P2C3.3.2",
+        "P2C3.3.2",
+        "P2C3.3.2",
+        "P2C3.3.2",
+        "P2C3.3.2",
+        "P2C3.7.5",
+        "P2C3.7.5",
+        "P2C3.7.5",
+        "P2C3.7.5",
+        "P2C3.7.5",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.3.7",
+        "P2C3.8.6",
+        "P2C3.8.6",
+        "P2C3.8.6",
+        "P2C3.8.6",
+        "P2C3.8.6"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "PROXY_ESCALATION",
+      "resolution": null,
+      "severity": "high",
+      "title": "Thin evidence across 166 subcaps in P2C3",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "125 subcaps in P1C2 are supported by fewer than 2 evidence rows in the active run (25 with none). Recommended action: PROXY_ESCALATION.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 0,
+      "id": "3cc41059-07c5-4116-b2fa-96b9daf9a2cb",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.8.2",
+        "P1C2.1.5",
+        "P1C2.1.5",
+        "P1C2.1.5",
+        "P1C2.1.5",
+        "P1C2.1.5",
+        "P1C2.8.6",
+        "P1C2.8.6",
+        "P1C2.8.6",
+        "P1C2.8.6",
+        "P1C2.8.6",
+        "P1C2.8.1",
+        "P1C2.8.1",
+        "P1C2.8.1",
+        "P1C2.8.1",
+        "P1C2.8.1",
+        "P1C2.1.7",
+        "P1C2.1.7",
+        "P1C2.1.7",
+        "P1C2.1.7",
+        "P1C2.1.7",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.3.5",
+        "P1C2.1.6",
+        "P1C2.1.6",
+        "P1C2.1.6",
+        "P1C2.1.6",
+        "P1C2.1.6",
+        "P1C2.8.3",
+        "P1C2.8.3",
+        "P1C2.8.3",
+        "P1C2.8.3",
+        "P1C2.8.3",
+        "P1C2.1.4",
+        "P1C2.1.4",
+        "P1C2.1.4",
+        "P1C2.1.4",
+        "P1C2.1.4",
+        "P1C2.5.2",
+        "P1C2.5.2",
+        "P1C2.5.2",
+        "P1C2.5.2",
+        "P1C2.5.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "PROXY_ESCALATION",
+      "resolution": null,
+      "severity": "high",
+      "title": "Thin evidence across 125 subcaps in P1C2",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "70 subcaps in P2C4 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "f956cd37-1dcc-47e9-aa21-5a5e856ce5e4",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.8.5",
+        "P2C4.3.3",
+        "P2C4.3.3",
+        "P2C4.3.3",
+        "P2C4.3.3",
+        "P2C4.3.3",
+        "P2C4.8.4",
+        "P2C4.8.4",
+        "P2C4.8.4",
+        "P2C4.8.4",
+        "P2C4.8.4",
+        "P2C4.7.5",
+        "P2C4.7.5",
+        "P2C4.7.5",
+        "P2C4.7.5",
+        "P2C4.7.5",
+        "P2C4.7.3",
+        "P2C4.7.3",
+        "P2C4.7.3",
+        "P2C4.7.3",
+        "P2C4.7.3",
+        "P2C4.8.3",
+        "P2C4.8.3",
+        "P2C4.8.3",
+        "P2C4.8.3",
+        "P2C4.8.3",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.6",
+        "P2C4.3.2",
+        "P2C4.3.2",
+        "P2C4.3.2",
+        "P2C4.3.2",
+        "P2C4.3.2",
+        "P2C4.7.6",
+        "P2C4.7.6",
+        "P2C4.7.6",
+        "P2C4.7.6",
+        "P2C4.7.6",
+        "P2C4.8.2",
+        "P2C4.8.2",
+        "P2C4.8.2",
+        "P2C4.8.2",
+        "P2C4.8.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 70 subcaps in P2C4",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "8 subcaps in P3C1 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "78a6f96e-f6db-4d09-8f33-ccbbf7d94ee1",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P3C1.3.RB2",
+        "P3C1.8.RB1",
+        "P3C1.3.RB1",
+        "P3C1.4.4",
+        "P3C1.4.4",
+        "P3C1.4.4",
+        "P3C1.4.4",
+        "P3C1.4.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 8 subcaps in P3C1",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "25 subcaps in P3C2 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "a4f90f49-bbc2-4dd9-bc58-d870c1065b0a",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P3C2.7.4",
+        "P3C2.7.4",
+        "P3C2.7.4",
+        "P3C2.7.4",
+        "P3C2.7.4",
+        "P3C2.3.4",
+        "P3C2.3.4",
+        "P3C2.3.4",
+        "P3C2.3.4",
+        "P3C2.3.4",
+        "P3C2.8.3",
+        "P3C2.8.3",
+        "P3C2.8.3",
+        "P3C2.8.3",
+        "P3C2.8.3",
+        "P3C2.8.4",
+        "P3C2.8.4",
+        "P3C2.8.4",
+        "P3C2.8.4",
+        "P3C2.8.4",
+        "P3C2.7.3",
+        "P3C2.7.3",
+        "P3C2.7.3",
+        "P3C2.7.3",
+        "P3C2.7.3"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 25 subcaps in P3C2",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "11 subcaps in P3C3 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "098371ee-b57a-456e-92ca-48ad1e970e42",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P3C3.6.4",
+        "P3C3.6.4",
+        "P3C3.6.4",
+        "P3C3.6.4",
+        "P3C3.6.4",
+        "P3C3.7.4",
+        "P3C3.7.4",
+        "P3C3.7.4",
+        "P3C3.7.4",
+        "P3C3.7.4",
+        "P3C3.8.RB1"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 11 subcaps in P3C3",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "60 subcaps in P1C1 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "1539f9d8-dfdd-4d23-8666-ef2b5d6d16ca",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C1.5.5",
+        "P1C1.5.5",
+        "P1C1.5.5",
+        "P1C1.5.5",
+        "P1C1.5.5",
+        "P1C1.7.3",
+        "P1C1.7.3",
+        "P1C1.7.3",
+        "P1C1.7.3",
+        "P1C1.7.3",
+        "P1C1.6.5",
+        "P1C1.6.5",
+        "P1C1.6.5",
+        "P1C1.6.5",
+        "P1C1.6.5",
+        "P1C1.7.4",
+        "P1C1.7.4",
+        "P1C1.7.4",
+        "P1C1.7.4",
+        "P1C1.7.4",
+        "P1C1.7.1",
+        "P1C1.7.1",
+        "P1C1.7.1",
+        "P1C1.7.1",
+        "P1C1.7.1",
+        "P1C1.3.2",
+        "P1C1.3.2",
+        "P1C1.3.2",
+        "P1C1.3.2",
+        "P1C1.3.2",
+        "P1C1.7.2",
+        "P1C1.7.2",
+        "P1C1.7.2",
+        "P1C1.7.2",
+        "P1C1.7.2",
+        "P1C1.2.5",
+        "P1C1.2.5",
+        "P1C1.2.5",
+        "P1C1.2.5",
+        "P1C1.2.5",
+        "P1C1.1.3",
+        "P1C1.1.3",
+        "P1C1.1.3",
+        "P1C1.1.3",
+        "P1C1.1.3",
+        "P1C1.6.4",
+        "P1C1.6.4",
+        "P1C1.6.4",
+        "P1C1.6.4",
+        "P1C1.6.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 60 subcaps in P1C1",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "55 subcaps in P4C2 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "eb3fd040-eefd-466e-bc0c-2584da4dd5fe",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P4C2.4.12",
+        "P4C2.4.12",
+        "P4C2.4.12",
+        "P4C2.4.12",
+        "P4C2.4.12",
+        "P4C2.4.8",
+        "P4C2.4.8",
+        "P4C2.4.8",
+        "P4C2.4.8",
+        "P4C2.4.8",
+        "P4C2.4.13",
+        "P4C2.4.13",
+        "P4C2.4.13",
+        "P4C2.4.13",
+        "P4C2.4.13",
+        "P4C2.2.10",
+        "P4C2.2.10",
+        "P4C2.2.10",
+        "P4C2.2.10",
+        "P4C2.2.10",
+        "P4C2.2.8",
+        "P4C2.2.8",
+        "P4C2.2.8",
+        "P4C2.2.8",
+        "P4C2.2.8",
+        "P4C2.2.7",
+        "P4C2.2.7",
+        "P4C2.2.7",
+        "P4C2.2.7",
+        "P4C2.2.7",
+        "P4C2.2.6",
+        "P4C2.2.6",
+        "P4C2.2.6",
+        "P4C2.2.6",
+        "P4C2.2.6",
+        "P4C2.2.9",
+        "P4C2.2.9",
+        "P4C2.2.9",
+        "P4C2.2.9",
+        "P4C2.2.9",
+        "P4C2.4.14",
+        "P4C2.4.14",
+        "P4C2.4.14",
+        "P4C2.4.14",
+        "P4C2.4.14",
+        "P4C2.4.9",
+        "P4C2.4.9",
+        "P4C2.4.9",
+        "P4C2.4.9",
+        "P4C2.4.9"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 55 subcaps in P4C2",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "40 subcaps in P1C5 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "fcc66fc4-b8ae-4c00-80f7-af581e4f4c2a",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P1C5.3.1",
+        "P1C5.3.1",
+        "P1C5.3.1",
+        "P1C5.3.1",
+        "P1C5.3.1",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.4",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.3.3",
+        "P1C5.2.4",
+        "P1C5.2.4",
+        "P1C5.2.4",
+        "P1C5.2.4",
+        "P1C5.2.4",
+        "P1C5.2.3",
+        "P1C5.2.3",
+        "P1C5.2.3",
+        "P1C5.2.3",
+        "P1C5.2.3",
+        "P1C5.3.2",
+        "P1C5.3.2",
+        "P1C5.3.2",
+        "P1C5.3.2",
+        "P1C5.3.2",
+        "P1C5.1.3",
+        "P1C5.1.3",
+        "P1C5.1.3",
+        "P1C5.1.3",
+        "P1C5.1.3",
+        "P1C5.1.4",
+        "P1C5.1.4",
+        "P1C5.1.4",
+        "P1C5.1.4",
+        "P1C5.1.4"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 40 subcaps in P1C5",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "142 subcaps in P2C1 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "aaf38671-502a-4e76-af17-fa8f7f6a2c82",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C1.6.5",
+        "P2C1.6.5",
+        "P2C1.6.5",
+        "P2C1.6.5",
+        "P2C1.6.5",
+        "P2C1.4.RB1",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.8.5",
+        "P2C1.5.4",
+        "P2C1.5.4",
+        "P2C1.5.4",
+        "P2C1.5.4",
+        "P2C1.5.4",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.6.8",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.8.2",
+        "P2C1.3.5",
+        "P2C1.3.5",
+        "P2C1.3.5",
+        "P2C1.3.5",
+        "P2C1.3.5",
+        "P2C1.5.6",
+        "P2C1.5.6",
+        "P2C1.5.6",
+        "P2C1.5.6",
+        "P2C1.5.6",
+        "P2C1.5.2",
+        "P2C1.5.2",
+        "P2C1.5.2",
+        "P2C1.5.2",
+        "P2C1.5.2",
+        "P2C1.4.4",
+        "P2C1.4.4",
+        "P2C1.4.4",
+        "P2C1.4.4",
+        "P2C1.4.4",
+        "P2C1.2.2",
+        "P2C1.2.2",
+        "P2C1.2.2",
+        "P2C1.2.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 142 subcaps in P2C1",
+      "waive_note": null
+    },
+    {
+      "age_days": 1,
+      "body": "107 subcaps in P2C2 are supported by fewer than 2 evidence rows in the active run (0 with none). Recommended action: TIER_UPGRADE.",
+      "closed_at": null,
+      "entity_display_id": null,
+      "entity_id": null,
+      "entity_name": null,
+      "evidence_count": 1,
+      "id": "a93cf974-accd-4156-9e1a-09f3c7e779a6",
+      "kind": "THIN_EVIDENCE",
+      "linked_e_ids": [],
+      "linked_subcap_ids": [
+        "P2C2.4.RB1",
+        "P2C2.2.10",
+        "P2C2.2.10",
+        "P2C2.2.10",
+        "P2C2.2.10",
+        "P2C2.2.10",
+        "P2C2.3.6",
+        "P2C2.3.6",
+        "P2C2.3.6",
+        "P2C2.3.6",
+        "P2C2.3.6",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.8.4",
+        "P2C2.9.2",
+        "P2C2.9.2",
+        "P2C2.9.2",
+        "P2C2.9.2",
+        "P2C2.9.2",
+        "P2C2.9.1",
+        "P2C2.9.1",
+        "P2C2.9.1",
+        "P2C2.9.1",
+        "P2C2.9.1",
+        "P2C2.3.RB1",
+        "P2C2.2.8",
+        "P2C2.2.8",
+        "P2C2.2.8",
+        "P2C2.2.8",
+        "P2C2.2.8",
+        "P2C2.3.1",
+        "P2C2.3.1",
+        "P2C2.3.1",
+        "P2C2.3.1",
+        "P2C2.3.1",
+        "P2C2.8.3",
+        "P2C2.8.3",
+        "P2C2.8.3",
+        "P2C2.8.3",
+        "P2C2.8.3",
+        "P2C2.2.9",
+        "P2C2.2.9",
+        "P2C2.2.9",
+        "P2C2.2.9",
+        "P2C2.2.9",
+        "P2C2.2.2",
+        "P2C2.2.2",
+        "P2C2.2.2"
+      ],
+      "opened_at": "2026-07-02T23:12:45.785804Z",
+      "proxy_searched": false,
+      "recommended_action": "TIER_UPGRADE",
+      "resolution": null,
+      "severity": "medium",
+      "title": "Thin evidence across 107 subcaps in P2C2",
+      "waive_note": null
+    }
+  ],
+  "audit_logs": {
+    "contradictions": [
+      {
+        "confidence_impact": "MEDIUM confidence on P3C2 subcaps despite CAMS certification",
+        "contradiction_id": "CONT-001",
+        "contradiction_type": "SOFT",
+        "evidence_a_claim": "Marshall Ponzi \u2014 Berkshire transaction monitoring failed (NBT warning ignored)",
+        "evidence_a_ers": "4.5",
+        "evidence_a_id": "E-058",
+        "evidence_b_claim": "CAMS-certified FIU hierarchy suggests compliance program exists",
+        "evidence_b_ers": "3.0",
+        "evidence_b_id": "E-061",
+        "flagged_in_report": "YES",
+        "justification": "Court filing documents specific control failure; FIU staffing doesn't contradict",
+        "resolution_rule": "Hard contradiction: E-058 (T1 court filing) overrides E-061 (T2 staffing signal)",
+        "run_id": "DMA-ASM-BBT-20260511-0001",
+        "subcap_id": "P3C2.3",
+        "winner": "E-058"
+      }
+    ],
+    "reasoning_chain": []
+  },
+  "caps_applied": [
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-001",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.1.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-002",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.1.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-003",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.1.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-004",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.1.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-005",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.1.5",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-006",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.1.6",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-040",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.10.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-041",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.10.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-007",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.2.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-008",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.2.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-009",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.2.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-010",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.2.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-011",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.3.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-012",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.3.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-013",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.3.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-014",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.3.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-015",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.4.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-016",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.4.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-017",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.4.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-018",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.4.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-019",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.5.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-020",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.5.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-021",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.5.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-022",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.5.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-023",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.5.5",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-024",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.5.6",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-025",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.6.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-026",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.6.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-027",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.6.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-028",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.6.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-029",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.7.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-030",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.7.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-031",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.7.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-032",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.8.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-033",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.8.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-034",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.8.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-035",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.8.4",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-036",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.8.5",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-037",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.9.1",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-038",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.9.2",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "SENTIMENT",
+      "date_applied": null,
+      "log_id": "CAP-039",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C4.9.3",
+      "trigger_condition": "ISS-002: SENTIMENT cap 3.0 (Berkshire Indeed 2.8/5)",
+      "trigger_evidence": [
+        "E-020"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "3.0",
+      "cap_type": "CROSS_PILLAR",
+      "date_applied": null,
+      "log_id": "CAP-042",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.1.1",
+      "trigger_condition": "CROSS_PILLAR: P3C3=2.26<2.5 \u2192 P2C2 cap 3.0 (was 3.5)",
+      "trigger_evidence": [
+        "E-037"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "3.0",
+      "cap_type": "CROSS_PILLAR",
+      "date_applied": null,
+      "log_id": "CAP-043",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.1.2",
+      "trigger_condition": "CROSS_PILLAR: P3C3=2.26<2.5 \u2192 P2C2 cap 3.0 (was 3.5)",
+      "trigger_evidence": [
+        "E-037"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "3.0",
+      "cap_type": "CROSS_PILLAR",
+      "date_applied": null,
+      "log_id": "CAP-044",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.1.3",
+      "trigger_condition": "CROSS_PILLAR: P3C3=2.26<2.5 \u2192 P2C2 cap 3.0 (was 3.5)",
+      "trigger_evidence": [
+        "E-037"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "3.0",
+      "cap_type": "CROSS_PILLAR",
+      "date_applied": null,
+      "log_id": "CAP-045",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.5.1",
+      "trigger_condition": "CROSS_PILLAR: P3C3=2.26<2.5 \u2192 P2C2 cap 3.0 (was 3.5)",
+      "trigger_evidence": [
+        "E-037"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "3.0",
+      "cap_type": "CROSS_PILLAR",
+      "date_applied": null,
+      "log_id": "CAP-046",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.6.1",
+      "trigger_condition": "CROSS_PILLAR: P3C3=2.26<2.5 \u2192 P2C2 cap 3.0 (was 3.5)",
+      "trigger_evidence": [
+        "E-037"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "3.0",
+      "cap_type": "CROSS_PILLAR",
+      "date_applied": null,
+      "log_id": "CAP-047",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.8.1",
+      "trigger_condition": "CROSS_PILLAR: P3C3=2.26<2.5 \u2192 P2C2 cap 3.0 (was 3.5)",
+      "trigger_evidence": [
+        "E-037"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-048",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.1.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-049",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.1.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-050",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.1.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-051",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.1.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-052",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.2.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-053",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.2.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-054",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.2.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-055",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.3.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-056",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.3.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-057",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.3.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-058",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.3.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-059",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.4.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-060",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.4.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-061",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.4.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-062",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.5.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-063",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.5.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-064",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.5.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-065",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.5.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-066",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.7.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-067",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.7.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-068",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.7.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-069",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.7.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-070",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.8.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-071",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.8.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-072",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.8.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-073",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.8.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-074",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-075",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-076",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-077",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-078",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.2.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-079",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.2.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-080",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.2.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-081",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.2.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-082",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.3.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-083",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.3.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-084",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.3.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-085",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.3.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-086",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.5.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-087",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.5.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-088",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.5.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-089",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.5.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-090",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.6.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-091",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.6.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-092",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.6.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-093",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.6.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-094",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.7.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-095",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.7.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-096",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.7.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-097",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.7.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-098",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.8.1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-099",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.8.2",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-100",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.8.3",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-101",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.8.4",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": "5.0",
+      "cap_type": "REGULATORY_LITIGATION",
+      "date_applied": null,
+      "log_id": "CAP-102",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.8.RB1",
+      "trigger_condition": "ISS-001: REGULATORY_LITIGATION cap 2.0 (Marshall Ponzi M2 ceiling)",
+      "trigger_evidence": [
+        "E-059"
+      ]
+    }
+  ],
+  "entity_display_id": "beacon-bank-0001",
+  "evidence_age": [
+    {
+      "e_id": "E-006",
+      "freshness_band": "stale",
+      "published_date": "2011-09-30",
+      "recency_months": 176,
+      "source_name": "Berkshire Hills Bancorp 2011 8-K \u2014 FIS IBS Core Banking Agreement",
+      "tier": 1
+    },
+    {
+      "e_id": "E-015",
+      "freshness_band": "stale",
+      "published_date": "2021-04-05",
+      "recency_months": 61,
+      "source_name": "Brookline Bank Innovation Partnership \u2014 Prolific Banking 'On-Ramp' (April 2021)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-014",
+      "freshness_band": "stale",
+      "published_date": "2022-03-28",
+      "recency_months": 50,
+      "source_name": "Berkshire Bank 2022 Press Release \u2014 Narmi Partnership Expansion + 'BEST' Digital Strategy",
+      "tier": 2
+    },
+    {
+      "e_id": "E-017",
+      "freshness_band": "stale",
+      "published_date": "2023-04-26",
+      "recency_months": 37,
+      "source_name": "Berkshire Bank 2022 ESG Report \u2014 Purpose Performance that Matters (BEST Community Comeback)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-053",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Berkshire Bank Berkshire One Hybrid Concierge Model \u2014 Digital-First Banking Operations Architecture",
+      "tier": 2
+    },
+    {
+      "e_id": "E-055",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Berkshire RTP via Finastra (2019) + Brookline Mona Macero Cash Mgmt (2023) + ACH Fast Credit FAQ + Mass DOB SUM Network \u2014 Multi-Channel/Instant Payments/Deposit Ops",
+      "tier": 1
+    },
+    {
+      "e_id": "E-057",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Brookline Bancorp Named Risk Leadership + 2009 Eastern Funding BSA C&D (Historical)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-066",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "SB-3B Gap-Close Proxy \u2014 Regulator Relationship + RB Regulatory Report Suite",
+      "tier": 1
+    },
+    {
+      "e_id": "E-068",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Berkshire + Brookline COVID-19 Business Continuity Response (March-July 2020)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-069",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Beacon Multi-Cloud Infrastructure \u2014 Azure + Red Hat (Brookline) + AWS (Narmi platform)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-073",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Beacon/Berkshire Business Intelligence & Data Analytics Team \u2014 Snowflake + Power BI + Tableau + Alteryx + Axiom Stack",
+      "tier": 1
+    },
+    {
+      "e_id": "E-074",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Brookline Bancorp Privacy & Information Security Framework \u2014 GLBA + 201 CMR 17.00 + FACT Act + NYDFS",
+      "tier": 1
+    },
+    {
+      "e_id": "E-075",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Mona Macero EVP Chief Digital Officer \u2014 Verbatim 'Monetize Data' Mandate + Brookline Digital Strategy",
+      "tier": 1
+    },
+    {
+      "e_id": "E-077",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Narmi AI Platform \u2014 Anthropic Claude via AWS Bedrock + MCP Server + April 2026 Adoption Benchmarking",
+      "tier": 1
+    },
+    {
+      "e_id": "E-078",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Berkshire Bank Upstart AI Lending Partnership \u2014 SEC 8-K + Q2 2022 Earnings Call (ML History + Model Governance)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-081",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Beacon Bank CTO + Berkshire Technology Stack \u2014 Todd Byers CTO + Salesforce/MuleSoft/Snowflake Confirmed (DevOps Job Postings)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-082",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "CrowdStrike Berkshire Bank Case Study \u2014 Falcon XDR + Identity Protection + Zero Trust (CSO Melle Quoted)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-079",
+      "freshness_band": "dated",
+      "published_date": "2024-04-19",
+      "recency_months": 25,
+      "source_name": "Berkshire CEO 'Augmented Intelligence' + DigiTouch AI Strategy + Cloud/Data Warehousing/CRM Investments",
+      "tier": 1
+    },
+    {
+      "e_id": "E-021",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 23,
+      "source_name": "Berkshire Bank 2023 Sustainability Report (filed June 2024 via ARS)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-064",
+      "freshness_band": "aging",
+      "published_date": "2024-09-09",
+      "recency_months": 20,
+      "source_name": "Brookline Bank CRA Performance Evaluation (Sept 9, 2024) \u2014 Fair Lending Assessment",
+      "tier": 1
+    },
+    {
+      "e_id": "E-050",
+      "freshness_band": "aging",
+      "published_date": "2024-12-16",
+      "recency_months": 17,
+      "source_name": "Beacon Financial Investor Presentation \u2014 Merger Announcement (Dec 16, 2024)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-067",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 14,
+      "source_name": "Berkshire Hills Bancorp 2024 10-K Item 1C \u2014 Information Security Program",
+      "tier": 1
+    },
+    {
+      "e_id": "E-018",
+      "freshness_band": "aging",
+      "published_date": "2025-03-03",
+      "recency_months": 14,
+      "source_name": "Brookline Bancorp FY2024 10-K \u2014 Item 1C Cybersecurity Disclosure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-060",
+      "freshness_band": "aging",
+      "published_date": "2025-03-03",
+      "recency_months": 14,
+      "source_name": "Brookline 10-K Item 1C Cybersecurity Risk Management Program \u2014 Full Disclosure",
+      "tier": 1
+    },
+    {
+      "e_id": "E-023",
+      "freshness_band": "aging",
+      "published_date": "2025-03-13",
+      "recency_months": 14,
+      "source_name": "Beacon Bank Brand + Culture Articulation \u2014 Anti-AI Customer Positioning + Hybrid Service Model",
+      "tier": 2
+    },
+    {
+      "e_id": "E-059",
+      "freshness_band": "aging",
+      "published_date": "2025-03-19",
+      "recency_months": 14,
+      "source_name": "Berkshire Hills Bancorp Board Governance \u2014 Risk Management, Capital & Compliance Committee Charter",
+      "tier": 1
+    },
+    {
+      "e_id": "E-051",
+      "freshness_band": "aging",
+      "published_date": "2025-04-04",
+      "recency_months": 13,
+      "source_name": "Berkshire Hills Bancorp 2024 10-K (BHLB) \u2014 Named CIO + DigitouchSM + Operations Architecture",
+      "tier": 1
+    },
+    {
+      "e_id": "E-056",
+      "freshness_band": "current",
+      "published_date": "2025-07-01",
+      "recency_months": 10,
+      "source_name": "Berkshire Bank Named Risk/Compliance C-Suite \u2014 Mass DOB Officer Lookup + Press Releases",
+      "tier": 1
+    },
+    {
+      "e_id": "E-012",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 9,
+      "source_name": "Mass Division of Banks Merger Decision \u2014 Berkshire/BankRI/PCSB into Brookline",
+      "tier": 1
+    },
+    {
+      "e_id": "E-026",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 9,
+      "source_name": "Mass Division of Banks Fair Lending + Multi-Bank CRA Framework (Aggregated)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-040",
+      "freshness_band": "current",
+      "published_date": "2025-08-20",
+      "recency_months": 9,
+      "source_name": "Narmi AI + MCP Server \u2014 Platform AI Capabilities at Beacon (Brand vs. Platform Tension)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-058",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 8,
+      "source_name": "Marshall Ponzi Case Update \u2014 Oct 2024 First Dismissal + Sept 2025 Refile + June 2025 Criminal Indictment",
+      "tier": 1
+    },
+    {
+      "e_id": "E-003",
+      "freshness_band": "current",
+      "published_date": "2025-09-02",
+      "recency_months": 8,
+      "source_name": "Beacon Financial Corp 2025 Form 8-K (Merger Closing) \u2014 Executive Officers Appointment",
+      "tier": 1
+    },
+    {
+      "e_id": "E-007",
+      "freshness_band": "current",
+      "published_date": "2025-09-10",
+      "recency_months": 8,
+      "source_name": "Marshall Ponzi Class Action Complaint \u2014 US District Court Northern District of New York",
+      "tier": 1
+    },
+    {
+      "e_id": "E-037",
+      "freshness_band": "current",
+      "published_date": "2025-09-10",
+      "recency_months": 8,
+      "source_name": "P2C2 RB-Specific Subcap Anchors \u2014 BSA/AML EDD + CRA Consideration (linking existing T1 evidence)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-025",
+      "freshness_band": "current",
+      "published_date": "2025-10-30",
+      "recency_months": 7,
+      "source_name": "Beacon Financial Q3 2025 Earnings Presentation Slide Deck (Oct 30 2025 8-K Filing)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-049",
+      "freshness_band": "current",
+      "published_date": "2026-01-28",
+      "recency_months": 4,
+      "source_name": "Beacon Financial Q4 2025 + FY2025 Earnings Release (Jan 28, 2026)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-004",
+      "freshness_band": "current",
+      "published_date": "2026-01-29",
+      "recency_months": 4,
+      "source_name": "Beacon Financial Q4 2025 Earnings Call Transcript (Jan 29, 2026)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-020",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "LinkedIn Leadership Profiles \u2014 Sumant Pustake, Sean Gray, Cathy Velez, Brian Sullivan, Raakesh Desai (via Exa)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-033",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 3,
+      "source_name": "Beacon Bank Business Banking + Specialty Lending Divisions (Eastern Funding + 44 Business Capital + Clarendon Private)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-070",
+      "freshness_band": "current",
+      "published_date": "2026-02-09",
+      "recency_months": 3,
+      "source_name": "Beacon Feb 6-9, 2026 Systems Conversion \u2014 Major BCP/DR Real-World Test",
+      "tier": 1
+    },
+    {
+      "e_id": "E-028",
+      "freshness_band": "current",
+      "published_date": "2026-02-11",
+      "recency_months": 3,
+      "source_name": "Beacon Bank Website \u2014 Beacon One Digital-First Product Suite (Personal Banking)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-039",
+      "freshness_band": "current",
+      "published_date": "2026-02-12",
+      "recency_months": 3,
+      "source_name": "Beacon Bank Mobile App \u2014 Alerts, Card Controls, Self-Service Functionality (post-Narmi conversion)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-010",
+      "freshness_band": "current",
+      "published_date": "2026-02-23",
+      "recency_months": 3,
+      "source_name": "Beacon Financial Corp Feb 23 2026 Press Release \u2014 Brand Debut",
+      "tier": 2
+    },
+    {
+      "e_id": "E-071",
+      "freshness_band": "current",
+      "published_date": "2026-02-27",
+      "recency_months": 3,
+      "source_name": "Beacon Branch Closure Workflow + Director of Small Business + Special Assets Team",
+      "tier": 1
+    },
+    {
+      "e_id": "E-024",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 2,
+      "source_name": "Beacon Bank Org \u2014 Training & Engagement Functions Identified (The Org / ZoomInfo / Berkshire Edge)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-030",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 2,
+      "source_name": "Reevx Labs \u2014 Beacon Bank's Financial-Inclusion Sub-Brand on Narmi Platform",
+      "tier": 2
+    },
+    {
+      "e_id": "E-002",
+      "freshness_band": "current",
+      "published_date": "2026-03-02",
+      "recency_months": 2,
+      "source_name": "Beacon Financial Corporation FY2025 10-K (filed March 2, 2026)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-016",
+      "freshness_band": "current",
+      "published_date": "2026-03-04",
+      "recency_months": 2,
+      "source_name": "FinTech Futures \u2014 Beacon Bank Adopts Narmi One (March 4, 2026)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-027",
+      "freshness_band": "current",
+      "published_date": "2026-03-04",
+      "recency_months": 2,
+      "source_name": "Narmi-Beacon Bank Case Study + Press Release \u2014 Narmi One Platform Implementation",
+      "tier": 2
+    },
+    {
+      "e_id": "E-032",
+      "freshness_band": "current",
+      "published_date": "2026-03-12",
+      "recency_months": 2,
+      "source_name": "Beacon Bank Online Banking Agreement + Disclosures + Merger FAQ",
+      "tier": 2
+    },
+    {
+      "e_id": "E-031",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 1,
+      "source_name": "Beacon Bank Marketing Organization + Social Presence (Levante CMO + LinkedIn migration)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-001",
+      "freshness_band": "current",
+      "published_date": "2026-04-02",
+      "recency_months": 1,
+      "source_name": "Beacon Financial Corporation 2026 Proxy Statement (DEF 14A) \u2014 Board Composition",
+      "tier": 1
+    },
+    {
+      "e_id": "E-063",
+      "freshness_band": "current",
+      "published_date": "2026-04-02",
+      "recency_months": 1,
+      "source_name": "Beacon Financial 2026 Proxy Statement \u2014 Audit Committee + KPMG Auditor Confirmation",
+      "tier": 1
+    },
+    {
+      "e_id": "E-052",
+      "freshness_band": "current",
+      "published_date": "2026-04-17",
+      "recency_months": 1,
+      "source_name": "Beacon Bank Operations Associate Role \u2014 Clarendon Private + Charles Schwab Custodian (Indeed JOB_122)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-042",
+      "freshness_band": "current",
+      "published_date": "2026-04-20",
+      "recency_months": 1,
+      "source_name": "Beacon Bank Frontline Cross-Sell \u2014 Teller + Call Center Roles (Indeed Job Postings, March-April 2026)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-005",
+      "freshness_band": "current",
+      "published_date": "2026-04-21",
+      "recency_months": 1,
+      "source_name": "Beacon Financial Q1 2026 8-K Earnings Release",
+      "tier": 1
+    },
+    {
+      "e_id": "E-011",
+      "freshness_band": "current",
+      "published_date": "2026-04-23",
+      "recency_months": 1,
+      "source_name": "Beacon Financial Corp Apr 23 2026 CMO Appointment Announcement",
+      "tier": 2
+    },
+    {
+      "e_id": "E-061",
+      "freshness_band": "current",
+      "published_date": "2026-04-28",
+      "recency_months": 1,
+      "source_name": "Beacon Bank Financial Intelligence Unit (FIU) AML/CFT Program \u2014 Indeed JOB_135 AML/CFT Manager Spec",
+      "tier": 1
+    },
+    {
+      "e_id": "E-048",
+      "freshness_band": "current",
+      "published_date": "2026-04-29",
+      "recency_months": 1,
+      "source_name": "Beacon Financial Q1 2026 Earnings Release + Earnings Call Transcript (April 29-30, 2026)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-008",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Indeed Berkshire Bank Employer Profile + Ratings (~365 reviews)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-009",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Indeed Brookline Bank Employer Profile + Ratings (~48 reviews)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-013",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Website \u2014 About / Our Approach pages",
+      "tier": 2
+    },
+    {
+      "e_id": "E-019",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Website Culture Page \u2014 Core Four + Colleague Resource Networks",
+      "tier": 2
+    },
+    {
+      "e_id": "E-022",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Boston Indeed Job Listings \u2014 Hiring Pattern Proxy (May 2026)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-029",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Mobile App Stores (Apple App Store + Google Play) \u2014 Multi-App Fragmentation",
+      "tier": 3
+    },
+    {
+      "e_id": "E-034",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Customer Feedback Aggregators \u2014 Beacon Bank App Store + BBB + Trustpilot + SmartAsset",
+      "tier": 3
+    },
+    {
+      "e_id": "E-035",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Marketing Technology + Analytics \u2014 HYPOTHESIS Framing (Public Disclosure Ceiling)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-036",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Community Bank Brand Positioning \u2014 Marketing Strategy Anchor (RB-Specific)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-038",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Client Support \u2014 Contact Center Hours, Channels, Phone Banking, Secure Messaging",
+      "tier": 2
+    },
+    {
+      "e_id": "E-041",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Beacon Bank Financial Wellness Program + GreenPath Partnership + ReevX Labs Education",
+      "tier": 2
+    },
+    {
+      "e_id": "E-043",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "MyBanker Relationship Model \u2014 Tiered Servicing + Cross-Sell Architecture",
+      "tier": 2
+    },
+    {
+      "e_id": "E-044",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "Customer Feedback Mechanisms \u2014 App Store Reviews, BBB, Trustpilot, Worcester Region Coverage",
+      "tier": 3
+    },
+    {
+      "e_id": "E-045",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P2C4 Personalization Capability HYPOTHESIS Framing \u2014 CDP, NBA, Recommendations, Propensity",
+      "tier": 3
+    },
+    {
+      "e_id": "E-046",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P2C3 Vulnerable Customer Identification + Case Management \u2014 Proxy Anchors",
+      "tier": 2
+    },
+    {
+      "e_id": "E-047",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "SB-2C Gap Closure \u2014 Relationship Banker / Loyalty-Recognition Capability Anchors",
+      "tier": 2
+    },
+    {
+      "e_id": "E-054",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P3C1 Functional-Equivalent Framing \u2014 Automation Strategy/CoE/RPA/Workflow Proxies",
+      "tier": 3
+    },
+    {
+      "e_id": "E-065",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P3C2/P3C3 Proxy Validation \u2014 Functional-Equivalent Framing for Thin-Evidence Subcaps",
+      "tier": 3
+    },
+    {
+      "e_id": "E-072",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P3C4 Proxy Validation \u2014 Functional-Equivalent Framing for Resilience & TPRM Thin Subcaps",
+      "tier": 3
+    },
+    {
+      "e_id": "E-076",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P4C1 Functional-Equivalent Proxy \u2014 Multi-Source Data Governance Synthesis",
+      "tier": 2
+    },
+    {
+      "e_id": "E-080",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P4C2 Functional-Equivalent Proxy \u2014 Analytics & AI Enablement Multi-Source Synthesis",
+      "tier": 2
+    },
+    {
+      "e_id": "E-083",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P4C3 Technology Architecture Functional-Equivalent Synthesis \u2014 Multi-Source",
+      "tier": 2
+    },
+    {
+      "e_id": "E-084",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "P4C4 Information Security Functional-Equivalent Synthesis \u2014 Multi-Source (CrowdStrike + Brookline Item 1C + RSA + Melle)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-085",
+      "freshness_band": "current",
+      "published_date": "2026-05-01",
+      "recency_months": 0,
+      "source_name": "SB-4C Proxy Validation \u2014 P4C3+P4C4 Functional-Equivalent Signals (Carry-Forward + Inference)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-062",
+      "freshness_band": "current",
+      "published_date": "2026-05-08",
+      "recency_months": 0,
+      "source_name": "Beacon Branch Banking Operations \u2014 FIS Core + Compliance/Surprise Audit Program",
+      "tier": 1
+    }
+  ],
+  "narrative": null,
+  "qa_verdict_l1": null,
+  "qa_verdict_l2": {
+    "governance_skill_version": null,
+    "recommendation": null,
+    "verdict": "UNKNOWN",
+    "verdict_basis": null
+  },
+  "run_request_id": "DMA-ASM-BBT-20260511-0001",
+  "safeguard_gates": [],
+  "thin_evidence_subcap_ids": [
+    "P1C1.1.3",
+    "P1C1.2.4",
+    "P1C1.2.5",
+    "P1C1.3.1",
+    "P1C1.3.2",
+    "P1C1.5.5",
+    "P1C1.6.4",
+    "P1C1.6.5",
+    "P1C1.7.1",
+    "P1C1.7.2",
+    "P1C1.7.3",
+    "P1C1.7.4",
+    "P1C2.1.4",
+    "P1C2.1.5",
+    "P1C2.1.6",
+    "P1C2.1.7",
+    "P1C2.1.8",
+    "P1C2.3.4",
+    "P1C2.3.5",
+    "P1C2.3.6",
+    "P1C2.4.1",
+    "P1C2.4.2",
+    "P1C2.4.3",
+    "P1C2.4.4",
+    "P1C2.4.5",
+    "P1C2.5.1",
+    "P1C2.5.2",
+    "P1C2.5.3",
+    "P1C2.5.4",
+    "P1C2.5.5",
+    "P1C2.8.1",
+    "P1C2.8.2",
+    "P1C2.8.3",
+    "P1C2.8.4",
+    "P1C2.8.5",
+    "P1C2.8.6",
+    "P1C2.8.7",
+    "P1C3.1.3",
+    "P1C3.1.4",
+    "P1C3.2.1",
+    "P1C3.2.2",
+    "P1C3.2.3",
+    "P1C3.2.4",
+    "P1C3.2.5",
+    "P1C3.3.3",
+    "P1C3.3.4",
+    "P1C3.3.5",
+    "P1C3.4.1",
+    "P1C3.4.2",
+    "P1C3.4.3",
+    "P1C3.4.4",
+    "P1C3.4.5",
+    "P1C3.5.1",
+    "P1C3.5.2",
+    "P1C3.5.3",
+    "P1C3.5.4",
+    "P1C3.6.4",
+    "P1C3.9.3",
+    "P1C3.9.4",
+    "P1C4.1.3",
+    "P1C4.1.4",
+    "P1C4.1.5",
+    "P1C4.1.6",
+    "P1C4.2.4",
+    "P1C4.3.3",
+    "P1C4.3.4",
+    "P1C4.6.4",
+    "P1C4.7.3",
+    "P1C5.1.3",
+    "P1C5.1.4",
+    "P1C5.2.3",
+    "P1C5.2.4",
+    "P1C5.3.1",
+    "P1C5.3.2",
+    "P1C5.3.3",
+    "P1C5.3.4",
+    "P2C1.1.4",
+    "P2C1.1.RB1",
+    "P2C1.2.2",
+    "P2C1.2.6",
+    "P2C1.3.5",
+    "P2C1.4.3",
+    "P2C1.4.4",
+    "P2C1.4.5",
+    "P2C1.4.6",
+    "P2C1.4.7",
+    "P2C1.4.8",
+    "P2C1.4.RB1",
+    "P2C1.5.1",
+    "P2C1.5.2",
+    "P2C1.5.3",
+    "P2C1.5.4",
+    "P2C1.5.5",
+    "P2C1.5.6",
+    "P2C1.5.7",
+    "P2C1.6.2",
+    "P2C1.6.3",
+    "P2C1.6.4",
+    "P2C1.6.5",
+    "P2C1.6.6",
+    "P2C1.6.7",
+    "P2C1.6.8",
+    "P2C1.8.2",
+    "P2C1.8.5",
+    "P2C1.8.6",
+    "P2C1.8.7",
+    "P2C2.2.10",
+    "P2C2.2.2",
+    "P2C2.2.3",
+    "P2C2.2.5",
+    "P2C2.2.6",
+    "P2C2.2.7",
+    "P2C2.2.8",
+    "P2C2.2.9",
+    "P2C2.3.1",
+    "P2C2.3.2",
+    "P2C2.3.3",
+    "P2C2.3.4",
+    "P2C2.3.5",
+    "P2C2.3.6",
+    "P2C2.3.RB1",
+    "P2C2.4.3",
+    "P2C2.4.RB1",
+    "P2C2.8.3",
+    "P2C2.8.4",
+    "P2C2.9.1",
+    "P2C2.9.2",
+    "P2C2.9.3",
+    "P2C2.9.4",
+    "P2C3.1.2",
+    "P2C3.1.3",
+    "P2C3.1.5",
+    "P2C3.1.6",
+    "P2C3.2.2",
+    "P2C3.2.IC1",
+    "P2C3.3.1",
+    "P2C3.3.2",
+    "P2C3.3.3",
+    "P2C3.3.4",
+    "P2C3.3.5",
+    "P2C3.3.6",
+    "P2C3.3.7",
+    "P2C3.3.RB1",
+    "P2C3.4.1",
+    "P2C3.4.2",
+    "P2C3.4.3",
+    "P2C3.4.4",
+    "P2C3.5.4",
+    "P2C3.5.5",
+    "P2C3.5.6",
+    "P2C3.5.7",
+    "P2C3.6.1",
+    "P2C3.7.1",
+    "P2C3.7.2",
+    "P2C3.7.3",
+    "P2C3.7.4",
+    "P2C3.7.5",
+    "P2C3.8.1",
+    "P2C3.8.2",
+    "P2C3.8.3",
+    "P2C3.8.4",
+    "P2C3.8.5",
+    "P2C3.8.6",
+    "P2C4.3.2",
+    "P2C4.3.3",
+    "P2C4.3.6",
+    "P2C4.7.1",
+    "P2C4.7.2",
+    "P2C4.7.3",
+    "P2C4.7.4",
+    "P2C4.7.5",
+    "P2C4.7.6",
+    "P2C4.8.1",
+    "P2C4.8.2",
+    "P2C4.8.3",
+    "P2C4.8.4",
+    "P2C4.8.5",
+    "P3C1.3.RB1",
+    "P3C1.3.RB2",
+    "P3C1.4.4",
+    "P3C1.8.RB1",
+    "P3C2.3.4",
+    "P3C2.7.3",
+    "P3C2.7.4",
+    "P3C2.8.3",
+    "P3C2.8.4",
+    "P3C3.6.4",
+    "P3C3.7.4",
+    "P3C3.8.RB1",
+    "P4C2.2.10",
+    "P4C2.2.6",
+    "P4C2.2.7",
+    "P4C2.2.8",
+    "P4C2.2.9",
+    "P4C2.4.12",
+    "P4C2.4.13",
+    "P4C2.4.14",
+    "P4C2.4.16",
+    "P4C2.4.8",
+    "P4C2.4.9"
+  ]
+}

@@ -1,0 +1,751 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "CCU",
+      "amount": "$40M",
+      "announced_on": null,
+      "body": "Data Cloud consolidation",
+      "closed_on": null,
+      "details": "Data Cloud consolidation",
+      "e_id": "E-097",
+      "event_date": "2024-10-01",
+      "id": "7f18916c-0417-4ef7-8bd3-bdcc37081c10",
+      "source_url": null,
+      "status": null,
+      "target": "Rockford Bell",
+      "title": "Rockford Bell merger ($40M, 4,300 members)"
+    },
+    {
+      "acquirer": "CCU",
+      "amount": null,
+      "announced_on": "2024-04-01",
+      "body": "MuleSoft active demand",
+      "closed_on": null,
+      "details": "MuleSoft active demand",
+      "e_id": "E-048",
+      "event_date": "2024-04-01",
+      "id": "274ef074-5338-42d8-b095-6b2777a8d830",
+      "source_url": null,
+      "status": "announced",
+      "target": "KCT",
+      "title": "KCT merger announced"
+    },
+    {
+      "acquirer": "CCU",
+      "amount": "$370M",
+      "announced_on": null,
+      "body": "MuleSoft integration play",
+      "closed_on": null,
+      "details": "MuleSoft integration play",
+      "e_id": "E-014",
+      "event_date": "2020-06-01",
+      "id": "0fbdcc18-9112-4497-be51-bffd731c04eb",
+      "source_url": null,
+      "status": "integrating",
+      "target": "Andigo CU",
+      "title": "Andigo CU merger (~$370M, ~40K members)"
+    }
+  ],
+  "entity_display_id": "ccu-0001",
+  "financials": {
+    "lines": [
+      "CCU has grown from $1.2B (2017) to $4.3B (2026) \u2014 258% increase in 9 years driven by organic growth and 11 mergers. The 53% YoY dividend increase ($40.32M \u2192 $61.51M, 2023\u21922024) [E-007] confirms strong financial health and discretionary investment capacity for platform spending.",
+      "CCU has grown from $1.2B (2017) to $4.3B (2026): 258% asset growth, ~15% CAGR including M&A. Dividends paid grew 53% YoY ($40.3M\u2192$61.5M, 2023\u21922024), signaling strong net income improvement and investment capacity [E-007]."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 22,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 580,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Rodriguez joins"
+          },
+          {
+            "fy": "FY2020",
+            "label": "Andigo CU merger (~$370M, ~40K members)"
+          }
+        ],
+        "fy": [
+          "FY2017",
+          "FY2020",
+          "FY2023",
+          "FY2024",
+          "FY2026"
+        ],
+        "geography": "Lake Forest, IL \u2014 state-chartered, national digital reach (open charter)",
+        "headline": "$4.3B net income \u00b7 FY2026",
+        "regulator": "Illinois DFPR (state charter) + NCUA (federal insurer)",
+        "series": {
+          "net_income_m": [
+            4300.0,
+            2000.0,
+            3200.0,
+            4000.0,
+            4300.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        1.2,
+        4.3
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2017,
+          2026
+        ],
+        "metric": "net_income_m",
+        "unit": "usd_b",
+        "values": [
+          1.2,
+          4.3
+        ]
+      }
+    ],
+    "years": [
+      2017,
+      2026
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Lake Forest",
+      "IL \u2014 state-chartered",
+      "national digital reach (open charter)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sean Rathjen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO & President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mike Murphy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Dan Nerroth",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO / CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sean Bowers",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Russ Moore",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Enterprise Data Solutions"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "David Leal",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Information Security & Fraud"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Larry Paull",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Technology Governance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Baron",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Payments"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Charles Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director Data Analytics"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Reichart",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sergio Rodriguez",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP IT Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jennifer Evans",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director Member Experience"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "Consumers Credit Union is the registered trade name of Consumers Cooperative Credit Union, a state-chartered financial cooperative incorporated under Illinois law and supervised by IDFPR. Founded in 1930 (96 years old), CCU operates under the 'people helping people' cooperative philosophy confirmed as the institutional foundation by CEO Sean Rathjen's 2025 annual message [E-195]. CCU's open community charter \u2014 anyone may join via a $5 Consumers Cooperative Association fee \u2014 enables national member acquisition and amplifies the strategic value of Salesforce Marketing Cloud and Data Cloud beyond geographic constraints.",
+    "primary_regulator": "Illinois DFPR (state charter) + NCUA (federal insurer)",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": "Sean Rathjen",
+        "date": "2025-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-003",
+        "excerpt": "2024: 95th Annual Meeting March 12, 2025. Sean Rathjen (CEO) and Scott Drabicki (Chairman) co-authored the CEO/Chairman Report. CEO opening: 'For CCU, 2024 was another year of change and growth, and an unwavering focus o",
+        "title": "2024",
+        "type": "article",
+        "url": "https://www.myconsumers.org/docs/default-source/annual-reports/annualreport_2024_1.pdf?sfvrsn=572d99ab_1"
+      },
+      {
+        "author": null,
+        "date": "2009-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "2008 Board: John Janezic (Chairman), Lou Paparigian (Vice-Chair), Denise Twardy Charts (Secretary), Alice Clements (Treasurer), Ann Campanella, James A. Mahnich Sr. \u2014 confirms longstanding board structure with officer ro",
+        "title": "2008 Board: confirms longstanding board structure with officer roles",
+        "type": "conference",
+        "url": "https://www.myconsumers.org/docs/default-source/annual-reports/2008-annual-report.pdf?sfvrsn=272299ab_1"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-022",
+        "excerpt": "Aug 8, 2025 blog post on McKinsey Technology Trends Outlook covering Agentic AI, application-specific semiconductors, autonomous robotics. Suggests CCU monitors industry trend literature and shares with members.",
+        "title": "Aug 8, 2025 blog post on McKinsey Technology Trends Outlook covering\u2026",
+        "type": "blog",
+        "url": "https://www.consumerscu.org/blog/new-and-notable-technology-trends"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-023",
+        "excerpt": "Feb 12, 2026 LinkedIn post: 'Curious how generative AI can boost your small business? \ud83d\ude80 Join us on February 25 for an engaging workshop full of practical ways AI can support your success. Lunch is on us!' \u2014 CCU directly ",
+        "title": "Feb 12, 2026 LinkedIn post: 'Curious how generative AI can boost your\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/consumers-credit-union-illinois"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-070",
+        "excerpt": "CCU maintains active public press release program: 8+ separate press releases visible on website from 2024-2026 covering GPTW certifications (4 separate releases), branch openings, mergers, and workplace awards \u2014 systema",
+        "title": "CCU maintains active public press release program",
+        "type": "article",
+        "url": "https://www.myconsumers.org/support/press-releases/press-release-details"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "Board includes Dr. Angela Smith (academic background = diversity of professional perspective) and Melanie Meidel \u2014 board diversity evident in gender representation (at least 3 women confirmed: Masi, Mavrothalasitis, Meid",
+        "title": "Board includes Dr. Angela Smith (academic background = diversity of\u2026",
+        "type": "article",
+        "url": "https://www.myconsumers.org/ccu-board-of-directors"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "7a575516-bfee-4d3a-b9fe-f8ce3e1ed830",
+      "issue_id": "GAP-1-P4C2.4.10",
+      "linked_subcap_ids": [
+        "P4C2.4.10"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the None peer median (3.0/5). E-168 (n=1, ERS\u22483.9, T2) \u2192 AI Process Automation at CCU. Maps to M1 'absent/ad-hoc' [SV2 Medium, size adj\u22120.4]. Domain (1.0-2.0, M) confirmed by evidence pattern. Gap to M2: sustain excellence at scale. No caps applied.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI Process Automation"
+    },
+    {
+      "id": "f52e7153-e364-4a2e-bead-a459c9a290b5",
+      "issue_id": "GAP-2-P4C2.4.11",
+      "linked_subcap_ids": [
+        "P4C2.4.11"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the None peer median (3.0/5). E-168 (n=1, ERS\u22483.9, T2) \u2192 Model Serving & Continuous Monitoring at CCU. Maps to M1 'absent/ad-hoc' [SV2 Medium, size adj\u22120.4]. Domain (1.0-2.0, M) confirmed by evidence pattern. Gap to M2: sustain excellence at scale. No caps applied.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Model Serving & Continuous Monitoring"
+    },
+    {
+      "id": "00660009-52ee-47d8-89dc-e14281e29a92",
+      "issue_id": "GAP-3-P4C2.4.12",
+      "linked_subcap_ids": [
+        "P4C2.4.12"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the None peer median (3.0/5). E-168 (n=1, ERS\u22483.9, T2) \u2192 Feature Store & Feature Lifecycle Management at CCU. Maps to M1 'absent/ad-hoc' [SV2 Medium, size adj\u22120.4]. Domain (1.0-2.0, M) confirmed by evidence pattern. Gap to M2: sustain excellence at scale. No caps applied.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Feature Store & Feature Lifecycle Management"
+    },
+    {
+      "id": "c3c4ec56-f50e-4292-82f9-22fe58496c00",
+      "issue_id": "GAP-4-P4C2.4.13",
+      "linked_subcap_ids": [
+        "P4C2.4.13"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the None peer median (3.0/5). E-168 (n=1, ERS\u22483.9, T2) \u2192 Experiment Tracking + Model Registry Operating Model at CCU. Maps to M1 'absent/ad-hoc' [SV2 Medium, size adj\u22120.4]. Domain (1.0-2.0, M) confirmed by evidence pattern. Gap to M2: sustain excellence at scale. No caps applied.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Experiment Tracking + Model Registry Operating Model"
+    },
+    {
+      "id": "e6ac6394-6a11-47f4-86b8-90d21d019d4e",
+      "issue_id": "GAP-5-P4C2.4.14",
+      "linked_subcap_ids": [
+        "P4C2.4.14"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the None peer median (3.0/5). E-168 (n=1, ERS\u22483.9, T2) \u2192 Model CI/CD & Controlled Promotion at CCU. Maps to M1 'absent/ad-hoc' [SV2 Medium, size adj\u22120.4]. Domain (1.0-2.0, M) confirmed by evidence pattern. Gap to M2: sustain excellence at scale. No caps applied.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Model CI/CD & Controlled Promotion"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Borrowed from DMA-RES-CCUIL-20260504-0001 \u00a75.1. Enriched with Layer 1 scoring impacts and connected cap analysis.",
+    "trend_md": "Borrowed from DMA-RES-CCUIL-20260504-0001 Research Report \u00a73 per Phase 7 Data Borrowing Protocol. Assessment-layer maturity annotations added."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.41,
+        "P1C2": 2.54,
+        "P1C3": 2.06,
+        "P1C4": 2.84,
+        "P2C1": 2.51,
+        "P2C2": 2.01,
+        "P2C3": 2.78,
+        "P2C4": 2.17,
+        "P3C1": 2.56,
+        "P3C2": 2.63,
+        "P3C3": 2.71,
+        "P3C4": 2.19,
+        "P4C1": 2.04,
+        "P4C2": 2.24,
+        "P4C3": 2.89,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.47,
+      "peer_name": "AmeriCU Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.29,
+        "P1C2": 2.63,
+        "P1C3": 2.33,
+        "P1C4": 2.33,
+        "P1C5": 2.57,
+        "P2C1": 2.39,
+        "P2C2": 2.31,
+        "P2C3": 2.05,
+        "P2C4": 2.33,
+        "P3C1": 2.26,
+        "P3C2": 2.56,
+        "P3C3": 2.48,
+        "P3C4": 2.48,
+        "P4C1": 2.33,
+        "P4C2": 2.47,
+        "P4C3": 2.47,
+        "P4C4": 3.02
+      },
+      "overall_score": 2.43,
+      "peer_name": "Spokane Teachers Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 2.02,
+        "P1C3": 2.18,
+        "P1C4": 2.29,
+        "P1C5": 1.79,
+        "P2C1": 2.3,
+        "P2C2": 2.34,
+        "P2C3": 2.47,
+        "P2C4": 2.33,
+        "P3C1": 2.48,
+        "P3C2": 2.71,
+        "P3C3": 2.62,
+        "P3C4": 2.59,
+        "P4C1": 2.48,
+        "P4C2": 2.58,
+        "P4C3": 2.57,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.39,
+      "peer_name": "Mission Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.93,
+        "P1C2": 2.61,
+        "P1C3": 2.14,
+        "P1C4": 2.17,
+        "P2C1": 2.27,
+        "P2C2": 2.33,
+        "P2C3": 2.58,
+        "P2C4": 2.53,
+        "P3C1": 2.58,
+        "P3C2": 2.54,
+        "P3C3": 3.0,
+        "P3C4": 2.38,
+        "P4C1": 2.04,
+        "P4C2": 1.71,
+        "P4C3": 2.38,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.37,
+      "peer_name": "AAFCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.94,
+        "P1C2": 2.89,
+        "P1C3": 2.4,
+        "P1C4": 2.38,
+        "P1C5": 1.86,
+        "P2C1": 1.89,
+        "P2C2": 2.4,
+        "P2C3": 2.81,
+        "P2C4": 1.37,
+        "P3C1": 2.39,
+        "P3C2": 2.38,
+        "P3C3": 2.86,
+        "P3C4": 2.41,
+        "P4C1": 1.88,
+        "P4C2": 1.88,
+        "P4C3": 2.45,
+        "P4C4": 2.98
+      },
+      "overall_score": 2.36,
+      "peer_name": "Hudson Valley Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CCUIL-20260504-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": ", Lake County, Lake Zurich, Schaumburg), Bernie's Book Bank Indeed CEO approval: 72.14%",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "benchmark (QuestionPro Q1 2025): Credit unions average NPS 68, 84% CSAT \u2014 well above financial services industry average NPS 41",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 68,
+        "polarity": "neutral",
+        "source": "Net Promoter",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "KCT branches joining; Snowflake EDW building; Gov Lead hiring. ACTIVE NOW: Data Cloud + MuleSoft",
+      "date_precision": "quarter",
+      "e_id": "E-195",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-195",
+        "E-159"
+      ],
+      "id": "bc854ec6-3baf-444f-b7d5-f4369575dae2",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "KCT branches joining Snowflake EDW building"
+    },
+    {
+      "body": "Data Cloud Lumin integration",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "c19e19f3-c9ab-4b11-bb81-c5f7656e2142",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Lumin Digital go-live (cloud-native DBS)"
+    },
+    {
+      "body": "Branch experience via Service Cloud",
+      "date_precision": "month",
+      "e_id": "E-196",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-196"
+      ],
+      "id": "4a61696d-1cc1-4f83-8f83-5684b69a6960",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Lake in the Hills branch opens"
+    },
+    {
+      "body": "IMMEDIATE PAIN: KCT integration is the live MuleSoft use case. Sergio Rodriguez is the internal champion.",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "893819ea-c708-49c6-97c8-791b8d5abacd",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "KCT Credit Union (Kane County Teachers, Elgin IL)"
+    },
+    {
+      "body": "KCT merger completed; Rodriguez joins. MuleSoft: KCT pain acute",
+      "date_precision": "month",
+      "e_id": "E-097",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-097"
+      ],
+      "id": "923f463d-744b-46d2-ab49-d4a77ea6f3f0",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Rodriguez joins"
+    },
+    {
+      "body": "Data Cloud consolidation",
+      "date_precision": "month",
+      "e_id": "E-097",
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [
+        "E-097"
+      ],
+      "id": "7f18916c-0417-4ef7-8bd3-bdcc37081c10",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Rockford Bell merger ($40M, 4,300 members)"
+    },
+    {
+      "body": "Minor integration; future branch expansion signal.",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "3e4d9ca0-b664-4107-a18d-66e0e8ce6e57",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Rockford Bell Credit Union (Loves Park, IL)"
+    },
+    {
+      "body": "MuleSoft active demand",
+      "date_precision": "month",
+      "e_id": "E-048",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "274ef074-5338-42d8-b095-6b2777a8d830",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "KCT merger announced"
+    },
+    {
+      "body": "Creatio CRM deployed \u2014 15 systems consolidated. FSC upgrade target",
+      "date_precision": "year",
+      "e_id": "E-173",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-173"
+      ],
+      "id": "0a92c68a-612f-414e-8fcd-659f09853b58",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "15 systems consolidated"
+    },
+    {
+      "body": "nCino selected (Salesforce-native LOS). PRIMARY SALESFORCE ANCHOR",
+      "date_precision": "year",
+      "e_id": "E-043",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "59909938-6a34-4df9-a695-5bf861cd3551",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "NCino selected (Salesforce-native LOS)"
+    },
+    {
+      "body": "Service Cloud CTI connector",
+      "date_precision": "month",
+      "e_id": "E-191",
+      "event_date": "2022-08-01",
+      "evidence_e_ids": [
+        "E-191"
+      ],
+      "id": "d59627ea-730d-4962-9574-cc254fc56282",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Talkdesk CCaaS deployed"
+    },
+    {
+      "body": "MuleSoft integration play",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2020-06-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "0fbdcc18-9112-4497-be51-bffd731c04eb",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Andigo CU merger (~$370M, ~40K members)"
+    },
+    {
+      "body": "Historical integration precedent; established M&A playbook.",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2020-06-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "94068ab0-5158-4e19-a503-6f1708db83e2",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Andigo Credit Union (Schaumburg, IL)"
+    },
+    {
+      "body": "LGFCU merger. Integration precedent",
+      "date_precision": "month",
+      "e_id": "E-013",
+      "event_date": "2019-12-01",
+      "evidence_e_ids": [
+        "E-013"
+      ],
+      "id": "d6e6c02e-c5c9-472b-b333-e01e059501a8",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Lgfcu merger"
+    },
+    {
+      "body": "Foundational merger; integration debt origin.",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2019-12-01",
+      "evidence_e_ids": [],
+      "id": "ed6f192d-7cf5-4478-9bf2-e9e5b7844640",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Land of Lincoln FCU (LGFCU, Central IL)"
+    }
+  ]
+}

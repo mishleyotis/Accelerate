@@ -1,0 +1,265 @@
+{
+  "entity_display_id": "capital-farm-credit-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C3",
+        "P1C1.4.4",
+        "P1C3.1.4",
+        "P1C3.1.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P1C3",
+      "id": "e75942e6-0883-4c90-8144-3e7fab5f1f60",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-007",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C2"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P3C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-129",
+        "E-108",
+        "E-007"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Prioritize Innovation & Investment: recovering the 1.4-point deficit against the cohort moves overall maturity more than any at-parity category can [E-007].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "Innovation & Investment trails peers by 1.4",
+      "what_text": "Innovation Themes is one of Capital Farm Credit's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Capital Farm Credit's ability to deliver sharper strategic direction and stronger oversight [E-108].",
+      "why_text": "The peer benchmark for Innovation & Investment is 3.0; at 1.6 this institution operates 1.4 points behind the peers it competes with for the same customers [E-129, E-108].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C2.1.5",
+        "P3C1.8.AM2",
+        "P3C1.8.CL4",
+        "P2C3.5.CL1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C2",
+      "id": "985c2580-1ebc-4419-922e-cb93e7c7b45f",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-007",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P1C3"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P3C3"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-108",
+        "E-007"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Start with Customer Journeys & Servicing — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-007].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Customer Journeys & Servicing trails peers by 1.1",
+      "what_text": "Inclusive Eligibility Pathways is one of Capital Farm Credit's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Capital Farm Credit's ability to deliver a stronger, more personalised customer experience [E-108].",
+      "why_text": "Peers score 2.8 on Customer Journeys & Servicing against this institution's 1.6 — the 1.1-point shortfall shows up in every capability rolled into this category [E-065, E-108].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P3C3.2.1",
+        "P3C3.4.RIA1",
+        "P3C3.4.RIA2",
+        "P3C3.4.CIB2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P3C3",
+      "id": "dacc5fa5-3e91-4049-88e2-0ed9280b35f1",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P1C3"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P2C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-075",
+        "E-108",
+        "E-093"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Sequence Compliance & Surveillance into the near-term roadmap: the 1.1-point peer gap is measurable, so progress is provable quarter over quarter [E-093].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "Compliance & Surveillance trails peers by 1.1",
+      "what_text": "Transaction Monitoring is one of Capital Farm Credit's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Capital Farm Credit's ability to deliver more efficient, dependable operations [E-108].",
+      "why_text": "The assessment found: “Compliance team exists per LinkedIn job postings; roles include BSA/AML, fair lending, regulatory reporting. No Chief Compliance Officer title identified separately” [E-075]. At 1.9/5, Compliance & Surveillance is the widest measured deficit vs the peer median (3.0) among this run's remaining categories.",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4",
+        "P3C4.7.3",
+        "P1C2.3.1",
+        "P1C2.3.3",
+        "P1C2.3.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P3C4",
+      "id": "0f9bbb41-3039-4685-bbe4-1801edc83fd3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-095",
+        "E-078",
+        "E-010"
+      ],
+      "linked_subcap_id": "P3C4",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Close the Business Resilience & Third-Party Management gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-010].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Business Resilience & Third-Party Management trails peers by 1.5",
+      "what_text": "DR Testing is one of Capital Farm Credit's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Capital Farm Credit's ability to deliver more efficient, dependable operations [E-078].",
+      "why_text": "Business Resilience & Third-Party Management trails the peers by 1.5 points — a competitive maturity gap that compounds across the pillars it feeds [E-095, E-078].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Score: 1.70/5.0 (level 2 Developing)\nCFC demonstrates above-median maturity in digital strategy formulation and ESG integration. However, governance structures lag peer median (: 2.25 vs. 2.75). Limited documented digital risk appetite frameworks or innovation governance (E-202, https://www.capitalfarmcredit.com/corporate-governance, E-312 [https://ww3.fca.gov/readingrm/exammanual/General%20Guidance/Board%20Policies%20and%20Charters.pdf]).",
+        "heading": "6.1 Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [
+          "E-202",
+          "E-312"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Score: 1.60/5.0 (level 2 Developing)\nLowest score reflecting member experience gaps across marketing and acquisition channels. (Personalization, 3.0) is strength via Dynamics 365 CRM. However, (Digital Marketing, 2.0) lags peer median by 0.50 points—Q2 digital banking operational but underutilized for member acquisition (E-200, https://www.capitalfarmcredit.com/about-us, E-201 [https://www.capitalfarmcredit.com/services], E-329 [https://www.q2.com/products/digital-banking/distributed-cloud-architecture]).",
+        "heading": "6.2 Pillar 2: Member/Customer Experience",
+        "linked_e_ids": [
+          "E-200",
+          "E-201",
+          "E-329"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Score: 2.10/5.0 (level 2 Developing)\n (Core Process Automation, 3.0) is level 3 strength—equipment valuation standardized via Tractor Zoom Pro; collateral appraisal workflow automated. (Compliance, 2.75) above peer median reflecting FCA compliance leadership background (E-300, https://www.tractorzoompro.com/our-solutions/automated-equipment-lists/capital-farm-credit-boosts-appraisal-and-inspection-efficiency-with-equipment-lists, E-310 [https://www.capitalfarmcredit.com/about-us/leadership/], E-312 [https://ww3.fca.gov/readingrm/exammanual/General%20Guidance/Board%20Policies%20and%20Charters.pdf]).",
+        "heading": "6.3 Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [
+          "E-300",
+          "E-310",
+          "E-312"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Score: 2.00/5.0 (level 2 Developing)\n (Technology Architecture, 2.75) shows modern infrastructure investment—Microsoft Azure, Dynamics 365, Oracle HCM Cloud. (Cybersecurity, 2.25) above peer median. However, and at/below median. Analytics maturity lag limits competitive advantage in credit decisioning (E-327, https://rocketreach.co/capital-farm-credit-technology-stack_b5d54e08f42e3a32, E-328 [https://www.capitalfarmcredit.com/about-us/leadership/]).",
+        "heading": "6.4 Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [
+          "E-327",
+          "E-328"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-CFC-20260305-0001"
+}

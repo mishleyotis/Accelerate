@@ -1,0 +1,54 @@
+{
+  "entity_display_id": "sl-green-realty-corp-nys-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Medium-Term Objectives (2025\u20132031)",
+        "source_kind": "docx"
+      },
+      "id": "00dddfe6-b77a-40f5-b540-0ecddc6e2163",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "docx:strategic_section",
+      "title": "Medium-Term Objectives (2025\u20132031)",
+      "verbatim_quote": "Medium-Term Objectives (2025\u20132031)"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Strategic Objective \u2192 Zennify Solution Alignment",
+        "source_kind": "docx"
+      },
+      "id": "4c412423-27a6-402f-96da-540029638bdb",
+      "involved_subcap_ids": [
+        "P1C1.8.2",
+        "P1C1.5.3",
+        "P1C1.1.2",
+        "P1C1.2.5",
+        "P1C4.7.3",
+        "P1C4.7.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Strategic Objective \u2192 Zennify Solution Alignment",
+      "verbatim_quote": "Strategic Objective \u2192 Zennify Solution Alignment"
+    }
+  ]
+}

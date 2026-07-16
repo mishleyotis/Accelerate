@@ -1,0 +1,56 @@
+{
+  "entity_display_id": "penderfund-capital-manag-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-006",
+          "E-014",
+          "E-016",
+          "E-034",
+          "E-048",
+          "E-050"
+        ],
+        "representative_quote": "[EVIDENCE]: (PenderFund Leadership Transitions 2024-2, Pender Growth Fund FY2024 Annual Report ).",
+        "source_kind": "heuristic"
+      },
+      "id": "38ddadf3-ba21-492b-9be7-79ced14f5277",
+      "involved_subcap_ids": [
+        "P1C1.2.2",
+        "P1C1.2.5",
+        "P1C1.3.2",
+        "P1C1.5.2",
+        "P1C1.5.4",
+        "P1C1.5.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "$3,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "82",
+          "delta": null,
+          "kpi_label": "Employees",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

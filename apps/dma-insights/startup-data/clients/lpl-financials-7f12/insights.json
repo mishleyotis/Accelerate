@@ -1,0 +1,469 @@
+{
+  "entity_display_id": "lpl-financials-7f12",
+  "items": [
+    {
+      "affects": [
+        "P4C4.2.3",
+        "P4C4",
+        "P2C4.1.1",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "52c524d1-e115-4965-87a5-28631ba94990",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-123",
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-123",
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-132",
+        "E-123"
+      ],
+      "linked_subcap_id": "P4C4.2.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Digital Identity & Verifiable Credentials a near-term focus for LPL Financials: a scoped investment here would lift it from 2.0 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-123].",
+      "source_rec_id": "REC-01",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Digital Identity & Verifiable Credentials",
+      "what_text": "Digital Identity & Verifiable Credentials is one of LPL Financials's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes LPL Financials's ability to deliver a stronger data and technology foundation [E-132].",
+      "why_text": "scores 2.0/5 against a peer median of 2.9 on the latest assessment; this recommendation targets 6 capabilities [E-053, E-132].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.5.4",
+        "P4C1",
+        "P4C2.6.1",
+        "P1C2.1.1",
+        "P1C1.5.1",
+        "P4C2.7.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "c7563491-87fa-4103-bf98-9cd40d435ca1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-132",
+        "E-067"
+      ],
+      "linked_subcap_id": "P4C1.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Unified Data + AI Asset Governance Control Plane a near-term focus for LPL Financials: a scoped investment here would lift it from 2.0 toward the 2.7 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Unified Data + AI Asset Governance Control Plane",
+      "what_text": "Unified Data + AI Asset Governance Control Plane is one of LPL Financials's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.7 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes LPL Financials's ability to deliver a stronger data and technology foundation [E-132].",
+      "why_text": "scores 2.0/5 against a peer median of 2.7 on the latest assessment; this recommendation targets 6 capabilities [E-025, E-132].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.2.3",
+        "P3C3",
+        "P2C4.1.1",
+        "P1C1.5.1",
+        "P2C2.3.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "b3cc4abf-a392-45a6-951b-30fb54ecc14c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-123",
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-123",
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-132",
+        "E-123"
+      ],
+      "linked_subcap_id": "P3C3.2.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Sanctions Screening a near-term focus for LPL Financials: a scoped investment here would lift it from 2.0 toward the 3.1 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-123].",
+      "source_rec_id": "REC-03",
+      "theme": "Compliance & Surveillance",
+      "title": "Sanctions Screening",
+      "what_text": "Sanctions Screening is one of LPL Financials's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.1 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes LPL Financials's ability to deliver more efficient, dependable operations [E-132].",
+      "why_text": "scores 2.0/5 against a peer median of 3.1 on the latest assessment; this recommendation targets 6 capabilities [E-053, E-132].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2.5.4",
+        "P3C2",
+        "P2C4.1.1",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "037de80f-e3ca-4ebb-a738-bce48b1fa791",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-123",
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-123",
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-132",
+        "E-123"
+      ],
+      "linked_subcap_id": "P3C2.5.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Law Enforcement Coordination a near-term focus for LPL Financials: a scoped investment here would lift it from 2.5 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-123].",
+      "source_rec_id": "REC-04",
+      "theme": "Operational Workflow & Risk",
+      "title": "Law Enforcement Coordination",
+      "what_text": "Law Enforcement Coordination is one of LPL Financials's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes LPL Financials's ability to deliver more efficient, dependable operations [E-132].",
+      "why_text": "scores 2.5/5 against a peer median of 2.9 on the latest assessment; this recommendation targets 6 capabilities [E-053, E-132].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.2",
+        "P4C3",
+        "P1C1.5.1",
+        "P4C4.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "695718f1-0132-4c5d-9ce2-212f45e1c8c4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-132"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-132",
+        "E-022",
+        "E-023"
+      ],
+      "linked_subcap_id": "P4C3.6.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make DevSecOps & Security in Pipeline a near-term focus for LPL Financials: a scoped investment here would lift it from 2.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-023].",
+      "source_rec_id": "REC-05",
+      "theme": "Architecture & Cloud",
+      "title": "DevSecOps & Security in Pipeline",
+      "what_text": "DevSecOps & Security in Pipeline is one of LPL Financials's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes LPL Financials's ability to deliver a stronger data and technology foundation [E-022].",
+      "why_text": "scores 2.5/5 against a peer median of 3.3 on the latest assessment; this recommendation targets 6 capabilities [E-132, E-022].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Public evidence positioned LPL’s strategy pillar at 3.75 (level 4), driven by a $500M annual technology investment, the $285B Commonwealth Financial Network acquisition, and clear competitive positioning as the #1 independent broker-dealer. LPL’s 10-K discloses a formal enterprise risk management framework, and revenue grew at an 18% 5-year CAGR to approximately $11.3 billion.\nDiscovery intelligence reveals this score was materially overstated. The CEO termination for cause (DISC-001) is a direct governance failure that public filings did not disclose. Three to four enterprise reorganizations (DISC-002) with teams dismantled below leadership (DISC-003) have hollowed out the execution layer that translates strategy into operations. New CEO Steinmeier’s enterprise mandate (DISC-004) is the right direction, but it is nascent and arrives at a moment when the organization’s capacity to absorb change is depleted.\n (Talent & Culture) is the most impacted category in the entire assessment. The -0.75 adjustment reflects the compounding effect of three discovery signals: CEO fired for verbal abuse creates a culture-of-fear signal at the top; 3–4 reorganizations destroy retention and institutional knowledge; team dismantling below leadership eliminates the execution capacity that culture depends on. This is not level 3 (standardized) — this is level 2 (recovery mode) where the organization is actively rebuilding basic talent infrastructure.",
+        "heading": "Pillar 1: Strategy & Governance (3.27, M3) — Most Revised",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "LPL’s market-facing capabilities are the strongest pillar in the assessment and required only minor revision (−0.04). The ClientWorks platform anchors advisor experience with 350+ annual enhancements (E-083). At Focus 2025, 6,000+ advisors attended and 78% reported leveraging or planning AI adoption (E-219). LPL added 1,200 new advisors through its digital marketing platform, generating 15,000+ leads (E-163). The firm’s 39% faster advisor growth rate versus peers validates (Digital Marketing) strength.\nThe minor revision reflects two discovery signals: the active FSC RFP (DISC-005) reveals the CRM layer beneath ClientWorks needs upgrading, and the SF CTO services dependency (DISC-009) indicates internal platform expertise gaps. These are execution-layer issues, not strategic ones — the market-facing vision is sound.\nEnforcement cap note: (Client Onboarding) is capped at 3.50 due to the SEC AML/KYC enforcement action (E-075, $18M fine, January 2025). Client onboarding processes cannot score above level 3 when the regulator has documented failures in identity verification and anti-money-laundering protocols.",
+        "heading": "Pillar 2: Market-Facing Experience (3.70, M4) — Minimally Revised",
+        "linked_e_ids": [
+          "E-075",
+          "E-083",
+          "E-163",
+          "E-219"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Operations is LPL’s most enforcement-constrained pillar. The $77.4 million in regulatory fines across five actions (2023–2025) directly cap (Compliance) capability. These are not historical footnotes — the SEC AML/KYC action ($18M) was January 2025 and the off-channel communications action ($50M) was August 2024. FINRA documented 830,000 unsupervised trades (E-177). These actions impose S2 severity caps (≤3.0) on six capability and an S3 adjustment on.\nDiscovery intelligence adds two compounding factors: team dismantling (DISC-003) reduces operational capacity to remediate these findings, and technical debt from reorganizations (DISC-008) creates workflow fragmentation that makes compliance automation harder to implement. The bright spot is (Business Resilience) at 3.26, reflecting strong BCP/DR infrastructure and vendor risk management.\nEnforcement Detail: Five enforcement actions in 24 months is material. The SEC’s $50M off-channel communications fine (E-176) indicates systematic recordkeeping failures across the broker-dealer network. The $18M AML/KYC action (E-075) directly implicates client onboarding controls. FINRA’s finding of 830,000 unsupervised trades (E-177) reveals gaps in supervisory infrastructure. Together, these cap capability at level 3 maximum until demonstrable remediation is documented.",
+        "heading": "Pillar 3: Operations & Risk (2.93, M3)",
+        "linked_e_ids": [
+          "E-075",
+          "E-176",
+          "E-177"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "LPL’s technology story is one of contrast: strong forward investments alongside foundational gaps. The firm deployed Anthropic’s Claude AI to 30,000+ advisors with 78% adoption at Focus 2025 (E-219) — one of the most aggressive AI deployments in wealth management. AWS serves as the primary cloud platform, Kafka powers core trading infrastructure with straight-through processing, and the firm invested $500M in technology in 2024 alone (E-083) with over 250 product enhancements.\nHowever, the foundational layers lag. Chief Data & AI Officer Vaughn Harvey was appointed to build enterprise data governance, but MDM and data lineage tooling remain uncertain. CISO Renana Friedlich (ex-PayPal, 20+ years) was hired December 2024 — a post-enforcement hire signaling the cybersecurity function is being rebuilt rather than optimized. Discovery signals add further constraints: technical debt from 3–4 reorgs (DISC-008), SF CTO services dependency for FSC architecture (DISC-009), and an AI consumption model (DISC-007) that suggests Claude deployment may be usage-based rather than enterprise-governed.\nKey insight: LPL has the technology stack to solve its operational problems. Claude AI could automate KYC enrichment. Kafka could enable real-time trade surveillance. AWS provides the infrastructure for modern data governance. But the integration between P4 (Technology) and P3 (Operations) is where LPL falls short — the tools exist, the operational embedding does not. Discovery confirms this pattern: the technology budget is large, but business process leadership to connect tools to outcomes is missing (DISC-006).",
+        "heading": "Pillar 4: Technology & Data (2.75, M3)",
+        "linked_e_ids": [
+          "E-083",
+          "E-219"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Post-reorg organizations don’t buy “big bang transformation.” They need targeted scope, early validation, and reusable functional components. LPL under Rich Steinmeier’s enterprise mandate needs quick wins that rebuild organizational confidence, demonstrate execution capability, and create platform foundations that scale beyond pilot. The following three 90-day Proof of Value sprints are designed to deliver exactly that."
+  },
+  "run_request_id": "REQ-11C17F12"
+}

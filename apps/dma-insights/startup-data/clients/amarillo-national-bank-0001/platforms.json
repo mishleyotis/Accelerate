@@ -1,0 +1,1907 @@
+{
+  "cards": [
+    {
+      "absent_count": 5,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.5.1",
+        "P1C3.5.2",
+        "P1C3.5.3",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P2C1.2.1",
+        "P2C1.2.2",
+        "P2C1.2.3",
+        "P2C1.3.1",
+        "P2C1.3.2",
+        "P2C1.3.3",
+        "P2C1.4.1",
+        "P2C1.4.2",
+        "P2C1.4.3",
+        "P2C3.2.1",
+        "P2C3.2.2",
+        "P2C3.2.3",
+        "P2C3.4.1",
+        "P2C3.4.2",
+        "P2C3.4.3",
+        "P2C3.5.1",
+        "P2C3.5.2",
+        "P2C3.5.3",
+        "P2C4.3.2",
+        "P3C1.1.1",
+        "P3C1.1.2",
+        "P3C1.1.3",
+        "P3C1.2.2",
+        "P3C1.3.2",
+        "P3C1.4.1",
+        "P3C1.4.2",
+        "P3C1.4.3",
+        "P3C1.5.2",
+        "P3C1.5.3",
+        "P3C2.1.1",
+        "P3C2.1.3",
+        "P3C2.2.2",
+        "P3C2.2.3",
+        "P3C2.3.1",
+        "P3C2.3.2",
+        "P3C2.3.3",
+        "P3C2.4.1",
+        "P3C2.4.2",
+        "P3C2.4.3",
+        "P3C2.5.2",
+        "P3C2.5.3",
+        "P3C3.1.2",
+        "P3C3.1.3",
+        "P3C3.2.2",
+        "P3C3.2.3",
+        "P3C3.3.1",
+        "P3C3.3.2",
+        "P3C3.3.3",
+        "P3C3.5.3",
+        "P3C4.1.1",
+        "P3C4.1.2",
+        "P3C4.1.3",
+        "P3C4.2.1",
+        "P3C4.2.2",
+        "P3C4.2.3",
+        "P3C4.3.1",
+        "P3C4.3.2",
+        "P3C4.3.3",
+        "P3C4.4.1",
+        "P3C4.4.2",
+        "P3C4.4.3",
+        "P3C4.5.2",
+        "P3C4.5.3",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.3.1",
+        "P4C1.3.2",
+        "P4C1.3.3",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.4.3",
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.5.1",
+        "P4C2.5.2",
+        "P4C2.5.3",
+        "P4C3.1.1",
+        "P4C3.1.2",
+        "P4C3.2.1",
+        "P4C3.2.2",
+        "P4C3.2.3",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C3.3.3",
+        "P4C3.4.1",
+        "P4C3.4.2",
+        "P4C3.4.3",
+        "P4C3.5.1",
+        "P4C3.5.2",
+        "P4C3.5.3",
+        "P4C4.1.1",
+        "P4C4.1.2",
+        "P4C4.2.1",
+        "P4C4.2.2",
+        "P4C4.2.3",
+        "P4C4.4.1",
+        "P4C4.4.2",
+        "P4C4.4.3",
+        "P4C4.5.1",
+        "P4C4.5.2",
+        "P4C4.5.3"
+      ],
+      "conversation_starter": "Salesforce (pillar P2) addresses 166 subcaps, starting with P1C1.1.1; fit is 32/100 and the platform is near-ready (one or two prereqs to close).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.1 (prereq 'Customer data foundation': current 2.6 vs. threshold 3.0, status PARTIAL).\n3. Sequence: outline a 166-subcap roadmap starting at P1C1.1.1 and extending to 165 additional subcaps.\nNext step: book a Salesforce workshop scoped to P2, covering the 166-subcap addressable surface.",
+      "conversation_starters": [
+        "Amarillo National Bank scores 1.8 on Reference Data Management (P4C1.4.3) — 0.2 points below the peer median 2.0 [E-016, E-042]. Ask who owns it today, what tooling backs it, and what the review cadence is — Salesforce addresses 166 linked subcaps here and is near-ready (one or two prereqs to close) (fit 32/100).",
+        "Probe the blocker first: 'Customer data foundation' (P4C1.1.1) sits at 2.6 vs the 3.0 readiness threshold (PARTIAL). That gap is what keeps Amarillo National Bank from landing Salesforce now.",
+        "Peer framing: First National Bank of Omaha and Wintrust Financial Corporation are in Amarillo National Bank's benchmark cohort holding the 2.0 median on Reference Data Management. Sequence Salesforce after Databricks → Tableau; next step is a Salesforce workshop scoped to P2."
+      ],
+      "display_name": "Salesforce",
+      "evidence_ids": [
+        "E-016",
+        "E-042",
+        "E-087",
+        "E-001",
+        "E-041",
+        "E-071",
+        "E-084",
+        "E-023"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5005,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 40,
+            "points": 22.2,
+            "value": 0.8889
+          },
+          "opportunity": {
+            "points": 15.5,
+            "value": 0.2591
+          },
+          "readiness": {
+            "light": "amber",
+            "multiplier": 0.85,
+            "penalty_points": -5.7
+          }
+        },
+        "n_addressable": 166,
+        "prereqs": {
+          "P1C2.2.1": {
+            "current_score": 3.0,
+            "name": "Identity & access management",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P2C1.1.1": {
+            "current_score": 3.1,
+            "name": "Sales process digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C1.1.1": {
+            "current_score": 2.6,
+            "name": "Customer data foundation",
+            "status": "PARTIAL",
+            "threshold": 3.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks",
+            "tableau",
+            "twilio",
+            "ncino"
+          ],
+          "rank": 5
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 2.2,
+            "name": "Reference Data Management",
+            "opportunity": 0.5817,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 1.8,
+            "subcap_id": "P4C1.4.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.9,
+            "name": "Data Governance Operating Model",
+            "opportunity": 0.5024,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.1,
+            "subcap_id": "P4C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.9,
+            "name": "MDM Strategy & Golden Record",
+            "opportunity": 0.5024,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.1,
+            "subcap_id": "P4C1.4.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.7,
+            "name": "Model Validation",
+            "opportunity": 0.459,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.3,
+            "subcap_id": "P1C2.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-071",
+              "E-084",
+              "E-084"
+            ],
+            "gap": 1.7,
+            "name": "Card Fraud Management",
+            "opportunity": 0.459,
+            "peer_median": 3.0,
+            "pillar": "P3",
+            "score": 2.3,
+            "subcap_id": "P3C2.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-023",
+              "E-051",
+              "E-058"
+            ],
+            "gap": 1.7,
+            "name": "Unified Interaction History",
+            "opportunity": 0.4495,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 2.3,
+            "subcap_id": "P2C3.4.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.7,
+            "name": "Automated Data Quality Monitoring",
+            "opportunity": 0.4495,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.3,
+            "subcap_id": "P4C1.2.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.7,
+            "name": "Enterprise Data Catalog & Discovery",
+            "opportunity": 0.4495,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.3,
+            "subcap_id": "P4C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-041",
+              "E-017",
+              "E-067"
+            ],
+            "gap": 1.6,
+            "name": "Educational Content",
+            "opportunity": 0.432,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 2.4,
+            "subcap_id": "P2C1.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-015",
+              "E-056",
+              "E-074"
+            ],
+            "gap": 1.6,
+            "name": "Champion Coordination",
+            "opportunity": 0.423,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.4,
+            "subcap_id": "P1C4.3.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.5,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-041",
+              "E-017",
+              "E-067"
+            ],
+            "gap": 1.5,
+            "name": "Search Engine Optimization (SEO)",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C1.2.2",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 32.1,
+      "pillar": "P2",
+      "platform_id": "salesforce",
+      "prereq_checks": [
+        {
+          "current_score": 2.6,
+          "name": "Customer data foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.1",
+          "status": "PARTIAL",
+          "threshold": 3.0
+        },
+        {
+          "current_score": 3.1,
+          "name": "Sales process digitization",
+          "note": null,
+          "required_subcap_id": "P2C1.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.0,
+          "name": "Identity & access management",
+          "note": null,
+          "required_subcap_id": "P1C2.2.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "amber",
+      "sequence_rank": 5,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Reference Data Management",
+        "Data Governance Operating Model"
+      ],
+      "opportunity_md": "**Salesforce** at 32/100 fit addresses 166 scored capability gaps in P2, led by Reference Data Management. Reference Data Management scores 1.8/5 against a 2.0 peer median; Data Governance Operating Model is the next surface."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.5.1",
+        "P2C1.5.2",
+        "P2C1.5.3",
+        "P2C4.1.1",
+        "P2C4.1.2",
+        "P2C4.1.3",
+        "P2C4.4.1",
+        "P2C4.4.3",
+        "P3C2.2.1",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.3.1",
+        "P4C1.3.2",
+        "P4C1.3.3",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.4.3",
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.5.1",
+        "P4C2.5.2",
+        "P4C2.5.3",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C3.3.3"
+      ],
+      "conversation_starter": "Databricks (pillar P4) addresses 76 subcaps, starting with P1C1.1.1; fit is 48/100 and the platform is near-ready (one or two prereqs to close).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.2 (prereq 'Data lake / lakehouse foundation': current 2.1 vs. threshold 2.5, status PARTIAL).\n3. Sequence: outline a 76-subcap roadmap starting at P1C1.1.1 and extending to 75 additional subcaps.\nNext step: book a Databricks workshop scoped to P4, covering the 76-subcap addressable surface.",
+      "conversation_starters": [
+        "Amarillo National Bank scores 1.8 on Reference Data Management (P4C1.4.3) — 0.2 points below the peer median 2.0 [E-016, E-042]. Ask who owns it today, what tooling backs it, and what the review cadence is — Databricks addresses 76 linked subcaps here and is near-ready (one or two prereqs to close) (fit 48/100). Databricks is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Data lake / lakehouse foundation' (P4C1.1.2) sits at 2.1 vs the 2.5 readiness threshold (PARTIAL). That gap is what keeps Amarillo National Bank from landing Databricks now.",
+        "Peer framing: First National Bank of Omaha and Wintrust Financial Corporation are in Amarillo National Bank's benchmark cohort holding the 2.0 median on Reference Data Management. Sequence Databricks after Tableau → Twilio; next step is a Databricks workshop scoped to P4."
+      ],
+      "display_name": "Databricks",
+      "evidence_ids": [
+        "E-016",
+        "E-042",
+        "E-087",
+        "E-001",
+        "E-041",
+        "E-004",
+        "E-017",
+        "E-025"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Databricks"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.497,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 99,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 16.9,
+            "value": 0.2822
+          },
+          "readiness": {
+            "light": "amber",
+            "multiplier": 0.85,
+            "penalty_points": -8.5
+          }
+        },
+        "n_addressable": 76,
+        "prereqs": {
+          "P3C1.1.1": {
+            "current_score": 3.6,
+            "name": "Cloud infrastructure baseline",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C1.1.2": {
+            "current_score": 2.1,
+            "name": "Data lake / lakehouse foundation",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          },
+          "P4C2.1.1": {
+            "current_score": 3.1,
+            "name": "Data governance",
+            "status": "MET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "twilio",
+            "ncino"
+          ],
+          "rank": 4
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 2.2,
+            "name": "Reference Data Management",
+            "opportunity": 0.5817,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 1.8,
+            "subcap_id": "P4C1.4.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.9,
+            "name": "Data Governance Operating Model",
+            "opportunity": 0.5024,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.1,
+            "subcap_id": "P4C1.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.9,
+            "name": "MDM Strategy & Golden Record",
+            "opportunity": 0.5024,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.1,
+            "subcap_id": "P4C1.4.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.7,
+            "name": "Model Validation",
+            "opportunity": 0.459,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.3,
+            "subcap_id": "P1C2.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.7,
+            "name": "Automated Data Quality Monitoring",
+            "opportunity": 0.4495,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.3,
+            "subcap_id": "P4C1.2.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.7,
+            "name": "Enterprise Data Catalog & Discovery",
+            "opportunity": 0.4495,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.3,
+            "subcap_id": "P4C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.5,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-041",
+              "E-017",
+              "E-067"
+            ],
+            "gap": 1.5,
+            "name": "Lead Nurturing Programs",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 2.5,
+            "subcap_id": "P2C1.5.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.5,
+            "name": "Data Mesh Strategy & Domain Ownership",
+            "opportunity": 0.3966,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.5,
+            "subcap_id": "P4C1.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.4,
+            "name": "Enterprise Data Strategy & Roadmap",
+            "opportunity": 0.3702,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.6,
+            "subcap_id": "P4C1.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.4,
+            "name": "Identity Resolution & Unified Customer Profile",
+            "opportunity": 0.3702,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.6,
+            "subcap_id": "P4C1.4.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.3,
+            "name": "Model Governance Framework",
+            "opportunity": 0.351,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.7,
+            "subcap_id": "P1C2.4.1",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 48.4,
+      "pillar": "P4",
+      "platform_id": "databricks",
+      "prereq_checks": [
+        {
+          "current_score": 2.1,
+          "name": "Data lake / lakehouse foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.2",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.1,
+          "name": "Data governance",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.6,
+          "name": "Cloud infrastructure baseline",
+          "note": null,
+          "required_subcap_id": "P3C1.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "amber",
+      "sequence_rank": 4,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Reference Data Management",
+        "Data Governance Operating Model"
+      ],
+      "opportunity_md": "**Databricks** at 48/100 fit addresses 76 scored capability gaps in P4, led by Reference Data Management. Reference Data Management scores 1.8/5 against a 2.0 peer median; Data Governance Operating Model is the next surface. The platform family is confirmed absent from the current stack (Databricks) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.5.1",
+        "P1C3.5.2",
+        "P1C3.5.3",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P2C1.1.1",
+        "P2C3.1.1",
+        "P2C3.1.2",
+        "P2C3.1.3",
+        "P3C4.5.1",
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C2.1.1",
+        "P4C2.1.2",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C2.2.3"
+      ],
+      "conversation_starter": "Tableau (pillar P4) addresses 57 subcaps, starting with P1C1.1.1; fit is 53/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 57-subcap roadmap starting at P1C1.1.1 and extending to 56 additional subcaps.\nNext step: book a Tableau workshop scoped to P4, covering the 57-subcap addressable surface.",
+      "conversation_starters": [
+        "Amarillo National Bank scores 2.3 on Enterprise Data Catalog & Discovery (P4C1.5.1) — 0.3 points above the peer median 2.0 [E-016, E-042]. Ask who owns it today, what tooling backs it, and what the review cadence is — Tableau addresses 57 linked subcaps here and is ready to land now (fit 53/100). Tableau is confirmed absent from their detected stack — a greenfield entry.",
+        "Prerequisites are MET, so move to value: confirm Amarillo National Bank's appetite to close the Enterprise Data Catalog & Discovery gap (currently 2.3/5) this fiscal year and open scoping.",
+        "Peer framing: First National Bank of Omaha and Wintrust Financial Corporation are in Amarillo National Bank's benchmark cohort holding the 2.0 median on Enterprise Data Catalog & Discovery. Sequence Tableau; next step is a Tableau workshop scoped to P4."
+      ],
+      "display_name": "Tableau",
+      "evidence_ids": [
+        "E-016",
+        "E-042",
+        "E-087",
+        "E-004",
+        "E-017",
+        "E-025",
+        "E-085",
+        "E-028"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Tableau"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.5145,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 114,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 12.9,
+            "value": 0.2149
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 57,
+        "prereqs": {
+          "P4C2.1.1": {
+            "current_score": 3.1,
+            "name": "Governed reporting layer",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P4C3.1.1": {
+            "current_score": 3.6,
+            "name": "BI / analytics literacy",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [],
+          "rank": 1
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.7,
+            "name": "Enterprise Data Catalog & Discovery",
+            "opportunity": 0.4495,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.3,
+            "subcap_id": "P4C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.5,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.3,
+            "name": "Semantic Layer & Knowledge Graph",
+            "opportunity": 0.3437,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.7,
+            "subcap_id": "P4C1.5.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-042",
+              "E-087"
+            ],
+            "gap": 1.3,
+            "name": "Audience Segmentation & Activation",
+            "opportunity": 0.3437,
+            "peer_median": 2.0,
+            "pillar": "P4",
+            "score": 2.7,
+            "subcap_id": "P4C1.5.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-085",
+              "E-028"
+            ],
+            "gap": 1.2,
+            "name": "Production Transition",
+            "opportunity": 0.324,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.8,
+            "subcap_id": "P1C3.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.1,
+            "name": "Vendor Due Diligence",
+            "opportunity": 0.297,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.9,
+            "subcap_id": "P1C2.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Multi-Year Roadmap",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Digital Channel Priorities",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.0,
+            "name": "Steering Committee",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C2.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.0,
+            "name": "Executive Sponsorship",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C2.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.0,
+            "name": "Digital Risk Appetite Statement",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C2.2.1",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 52.9,
+      "pillar": "P4",
+      "platform_id": "tableau",
+      "prereq_checks": [
+        {
+          "current_score": 3.1,
+          "name": "Governed reporting layer",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.6,
+          "name": "BI / analytics literacy",
+          "note": null,
+          "required_subcap_id": "P4C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 1,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Enterprise Data Catalog & Discovery",
+        "Initiative Prioritization"
+      ],
+      "opportunity_md": "**Tableau** at 53/100 fit addresses 57 scored capability gaps in P4, led by Enterprise Data Catalog & Discovery. Enterprise Data Catalog & Discovery scores 2.3/5 against a 2.0 peer median; Initiative Prioritization is the next surface. The platform family is confirmed absent from the current stack (Tableau) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 1,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.2",
+        "P1C4.5.3",
+        "P2C3.3.1",
+        "P2C3.3.2",
+        "P2C3.3.3"
+      ],
+      "conversation_starter": "Twilio (pillar P2) addresses 38 subcaps, starting with P1C1.1.1; fit is 39/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 38-subcap roadmap starting at P1C1.1.1 and extending to 37 additional subcaps.\nNext step: book a Twilio workshop scoped to P2, covering the 38-subcap addressable surface.",
+      "conversation_starters": [
+        "Amarillo National Bank scores 2.4 on Champion Coordination (P1C4.3.3) — 0.1 points below the peer median 2.5 [E-015, E-056]. Ask who owns it today, what tooling backs it, and what the review cadence is — Twilio addresses 38 linked subcaps here and is ready to land now (fit 39/100).",
+        "Prerequisites are MET, so move to value: their own evidence shows house foreclosures for 1 month [E-074] — confirm Amarillo National Bank's appetite to close the Champion Coordination gap (currently 2.4/5) this fiscal year and open scoping.",
+        "Peer framing: First National Bank of Omaha and Wintrust Financial Corporation are in Amarillo National Bank's benchmark cohort holding the 2.5 median on Champion Coordination. Sequence Twilio after Tableau → nCino; next step is a Twilio workshop scoped to P2."
+      ],
+      "display_name": "Twilio",
+      "evidence_ids": [
+        "E-015",
+        "E-056",
+        "E-074",
+        "E-023",
+        "E-051",
+        "E-058",
+        "E-004",
+        "E-017"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5145,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 118,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 13.7,
+            "value": 0.2277
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 38,
+        "prereqs": {
+          "P1C3.2.1": {
+            "current_score": 4.3,
+            "name": "Communications compliance",
+            "status": "MET",
+            "threshold": 3.0
+          },
+          "P2C3.1.1": {
+            "current_score": 3.6,
+            "name": "Omnichannel CX baseline",
+            "status": "MET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "ncino"
+          ],
+          "rank": 3
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-015",
+              "E-056",
+              "E-074"
+            ],
+            "gap": 1.6,
+            "name": "Champion Coordination",
+            "opportunity": 0.423,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.4,
+            "subcap_id": "P1C4.3.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-023",
+              "E-051",
+              "E-058"
+            ],
+            "gap": 1.6,
+            "name": "Digital Messaging & Chat",
+            "opportunity": 0.423,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 2.4,
+            "subcap_id": "P2C3.3.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.5,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-023",
+              "E-051",
+              "E-058"
+            ],
+            "gap": 1.3,
+            "name": "Contact Center Excellence",
+            "opportunity": 0.3437,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 2.7,
+            "subcap_id": "P2C3.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-085",
+              "E-028"
+            ],
+            "gap": 1.2,
+            "name": "Production Transition",
+            "opportunity": 0.324,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.8,
+            "subcap_id": "P1C3.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Multi-Year Roadmap",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Digital Channel Priorities",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.0,
+            "name": "Steering Committee",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C2.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.0,
+            "name": "Executive Sponsorship",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C2.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-085",
+              "E-028"
+            ],
+            "gap": 1.0,
+            "name": "Innovation Horizons",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C3.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-085",
+              "E-028"
+            ],
+            "gap": 1.0,
+            "name": "Retirement Criteria",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C3.4.3",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 38.7,
+      "pillar": "P2",
+      "platform_id": "twilio",
+      "prereq_checks": [
+        {
+          "current_score": 3.6,
+          "name": "Omnichannel CX baseline",
+          "note": null,
+          "required_subcap_id": "P2C3.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 4.3,
+          "name": "Communications compliance",
+          "note": null,
+          "required_subcap_id": "P1C3.2.1",
+          "status": "MET",
+          "threshold": 3.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 3,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Champion Coordination",
+        "Digital Messaging & Chat"
+      ],
+      "opportunity_md": "**Twilio** at 39/100 fit addresses 38 scored capability gaps in P2, led by Champion Coordination. Champion Coordination scores 2.4/5 against a 2.5 peer median; Digital Messaging & Chat is the next surface."
+    },
+    {
+      "absent_count": 1,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.5.1",
+        "P1C3.5.2",
+        "P1C3.5.3",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P2C2.1.2",
+        "P2C2.1.3",
+        "P2C2.2.2",
+        "P2C2.3.1",
+        "P2C2.3.2",
+        "P2C2.3.3",
+        "P2C2.4.1",
+        "P2C2.4.2",
+        "P2C2.4.3",
+        "P2C2.5.1",
+        "P2C2.5.2",
+        "P2C2.5.3",
+        "P2C4.2.1",
+        "P2C4.2.2",
+        "P2C4.2.3",
+        "P2C4.3.1",
+        "P2C4.3.3",
+        "P2C4.4.2",
+        "P2C4.5.1",
+        "P2C4.5.2",
+        "P2C4.5.3",
+        "P3C1.3.1",
+        "P3C1.5.1",
+        "P3C2.1.2",
+        "P3C2.5.1"
+      ],
+      "conversation_starter": "nCino (pillar P3) addresses 69 subcaps, starting with P1C1.1.1; fit is 52/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 69-subcap roadmap starting at P1C1.1.1 and extending to 68 additional subcaps.\nNext step: book a nCino workshop scoped to P3, covering the 69-subcap addressable surface.",
+      "conversation_starters": [
+        "Amarillo National Bank scores 2.3 on Model Validation (P1C2.4.3) — 0.2 points below the peer median 2.5 [E-001, E-001]. Ask who owns it today, what tooling backs it, and what the review cadence is — nCino addresses 69 linked subcaps here and is ready to land now (fit 52/100). nCino is confirmed absent from their detected stack — a greenfield entry.",
+        "Prerequisites are MET, so move to value: their own evidence shows obligation implies AUM $100M [E-041] — confirm Amarillo National Bank's appetite to close the Model Validation gap (currently 2.3/5) this fiscal year and open scoping.",
+        "Peer framing: First National Bank of Omaha and Wintrust Financial Corporation are in Amarillo National Bank's benchmark cohort holding the 2.5 median on Model Validation. Sequence nCino after Tableau; next step is a nCino workshop scoped to P3."
+      ],
+      "display_name": "nCino",
+      "evidence_ids": [
+        "E-001",
+        "E-041",
+        "E-004",
+        "E-017",
+        "E-025",
+        "E-026",
+        "E-085",
+        "E-028"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "nCino"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.5063,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 133,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 12.0,
+            "value": 0.2007
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 69,
+        "prereqs": {
+          "P3C2.1.1": {
+            "current_score": 3.6,
+            "name": "Loan origination digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P3C2.2.1": {
+            "current_score": 3.3,
+            "name": "Commercial lending workflow",
+            "status": "MET",
+            "threshold": 2.0
+          },
+          "P3C3.1.1": {
+            "current_score": 4.1,
+            "name": "Document management",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau"
+          ],
+          "rank": 2
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.7,
+            "name": "Model Validation",
+            "opportunity": 0.459,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.3,
+            "subcap_id": "P1C2.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.5,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.405,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.5,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-026"
+            ],
+            "gap": 1.7,
+            "name": "Life Event Triggers",
+            "opportunity": 0.3883,
+            "peer_median": 2.0,
+            "pillar": "P2",
+            "score": 2.3,
+            "subcap_id": "P2C4.4.2",
+            "tier": 5
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.3,
+            "name": "Model Governance Framework",
+            "opportunity": 0.351,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.7,
+            "subcap_id": "P1C2.4.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.3,
+            "name": "Model Inventory",
+            "opportunity": 0.351,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.7,
+            "subcap_id": "P1C2.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-085",
+              "E-028"
+            ],
+            "gap": 1.2,
+            "name": "Production Transition",
+            "opportunity": 0.324,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.8,
+            "subcap_id": "P1C3.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.1,
+            "name": "Vendor Due Diligence",
+            "opportunity": 0.297,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.9,
+            "subcap_id": "P1C2.3.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-071",
+              "E-029"
+            ],
+            "gap": 1.0,
+            "name": "Income & Employment Verification",
+            "opportunity": 0.2817,
+            "peer_median": 2.5,
+            "pillar": "P2",
+            "score": 3.0,
+            "subcap_id": "P2C2.4.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Multi-Year Roadmap",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-004",
+              "E-017",
+              "E-025"
+            ],
+            "gap": 1.0,
+            "name": "Digital Channel Priorities",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C1.4.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-001",
+              "E-001",
+              "E-041"
+            ],
+            "gap": 1.0,
+            "name": "Steering Committee",
+            "opportunity": 0.27,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 3.0,
+            "subcap_id": "P1C2.1.2",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 52.0,
+      "pillar": "P3",
+      "platform_id": "ncino",
+      "prereq_checks": [
+        {
+          "current_score": 3.6,
+          "name": "Loan origination digitization",
+          "note": null,
+          "required_subcap_id": "P3C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.3,
+          "name": "Commercial lending workflow",
+          "note": null,
+          "required_subcap_id": "P3C2.2.1",
+          "status": "MET",
+          "threshold": 2.0
+        },
+        {
+          "current_score": 4.1,
+          "name": "Document management",
+          "note": null,
+          "required_subcap_id": "P3C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 2,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Model Validation",
+        "Initiative Prioritization"
+      ],
+      "opportunity_md": "**nCino** at 52/100 fit addresses 69 scored capability gaps in P3, led by Model Validation. Model Validation scores 2.3/5 against a 2.5 peer median; Initiative Prioritization is the next surface. The platform family is confirmed absent from the current stack (nCino) — greenfield rather than displacement."
+    }
+  ],
+  "entity_display_id": "amarillo-national-bank-0001",
+  "narrative": {
+    "gap_prioritization_md": "",
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each recommendation includes institution-specific root cause analysis and expected score outcomes.\nRECOMMENDATION 1: Data Foundation Remediation — MDM + CDP + Governance\nAddresses Gap(s): GAP-01 | Score Impact: 2.55 → 2.95 (+0.40)",
+    "roadmap_md": ""
+  },
+  "pillar_offerings": {
+    "P1": [],
+    "P2": [],
+    "P3": [],
+    "P4": []
+  },
+  "run_request_id": "DMA-ASM-ANB-20260420-0001"
+}

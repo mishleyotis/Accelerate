@@ -1,0 +1,294 @@
+{
+  "entity_display_id": "first-national-bank-of-o-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-091",
+          "E-093"
+        ],
+        "representative_quote": "nCino deployed for Commercial/CRE/Consumer.",
+        "source_kind": "docx"
+      },
+      "id": "2a8699aa-5b8e-46fa-a340-91e0205c17cd",
+      "involved_subcap_ids": [
+        "P1C5.3.3",
+        "P1C1.8.1",
+        "P1C1.1.1",
+        "P3C2.4.1",
+        "P1C1.6.1",
+        "P1C2.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 83,
+        "P3": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Ag Digital LOS Gap at #3 National Rank",
+      "verbatim_quote": "F-004 | Ag Digital LOS Gap at #3 National Rank | #3 US ag lender (2026). nCino deployed for Commercial/CRE/Consumer. Ag digital loan portal NOT confirmed. FCSAmerica has full Ag nCino. [E-091, E-093] | Competitively vulnerable as FCSAmerica digitizes Ag origination with nCino. | nCino Ag module: highest-urgency upsell. Champion: Barry Benson (SVP Agribusiness)."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-002",
+          "E-095"
+        ],
+        "representative_quote": "Until our integration takes place in 2026, CCB customers can't transact at FNBO branches.",
+        "source_kind": "docx"
+      },
+      "id": "8da0f3d3-c004-40f1-84b1-e3cdd828b750",
+      "involved_subcap_ids": [
+        "P2C3.3.4",
+        "P2C2.9.4",
+        "P2C1.4.6",
+        "P4C3.3.1",
+        "P2C4.1.3",
+        "P1C1.8.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 66,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "CCB Systems Integration = 2026 Window",
+      "verbatim_quote": "F-002 | CCB Systems Integration = 2026 Window | CCB closed Oct 1, 2025. FNBO.com: \"Until our integration takes place in 2026, CCB customers can't transact at FNBO branches.\" [E-002, E-095] | Platform decisions being made NOW. CCB legacy systems need migration path. | All SFDC solutions: CCB integration is the engagement trigger. Target: Lauritzen (President), Spyers (CIO)."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-129",
+          "E-080",
+          "E-149"
+        ],
+        "representative_quote": "26-yr CISO; ISO 27001 + PCI; FS-ISAC + PPISC; OTA Honor Roll; post-quantum planning; FNTS SOC-as-a-Service 2024.",
+        "source_kind": "docx"
+      },
+      "id": "9cf411f3-f446-4a48-b66f-600b3f802aef",
+      "involved_subcap_ids": [
+        "P1C2.6.2",
+        "P4C1.1.8",
+        "P3C4.4.4",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C2.4.13"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "CISO Jeffrey Weeks",
+      "verbatim_quote": "F-006 | CISO Jeffrey Weeks: M4 Security Framework | 26-yr CISO; ISO 27001 + PCI; FS-ISAC + PPISC; OTA Honor Roll; post-quantum planning; FNTS SOC-as-a-Service 2024. [E-129, E-080, E-149] | P4C4 ceiling = M4. Any SFDC deployment requires Weeks security review. | Pre-arm with Salesforce Trust/Shield/FINRA docs before Data Cloud + Agentforce pitch."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-131",
+          "E-130",
+          "E-097",
+          "E-146",
+          "E-106"
+        ],
+        "representative_quote": "Verafin (agentic AML), Pindrop (voice AI), Zeta AI (cardholder), Alloy (risk), Zest AI (underwriting) deployed independently.",
+        "source_kind": "docx"
+      },
+      "id": "29ca2081-6791-4d13-a4c8-53ecf5d54749",
+      "involved_subcap_ids": [
+        "P4C1.8.7",
+        "P4C1.8.6",
+        "P4C1.8.7",
+        "P4C1.8.7",
+        "P4C2.6.5",
+        "P4C2.8.5",
+        "P4C2.5.5",
+        "P4C2.6.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Five Vendor AI, No Enterprise Platform",
+      "verbatim_quote": "F-003 | Five Vendor AI, No Enterprise Platform | Verafin (agentic AML), Pindrop (voice AI), Zeta AI (cardholder), Alloy (risk), Zest AI (underwriting) deployed independently. No orchestration layer. [E-131, E-130, E-097, E-146, E-106] | Model governance gaps. BSA/AML Model Governance Committee manages 5 tools independently. | Agentforce: orchestration above vendor AI. Champion: Megan Hennigs (Dir AI Adoption, Jan 2026)."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Five explicitly confirmed FNBO strategic priorities in 2025\u20132026.",
+        "source_kind": "docx"
+      },
+      "id": "8612c48a-db55-40ff-b509-56c126a6b445",
+      "involved_subcap_ids": [
+        "P1C4.7.3",
+        "P1C4.6.3",
+        "P1C4.1.4",
+        "P1C4.1.6",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.5",
+        "P1C1.6.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "67%",
+          "delta": null,
+          "kpi_label": "Compensation",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Five explicitly confirmed FNBO strategic priorities in 2025\u20132026\u2026",
+      "verbatim_quote": "Five explicitly confirmed FNBO strategic priorities in 2025\u20132026. These are the lens through which every Zennify solution must be framed."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-154",
+          "E-160"
+        ],
+        "representative_quote": "stable data foundation",
+        "source_kind": "docx"
+      },
+      "id": "2ea46cf5-e899-4cda-a3bf-2fa5154f1037",
+      "involved_subcap_ids": [
+        "P1C4.7.3",
+        "P1C4.6.3",
+        "P1C4.1.4",
+        "P1C4.1.6",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.5",
+        "P1C1.6.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "67%",
+          "delta": null,
+          "kpi_label": "Compensation",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Governance Ready",
+      "verbatim_quote": "F-005 | Governance Ready \u2014 CDP Fragmented | CATCH Intelligence DG KickStart 10/10. Named Data Steward (Core Banking, 6yr). BUT: Adobe RTCDP + Tealium + Zeta AI + QuickSight = 4-platform CDP. [E-154, E-160] | Cory Mann (Mar 2025): \"stable data foundation\" required for GenAI. Fragmentation is the bottleneck. | Data Cloud: governance foundations ready. Gap = unified customer data across nCino, COMS, Zeta, Developer Circle."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-018",
+          "E-063",
+          "E-103"
+        ],
+        "representative_quote": "Many of the businesses we operate today have come from partnerships \u2014 so that's at our core.",
+        "source_kind": "docx"
+      },
+      "id": "7737a006-58ee-4684-97c6-b087ee368373",
+      "involved_subcap_ids": [
+        "P1C3.6.4",
+        "P1C3.6.1",
+        "P1C1.6.1",
+        "P4C3.5.5",
+        "P1C1.6.2",
+        "P4C1.4.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Partnership-First DNA = SFDC Receptivity",
+      "verbatim_quote": "F-007 | Partnership-First DNA = SFDC Receptivity | Trilli (Jan 2025): \"Many of the businesses we operate today have come from partnerships \u2014 so that's at our core.\" Active partnerships with Marqeta, Centime, Greenlight, MGM, Prove. [E-018, E-063, E-103] | Culture primed for enterprise platform partnerships \u2014 demands KPI evidence + risk management. | Zennify positioning: lead with FNBO-specific outcomes, reference HTLF deployment, align to Trilli's KPI framework."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-092",
+          "E-156",
+          "E-091"
+        ],
+        "representative_quote": "FNBO runs SFDC Service Cloud (COMS), Experience Cloud (Developer Circle \u2014 \u00a9 salesforce.com confirmed), and nCino.",
+        "source_kind": "docx"
+      },
+      "id": "76e3d5d4-9190-4c94-826a-71c827e0e22f",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P4C1.1.4",
+        "P2C3.3.RB1",
+        "P1C1.5.5",
+        "P2C4.5.3",
+        "P2C2.8.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 35,
+        "P2": 48,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Three Salesforce Products, No FSC",
+      "verbatim_quote": "F-001 | Three Salesforce Products, No FSC | FNBO runs SFDC Service Cloud (COMS), Experience Cloud (Developer Circle \u2014 \u00a9 salesforce.com confirmed), and nCino. FSC absent. [E-092, E-156, E-091] | Commercial bankers lack 360\u00b0 relationship view. Cross-sell between Ag/CRE/Healthcare is siloed. | Salesforce FSC \u2014 upgrade within existing licensing. Target: Spyers (CIO), Kobjerowski (EVP CCO)."
+    }
+  ]
+}

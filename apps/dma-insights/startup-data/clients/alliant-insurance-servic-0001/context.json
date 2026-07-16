@@ -1,0 +1,890 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Alliant Insurance Services",
+      "amount": null,
+      "announced_on": null,
+      "body": "Acquired FutureSense (Nov 2022) \u2014 national HR, compensation, and organizational development consulting firm",
+      "closed_on": null,
+      "details": "Acquired FutureSense (Nov 2022) \u2014 national HR, compensation, and organizational development consulting firm",
+      "e_id": "E-025",
+      "event_date": "2022-11-01",
+      "id": "11f0efe6-ae3e-4252-8c87-d21f7c5f2790",
+      "source_url": "https://ffnews.com/newsarticle/alliant-insurance-services-acquires-futuresense-expands-consulting-capabilities/",
+      "status": null,
+      "target": "FutureSense",
+      "title": "Acquired FutureSense (Nov 2022)"
+    },
+    {
+      "acquirer": "Alliant Insurance Services",
+      "amount": null,
+      "announced_on": null,
+      "body": "Added 3,000+ employees, distinct tech stack",
+      "closed_on": null,
+      "details": "Added 3,000+ employees, distinct tech stack",
+      "e_id": "E-076",
+      "event_date": "2021-01-01",
+      "id": "e5ad5b9a-06e1-4a40-9516-4e4ed37f022e",
+      "source_url": null,
+      "status": null,
+      "target": "Confie",
+      "title": "Confie"
+    }
+  ],
+  "entity_display_id": "alliant-insurance-servic-0001",
+  "financials": {
+    "lines": [
+      "Total Acquisitions (cumulative): 59 (2024)"
+    ],
+    "metrics": {
+      "Acquisitions (#)": "6 (2024)",
+      "Employees": "14,000+ (2024)",
+      "Headcount Growth (%)": "15% YoY (2024)",
+      "Organic Growth (%)": "21.9% (2024)",
+      "Premium Placed ($B)": "47 (2024)",
+      "Revenue ($B)": "5.1 (2024)",
+      "US Ranking": "#5 globally, #1 private (2024)",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 14000,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Greg Zimmer appointed CEO"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "National (all 50 states) + 9 countries",
+        "headline": "$5.1B assets \u00b7 FY2024 \u00b7 +36.6% CAGR",
+        "regulator": "State Departments of Insurance (DOI)",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            2.0,
+            3.0,
+            4.0,
+            5.1
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        2.0,
+        3.0,
+        4.0,
+        5.1
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "metric": "revenue_b",
+        "unit": "unknown",
+        "values": [
+          2.0,
+          3.0,
+          4.0,
+          5.1
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "National (all 50 states) + 9 countries"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Greg Zimmer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Thomas W. Corbett",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Executive Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ralph Hurst",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ilene Anders",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "State-licensed insurer",
+    "narrative_md": "Alliant Insurance Services, Inc. was founded in 1925 and rebranded in 2001. The firm operates as a PE-backed holding company controlled by Stone Point Capital and PSP Investments, with CEO Greg Zimmer (appointed April 2024, formerly of Lockton) leading the executive team [E-001, E-013]. The structure encompasses 10+ subsidiaries including Confie, Alliant Cyber, AUS, Imperium, and CSURMA [E-005, E-029]. Headquarters in Irvine, California with national presence across all 50 states and 9 countries [E-001, E-004].",
+    "primary_regulator": "State Departments of Insurance (DOI)",
+    "size_tier": "Mega (>$50B premium placed)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "Alliant publishes structured Fraud & Controls Assessment methodology: fraud risk identification, control gap detection, remediation roadmap prioritization \u2014 thought leadership AND client-facing service Assessment covers:",
+        "title": "Alliant publishes structured Fraud & Controls Assessment methodology\u2026",
+        "type": "article",
+        "url": "https://alliant.com/news-resources/article-how-to-reduce-fraud-risk-in-the-age-of-cyber-and-financial-threats/"
+      },
+      {
+        "author": null,
+        "date": "2023-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "Alliant Insurance Podcast: dedicated to insurance/risk management solutions and market trends \u2014 ranked in top 100 insurance podcasts Features senior leaders (Kevin Kenny EVP, Alex Littlejohn EVP) discussing market insigh",
+        "title": "Alliant Insurance Podcast: dedicated to insurance/risk management\u2026",
+        "type": "podcast",
+        "url": "https://alliant.com/news-resources/podcast-insurance-market-insights-and-predictions-for-2023"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "alliant.com/news-resources: centralized content hub for press releases, articles, podcasts, reports \u2014 active content marketing Cyber newsletter: 'latest cyber trends, market updates, critical cyber risk & security consid",
+        "title": "Alliant.com/news-resources: centralized content hub for press\u2026",
+        "type": "podcast",
+        "url": "https://alliant.com/news-resources/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "12-month rotational program for Class of 2026 undergraduates from RMI programs (St. John's etc.); starting Aug 2026 Three rotations across specialties and geographies with senior executive mentors; professional developme",
+        "title": "12-month rotational program for Class of 2026 undergraduates from RMI\u2026",
+        "type": "conference",
+        "url": "https://alliant.com/about/why-alliant/rotational-associates-program/"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "CASE MANAGEMENT: ServiceNow CSM + Freshdesk \u2014 dual case management/ticketing platforms CONTACT CENTER: Five9 (cloud contact center), Cisco VoIP/Unified Communications, GoToMeeting/GoToWebinar \u2014 multi-channel assisted ser",
+        "title": "ServiceNow CSM + Freshdesk",
+        "type": "webinar",
+        "url": "https://alliant.com"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-058",
+        "excerpt": "LinkedIn: 10,001+ employees listed; active posting of awards, acquisitions, thought leadership, culture content Facebook page active (AlliantInsuranceServices), Twitter/X presence, YouTube for podcasts/webinars",
+        "title": "LinkedIn: 10,001+ employees listed; active posting of awards\u2026",
+        "type": "podcast",
+        "url": "https://www.linkedin.com/company/alliant-insurance-services/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "e1f00dff-1aaa-412d-b7e3-15486bcca702",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "MMA poaching lawsuit \u2014 TRO issued Jan 2025, 16 clients moved"
+    },
+    {
+      "id": "1c1df608-c96c-421b-a1a3-6290ea1906ab",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "WalletHub VP fraud allegation \u2014 illusory policy claim"
+    },
+    {
+      "id": "c3875858-fc02-4076-8022-cc4dac014495",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "NPS 25 \u2014 11pts below insurance broker industry average (36)"
+    },
+    {
+      "id": "c22e3c31-8256-4b31-96a9-5a8a0fbf7f8b",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Customer service score 2.2/5 \u2014 significantly below average"
+    },
+    {
+      "id": "3128063e-3b04-4ee5-ac08-4ef5cf786eb0",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Internal: 'Incomplete data is a huge problem', fields overwritable, carrier data"
+    },
+    {
+      "id": "47d8898d-6bb9-451f-b100-2937f509625a",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "5 AI models in production without governance framework, no GenAI deployment"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Revenue b grew from 2.0 (2021) to 5.1 (2024) \u2014 36.6% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.74,
+        "P1C2": 3.25,
+        "P1C3": 3.33,
+        "P1C4": 3.41,
+        "P2C1": 3.06,
+        "P2C2": 2.99,
+        "P2C3": 3.11,
+        "P2C4": 3.22,
+        "P3C1": 3.18,
+        "P3C2": 3.25,
+        "P3C3": 3.37,
+        "P3C4": 3.4,
+        "P4C1": 3.13,
+        "P4C2": 3.36,
+        "P4C3": 2.81,
+        "P4C4": 1.97
+      },
+      "overall_score": 3.1,
+      "peer_name": "OneDigital Partners, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.93,
+        "P1C2": 2.97,
+        "P1C3": 3.5,
+        "P1C4": 2.99,
+        "P1C5": 1.57,
+        "P2C1": 2.99,
+        "P2C2": 2.97,
+        "P2C3": 2.51,
+        "P2C4": 2.02,
+        "P3C1": 2.97,
+        "P3C2": 2.96,
+        "P3C3": 2.98,
+        "P3C4": 2.02,
+        "P4C1": 2.51,
+        "P4C2": 2.02,
+        "P4C3": 2.97,
+        "P4C4": 2.52
+      },
+      "overall_score": 2.67,
+      "peer_name": "IMA Financial Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.84,
+        "P1C2": 2.74,
+        "P1C3": 2.58,
+        "P1C4": 2.84,
+        "P1C5": 2.25,
+        "P2C1": 2.67,
+        "P2C2": 3.0,
+        "P2C3": 2.92,
+        "P2C4": 2.69,
+        "P3C1": 2.6,
+        "P3C2": 2.3,
+        "P3C3": 2.79,
+        "P3C4": 2.55,
+        "P4C1": 2.21,
+        "P4C2": 2.08,
+        "P4C3": 2.29,
+        "P4C4": 2.52
+      },
+      "overall_score": 2.58,
+      "peer_name": "TowneBank Insurance",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.63,
+        "P1C2": 1.5,
+        "P1C3": 1.61,
+        "P1C4": 2.2,
+        "P1C5": 1.57,
+        "P2C1": 2.25,
+        "P2C2": 2.23,
+        "P2C3": 1.6,
+        "P2C4": 1.0,
+        "P3C1": 1.0,
+        "P3C2": 1.96,
+        "P3C3": 2.0,
+        "P3C4": 1.57,
+        "P4C1": 1.0,
+        "P4C2": 1.01,
+        "P4C3": 1.01,
+        "P4C4": 2.2
+      },
+      "overall_score": 1.61,
+      "peer_name": "Virtuity Financial Partners",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-ALLI-20260331-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 540,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [
+          "68% recommend"
+        ],
+        "trend": "Stable",
+        "value": 3.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [
+          "Culture 3.0, Mgmt 2.9, WLB 3.4, Comp 3.3"
+        ],
+        "trend": "Stable",
+        "value": 3.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": 25,
+        "polarity": "neutral",
+        "source": "Comparably NPS",
+        "themes": [
+          "50% Promoters, 25% Passives, 25% Detractors"
+        ],
+        "trend": "Concern",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Comparably Customer Svc",
+        "themes": [
+          "Significantly below average"
+        ],
+        "trend": "Concern",
+        "value": 2.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": 9,
+        "polarity": "neutral",
+        "source": "Comparably eNPS",
+        "themes": [
+          "Very low employee advocacy"
+        ],
+        "trend": "Concern",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Comparably Company Culture",
+        "themes": [
+          "Bottom 45% of similar-sized companies"
+        ],
+        "trend": "Below avg",
+        "value": 3.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Forbes",
+        "themes": [
+          "Top employer recognition"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": 14,
+        "polarity": "positive",
+        "source": "WalletHub",
+        "themes": [
+          "Some positive, some fraud allegations"
+        ],
+        "trend": "Volatile",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "ClearlyRated (industry)",
+        "themes": [
+          "Alliant 11 points below"
+        ],
+        "trend": "Benchmark",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Indeed Wellbeing",
+        "themes": [
+          "Satisfaction: Above Avg, Learning: Above Avg, Stress: Below Avg"
+        ],
+        "trend": "Mixed",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Named Forbes America's Best Employers 2026",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "ea2680b0-bb9a-484c-a60f-59fcfc5406e1",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/news-resources/alliant-insurance-services-named-one-of-america-s-best-employers-for-2026-by-forbes/",
+      "subcap_ids": [],
+      "title": "Named Forbes America's Best Employers 2026"
+    },
+    {
+      "body": "Sodalis already launched cyber/tech E&O brokerage (Mar 2026) \u2014 rapid execution from platform",
+      "date_precision": "month",
+      "e_id": "E-046",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "81131550-9905-4889-8d49-2cb3794efcf0",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.insurancebusinessmag.com/uk/news/breaking-news/new-insurance-platform-sodalis-launches-with-eye-on-intermediary-acquisitions-558083.aspx",
+      "subcap_ids": [],
+      "title": "Sodalis launched cyber/tech E&O brokerage (Mar 2026)\u2026"
+    },
+    {
+      "body": "NOTE: Multiple overlapping platforms (6 marketing automation tools, 2 CRMs, multiple CMSs) signals M&A integration debt \u2014 acquired companies brought their own stacks",
+      "date_precision": "publish_fallback",
+      "e_id": "E-056",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-056"
+      ],
+      "id": "1f43a5fa-9ae7-438c-b4e0-7cbb2a886026",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://alliant.com",
+      "subcap_ids": [],
+      "title": "Multiple overlapping platforms (6 marketing automation\u2026"
+    },
+    {
+      "body": "M&A VENDOR DUE DILIGENCE: Internal audit performs controls assessment of acquired companies (E-077) \u2014 M&A due diligence serves as TPRM proxy for acquisition targets",
+      "date_precision": "publish_fallback",
+      "e_id": "E-091",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-091",
+        "E-077"
+      ],
+      "id": "8a26d25f-ebee-424c-9fc9-374299ddec15",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "N/A_SYNTHESIS",
+      "subcap_ids": [],
+      "title": "M&A due diligence serves as TPRM proxy for acquisition\u2026"
+    },
+    {
+      "body": "Internal audit performs controls assessments of acquired companies (E-077) \u2014 M&A due diligence includes financial/operational/compliance controls assessment",
+      "date_precision": "publish_fallback",
+      "e_id": "E-092",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-092",
+        "E-077"
+      ],
+      "id": "dbfc48b8-93a4-4acd-9224-fe62ac36505d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/about/agency-acquisitions/",
+      "subcap_ids": [],
+      "title": "M&A due diligence includes financial/operational/compliance\u2026"
+    },
+    {
+      "body": "MULTIPLE FRAMEWORKS: ASP.NET + PHP + Java EE + Angular indicates legacy + modern coexistence \u2014 acquired sites running different technology stacks not yet consolidated",
+      "date_precision": "publish_fallback",
+      "e_id": "E-097",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-097"
+      ],
+      "id": "c2e65675-9241-4e69-b791-cd9787137b44",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://alliant.com",
+      "subcap_ids": [],
+      "title": "Angular indicates legacy + modern coexistence"
+    },
+    {
+      "body": "M&A DATA: 59 acquisitions bring disparate data formats. Internal audit performs controls assessments (E-077) but data normalization across acquired entities is an ongoing challenge.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-101",
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-101",
+        "E-077"
+      ],
+      "id": "ca77131c-17d1-4936-a9ec-f52afef1fadf",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "N/A_SYNTHESIS",
+      "subcap_ids": [],
+      "title": "Internal audit performs controls assessments but"
+    },
+    {
+      "body": "Launched Dec 2025 \u2014 recent innovation output demonstrates active product development pipeline",
+      "date_precision": "month",
+      "e_id": "E-045",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "e53f7fb2-cf13-4886-b8fa-a51c08779c89",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://alliant.com/news-resources/alliant-insurance-services-introduces-alliant-london-program-slip-alps/",
+      "subcap_ids": [],
+      "title": "Recent innovation output demonstrates active product\u2026"
+    },
+    {
+      "body": "AssuredPartners (#10) agreed to be acquired by Gallagher for $13.45B",
+      "date_precision": "publish_fallback",
+      "e_id": "E-011",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "1cb1b2e4-c934-45be-a1d3-3d3337d54823",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.marshberry.com/resource/big-deals-drive-bigger-revenue-for-the-top-100-insurance-brokers/",
+      "subcap_ids": [],
+      "title": "AssuredPartners (#10) agreed"
+    },
+    {
+      "body": "M&A controls assessment: 'Internal controls assessments of acquired companies and lead efforts to mitigate identified control deficiencies' \u2014 critical for 59-acquisition entity",
+      "date_precision": "publish_fallback",
+      "e_id": "E-077",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-077"
+      ],
+      "id": "2fff306c-9163-40c3-b58b-fe78155b897b",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://www.tealhq.com/job/director-of-internal-audit_61881bab-8222-4378-8f63-bb4e7a1ec564",
+      "subcap_ids": [],
+      "title": "M&A controls assessment: 'Internal controls assessments of\u2026"
+    },
+    {
+      "body": "Alliant acquired AnalyticsIQ in July 2025 \u2014 people-based marketing data company delivering data-driven consumer insights",
+      "date_precision": "month",
+      "e_id": "E-020",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-020"
+      ],
+      "id": "d8dfe9ef-e16a-4fa0-97e9-2816e87c0446",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://tracxn.com/d/acquisitions/acquisitions-by-alliant-insurance-services/",
+      "subcap_ids": [],
+      "title": "Alliant acquired people-based marketing data company\u2026"
+    },
+    {
+      "body": "PEER CONTEXT: Allianz UK appointed CDO in Jun 2025 to oversee Data Centre of Excellence (data strategy, privacy, governance, architecture, engineering, BI). Alliant has NOT taken this centralizing step.",
+      "date_precision": "month",
+      "e_id": "E-108",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-108"
+      ],
+      "id": "2187ba60-e2d1-460a-b709-53e61cbad974",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/about/leadership/",
+      "subcap_ids": [],
+      "title": "Allianz UK appointed CDO"
+    },
+    {
+      "body": "MMA filed suit (Dec 2024) alleging Alliant orchestrated scheme to poach employees and solicit clients; TRO issued Jan 2025 against 3 former MMA employees who joined Alliant",
+      "date_precision": "month",
+      "e_id": "E-073",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-073"
+      ],
+      "id": "ba415171-5f52-4814-9adb-14776c2df666",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.insurancejournal.com/news/national/2025/01/22/809011.htm",
+      "subcap_ids": [],
+      "title": "TRO issued Jan 2025 against 3 former MMA employees who\u2026"
+    },
+    {
+      "body": "Greg Zimmer appointed CEO effective April 2024; joined 1998 as CFO, president since 2007",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "f4bf9445-976f-4b0e-85d5-81ed48b602cb",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/news-resources/greg-zimmer-named-chief-executive-officer-of-alliant-insurance-services/",
+      "subcap_ids": [],
+      "title": "Greg Zimmer appointed CEO"
+    },
+    {
+      "body": "Ralph Hurst promoted to President; Peter Arkley named President National Brokerage; Sean McConlogue leads Underwriting + Consumer",
+      "date_precision": "publish_fallback",
+      "e_id": "E-003",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "f45666ff-2d75-4f6b-a7b1-73f312860529",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://alliant.com/news-resources/greg-zimmer-named-chief-executive-officer-of-alliant-insurance-services/",
+      "subcap_ids": [],
+      "title": "Ralph Hurst promoted to President"
+    },
+    {
+      "body": "Launched Sept 2023 \u2014 demonstrates active innovation pipeline with scaled AI/ML products, not just experimentation",
+      "date_precision": "month",
+      "e_id": "E-044",
+      "event_date": "2023-09-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "8edb3080-50ff-4dbe-959f-c1e20493c7a4",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://instanda.com/us/news/alliant-ses-launch-revolutionizes-rental-property-owner-insurance-with-qubie-powered-by-instanda/",
+      "subcap_ids": [],
+      "title": "Launched Sept 2023 \u2014 demonstrates active innovation\u2026"
+    },
+    {
+      "body": "Acquired FutureSense (Nov 2022) \u2014 national HR, compensation, and organizational development consulting firm",
+      "date_precision": "month",
+      "e_id": "E-025",
+      "event_date": "2022-11-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "11f0efe6-ae3e-4252-8c87-d21f7c5f2790",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://ffnews.com/newsarticle/alliant-insurance-services-acquires-futuresense-expands-consulting-capabilities/",
+      "subcap_ids": [],
+      "title": "Acquired FutureSense (Nov 2022)"
+    },
+    {
+      "body": "Added 3,000+ employees, distinct tech stack",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-076"
+      ],
+      "id": "e5ad5b9a-06e1-4a40-9516-4e4ed37f022e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Confie"
+    },
+    {
+      "body": "Each adds portals, workflows, data models",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2019-01-01",
+      "evidence_e_ids": [
+        "E-103"
+      ],
+      "id": "db24de6f-0122-4f93-a137-1a7293042f63",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Crystal & Company, Mhbt, Pacific Crest"
+    },
+    {
+      "body": "Steve Sampiere named CIO in 2015; previously served as CTO building IT team and retooling technology platform",
+      "date_precision": "year",
+      "e_id": "E-013",
+      "event_date": "2015-07-01",
+      "evidence_e_ids": [
+        "E-013"
+      ],
+      "id": "7ab463ea-7f33-443e-b297-f3f4e085d515",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20151106005114/en/Alliant-Names-Steve-Sampiere-Chief-Information-Officer",
+      "subcap_ids": [],
+      "title": "Steve Sampiere named CIO"
+    },
+    {
+      "body": "Kevin Overbey leads Employee Benefits; formerly founded ClearPoint (acquired by Alliant 2008)",
+      "date_precision": "year",
+      "e_id": "E-012",
+      "event_date": "2008-07-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "5e1c5536-a668-44e3-93b9-854b102f81a2",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/about/leadership/",
+      "subcap_ids": [],
+      "title": "Formerly founded ClearPoint"
+    },
+    {
+      "body": "Peter Carpenter COO: oversees ALL operations, directs M&A activity AND hiring strategy; co-founded ClearPoint (acquired 2008)",
+      "date_precision": "year",
+      "e_id": "E-032",
+      "event_date": "2008-07-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "1c35c2ae-f557-42f2-b7e8-400e8df00fc3",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/about/leadership/",
+      "subcap_ids": [],
+      "title": "Co-founded ClearPoint acquired"
+    },
+    {
+      "body": "Greg Zimmer appointed CEO effective April 2024; joined 1998 as CFO, president since 2007",
+      "date_precision": "year",
+      "e_id": "E-003",
+      "event_date": "1998-07-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "de4b1a0e-8f94-42de-8fa2-e3ab4f46b537",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://alliant.com/news-resources/greg-zimmer-named-chief-executive-officer-of-alliant-insurance-services/",
+      "subcap_ids": [],
+      "title": "Joined 1998 as CFO, president since 2007"
+    }
+  ]
+}

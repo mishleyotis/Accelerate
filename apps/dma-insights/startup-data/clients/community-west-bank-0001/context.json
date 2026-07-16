@@ -1,0 +1,502 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "community-west-bank-0001",
+  "financials": {
+    "metrics": {
+      "Branches": "31+ (2026)",
+      "EPS ($)": "Accretion 10-19% (2026)",
+      "Efficiency (%)": "61.6 (2025)",
+      "Employees": "~500+ (2026)",
+      "NIM (%)": "4.04 (2025)",
+      "Net Income ($M)": "~60.2 (2026)",
+      "Net Loans ($B)": "~3.5 (2026)",
+      "Texas Ratio (%)": "1.43 (2025)",
+      "Total Assets ($B)": "~5.0 (2026)",
+      "Total Deposits ($B)": "~4.2 (2026)",
+      "trajectory": {
+        "branches": 26,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 341,
+        "events": [],
+        "fy": [
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Northern/Central CA",
+        "headline": "$5.0B assets \u00b7 FY2026 \u00b7 +28.6% CAGR",
+        "regulator": "FDIC + California Department of Financial Protection and",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            1.83,
+            1.87,
+            3.52,
+            3.69,
+            5.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        1.83,
+        1.87,
+        3.52,
+        3.69,
+        5.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2022,
+          2023,
+          2024,
+          2025,
+          2026
+        ],
+        "metric": "value",
+        "unit": "unknown",
+        "values": [
+          1.83,
+          1.87,
+          3.52,
+          3.69,
+          5.0
+        ]
+      }
+    ],
+    "years": [
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Northern/Central CA"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "James Kim",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Gary Henderson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cynthia Hooper",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Hinson Thomas",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Shannon Livingston",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Blaine Lauhon",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "retiring"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dawn Cagle",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jeff Martin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CBO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "Community West Bank is a regional bank. It reports $3.7 billion in total assets. It is regulated by FDIC and employs approximately 341 people across 26 branches. Its overall digital maturity is assessed at 1.7 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC + California Department of Financial Protection and",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": null,
+    "ticker": "TCBK"
+  },
+  "issue_register": [
+    {
+      "id": "ad9cd142-6f31-431e-9f1e-828c2eb3aa73",
+      "issue_id": "GAP-1-P1C3.1.1",
+      "linked_subcap_ids": [
+        "P1C3.1.1"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [EV]: ABSENT: zero fintech/patents/innovation [E-094]. CTO has fintech skill, no program. [MAT]: M1 'Foundational' for Innovation Vision. [GAP]: Must establish basic processes. [SO WHAT]: Post-USB $5B bank strategy impact.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Innovation Vision"
+    },
+    {
+      "id": "8569c8d1-19de-4600-9047-3a161300b113",
+      "issue_id": "GAP-2-P1C3.1.2",
+      "linked_subcap_ids": [
+        "P1C3.1.2"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [EV]: ABSENT: zero fintech/patents/innovation [E-094]. CTO has fintech skill, no program. [MAT]: M1 'Foundational' for Innovation Themes. [GAP]: Must establish basic processes. [SO WHAT]: Post-USB $5B bank strategy impact.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Innovation Themes"
+    },
+    {
+      "id": "131e7222-bbfc-4263-8d72-e5397ecbd380",
+      "issue_id": "GAP-3-P1C3.1.3",
+      "linked_subcap_ids": [
+        "P1C3.1.3"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [EV]: ABSENT: zero fintech/patents/innovation [E-094]. CTO has fintech skill, no program. [MAT]: M1 'Foundational' for Innovation Horizons. [GAP]: Must establish basic processes. [SO WHAT]: Post-USB $5B bank strategy impact.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Innovation Horizons"
+    },
+    {
+      "id": "53d94d52-574b-4230-9c02-84df84418937",
+      "issue_id": "GAP-4-P1C3.2.1",
+      "linked_subcap_ids": [
+        "P1C3.2.1"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [EV]: ABSENT: zero fintech/patents/innovation [E-094]. CTO has fintech skill, no program. [MAT]: M1 'Foundational' for Idea Sourcing Channels. [GAP]: Must establish basic processes. [SO WHAT]: Post-USB $5B bank strategy impact.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Idea Sourcing Channels"
+    },
+    {
+      "id": "873cd18b-ea14-432b-8080-cf0e7f6f8e90",
+      "issue_id": "GAP-5-P1C3.2.2",
+      "linked_subcap_ids": [
+        "P1C3.2.2"
+      ],
+      "opened_on": "2026-04-08",
+      "rationale": "Maturity 1.0/5 \u2014 1.0 pts below the RB peer median (2.0/5). [EV]: ABSENT: zero fintech/patents/innovation [E-094]. CTO has fintech skill, no program. [MAT]: M1 'Foundational' for Employee Ideation. [GAP]: Must establish basic processes. [SO WHAT]: Post-USB $5B bank strategy impact.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Employee Ideation"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Value grew from 1.8 (2022) to 5.0 (2026) \u2014 28.6% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.91,
+      "peer_name": "Tri Counties Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.76,
+      "peer_name": "Heritage Commerce Corp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.5,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.76,
+      "peer_name": "Westamerica Bancorporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.35,
+      "peer_name": "Bank of the Sierra",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.26,
+      "peer_name": "Commercial Bank of CA",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-RES-CWB-20260408-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Explorium Overall",
+        "themes": [
+          "Mixed satisfaction"
+        ],
+        "trend": "STABLE",
+        "value": 3.8
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Explorium D&I",
+        "themes": [
+          "Positive D&I"
+        ],
+        "trend": "STABLE",
+        "value": 3.8
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Explorium CEO",
+        "themes": [
+          "Moderate approval"
+        ],
+        "trend": "STABLE",
+        "value": 76.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Indeed Fresno Culture",
+        "themes": [
+          "CRITICAL dissatisfaction"
+        ],
+        "trend": "NEGATIVE",
+        "value": 1.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Indeed Fresno Mgmt",
+        "themes": [
+          "Leadership perception poor"
+        ],
+        "trend": "NEGATIVE",
+        "value": 1.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Indeed Fresno Security",
+        "themes": [
+          "Post-merger anxiety"
+        ],
+        "trend": "NEGATIVE",
+        "value": 1.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "LunarCrush $CWBC",
+        "themes": [
+          "Merger-driven spike"
+        ],
+        "trend": "SPIKE",
+        "value": 942.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Yelp Post-Merger",
+        "themes": [
+          "Long waits",
+          "lost personal banker"
+        ],
+        "trend": "NEGATIVE",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of Community West Bank. Overall digital maturity scored 1.68/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-04-08",
+      "evidence_e_ids": [],
+      "id": "67d03598-e6e7-4a8a-8505-b46790784609",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    }
+  ]
+}

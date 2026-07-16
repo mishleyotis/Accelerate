@@ -1,0 +1,467 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "commerce-trust-company-0001",
+  "financials": {
+    "metrics": {
+      "net_income": "$530.8M",
+      "total_assets": "$35.7B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "HQ Kansas City & St. Louis",
+      "MO",
+      "wealth offices nationwide",
+      "new FL/AZ/SC via Fine"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "John Kemper",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO, Commerce Bancshares"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "John Handy",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO, Commerce Trust"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Joseph Catti",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO, FineMark division & Chairman, Commerce Trust"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "David Roller",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & Chief Information Officer (enterprise technology + data analytics)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Derrick Brooks",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Enterprise Digital Strategy (Executive Management Committee)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Oscar Pineda-Madrid",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP, Digital Strategy"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Earl H. Devanny III",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Director (technology background)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "National bank charter (OCC)",
+    "narrative_md": "Commerce Trust Company is a wealth & advisory firm. It reports $90.0 billion in total assets. It is regulated by Federal Reserve / OCC (bank & trust) and operates 13 branches. Its overall digital maturity is assessed at 2.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Federal Reserve / OCC (bank & trust)",
+    "size_tier": "large",
+    "thought_leadership": [
+      {
+        "author": "Earl H. Devanny III",
+        "date": "2025-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "Director Earl H. Devanny III brings enterprise technology/healthcare-IT leadership (ex-Cerner CEO) \u2014 board-level technology perspective (P1C2 digital-oversight proxy). 17-member board incl. Kemper family control; KPMG au",
+        "title": "Director Earl H. Devanny III brings enterprise\u2026",
+        "type": "article",
+        "url": "https://www.sec.gov/Archives/edgar/data/22356/000002235625000021/cbsh-20250307.htm"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "1dc9ec68-3786-4c5b-bb34-57f6178b05be",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Harness computes overall as UNWEIGHTED pillar avg (2.85); correct SV5-weighted overall=2.817=stated 2.82 (AP-05 reproduces pillars from categories exactly)."
+    },
+    {
+      "id": "2679fb20-72ba-42f0-81de-6003807168f2",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Harness expects Calculation_Chain/Contradiction_Log/Absent_Evidence_Log/QA_Validation_Log tabs; v5.5 externalizes these to reasoning_chain_log.json, contradiction_log.csv, Proxy_Searched column, qa_verdict.json."
+    },
+    {
+      "id": "4de40696-3c7b-431d-9850-4c61da9d2f5f",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "v5.5 11-col schema has no per-subcap weight column; rollup uses category mean (verified exact)."
+    },
+    {
+      "id": "bf59454a-1b8d-47c4-a9c8-61663dc1969f",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "112 caps typed CRITIC_CHALLENGE flagged invalid, but skill interface contract explicitly lists CRITIC_CHALLENGE; harness VALID_CAP_TYPES stale."
+    },
+    {
+      "id": "de6d6d45-e18f-4907-bb2a-bb8dd85ca3d2",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "118 rationales cite internal INT-xxx only; harness EVIDENCE_ID_PATTERN ignores INT- (all 709 cite evidence)."
+    },
+    {
+      "id": "d3f9d922-da7f-41ca-83ec-5f8963209621",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "No inline per-subcap counterclaim column in v5.5; genuine contradictions captured in contradiction_log.csv (2, BankSync false-positive resolved)."
+    },
+    {
+      "id": "8472198a-41bb-4ea3-b143-c181bf18bbc2",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "resolution_rule PREFER_AUTHORITATIVE_TIER non-canonical vs harness enum (semantically tier-override); contradiction correctly resolved."
+    },
+    {
+      "id": "7bafb342-3e6f-42c7-8436-9a68673adf31",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "86% subcaps HIGH confidence (>70% threshold): research evidence uniformly high-ERS; calibration differentiation opportunity."
+    },
+    {
+      "id": "b90a3ba2-5be9-4b9f-9fd6-2a33ffe2e7ef",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Structured rationale template yields high pairwise text similarity across P1-P4."
+    },
+    {
+      "id": "7d32682a-ad63-4abf-94fe-1130ec87c5bb",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "25 evidence items cited by >15% of subcaps \u2014 expected with 71-item corpus over 709 subcaps."
+    },
+    {
+      "id": "50ff4478-e5a9-4619-9ef3-6e9d39c1662c",
+      "issue_id": "ISS-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "26 corpus items used in narrative/background not in subcap Evidence_IDs (report cites 65 unique vs scoring 55)."
+    },
+    {
+      "id": "cc34d9c2-acbd-4647-9643-594b52eb09c9",
+      "issue_id": "ISS-012",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Peer-proxy disclosure lacked literal 'proxy' keyword; report Section 7 updated to disclose peer scores as proxy estimates."
+    },
+    {
+      "id": "157a4fa9-6b8f-4c7a-8f48-0674a9a474d7",
+      "issue_id": "ISS-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Template-derived 'Critical Gaps' heading conflicts with harness forbidden-language; renamed to 'Priority Gaps: Root Cause Analysis'."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Latest available financials show total assets of $35.7B.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.12,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.81,
+        "P1C5": 3.82,
+        "P2C1": 4.05,
+        "P2C2": 3.5,
+        "P2C3": 3.91,
+        "P2C4": 3.5,
+        "P3C1": 3.02,
+        "P3C2": 2.93,
+        "P3C3": 2.67,
+        "P3C4": 3.26,
+        "P4C1": 2.59,
+        "P4C2": 3.14,
+        "P4C3": 3.01,
+        "P4C4": 2.45
+      },
+      "overall_score": 3.34,
+      "peer_name": "LPL Financials",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.46,
+        "P1C2": 3.51,
+        "P1C3": 2.34,
+        "P1C4": 3.51,
+        "P1C5": 3.0,
+        "P2C1": 1.98,
+        "P2C2": 1.49,
+        "P2C3": 2.5,
+        "P2C4": 2.48,
+        "P3C1": 2.4,
+        "P3C2": 3.52,
+        "P3C3": 3.98,
+        "P3C4": 3.43,
+        "P4C1": 1.99,
+        "P4C2": 1.98,
+        "P4C3": 3.52,
+        "P4C4": 4.05
+      },
+      "overall_score": 2.83,
+      "peer_name": "Odlum Brown Limited",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.66,
+        "P1C2": 2.7,
+        "P1C3": 1.96,
+        "P1C4": 2.35,
+        "P1C5": 2.34,
+        "P2C1": 2.31,
+        "P2C2": 1.98,
+        "P2C3": 1.82,
+        "P2C4": 2.13,
+        "P3C1": 2.53,
+        "P3C2": 2.35,
+        "P3C3": 2.77,
+        "P3C4": 2.5,
+        "P4C1": 2.61,
+        "P4C2": 2.68,
+        "P4C3": 2.89,
+        "P4C4": 2.55
+      },
+      "overall_score": 2.42,
+      "peer_name": "Vestgen Wealth Partners",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.27,
+        "P1C3": 2.73,
+        "P1C4": 2.35,
+        "P1C5": 2.27,
+        "P2C1": 1.8,
+        "P2C2": 2.39,
+        "P2C3": 2.27,
+        "P2C4": 2.16,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.19,
+        "P3C4": 2.45,
+        "P4C1": 2.09,
+        "P4C2": 2.65,
+        "P4C3": 2.74,
+        "P4C4": 2.35
+      },
+      "overall_score": 2.36,
+      "peer_name": "Interactive Brokers Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.78,
+        "P1C2": 2.18,
+        "P1C3": 2.32,
+        "P1C4": 2.32,
+        "P1C5": 2.14,
+        "P2C1": 1.65,
+        "P2C2": 1.34,
+        "P2C3": 2.18,
+        "P2C4": 1.82,
+        "P3C1": 2.34,
+        "P3C2": 3.0,
+        "P3C3": 2.95,
+        "P3C4": 2.0,
+        "P4C1": 2.23,
+        "P4C2": 2.7,
+        "P4C3": 3.14,
+        "P4C4": 2.78
+      },
+      "overall_score": 2.35,
+      "peer_name": "Fisher Investments",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CTC-20260602-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Commerce Bank 3.8/5 Glassdoor (1,124+ reviews); 64% recommend; culture/values 4.0; KC 3.9; stable 12 mo",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 1124,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "trend": "Stable",
+        "value": 3.8
+      },
+      {
+        "drilldown": "Apple App Store rating 4.7 (consumer digital experience well-rated) [corr",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Commerce Bank BBB A+ (accredited 1961); 53 complaints in 36 months (low for asset size); merchant support in-house, not outsourced",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 53,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "All-stock deal ~$585M (0.690 CBSH shares per FNBT share; ~$41.87/sh); announced 6/16/2025, closed 1/1/2026. FineMark: $4.0B assets, $3.1B deposits, $2.6B loans (3/31/25); Trust & Investment ~$7.7B AUA for ~2,000 clients.",
+      "date_precision": "day",
+      "e_id": "E-057",
+      "event_date": "2025-06-16",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "3dfb1f22-87a8-4ce1-af4a-69e3c76460a5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000022356/000110465925059653/tm2517993d1_ex99-1.htm",
+      "subcap_ids": [],
+      "title": "Announced 6/16/2025"
+    },
+    {
+      "body": "New Chief Investment Officer appointed after ~22 years (leadership change signal).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-011",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "57ba6d6e-2956-4afd-ac1b-b87b999f9c4c",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/commerce-trust/5a1dccb22300005b00d31b17",
+      "subcap_ids": [],
+      "title": "New Chief Investment Officer appointed after ~22 years"
+    },
+    {
+      "body": "David Roller, EVP & CIO (joined 1997), leads enterprise technology, DATA ANALYTICS, bank operations, real estate, corporate services; serves on UMKC School of Computer Science Advisory Board.",
+      "date_precision": "year",
+      "e_id": "E-019",
+      "event_date": "1997-07-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "428c822a-a1fa-48aa-8d02-5e4414218a2f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.commercebank.com/about-us/leadership",
+      "subcap_ids": [],
+      "title": "David Roller, EVP & CIO ( joined"
+    }
+  ]
+}

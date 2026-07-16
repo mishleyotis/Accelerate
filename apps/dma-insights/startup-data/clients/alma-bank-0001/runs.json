@@ -1,0 +1,21 @@
+{
+  "active_run_id": "4f9865d3-49ee-461b-83cd-4e4237ff65b6",
+  "items": [
+    {
+      "assessment_date": "2026-05-19",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v5.5",
+      "completed_at": "2026-07-02T23:10:56.471519Z",
+      "created_at": "2026-07-02T23:10:56.471519Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "4f9865d3-49ee-461b-83cd-4e4237ff65b6",
+      "overall_score": 1.97,
+      "request_id": "DMA-ASM-ALMA-20260519-0001",
+      "started_at": "2026-07-02T23:10:56.471519Z",
+      "status": "ACTIVE",
+      "subcap_count": 689,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "entity_display_id": "tri-counties-bank-trico--0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Engineering": "1%",
+        "NIB deposits declining": "37.8%",
+        "outcome $": "10B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Engineering 1%",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud + Platform Optimization (Utilization Audit)",
+          "maturity_lift": "+2.57",
+          "metric": "Engineering 1%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Engineering 1%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-001",
+          "title": "Salesforce Platform Optimization & Data Cloud Deployment"
+        },
+        {
+          "feature": "Marketing Cloud + Data Cloud + Journey Builder",
+          "maturity_lift": "+2.57",
+          "metric": "NIB deposits declining 37.8%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "NIB deposits declining 37.8%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-002",
+          "title": "Marketing Cloud Activation for Deposit Growth Campaigns"
+        },
+        {
+          "feature": "Shield + GRC + Compliance Modules",
+          "maturity_lift": null,
+          "metric": "outcome $10B",
+          "outcomes": {
+            "effort": "S",
+            "metric": "outcome $10B",
+            "peer": null,
+            "time": "0\u20136 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-003",
+          "title": "Shield + Compliance Automation for $10B CFPB Readiness"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Commercial Card $": "163K",
+        "Outcome": "P3C1 score 1.76 \u2192 4.0 (peer median 2.50)",
+        "production deployment after": "22 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P3C1 score 1.76 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft",
+          "maturity_lift": "+2.24",
+          "metric": "P3C1 score 1.76 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 1.76 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-004",
+          "title": "MuleSoft Integration Deepening for Portal Consolidation"
+        },
+        {
+          "feature": "Einstein + Agentforce + CRM Analytics",
+          "maturity_lift": null,
+          "metric": "production deployment after 22 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "production deployment after 22 months",
+            "peer": null,
+            "time": "22 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-005",
+          "title": "Einstein / Agentforce AI Activation"
+        },
+        {
+          "feature": "FSC Payments + MuleSoft (ERP Integration)",
+          "maturity_lift": "+2.57",
+          "metric": "Commercial Card $163K",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Commercial Card $163K",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-006",
+          "title": "FSC Payments + Card Modernization Partnership"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C1"
+    },
+    {
+      "customer_impact": {
+        "Engineering": "1%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Engineering 1%",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Managed Services (Salesforce Administration + MuleSoft + Marketing Cloud)",
+          "maturity_lift": "+2.57",
+          "metric": "Engineering 1%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Engineering 1%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-007",
+          "title": "Zennify Managed Services for Long-Term Technology Partnership"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-TCB-20260407-0001",
+  "total_duration_months": 12
+}

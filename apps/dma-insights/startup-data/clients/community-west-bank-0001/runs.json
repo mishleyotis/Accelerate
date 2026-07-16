@@ -1,0 +1,21 @@
+{
+  "active_run_id": "2bda5dac-1428-4cc3-8e7c-33e570ac1c75",
+  "items": [
+    {
+      "assessment_date": "2026-04-08",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:16.853547Z",
+      "created_at": "2026-07-02T23:11:16.853547Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "2bda5dac-1428-4cc3-8e7c-33e570ac1c75",
+      "overall_score": 1.6837606837606838,
+      "request_id": "DMA-RES-CWB-20260408-0001",
+      "started_at": "2026-07-02T23:11:16.853547Z",
+      "status": "ACTIVE",
+      "subcap_count": 819,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

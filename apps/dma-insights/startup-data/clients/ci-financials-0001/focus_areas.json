@@ -1,0 +1,51 @@
+{
+  "entity_display_id": "ci-financials-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-113"
+        ],
+        "representative_quote": "Digital Marketing Strategy Document maps to M1-Foundational based on P2C1 base score 1.5.",
+        "source_kind": "heuristic"
+      },
+      "id": "2ae6b3a3-5b29-4364-8a03-d625d817d45d",
+      "involved_subcap_ids": [
+        "P2C1.1.1",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C1.1.5",
+        "P2C1.1.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "$529,000,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

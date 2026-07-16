@@ -1,0 +1,69 @@
+{
+  "entity_display_id": "financial-partners-credi-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-084",
+          "E-085"
+        ],
+        "representative_quote": "[MATURITY]: M1.0 (basic) for Onboarding Content & Education.",
+        "source_kind": "heuristic"
+      },
+      "id": "339c32fb-f381-4cd1-a6e7-1591f18796c1",
+      "involved_subcap_ids": [
+        "P2C2.6.5",
+        "P2C2.6.6",
+        "P2C2.7.5",
+        "P2C2.7.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 4 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-032",
+          "E-033",
+          "E-034",
+          "E-036"
+        ],
+        "representative_quote": "[EVIDENCE]: mapped to P1C2.3.4.",
+        "source_kind": "heuristic"
+      },
+      "id": "6a9f9717-5268-4d73-abaa-5af8bac3dd58",
+      "involved_subcap_ids": [
+        "P1C2.3.4",
+        "P1C2.4.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C2.8.7",
+        "P1C1.1.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 19 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

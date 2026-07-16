@@ -1,0 +1,239 @@
+{
+  "entity_display_id": "financial-partners-credi-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.1.3",
+        "P1C3.1.1",
+        "P1C1.1.4",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-021",
+        "E-023"
+      ],
+      "ic_id": "GAP-P1C1",
+      "id": "6041cd12-3bc6-4c3c-98b5-8a6f12dbfbbe",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-021",
+            "E-023"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P1C2"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-005",
+        "E-061"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize Digital Strategy & Vision: recovering the 0.6-point deficit against the cohort moves overall maturity more than any at-parity category can [E-061].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy & Vision trails peers by 0.6",
+      "what_text": "Strategy Refresh Cadence is one of Financial Partners Credit Union's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Financial Partners Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-005].",
+      "why_text": "The peer benchmark for Digital Strategy & Vision is 2.8; at 2.2 this institution operates 0.6 points behind the peers it competes with for the same customers [E-004, E-005].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2",
+        "P1C2.3.4",
+        "P3C2.1.4",
+        "P1C2.9.IC1",
+        "P1C2.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P1C2",
+      "id": "a40bf167-7735-4b28-a7c8-2050feeb11a6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "GAP-P1C1"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-123",
+        "E-158"
+      ],
+      "linked_subcap_id": "P1C2",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Start with Governance & Risk — a focused program here recovers peer parity fastest and unlocks the downstream capabilities that depend on it [E-158].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "Governance & Risk trails peers by 0.6",
+      "what_text": "Concentration Risk Management is one of Financial Partners Credit Union's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Financial Partners Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-004].",
+      "why_text": "The assessment found: “VP Enterprise Risk Management & Compliance — Stephanie Heglar (since 2018, 8yr) = operational risk ownership Director Risk & Compliance — Sheila C. (since 2005, 21yr) = operational risk execution” [E-123]. Peers score 2.8 on Governance & Risk against this institution's 2.2 — the 0.6-point shortfall shows up in every capability rolled into this category.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C2.6.5",
+        "P3C1.8.AM2",
+        "P3C1.8.CL4",
+        "P2C3.5.CL1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P2C2",
+      "id": "190cead0-1ad6-4967-87ec-f18c4e3a1cd2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-083",
+        "E-089",
+        "E-092",
+        "E-087",
+        "E-082",
+        "E-090",
+        "E-187",
+        "E-084"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Close the Customer Journeys & Servicing gap: sequence the lowest-scoring subcaps here first to recover parity with peers — this is where targeted investment moves the overall score most [E-092].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Customer Journeys & Servicing trails peers by 0.9",
+      "what_text": "Onboarding Content & Education is one of Financial Partners Credit Union's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Financial Partners Credit Union's ability to deliver a stronger, more personalised customer experience [E-089].",
+      "why_text": "The assessment found: “Equifax integration confirmed — credit bureau for decisioning/KYC Plaid + Finicity — account verification and financial data aggregation for KYC” [E-083]. Customer Journeys & Servicing trails the peers by 0.9 points — a competitive maturity gap that compounds across the pillars it feeds.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P1C2.3.4",
+        "P1C2.5.5",
+        "P1C2.5.2",
+        "P1C2.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "GAP-P4C1",
+      "id": "41c62b33-3bc7-45c8-8ee6-caec7ea58740",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-162",
+        "E-151",
+        "E-149",
+        "E-150",
+        "E-163",
+        "E-153",
+        "E-165",
+        "E-152"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Sequence Data Management & Governance into the near-term roadmap: the 0.5-point peer gap is measurable, so progress is provable quarter over quarter [E-151].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Data Management & Governance trails peers by 0.5",
+      "what_text": "Domain Data Ownership Model is one of Financial Partners Credit Union's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Financial Partners Credit Union's ability to deliver a stronger data and technology foundation [E-162].",
+      "why_text": "The assessment found: “VP Marketing & BI (Brian Siegel) = data strategy ownership at VP level, combined marketing+analytics leadership Director of BI (Shinar Shivdasani, since Nov 2024) = dedicated BI leadership — recent” [E-149]. At 2.5/5, Data Management & Governance is the widest measured deficit vs the peer median (3.0) among this run's remaining categories.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-FPCU-20260408-0001"
+}

@@ -1,0 +1,127 @@
+{
+  "entity_display_id": "east-west-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 1.94"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C2 score 1.94",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce CRM Optimization + Experience Cloud + Service Cloud",
+          "maturity_lift": "+2.06",
+          "metric": "P2C2 score 1.94",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 1.94",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Platform Optimization & Digital Experience Uplift"
+        },
+        {
+          "feature": "Data Platform Strategy + AI/ML Implementation",
+          "maturity_lift": "+2.2",
+          "metric": "P4C1 score 1.8",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.8",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Enterprise Data Platform & Analytics Modernization"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1, P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C3 score 1.9"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C3 score 1.9",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "CX Integration + Journey Orchestration",
+          "maturity_lift": "+2.1",
+          "metric": "P2C3 score 1.9",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 1.9",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Omnichannel Experience Integration & Journey Orchestration"
+        },
+        {
+          "feature": "Innovation Strategy + GenAI Advisory",
+          "maturity_lift": "+2.32",
+          "metric": "P1C3 score 1.68",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C3 score 1.68",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Innovation Framework & GenAI Strategy"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C3, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.91"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P1C5 score 1.91",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Sustainability Analytics + ESG Reporting Platform",
+          "maturity_lift": "+2.07",
+          "metric": "P1C5 score 1.91",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.91",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "ESG Data Platform & Climate Risk Analytics"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C5"
+    }
+  ],
+  "run_request_id": "DMA-ASM-EWBC-20260401-0001",
+  "total_duration_months": 12
+}

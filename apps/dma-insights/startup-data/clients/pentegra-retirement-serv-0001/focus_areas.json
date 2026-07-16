@@ -1,0 +1,117 @@
+{
+  "entity_display_id": "pentegra-retirement-serv-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "ca08d9a4-7101-47dc-9c54-c36f56f47c96",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "Salesforce 5-Cloud Ecosystem Active",
+      "verbatim_quote": "F-001 | Salesforce 5-Cloud Ecosystem Active | FSC, SFMC, Experience Cloud, Service Cloud, Sales Cloud rebuilt by Zennify [E-026] | L3.5-L4.0 tech maturity for CRM/engagement | Managed Services renewal, Agentforce, Data Cloud upsell"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "29170c8f-0224-4816-ae84-088b0a12296a",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "<24hr Digital Onboarding via Experience Cloud",
+      "verbatim_quote": "F-002 | <24hr Digital Onboarding via Experience Cloud | New client onboarding reduced to under 24 hours [E-027] | L4.0 onboarding maturity \u2014 proven digital capability | Experience Cloud optimization, participant self-service portal"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "ab771f57-0a54-4cab-95e4-e727c92155d3",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "$48.5M ERISA Fiduciary Breach Settlement",
+      "verbatim_quote": "F-003 | $48.5M ERISA Fiduciary Breach Settlement | Final approval Dec 2025. Unreasonable fees + prohibited transactions in MEP [E-005, E-023] | MATERIAL severity \u2192 M3 cap on P1C2/P3C2/P3C3 | Service Cloud case management, Salesforce Shield, compliance dashboards"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "ff9577dc-68f5-4fc2-9847-7a28ffe65a6f",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "2 Cybersecurity Board Members Added July 2024",
+      "verbatim_quote": "F-004 | 2 Cybersecurity Board Members Added July 2024 | Yonesy N\u00fa\u00f1ez (global infosec exec) + Gregory Wilson (NACD.DC, later Whirlpool CISO) [E-035, E-043] | Board-level cyber governance established \u2014 L3.0+ for P4C4 | Security posture review, platform hardening"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "74c54044-4d89-42fe-86b1-9aa0651d146e",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "No CDO/CTO in C-Suite",
+      "verbatim_quote": "F-005 | No CDO/CTO in C-Suite | IT led by VP Head of IT Infrastructure. Engineering = 1% workforce [E-013, E-011] | Digital transformation ceiling \u2014 limited strategic tech leadership | Zennify Advisory Services, fractional digital leadership"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "f7060958-18bc-4d9b-92c0-35ce000a54ef",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "1,139 Monthly Website Visitors",
+      "verbatim_quote": "F-006 | 1,139 Monthly Website Visitors | National firm with $16B AUA gets fewer visitors than local businesses [E-020] | Critical digital marketing gap \u2014 P2C1 likely L1.5-L2.0 | Marketing Cloud optimization, Account Engagement, SEO strategy"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": null,
+      "id": "b18e4ec8-2765-4bd9-9562-27ceae6b6910",
+      "involved_subcap_ids": [],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": null,
+      "source_path": "(unknown)",
+      "title": "Marketing Tech Fragmentation",
+      "verbatim_quote": "F-007 | Marketing Tech Fragmentation | SharpSpring + SendGrid + Brevo alongside SFMC [E-019, E-026] | Multiple overlapping tools = data silos, inefficiency | Marketing Cloud consolidation, decommission legacy tools"
+    }
+  ]
+}

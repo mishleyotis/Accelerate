@@ -1,0 +1,1070 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 172
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 232,
+        "subcaps": 232,
+        "thin": 232
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 118
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 172
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "compeer-financial-0001",
+    "domain": null,
+    "hq": null,
+    "id": "cbc886e4-479c-46df-9448-00b1ad9f7306",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Compeer Financial",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CL",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:33.688962Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 26,
+    "current_count": 3,
+    "dated_count": 9,
+    "median_age_months": 21.6,
+    "oldest_published_date": "2022-05-18",
+    "stale_count": 1,
+    "stale_pct": 2.5,
+    "total": 40,
+    "undated_count": 1
+  },
+  "evidence_summary": {
+    "claims": {
+      "CEILING_ESTIMATE": 2,
+      "FACT": 36,
+      "INFERENCE": 2
+    },
+    "connectors": {
+      "Indeed": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 1,
+      "NEUTRAL": 38,
+      "POSITIVE": 1
+    },
+    "tiers": {
+      "T1": 3,
+      "T2": 23,
+      "T3": 9,
+      "T4": 5
+    },
+    "total_facts": 97,
+    "total_items": 40
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 34.3,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 34300000000.0,
+    "cagr": "4.2%",
+    "cagr_basis": "report_prose",
+    "clay_synced_at": null,
+    "employees_approx": "~1,300 team members",
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "2021": 385000000.0,
+      "2022": 420000000.0,
+      "2023": 455000000.0,
+      "tier_1_risk_based_pct": 12.0,
+      "total_assets": "$34.3B",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 1300,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Upper Midwest — 144 counties in Illinois, Minnesota, Wisconsin",
+        "headline": "$34.3B assets · FY2025 · +3.8% CAGR",
+        "regulator": "Farm Credit Administration (FCA)",
+        "series": {
+          "net_income_m": [
+            385.0,
+            420.0,
+            455.0,
+            null,
+            null
+          ],
+          "total_assets": [
+            29.5,
+            30.8,
+            32.1,
+            0.48,
+            34.3
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Upper Midwest — 144 counties in Illinois, Minnesota, Wisconsin",
+    "footprint_basis": "derived:geography",
+    "geography": "Upper Midwest — 144 counties in Illinois, Minnesota, Wisconsin",
+    "headcount": 1300,
+    "hq": "Sun Prairie, Wisconsin",
+    "hq_address": "Sun Prairie, Wisconsin",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jase Wagner",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 48,
+        "title": "appointed 2022, former CFO, with org since 2009"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Betsy Horton",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Bill Moore",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Matt Ginder",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Marketplace Development Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Stephanie Wise",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 24,
+        "title": "elected Feb 2024"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dan Erickson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "BOARD VICE CHAIR"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Compeer Financial",
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Compeer Financial is a lending institution headquartered in Sun Prairie, Wisconsin. It reports $34.3 billion in total assets. It is regulated by Farm Credit Administration (FCA) and employs approximately 1,300 people. Its overall digital maturity is assessed at 2.4 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "revenue_basis": "report",
+    "revenue_usd": 15000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 100,
+          "score": 22.0,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "research_report_prose",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "wever, employee engagement metrics show 79% satisfaction on Glassdoor (Source:, Tier 3), indicating strong internal culture alignment despite external customer experience challenges",
+          "source": "Glassdoor",
+          "trend": "Improving"
+        },
+        {
+          "rating": "22",
+          "signal": "ophistication, behavioral targeting, engagement automation, NPS lift",
+          "source": "Net Promoter Score",
+          "trend": "Declining"
+        },
+        {
+          "signal": "Debt Ratings KBRA A-, S&P BBB+ Sub-Vertical Classification Commercial Lender Size Tier Large ($10B-$50B) Evidence Mode PUBLIC Component Description Assessment Framework 17-Capability maturity model for Commercial Lending vertical Scoring Sc",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large ($10-50B)",
+    "thought_leadership": null,
+    "tl_synced_at": null,
+    "total_assets": "$34.3B (Nov 2025 press release)"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.191158+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Compeer Financial — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Compeer Financial's overall score of 2.72 is -0.06 points below the peer median of 2.78 across six Farm Credit System institutions. The peer set includes FCSAmerica (2.90), CoBank (3.20), FCMA (2.65), GreenStone (2.75), AgCountry (2.55), and AgWest (2.70). Notable benchmark reference: CoBank (3.20) leads the peer group with particular strength in innovation management and digital lending. Compeer's positioning reflects competitive parity with most peers, but lags CoBank by 0.48 points—a gap addressable through the recommended transformation roadmap.",
+    "gap_prioritization_md": "Seven capability gaps were identified across the assessment. Prioritization follows a six-factor formula: Gap Size (current vs target, 0-10 scale), Peer Benchmark Comparison (rank vs peers, 0-10), Strategic Alignment (alignment with Farm Credit member mission, 0-10), Implementation Complexity (inverse scale, 10=simple, 0-10), Investment Efficiency (ROI proxy, 0-10), and Stakeholder Readiness (change capacity, 0-10). Weighted formula: Priority Score = (0.25 × Gap Size) + (0.20 × Peer Comparison) + (0.15 × Strategic Alignment) + (0.15 × Implementation Complexity) + (0.15 × Investment Efficiency) + (0.10 × Stakeholder Readiness).",
+    "page_number": null,
+    "scqa_heading": "SCQA Context",
+    "scqa_md": "Compeer Financial is a $34.3B in assets commercial lender regulated by Farm Credit Administration (FCA) with 1,300 employees. A 4.2% multi-year growth rate and fundamentals of Tier-1 12.00% give it the balance sheet to fund transformation [E-058, E-034]. Zennify's assessment places overall digital maturity at 2.4/5. The deepest capability gap is Plan Maintenance at 2.0/5 against a 2.6 peer median. Next is Contextual Personalization at 2.0/5 against a 2.4 peer median.\n\nThird is Financial Spreading Automation at 2.4/5 against a 2.9 peer median [E-038]. The issue register adds Assessment report initially existed only in.docx format; Excel export recommended for standardization. The issue register adds Proof structure columns (S/T) partially populated in detail sheets. Counter-signal: ESG Strategy already runs at 2.5/5 against a 2.3 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-041, E-042, E-043].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Compeer Financial is whether to close Plan Maintenance first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Compeer Financial should lead with Tableau (71/100 fit) against Digital Strategy Document, then sequence nCino behind it. Closing Plan Maintenance to the peer median alone is worth 0.6 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.\"."
+  },
+  "overall_score": 2.42,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/batch2_3_consolidated_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.364474+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p1_diagnostic_questions.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.402503+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p2_diagnostic_questions.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.409124+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p3_diagnostic_questions.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 30 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.409957+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/p4_diagnostic_questions.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 31 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.410762+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch4_gate_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.411262+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_benchmarks.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.411954+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_comparison_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.412627+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_scoring_detail.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.413079+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/governance_audit.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.413357+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/governance_summary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.413596+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.413827+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_error_log.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.413994+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/04_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.419650+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/05_layer1_phase3_phase4_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.420381+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/05_priorities.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.421502+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/08_qa_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.422195+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/09_LAYER1_PHASE8_LAYER2_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.422524+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/EXECUTION_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.422794+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.423091+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:32.427710+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 4,
+      "INFO": 29
+    },
+    "stage_ms": {
+      "manifest": 5,
+      "parse": 8242,
+      "persist": 1138
+    },
+    "structured": [
+      {
+        "code": "qa_verdict.json",
+        "detail": "qa_verdict.json: schema_mismatch: ValueError: qa_verdict.json: no run_id-shaped field after reconcile (strict error: empty run_id)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "synthesized run_manifest from handoff",
+        "detail": "synthesized run_manifest from handoff: source=research_handoff.json, run_id=DMA-RES-COMPEER-20260305-0001, institution_name=Compeer Financial",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx fallback extracted 708 subcaps from DMA_Scoring_Workbook_Co",
+        "detail": "xlsx fallback extracted 708 subcaps from DMA_Scoring_Workbook_Compeer_Financial_20260305.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from non-canonical layout batch2_3_consolidated_",
+        "detail": "evidence loaded from non-canonical layout batch2_3_consolidated_evidence.json (40 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/06_recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 7 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_recommendations",
+        "detail": "insights_derived_from_recommendations: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=6",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/batch2_3_consolidated_evidence.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p1_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p2_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p3_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 30 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/p4_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 31 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch4_gate_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_benchmarks.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_comparison_summary.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_scoring_detail.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/governance_audit.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/governance_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/04_scores.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/05_layer1_phase3_phase4_complete.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/05_priorities.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/08_qa_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/09_LAYER1_PHASE8_LAYER2_COMPLETE.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/EXECUTION_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/README.md — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/critic_log.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/708 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 6",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "qa_verdict.json: schema_mismatch: ValueError: qa_verdict.json: no run_id-shaped field after reconcile (strict error: empty run_id)",
+      "synthesized run_manifest from handoff: source=research_handoff.json, run_id=DMA-RES-COMPEER-20260305-0001, institution_name=Compeer Financial",
+      "xlsx fallback extracted 708 subcaps from DMA_Scoring_Workbook_Compeer_Financial_20260305.xlsx",
+      "scoring loaded from xlsx fallback (708 subcaps, dir=03_scoring_workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from non-canonical layout batch2_3_consolidated_evidence.json (40 rows)",
+      "used variant recommendations source: 08_appendices/06_recommendations.json",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "tech_stack_from_report_prose: 7 vendors mentioned",
+      "insights_derived_from_recommendations: 6",
+      "firmographics_leadership_healed: count=6",
+      "INFO/pattern_gap: 01_evidence/batch2_3_consolidated_evidence.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p1_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p2_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p3_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 30 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/p4_diagnostic_questions.json — no fingerprint matched (best confidence 0.00); 31 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch4_gate_validation.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_benchmarks.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_comparison_summary.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_scoring_detail.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/governance_audit.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/governance_summary.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_error_log.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/04_scores.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/05_layer1_phase3_phase4_complete.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/05_priorities.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/08_qa_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/09_LAYER1_PHASE8_LAYER2_COMPLETE.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/EXECUTION_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/README.md — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/critic_log.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "catalogue_unresolved:14/708 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 6"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.91,
+      "pillar_id": "P1",
+      "score": 2.49,
+      "subcaps_scored": 172
+    },
+    {
+      "peer_benchmarked": 232,
+      "peer_median": 2.78,
+      "pillar_id": "P2",
+      "score": 2.37,
+      "subcaps_scored": 232
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 2.79,
+      "pillar_id": "P3",
+      "score": 2.34,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.72,
+      "pillar_id": "P4",
+      "score": 2.49,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-05",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:33.688962Z",
+    "created_at": "2026-07-02T23:11:33.688962Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "a2ff408d-b37d-4de1-9857-93b68738ebf7",
+    "overall_score": null,
+    "request_id": "DMA-RES-COMPEER-20260305-0001",
+    "started_at": "2026-07-02T23:11:33.688962Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 100,
+        "score": 22.0,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "research_report_prose",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-033",
+        "E-042",
+        "E-049",
+        "E-062"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 3.13,
+      "platforms": [
+        "Tableau",
+        "Twilio"
+      ],
+      "score": 2.48,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: FACT: Bruce Feist hired as CIO in February 2024, replacing Jerry Wiese (retired April 2024). Feist leads Business Technology team for technology-based innovation and digital initiatives. Degree in Computer Information Systems from St. Cloud State."
+    },
+    {
+      "body": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-035",
+        "E-036",
+        "E-037",
+        "E-047"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.94,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.48,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: FACT: Online Banking available 24/7. Features: view balances, recent transactions, pay bills, initiate transfers, remote deposit to line of credit. Link business and personal accounts. Desktop, mobile, tablet access. Automated transfers from operating loan."
+    },
+    {
+      "body": "Plan Maintenance is a priority capability gap in operations, scoring 2.00/5 against a peer median of 2.63. Strengthening it is among the highest-leverage moves to lift maturity in operations.",
+      "evidence": [
+        "E-056",
+        "E-033",
+        "E-058"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Plan Maintenance",
+      "peer_median": 2.63,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 2.0,
+      "so_what": "Prioritize Plan Maintenance in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "Plan Maintenance",
+      "what": "Plan Maintenance is a priority capability gap in operations, scoring 2.00/5 against a peer median of 2.63. Strengthening it is among the highest-leverage moves to lift maturity in operations.",
+      "why": "The shortfall is relative, not absolute: 2.0/5 sits below the 2.63 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "168 of 168 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Strategy Document averages 2.5/5 over 168 scored subcaps; ceiling 3.0 reflects thin evidence density (0/168 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-041"
+      ],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Fair Lending Governance averages 2.5/5 over 217 scored subcaps; ceiling 3.0 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-043"
+      ],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Accelerator/Incubator Engagement averages 2.5/5 over 190 scored subcaps; ceiling 3.0 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Impact Assessment averages 2.5/5 over 205 scored subcaps; ceiling 3.0 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-062"
+      ],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Strategy averages 2.5/5 over 70 scored subcaps; ceiling 3.0 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-051"
+      ],
+      "modifiers": [
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Commercial Lead Qualification averages 2.5/5 over 291 scored subcaps; ceiling 3.0 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-053"
+      ],
+      "modifiers": [
+        "294 of 294 subcaps on thin evidence"
+      ],
+      "rationale": "Commercial Credit Pre-Qualification averages 2.5/5 over 294 scored subcaps; ceiling 3.0 reflects thin evidence density (0/294 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-047"
+      ],
+      "modifiers": [
+        "300 of 300 subcaps on thin evidence"
+      ],
+      "rationale": "Collections & Delinquency Servicing Case Management averages 2.5/5 over 300 scored subcaps; ceiling 3.0 reflects thin evidence density (0/300 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Contextual Personalization averages 2.0/5 over 255 scored subcaps; ceiling 2.5 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-058"
+      ],
+      "modifiers": [
+        "161 of 161 subcaps on thin evidence"
+      ],
+      "rationale": "Financial Spreading Automation averages 2.4/5 over 161 scored subcaps; ceiling 2.9 reflects thin evidence density (0/161 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Scenario Analysis averages 2.5/5 over 130 scored subcaps; ceiling 3.0 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-041"
+      ],
+      "modifiers": [
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Issue Management averages 2.5/5 over 140 scored subcaps; ceiling 3.0 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Plan Maintenance averages 2.0/5 over 145 scored subcaps; ceiling 2.5 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Enterprise Data Strategy & Roadmap averages 2.5/5 over 200 scored subcaps; ceiling 3.0 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "273 of 273 subcaps on thin evidence"
+      ],
+      "rationale": "Commercial Lending: Credit Risk Analytics & Monitoring averages 2.5/5 over 273 scored subcaps; ceiling 3.0 reflects thin evidence density (0/273 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-043"
+      ],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Data Product SLO/SLA Definition & Error Budgets averages 2.5/5 over 235 scored subcaps; ceiling 3.0 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-041"
+      ],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Data Protection & Privacy Controls averages 2.5/5 over 150 scored subcaps; ceiling 3.0 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "FACT: 26-66 open positions across platforms. Active hiring for: Data Analytics Engineer (builds data pipelines, operationalizes ML models), Business Continuity Analyst (security and business continuity programs, assessments, incident management), DevSecOps technology strategy roles.",
+      "evidence": [
+        "E-048"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "26-66 open positions across platforms",
+      "metric": null,
+      "peer_context": "Plan Maintenance runs 2.00/5 vs a 2.63 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "FACT: 26-66 open positions across platforms. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of Compeer Financial. Overall digital maturity scored 2.42/5.0 (Mar 2026).",
+      "evidence": [
+        "E-039",
+        "E-047",
+        "E-033",
+        "E-037"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of Compeer…",
+      "metric": null,
+      "peer_context": "Plan Maintenance runs 2.00/5 vs a 2.63 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Strategy Document — highest-fit surface at 71/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of Compeer Financial. Overall digital maturity scored 2.42/5.0 (Mar 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-05",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Plan Maintenance scores 2.00/5 vs a typical 2.63 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "evidence": [
+        "E-041",
+        "E-029"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Plan Maintenance scores 2.00/5",
+      "metric": "Plan Maintenance 2.00/5 vs peer 2.63",
+      "peer_context": "Plan Maintenance runs 2.00/5 vs a 2.63 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Strategy Document — highest-fit surface at 71/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P3C4",
+      "text": "Plan Maintenance scores 2.00/5 vs a typical 2.63 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

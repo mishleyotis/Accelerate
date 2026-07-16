@@ -1,0 +1,1498 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 85
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 159
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 111
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 164
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "tristate-capital-holding-0001",
+    "domain": null,
+    "hq": null,
+    "id": "d2b66bd3-97d8-471e-8907-e9daa135bbe7",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "TriState Capital Holdings, Inc.",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:05.344425Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 25,
+    "current_count": 47,
+    "dated_count": 5,
+    "median_age_months": 18.8,
+    "oldest_published_date": "2020-02-01",
+    "stale_count": 15,
+    "stale_pct": 16.3,
+    "total": 92,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 2,
+      "NEUTRAL": 5,
+      "POSITIVE": 85
+    },
+    "connectors": {
+      "LinkedIn": 6
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 4,
+      "NEUTRAL": 77,
+      "POSITIVE": 11
+    },
+    "tiers": {
+      "T1": 12,
+      "T2": 3,
+      "T3": 20,
+      "T4": 28,
+      "T5": 29
+    },
+    "total_facts": 775,
+    "total_items": 92
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Net income",
+        "unit": null,
+        "value": 13141.0,
+        "year": null
+      },
+      {
+        "label": "Total assets",
+        "unit": null,
+        "value": 59.1,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 20969194000.0,
+    "branches": 2,
+    "cagr": "21%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "357",
+    "financial_highlights": {
+      "net_income": 13141.0,
+      "roa_pct": 0.89,
+      "roe_pct": 11.47,
+      "size_tier": "Large Community / Small Regional ($20B+ assets)",
+      "total_assets_growth_yoy_pct": 59.1,
+      "trajectory": {
+        "branches": 2,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 357,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Andrew Caudill appointed CTO"
+          },
+          {
+            "fy": "FY2025",
+            "label": "Vince Locher named Head of CRE - newly created…"
+          }
+        ],
+        "fy": [
+          "FY2018",
+          "FY2019",
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "National (HQ: Pittsburgh PA)",
+        "headline": "$10.0B assets · FY2021",
+        "regulator": "Federal Reserve, FDIC, PA DBS, CFPB",
+        "series": {
+          "net_income_m": [
+            23000.0,
+            7300.0,
+            8500.0,
+            11500.0,
+            14000.0,
+            17000.0,
+            20000.0,
+            100000.0,
+            23000.0
+          ],
+          "total_assets": [
+            null,
+            null,
+            null,
+            10.0,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "National (HQ: Pittsburgh PA)",
+    "footprint_basis": "derived:geography",
+    "founded": 2007,
+    "geography": "National (HQ: Pittsburgh PA)",
+    "headcount": 357,
+    "hq": "One Oxford Centre, 301 Grant Street, Suite 2700, Pittsburgh, PA 15219",
+    "hq_address": "One Oxford Centre, 301 Grant Street, Suite 2700, Pittsburgh, PA 15219",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "James Getz",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chairman/CEO, TriState Capital Holdings"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Brian Fetterolf",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President/CEO, TriState Capital Bank"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Dan Pavlick",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Justin Sansonetti",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Landi",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Data Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Darin Fabian",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Enterprise Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kevin Sinagra",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Enterprise Apps & Data Integrations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Theophilus Hudson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Charles Fawcett",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Thad Clements",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kyle McNamara",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP & COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ismail Sawan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Information Security Risk"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tommy Moran",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Solutions Architect (Data)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Benji Opoku Agyemang",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Data Architect"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "TriState Capital Holdings, Inc.",
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "TriState Capital Holdings, Inc. is a regional bank. It reports $21 million in total assets and has operated since 2007. It is regulated by Federal Reserve and employs approximately 357 people across 2 branches. Its overall digital maturity is assessed at 2.2 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Federal Reserve, FDIC, PA DBS, CFPB",
+    "revenue_usd": null,
+    "sentiment": {
+      "sources": [
+        {
+          "signal": "3.2",
+          "source": "Indeed Overall"
+        },
+        {
+          "signal": "2.9",
+          "source": "Indeed Culture"
+        },
+        {
+          "signal": "2.5",
+          "source": "Indeed Work Life Balance"
+        },
+        {
+          "signal": "3.7",
+          "source": "Indeed Compensation"
+        },
+        {
+          "signal": "2.9",
+          "source": "Indeed Management"
+        },
+        {
+          "signal": "3.0",
+          "source": "Indeed Job Security"
+        },
+        {
+          "signal": "40%",
+          "source": "Indeed Ceo Approval"
+        },
+        {
+          "signal": "50%",
+          "source": "Indeed Recommend Friend"
+        },
+        {
+          "signal": "difficulty: MEDIUM, experience: EXCELLENT, length: TWO_WEEKS",
+          "source": "Indeed Interview"
+        },
+        {
+          "signal": "work_life: 2.5, compensation: 3.8, culture: 2.9",
+          "source": "Exa Ratings"
+        },
+        {
+          "signal": "Below-average employee satisfaction, particularly in work-life balance (2.5) and management (2.9). Compensation rates well (3.7-3.8). CEO approval below 50%. Mixed recommend-to-friend ratio.",
+          "source": "Assessment"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large Community / Small Regional ($20B+ assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-048",
+        "excerpt": "Common Data Platform unveiled at 2025 Innovation Summit - Azure-based cloud data lake supporting regulatory reporting, real-time analytics, and AI pilot AI pilot uses Azure AI Studio and RAG for internal data queries wit",
+        "title": "Common Data Platform unveiled at 2025 Innovation Summit - Azure-based…",
+        "type": "conference",
+        "url": "https://hike2.com/resources/video/architecting-secure-scalable-cloud-data-lake/"
+      },
+      {
+        "author": "Dan Pavlick",
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "TSC held/participated in Innovation Summit 2025 where Common Data Platform was presented CIO Dan Pavlick was 2025 CIO of the Year finalist - external recognition of tech leadership",
+        "title": "CIO Dan Pavlick was 2025 CIO of the Year finalist - external…",
+        "type": "conference",
+        "url": "https://www.linkedin.com/in/carlo-mciltrot-a13a45157/"
+      }
+    ],
+    "ticker": "TSC (delisted May 31, 2022)",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "tristatecapitalbank.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.411647+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# TriState Capital Holdings, Inc. — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "DMA Report Synthesis — TriState Capital Bank",
+    "scqa_md": "TriState Capital Holdings, Inc. is a $21M in assets regional bank regulated by Federal Reserve, FDIC, PA DBS, CFPB, operating since 2007 with 357 employees. A 21.0% multi-year growth rate and a trajectory the analyst classifies as accelerating and fundamentals of ROA 0.89%, ROE 11.47% give it the balance sheet to fund transformation [E-049, E-088]. Zennify's assessment places overall digital maturity at 2.2/5. The deepest capability gap is Customer-Centric Culture at 1.7/5 against a 2.8 peer median [E-056, E-028]. Next is ESG-Integrated Products at 1.9/5 against a 2.6 peer median [E-057].\n\nThird is Vulnerable Customer Identification at 1.9/5 against a 2.7 peer median [E-075, E-045]. The issue register adds Capability gap: Change Readiness Assessment (high severity) [E-054]. The issue register adds Capability gap: Change Metrics (high severity). Counter-signal: Budget Alignment already runs at 3.2/5 against a 3.1 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below. The question for TriState Capital Holdings, Inc.\n\nis whether to close Customer-Centric Culture first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. TriState Capital Holdings, Inc. should lead with nCino (72/100 fit) against Emerging Risk Identification, then sequence Tableau behind it. Closing Customer-Centric Culture to the peer median alone is worth 1.1 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"400+ Financial Intermediary Distribution Network — TSC's private banking (60%+ of loans) sources through 400+ financial advisors/intermediaries nationally via a Digital Lending…\"."
+  },
+  "overall_score": 2.17,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.283256+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.283530+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/exports/A3_subcap_coverage.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.293633+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/exports/A6_peer_set.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.300619+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/exports/A9_internal_evidence_request.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.302904+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/safeguard_gates.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.303330+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_comparison_table.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.304579+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.304949+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.305206+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/analysis/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.305879+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/capability_coverage_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.308264+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/LAYER_0_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.308547+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B1.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.308859+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B2A.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.309133+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B2B.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.309358+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B2C.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.309570+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B2D.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.309817+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B2_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.310097+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B3A.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.310322+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B3B.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.310532+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B3C.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.310750+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B3D.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.310964+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B3_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.311213+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.311439+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B5A.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.311774+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B5B.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.312027+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B5C.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.312252+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B5_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.312465+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_B6.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.312664+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P0-P3.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.312871+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P4_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.313422+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P6_RECOMMENDATIONS.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.313756+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P7A.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.313984+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P7B.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.314259+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P7_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.314502+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/checkpoint_P8_GOV_COMPLETE.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:05.314749+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 1,
+      "INFO": 49
+    },
+    "stage_ms": {
+      "manifest": 23,
+      "parse": 7250,
+      "persist": 535
+    },
+    "structured": [
+      {
+        "code": "institution_name derived from report artifacts",
+        "detail": "institution_name derived from report artifacts: 'TriState Capital Holdings, Inc.'",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'Regional Banks'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 24 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'founded', 'hq', 'legal_name', 'ticker'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_TSCP.docx count=14",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=18 subcaps=17 replaced_docx_scqa=False",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 11 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/exports/A3_subcap_coverage.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/exports/A6_peer_set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/exports/A9_internal_evidence_request.csv — no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/safeguard_gates.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/analysis/report_analysis.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/capability_coverage_map.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/LAYER_0_COMPLETE.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B1.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B2A.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B2B.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B2C.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B2D.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B2_COMPLETE.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B3A.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B3B.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B3C.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B3D.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B3_COMPLETE.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B4.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B5A.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B5B.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B5C.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B5_COMPLETE.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_B6.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P0-P3.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P4_COMPLETE.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P6_RECOMMENDATIONS.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P7A.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P7B.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P7_COMPLETE.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/checkpoint_P8_GOV_COMPLETE.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 9",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "institution_name derived from report artifacts: 'TriState Capital Holdings, Inc.'",
+      "subvertical derived from report artifacts: 'Regional Banks'",
+      "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "tech_stack_from_variant_source: 24 entries",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'founded', 'hq', 'legal_name', 'ticker'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_TSCP.docx count=14",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=18 subcaps=17 replaced_docx_scqa=False",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 11 sources",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/exports/A3_subcap_coverage.csv — no fingerprint matched (best confidence 0.25); 200 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/exports/A6_peer_set.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/exports/A9_internal_evidence_request.csv — no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/safeguard_gates.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/analysis/report_analysis.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/capability_coverage_map.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/LAYER_0_COMPLETE.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B1.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B2A.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B2B.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B2C.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B2D.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B2_COMPLETE.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B3A.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B3B.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B3C.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B3D.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B3_COMPLETE.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B4.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B5A.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B5B.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B5C.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B5_COMPLETE.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_B6.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P0-P3.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P4_COMPLETE.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P6_RECOMMENDATIONS.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P7A.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P7B.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P7_COMPLETE.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/checkpoint_P8_GOV_COMPLETE.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "timeline_events_persisted: 9",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 12",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.85,
+      "pillar_id": "P1",
+      "score": 2.31,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.77,
+      "pillar_id": "P2",
+      "score": 2.07,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.85,
+      "pillar_id": "P3",
+      "score": 2.22,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.74,
+      "pillar_id": "P4",
+      "score": 2.08,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-13",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:05.344425Z",
+    "created_at": "2026-07-02T23:11:05.344425Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "2e1db6ee-aed9-4fd6-b8a0-b4e6a0a13182",
+    "overall_score": null,
+    "request_id": "DMA-ASM-TSCP-20260413-0001",
+    "started_at": "2026-07-02T23:11:05.344425Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": null,
+  "top_findings": [
+    {
+      "body": "Common Data Platform — Enterprise Data Lake on Azure — TSC built a cloud-native 'Common Data Platform' on Azure Data Lake Gen2 with medallion architecture (bronze/silver/gold), Azure Data Factory (<1 day new source onboarding), and Azure Synapse for business user direct querying [E-094] — P4C1 Data Management likely M3-M3.5 — formalized architecture with governance, lineage, and quality rigor. Positions TSC ahead of most regional bank peers.",
+      "evidence": [
+        "E-094",
+        "E-108",
+        "E-093",
+        "E-103"
+      ],
+      "magnitude": "1 day",
+      "name": "Common Data Platform",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.98,
+      "so_what": "Prioritize Common Data Platform in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C3",
+      "theme": "Data & technology",
+      "title": "Common Data Platform",
+      "what": "Common Data Platform — Enterprise Data Lake on Azure — TSC built a cloud-native 'Common Data Platform' on Azure Data Lake Gen2 with medallion architecture (bronze/silver/gold), Azure Data Factory (<1 day new source onboarding), and Azure Synapse for business user direct querying.",
+      "why": "The linked evidence records: Common Data Platform built on Azure Data Lake Gen2 — 'single source of truth' for reporting, analytics, operational efficiency Medallion Architecture: three-layer system (bronze, silver, gold) to incrementally refine data"
+    },
+    {
+      "body": "CIO of Year Finalist + Dedicated Technology Leadership — CIO Dan Pavlick (2025 Pittsburgh Tech Council CIO of Year finalist), CTO Justin Sansonetti, SVP Data Management Mark Landi (since 2012), VP Enterprise Apps Darin Fabian, 2 named Data Architects [E-009, E-010, E-094] — P1C1 (Digital Strategy) and P4C3 (Architecture) benefit from strong technology leadership bench. CIO scope includes apps, infra, cloud, architecture, data, process automation.",
+      "evidence": [
+        "E-009",
+        "E-010",
+        "E-094",
+        "E-108"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "CIO of Year Finalist + Dedicated Technology",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.98,
+      "so_what": "Prioritize CIO of Year Finalist + Dedicated Technology in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C3",
+      "theme": "Data & technology",
+      "title": "CIO of Year Finalist + Dedicated Technology",
+      "what": "CIO of Year Finalist + Dedicated Technology Leadership — CIO Dan Pavlick (2025 Pittsburgh Tech Council CIO of Year finalist), CTO Justin Sansonetti, SVP Data Management Mark Landi (since 2012), VP Enterprise Apps Darin Fabian, 2 named Data Architects [E-009, E-010, E-094] — P1C1 (Digital Strategy) and P4C3 (Architecture) benefit from strong technology",
+      "why": "The linked evidence records: Common Data Platform built on Azure Data Lake Gen2 — 'single source of truth' for reporting, analytics, operational efficiency Medallion Architecture: three-layer system (bronze, silver, gold) to incrementally refine data"
+    },
+    {
+      "body": "400+ Financial Intermediary Distribution Network — TSC's private banking (60%+ of loans) sources through 400+ financial advisors/intermediaries nationally via a Digital Lending Platform with 24/7 access and 3-day document delivery [E-027, E-001] — Unique B2B2C model where advisors are the primary customer interface. P2C2 (Onboarding) and P2C3 (Omnichannel) benefit from digital-first intermediary model.",
+      "evidence": [
+        "E-027",
+        "E-001",
+        "E-028",
+        "E-029"
+      ],
+      "magnitude": "60%",
+      "name": "400+ Financial Intermediary Distribution Network",
+      "peer_median": 2.83,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.71,
+      "so_what": "Prioritize 400+ Financial Intermediary Distribution Network in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "400+ Financial Intermediary Distribution Network",
+      "what": "400+ Financial Intermediary Distribution Network — TSC's private banking (60%+ of loans) sources through 400+ financial advisors/intermediaries nationally via a Digital Lending Platform with 24/7 access and 3-day document delivery [E-027, E-001] — Unique B2B2C model where advisors are the primary customer interface.",
+      "why": "The linked evidence records: CIO Dan Pavlick responsible for strategy and execution of technology initiatives across the Bank CIO scope includes enterprise applications, infrastructure, data ownership and strategy, cloud, architecture, process automation"
+    },
+    {
+      "body": "Employee Sentiment Gap Despite Strong Compensation — Glassdoor 3.4/5, Indeed 3.2/5, Comparably D (2.5/5), eNPS Bottom 15%. Work-life balance (2.5-2.6) and post-RJF culture concerns. CEO Fetterolf approval Top 5% in Pittsburgh. Compensation rated 3.7-3.8 [E-044, E-046, E-074] — P1C4 Culture & Change likely capped at M2.5-M3. Leadership credibility (CEO Top 5%) coexists with operational culture challenges. Post-acquisition integration stress.",
+      "evidence": [
+        "E-044",
+        "E-046",
+        "E-074",
+        "E-028"
+      ],
+      "magnitude": "15%",
+      "name": "Employee Sentiment Gap Despite Strong Compensation",
+      "peer_median": 2.83,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.71,
+      "so_what": "Prioritize Employee Sentiment Gap Despite Strong Compensation in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Employee Sentiment Gap Despite Strong Compensation",
+      "what": "Employee Sentiment Gap Despite Strong Compensation — Glassdoor 3.4/5, Indeed 3.2/5, Comparably D (2.5/5). ENPS. Bottom 15%. Work-life balance (2.5-2.6) and post-RJF culture concerns. CEO Fetterolf approval Top 5% in Pittsburgh. Compensation rated 3.7-3.8 [E-044, E-046, E-074] — P1C4 Culture & Change likely capped at M2.5-M3.",
+      "why": "The linked evidence records: TSC created new enterprise-wide Head of CRE position (Dec 2025) — active business line expansion CRE line-of-business mirrors specialty strategies used in Fund Finance and Equipment Finance"
+    },
+    {
+      "body": "Deep Salesforce Ecosystem — 6+ Products in Production — TSC runs Salesforce CRM, Sales Cloud, Service Cloud, Experience Cloud, Pardot (SFMC Account Engagement), Connect, Forms, and AppExchange — integrated with Bizagi BPM and Fiserv core [E-006, E-073, E-081] — Strong CRM foundation across P2 (Customer Experience) and P3 (Automation). Salesforce-Bizagi integration indicates process maturity. — CRITICAL: Existing SF customer = no greenfield risk.",
+      "evidence": [
+        "E-006",
+        "E-073",
+        "E-081",
+        "E-028"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Deep Salesforce Ecosystem",
+      "peer_median": 2.83,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.71,
+      "so_what": "Prioritize Deep Salesforce Ecosystem in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Deep Salesforce Ecosystem",
+      "what": "Deep Salesforce Ecosystem — 6+ Products in Production — TSC runs Salesforce CRM, Sales Cloud, Service Cloud, Experience Cloud, Pardot (SFMC Account Engagement), Connect, Forms, and AppExchange — integrated with Bizagi BPM and Fiserv core [E-006, E-073, E-081] — Strong CRM foundation across P2 (Customer Experience) and P3 (Automation).",
+      "why": "The linked evidence records: Salesforce Service Cloud = case management, service console, knowledge base platform Salesforce CRM/Sales Cloud = relationship manager desktop with 360-degree customer view"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-114"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "40 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Budget Alignment averages 3.2/5 over 165 scored subcaps; ceiling 4.0 reflects thin evidence density (125/165 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "97 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Project/Program Governance averages 2.4/5 over 217 scored subcaps; ceiling 3.2 reflects thin evidence density (120/217 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.5,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-040"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "105 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Academic Partnerships averages 2.3/5 over 190 scored subcaps; ceiling 3.1 reflects thin evidence density (85/190 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.5,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "120 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Customer-Centric Culture averages 1.7/5 over 205 scored subcaps; ceiling 2.4 reflects thin evidence density (85/205 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-057"
+      ],
+      "modifiers": [
+        "55 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG-Integrated Products averages 1.9/5 over 70 scored subcaps; ceiling 2.5 reflects thin evidence density (15/70 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.5,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-063"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "122 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Content Review & Approval averages 2.0/5 over 287 scored subcaps; ceiling 2.7 reflects thin evidence density (165/287 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "182 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "KYC/CIP Compliance averages 2.4/5 over 287 scored subcaps; ceiling 3.1 reflects thin evidence density (105/287 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-073"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "246 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Vulnerable Customer Identification averages 1.9/5 over 286 scored subcaps; ceiling 2.5 reflects thin evidence density (40/286 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-080"
+      ],
+      "modifiers": [
+        "225 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Streaming Event Processing averages 2.0/5 over 255 scored subcaps; ceiling 2.6 reflects thin evidence density (30/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-081"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "138 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Automation Governance Framework averages 2.3/5 over 143 scored subcaps; ceiling 2.8 reflects thin evidence density (5/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-084"
+      ],
+      "modifiers": [
+        "125 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Performance Monitoring averages 2.2/5 over 130 scored subcaps; ceiling 2.7 reflects thin evidence density (5/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-088"
+      ],
+      "modifiers": [
+        "cap applied: No direct evidence; score reflects minimum regulatory baseline",
+        "136 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Compliance Governance averages 2.5/5 over 141 scored subcaps; ceiling 3.0 reflects thin evidence density (5/141 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-091"
+      ],
+      "modifiers": [
+        "140 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Crisis Framework averages 1.9/5 over 145 scored subcaps; ceiling 2.5 reflects thin evidence density (5/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-094"
+      ],
+      "modifiers": [
+        "195 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Event-Driven Data Architecture averages 2.3/5 over 200 scored subcaps; ceiling 2.8 reflects thin evidence density (5/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-099"
+      ],
+      "modifiers": [
+        "265 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Generative AI Strategy & Use Cases averages 2.0/5 over 270 scored subcaps; ceiling 2.5 reflects thin evidence density (5/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-105"
+      ],
+      "modifiers": [
+        "215 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Quantum Computing Readiness averages 2.0/5 over 235 scored subcaps; ceiling 2.5 reflects thin evidence density (20/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-111"
+      ],
+      "modifiers": [
+        "145 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Network Security Architecture averages 2.0/5 over 150 scored subcaps; ceiling 2.5 reflects thin evidence density (5/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Andrew Caudill appointed CTO. Andrew Caudill appointed CTO at TriState Capital Bank, Jan 2026",
+      "evidence": [
+        "E-037"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Andrew Caudill appointed CTO",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.71/5 vs a 2.83 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Andrew Caudill appointed CTO. Andrew Caudill appointed CTO at TriState Capital Bank, Jan 2026. Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Andrew Caudill appointed CTO"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "TSC has a CTO: Andrew M. Caudill, appointed Jan 2026. Previously Head of Technology Strategy and Architecture (Nov 2024-Jan 2026)",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "TSC has a CTO: Andrew M. Caudill, appointed Jan 2026",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.71/5 vs a 2.83 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "TSC has a CTO: Andrew M. Caudill, appointed Jan 2026. Previously Head of Technology Strategy and Architecture (Nov 2024-Jan 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "TSC has a CTO: Andrew M. Caudill, appointed Jan 2026"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Change & Product Management Office exists as formal organizational function Active hiring: Business Systems Analyst (Data Services), Senior Product Manager Deposits & Liquidity, Data Technology & Engineering Manager, Technical Business Systems Analyst",
+      "evidence": [
+        "E-070"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Change & Product Management Office Business Systems Analyst…",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.71/5 vs a 2.83 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Change & Product Management Office exists as formal organizational function Active hiring: Business Systems Analyst (Data Services), Senior Product Manager Deposits & Liquidity, Data Technology & Engineering Manager. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Named Top 50 Bank for Equipment Finance by Monitor (2025) — external industry recognition (Jul 2025).",
+      "evidence": [
+        "E-041"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Named Top 50 Bank for Equipment Finance by Monitor (2025)",
+      "metric": null,
+      "peer_context": "Customer-Centric Culture runs 1.71/5 vs a 2.83 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Emerging Risk Identification — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Named Top 50 Bank for Equipment Finance by Monitor (2025) — external industry recognition (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Named Top 50 Bank for Equipment Finance by Monitor (2025)"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Customer-Centric Culture scores 1.71/5 vs a typical 2.83 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-056",
+        "E-028",
+        "E-029",
+        "E-036"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Customer-Centric Culture scores 1.71/5",
+      "metric": "Customer-Centric Culture 1.71/5 vs peer 2.83",
+      "peer_context": "Customer-Centric Culture runs 1.71/5 vs a 2.83 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Emerging Risk Identification — highest-fit surface at 72/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C4",
+      "text": "Customer-Centric Culture scores 1.71/5 vs a typical 2.83 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

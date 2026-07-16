@@ -1,0 +1,1018 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 185,
+        "subcaps": 185,
+        "thin": 142
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 222,
+        "subcaps": 222,
+        "thin": 158
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 111,
+        "subcaps": 111,
+        "thin": 53
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 85
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "texas-capital-bancshares-0001",
+    "domain": null,
+    "hq": null,
+    "id": "6aed9032-890a-4e81-ab74-30e6af39616b",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Texas Capital Bancshares, Inc. / Texas Capital Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:44.600512Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 13,
+    "current_count": 59,
+    "dated_count": 6,
+    "median_age_months": 11.7,
+    "oldest_published_date": "2020-08-14",
+    "stale_count": 4,
+    "stale_pct": 3.67,
+    "total": 109,
+    "undated_count": 27
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 1,
+      "POSITIVE": 104,
+      "POSITIVE_STRATEGIC": 2,
+      "POSITIVE_WITH_CAVEAT": 2
+    },
+    "connectors": {
+      "Indeed": 6,
+      "LinkedIn": 27
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 102,
+      "POSITIVE": 5
+    },
+    "tiers": {
+      "T1": 53,
+      "T2": 24,
+      "T3": 7,
+      "T7": 25
+    },
+    "total_facts": 918,
+    "total_items": 109
+  },
+  "financial_trajectory": {
+    "cagr": "40%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "TREND CLASSIFICATION: ACCELERATING — 73 basis points ROAA improvement from FY2021 to Q3 2025; ROATCE from 2.0% to 12.0% (10pp improvement); fee income +84% since Q3 2021; PPNR +30%",
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 32.5,
+        "year": 2025
+      }
+    ],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 32500000000.0,
+    "cagr": "8%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "1818",
+    "financial_highlights": {
+      "accelerating": "73 basis points ROAA improvement from FY20",
+      "as_of_q3_2025": "32.5B total assets (record), $27.5B deposits",
+      "lines": [
+        "As of Q3 2025: $32.5B total assets (record), $27.5B deposits (record), approximately 1,818 employees — 90% of whom joined since the 2021 transformation began. Workday confirmed as HR and ATS platform (texascapitalbank.wd12.myworkdayjobs.com). TCB employs a talent-first strategy: 50% of commercial and industrial clients are now covered by industry-specialized bankers, up from near-zero in 2021.",
+        "TREND CLASSIFICATION: ACCELERATING — 73 basis points ROAA improvement from FY2021 to Q3 2025; ROATCE from 2.0% to 12.0% (10pp improvement); fee income +84% since Q3 2021; PPNR +30% YoY Q3 2025 (all-time record $150M). Revenue growth forecast: +20% p.a. average next two years vs. 7.2% banking industry benchmark.",
+        "CAGR Estimates: Fee Income CAGR FY2021–FY2025: ~+40%; Tangible Book Value per share CAGR: ~+8% (FY2024 record, then Q3 2025 record $73.02/share). Asset CAGR FY2021–Q3 2025: ~+2% — reflecting deliberate capital rebalancing (mortgage correspondent exit, BankDirect sale) followed by organic growth acceleration.",
+        "TREND CLASSIFICATION: ACCELERATING. TCB's financial trajectory from FY2021 (transformation start) to Q3 2025 (transformation declared complete) shows a sustained multi-year recovery and acceleration. Key performance targets set at the September 2021 strategic update have been met or exceeded. Q3 2025 results beat analyst estimates by >20% ($2.18 EPS vs $1.81 estimated).",
+        "Key Financial Signals for Salesforce Account Executive: (1) Fee income 84%+ growth since Q3 2021 — TCB has successfully transformed from a spread-dependent bank to a fee-generating financial services firm. (2) ROATCE target >12.5% — Q3 2025 hit 12.0%, signaling capital available for platform investment. (3) Revenue forecast +20% p.a. next 2 years vs. 7.2% industry — aggressive product and technology investment cycle ahead. (4) CET1 12.14% and TCE/TA 10.25% (#1 capitalization vs. peer group) — balance sheet strength supports technology investment without capital constraints. (5) Treasury Product Fees +23% YoY for 4th consecutive quarter — each new treasury API product is a MuleSoft use case."
+      ],
+      "tcb_employs_a_talent-first_strategy": "50% of commercial and industrial clients a"
+    },
+    "footprint": "United States — Texas-primary (Dallas HQ, 5 TX metros) + national expansion (CA/",
+    "footprint_basis": "derived:geography",
+    "founded": 2021,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "United States — Texas-primary (Dallas HQ, 5 TX metros) + national expansion (CA/",
+    "headcount": 1818,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Tenet Healthcare",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Holmes Feb",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Chief Credit",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Rob Holmes-hosted",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Texas Capital Bancshares, Inc. / Texas Capital Bank",
+    "license_type": "SEC-registered",
+    "narrative_md": "Comprehensive organizational context derived from SEC filings (10-K FY2024), FDIC records, and public corporate disclosures. All claims cite evidence IDs. Financial data covers FY2020–Q3 2025 for trend analysis.",
+    "primary_regulator": "SEC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 340000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.8,
+          "source": "Overall Rating"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Culture & Values"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.6,
+          "source": "Job Security & Advancement"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Management"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.1,
+          "source": "Work-Life Balance"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.1,
+          "source": "Compensation & Benefits"
+        }
+      ],
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.8 / 5.0",
+          "source": "Overall Rating"
+        },
+        {
+          "rating": "3.7 / 5.0",
+          "source": "Culture & Values"
+        },
+        {
+          "rating": "3.6 / 5.0",
+          "source": "Job Security & Advancement"
+        },
+        {
+          "rating": "3.7 / 5.0",
+          "source": "Management"
+        },
+        {
+          "rating": "4.1 / 5.0  ★ STRONG",
+          "source": "Work-Life Balance"
+        },
+        {
+          "rating": "4.1 / 5.0  ★ STRONG",
+          "source": "Compensation & Benefits"
+        },
+        {
+          "rating": "4145%  (below ~65% benchmark — reflects 90% workforce turnover since 2021)",
+          "source": "CEO Approval (Rob Holmes)"
+        },
+        {
+          "rating": "52.5% recommend — marginally positive",
+          "source": "Recommend to a Friend"
+        },
+        {
+          "rating": "68.9% satisfied",
+          "source": "Salary Satisfaction"
+        },
+        {
+          "rating": "EASY / AVERAGE experience / TWO WEEKS",
+          "source": "Interview Process"
+        },
+        {
+          "rating": "Indeed (Texas Capital Bank, Dallas TX, verified May 2026)",
+          "source": "Data Source"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": "Rob Holmes-hosted",
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-126",
+        "excerpt": "'Taking Share: Lessons From Leaders' — CEO Rob Holmes-hosted thought-leadership podcast with premium guest roster: Condoleezza Rice (Hoover Institution, 66th Secretary of State); Frank Bisignano (SSA Commissioner + IRS C",
+        "title": "'Taking Share: Lessons From Leaders'",
+        "type": "podcast",
+        "url": "https://www.texascapitalbank.com/commercial-banking/insights"
+      }
+    ],
+    "ticker": "NASDAQ: TCBI",
+    "ticker_basis": "prose:entity-scoped",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$32.5B",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "texascapitalbank.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v5.5",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.144489+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Texas Capital Bancshares, Inc. / Texas Capital Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peer set locked in research Batch 1: Cullen/Frost (CFR, $53B), Prosperity Bancshares (PB, $40B), Comerica (CMA, $78B), Western Alliance (WAL, $80B), Pinnacle Financial Partners (PNFP, $56B). TCB ($32.5B) is the smallest peer group member by assets but the fastest-growing by ROATCE improvement trajectory. Peer scores at CATEGORY LEVEL (not capability) — all peer scores are T3 quality based on public disclosures and analyst research.",
+    "gap_prioritization_md": "Priority Score = (0.25 × Business Impact) + (0.20 × Peer Comparison) + (0.15 × Strategic Alignment) + (0.15 × Implementation Complexity Inverse) + (0.15 × Investment Efficiency) + (0.10 × Stakeholder Readiness). Six of the top 8 gaps map directly to Zennify Salesforce solutions. Two gaps ( Culture, ESG) are CLIENT-responsibility items requiring internal programs, not technology investment.",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Texas Capital Bancshares DMA Assessment",
+    "scqa_md": "Texas Capital Bancshares, Inc. / Texas Capital Bank is a $32.5B in assets regional bank regulated by SEC with 1,818 employees. A 8.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-100, E-101]. Zennify's assessment places overall digital maturity at 2.3/5. The deepest capability gap is Governance & Ethics — a lower-scoring capability area at 1.6/5 against a 2.5 peer median [E-118, E-112].\n\nNext is Integration Planning at 1.9/5 against a 3.0 peer median [E-102, E-109]. Third is In-Session Personalization at 1.9/5 against a 2.5 peer median [E-141, E-142]. The issue register adds contradiction_log.csv absent — Layer 1 v5.5↔Layer 2 v2.4 schema drift (high severity). The issue register adds reasoning_chain_log.json absent — Layer 1 v5.5↔Layer 2 v2.4 schema drift (high severity). Counter-signal: SOAR & Security Automation already runs at 3.1/5 against a 3.0 peer median — a strength to build on, not rebuild.\n\nThe roster shows no CDO — a named ownership gap for the capabilities below. The question for Texas Capital Bancshares, Inc. / Texas Capital Bank is whether to close Governance & Ethics — a lower-scoring capability area first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Texas Capital Bancshares, Inc. / Texas Capital Bank should lead with Tableau (64/100 fit) against Channel Strategy, then sequence nCino behind it.\n\nClosing Governance & Ethics — a lower-scoring capability area to the peer median alone is worth 0.9 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.3,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:43.695174+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_comparison_table.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:43.697178+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:43.697669+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:43.697922+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/peer_set_locked.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:43.698248+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/scoring_parameters.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:43.698611+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 18
+    },
+    "stage_ms": {
+      "manifest": 23,
+      "parse": 9452,
+      "persist": 1481
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 36 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 02_research_workbook/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_TCB_20260511.docx leadership=0 focus_areas=2 facts_extracted=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=14 subcaps=17 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 17 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 11 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:employees_approx,total_assets",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/report_analysis.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/peer_set_locked.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/scoring_parameters.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 11",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:9/698 subcaps unresolved against v5.5",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 13",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "caps_applied_log: 36 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+      "used variant recommendations source: 02_research_workbook/recommendations.json",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_Research_TCB_20260511.docx leadership=0 focus_areas=2 facts_extracted=1",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=14 subcaps=17 replaced_docx_scqa=True",
+      "tech_stack_from_report_prose: 17 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 11 sources",
+      "firmographics_mined_from_report_prose:employees_approx,total_assets",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 02_research_workbook/report_analysis.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/peer_set_locked.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/scoring_parameters.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "timeline_events_persisted: 11",
+      "catalogue_unresolved:9/698 subcaps unresolved against v5.5",
+      "insight_cards_persisted: 13"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 185,
+      "peer_median": 2.82,
+      "pillar_id": "P1",
+      "score": 2.07,
+      "subcaps_scored": 185
+    },
+    {
+      "peer_benchmarked": 222,
+      "peer_median": 2.76,
+      "pillar_id": "P2",
+      "score": 2.18,
+      "subcaps_scored": 222
+    },
+    {
+      "peer_benchmarked": 111,
+      "peer_median": 3.0,
+      "pillar_id": "P3",
+      "score": 2.45,
+      "subcaps_scored": 111
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.73,
+      "pillar_id": "P4",
+      "score": 2.51,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-11",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v5.5",
+    "completed_at": "2026-07-02T23:11:44.600512Z",
+    "created_at": "2026-07-02T23:11:44.600512Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "aa5ca855-bf2d-48e8-9be2-b1b5d1169a43",
+    "overall_score": null,
+    "request_id": "DMA-ASM-TCB-20260511-0001",
+    "started_at": "2026-07-02T23:11:44.600512Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.8,
+        "source": "Overall Rating"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Culture & Values"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.6,
+        "source": "Job Security & Advancement"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Management"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.1,
+        "source": "Work-Life Balance"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.1,
+        "source": "Compensation & Benefits"
+      }
+    ],
+    "derived_from": null,
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Priority 1 gaps must be resolved via internal discovery before finalizing Layer 1 scoring.",
+      "evidence": [
+        "E-112",
+        "E-118"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Priority 1 gaps must be resolved",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 1.62,
+      "so_what": "Priority 1 gaps must be resolved via internal discovery before finalizing Layer 1 scoring.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Priority 1 gaps must be resolved",
+      "what": "Priority 1 gaps must be resolved via internal discovery before finalizing Layer 1 scoring.",
+      "why": "The linked evidence records: Formal ESG Council established 2021, overseen by Governance & Nominating Committee of the Board. Consists of executive leadership + senior management. Purpose: identify ESG opportunities, set goals, monitor progress, report outcomes."
+    },
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-100",
+        "E-101",
+        "E-102",
+        "E-103"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 2.35,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 24 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: Formal documented strategy: 'become a Texas-based full-service financial services firm that can seamlessly serve the best clients in its markets through the entirety of their life cycles'. Strategy explicitly published in 10-K Business Strategy section."
+    },
+    {
+      "body": "Integration Planning is a priority capability gap in strategy and governance, scoring 1.87/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "evidence": [
+        "E-102",
+        "E-109",
+        "E-110",
+        "E-116"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Integration Planning",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Tableau"
+      ],
+      "score": 1.87,
+      "so_what": "Prioritize Integration Planning in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C4",
+      "theme": "Strategy & governance",
+      "title": "Integration Planning",
+      "what": "Integration Planning is a priority capability gap in strategy and governance, scoring 1.87/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "why": "The linked evidence records: CEO declared the 2021-launched transformation 'completed' in 2026 letter — formal strategic milestone communication."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-103"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "120 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Efficiency Metrics averages 2.4/5 over 165 scored subcaps; ceiling 3.0 reflects thin evidence density (45/165 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-117"
+      ],
+      "modifiers": [
+        "cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0",
+        "cap applied: Evidence ceiling: 1.5",
+        "136 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Risk Management averages 2.5/5 over 221 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-141"
+      ],
+      "modifiers": [
+        "cap applied: CT-005a: No formal innovation program or CDAO confirmed — innovation governance cap",
+        "165 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Dedicated Innovation Budget averages 1.9/5 over 190 scored subcaps; ceiling 2.5 reflects thin evidence density (25/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-213"
+      ],
+      "modifiers": [
+        "cap applied: CT-005b: Culture internal evidence thin; 41.45% CEO approval signal",
+        "165 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Integration Planning averages 1.9/5 over 205 scored subcaps; ceiling 2.5 reflects thin evidence density (40/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-112"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "109 of 125 subcaps on thin evidence"
+      ],
+      "rationale": "Governance & Ethics — Subcap 2 averages 1.6/5 over 125 scored subcaps; ceiling 2.2 reflects thin evidence density (16/125 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-125"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "180 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Marketing Compliance & Governance averages 2.4/5 over 285 scored subcaps; ceiling 3.1 reflects thin evidence density (105/285 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-127"
+      ],
+      "modifiers": [
+        "cap applied: CP-003: P3C3=2.48<2.5 → P2C2 max 3.0",
+        "cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0",
+        "205 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Notification Template & Alert Configuration averages 2.4/5 over 285 scored subcaps; ceiling 3.0 reflects the binding cap (cap applied: CP-003: P3C3=2.48<2.5 → P2C2 max 3.0); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-138"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "220 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Partner/Ecosystem Integration averages 2.0/5 over 285 scored subcaps; ceiling 2.6 reflects thin evidence density (65/285 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-141"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "185 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "In-Session Personalization averages 1.9/5 over 255 scored subcaps; ceiling 2.6 reflects thin evidence density (70/255 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-171"
+      ],
+      "modifiers": [
+        "cap applied: CT-002: Platform unconfirmed — automation outcomes evidenced but no enterprise RPA platf",
+        "cap applied: Evidence ceiling: 1.5",
+        "90 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Exception Management averages 2.1/5 over 140 scored subcaps; ceiling 2.8 reflects thin evidence density (50/140 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.5,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-152"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "cap applied: Evidence ceiling: 2.0",
+        "65 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Recovery Operations averages 2.6/5 over 130 scored subcaps; ceiling 3.4 reflects thin evidence density (65/130 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.4,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-162"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "cap applied: Evidence ceiling: 2.0",
+        "40 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Reporting Calendar averages 2.5/5 over 140 scored subcaps; ceiling 3.4 reflects thin evidence density (100/140 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.5,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-148"
+      ],
+      "modifiers": [
+        "cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0",
+        "cap applied: Evidence ceiling: 1.5",
+        "70 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "RTO/RPO Achievement averages 2.5/5 over 145 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0); band ±0.5 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-176"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling: 1.5",
+        "cap applied: Evidence ceiling: 2.0",
+        "135 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Cross-Domain Data Sharing Enablement averages 2.3/5 over 200 scored subcaps; ceiling 2.9 reflects thin evidence density (65/200 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.5,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-193"
+      ],
+      "modifiers": [
+        "cap applied: CT-001a: AI governance framework not confirmed vs new Texas AI Act obligation",
+        "cap applied: Evidence ceiling: 1.5",
+        "155 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Metric Parity Mapping & Legacy-to-New Reconciliation averages 2.4/5 over 270 scored subcaps; ceiling 3.1 reflects thin evidence density (115/270 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.5,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-204"
+      ],
+      "modifiers": [
+        "cap M2 applied: CT-004: Core banking platform unknown — cannot score application portfolio above M2.5",
+        "cap applied: Evidence ceiling: 1.5",
+        "115 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Cost Anomaly Detection & Guardrails averages 2.5/5 over 235 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: CT-004: Core banking platform unknown — cannot score application portfolio above M2.5); band ±0.5 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-206"
+      ],
+      "modifiers": [
+        "cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0",
+        "cap applied: Evidence ceiling: 2.0",
+        "20 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "SOAR & Security Automation averages 3.1/5 over 150 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: CRITIC: Single evidence item cannot support M3.5+ — downgrade to M3.0); band ±0.4 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Technology strategy explicit: 'agile, cloud-native technology infrastructure'; AI/automation/data named as 2026 'leading investment priorities' (Jul 2026).",
+      "evidence": [
+        "E-102"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Technology strategy explicit: 'agile, cloud-native…",
+      "metric": null,
+      "peer_context": "Governance & Ethics — Subcap 2 runs 1.62/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Channel Strategy — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Technology strategy explicit: 'agile, cloud-native technology infrastructure'; AI/automation/data named as 2026 'leading investment priorities' (Jul 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "AI/automation/data named as 2026 'leading investment…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Director Ranjana B. Clark (joined 2025): former Head of Global Transaction Banking at MUFG — deep financial-services and treasury expertise; serves on Audit + Technology committees (Jul 2025).",
+      "evidence": [
+        "E-106"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Director Ranjana B. Clark joined 2025",
+      "metric": null,
+      "peer_context": "Governance & Ethics — Subcap 2 runs 1.62/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Director Ranjana B. Clark (joined 2025): former Head of Global Transaction Banking at MUFG — deep financial-services and treasury expertise; serves on Audit + Technology committees (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Director Ranjana B. Clark joined 2025"
+      },
+      "window": null
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "🎯 MAJOR FINDING: TCB Digital Engagement team is implementing a NEW Customer Data Platform — actively hiring 'Customer Data Platform Product Owner' role.",
+      "evidence": [
+        "E-141"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "🎯 Major Finding",
+      "metric": null,
+      "peer_context": "Governance & Ethics — Subcap 2 runs 1.62/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "🎯 MAJOR FINDING: TCB Digital Engagement team is implementing a NEW Customer Data Platform — actively hiring 'Customer Data Platform Product Owner' role. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Geographic strategy expansion: LA office opened 2025; Chicago + NYC offices planned 2026 — 'Y'all Street to Wall Street' (Jul 2025).",
+      "evidence": [
+        "E-102"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Chicago + NYC offices planned 2026",
+      "metric": null,
+      "peer_context": "Governance & Ethics — Subcap 2 runs 1.62/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Channel Strategy — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Geographic strategy expansion: LA office opened 2025; Chicago + NYC offices planned 2026 — 'Y'all Street to Wall Street' (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "LA office opened 2025"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Governance & Ethics — Subcap 2 scores 1.62/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-118",
+        "E-112"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Governance & Ethics",
+      "metric": "Governance & Ethics — Subcap 2 1.62/5 vs peer 2.50",
+      "peer_context": "Governance & Ethics — Subcap 2 runs 1.62/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Channel Strategy — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "Governance & Ethics — a lower-scoring capability area scores 1.62/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

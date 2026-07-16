@@ -1,0 +1,1121 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 67,
+        "subcaps": 67,
+        "thin": 52
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 36,
+        "subcaps": 36,
+        "thin": 29
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 26,
+        "subcaps": 26,
+        "thin": 21
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 32,
+        "subcaps": 32,
+        "thin": 26
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "united-business-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "c8f731cb-707e-49d5-be36-df06d682bf16",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "United Business Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CL",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:37.272831Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 4,
+    "current_count": 37,
+    "dated_count": 1,
+    "median_age_months": 5.7,
+    "oldest_published_date": "2024-03-01",
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 42,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 2,
+      "NEGATIVE": 16,
+      "NEUTRAL": 14,
+      "POSITIVE": 10
+    },
+    "connectors": {
+      "Clay": 1,
+      "Glassdoor": 1,
+      "Indeed": 3,
+      "LinkedIn": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 6,
+      "NEUTRAL": 27,
+      "POSITIVE": 9
+    },
+    "tiers": {
+      "T1": 4,
+      "T2": 8,
+      "T3": 14,
+      "T4": 1,
+      "T5": 13,
+      "T6": 2
+    },
+    "total_facts": 171,
+    "total_items": 42
+  },
+  "financial_trajectory": null,
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 2700000000.0,
+    "branches": "34",
+    "cagr": "-21.4%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Sales narrative: The NIB deposit decline (-16% YoY, $111M lost) is the most commercially actionable data point. It maps directly to the CEO's stated objective of 'enhancing shareholder value' — you cannot enhance shareholder value while losing your cheapest funding source. Marketing Cloud deposit retention campaigns and FSC relationship visibility are the direct answer."
+      ],
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 256,
+        "events": [
+          {
+            "fy": "FY2010",
+            "label": "10 strategic acquisitions completed since 2010, with…"
+          }
+        ],
+        "fy": [
+          "FY2010",
+          "FY2024"
+        ],
+        "geography": "CA, CO, NM, WA, NV",
+        "headline": "$578M net income · FY2024",
+        "regulator": "Federal Reserve Board (state member bank)",
+        "series": {
+          "net_income_m": [
+            2300.0,
+            578.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "CA, CO, NM, WA, NV",
+    "footprint_basis": "derived:geography",
+    "founded": 2004,
+    "geography": "CA, CO, NM, WA, NV",
+    "headcount": 256,
+    "hq": "Walnut Creek, Cal",
+    "hq_address": "Walnut Creek, Cal",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "George J. Guarini",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO (founder)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Janet L. King",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SEVP & COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Keary L. Colwell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SEVP, CFO & Corp Secretary"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Izabella Zhu Mitchell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Terry Curley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Steve Wallace",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "BSA Officer (CAMS)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lloyd W. Kendall Jr.",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Board Chairman"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "United Business Bank",
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "United Business Bank (UBB), a subsidiary of BayCom Corp (NASDAQ: BCML), is a $2.6 billion-asset community commercial bank headquartered in Walnut Creek, California. Founded in 2004 by CEO George Guarini, UBB operates 34 branches across five Western states (CA, CO, NM, WA, NV) and has completed 10 acquisitions since 2010, absorbing approximately $2.3 billion in assets. The bank's loan portfolio is heavily concentrated in commercial real estate (85.5% of total loans), serving small and mid-sized businesses, professional firms, labor unions, and real estate investors. UBB holds a Bauer Financial 5-Star rating and maintains a clean regulatory record with no enforcement actions.",
+    "primary_regulator": "Federal Reserve Board (state member bank)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 48,
+          "scale": 5,
+          "score": 2.2,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.8,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "2.2/5",
+          "signal": "banking language, zero technology/digital mentions Glassdoor overall rating 2.2/5.0 from 48 reviews — 41% below Financial Services industry average of 3.7 Only 21% of employees would recommend UBB to a friend LinkedIn followers: 3,565 — ver",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.8/5",
+          "signal": "Industry classified as Banking on LinkedIn, Public Company Indeed overall rating 3.8/5.0 for US/CA location Compensation & Benefits rated highest at 3.9; Culture/Values, Job Security, Management all at 3.7 Bank reportedly integrating techno",
+          "source": "Indeed",
+          "trend": "Improving"
+        },
+        {
+          "signal": "reported as intermittent — works for ~1 month then stops Google Play reviews describe app as one of worst mobile bank apps — check deposit disables flash, doesn't recognize handwritten checks Users report need to frequently uninstall/reinst",
+          "source": "Google Play"
+        },
+        {
+          "signal": "chat, AI agents (virtual assistants), AI assistants for CFPB explicitly states: 'We do not publish complaints referred to other regulators, such as complaints about depository institutions with less than $10 billion in assets.' UBB has $2.6",
+          "source": "CFPB complaints"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "T3_MID_COMMUNITY",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-022",
+        "excerpt": "CEO Guarini LinkedIn shows speaking at West Coast AML Forum — compliance/risk topic, NOT technology/digital LinkedIn description emphasizes 'best in class' offerings and 'dynamic business climate' — relationship banking ",
+        "title": "CEO Guarini LinkedIn shows relationship banking language, zero…",
+        "type": "conference",
+        "url": "https://www.linkedin.com/in/george-guarini-803801120/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "NO_EVIDENCE: Zero results for UBB + Salesforce/nCino/Alkami/FIS/Fiserv/Jack Henry vendor searches NO_EVIDENCE: Zero results for UBB + FinTech partnership press releases from primary sources",
+        "title": "NO_EVIDENCE",
+        "type": "article",
+        "url": "N/A — no evidence found"
+      }
+    ],
+    "ticker": "NASDAQ: BCML",
+    "ticker_basis": "prose:entity-scoped",
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "unitedbusinessbank.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.637653+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# United Business Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — DMA-ASM-UBB-20260401-0001",
+    "scqa_md": "United Business Bank is a $2.7B in assets commercial lender regulated by Federal Reserve Board (state member bank), operating since 2004 with 256 employees. A 21.4% multi-year growth rate gives it the balance sheet to fund transformation [E-001, E-014]. Zennify's assessment places overall digital maturity at 1.5/5. The deepest capability gap is Idea Management at 1.0/5 against a 1.8 peer median [E-008, E-009]. Next is Recommendations & Decisioning at 1.0/5 against a 1.5 peer median [E-041, E-018].\n\nThird is Channel Strategy at 1.0/5 against a 1.8 peer median [E-022, E-042]. The issue register adds 2 categories with <2 unique scores ( expected — all level 1 due to T5 cap). Counter-signal: Zero Trust Architecture Strategy already runs at 2.7/5 against a 2.2 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below. The question for United Business Bank is whether to close Idea Management first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost.\n\nUnited Business Bank should lead with nCino (82/100 fit) against Digital Strategy Document, then sequence Tableau behind it. Closing Idea Management to the peer median alone is worth 0.8 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Glassdoor 2.2/5.0 (41% below industry avg) — NEGATIVE — Culture 1.9/5.0. 'Outdated and uninspiring.' Only 21% recommend. Talent retention crisis…\"."
+  },
+  "overall_score": 1.48,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.244577+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.245207+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/caps_determination.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.245654+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.246103+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.246461+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.246821+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/report_qa.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.247078+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A1_Evidence_Registry.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 47 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.248213+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_Uncertainty_Matrix.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.248767+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Coverage_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.249824+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/analysis_synthesis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.251151+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.251375+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.251868+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:37.252246+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 30
+    },
+    "stage_ms": {
+      "manifest": 16,
+      "parse": 5112,
+      "persist": 465
+    },
+    "structured": [
+      {
+        "code": "used variant scoring CSV location (root fallback)",
+        "detail": "used variant scoring CSV location (root fallback): 01_evidence/export_scoring_detail.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +163 subcap names +163 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/governance_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 2 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. 'NONE; NONE; NONE')",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 13 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_handoff.json",
+        "detail": "research_handoff.json: AttributeError: 'str' object has no attribute 'get'",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_UBB_20260401.docx leadership=7 focus_areas=9 facts_extracted=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=10 subcaps=13 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "subcap coverage 23% below 80% threshold (163 of 700 expected for",
+        "detail": "subcap coverage 23% below 80% threshold (163 of 700 expected for unknown)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/caps_determination.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/report_qa.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A1_Evidence_Registry.csv — no fingerprint matched (best confidence 0.20); 47 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_Uncertainty_Matrix.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Coverage_Map.csv — no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/analysis_synthesis.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:2/163 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant scoring CSV location (root fallback): 01_evidence/export_scoring_detail.csv",
+      "xlsx_name_enrichment: +163 subcap names +163 rationales merged from workbook into CSV-parsed rows",
+      "used variant issue register: 07_governance/governance_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=0 contradictions=2",
+      "caps_applied_log: 2 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "DEGRADED:techstack_noise_dropped: 3 candidate(s) rejected by taxonomy (e.g. 'NONE; NONE; NONE')",
+      "tech_stack_from_variant_source: 13 entries",
+      "research_handoff.json: AttributeError: 'str' object has no attribute 'get'",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_UBB_20260401.docx leadership=7 focus_areas=9 facts_extracted=2",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=10 subcaps=13 replaced_docx_scqa=True",
+      "subcap coverage 23% below 80% threshold (163 of 700 expected for unknown)",
+      "financial_highlights_from_client_report",
+      "insights_derived_from_category_gaps: 4",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/caps_determination.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 07_governance/report_qa.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A1_Evidence_Registry.csv — no fingerprint matched (best confidence 0.20); 47 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_Uncertainty_Matrix.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Coverage_Map.csv — no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/analysis_synthesis.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_scores.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 3",
+      "catalogue_unresolved:2/163 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 67,
+      "peer_median": 1.94,
+      "pillar_id": "P1",
+      "score": 1.22,
+      "subcaps_scored": 67
+    },
+    {
+      "peer_benchmarked": 36,
+      "peer_median": 1.83,
+      "pillar_id": "P2",
+      "score": 1.19,
+      "subcaps_scored": 36
+    },
+    {
+      "peer_benchmarked": 26,
+      "peer_median": 2.35,
+      "pillar_id": "P3",
+      "score": 1.98,
+      "subcaps_scored": 26
+    },
+    {
+      "peer_benchmarked": 32,
+      "peer_median": 1.97,
+      "pillar_id": "P4",
+      "score": 1.67,
+      "subcaps_scored": 32
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-01",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:37.272831Z",
+    "created_at": "2026-07-02T23:10:37.272831Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "0d486543-5164-4696-9efd-d92e73b227aa",
+    "overall_score": 1.48,
+    "request_id": "DMA-ASM-UBB-20260401-0001",
+    "started_at": "2026-07-02T23:10:37.272831Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 48,
+        "scale": 5,
+        "score": 2.2,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.8,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Glassdoor 2.2/5.0 (41% below industry avg) — NEGATIVE — Culture 1.9/5.0. 'Outdated and uninspiring.' Only 21% recommend. Talent retention crisis. — Slack + Employee Experience consulting.",
+      "evidence": [
+        "E-008",
+        "E-009",
+        "E-012",
+        "E-013"
+      ],
+      "magnitude": "41%",
+      "name": "Glassdoor 2.2/5.0 (41% below industry avg)",
+      "peer_median": 1.75,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 1.0,
+      "so_what": "Only 21% recommend.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Glassdoor 2.2/5.0 (41% below industry avg)",
+      "what": "Glassdoor 2.2/5.0 (41% below industry avg) — NEGATIVE — Culture 1.9/5.0. 'Outdated and uninspiring.'. Talent retention crisis. Slack + Employee Experience consulting.",
+      "why": "The linked evidence records: Bank reportedly integrating technology and innovation for sustained growth, improving mobile banking and remote deposit Promotes eStatements as part of Go Green initiative"
+    },
+    {
+      "body": "4 tools purchased, 0 deployed customer-facing — NEGATIVE — Eltropy (text/video/chat), Genesys PureCloud, Zendesk Chat, Intercom all detected but invisible to customers. — Activation consulting — strategy + implementation + integration.",
+      "evidence": [
+        "E-041",
+        "E-018",
+        "E-021",
+        "E-027"
+      ],
+      "magnitude": "0.5 pts below peer median",
+      "name": "4 tools purchased, 0 deployed customer-facing",
+      "peer_median": 1.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.0,
+      "so_what": "Prioritize 4 tools purchased, 0 deployed customer-facing in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "4 tools purchased, 0 deployed customer-facing",
+      "what": "4 tools purchased, 0 deployed customer-facing — NEGATIVE — Eltropy (text/video/chat), Genesys PureCloud, Zendesk Chat, Intercom all detected but invisible to customers. Activation consulting — strategy + implementation + integration.",
+      "why": "The linked evidence records: CONFIRMED 4A: UBB website has ZERO live chat, chatbot, video banking, callback scheduling, or virtual assistant features. Contact limited to phone (855.476.2265, 888.262.3536) + web form + branch visits. CONFIRMED 4A:"
+    },
+    {
+      "body": "Windows Server 2003 in production — CRITICAL — 23-year-old OS, EOL since 2015. Zero security patches for 11 years. Regulatory and compliance time bomb. — Legacy remediation — URGENT.",
+      "evidence": [
+        "E-008",
+        "E-009",
+        "E-012",
+        "E-013"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Windows Server 2003 in production",
+      "peer_median": 1.75,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 1.0,
+      "so_what": "Prioritize Windows Server 2003 in production in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Windows Server 2003 in production",
+      "what": "Windows Server 2003 in production — CRITICAL — 23-year-old OS, EOL since 2015. Zero security patches for 11 years. Regulatory and compliance time bomb. Legacy remediation — URGENT.",
+      "why": "The linked evidence records: Bank reportedly integrating technology and innovation for sustained growth, improving mobile banking and remote deposit Promotes eStatements as part of Go Green initiative"
+    },
+    {
+      "body": "No digital account opening — NEGATIVE — Online banking enrollment for existing customers only. New-to-bank customers must visit a branch. — Experience Cloud + digital onboarding implementation.",
+      "evidence": [
+        "E-008",
+        "E-009",
+        "E-012",
+        "E-013"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "No digital account opening",
+      "peer_median": 1.75,
+      "platforms": [
+        "Tableau",
+        "nCino"
+      ],
+      "score": 1.0,
+      "so_what": "New-to-bank customers must visit a branch.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "No digital account opening",
+      "what": "No digital account opening — NEGATIVE — Online banking enrollment for existing customers only. Experience Cloud + digital onboarding implementation.",
+      "why": "The linked evidence records: Bank reportedly integrating technology and innovation for sustained growth, improving mobile banking and remote deposit Promotes eStatements as part of Go Green initiative"
+    },
+    {
+      "body": "Banno supports Salesforce data streaming — POSITIVE — Jack Henry's digital platform explicitly integrates with Salesforce. Pre-existing integration path reduces implementation risk. — FSC implementation has lower barrier than typical core-to-CRM integration.",
+      "evidence": [
+        "E-017",
+        "E-027",
+        "E-028",
+        "E-035"
+      ],
+      "magnitude": "0.4 pts below peer median",
+      "name": "Banno supports Salesforce data streaming",
+      "peer_median": 1.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.13,
+      "so_what": "Prioritize Banno supports Salesforce data streaming in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Banno supports Salesforce data streaming",
+      "what": "Banno supports Salesforce data streaming — POSITIVE — Jack Henry's digital platform explicitly integrates with Salesforce. Pre-existing integration path reduces implementation risk. FSC implementation has lower barrier than typical core-to-CRM integration.",
+      "why": "The linked evidence records: Zero technology/digital/IT job postings found on Indeed for United Business Bank as of April 2026 ABSENCE signals: no hiring for data analysts, software developers, digital product managers, Salesforce admins, or AI/ML roles"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 1.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "63 of 88 subcaps on thin evidence"
+      ],
+      "rationale": "Channel Strategy averages 1.0/5 over 88 scored subcaps; ceiling 1.7 reflects thin evidence density (25/88 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-011"
+      ],
+      "modifiers": [
+        "65 of 85 subcaps on thin evidence"
+      ],
+      "rationale": "Executive Sponsorship averages 1.7/5 over 85 scored subcaps; ceiling 2.4 reflects thin evidence density (20/85 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 1.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-016"
+      ],
+      "modifiers": [
+        "cap M2 applied: CAP-E-001: T5-only cap 2.0",
+        "40 of 50 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Management averages 1.0/5 over 50 scored subcaps; ceiling 1.6 reflects the binding cap (cap M2 applied: CAP-E-001: T5-only cap 2.0); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "cap M2 applied: CAP-S-001: Sentiment cap 2.0 (Glassdoor 2.2/5.0 < 3.0)",
+        "45 of 60 subcaps on thin evidence"
+      ],
+      "rationale": "Stakeholder Analysis averages 1.1/5 over 60 scored subcaps; ceiling 1.8 reflects the binding cap (cap M2 applied: CAP-S-001: Sentiment cap 2.0 (Glassdoor 2.2/5.0 < 3.0)); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 1.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "35 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Strategy averages 1.1/5 over 40 scored subcaps; ceiling 1.6 reflects thin evidence density (5/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "35 of 50 subcaps on thin evidence"
+      ],
+      "rationale": "Social Media Presence averages 1.1/5 over 50 scored subcaps; ceiling 1.8 reflects thin evidence density (15/50 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-004"
+      ],
+      "modifiers": [
+        "35 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "Eligibility & Pre-Qualification averages 1.4/5 over 40 scored subcaps; ceiling 1.9 reflects thin evidence density (5/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-030"
+      ],
+      "modifiers": [
+        "40 of 50 subcaps on thin evidence"
+      ],
+      "rationale": "Service Journey Design averages 1.2/5 over 50 scored subcaps; ceiling 1.9 reflects thin evidence density (10/50 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 1.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "35 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "Recommendations & Decisioning averages 1.0/5 over 40 scored subcaps; ceiling 1.6 reflects thin evidence density (5/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-033"
+      ],
+      "modifiers": [
+        "35 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "Automation Governance Framework averages 1.4/5 over 40 scored subcaps; ceiling 1.9 reflects thin evidence density (5/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-002"
+      ],
+      "modifiers": [
+        "25 of 30 subcaps on thin evidence"
+      ],
+      "rationale": "Loss Data Collection averages 2.1/5 over 30 scored subcaps; ceiling 2.7 reflects thin evidence density (5/30 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-030"
+      ],
+      "modifiers": [
+        "20 of 30 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Due Diligence averages 2.6/5 over 30 scored subcaps; ceiling 3.2 reflects thin evidence density (10/30 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "25 of 30 subcaps on thin evidence"
+      ],
+      "rationale": "Impact Tolerance Definition averages 2.1/5 over 30 scored subcaps; ceiling 2.7 reflects thin evidence density (5/30 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 1.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap applied: ±0.8 uncertainty cap",
+        "35 of 40 subcaps on thin evidence"
+      ],
+      "rationale": "Data Strategy & Vision averages 1.1/5 over 40 scored subcaps; ceiling 1.7 reflects thin evidence density (5/40 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap applied: ±0.8 uncertainty cap",
+        "17 of 22 subcaps on thin evidence"
+      ],
+      "rationale": "Analytics & AI Strategy averages 1.4/5 over 22 scored subcaps; ceiling 2.0 reflects thin evidence density (5/22 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.5,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "cap applied: ±0.8 uncertainty cap",
+        "23 of 38 subcaps on thin evidence"
+      ],
+      "rationale": "Low-Code/No-Code Platform Strategy averages 1.5/5 over 38 scored subcaps; ceiling 2.2 reflects thin evidence density (15/38 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "27 of 32 subcaps on thin evidence"
+      ],
+      "rationale": "Zero Trust Architecture Strategy averages 2.7/5 over 32 scored subcaps; ceiling 3.2 reflects thin evidence density (5/32 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Zero technology/digital/IT job postings found on Indeed for United Business Bank as of April 2026 ABSENCE signals: no hiring for data analysts, software developers, digital product managers, Salesforce admins, or AI/ML roles",
+      "evidence": [
+        "E-017"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Zero technology/digital/IT job postings found on Indeed for…",
+      "metric": null,
+      "peer_context": "Idea Management runs 1.00/5 vs a 1.75 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Zero technology/digital/IT job postings found on Indeed for United Business Bank as of April 2026 ABSENCE signals: no hiring for data analysts, software developers, digital product managers, Salesforce admins, or AI/ML. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "FIS launched Bank Modernization Framework (Sep 2025) with 4 pillars: Digital, Open Banking/APIs, Platform Transformation, Data/AI",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "FIS launched Bank Modernization Framework (Sep 2025)",
+      "metric": null,
+      "peer_context": "Idea Management runs 1.00/5 vs a 1.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Digital Strategy Document — highest-fit surface at 82/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "FIS launched Bank Modernization Framework (Sep 2025) with 4 pillars: Digital, Open Banking/APIs, Platform Transformation, Data/AI",
+      "timeline": {
+        "date": "2025-09-01",
+        "event": "FIS launched Bank Modernization Framework (Sep 2025)"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "zennify_opportunities",
+      "detail": "The analyst's play sheet flags Greenfield CRM — zero CRM in 44+ tool stack as a 1-priority opening for Financial Services Cloud at United Business Bank.",
+      "evidence": [
+        "E-023",
+        "E-017",
+        "E-035",
+        "E-016"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PLAY",
+      "label": "The analyst's play sheet flags Greenfield CRM",
+      "metric": null,
+      "peer_context": "Idea Management runs 1.00/5 vs a 1.75 median at comparable institutions.",
+      "play": "Prioritize Financial Services Cloud against the Greenfield CRM — zero CRM in 44+ tool stack opening.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "The analyst's play sheet flags Greenfield CRM — zero CRM in 44+ tool stack as a 1-priority opening for Financial Services Cloud at United Business Bank.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Idea Management scores 1.00/5 vs a typical 1.75 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-008",
+        "E-009",
+        "E-013",
+        "E-016"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Idea Management scores 1.00/5",
+      "metric": "Idea Management 1.00/5 vs peer 1.75",
+      "peer_context": "Idea Management runs 1.00/5 vs a 1.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Digital Strategy Document — highest-fit surface at 82/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C3",
+      "text": "Idea Management scores 1.00/5 vs a typical 1.75 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

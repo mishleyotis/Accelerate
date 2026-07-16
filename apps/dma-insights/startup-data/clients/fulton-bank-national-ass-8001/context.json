@@ -1,0 +1,1032 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Fulton Bank, National Association",
+      "amount": "$1.1M",
+      "announced_on": null,
+      "body": "Blue Foundry merger: agreement Nov 24, 2025; shareholder approval Jan 29, 2026; expected close ~April 1, 2026; integration costs $1.1M FY2025 (early-stage); system conversion expected Q3 2026 \u2014 formal sequenced integration milestones (P1C2.8 stage-gate evidence).",
+      "closed_on": null,
+      "details": "Blue Foundry merger: agreement Nov 24, 2025; shareholder approval Jan 29, 2026; expected close ~April 1, 2026; integration costs $1.1M FY2025 (early-stage); system conversion expected Q3 2026 \u2014 formal sequenced integration milestones (P1C2.8 stage-gate evidence).",
+      "e_id": "E-021",
+      "event_date": "2025-11-24",
+      "id": "be89f808-a12c-443e-b222-476502ea472c",
+      "source_url": "https://investor.fultonbank.com/news-events/news/news-details/2024/Fulton-Financial-Corporation-Acquires-Substantially-All-of-the-Assets-and-Assumes-Substantially-All-of-the-Deposits-of-Republic-First-Bank-From-the-FDIC/default.aspx",
+      "status": "integrating",
+      "target": "Blue Foundry",
+      "title": "Blue Foundry merger: agreement Nov 24, 2025"
+    },
+    {
+      "acquirer": "Fulton Bank, National Association",
+      "amount": null,
+      "announced_on": null,
+      "body": "DEFINITIVE \u2014 Page contains tracking pixel 'https://nova.collect.igodigital.com/c2/100019570/track_page_view' \u2014 igoDigital was acquired by Salesforce in 2013 and is now Salesforce Marketing Cloud Personalization (formerly Interaction Studio, before that Evergage). The igodigital.com domain confirms Fulton Bank uses SFMC Personalization for behavioral tracking + real-time content personalization (P2C1.5.5 Trigger-Based Campaigns M3 + P2C1.6.7 Predictive Analytics + P1C3.8 AI in Marketing).",
+      "closed_on": null,
+      "details": "DEFINITIVE \u2014 Page contains tracking pixel 'https://nova.collect.igodigital.com/c2/100019570/track_page_view' \u2014 igoDigital was acquired by Salesforce in 2013 and is now Salesforce Marketing Cloud Personalization (formerly Interaction Studio, before that Evergage). The igodigital.com domain confirms Fulton Bank uses SFMC Personalization for behavioral tracking + real-time content personalization (P2C1.5.5 Trigger-Based Campaigns M3 + P2C1.6.7 Predictive Analytics + P1C3.8 AI in Marketing).",
+      "e_id": "E-039",
+      "event_date": "2013-07-01",
+      "id": "7ec2b7f9-ca5f-40ca-9882-0602dfe3293f",
+      "source_url": "https://cloud.em.fultonbank.com/consumer-epm",
+      "status": null,
+      "target": "IgoDigital",
+      "title": "IgoDigital was acquired in 2013"
+    }
+  ],
+  "entity_display_id": "fulton-bank-national-ass-8001",
+  "financials": {
+    "lines": [
+      "Fulton operates approximately 3,400+ employees (LinkedIn corporate-page count of 1,636 employees +7.7% YoY [E-050] reflects only the LinkedIn-affiliated subset; full holdco employment is materially higher per 10-K disclosures). Branch network: 200+ financial centers across five Mid-Atlantic states (PA, NJ, MD, DE, VA), having exited New York in September 2024 to concentrate footprint in core markets. The 2024 Republic First Bank acquisition added 32 branches in the Greater Philadelphia metro, and the pending Q2 2026 Blue Foundry Bancorp close will further extend Northern New Jersey presence [E-001].",
+      "Six-year balance-sheet trajectory (FY2019 through FY2025, with calculated CAGRs from full-year data sourced from the FY2025 Annual Report [E-001]):",
+      "Trend Classification: ACCELERATING (M&A-driven step in 2024 from $27.6B to $32.1B; +16.3% YoY assets via Republic First; followed by stable 2025 organic growth + Blue Foundry pending Q2 2026). The 2024 step-change from $27.6B to $32.1B in total assets reflects the inorganic addition of Republic First Bank ($6B assets, $4B deposits, 32 branches via FDIC-assisted failed-bank deal completed April 26, 2024). FY2025 was a year of organic stabilization with all three core metrics holding flat-to-slightly-up; the next inorganic inflection arrives with Blue Foundry close in Q2 2026.",
+      "FY2025 Record Performance Metrics [E-001/E-002/E-003/E-027/E-063]:",
+      "FY2026 Forward Guidance [E-063 \u2014 Q1 2026 8-K]:",
+      "The FY2026 OpEx envelope of $800-835M is a material number for engagement planning: it explicitly includes Blue Foundry merger-related costs estimated at approximately $36M, leaving $764-799M of base operating spend in which discretionary technology investments compete. FY2025's $191M of returned capital to shareholders ($150M new buyback authorization Q4 2025 effective through January 2027 plus $0.73 dividend, +5.8% YoY) signals a confident capital posture compatible with strategic technology spend.",
+      "Six years of full-year balance-sheet and operating data (FY2019 through FY2025) sourced from the FY2025 Annual Report [E-001], Q3 2025 Investor Presentation [E-002/E-027], and Q1 2026 8-K [E-063]. CAGRs computed over the full six-year window. Trend classifications follow the ACCELERATING / STABLE / DECLINING / VARIABLE schema with directional commentary.",
+      "FY2025 record-year milestones. Record annual operating EPS of $2.16 (+16.8% YoY); Record total revenue >$1.4B; Record net income $381.4M (+$102.9M YoY = +37%); Customer deposits grew $449M to $26.6B; Wealth advisor referrals from financial centers +17% YoY (~$50M); Wealth AUM crossed $17B threshold; $191M returned to shareholders ($150M new buyback authorization Q4 2025 effective through Jan 2027).",
+      "FY2026 forward guidance (per Q1 2026 8-K [E-063]):",
+      "Trajectory interpretation for Zennify engagement. The seven-metric trajectory shows a bank in active acceleration: ACCELERATING on assets/loans/deposits/EPS/NIM/Wealth AUM, with efficiency ratio DECLINING (favorable). The FY2026 OpEx envelope of $800-835M explicitly includes Blue Foundry merger costs (~$36M), giving the AE clear visibility into discretionary technology spend availability. Wealth AUM CAGR of ~9.2% (the fastest CAGR across the trajectory) signals where the strategic energy is \u2014 and Wealth Access's 10K-household life-event detection deployment (E-053) shows where the technology investment is already flowing."
+    ],
+    "metrics": {
+      "branch_network": "200+ financial centers across five Mid-Atla",
+      "e-002/e": "027], and Q1 2026 8-K [E-063]. CAGRs comput",
+      "net_income": 381400000.0
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "PA",
+      "OH",
+      "MD",
+      "WV",
+      "NC",
+      "SC",
+      "DC",
+      "VA (8 states + DC)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Prior CDO Jad Abou",
+        "recent_hire": true,
+        "tenure_months": 0,
+        "title": "Maarouf (2021-2025) departed before Dearwester appointment Feb 2026 \u2014 interim governance gap closed by Dearwester arrival"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "National Association",
+    "narrative_md": "This section establishes the institutional context that anchors every downstream finding. Every claim cites evidence IDs traceable to the Evidence Linkage Matrix in the Research Workbook.\n\nFulton Financial Corporation (the holding company; NASDAQ: FULT common shares, FULTP Series A Preferred) is a Pennsylvania-domiciled bank holding company. Its operating bank subsidiary, Fulton Bank, National Association, is a national bank chartered under the Office of the Comptroller of the Currency. The institution was founded in 1882 and has operated continuously for 143 years from its current headquarters at One Penn Square, Lancaster, PA 17604 [E-001/E-002/E-003]. It is a component of the S&P SmallCap 600 index. CEO Curtis J. Myers holds an ownership stake of 0.13%; institutional ownership constitutes the majority of the float. The independent registered public accounting firm is KPMG LLP, which signed the FY2025 audit opinion in the combined 2026 Notice/Proxy Statement and 2025 Annual Report [E-005].",
+    "primary_regulator": "FDIC",
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-024",
+        "excerpt": "CEO Curt Myers Banking+ interview (Nov 2025) explicit cultural management framing: 'culture must be actively managed like any core business line to ensure organizational alignment and success' \u2014 direct CEO-level cultural",
+        "title": "CEO Curt Myers Banking+ interview (Nov 2025) explicit cultural\u2026",
+        "type": "article",
+        "url": "https://bankingplus.news/enrichment/fulton-bank-ceo-managing-culture-performance/"
+      }
+    ],
+    "ticker": "FULT (NASDAQ Common); FULTP (Series A Preferred)"
+  },
+  "issue_register": [
+    {
+      "id": "45e7c011-86ef-4c66-b015-9afc9d070e99",
+      "issue_id": "I-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Mortgage Servicing Rights valuation allowance \u2014 material misrepresentations and omissions in 2016 Q4 / 2017 Q1 public filings; insufficient internal accounting controls. Settled with no admission of guilt.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Mortgage Servicing Rights valuation allowance \u2014 material misrepresentations and omissions in 2016 Q4 / 2017 Q1 public filings; insufficient internal accounting controls. Settled with no admission of guilt."
+    },
+    {
+      "id": "cd4bab6a-a254-47c3-97e1-a4bf6f23684e",
+      "issue_id": "I-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Consent Orders covering 3 legacy Fulton bank subsidiaries (BSA/AML program deficiencies pre-charter consolidation). Successfully remediated through 5-year cycle culminating in Fed termination May 2019.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Consent Orders covering 3 legacy Fulton bank subsidiaries (BSA/AML program deficiencies pre-charter consolidation). Successfully remediated through 5-year cycle culminating in Fed termination May 2019."
+    },
+    {
+      "id": "4f8e045a-dad0-473e-808b-835eaeaa73fe",
+      "issue_id": "I-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Overby-Seawell Co. (insurance verification vendor) compromise exposed 100,744 Fulton customer records. Fulton's OWN systems were UNCOMPROMISED \u2014 third-party vendor was the breach vector.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Overby-Seawell Co. (insurance verification vendor) compromise exposed 100,744 Fulton customer records. Fulton's OWN systems were UNCOMPROMISED \u2014 third-party vendor was the breach vector."
+    },
+    {
+      "id": "58b9eade-12c4-4609-8578-e0c9a73b35ab",
+      "issue_id": "I-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Vendor-related online banking outage flagged in BBB/WalletHub/AppStore complaints. Likely Republic First integration-timing-related per April 1 2024 timing (just days before April 26 2024 Republic First close).",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Vendor-related online banking outage flagged in BBB/WalletHub/AppStore complaints. Likely Republic First integration-timing-related per April 1 2024 timing (just days before April 26 2024 Republic First close)."
+    },
+    {
+      "id": "aea8854d-3744-40cf-9b65-1ad92e123c51",
+      "issue_id": "I-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "External customer-sentiment gap: Comparably -21 NPS / 46 CSAT [E-057]; Birdeye 1.1/5 [E-033]; WalletHub 2.6/5; BBB 1/5; Yelp 3.8/5; BankBranchLocator 3.3/5. Republic First M&A integration (Apr 2024) generated debit card delays + support access issues persistent into 2025. CONTRAST: iOS App Store 4.8/5 (26K reviews) [E-028] = strong app channel \u2014 channel-mix problem.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "External customer-sentiment gap: Comparably -21 NPS / 46 CSAT [E-057]; Birdeye 1.1/5 [E-033]; WalletHub 2.6/5; BBB 1/5; Yelp 3.8/5; BankBranchLocator 3.3/5. Republic First M&A integration (Apr 2024) generated debit card delays + support access issues persistent into 2025. CONTRAST: iOS App Store 4.8/5 (26K reviews) [E-028] = strong app channel \u2014 channel-mix problem."
+    },
+    {
+      "id": "170dfa4c-0e91-4195-8b3c-8dbba29e7743",
+      "issue_id": "I-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "Section 1033 Open Banking final rule status INACTIVE per Fiskil regulatory tracker [E-042]. Fulton has Plaid/MX/Yodlee aggregation backbone (consumption side) [E-054] but no producer-side API readiness signal. Tier 1 institutions ($32B+) deadline = April 4, 2028 \u2014 ~23 months from assessment date.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Section 1033 Open Banking final rule status INACTIVE per Fiskil regulatory tracker [E-042]. Fulton has Plaid/MX/Yodlee aggregation backbone (consumption side) [E-054] but no producer-side API readiness signal. Tier 1 institutions ($32B+) deadline = April 4, 2028 \u2014 ~23 months from assessment date."
+    },
+    {
+      "id": "20f713af-3029-43de-82d1-f6f3083ed903",
+      "issue_id": "I-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": "M&A integration capacity stress flagged. Republic First (Apr 26, 2024 \u2014 $6B/$4B/32 branches) generated 2024 Q2-Q4 customer service complaints persistent into 2025. Blue Foundry Bancorp pending close (announced Nov 2025, expected Q2 2026 close) \u2014 second integration in 24-month window with summer 2026 systems conversion.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "M&A integration capacity stress flagged. Republic First (Apr 26, 2024 \u2014 $6B/$4B/32 branches) generated 2024 Q2-Q4 customer service complaints persistent into 2025. Blue Foundry Bancorp pending close (announced Nov 2025, expected Q2 2026 close) \u2014 second integration in 24-month window with summer 2026 systems conversion."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Fulton operates approximately 3,400+ employees (LinkedIn corporate-page count of 1,636 employees +7.7% YoY reflects only the LinkedIn-affiliated subset; full holdco employment is materially higher per 10-K disclosures). Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.2,
+        "P1C2": 3.0,
+        "P1C3": 3.4,
+        "P1C4": 2.8,
+        "P1C5": 2.6,
+        "P2C1": 3.3,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.7,
+        "P3C1": 3.0,
+        "P3C2": 2.9,
+        "P3C3": 2.9,
+        "P3C4": 2.8,
+        "P4C1": 3.1,
+        "P4C2": 3.0,
+        "P4C3": 2.9,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.98,
+      "peer_name": "WSFS Financial Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.7,
+        "P1C4": 2.5,
+        "P1C5": 2.7,
+        "P2C1": 3.2,
+        "P2C2": 2.9,
+        "P2C3": 2.8,
+        "P2C4": 2.5,
+        "P3C1": 2.9,
+        "P3C2": 3.2,
+        "P3C3": 2.8,
+        "P3C4": 3.0,
+        "P4C1": 2.8,
+        "P4C2": 2.7,
+        "P4C3": 2.7,
+        "P4C4": 3.3
+      },
+      "overall_score": 2.86,
+      "peer_name": "F.N.B. Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.8,
+        "P1C2": 2.8,
+        "P1C3": 2.6,
+        "P1C4": 2.6,
+        "P1C5": 2.5,
+        "P2C1": 2.9,
+        "P2C2": 2.7,
+        "P2C3": 2.7,
+        "P2C4": 2.4,
+        "P3C1": 2.7,
+        "P3C2": 3.0,
+        "P3C3": 2.5,
+        "P3C4": 2.7,
+        "P4C1": 2.6,
+        "P4C2": 2.6,
+        "P4C3": 2.5,
+        "P4C4": 2.9
+      },
+      "overall_score": 2.68,
+      "peer_name": "Atlantic Union Bankshares Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.7,
+        "P1C3": 2.4,
+        "P1C4": 2.5,
+        "P1C5": 2.4,
+        "P2C1": 2.6,
+        "P2C2": 2.5,
+        "P2C3": 2.6,
+        "P2C4": 2.2,
+        "P3C1": 2.6,
+        "P3C2": 2.8,
+        "P3C3": 2.4,
+        "P3C4": 2.6,
+        "P4C1": 2.5,
+        "P4C2": 2.4,
+        "P4C3": 2.4,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.52,
+      "peer_name": "Provident Financial Services, Inc.",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-FULT-20260508-001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "INDEED OVERALL RATING: 3.7/5 (Lancaster, PA)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.7
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Blue Foundry Bancorp acquisition announced Nov 2025; Blue Foundry Bank operates 20 locations, will be merged into Fulton Bank N.A. in Q3 2026; targets Northern New Jersey market share expansion.",
+      "date_precision": "quarter",
+      "e_id": "E-001",
+      "event_date": "2026-08-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "8851cd72-d7ec-45e6-bec7-fb73397d54de",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2025/ar/Latest-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Blue Foundry Bank operates 20 locations"
+    },
+    {
+      "body": null,
+      "date_precision": "quarter",
+      "e_id": null,
+      "event_date": "2026-04-01",
+      "evidence_e_ids": [],
+      "id": "dda3241a-3ecd-493e-aea1-13a8db72543d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Blue Foundry Bancorp (Northern NJ)"
+    },
+    {
+      "body": "DATA GOVERNANCE FUNCTION CONFIRMED WITH NAMED LEADER: Ethan Farrell \u2014 Manager, Data Governance at Fulton Bank (since June 2025). Career path entirely within Fulton: IT Management Trainee (2015) \u2192 IT Data Quality Associate Analyst \u2192 IT Data Quality Engineer \u2192 Senior IT Data Governance Analyst (2022-2025) \u2192 Manager Data Governance (2025-Present). Holds Master's in Data Science. CONFIRMS that despite no public CDO, Fulton has a FORMAL DATA GOVERNANCE FUNCTION with progression path and dedicated manager. (P1C2.5 Data Governance \u2014 FUNCTIONAL EQUIVALENCE per anti-negative framing: not a 'no CDO' gap, but a distributed data governance function under CISO/CIO/CRO with a named Manager).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-012",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "bf7f2288-15db-4357-b4ba-bb9e904ac52f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/cdstoneley",
+      "subcap_ids": [
+        "P1C2.5"
+      ],
+      "title": "(P1C2.5 Data Governance"
+    },
+    {
+      "body": "'Works under the direction of the Chief Enterprise Architect and Project Managers' \u2014 explicit confirmation of NAMED Chief Enterprise Architect role at Fulton (governance maturity signal P1C1.5.1 Target Architecture Vision + P1C2.8 Project Governance).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-026",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-026"
+      ],
+      "id": "abcbb413-8538-4f21-afb2-23ffeb3777ae",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://to.indeed.com/aa2wgnd6yxxm",
+      "subcap_ids": [
+        "P1C1.5.1",
+        "P1C2.8"
+      ],
+      "title": "'Works under the direction of the Chief Enterprise\u2026"
+    },
+    {
+      "body": "Leadership transition: Angela M. Snyder retired as President Dec 31, 2025 after 23-year career; Curt Myers named President effective Jan 1, 2026 (in addition to Chairman/CEO role).",
+      "date_precision": "day",
+      "e_id": "E-001",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "cabf39d9-15e7-4ca4-96e6-423a1fb5d5c6",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2025/ar/Latest-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Curt Myers named President"
+    },
+    {
+      "body": "Atul Malhotra promoted to SEVP/Chief Risk Officer effective Jan 1, 2026 (was EVP/CRO; replacing Betsy Chivinski who is no longer listed in 2025 executive team).",
+      "date_precision": "day",
+      "e_id": "E-001",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "83b1b96d-4f14-4279-9a97-fd359eab6101",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2025/ar/Latest-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Atul Malhotra promoted to SEVP/Chief Risk Officer effective\u2026"
+    },
+    {
+      "body": "Executive team (Dec 31, 2025): Curt Myers (Chairman/CEO), Angela Snyder (retiring President), Andy Fiol (SEVP/Chief Banking Officer \u2014 promoted from Head of Consumer & Small Business), John Glover (SEVP/Head of Commercial Banking), Kevin Gremer (SEVP/COTO), Rick Kraemer (SEVP/CFO), Natasha Luddington (SEVP/CLO), Atul Malhotra (EVP/CRO), Josephine Mauriello (SEVP/Head of Consumer & Small Business), Meg Mueller (SEVP/Enterprise Credit Executive), Angela Sargent (SEVP/CIO), Bernadette Taylor (SEVP/CHRO).",
+      "date_precision": "day",
+      "e_id": "E-001",
+      "event_date": "2025-12-31",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "cb81fccf-6183-47b4-b92a-a1c23bc00545",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2025/ar/Latest-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Executive team (Dec 31, 2025): Curt Myers (Chairman/CEO)\u2026"
+    },
+    {
+      "body": "NEW TREASURER (Dec 18, 2025): Gordon Roder appointed. Oversees corporate treasury, ALM, interest rate risk, hedging, liquidity, capital management, long-term strategic planning. 20+ years investment management/balance sheet strategy. Prior: Third Federal Savings & Loan, Flagstar Bank, ABN AMRO. MBA from UCLA Anderson + Harvard Extension Master's. (P1C2.4 Model Risk + P1C2.1 Governance \u2014 strategic finance leader added).",
+      "date_precision": "day",
+      "e_id": "E-014",
+      "event_date": "2025-12-18",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "f4ccc171-9eec-49b2-aa7a-0ee063ccceb0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/Media-Room/Forbes",
+      "subcap_ids": [
+        "P1C2.4",
+        "P1C2.1"
+      ],
+      "title": "NEW Treasurer (Dec 18, 2025): appointed"
+    },
+    {
+      "body": "BLUE FOUNDRY ACQUISITION RESHAPE: $243M all-stock deal announced Nov 24, 2025. $1.5M Fulton Forward Foundation contribution tied to deal. Expected close Q2 2026 (per NJ Biz April 2026 \u2014 earlier reports said Q3 2026; discrepancy in close timing). $2.5B-asset Blue Foundry \u2192 $34B combined asset base. Part of broader 2025-2026 banking M&A wave. (P1C1.8 M&A Integration Strategy + P1C5.5 Social Impact).",
+      "date_precision": "day",
+      "e_id": "E-014",
+      "event_date": "2025-11-24",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "27455acc-f8f3-4192-8698-a2c82bf75116",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/Media-Room/Forbes",
+      "subcap_ids": [
+        "P1C1.8",
+        "P1C5.5"
+      ],
+      "title": "$243M all-stock deal announced Nov 24, 2025"
+    },
+    {
+      "body": "Blue Foundry merger: agreement Nov 24, 2025; shareholder approval Jan 29, 2026; expected close ~April 1, 2026; integration costs $1.1M FY2025 (early-stage); system conversion expected Q3 2026 \u2014 formal sequenced integration milestones (P1C2.8 stage-gate evidence).",
+      "date_precision": "day",
+      "e_id": "E-021",
+      "event_date": "2025-11-24",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "be89f808-a12c-443e-b222-476502ea472c",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://investor.fultonbank.com/news-events/news/news-details/2024/Fulton-Financial-Corporation-Acquires-Substantially-All-of-the-Assets-and-Assumes-Substantially-All-of-the-Deposits-of-Republic-First-Bank-From-the-FDIC/default.aspx",
+      "subcap_ids": [
+        "P1C2.8"
+      ],
+      "title": "Blue Foundry merger: agreement Nov 24, 2025"
+    },
+    {
+      "body": "Blue Foundry Bancorp acquisition announced Nov 2025; Blue Foundry Bank operates 20 locations, will be merged into Fulton Bank N.A. in Q3 2026; targets Northern New Jersey market share expansion.",
+      "date_precision": "month",
+      "e_id": "E-001",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "3ae57d0e-5c38-4ac7-a69f-01258e35217c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2025/ar/Latest-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Blue Foundry Bancorp acquisition announced Nov 2025"
+    },
+    {
+      "body": "Kevin C. Gremer appointed Senior Executive Vice President and Chief Operations and Technology Officer (COTO) of Fulton Bank, effective August 25, 2025. Responsible for leading information technology AND operations professionals (combined ops+tech mandate). (P1C1.5 Tech Strategy + P1C2.1 Governance Structure \u2014 strategic role with explicit transformation mandate).",
+      "date_precision": "day",
+      "e_id": "E-009",
+      "event_date": "2025-08-25",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "79e5218e-4cc7-4e82-b037-db13c35f34a1",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/700564/000070056425000041/fult-20250723.htm",
+      "subcap_ids": [
+        "P1C1.5",
+        "P1C2.1"
+      ],
+      "title": "Kevin C. Gremer appointed Senior Executive Vice President\u2026"
+    },
+    {
+      "body": "Q3 2025 IR Deck: 'Organic & Analytics Based Growth Strategy' as formal strategic pillar \u2014 ANALYTICS explicitly named as growth lever; 'Repeatable Income Stream; Analytics-Based Cross-Sell Opportunity' (P1C3.8 AI/Analytics + P1C1.1 Strategy).",
+      "date_precision": "quarter",
+      "e_id": "E-027",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-027"
+      ],
+      "id": "c1879ad7-2109-4a96-8c96-4ecb1496e6a4",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_presentations/2025/Oct/21/IR-PRESENTATION-3Q25.pdf",
+      "subcap_ids": [
+        "P1C3.8",
+        "P1C1.1"
+      ],
+      "title": "Q3 2025 IR Deck: 'Organic & Analytics Based Growth\u2026"
+    },
+    {
+      "body": "Chief Compliance Officer: SHELLEY ARMENTROUT (named first time per Phila.gov CRA filing) \u2014 formal CCO with regulatory contact authority (P1C2.1 Governance Charter + P2C1.7.1 Content Review).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-045",
+      "event_date": "2025-06-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "3b49e3a8-3634-498f-a4dc-52806ac34b7e",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.fultonbank.com/-/media/Files/About-Fulton-Bank/CSR/2024-CSR-Report.pdf",
+      "subcap_ids": [
+        "P1C2.1",
+        "P2C1.7.1"
+      ],
+      "title": "Chief Compliance Officer: Shelley Armentrout (named first\u2026"
+    },
+    {
+      "body": "Acquisition gain: $37.0M after-tax / $47.8M before-tax recorded as gain on acquisition; $4.8B assets + $0.8B FDIC cash + $5.6B liabilities assumed; final settlement closed April 25, 2025.",
+      "date_precision": "day",
+      "e_id": "E-021",
+      "event_date": "2025-04-25",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "3ba81144-29d5-4f1b-b573-988468f52121",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://investor.fultonbank.com/news-events/news/news-details/2024/Fulton-Financial-Corporation-Acquires-Substantially-All-of-the-Assets-and-Assumes-Substantially-All-of-the-Deposits-of-Republic-First-Bank-From-the-FDIC/default.aspx",
+      "subcap_ids": [],
+      "title": "Final settlement closed"
+    },
+    {
+      "body": "CHIEF DIVERSITY OFFICER ROLE EXISTS: 'Fulton's Chief Diversity Officer is responsible for overseeing diversity, equity and inclusion programs and activities and for reporting on results of diversity, equity and inclusion activities and programs to Senior Leaders, Fulton Board of Directors and the Fulton HR Committee on an annual basis.' Named C-level role (CDO) with formal Board reporting cadence. (P1C5.2 ESG Governance \u2014 formal accountability and reporting).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-007",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "93655be5-9006-4461-b100-2638dfbae484",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/CSR/2024/Valuing-Our-Employees",
+      "subcap_ids": [
+        "P1C5.2"
+      ],
+      "title": "Named C-level role (CDO) with formal Board reporting cadence"
+    },
+    {
+      "body": "FDX (Financial Data Exchange) named standard-setting body by CFPB January 8, 2025; FDX adoption by major banks + data aggregators; Fulton's Fiskil entry confirms FDX as Fulton's technical standard target (P2C2.9.1 + P2C2.9.4 Aggregator Integration FDX-aligned).",
+      "date_precision": "day",
+      "e_id": "E-042",
+      "event_date": "2025-01-08",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "b335583f-7174-4e6d-bbe6-e26746acbfae",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.fiskil.com/institutions/section-1033/fulton-bank",
+      "subcap_ids": [
+        "P2C2.9.1",
+        "P2C2.9.4"
+      ],
+      "title": "FDX (Financial Data Exchange) named standard-setting body"
+    },
+    {
+      "body": "Policy explicitly assigns 'Chief Legal Officer' role with detailed responsibilities \u2014 confirms named C-suite Chief Legal Officer (P1C2 governance leadership beyond CRO/CISO).",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "f4c8e7e2-e26e-4b18-85d9-2b01cc6e4b2a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/700564/000070056425000014/fult12312024-ex19insidertr.htm",
+      "subcap_ids": [],
+      "title": "Policy explicitly assigns 'Chief Legal Officer' role with\u2026"
+    },
+    {
+      "body": "DECISIVE NEW 2024 \u2014 Fulton Escrow Management LAUNCHED Summer 2024 (with ZSuite ZEscrow per E-036): 'replace the previous escrow platform. The new solution is modern and fully digital, accessible within BOSS (online banking for business) and leverages virtual accounts to accelerate account opening while providing commercial customers with improved transparency and more control' \u2014 replaces legacy escrow with virtual-account architecture (P2C2.5.4 Ancillary commercial M3 + P1C1.5 Tech Modernization).",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-045",
+        "E-036"
+      ],
+      "id": "128aad40-e488-4cb0-9d13-deb1c89b594b",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/-/media/Files/About-Fulton-Bank/CSR/2024-CSR-Report.pdf",
+      "subcap_ids": [
+        "P2C2.5.4",
+        "P1C1.5"
+      ],
+      "title": "Fulton Escrow Management Launched Summer 2024 (with ZSuite\u2026"
+    },
+    {
+      "body": "LEADERS' CHANGE TOOLKIT \u2014 2024 Council launched a formal toolkit 'to create change-ready teams' addressing communication and change management. (P1C4.1 Change Methodology \u2014 explicit change management deliverable, formal program with defined scope).",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "f34be174-c7a6-49eb-9d26-4058eb60bacb",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/CSR/2024/Valuing-Our-Employees",
+      "subcap_ids": [
+        "P1C4.1"
+      ],
+      "title": "2024 Council launched a formal toolkit"
+    },
+    {
+      "body": "2024 Council deliverables: (1) Launched Leaders' Change Toolkit to create 'change-ready' teams \u2014 formal change methodology toolkit (P1C4.1.1, P1C4.1.2 specifics); (2) Enhanced internal communication during major initiatives (P1C4.4); (3) Streamlined intranet UX.",
+      "date_precision": "year",
+      "e_id": "E-024",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "42ffae1e-3d41-4807-8b25-5f1c0cef069c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://bankingplus.news/enrichment/fulton-bank-ceo-managing-culture-performance/",
+      "subcap_ids": [
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.4"
+      ],
+      "title": "2024 Council deliverables: (1) Launched Leaders' Change\u2026"
+    },
+    {
+      "body": "DECISIVE NEW 2024 FEATURE \u2014 Digital Debit Card Issuance LAUNCHED 2024: 'instant access to their debit cards in their mobile wallet while they wait for physical card delivery'; 'Whether opening a new account or replacing a lost or stolen card, customers can immediately receive a temporary digital card via text or through the Fulton Online/Mobile Banking Debit Card Center'; activate card + set PIN + create travel alerts via Debit Card Center; Apple Pay + Google Pay compatible (P2C2.5.4 Ancillary Services Setup M3+ + P2C2.5.6 Account Activation Speed M3+ \u2014 instant digital issuance).",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "516451fa-de96-4c86-a88e-f6aa46182e32",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/-/media/Files/About-Fulton-Bank/CSR/2024-CSR-Report.pdf",
+      "subcap_ids": [
+        "P2C2.5.4",
+        "P2C2.5.6"
+      ],
+      "title": "Digital Debit Card Issuance Launched 2024: 'instant access\u2026"
+    },
+    {
+      "body": "DECISIVE NEW 2024 FEATURE \u2014 External Transfer LAUNCHED 2024: 'enhanced Account-to-Account transfer service. Accessible via our online banking platform, External Transfer enables next-day transfers between Fulton accounts and accounts at other financial institutions. Customers can choose delivery speeds based on their needs' \u2014 formal A2A external transfer capability (P2C2.5.3 Initial Funding Options M3 + P2C2.9.4 Aggregator Integration adjacent).",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "1afcc285-06d9-406c-a566-f70326d69213",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/-/media/Files/About-Fulton-Bank/CSR/2024-CSR-Report.pdf",
+      "subcap_ids": [
+        "P2C2.5.3",
+        "P2C2.9.4"
+      ],
+      "title": "External Transfer Launched 2024: 'enhanced\u2026"
+    },
+    {
+      "body": null,
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2024-04-26",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "18315b0b-cfee-4c83-aa13-ef23af1fcf54",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Republic First Bank (Philadelphia)"
+    },
+    {
+      "body": "M&A track record (P1C1.8 M&A Integration Strategy): Completed $5.2B Republic transaction (April 2024), $1.2B Prudential Bancorp (2022), and acquired 5 wealth management firms since 2018. Operates in 'target rich market with over 50 in-market banking institutions that fit our M&A strategy'.",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "d242cc55-3613-44fd-bfc7-483db0f833ba",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000700564/000070056424000054/irpresentation.htm",
+      "subcap_ids": [
+        "P1C1.8"
+      ],
+      "title": "M&A track record (P1C1.8 M&A Integration Strategy)\u2026"
+    },
+    {
+      "body": "Republic First conversion (April 2024) friction widely reported: Republic Bank-era customers consistently report service degradation post-merger; 'no phone/online access', 'time spent at branch', 'rates and fees not disclosed', card/check reissuance errors, account-association mistakes \u2014 direct M&A integration UX failure (P2C2.6.4 Welcome Journey + P1C4.10 M&A Cultural Integration counter-evidence).",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "4c17953a-3e32-405e-8eaf-921de4f17cab",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://wallethub.com/profile/fulton-bank-13003482i",
+      "subcap_ids": [
+        "P2C2.6.4",
+        "P1C4.10"
+      ],
+      "title": "Republic First conversion (April 2024) friction reported"
+    },
+    {
+      "body": "Targeted home ownership programs explicitly designed for LMI/underserved buyers: HomeReady\u00ae Plus, Homebuyer Advantage Plus\u00ae, Community Combo (80/20 first+second mortgage), Closing Cost Assistance Program (up to $5,000 enhanced April 2024), First Front Door Program (FHLB Pittsburgh, up to $15,000), Keys to Equity Program (FHLB Pittsburgh, up to $20,000 forgivable, launched 2024). (P1C5.4 Sustainable Products + P1C5.5 Social Impact).",
+      "date_precision": "month",
+      "e_id": "E-004",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "af87c7ae-6f93-4388-bffb-3f12580bd8f0",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2024/esg/2024-CSR-Full-Report-FINAL_Web-Version-Two-Page-View.pdf",
+      "subcap_ids": [
+        "P1C5.4",
+        "P1C5.5"
+      ],
+      "title": "Targeted home ownership programs explicitly designed for\u2026"
+    },
+    {
+      "body": "49 diverse suppliers worked with in 2023; $3.6M total spend with diverse suppliers; Sourcing and Procurement organization launched supplier diversity webpage 2023 \u2014 quantified DEI procurement (P1C5.6.2).",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "43fcf904-bb97-464f-8832-5e569ca851ca",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/CSR/2024/Sustaining-Our-Environment",
+      "subcap_ids": [
+        "P1C5.6.2"
+      ],
+      "title": "Sourcing and Procurement organization launched supplier\u2026"
+    },
+    {
+      "body": null,
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2022-11-05",
+      "evidence_e_ids": [],
+      "id": "8c7a0ec6-e8a7-4e06-9142-54809419282d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Prudential Bancorp (Philadelphia)"
+    },
+    {
+      "body": "CISO HIRING TIMELINE INFERENCE: Chris Stoneley (current CISO with deep TPRM/three-lines-of-defense expertise from RBC/CNB) was hired AFTER the 2022 OSC breach, suggesting a deliberate TPRM uplift response. Stoneley's stated CNB role explicitly included 'Third Party Risk Management oversight under City National Bank's Chief Risk Officer.' (P1C2.3 TPRM \u2014 corrective leadership action).",
+      "date_precision": "year",
+      "e_id": "E-013",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-013"
+      ],
+      "id": "fe094fbb-d822-4091-8366-c30cfce71f8e",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://news.bloomberglaw.com/litigation/fulton-bank-to-pay-750-000-to-settle-breach-affecting-112-000-1",
+      "subcap_ids": [
+        "P1C2.3"
+      ],
+      "title": "Chris Stoneley (current CISO with deep\u2026"
+    },
+    {
+      "body": "Director Pergolin appointed 2022, Devine appointed 2012, plus a 50-year-old director appointed 2025 (refresh signal \u2014 youngest director recent addition).",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "f9dd8656-6e2f-40b1-baf4-3cf87a5d8a75",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://s205.q4cdn.com/172110365/files/doc_financials/2025/ar/Latest-Annual-Report.pdf",
+      "subcap_ids": [],
+      "title": "Devine appointed 2012"
+    },
+    {
+      "body": "DATA & ANALYTICS WORKFORCE INVESTMENT: 30+ full-time equivalent employees hired to build out data and analytics capabilities (disclosed 2022/2023 investor decks). 'Build out of data warehouse and analytical capabilities' \u2014 explicit data infrastructure investment. (P1C2.5 Data Governance + P1C3.8 AI Innovation + P4 capability proxy).",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "26ea3ac0-15ad-4af8-b694-558f65fb4276",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://boomi.com/customer/fulton-bank/",
+      "subcap_ids": [
+        "P1C2.5",
+        "P1C3.8"
+      ],
+      "title": "DATA & Analytics Workforce INVESTMENT: 30+ full-time\u2026"
+    },
+    {
+      "body": "Preference page deployed since at least 2020 (page footer: '\u00a9 2020 Fulton Financial Corporation') \u2014 at least 5+ years of SFMC operational maturity (P2C1.5.1 Maturity \u2265M3 \u2014 multi-year production deployment).",
+      "date_precision": "year",
+      "e_id": "E-039",
+      "event_date": "2020-07-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "1d37a073-5318-4f2f-b5ca-1acb4b7b231d",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://cloud.em.fultonbank.com/consumer-epm",
+      "subcap_ids": [
+        "P2C1.5.1"
+      ],
+      "title": "Preference page deployed since at least 2020 (page footer: '"
+    },
+    {
+      "body": "DECISIVE \u2014 Fulton Bank adopted nCino's Cloud Banking Platform announced June 9, 2020; 'Fulton Bank, a community bank specializing in personalized customer service, implemented nCino's comprehensive cloud-based platform to make banking easier for its customers and employees, enhance compliance and risk management, automate processes' (P2C2.4.1 Automated Credit Decisioning M3 \u2014 production for commercial since 2020).",
+      "date_precision": "day",
+      "e_id": "E-037",
+      "event_date": "2020-06-09",
+      "evidence_e_ids": [
+        "E-037"
+      ],
+      "id": "845a7b31-8760-46d3-aaac-d936b58249f6",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.ncino.com/news/fulton-bank-adopts-ncino-improve-customer-experience-enhance-effieciency",
+      "subcap_ids": [
+        "P2C2.4.1"
+      ],
+      "title": "Fulton Bank adopted nCino's Cloud Banking Platform"
+    },
+    {
+      "body": "INFORMATION SECURITY DEPTH: Ric Bromirski \u2014 Lead Analyst IT Information Security at Fulton Bank since Dec 2019 (6+ years), prior at Susquehanna Bank (acquired by BB&T/Truist) for 10 years. Certifications: CEH, CompTIA Security+, MCP, GIAC. Tools: Palo Alto, Checkpoint, Tufin, Firemon, SIEM (LogRhythm/Tri-Geo), Nessus. Confirms operational cyber depth. (P1C2.6 Cyber Governance \u2014 operational maturity).",
+      "date_precision": "month",
+      "e_id": "E-012",
+      "event_date": "2019-12-01",
+      "evidence_e_ids": [
+        "E-012"
+      ],
+      "id": "3e790707-2539-4228-a033-f27698dc57ae",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/cdstoneley",
+      "subcap_ids": [
+        "P1C2.6"
+      ],
+      "title": "Ric Bromirski"
+    },
+    {
+      "body": "LIFE SCIENCES & TECHNOLOGY DIVISION (P1C3.6 Innovation Ecosystem + P1C1.3 Segment Strategy): Launched late 2019; led by Bret Schreiber (VP, Life Sciences and Technology). 72+ companies in portfolio + 28+ in pipeline (mid-2021 figures). Specialty banking for early-stage innovation companies. (Source: BioBuzz interview).",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2019-10-15",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "460a9557-5dd6-45d9-820d-2d2c277348d9",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://boomi.com/customer/fulton-bank/",
+      "subcap_ids": [
+        "P1C3.6",
+        "P1C1.3"
+      ],
+      "title": "LIFE Sciences & Technology Division (P1C3.6 Innovation\u2026"
+    },
+    {
+      "body": "5-YEAR BSA/AML REMEDIATION COMPLETED MAY 2019 (Lancaster Online): 'Federal Reserve System has terminated a consent order requiring it and its subsidiary Lafayette Ambassador Bank in Lehigh Valley to fix deficiencies in their compliance with the U.S. Bank Secrecy Act and anti-money laundering regulations'; remediation activities included 'addition of personnel and retention of third-party consultants that specialize in strengthening compliance programs' (P1C2.7 + P2C2.3.5 AML M3 \u2014 post-remediation modern AML stack).",
+      "date_precision": "year",
+      "e_id": "E-043",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "39cf7490-6039-46e3-8bbe-4f1ffe240f21",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.fultonbank.com/Commercial/Treasury-Management/Fraud-Prevention-and-Risk-Management",
+      "subcap_ids": [
+        "P1C2.7",
+        "P2C2.3.5"
+      ],
+      "title": "Federal Reserve System has terminated a consent order\u2026"
+    },
+    {
+      "body": "Fulton Bank Life Sciences & Technology Specialty Banking team (launched 2019 per E-006, Bret Schreiber, 72+ portfolio companies) provides banking to GO PA Fund's portfolio companies \u2014 direct innovation ecosystem alignment.",
+      "date_precision": "year",
+      "e_id": "E-015",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-015",
+        "E-006"
+      ],
+      "id": "8744d53d-f5c1-4667-939e-bd29e1901e77",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/Media-Room/Fulton-Bank-Commits-$10M-to-PA-Growth-Stage-Tech-Companies-Fund",
+      "subcap_ids": [],
+      "title": "Fulton Bank Life Sciences & Technology Specialty Banking\u2026"
+    },
+    {
+      "body": "5 wealth management firms acquired since 2018 \u2014 explicit M&A track in wealth segment (P1C1.8 M&A Integration Strategy).",
+      "date_precision": "year",
+      "e_id": "E-003",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "31aea70a-752e-4a3a-9ea7-2c0170999480",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000700564/000162828024038960/irpresentation-final.htm",
+      "subcap_ids": [
+        "P1C1.8"
+      ],
+      "title": "5 wealth management firms acquired explicit M&A track in\u2026"
+    },
+    {
+      "body": "5-PILLAR ACQUISITION HISTORY: Columbia Bank consolidation (Fall 2019, Howard County MD) \u2192 Prudential Bancorp (July 2022, $1.2B) \u2192 Republic First Bank (FDIC seized April 26, 2024, ~$6B assets, doubled Philadelphia presence) \u2192 Blue Foundry (pending Q2/Q3 2026, $2.5B). Plus 5 wealth firms acquired since 2018. CONFIRMS 'Acquisitions' as a primary strategic driver, with consistent integration cadence. (P1C1.8 M&A Integration Strategy \u2014 proven repeatable model).",
+      "date_precision": "year",
+      "e_id": "E-014",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "4c49785a-edb7-4af6-8d9d-6bb00f6b4966",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/Media-Room/Forbes",
+      "subcap_ids": [
+        "P1C1.8"
+      ],
+      "title": "5 wealth firms acquired since 2018"
+    },
+    {
+      "body": "HISTORICAL BSA/AML CONSENT ORDERS \u2014 2014 OCC: Fulton Bank N.A., Swineford National Bank, FNB Bank N.A. all consented to OCC Consent Orders July 14, 2014 for BSA/AML compliance deficiencies; 2014 FDIC+NJ DOBI Consent Order for The Bank of Lafayette/Lafayette Ambassador. Required: enhanced BSA/AML risk assessments (FFIEC Manual aligned), enhanced internal controls, enhanced CIP/CDD/EDD, monitoring/SAR filing improvements (P1C2.7 Regulatory Compliance Risk historical + Tier 10).",
+      "date_precision": "day",
+      "e_id": "E-043",
+      "event_date": "2014-07-14",
+      "evidence_e_ids": [
+        "E-043"
+      ],
+      "id": "e52aed31-3418-42a6-8bb2-8e04d410a7dc",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.fultonbank.com/Commercial/Treasury-Management/Fraud-Prevention-and-Risk-Management",
+      "subcap_ids": [
+        "P1C2.7"
+      ],
+      "title": "2014 OCC: consented to OCC Consent Orders July 14, 2014"
+    },
+    {
+      "body": "DEFINITIVE \u2014 Page contains tracking pixel 'https://nova.collect.igodigital.com/c2/100019570/track_page_view' \u2014 igoDigital was acquired by Salesforce in 2013 and is now Salesforce Marketing Cloud Personalization (formerly Interaction Studio, before that Evergage). The igodigital.com domain confirms Fulton Bank uses SFMC Personalization for behavioral tracking + real-time content personalization (P2C1.5.5 Trigger-Based Campaigns M3 + P2C1.6.7 Predictive Analytics + P1C3.8 AI in Marketing).",
+      "date_precision": "year",
+      "e_id": "E-039",
+      "event_date": "2013-07-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "7ec2b7f9-ca5f-40ca-9882-0602dfe3293f",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://cloud.em.fultonbank.com/consumer-epm",
+      "subcap_ids": [
+        "P2C1.5.5",
+        "P2C1.6.7",
+        "P1C3.8"
+      ],
+      "title": "IgoDigital was acquired in 2013"
+    },
+    {
+      "body": "Fulton Bank is named as alumni of Accenture's FinTech Innovation Lab (NYC) \u2014 premier global fintech accelerator with 130 alumni having raised $3B since 2010.",
+      "date_precision": "year",
+      "e_id": "E-015",
+      "event_date": "2010-07-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "702d48a5-d507-40c8-9758-e52ecda36cac",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.fultonbank.com/About-Fulton-Bank/Media-Room/Fulton-Bank-Commits-$10M-to-PA-Growth-Stage-Tech-Companies-Fund",
+      "subcap_ids": [],
+      "title": "Fulton Bank premier global fintech accelerator with 130\u2026"
+    }
+  ]
+}

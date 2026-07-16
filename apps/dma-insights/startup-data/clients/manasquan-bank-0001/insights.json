@@ -1,0 +1,848 @@
+{
+  "entity_display_id": "manasquan-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P2C4.9.1",
+        "P2C1.4.6",
+        "P4C3.1.7",
+        "P4C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "1885e3a6-7ce7-4cdd-8ccb-391dccd8e714",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-069",
+        "E-056",
+        "E-071",
+        "E-067",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Next Best Actions & Recommendations a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "NO CRM platform exists. Customer relationships managed via branch staff + Fiserv core.",
+      "what_text": "Next Best Actions & Recommendations is one of Manasquan Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 1.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Manasquan Bank's ability to deliver a stronger data and technology foundation [E-069].",
+      "why_text": "At 1.0 out of 5, Next Best Actions & Recommendations sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-068, E-069].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.3.1",
+        "P1C2.6.1",
+        "P4C3.1.3",
+        "P4C4.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "82468d5d-8d90-4364-aee2-4e75c29dfb97",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-060"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-025-REVISED",
+            "E-027",
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-062",
+        "E-027",
+        "E-024",
+        "E-029",
+        "E-032",
+        "E-025-REVISED",
+        "E-074",
+        "E-060"
+      ],
+      "linked_subcap_id": "P4C4.3.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Network Security Architecture a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-024].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Cybersecurity unusually strong (3-person InfoSec, board Skoudis, InfraGard, clean record)",
+      "what_text": "Network Security Architecture is one of Manasquan Bank's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Manasquan Bank's ability to deliver a stronger data and technology foundation [E-027].",
+      "why_text": "At 1.5 out of 5, Network Security Architecture sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-062, E-027].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P3C3.3.5",
+        "P1C3.9.2",
+        "P2C3.3.4",
+        "P3C3.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "8f50c1da-08ea-4dc0-a3ad-716562cc7208",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-069",
+        "E-056",
+        "E-071",
+        "E-067",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Next Best Actions & Recommendations a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "5-person compliance team with NO regtech/GRC platform detected",
+      "what_text": "Next Best Actions & Recommendations is one of Manasquan Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 1.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Manasquan Bank's ability to deliver a stronger data and technology foundation [E-069].",
+      "why_text": "At 1.0 out of 5, Next Best Actions & Recommendations sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-068, E-069].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2.5.1",
+        "P4C2.1.1",
+        "P4C1.3.1"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "c684ab96-c815-4984-a019-6b5662110bbd",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-060"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-057",
+        "E-059",
+        "E-061"
+      ],
+      "linked_subcap_id": "P3C2.5.1",
+      "platforms": [
+        "ncino",
+        "tableau",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Case Management a near-term focus for Manasquan Bank: a scoped investment here would lift it from 2.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": null,
+      "theme": "Operational Workflow & Risk",
+      "title": "Marketo lightly utilized",
+      "what_text": "Case Management is one of Manasquan Bank's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, roughly in line with the 2.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Manasquan Bank's ability to deliver more efficient, dependable operations [E-057].",
+      "why_text": "At 2.0 out of 5, Case Management shows a developing capability still short of the peer standard. Because it feeds the core processes that keep the institution running, lifting it toward best practice compounds across the rest of the business [E-060, E-057].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.4.4",
+        "P4C1.2.5",
+        "P1C4.2.5",
+        "P4C4.1.2",
+        "P1C1.5.2",
+        "P2C4.1.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "e588798a-124a-47ed-93c2-9fa7b2ed5530",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-069",
+        "E-056",
+        "E-071",
+        "E-067",
+        "E-070"
+      ],
+      "linked_subcap_id": "P4C2.4.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Next Best Actions & Recommendations a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "CTO data strategy is Aspirational not implemented",
+      "what_text": "Next Best Actions & Recommendations is one of Manasquan Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 1.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Manasquan Bank's ability to deliver a stronger data and technology foundation [E-069].",
+      "why_text": "At 1.0 out of 5, Next Best Actions & Recommendations sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-068, E-069].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.6",
+        "P2C4.9.1",
+        "P4C3.4.2",
+        "P1C2.1.7",
+        "P2C2.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "51dcd200-d16d-425d-979a-81ffc075c17c",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-025-REVISED",
+            "E-027",
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-027",
+        "E-068",
+        "E-029",
+        "E-025-REVISED",
+        "E-050",
+        "E-053",
+        "E-054"
+      ],
+      "linked_subcap_id": "P4C3.1.6",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-068].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Fiserv Premier (85% confidence) with Communicator Open = native Salesforce integration…",
+      "what_text": "This capability is one of Manasquan Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Manasquan Bank's ability to deliver a stronger data and technology foundation [E-027].",
+      "why_text": "At 1.0 out of 5, this capability sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-046, E-027].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P2C4",
+        "P1C2",
+        "P2C4.9.1",
+        "P3C1.1.5",
+        "P3C3.3.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "5eac3d27-f69c-47b6-bf04-4eec412445ed",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-064",
+        "E-065",
+        "E-063",
+        "E-037"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Sanctions Screening a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-063].",
+      "source_rec_id": "REC-01",
+      "theme": "Compliance & Surveillance",
+      "title": "Deploy Financial Services Cloud as the Enterprise CRM Foundation",
+      "what_text": "Manasquan Bank has NO CRM platform. Customer relationships exist in branch staff knowledge and Fiserv core account records, not in a relationship management system. Terafina digitized account opening (Feb 2024) but opened accounts disappear into Fiserv without relationship tracking. Financial Services Cloud connected unlock: compliance workflows automated; personalization foundation (requires customer data in CRM first); governance audit trail. In Zennify's assessment Sanctions Screening scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-065].",
+      "why_text": "The assessment found: “COMPLIANCE TEAM VALIDATED (5+ dedicated staff): SVP CRA & Compliance Officer Luanne Siverio (since Mar 2016, 10+ yrs), Compliance Analyst II Paula Ryan, Compliance Analyst Dawn Kellener, BSA” [E-064]. At 1.0 out of 5, Sanctions Screening sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P3C2",
+        "P4C1.2.5",
+        "P4C2.1.7",
+        "P2C4.9.1",
+        "P2C1.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "98c9bae4-4669-4311-93b1-51bf1ec451da",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-024",
+        "E-019",
+        "E-038",
+        "E-049",
+        "E-054",
+        "E-056",
+        "E-065"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Implement Data Cloud + Tableau as the Analytics & Data Unification Platform — addressable via salesforce [E-019].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Implement Data Cloud + Tableau as the Analytics & Data Unification Platform",
+      "what_text": "CTO Rich Lanza's data strategy is ASPIRATIONAL not implemented. Zero data team (Clay search: 0/12 data titles). No BI platform, no data warehouse, no CDP. 8+ siloed systems (Fiserv, Terafina, ZSuite, Marketo, DocuSign, Positive Pay, mobile banking, branch systems) with no unification layer. Coremetrics/IBM discontinued. Data Cloud + CRM Analytics (Tableau) connected unlock: personalization (requires unified data first); fraud analytics (cross-system pattern detection). In Zennify's assessment Behavioral Data Capture scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-024].",
+      "why_text": "At 1.0 out of 5, Behavioral Data Capture sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-046, E-024].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C4.9.1",
+        "P2C2.8.5",
+        "P3C1.1.5",
+        "P2C2.6.7",
+        "P4C1.6.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "b2caee54-6223-45f6-a04d-20bdb115eb30",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-019",
+            "E-049"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-047",
+        "E-017",
+        "E-019",
+        "E-049",
+        "E-018",
+        "E-026",
+        "E-048"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 47 a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-017].",
+      "source_rec_id": "REC-03",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Deploy nCino for Loan Origination Automation",
+      "what_text": "Loan origination is manual or semi-automated. Dovenmuehle (mymortgage-online.com) handles mortgage SERVICING only — not origination. Enterprise automation gap confirmed: Clay search for 13 RPA/workflow/automation title variants returned zero results. Job descriptions reference manual lending processes. Financial Services Cloud + nCino (partner) connected unlock: onboarding (lending products digitized end-to-end). In Zennify's assessment capability dimension 47 scores 1.5 out of 5, versus a typical 2.0 at comparable institutions [E-020].",
+      "why_text": "The assessment found: “Launched Terafina platform Feb 2024 for fully online account opening — both business and consumer clients. All account types: checking, savings, money markets, CDs. Features: user-friendly interface” [E-047]. At 1.5 out of 5, capability dimension 47 sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P2C4.9.1",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.7.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "a742128f-b39d-474f-8fca-cf21505a293b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-046",
+        "E-024",
+        "E-019",
+        "E-038",
+        "E-049",
+        "E-054",
+        "E-056",
+        "E-065"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Behavioral Data Capture a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-019].",
+      "source_rec_id": "REC-04",
+      "theme": "CX & Personalization",
+      "title": "Replace Marketo with Marketing Cloud for Full-Lifecycle Marketing",
+      "what_text": "Marketo is LIGHTLY UTILIZED — no case study, no JD mentions, no evidence of full lifecycle marketing (lead scoring, nurture campaigns, journey orchestration). VP Digital Marketing Nick Martin hired Nov 2025 — new hire represents change opportunity. Marketing Cloud connected unlock: personalization (journey-level personalization via Data Cloud). In Zennify's assessment Behavioral Data Capture scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-024].",
+      "why_text": "At 1.0 out of 5, Behavioral Data Capture sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-046, E-024].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P3C1",
+        "P4C1.2.5",
+        "P4C3.1.6",
+        "P3C1.1.5",
+        "P1C2.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "bf099a4c-14e8-4844-a91a-b3dc2e010425",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-024",
+            "E-025-REVISED",
+            "E-029"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-067",
+            "E-068",
+            "E-069"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-024",
+        "E-029",
+        "E-025-REVISED",
+        "E-054",
+        "E-067",
+        "E-068",
+        "E-065",
+        "E-069"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for Manasquan Bank: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-025-REVISED].",
+      "source_rec_id": "REC-05",
+      "theme": "Data Management & Governance",
+      "title": "Implement MuleSoft for Non-Fiserv System Integration",
+      "what_text": "Fiserv Premier Communicator Open handles core banking integration, but 5+ non-Fiserv systems (Terafina, ZSuite, Marketo/SFMC, DocuSign, Bakkt/Clover) require middleware. No enterprise integration platform detected. Point-to-point integrations are brittle and unmaintainable. MuleSoft Anypoint connected unlock: data governance (APIs enforce data standards); automation (API-triggered workflows). In Zennify's assessment Data Mesh Strategy & Domain Ownership scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-029].",
+      "why_text": "At 1.0 out of 5, Data Mesh Strategy & Domain Ownership sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-024, E-029].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "What We See\nManasquan Bank’s governance includes three board directors with explicit technology and risk backgrounds: Ed Skoudis (cybersecurity CEO, Counter Hack/SANS), Aaron Jeter (telecom/technology executive), and Noeleen Doelger (KPMG financial forensics, appointed 2025). CTO Rich Lanza was promoted to EVP in November 2025 — a board confidence signal (E-025-REVISED, E-068). Innovation follows a systematic fintech partnership model: Bakkt digital assets (2021), ZSuite mSuite escrow (2022), Terafina digital opening (2024), Clover POS (E-028, E-047). ESG is the strongest P1 category: $392K in grants, 146 awards, 505+ volunteer hours, NJBankers Community Service Award 2025 (E-045, E-046).\nWhy It Matters\nP1 is the ONLY pillar above peer median (+0.15). The systematic innovation cadence — roughly one strategic fintech partnership per year — signals that CTO Lanza has an established evaluation process. Zennify/Salesforce should position as the NEXT partnership in this established pattern. The award-winning culture (E-075: Indeed 4.7/5.0, 6yr Best Banks) means change adoption risk is LOW.",
+        "heading": "P1: Strategy, Governance & Culture (2.03)",
+        "linked_e_ids": [
+          "E-025",
+          "E-028",
+          "E-045",
+          "E-046",
+          "E-047",
+          "E-068",
+          "E-075"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "What We See\nTerafina launched digital account opening in February 2024 for all account types (E-047). The bank operates a comprehensive digital center: mobile app, online banking, BillPay, Zelle, mobile deposit, eStatements, alerts. Katie Meyers CCXP was appointed VP/CXO in 2023 (E-038) — a dedicated CX executive role. Nick Martin joined as VP Digital Marketing in November 2025 (E-025-REVISED). But NO CRM platform exists (E-051: Vibe keywords NULL for 9 CRM terms). Marketo handles marketing automation but is lightly utilized (E-050: no case study, no JD mentions). Personalization is limited to Compass Profile, a rules-based tool (E-056).\nWhy It Matters\nP2 scores 0.24 below peers despite having digital channels because the RELATIONSHIP LAYER is missing. Terafina opens accounts digitally, but those accounts disappear into Fiserv core without relationship tracking. The CXO has responsibility for experience but no CRM platform to manage it. FSC is the structural answer — it creates the relationship view across branch, digital, and phone that // all require.",
+        "heading": "P2: Customer Experience (1.64)",
+        "linked_e_ids": [
+          "E-025",
+          "E-038",
+          "E-047",
+          "E-050",
+          "E-051",
+          "E-056"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "What We See\nTransactional automation is strong: Positive Pay with auto-return (E-057), ZSuite mSuite end-to-end escrow (E-028), Cash Recyclers at all 15 branches reducing wait times 50% (E-061). However, enterprise automation is absent — Clay search for 13 RPA/workflow/automation titles returned zero results (E-061, E-062). The 5-person compliance team (SVP Siverio 10+ years, E-064) operates without a detected regtech/GRC platform. BCP/DR exists per FDIC mandate but is not publicly documented (E-066).\nWhy It Matters\nP3 is 0.27 below peers. The gap is at the PROCESS ORCHESTRATION layer, not the transaction layer. Fiserv handles check/ACH processing; mSuite handles escrow. But cross-functional workflows (onboarding routing, compliance case management, RM task queues) are manual. FSC Workflows + Flow + nCino (origination) address this exact layer. The compliance gap (: 1.70) represents both a risk and an opportunity — SVP Siverio’s 10-year tenure means she understands the pain points intimately.",
+        "heading": "P3: Operations, Risk & Compliance (1.61)",
+        "linked_e_ids": [
+          "E-028",
+          "E-057",
+          "E-061",
+          "E-062",
+          "E-064",
+          "E-066"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "What We See\nThis is the widest gap between VISION and REALITY. CTO Lanza’s LinkedIn lists “AI | Blockchain | Driving Multi-Million Dollar Transformations” and his promotion PR references a “comprehensive data strategy” (E-068). But Clay searches for 12 data-titled roles returned zero results (E-067). No BI platform, no data warehouse, no CDP detected. CECL (mandatory credit loss modeling) is the only predictive analytics (platform unknown, E-070). Coremetrics/IBM is DISCONTINUED (E-069). FAQ chatbot is the only AI (vendor-provided, E-071). Fiserv Premier (85% confidence) is the core banking platform with Communicator Open APIs available (E-072). ASP.NET 4.0/IIS 8 is legacy website infrastructure (E-073). Cybersecurity is the exception: 3-person InfoSec team, board Skoudis, InfraGard, clean breach record (E-074).\nWhy It Matters\nP4 is 0.40 below peers — the largest gap. Data Cloud is THE implementation vehicle for the CTO’s aspirational data strategy. The no-code approach is critical: MBNK has no data engineers and won’t hire them (253 total employees, community bank economics). Embedded Tableau provides analytics without an analyst team. The CECL enrichment angle is strategic — regulatory mandates don’t require discretionary budget approval. Cybersecurity strength (: 2.01) means Shield is an add-on, not a selling point.",
+        "heading": "P4: Data, Analytics & Technology (1.48)",
+        "linked_e_ids": [
+          "E-067",
+          "E-068",
+          "E-069",
+          "E-070",
+          "E-071",
+          "E-072",
+          "E-073",
+          "E-074"
+        ],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "ROOT CAUSE: No CRM platform exists (E-051). Customer relationships managed via branch staff + Fiserv core records. 5-person compliance team with no regtech (E-064). CXO has no platform to manage experience.\nSOLUTION: FSC provides unified relationship management, compliance workflows (KYC/CDD), interaction tracking, and financial goal tracking. Fiserv Premier integration via Communicator Open (E-072). Score improvement: +0.5 to +1.0 across,,. Timeline: 6–15 months.\nBUYERS: CTO Rich Lanza (technical), CXO Katie Meyers (CX), SVP Luanne Siverio (compliance)."
+  },
+  "run_request_id": "DMA-ASM-MBNK-20260330-0001"
+}

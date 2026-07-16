@@ -1,0 +1,946 @@
+{
+  "entity_display_id": "virtuity-financial-partn-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2",
+        "P2C3",
+        "P2C4",
+        "P4C1",
+        "P4C2.1.1",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "6ebc2cc1-4b2e-42ee-bac8-43a8bb73fa3d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-132",
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-133",
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-149",
+        "E-133",
+        "E-144",
+        "E-143",
+        "E-132",
+        "E-134",
+        "E-135"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Validation requires a MyWFG platform demonstration from a VFP contact or WFG technology team briefing, ideally with Mike Brodeur's team [E-133].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "The most significant evidence gap is",
+      "what_text": "The most significant evidence gap is what exists behind the MyWFG and WFG 365 login walls. These platforms may contain features, data, and capabilities that are not publicly visible. If WFG 365 includes CRM-like contact management, pipeline tracking, or reporting beyond commission statements, the (Analytics & AI) and -4 (Servicing, Personalization) scores would increase materially. Validation requires a MyWFG platform demonstration from a VFP contact or WFG technology team briefing, ideally with Mike Brodeur's team. Capabilities affected:. In Zennify's assessment Enterprise Analytics Strategy scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-149].",
+      "why_text": "The assessment found: “Transamerica uses Salesforce as CRM. Previously had customer data in multiple legacy systems (Avaya, Verint, Salesforce). Tenfold centralized activities and data capture into Salesforce. Salesforce” [E-132]. At 1.0 out of 5, Enterprise Analytics Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.5.IB1",
+        "P2C4.5",
+        "P1C5.4.2",
+        "P1C5.3.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "d32f667c-d222-4030-9de3-2438b3e828dc",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-105",
+        "E-099",
+        "E-020"
+      ],
+      "linked_subcap_id": "P2C4.5.IB1",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Coverage Gap Analysis a near-term focus for Virtuity Financial Partners: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Gap G-004 (Priority 2)",
+      "what_text": "Coverage Gap Analysis is one of Virtuity Financial Partners's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver a stronger, more personalised customer experience [E-099].",
+      "why_text": "At 1.0 out of 5, Coverage Gap Analysis sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-105, E-099].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.6.3",
+        "P1C1.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "7be2a969-063e-4204-8d91-4e274ec2c44f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-121",
+            "E-122"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-012"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-122",
+        "E-121",
+        "E-009"
+      ],
+      "linked_subcap_id": "P3C3.6.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Compliance & Surveillance discovery conversation — the finding is documented in the client's research report [E-009].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "Finding F-007",
+      "what_text": "Finding Remediation is one of Virtuity Financial Partners's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver more efficient, dependable operations [E-122].",
+      "why_text": "The assessment found: “Transamerica Financial Advisors (TFA) has detailed Written Supervisory Procedures (Oct 2024) covering: compliance, supervision, branch office registration, due diligence, marketing, AML, Form CRS” [E-121]. At 2.0 out of 5, Finding Remediation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.6.3",
+        "P1C2.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "5924b84c-a48e-4279-9d88-d2cd46169c2a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-121",
+            "E-122"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-122",
+        "E-121",
+        "E-004"
+      ],
+      "linked_subcap_id": "P3C3.6.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Compliance & Surveillance discovery conversation — the finding is documented in the client's research report [E-004].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "Finding F-003",
+      "what_text": "Finding Remediation is one of Virtuity Financial Partners's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver more efficient, dependable operations [E-122].",
+      "why_text": "The assessment found: “Transamerica Financial Advisors (TFA) has detailed Written Supervisory Procedures (Oct 2024) covering: compliance, supervision, branch office registration, due diligence, marketing, AML, Form CRS” [E-121]. At 2.0 out of 5, Finding Remediation sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.3.2",
+        "P1C1.5.3",
+        "P1C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "e5170c01-bd07-422d-8d2c-1933fd47b1d8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-002",
+        "E-108"
+      ],
+      "linked_subcap_id": "P1C1.3.2",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Digital Strategy & Vision discovery conversation — the finding is documented in the client's research report [E-108].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Each finding includes quantified observation, maturity implication, and specific Zennify…",
+      "what_text": "Segment-Specific Journeys is one of Virtuity Financial Partners's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver sharper strategic direction and stronger oversight [E-002].",
+      "why_text": "At 1.5 out of 5, Segment-Specific Journeys sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-005, E-002].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.1.1",
+        "P2C4.1.4",
+        "P2C4.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "01b538ac-df4f-4875-8266-1116cac719b8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-101",
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-140"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-140",
+        "E-149",
+        "E-101"
+      ],
+      "linked_subcap_id": "P2C4.1.1",
+      "platforms": [
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for Virtuity Financial Partners: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-101].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "It is executing at record levels",
+      "what_text": "Aegon's FY2025 results (6-K filed February 19, 2026) demonstrate that the parent ecosystem is not merely planning growth — it is executing at record levels. The operating result reached EUR 1.7 billion (+15% YoY), net result EUR 980 million (+45%), operating capital generation EUR 1.3 billion (exceeding the EUR 1.2 billion target), and free cash flow EUR 829 million. WFG specifically grew to 95,740 licensed agents (+11% from 86,142), new life sales increased 16% to $360 million in H2 2025, annuity gross deposits surged 19% to $2.31 billion, and Individual Life sales jumped 49% — with more than half of that increase coming from the Bestow-powered instant-decision Final Expense market. Transamerica's market share of WFG US Life sales climbed to 67% (from 62%). These are not projections — they are audited SEC filings. Maturity Implication: The ecosystem has financial capacity to invest in distribution platform modernization. Zennify Relevance: Position for the WFG platform RFP. VFP as pilot customer for Salesforce deployment within the agent network. In Zennify's assessment Customer Data Foundation (CDP) scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-149].",
+      "why_text": "At 1.0 out of 5, Customer Data Foundation (CDP) sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-140, E-149].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.1.1",
+        "P2C4.5.IB1",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "ddafea26-4d66-466c-a650-5cd675f43e56",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-132",
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-101",
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-012"
+        }
+      ],
+      "linked_e_ids": [
+        "E-149",
+        "E-101",
+        "E-132"
+      ],
+      "linked_subcap_id": "P2C4.1.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for Virtuity Financial Partners: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-101].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Gap G-003 (Priority 1)",
+      "what_text": "Customer Data Foundation (CDP) is one of Virtuity Financial Partners's least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver a stronger, more personalised customer experience [E-149].",
+      "why_text": "The assessment found: “Transamerica uses Salesforce as CRM. Previously had customer data in multiple legacy systems (Avaya, Verint, Salesforce). Tenfold centralized activities and data capture into Salesforce. Salesforce” [E-132]. At 1.0 out of 5, Customer Data Foundation (CDP) sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P3C2",
+        "P3C4.6.2",
+        "P3C3.4.5",
+        "P3C1.4.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-020",
+        "E-022"
+      ],
+      "ic_id": "CP-F-008",
+      "id": "b0ff436d-d1ae-4d76-b283-bbb2c0785788",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-020",
+            "E-022"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-140"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-140",
+        "E-145",
+        "E-004",
+        "E-002",
+        "E-027",
+        "E-001",
+        "E-110",
+        "E-025"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Producer/Advisor Channel Strategy a near-term focus for Virtuity Financial Partners: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-004].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "VFP's LLC revenue is estimated at $20-50 million based on ZoomInfo ($31.5M) and Vibe…",
+      "what_text": "VFP's LLC revenue is estimated at $20-50 million based on ZoomInfo ($31.5M) and Vibe ($200-500M range, likely including WFG ecosystem revenue). Without VFP's own financial statements, the size tier classification and strategic capacity assessment rely on estimates. If revenue is significantly higher than estimated, the organization may have more budget autonomy for technology investments. Validation requires VFP management financial statements or tax filings. Capabilities affected:,, Size Tier. In Zennify's assessment Producer/Advisor Channel Strategy scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-145].",
+      "why_text": "At 1.0 out of 5, Producer/Advisor Channel Strategy sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-140, E-145].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.3.1",
+        "P2C4.5.IB1",
+        "P1C5.4.2",
+        "P1C5.3.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-009",
+      "id": "2233d441-284b-4298-922a-bda26b5f5d07",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-015",
+            "E-123",
+            "E-147"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-010"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-011"
+        }
+      ],
+      "linked_e_ids": [
+        "E-123",
+        "E-015",
+        "E-147"
+      ],
+      "linked_subcap_id": "P4C4.3.1",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Cybersecurity & Privacy discovery conversation — the finding is documented in the client's research report [E-147].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Gap G-005 (Priority 2)",
+      "what_text": "Network Security Architecture is one of Virtuity Financial Partners's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver a stronger data and technology foundation [E-015].",
+      "why_text": "At 2.0 out of 5, Network Security Architecture sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-123, E-015].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.5",
+        "P4C4.8",
+        "P4C4.3.1",
+        "P2C4.1.1",
+        "P2C2.2.IB1",
+        "P3C4.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-010",
+      "id": "643973ad-8cba-4c7f-a076-f7314332b406",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-015",
+            "E-123",
+            "E-147"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-011"
+        }
+      ],
+      "linked_e_ids": [
+        "E-147",
+        "E-148",
+        "E-123",
+        "E-146",
+        "E-015"
+      ],
+      "linked_subcap_id": "P4C4.5",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Cybersecurity & Privacy discovery conversation — the finding is documented in the client's research report [E-123].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Transamerica has experienced two significant data breaches",
+      "what_text": "Transamerica has experienced two significant data breaches through third-party vendors. The May 2025 breach: detected May 7, investigation concluded June 10 (34-day detection gap), notifications sent June 26. Attack vector was social engineering — an unknown actor gained access through Transamerica's call center by impersonating an employee to access a third-party cloud-based client management application. 1,281 persons affected per Maine AG filing. SSNs and financial account information exposed. 24 months of Equifax credit monitoring offered. Multiple law firms investigating potential class actions. Separately, the 2023 WebTPA/MOVEit breach: approximately 10 million accounts affected across multiple insurers including Transamerica, Hartford, and Gerber Life. $13.75 million class action settlement approved, with claim deadline November 4, 2025. This establishes a pattern of third-party vendor vulnerability that is directly relevant to VFP — which uses 10+ third-party SaaS tools (GoDaddy, Calendly, Teachable, Telegram, Wave, WooCommerce, etc.) with no evidence of security assessment for any of them. Maturity Implication: level 3 cap on (Data Protection) and (Third-Party Security). The pattern of two breaches in 24 months is more concerning than a single incident. Zennify Relevance: Security conversation opener. Shield + Event Monitoring for the Salesforce implementation. Third-party SaaS vendor risk assessment as an immediate engagement. In Zennify's assessment Row-Level Security & Column-Level Security scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-148].",
+      "why_text": "At 2.0 out of 5, Row-Level Security & Column-Level Security sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-147, E-148].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.3.1",
+        "P3C4.1.1",
+        "P3C3.6.3",
+        "P1C2.3.1",
+        "P1C2.3.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-011",
+      "id": "4cb81700-f867-42a1-a04e-a9f8b176f60a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        },
+        {
+          "e_ids": [
+            "E-123"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-123",
+        "E-126",
+        "E-013"
+      ],
+      "linked_subcap_id": "P4C4.3.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Cybersecurity & Privacy discovery conversation — the finding is documented in the client's research report [E-126].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Finding F-005",
+      "what_text": "Network Security Architecture is one of Virtuity Financial Partners's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Virtuity Financial Partners's ability to deliver a stronger data and technology foundation [E-123].",
+      "why_text": "The assessment found: “Aegon enterprise risk management framework covers all subsidiaries including Transamerica/WFG. Through proactive risk management actions, Aegon improving risk profile and reducing capital ratio” [E-013]. At 2.0 out of 5, Network Security Architecture sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.1",
+        "P2C4.1.1",
+        "P1C2.1.3",
+        "P1C1.5.5",
+        "P4C3.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-012",
+      "id": "72ac4c14-c8cf-4979-951f-f452a9377e76",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-133",
+            "E-149"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-009",
+        "E-149",
+        "E-133",
+        "E-004"
+      ],
+      "linked_subcap_id": "P4C2.1.1",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Analytics Strategy a near-term focus for Virtuity Financial Partners: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-149].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Transamerica appointed Mike Brodeur",
+      "what_text": "In January 2026, Transamerica appointed Mike Brodeur as President of World Financial Group, replacing Todd Buchanan. Brodeur's background is critical: as WFG's Chief Operating Officer, he 'strengthened its data analytics strategy' and led the technology roadmap. He is not a traditional insurance distribution executive — he brings operational and technology orientation to the role. Additionally, Anissa Benich was hired in January 2025 as Head of Customer Experience and Marketing for WFG, signaling investment in CX transformation. These two appointments together suggest WFG is building executive capacity for digital transformation. Maturity Implication: Executive sponsor signal for platform modernization at the WFG level, which cascades to co-brands like VFP. Zennify Relevance: Brodeur is the target executive for a Zennify engagement. His data analytics background makes him a natural champion for Tableau and Data Cloud. Benich is the CX stakeholder for Experience Cloud and Marketing Cloud. In Zennify's assessment Enterprise Analytics Strategy scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-009].",
+      "why_text": "The assessment found: “Mike Brodeur appointed WFG President (Jan 2026), formerly COO who 'spearheaded WFG's technology roadmap, strengthened its data analytics strategy'. WFG strategic direction: 'building a more dynamic” [E-004]. At 1.0 out of 5, Enterprise Analytics Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C2",
+        "P1C3",
+        "P1C1.4.IB1",
+        "P1C2.1.8",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-020",
+        "E-022"
+      ],
+      "ic_id": "INS-R-010",
+      "id": "2976a532-0da3-432b-9dd3-18fee5d7c09b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-020",
+            "E-022"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-004"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-009",
+        "E-140",
+        "E-145",
+        "E-004",
+        "E-002",
+        "E-027",
+        "E-110"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Producer/Advisor Channel Strategy a near-term focus for Virtuity Financial Partners: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-140].",
+      "source_rec_id": "R-010",
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy Workshop: Zennify-Led Transformation Roadmap for VFP",
+      "what_text": "VFP has no documented digital strategy. No technology roadmap, no digital transformation governance, no innovation framework. Digital Strategy scores 1.63, Governance 1.50, Innovation 1.61. The Aegon re-domiciliation (EUR 350M, target Jan 2028) and Mike Brodeur's appointment as WFG Pr Evidence: (VFP website: no digital strategy referenced), (Aegon CMD: re-domiciliation, Brodeur appointment, WFG growth targets), (Aegon 6-K: record growth creating urgency for platform modernization). Primary: Zennify Digital Strategy Workshop\nSupporting: Innovation Roadmap Development, Digital Maturity Benchmarking (this DMA), Executive Alignment Session (Horenstein + Brodeur + Zennify). In Zennify's assessment Producer/Advisor Channel Strategy scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-009].",
+      "why_text": "At 1.0 out of 5, Producer/Advisor Channel Strategy sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-001, E-009].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "VFP scores below ALL five peers across most pillars. The gap is most pronounced against aspirational peers (Symmetry -1.27, Primerica -1.98) and smallest against direct WFG ecosystem comparables (WealthWave -0.34, Managed Wealth -0.25). PHP/Integrity occupies the middle ground at 2.63, demonstrating what platform investment can achieve. The key insight: WFG co-brands (VFP, WealthWave, Managed Wealth) cluster at level 1.8-2.0, while digitally-invested peers (Symmetry, Primerica) cluster at level 3.2-3.6. The bifurcation is structural, not performance-based.",
+        "heading": "Strategic Positioning",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "P2: Customer Experience & Engagement — 1.79 vs 2.5 (-0.71)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "P3: Operations, Risk & Compliance — 1.62 vs 2.5 (-0.88)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "P4: Data, Analytics & Technology — 1.21 vs 2.5 (-1.29)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-VFP-20260414-0001"
+}

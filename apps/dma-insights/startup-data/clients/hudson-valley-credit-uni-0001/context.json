@@ -1,0 +1,918 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Hudson Valley Credit Union",
+      "amount": null,
+      "announced_on": "2024-01-01",
+      "body": "Catskill Hudson Bank merger announced Jan 2024 \u2014 7,500 clients, 100 employees, 11 branches",
+      "closed_on": null,
+      "details": "Catskill Hudson Bank merger announced Jan 2024 \u2014 7,500 clients, 100 employees, 11 branches",
+      "e_id": "E-001",
+      "event_date": "2024-01-01",
+      "id": "005a8889-df08-45dc-b82c-8716b866b5b7",
+      "source_url": "https://en.wikipedia.org/wiki/Hudson_Valley_Credit_Union",
+      "status": "announced",
+      "target": "Catskill Hudson Bank",
+      "title": "Catskill Hudson Bank merger announced"
+    },
+    {
+      "acquirer": "Hudson Valley Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": "1963: IBM Poughkeepsie Employees FCU granted NCUA charter. 1994: Name changed to Hudson Valley FCU. 2024: Acquired 8 Berkshire Bank locations (Capital District & Columbia County)",
+      "closed_on": null,
+      "details": "1963: IBM Poughkeepsie Employees FCU granted NCUA charter. 1994: Name changed to Hudson Valley FCU. 2024: Acquired 8 Berkshire Bank locations (Capital District & Columbia County)",
+      "e_id": "E-003",
+      "event_date": "2024-01-01",
+      "id": "96563ce4-aee2-4331-a94c-449225fd381a",
+      "source_url": "https://www.hvcu.org/about-us/who-we-are/our-history/",
+      "status": null,
+      "target": "Berkshire Bank",
+      "title": "Acquired 8 Berkshire Bank locations (Capital District\u2026"
+    }
+  ],
+  "entity_display_id": "hudson-valley-credit-uni-0001",
+  "financials": {
+    "metrics": {
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 40,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 1110,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "William Lionhood promoted to SVP, Senior Director of\u2026"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Annette Gabriel hired SVP Head of Human Resources \u2014 20\u2026"
+          }
+        ],
+        "fy": [
+          "FY2019",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "National FOM (effective Jan 2, 2026); HQ: Poughkeepsie, NY",
+        "headline": "$7.5B assets \u00b7 FY2024 \u00b7 +5.5% CAGR",
+        "regulator": "NCUA (post Jan 2026)",
+        "series": {
+          "net_income_m": [
+            5000.0,
+            5800.0,
+            6200.0,
+            6800.0,
+            1.5,
+            14200.0
+          ],
+          "total_assets": [
+            null,
+            null,
+            null,
+            7.06,
+            7.45,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        5000000000.0,
+        5800000000.0,
+        6200000000.0,
+        7060000000.0,
+        7450000000.0,
+        14200000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2019,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          5000000000.0,
+          5800000000.0,
+          6200000000.0,
+          7060000000.0,
+          7450000000.0,
+          14200000000.0
+        ]
+      }
+    ],
+    "years": [
+      2019,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "National FOM (effective Jan 2",
+      "2026)",
+      "HQ: Poughkeepsie",
+      "NY"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jonathan W. Roberts",
+        "recent_hire": false,
+        "tenure_months": 48,
+        "title": "CEO / Sept 2022"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rehan Kausar",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "SVP / CAIO / Aug 2025"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "John Fede",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP / CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Timmerman",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP / CRO + General Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Debra Leone",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "SVP / CCO + Deputy GC / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sarah Gillespie",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "SVP / Senior Director PMO / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tina Ludwig",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP / Head Experience Administration"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Steve Goodwine",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP / Director Contact Center"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael Burke",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "SVP / Senior Director Internal Audit / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Charlie Thompson",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "SVP / Physical Ops + Security / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "John Brozycki",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "AVP / Information Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Benjamin Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Secretary (external)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nancy K. Boehm",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Member (external)"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "Hudson Valley Credit Union is a credit union. It reports $8.0 billion in total assets and has operated since 1963. It is regulated by NCUA (post Jan 2026) and employs approximately 1,110 people across 40 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (post Jan 2026)",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-034",
+        "excerpt": "Hudson Valley AI Summit co-hosted by Dutchess County + Marist University \u2014 annual conference in HVCU's backyard (Poughkeepsie). 2025 edition featured IBM, Amazon, Meta; 200+ attendees. 2026",
+        "title": "Hudson Valley AI Summit co-hosted by Dutchess County + Marist\u2026",
+        "type": "conference",
+        "url": "https://library.marist.edu/web/guest/w/ai-summit-2025"
+      },
+      {
+        "author": "Debra Leone",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-075",
+        "excerpt": "Debra Leone (SVP CCO + Deputy General Counsel) spoke at America's Credit Unions Regulatory Compliance Certification eSchool 2025 on 'mortgage lending regulations and compliance challenges' \u2014 external compliance thought l",
+        "title": "Debra Leone (SVP CCO + Deputy General Counsel) spoke at America's\u2026",
+        "type": "article",
+        "url": "https://www.americascreditunions.org/events-training/eschool/regulatory-complian"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "HVCU offers Solar Panel Loan: fixed rate up to $30,000, 15-year term, 9.00% APR (as of 2/1/26), 100% of solar panel invoice, no closing costs. HVCU pays all associated fees.",
+        "title": "HVCU offers Solar Panel Loan: fixed rate up to $30,000, 15-year term\u2026",
+        "type": "conference",
+        "url": "https://www.hvcu.org/Personal/Home-Finance-Center/Home-Equity-Solar-Panel-Financ"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-046",
+        "excerpt": "Glia CONFIRMED as HVCU's live chat / co-browsing platform (from 2021 press release: HVCU partners with Posh+Glia). Glia enables seamless handoff from Posh chatbot to live agent without re-authentication.",
+        "title": "Glia Confirmed as HVCU's live chat / co-browsing platform (from 2021\u2026",
+        "type": "article",
+        "url": "https://www.glia.com/news/posh-and-glia-help-modernize-member-service-for-seven-"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "HVCU LinkedIn posts use hubs.la shortlinks (HubSpot-exclusive) \u2014 confirms full HubSpot Marketing Hub deployment, not just analytics. HVCU social: Facebook 13,659 likes, LinkedIn 4,664 followers, Instagram 1,702 posts. So",
+        "title": "HVCU LinkedIn posts use hubs.la shortlinks (HubSpot-exclusive)",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/hvcu"
+      },
+      {
+        "author": "Rehan Kausar",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-026",
+        "excerpt": "HVCU CAIO Rehan Kausar publicly tagged #CAIO #responsibleAI #creditunions \u2014 communicating responsible AI agenda externally. Kausar presented on 'ethical business conduct' at Prudential's Ethical Leadership Conference \u2014 d",
+        "title": "HVCU CAIO Rehan Kausar tagged #CAIO",
+        "type": "conference",
+        "url": "https://www.linkedin.com/posts/rehankausar_caio-responsibleai-creditunions-activ"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "6230476d-cd0b-4521-9433-8ab04af6f341",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Citation density 39 unique E-IDs is above Layer 1 threshold (30) but below Layer 2 aspirational target of 50. P3 and P4 deep dives have lighter citation density vs P1 and P2."
+    },
+    {
+      "id": "843e9cc0-1ac7-4939-bac0-8532e84e2a50",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "contradiction_log.csv and reasoning_chain_log.json were generated during governance audit rather than during Layer 1 scoring phase. Layer 1 should produce these natively."
+    },
+    {
+      "id": "59716565-0cd1-4f5d-a357-f7e8da82b4de",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Evidence_Index URL validation: a small number of T4 evidence items have shortened URLs that may not be directly accessible. All T1/T2 items have full, specific URLs."
+    },
+    {
+      "id": "7cbd0bf4-9e7b-4ba0-b889-30c429035af5",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Evidence reuse concentration: E-067 (LeadIQ tech stack) used in >60 subcap mappings as the primary 'absence' evidence for confirmed technology gaps. This is by design (single-source absence confirmation) but warrants disclosure."
+    },
+    {
+      "id": "61913831-0570-48e8-9bfa-306c2cfc78ef",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "4 contradictions documented \u2014 all classified as SOFT (scope-separation resolutions). No HARD contradictions were identified. While this is positive, the complete absence of HARD contradictions warrants noting: it may indicate that evidence collection was thorough enough that no genuinely conflicting facts were encountered, OR that contradictions were not systematically surfaced during Phase 4.5."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Value grew from $5.0B (2019) to $14.2B (2025) \u2014 19.0% CAGR.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.29,
+        "P1C2": 2.63,
+        "P1C3": 2.33,
+        "P1C4": 2.33,
+        "P1C5": 2.57,
+        "P2C1": 2.39,
+        "P2C2": 2.31,
+        "P2C3": 2.05,
+        "P2C4": 2.33,
+        "P3C1": 2.26,
+        "P3C2": 2.56,
+        "P3C3": 2.48,
+        "P3C4": 2.48,
+        "P4C1": 2.33,
+        "P4C2": 2.47,
+        "P4C3": 2.47,
+        "P4C4": 3.02
+      },
+      "overall_score": 2.43,
+      "peer_name": "Spokane Teachers Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.64,
+        "P1C3": 2.34,
+        "P1C4": 2.77,
+        "P1C5": 2.0,
+        "P2C1": 2.54,
+        "P2C2": 2.57,
+        "P2C3": 2.79,
+        "P2C4": 2.31,
+        "P3C1": 2.36,
+        "P3C2": 2.5,
+        "P3C3": 2.59,
+        "P3C4": 2.81,
+        "P4C1": 1.73,
+        "P4C2": 1.73,
+        "P4C3": 2.06,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.41,
+      "peer_name": "CCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 2.02,
+        "P1C3": 2.18,
+        "P1C4": 2.29,
+        "P1C5": 1.79,
+        "P2C1": 2.3,
+        "P2C2": 2.34,
+        "P2C3": 2.47,
+        "P2C4": 2.33,
+        "P3C1": 2.48,
+        "P3C2": 2.71,
+        "P3C3": 2.62,
+        "P3C4": 2.59,
+        "P4C1": 2.48,
+        "P4C2": 2.58,
+        "P4C3": 2.57,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.39,
+      "peer_name": "Mission Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.93,
+        "P1C2": 2.61,
+        "P1C3": 2.14,
+        "P1C4": 2.17,
+        "P2C1": 2.27,
+        "P2C2": 2.33,
+        "P2C3": 2.58,
+        "P2C4": 2.53,
+        "P3C1": 2.58,
+        "P3C2": 2.54,
+        "P3C3": 3.0,
+        "P3C4": 2.38,
+        "P4C1": 2.04,
+        "P4C2": 1.71,
+        "P4C3": 2.38,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.37,
+      "peer_name": "AAFCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.57,
+        "P1C2": 2.64,
+        "P1C3": 2.26,
+        "P1C4": 2.39,
+        "P1C5": 1.75,
+        "P2C1": 2.22,
+        "P2C2": 2.45,
+        "P2C3": 2.22,
+        "P2C4": 2.0,
+        "P3C1": 2.42,
+        "P3C2": 2.38,
+        "P3C3": 2.69,
+        "P3C4": 2.5,
+        "P4C1": 2.14,
+        "P4C2": 1.99,
+        "P4C3": 2.23,
+        "P4C4": 2.2
+      },
+      "overall_score": 2.3,
+      "peer_name": "APG Federal Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-HVCU-20260427-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "75% employees recommend to friend (Glassdoor)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.0
+      },
+      {
+        "drilldown": "BBB complaints include: Catskill Hudson Bank integration-era call center/loan quality issues, credit life insurance opt-out difficulty, 1099-C form delays, fraud dispute handling gaps",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "William Lionhood promoted to SVP, Senior Director of Strategy & Transformation \u2014 signals formal transformation management structure",
+      "date_precision": "publish_fallback",
+      "e_id": "E-010",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "2904d5d3-ef45-4e2a-a53d-b5a74069aa97",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://hudsonvalleypress.com/2025/11/05/hudson-valley-credit-union-announces-promotions-2/",
+      "subcap_ids": [],
+      "title": "William Lionhood promoted to SVP, Senior Director of\u2026"
+    },
+    {
+      "body": "Steve Goodwine promoted to SVP, Head of Contact Center",
+      "date_precision": "publish_fallback",
+      "e_id": "E-010",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "5b3f7352-bed8-4fc5-afd6-7c1c660d193a",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://hudsonvalleypress.com/2025/11/05/hudson-valley-credit-union-announces-promotions-2/",
+      "subcap_ids": [],
+      "title": "Steve Goodwine promoted to SVP, Head of Contact Center"
+    },
+    {
+      "body": "Erin Hartnagel joined as VP, Director of Enterprise Consulting",
+      "date_precision": "publish_fallback",
+      "e_id": "E-007",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "fb43c836-5a3f-49d3-b05e-235497e5bd3f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/hudson-valley-credit-union/5a1d82ab24000024005d40ff",
+      "subcap_ids": [],
+      "title": "Erin Hartnagel joined as VP, Director of Enterprise\u2026"
+    },
+    {
+      "body": "Rehan Kausar joined HVCU as SVP, Chief Artificial Intelligence Officer \u2014 responsible for strategic leadership, development, and enterprise-wide execution of AI and GenAI initiatives",
+      "date_precision": "publish_fallback",
+      "e_id": "E-006",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "1abe46ad-d8a3-4c7d-ac3d-c1ef750a65b6",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://capitalregionchamber.com/news/hudson-valley-credit-union-announces-new-hire-and-new-role/",
+      "subcap_ids": [],
+      "title": "Rehan Kausar joined HVCU"
+    },
+    {
+      "body": "Michael Burke promoted to SVP Senior Director Internal Audit \u2014 'identifying risks associated with business objectives and evaluating controls.' Board/Supervisory Committee relationship maintained.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "7e2ed9d1-ed77-471d-b164-5dcf7bcba7b0",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://capitalregionchamber.com/news/hudson-valley-credit-union-announces-promotions/",
+      "subcap_ids": [],
+      "title": "Michael Burke promoted to SVP Senior Director Internal Audit"
+    },
+    {
+      "body": "Debra Leone promoted to SVP Chief Compliance Officer and Deputy General Counsel. Oversees 'enterprise compliance management system, including regulatory monitoring, policy governance, complaint resolution, and examination readiness.'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "8717fcca-7698-4930-afc7-bc8946e9f6b9",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://capitalregionchamber.com/news/hudson-valley-credit-union-announces-promotions/",
+      "subcap_ids": [],
+      "title": "Debra Leone promoted to SVP Chief Compliance Officer and\u2026"
+    },
+    {
+      "body": "Tina Ludwig promoted to SVP Head of Experience Administration. 'Experience Design Strategy for key channels, including digital (mobile, desktop, consumer relationship management).' Responsible for 'experience insights, activating the data and analytics.' Formerly VP Head of Emerging Channels since 2024.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-017",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "7f84b113-ec11-4389-a1d0-421c91b3231a",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://capitalregionchamber.com/news/hudson-valley-credit-union-announces-promotions/",
+      "subcap_ids": [],
+      "title": "Tina Ludwig promoted to SVP Head of Experience\u2026"
+    },
+    {
+      "body": "Sarah Gillespie promoted to SVP Senior Director PMO: '75+ projects including M&A, new enterprise systems, enterprise capacity model, Steering Committee and Project Review Committee' \u2014 formal investment/prioritization infrastructure confirmed.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-068",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "3d6993b5-c24b-431a-9a99-5755ceac7f25",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://hudsonvalleypress.com/2025/05/28/hudson-valley-credit-union-announces-promotions/",
+      "subcap_ids": [],
+      "title": "Sarah Gillespie promoted to SVP Senior Director PMO"
+    },
+    {
+      "body": "HVCU Charitable Foundation launched Feb/March 2025 as official 501(c)(3). Board of Directors authorized $3,000,000 endowment. Focus: education, food, health, housing.",
+      "date_precision": "month",
+      "e_id": "E-044",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-044"
+      ],
+      "id": "dfda2d30-605f-4321-8635-a3caf26f88bf",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://capitalregionchamber.com/news/hudson-valley-credit-union-launches-new-hvcu-charitable-foundation/",
+      "subcap_ids": [],
+      "title": "HVCU Charitable Foundation launched as official 501(c)(3"
+    },
+    {
+      "body": "Marist Red Fox Financial launched Feb 25, 2025 \u2014 HVCU's first cashless branch, first branch with ITM (Interactive Teller Machine) with live agent. Staffed by 12 student 'relationship advisors' Monday\u2013Friday noon\u20135:30pm.",
+      "date_precision": "day",
+      "e_id": "E-033",
+      "event_date": "2025-02-25",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "6f7f5bf2-1c9f-4267-b471-ac0296309396",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.marist.edu/w/red-fox-financial-2025",
+      "subcap_ids": [],
+      "title": "Marist Red Fox Financial launched"
+    },
+    {
+      "body": "FourLeaf FCU (formerly Bethpage FCU): $13.4B assets, 484K members, 36 branches, top 15 nationally. Rebranding completed Q1 2025.",
+      "date_precision": "quarter",
+      "e_id": "E-014",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "57121b54-e525-45e3-a452-a25d569b8a7d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://tyfone.com/news/breaking-news/bethpage-fcu-turning-over-a-new-leaf/",
+      "subcap_ids": [],
+      "title": "Rebranding completed Q1 2025"
+    },
+    {
+      "body": "Annette Gabriel hired SVP Head of Human Resources \u2014 20+ years business transformation, HR management, M&A, policy implementation.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-025",
+      "event_date": "2024-08-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "4c916f3e-3f14-41c4-a025-c1425a9b943b",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://hudsonvalleypress.com/2024/07/31/hudson-valley-credit-union-welcomes-new-leaders/",
+      "subcap_ids": [],
+      "title": "Annette Gabriel hired SVP Head of Human Resources \u2014 20\u2026"
+    },
+    {
+      "body": "Latham branch opened July 2024; 8 Berkshire Bank branches acquired Sept 2024 (Capital District + Columbia County)",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "57f2e6e7-da47-4ac6-b158-3400fa4fa413",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.hvcu.org/HVCU/media/Documents/Hudson_Valley_Credit_Union_2024_Annual_Report.pdf",
+      "subcap_ids": [],
+      "title": "Latham branch opened"
+    },
+    {
+      "body": "New ITM/ATM fleet deployed 2024 \u2014 modernized member access",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "30f1dcae-1183-4bdf-878c-e4e404010e2c",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.hvcu.org/HVCU/media/Documents/Hudson_Valley_Credit_Union_2024_Annual_Report.pdf",
+      "subcap_ids": [],
+      "title": "New ITM/ATM fleet deployed modernized member access"
+    },
+    {
+      "body": "New fleet of ATMs and Interactive Teller Machines (ITMs) deployed in 2024 \u2014 capital investment in branch technology modernization documented.",
+      "date_precision": "year",
+      "e_id": "E-048",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "62c650a3-90ed-452b-971e-23030c3065bf",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.hvcu.org/HVCU/media/Documents/Hudson_Valley_Credit_Union_2024_Annual_Report.pdf",
+      "subcap_ids": [],
+      "title": "Capital investment in branch technology modernization\u2026"
+    },
+    {
+      "body": "Joseph Oliva hired as VP/Director of Card Processing Operations from Webster Bank (400,000+ digital banking users, core conversion migration) \u2014 card processing automation expertise in leadership.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-071",
+      "event_date": "2024-03-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "0a7216e8-3856-4cd2-ae1e-14cc7305113d",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://midhudsonnews.com/2024/03/22/hudson-valley-credit-union-welcomes-new-leaders/",
+      "subcap_ids": [],
+      "title": "Joseph Oliva hired as VP/Director of Card Processing\u2026"
+    },
+    {
+      "body": "Catskill Hudson Bank merger announced Jan 2024 \u2014 7,500 clients, 100 employees, 11 branches",
+      "date_precision": "month",
+      "e_id": "E-001",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "005a8889-df08-45dc-b82c-8716b866b5b7",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Hudson_Valley_Credit_Union",
+      "subcap_ids": [],
+      "title": "Catskill Hudson Bank merger announced"
+    },
+    {
+      "body": "1963: IBM Poughkeepsie Employees FCU granted NCUA charter. 1994: Name changed to Hudson Valley FCU. 2024: Acquired 8 Berkshire Bank locations (Capital District & Columbia County)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-003",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "96563ce4-aee2-4331-a94c-449225fd381a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.hvcu.org/about-us/who-we-are/our-history/",
+      "subcap_ids": [],
+      "title": "Acquired 8 Berkshire Bank locations (Capital District\u2026"
+    },
+    {
+      "body": "Sarah Gillespie promoted to SVP Senior Director Project Management \u2014 'overseeing the PMO' since 2023. 'Completed more than 75 projects...major initiatives tied to mergers and acquisitions, new enterprise systems, development and oversight of an enterprise capacity model.'",
+      "date_precision": "year",
+      "e_id": "E-030",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-030"
+      ],
+      "id": "4f6122e7-1b34-4666-9c80-251771bbeee1",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://capitalregionchamber.com/news/hudson-valley-credit-union-announces-promotions/",
+      "subcap_ids": [],
+      "title": "Sarah Gillespie promoted to SVP Senior Director Project\u2026"
+    },
+    {
+      "body": "Posh Casey (GenAI Knowledge Assistant, deployed summer 2023): 143 hours saved per month, 1,300 fewer call transfers/month, 201% ROI, $163,000 annual savings, 89% first-call resolution rate.",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "6e8be055-e5fa-44bf-9c96-dd4bd05b0116",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.posh.ai/blog/client-story-hudson-valley-credit-union",
+      "subcap_ids": [],
+      "title": "Posh Casey (GenAI Knowledge Assistant, deployed 143 hours\u2026"
+    },
+    {
+      "body": "Posh Casey = 'generative AI-powered Knowledge Assistant' deployed at HVCU summer 2023. 'Advanced search technology, powered by the latest generative AI techniques' = RAG (Retrieval-Augmented Generation) confirmed with document ingestion (PDF, DOCX, XLSX).",
+      "date_precision": "year",
+      "e_id": "E-083",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-083"
+      ],
+      "id": "ede1cb25-5af4-452c-97a9-f286e29a4fb3",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.posh.ai/blog/posh-turns-knowledge-into-action-with-next-generation-ai-workspace-for-financial-institutions",
+      "subcap_ids": [],
+      "title": "Posh Casey = 'generative AI-powered Knowledge Assistant'\u2026"
+    },
+    {
+      "body": "Desiree Wolfe (HVCU CXO): 2022\u20132023 Senior Director, Global Banking Industry Advisor @ Salesforce \u2014 hired DIRECTLY from Salesforce into HVCU in 2023. Prior: 10yrs SVP Director Product Management @ Webster Bank, Chair Deposit & Payments Committee @ Consumer Bankers Assoc (2013-2022).",
+      "date_precision": "year",
+      "e_id": "E-028",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "751bd5f8-180b-426b-a69b-b9cbcb74d234",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://rocketreach.co/desiree-wolfe-email_78341894",
+      "subcap_ids": [],
+      "title": "Salesforce \u2014 hired DIRECTLY from Salesforce into HVCU in\u2026"
+    },
+    {
+      "body": "Chris Kieffer (CSO) joined Jan 2023. 30+ years financial services. Responsibilities include corporate development, project management, and CUSO strategies. PMP certified. Prior: COO at Scott CU; 22yrs at First Bank (data engineering, analytics, digital channels, strategic product development).",
+      "date_precision": "month",
+      "e_id": "E-015",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "d0842bb5-d77d-4bf4-8d70-b539cb2220d5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://people.equilar.com/bio/org/hudson-valley-federal-credit-union/10952803",
+      "subcap_ids": [],
+      "title": "Chris Kieffer (CSO) joined"
+    },
+    {
+      "body": "CEO Jonathan Roberts succeeded Mary Madden (2022). IBM origins 1963 Poughkeepsie",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "cfeb2afb-7571-408d-b4c3-7a75376273c5",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Hudson_Valley_Credit_Union",
+      "subcap_ids": [],
+      "title": "CEO Jonathan Roberts succeeded Mary Madden (2022)"
+    },
+    {
+      "body": "Jonathan Roberts (CEO) joined 2022. Prior: Head of Community Bank at Webster Bank; 30yr career at Fifth Third, Citizens, FNB Corp, Santander.",
+      "date_precision": "year",
+      "e_id": "E-015",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "f5d59853-4e87-4077-bb11-081afbed91dd",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://people.equilar.com/bio/org/hudson-valley-federal-credit-union/10952803",
+      "subcap_ids": [],
+      "title": "Jonathan Roberts (CEO) joined 2022"
+    },
+    {
+      "body": "State charter granted September 4 2019; name changed to HVCU Oct 4 2019; federal re-conversion Jan 2026",
+      "date_precision": "day",
+      "e_id": "E-001",
+      "event_date": "2019-09-04",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "925b4fba-2ce3-4733-bcbd-4836f3883347",
+      "kind": "regulatory",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Hudson_Valley_Credit_Union",
+      "subcap_ids": [],
+      "title": "State charter granted"
+    }
+  ]
+}

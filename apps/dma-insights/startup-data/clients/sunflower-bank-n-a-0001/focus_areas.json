@@ -1,0 +1,244 @@
+{
+  "entity_display_id": "sunflower-bank-n-a-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-044",
+          "E-026"
+        ],
+        "representative_quote": "CXO/CIO Alignment diagnostic. EA approach. nCino co-presenter",
+        "source_kind": "docx"
+      },
+      "id": "4f442dee-e315-4087-b02a-efd475c1e340",
+      "involved_subcap_ids": [
+        "P1C1.1.2",
+        "P4C3.3.2",
+        "P3C4.2.1",
+        "P4C3.1.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 25,
+        "P3": 25,
+        "P4": 50
+      },
+      "source_path": "CXO/CIO Alignment diagnostic. EA approach. nCino co-presenter [E-044,E-026]",
+      "title": "CIO driving IT-business alignment",
+      "verbatim_quote": "7 | GREEN | SO-2 | CIO driving IT-business alignment | CXO/CIO Alignment diagnostic. EA approach. nCino co-presenter [E-044,E-026] | L3.0\u00b10.3 | Platform expansion"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-137"
+        ],
+        "representative_quote": "ITSM platform end-of-life in 8 months",
+        "source_kind": "docx"
+      },
+      "id": "2ffd0101-1782-48e2-8696-84a90fe4f14c",
+      "involved_subcap_ids": [
+        "P4C3.4.1",
+        "P4C2.2.1",
+        "P4C3.4.2",
+        "P4C2.3.2",
+        "P2C3.1.2",
+        "P2C3.2.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "8 months",
+          "delta": null,
+          "kpi_label": "ITSM platform end-of-life",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 33,
+        "P4": 67
+      },
+      "source_path": "ITSM platform end-of-life in 8 months [E-137]",
+      "title": "Cherwell ITSM EOL Dec 2026",
+      "verbatim_quote": "2 | RED | SO-5 | Cherwell ITSM EOL Dec 2026 | ITSM platform end-of-life in 8 months [E-137] | N/A | Service Cloud (URGENT)"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-138",
+          "E-009"
+        ],
+        "representative_quote": "Dell EMC RecoverPoint+Avamar. MOVEit breach=vendor gap",
+        "source_kind": "docx"
+      },
+      "id": "dba9ee95-5979-4586-ad4a-dc538fb81ea7",
+      "involved_subcap_ids": [
+        "P3C4.3.1",
+        "P1C2.3.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P3": 50
+      },
+      "source_path": "Dell EMC RecoverPoint+Avamar. MOVEit breach=vendor gap [E-138,E-009]",
+      "title": "DR confirmed",
+      "verbatim_quote": "4 | AMBER | SO-1 | DR confirmed but TPRM failed 2023 | Dell EMC RecoverPoint+Avamar. MOVEit breach=vendor gap [E-138,E-009] | L2.5\u00b10.4 | Shield, MuleSoft"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-022",
+          "E-040"
+        ],
+        "representative_quote": "SB Black Diamond vs FF Orion+eMoney. $6.8B AUM",
+        "source_kind": "docx"
+      },
+      "id": "24b5ca8b-747b-4f3f-8a89-e7166e30ab66",
+      "involved_subcap_ids": [
+        "P4C2.1.2",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.3.1",
+        "P4C1.2.1",
+        "P4C1.3.2",
+        "P4C1.2.2",
+        "P4C1.2.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$6,800,000,000",
+          "delta": null,
+          "kpi_label": "AUM",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "SB Black Diamond vs FF Orion+eMoney. $6.8B AUM [E-022,E-040]",
+      "title": "Dual wealth platforms",
+      "verbatim_quote": "5 | AMBER | SO-3 | Dual wealth platforms | SB Black Diamond vs FF Orion+eMoney. $6.8B AUM [E-022,E-040] | L2.0\u00b10.5 | FSC Wealth, Data Cloud"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-040",
+          "E-007"
+        ],
+        "representative_quote": "Dual-platform conflict across 11 domains",
+        "source_kind": "docx"
+      },
+      "id": "497ea1c1-6543-4ae4-8f07-a5420912b8cc",
+      "involved_subcap_ids": [
+        "P4C2.1.2",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.3.1",
+        "P4C1.2.1",
+        "P4C1.3.2",
+        "P4C1.2.2",
+        "P4C1.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "SB Salesforce vs FF Dynamics, SB Actimize vs FF SAS, SB SailPoint vs FF Okta [E-040,E-007]",
+      "title": "Dual-platform conflict across 11 domains",
+      "verbatim_quote": "1 | RED | SO-1 | Dual-platform conflict across 11 domains | SB Salesforce vs FF Dynamics, SB Actimize vs FF SAS, SB SailPoint vs FF Okta [E-040,E-007] | L2.0\u00b10.5 | FSC, Data Cloud, MuleSoft"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-012",
+          "E-112"
+        ],
+        "representative_quote": "DepositAccounts allegations",
+        "source_kind": "docx"
+      },
+      "id": "6bfb195e-f1bd-48ae-8200-4dd30b284f50",
+      "involved_subcap_ids": [
+        "P4C3.4.1",
+        "P4C3.4.2",
+        "P2C3.1.2",
+        "P2C3.2.1",
+        "P4C2.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 40,
+        "P4": 60
+      },
+      "source_path": "Indeed 2.4/5 ALL LOW. CFPB complaints. DepositAccounts allegations [E-012,E-112]",
+      "title": "Employee satisfaction critically low",
+      "verbatim_quote": "6 | AMBER | SO-6 | Employee satisfaction critically low | Indeed 2.4/5 ALL LOW. CFPB complaints. DepositAccounts allegations [E-012,E-112] | L1.5\u00b10.5 | Service Cloud, EE"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-051",
+          "E-093"
+        ],
+        "representative_quote": "No AI/ML platforms, no data science roles, engineering shrinking",
+        "source_kind": "docx"
+      },
+      "id": "741937a5-b5f9-43ac-a8ca-93b730e63ee6",
+      "involved_subcap_ids": [
+        "P4C2.1.2",
+        "P4C2.3.2",
+        "P4C4.1.2",
+        "P4C4.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "No AI/ML platforms, no data science roles, engineering shrinking [E-051,E-093]",
+      "title": "ZERO AI/ML in 134+ tech stack",
+      "verbatim_quote": "3 | RED | SO-2,3 | ZERO AI/ML in 134+ tech stack | No AI/ML platforms, no data science roles, engineering shrinking [E-051,E-093] | L1.0\u00b10.5 | Agentforce, Einstein AI"
+    }
+  ]
+}

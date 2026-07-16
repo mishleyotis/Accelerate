@@ -1,0 +1,1013 @@
+{
+  "entity_display_id": "bok-financial-corporatio-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.4.5",
+        "P1C2.4.6",
+        "P1C4.4.5",
+        "P4C3.4.6",
+        "P4C3.4.1",
+        "P4C3.4.5"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "c8169de2-dc41-40c6-ad9c-b878ff5d2a8b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-085"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-067",
+        "E-029"
+      ],
+      "linked_subcap_id": "P4C1.4.5",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 20 a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "CDO Has IT Infrastructure Background",
+      "what_text": "Capability dimension 20 is one of BOK Financial Corporation's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes BOK Financial Corporation's ability to deliver a stronger data and technology foundation [E-085].",
+      "why_text": "The assessment found: “Chief Data Officer role exists at BOK Financial (David Poczynek) CDO responsible for delivery of data solutions — dedicated data leadership at C-suite level” [E-029]. At 1.0 out of 5, capability dimension 20 sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.2",
+        "P4C2.1.3",
+        "P2C2.4.7",
+        "P2C4.8.5",
+        "P1C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "bf59e6db-157c-4404-b6d0-493b53bcd68b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-055",
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-055",
+        "E-086"
+      ],
+      "linked_subcap_id": "P4C2.1.2",
+      "platforms": [
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-086].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Zero AI/ML in Production",
+      "what_text": "AI & ML Strategy & Governance is one of BOK Financial Corporation's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 1.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes BOK Financial Corporation's ability to deliver a stronger data and technology foundation [E-055].",
+      "why_text": "At 1.0 out of 5, AI & ML Strategy & Governance sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-072, E-055].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.4.1",
+        "P2C4.1.1",
+        "P3C1.3.8",
+        "P2C1.4.6",
+        "P2C1.5.4",
+        "P2C1.5.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "99cb92fb-e666-4721-8485-e355e20d078e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-043",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-032",
+        "E-043",
+        "E-056"
+      ],
+      "linked_subcap_id": "P3C1.4.1",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Document Ingestion a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Dual CRM + Dual Marketing Automation",
+      "what_text": "Document Ingestion is one of BOK Financial Corporation's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes BOK Financial Corporation's ability to deliver more efficient, dependable operations [E-043].",
+      "why_text": "At 1.5 out of 5, Document Ingestion sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-032, E-043].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.4.5",
+        "P1C2.3.7",
+        "P1C5.6.1",
+        "P4C4.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "ea221098-60a0-4e6b-9359-fef78760b328",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-088",
+        "E-075",
+        "E-064"
+      ],
+      "linked_subcap_id": "P1C1.4.5",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make vendor strategy a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-064].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Jack Henry Single-Vendor Concentration",
+      "what_text": "Vendor strategy is one of BOK Financial Corporation's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes BOK Financial Corporation's ability to deliver sharper strategic direction and stronger oversight [E-075].",
+      "why_text": "At 1.5 out of 5, vendor strategy sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-088, E-075].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.5",
+        "P1C4.8.6",
+        "P2C2.9.4",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "7e4deb48-f308-43bd-b1b4-544838bf2dd8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-081",
+        "E-078",
+        "E-068"
+      ],
+      "linked_subcap_id": "P4C3.1.5",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 5 a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-078].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "No Enterprise Integration Layer",
+      "what_text": "Capability dimension 5 is one of BOK Financial Corporation's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes BOK Financial Corporation's ability to deliver a stronger data and technology foundation [E-081].",
+      "why_text": "The assessment found: “Customer data FRAGMENTED across 4+ systems: Salesforce CRM + Microsoft Dynamics + Tealium CDP + Banno digital banking [from ] No MDM platform or golden record evidence found — customer master data” [E-068]. At 2.0 out of 5, capability dimension 5 sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.4.5",
+        "P2C4.1.1",
+        "P2C4.2.5",
+        "P2C4.8.4",
+        "P2C4.2.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "d221deaf-3377-4842-8bdb-fc572e659a36",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-032",
+        "E-055",
+        "E-033"
+      ],
+      "linked_subcap_id": "P4C1.4.5",
+      "platforms": [
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 20 a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-033].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Personalization Tools PRESENT but INACTIVE",
+      "what_text": "Capability dimension 20 is one of BOK Financial Corporation's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes BOK Financial Corporation's ability to deliver a stronger data and technology foundation [E-055].",
+      "why_text": "At 1.0 out of 5, capability dimension 20 sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-032, E-055].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.4.5",
+        "P2C4.1.1",
+        "P2C1.4.6",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "02a80336-2b69-4e5f-b3c8-e6a2ef0f7324",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-056",
+        "E-032"
+      ],
+      "linked_subcap_id": "P4C1.4.5",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 20 a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-032].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Customer 360 Fragmented",
+      "what_text": "Capability dimension 20 is one of BOK Financial Corporation's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes BOK Financial Corporation's ability to deliver a stronger data and technology foundation [E-056].",
+      "why_text": "At 1.0 out of 5, capability dimension 20 sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-068, E-056].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C1",
+        "P2C3",
+        "P4C1.4.5",
+        "P2C4.1.1",
+        "P2C1.3.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "478899cf-7ed6-494c-9ec4-6031aae3450c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-043",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-056",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-043",
+        "E-068",
+        "E-056"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": "REC-01",
+      "theme": "CX & Personalization",
+      "title": "CRM Platform Consolidation — Salesforce as Single System of Record",
+      "what_text": "BOKF operates dual CRM platforms (Salesforce + Microsoft Dynamics) creating data fragmentation, inconsistent customer views, and duplicated licensing costs. Zendesk serves as a separate support platform disconnected from CRM. The Customer 360 is split across 4+ systems (:F4). This fragmentation directly drives the Personalization gap (score 1.5 vs peer median 2.0) — you cannot personalize what you cannot see. {'primary': 'Sales Cloud', 'secondary': 'Service Cloud', 'complementary': 'Data Cloud'} connected unlock: Data Governance: unified CRM feeds data governance program; Personalization: single customer view enables NBO/propensity models; Omnichannel: consistent service across channels. In Zennify's assessment Customer Data Foundation (CDP) scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-068].",
+      "why_text": "At 1.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-043, E-068].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2",
+        "P2C1",
+        "P4C1.4.5",
+        "P4C2.1.3",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "b2f9c94f-1e26-485d-a88e-97d6517d15e6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-085"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-055",
+        "E-080",
+        "E-085",
+        "E-068"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-080].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Salesforce Data Cloud — Unified Customer Profile & CDP Replacement",
+      "what_text": "Tealium AudienceStream CDP is deployed (:F8) but shows LOW utilization (:F6) — no evidence of audience segmentation activation or behavioral targeting. Customer data sits in 4+ systems (Salesforce CRM, Dynamics, Tealium, Banno) without a golden record. CDO David Poczynek has IT infrastructure background, not data governance — the 'unified data platform' aspiration (:F5) lacks a governance foundation. {'primary': 'Data Cloud', 'secondary': 'Data Cloud for Marketing'} connected unlock: Personalization: Data Cloud is prerequisite for Einstein personalization; Analytics: unified data enables analytics consolidation; Marketing: Data Cloud activates marketing segmentation. In Zennify's assessment Customer Data Foundation (CDP) scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-055].",
+      "why_text": "The assessment found: “Customer data FRAGMENTED across 4+ systems: Salesforce CRM + Microsoft Dynamics + Tealium CDP + Banno digital banking [from ] No MDM platform or golden record evidence found — customer master data” [E-068]. At 1.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C3",
+        "P3C4",
+        "P4C3.1.5",
+        "P3C1.3.8",
+        "P3C4.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "2d3a9ba2-cc7b-4966-a9a2-594301f8c820",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-064",
+            "E-075"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-078"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-078",
+        "E-064",
+        "E-075",
+        "E-084"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automation Governance Framework a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": "REC-03",
+      "theme": "Core Automation",
+      "title": "MuleSoft iPaaS — Enterprise Integration Layer (GREENFIELD)",
+      "what_text": "BOKF has NO enterprise integration platform (:F1) — no MuleSoft, Apigee, or ESB detected despite 200+ technologies. 10-K discloses 'heavily reliant on single vendor' (:F2) for IT — Jack Henry SilverLake on IBM Power Systems (:F6). However, cloud migration is ACTIVE with HashiCorp Terraform+Vault (:F1,F3). The gap is not cloud readiness — it's integration orchestration between legacy core and modern stack. {'primary': 'MuleSoft Anypoint Platform', 'secondary': 'MuleSoft Composer'} connected unlock: Automation: API-led integration enables STP automation; Tech Architecture: iPaaS is the missing architecture layer; Resilience: reduces single-vendor concentration. In Zennify's assessment Automation Governance Framework scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-064].",
+      "why_text": "At 1.5 out of 5, Automation Governance Framework sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-078, E-064].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2",
+        "P2C3",
+        "P4C2.1.3",
+        "P2C4.1.1",
+        "P2C1.3.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "f8049ec7-30c6-4d96-b608-c9130dcf1437",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-055",
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-055",
+            "E-080"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-072",
+        "E-055",
+        "E-051",
+        "E-080"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-051].",
+      "source_rec_id": "REC-04",
+      "theme": "CX & Personalization",
+      "title": "Einstein AI + Agentforce — AI-Powered Customer Experience (GREENFIELD)",
+      "what_text": "BOKF has ZERO AI/ML in production across ANY domain (:F1). No NBO, no propensity models, no churn prediction, no AI chatbot (:F1). SnapEngage serves as live chat but is NOT an AI assistant (:F4). The personalization tools exist (Sitecore, Tealium, Optimizely) but are INACTIVE for AI-powered use cases (:F5). This is the single largest maturity gap — scores 1.5 vs peer median 2.0, and scores at the bottom of the assessment. {'primary': 'Einstein AI', 'secondary': 'Agentforce', 'complementary': 'Einstein Bots'} connected unlock: Personalization: Einstein AI is the activation layer for dormant personalization stack; Analytics: Einstein brings ML into production; Omnichannel: Agentforce enables AI-assisted service. In Zennify's assessment Customer Data Foundation (CDP) scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-055].",
+      "why_text": "At 1.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-072, E-055].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P4C1.4.5",
+        "P4C2.1.3",
+        "P2C4.1.1",
+        "P3C1.3.8"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "957ba095-ba1f-4aba-96e6-5d8054efadf9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-043"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-043",
+        "E-032",
+        "E-076"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Audience Segmentation a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-076].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Marketing Cloud — Replace Dual Marketing Automation Stack",
+      "what_text": "BOKF runs DUAL marketing automation platforms: Oracle Eloqua AND Marketo Engage (:F1,F2). This is a textbook consolidation opportunity — duplicated licensing, fragmented campaign data, inconsistent customer journeys, split reporting. Combined with Tealium CDP (:F4) and Sitecore CMS, the marketing technology stack has 4+ overlapping platforms with no clear primary. {'primary': 'Marketing Cloud Engagement', 'secondary': 'Marketing Cloud Account Engagement'} connected unlock: Marketing: direct consolidation of marketing tech sprawl; Personalization: Marketing Cloud + Data Cloud enables personalized journeys. In Zennify's assessment Audience Segmentation scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-032].",
+      "why_text": "At 1.5 out of 5, Audience Segmentation sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-043, E-032].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C4",
+        "P4C2.1.3",
+        "P2C4.1.1",
+        "P2C1.3.2",
+        "P2C2.2.7"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "68a6d525-9da4-4b99-a014-4a722d9975c4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-052",
+        "E-051",
+        "E-053"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-053].",
+      "source_rec_id": "REC-06",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Service Cloud + Voice — Unified Contact Center on Salesforce",
+      "what_text": "BOKF operates a hybrid contact center: Five9 (cloud) + Cisco (legacy on-prem) (:F1). SnapEngage provides live chat but lacks AI capabilities (:F1). Zendesk handles support tickets separately from CRM (:F3). The result: agents lack unified customer context, and customers experience inconsistent service across channels (:F1). {'primary': 'Service Cloud', 'secondary': 'Service Cloud Voice (Five9 CTI)'} connected unlock: Omnichannel: unified service console across all channels; Personalization: service interactions feed personalization engine. In Zennify's assessment this capability scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-051].",
+      "why_text": "The assessment found: “Five9 cloud contact center deployed — modern cloud CCaaS platform (POSITIVE signal for ) Cisco Contact Center + Cisco Unified Communications Manager ALSO deployed — hybrid on-prem/cloud CC” [E-052]. At 1.5 out of 5, this capability sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C1",
+        "P4C1.4.5",
+        "P4C3.1.5",
+        "P2C4.1.1",
+        "P1C2.4.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "365e4c2f-f86c-4e24-920a-f121cdc8f27b",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-032"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-032",
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-049",
+        "E-032",
+        "E-056"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": "REC-07",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Financial Services Cloud — Unified Client Relationship Platform",
+      "what_text": "BOKF deployed nCino for commercial lending origination (:F1) with a 4-month implementation (:F3), but the broader client relationship management across wealth, commercial, and consumer is fragmented. Salesforce CRM exists but without FSC's banking data model (:F16). Wealth management ($126.6B AUM/AUA) lacks an integrated advisor workstation. {'primary': 'Financial Services Cloud', 'secondary': 'nCino + FSC integration'} connected unlock: Onboarding: FSC streamlines client onboarding; Data Governance: FSC enforces financial data model. In Zennify's assessment this capability scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-032].",
+      "why_text": "At 1.5 out of 5, this capability sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-049, E-032].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C1",
+        "P4C1.4.5",
+        "P4C2.1.3",
+        "P2C4.1.1",
+        "P1C2.4.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "26e27a6e-888f-441f-90ae-489f3eab8a29",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-074",
+        "E-022"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.0 toward the 1.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": "REC-08",
+      "theme": "Analytics & AI",
+      "title": "Tableau — Consolidate 5+ BI Tools into Unified Analytics Platform",
+      "what_text": "BOKF runs 5+ BI tools in parallel: Power BI, Oracle BI, SAS Analytics, MicroStrategy ONE, Splunk (:F1,F2). This tool sprawl creates inconsistent metrics, duplicated licensing, fragmented governance, and no single source of truth for business intelligence. No data science team was found (:F1 — Indeed salary data NULL for data scientist at BOKF). {'primary': 'Tableau', 'secondary': 'CRM Analytics (Einstein Analytics)'} connected unlock: Analytics: direct consolidation of analytics sprawl; Data Governance: single analytics platform enforces metric governance. In Zennify's assessment AI & ML Strategy & Governance scores 1.0 out of 5, versus a typical 1.5 at comparable institutions [E-074].",
+      "why_text": "At 1.0 out of 5, AI & ML Strategy & Governance sits 0.5 points below the 1.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-071, E-074].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C3",
+        "P2C1.3.2",
+        "P2C3.2.2",
+        "P2C1.2.8",
+        "P1C1.5.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "d5af2794-c546-498f-ba3a-40e7bc344718",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-045",
+        "E-046",
+        "E-047"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-046].",
+      "source_rec_id": "REC-09",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Experience Cloud — Unified Digital Portal & App Strategy",
+      "what_text": "BOKF operates 4+ brand websites (BOK Financial, Bank of Oklahoma, Bank of Texas, Bank of Albuquerque) (:F1) and 3+ separate mobile apps (:F1). Customer reviews cite app fragmentation and bugs (:F1,:F1). Geo-restricted new account opening limits digital acquisition beyond core footprint. SVP of Digital Origination hired Jan 2025 signals intent to address this. {'primary': 'Experience Cloud', 'secondary': 'Mobile Publisher'} connected unlock: Onboarding: unified digital onboarding across brands; Omnichannel: consistent experience across web and mobile. In Zennify's assessment this capability scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-045].",
+      "why_text": "At 1.5 out of 5, this capability sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-044, E-045].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P1C2",
+        "P4C2.1.3",
+        "P1C2.4.6",
+        "P1C5.1.1",
+        "P1C2.7.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "98258a55-b02e-42bb-a427-bc2c11224323",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-041",
+        "E-087",
+        "E-042"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make ESG strategy a near-term focus for BOK Financial Corporation: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-042].",
+      "source_rec_id": "REC-10",
+      "theme": "ESG & Sustainability",
+      "title": "Net Zero Cloud — ESG Reporting & Climate Risk Management",
+      "what_text": "BOKF has Outstanding CRA (12+ years,:F1) and $8M/yr community investment (:F3), but publishes NO sustainability report, no TCFD alignment, no Scope 1/2/3 data, no climate scenario analysis — despite 11% energy loan exposure. Peer First Horizon publishes a dedicated ESG report (:F1), making BOKF a laggard vs. peers on ESG reporting (:F3). {'primary': 'Net Zero Cloud', 'secondary': 'Sustainability Reporting'} connected unlock: ESG: direct gap remediation; Governance: ESG governance framework. In Zennify's assessment ESG strategy scores 1.5 out of 5, versus a typical 2.0 at comparable institutions [E-041].",
+      "why_text": "The assessment found: “Peer First Horizon publishes CSR/ESG Impact Report — BOKF peer has formal ESG reporting. BOKF does not. First Horizon: $50M to foundation, $18M annual through 1,600+ nonprofits, 27,000+ volunteer” [E-087]. At 1.5 out of 5, ESG strategy sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 1.88 | vs Median: -0.52",
+        "heading": "6.1. Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 1.74 | vs Median: -0.51",
+        "heading": "6.2. Pillar 2: Customer Experience & Engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.20 | vs Median: -0.55",
+        "heading": "6.3. Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 1.98 | vs Median: -0.27",
+        "heading": "6.4. Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following 10 recommendations each include: (a) evidence-grounded root cause with specific E-IDs, (b) peer benchmark gap, (c) Zennify solution alignment from the 12-solution catalog, (d) expected score outcomes, (e) counter-argument with rebuttal, and (f) risk of inaction. All 10 recommendations passed the 4-gate validation protocol."
+  },
+  "run_request_id": "DMA-ASM-BOKF-20260330-0001"
+}

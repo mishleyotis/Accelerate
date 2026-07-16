@@ -1,0 +1,978 @@
+{
+  "entity_display_id": "east-west-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C4.1.5",
+        "P3C4.7.1",
+        "P2C2.4.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "6c5f592d-51a6-4358-a322-47c508b7813e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-003",
+        "E-071",
+        "E-101"
+      ],
+      "linked_subcap_id": "P1C4.1.5",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Strong financial foundation supports digital investment capacity — Executive sponsorship secured; investment capacity exists for transformation [E-071].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "$80.4B assets, $1.3B net income (record), ROA 1.70%, ROE 16.0% -top performance metrics",
+      "what_text": "Change Metrics is one of East West Bank's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, roughly in line with the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes East West Bank's ability to deliver sharper strategic direction and stronger oversight [E-003].",
+      "why_text": "The assessment found: “EWBC 10-K confirms consumer/business banking segment delivers through domestic branch network AND digital banking platform Company investing in technology to improve operational efficiency and” [E-001]. At 2.5 out of 5, Change Metrics shows a developing capability still short of the peer standard. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P4C1.1.3",
+        "P2C4.1.4",
+        "P2C1.8.3",
+        "P1C4.1.4",
+        "P1C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-091"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "ef062d98-feea-4f35-9496-c44325b271d0",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-004",
+            "E-011",
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-026"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-026",
+        "E-064",
+        "E-002",
+        "E-086",
+        "E-011",
+        "E-004",
+        "E-068"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: strategy leadership confirmed; digital onboarding active — Salesforce platform alignment -direct Zennify CRM/digital engagement opportunity [E-064].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "CDO with clear data strategy driving digital banking",
+      "what_text": "Strategy Refresh Cadence is one of East West Bank's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes East West Bank's ability to deliver sharper strategic direction and stronger oversight [E-026].",
+      "why_text": "At 1.5 out of 5, Strategy Refresh Cadence sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-005, E-026].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P4C1.1.3",
+        "P4C2.2.3",
+        "P1C2.1.2",
+        "P1C5.3.4",
+        "P1C5.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "e32f9162-15e9-4b24-aa56-6ab5756dc052",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-047",
+            "E-048",
+            "E-049",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-099",
+        "E-048",
+        "E-047",
+        "E-049",
+        "E-071"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-047].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "ESG reporting without net-zero commitment",
+      "what_text": "This capability is one of East West Bank's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes East West Bank's ability to deliver sharper strategic direction and stronger oversight [E-099].",
+      "why_text": "The assessment found: “Environmental and Social Policy Framework listed as governance highlight — board-level ESG oversight LEED and/or Energy Star certified buildings — operational environmental management” [E-048]. The research report pins the maturity impact at: ESG at level 2 (Developing) -reporting exists but commitments incomplete vs peers. averages 1.9/5 across its 14 scored capability (peer median ~ 2.0) on the current assessment.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3",
+        "P4C2.2.3",
+        "P1C3.1.7",
+        "P1C3.1.5",
+        "P1C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-037"
+      ],
+      "ic_id": "CP-F-006",
+      "id": "5be53ae4-b835-4a0d-98e3-bf5652f0f2b9",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C3"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-068",
+            "E-093"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-100",
+        "E-064",
+        "E-033",
+        "E-093",
+        "E-068",
+        "E-031",
+        "E-029",
+        "E-035"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Innovation Horizons a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-033].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "No formal innovation lab despite GenAI adoption signals",
+      "what_text": "Innovation Horizons is one of East West Bank's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes East West Bank's ability to deliver sharper strategic direction and stronger oversight [E-064].",
+      "why_text": "The research report pins the maturity impact at: Innovation likely level 2 -ad hoc innovation without structured programs. averages 1.7/5 across its 38 scored capability (peer median ~ 2.2) on the current assessment [E-100, E-064].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P2C1.1.RB1",
+        "P2C4.5.3",
+        "P2C1.5.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-091"
+      ],
+      "ic_id": "CP-F-007",
+      "id": "710133cc-efbb-43ce-a545-7adc4f62ebf7",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-004",
+            "E-011",
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-068",
+            "E-093"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-092",
+        "E-093",
+        "E-064",
+        "E-002",
+        "E-086",
+        "E-011",
+        "E-004",
+        "E-068"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Unique competitive positioning supports premium strategy score — Cross-border digital experience optimization -differentiated Zennify engagement scope [E-064].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Cross-border banking with unique China license -competitive moat",
+      "what_text": "Strategy Refresh Cadence is one of East West Bank's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes East West Bank's ability to deliver sharper strategic direction and stronger oversight [E-093].",
+      "why_text": "At 1.5 out of 5, Strategy Refresh Cadence sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-092, E-093].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P4C2.2.3",
+        "P4C3.6.9",
+        "P2C4.1.4",
+        "P2C2.1.4",
+        "P3C1.1.10"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "4b34fc65-00f2-42bd-9620-c6cd29c2d4db",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-005",
+            "E-026"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-026",
+        "E-005",
+        "E-065",
+        "E-063",
+        "E-074",
+        "E-054",
+        "E-072",
+        "E-092"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Segment-Specific Pathways a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-005].",
+      "source_rec_id": "REC-01",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Salesforce Platform Optimization & Digital Experience Uplift",
+      "what_text": "Scores 1.94 (vs peer 2.5): Salesforce onboarding platform confirmed but STP rates, completion metrics, and workflow optimization unknown. CDO Nambiar acknowledges 'complex use-case management' on Salesforce. Zennify Salesforce Implementation & Optimization: Platform health check, workflow rationalization, Experience Cloud enhancement, Service Cloud case management optimization, Einstein Analytics integration for CX metrics. In Zennify's assessment Segment-Specific Pathways scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-026].",
+      "why_text": "The assessment found: “Fiserv Premier confirmed as core banking system — major core platform FIS Global + FIS Lending — lending platform and payments processing” [E-063]. At 1.0 out of 5, Segment-Specific Pathways sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C2",
+        "P4C1.1.3",
+        "P4C2.2.3",
+        "P1C2.1.2",
+        "P4C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "13782de9-04c7-476f-8b4a-14ddd4fd10fe",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-064",
+        "E-096",
+        "E-090",
+        "E-081",
+        "E-089",
+        "E-085",
+        "E-095"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-090].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Enterprise Data Platform & Analytics Modernization",
+      "what_text": "Scores 1.8 and scores 1.75 (vs peers 2.25/2.25): Azure Databricks, ML, Synapse confirmed but no data governance framework, data catalog, or MLOps pipeline detected. Data Analyst job references Co-pilot and Power BI but no enterprise data strategy documentation found. Zennify Data & AI Platform: Data governance framework implementation, metadata management (data catalog), MLOps pipeline design, Tableau/Power BI rationalization, Azure Synapse optimization, AI/ML use case prioritization. In Zennify's assessment Data Mesh Strategy & Domain Ownership scores 1.0 out of 5, versus a typical 2.3 at comparable institutions [E-096].",
+      "why_text": "At 1.0 out of 5, Data Mesh Strategy & Domain Ownership sits 1.3 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-064, E-096].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C1.1.3",
+        "P4C2.2.3",
+        "P4C3.6.9",
+        "P2C4.1.4",
+        "P2C1.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "9b5eadc5-ebca-44fa-a622-76180cdffb70",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-063"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-012",
+        "E-001",
+        "E-066",
+        "E-065",
+        "E-075",
+        "E-056",
+        "E-058",
+        "E-063"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Accessibility & Inclusion a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-001].",
+      "source_rec_id": "REC-03",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Omnichannel Experience Integration & Journey Orchestration",
+      "what_text": "Scores 1.9 (vs peer 2.75): Strong channel presence confirmed — iOS 4.79/5, 110+ branches, Ada chatbot, Aspect contact center — but cross-channel data unification, journey continuity, and channel deflection analytics unknown. Gap vs peer median is largest at -0.85. Zennify CX Integration: Salesforce-Adobe-Ada integration layer, unified customer data platform, journey orchestration across digital/branch/contact center, cross-channel analytics dashboard, channel deflection optimization [E-012].",
+      "why_text": "The assessment found: “Fiserv Premier confirmed as core banking system — major core platform FIS Global + FIS Lending — lending platform and payments processing” [E-063]. At 1.0 out of 5, Accessibility & Inclusion sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3",
+        "P4C2.2.3",
+        "P1C2.1.2",
+        "P1C3.8.2",
+        "P1C3.1.3",
+        "P1C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-037"
+      ],
+      "ic_id": "INS-REC-04",
+      "id": "29579ed2-5375-496d-96eb-46c1acfffba9",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-033",
+            "E-064",
+            "E-068",
+            "E-093"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-064",
+            "E-068",
+            "E-093"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-100",
+        "E-082",
+        "E-090",
+        "E-103",
+        "E-064",
+        "E-033",
+        "E-093",
+        "E-068"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Innovation Horizons a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-090].",
+      "source_rec_id": "REC-04",
+      "theme": "Innovation & Investment",
+      "title": "Innovation Framework & GenAI Strategy",
+      "what_text": "Scores 1.68 (vs peer 2.25): No formal innovation lab or program, ISS-003 caps at level 3. However, GenAI adoption signals exist — OpenAI in tech stack, Co-pilot in job postings, SVP Product with fintech/GenAI skills. Innovation is happening ad hoc but without structure. Zennify Innovation Advisory: Structured innovation framework, GenAI use case identification and prioritization, pilot governance model, innovation KPI dashboard, partnership strategy (fintech/BaaS expansion beyond BayaniPay). In Zennify's assessment Innovation Horizons scores 1.0 out of 5, versus a typical 2.3 at comparable institutions [E-082].",
+      "why_text": "At 1.0 out of 5, Innovation Horizons sits 1.3 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-100, E-082].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P4C1.1.3",
+        "P4C2.2.3",
+        "P3C1.1.10",
+        "P3C3.1.5",
+        "P1C5.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "98c71870-8dae-4676-be63-3797f04c56c6",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-047",
+            "E-048",
+            "E-049",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-099",
+        "E-048",
+        "E-047",
+        "E-049",
+        "E-071"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for East West Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-047].",
+      "source_rec_id": "REC-05",
+      "theme": "ESG & Sustainability",
+      "title": "ESG Data Platform & Climate Risk Analytics",
+      "what_text": "Scores 1.91 (vs peer 2.0): ESG reports (2022-2023) with SASB index confirmed, but no net-zero commitment, no CDP score, no TCFD full alignment. Regulatory pressure increasing (SEC climate disclosure rules). E&S Policy Framework exists but lacks quantified targets. ESG data platform for climate risk measurement, TCFD-aligned reporting automation, net-zero pathway modeling, CDP questionnaire preparation, financed emissions tracking across loan portfolio. In Zennify's assessment this capability scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-099].",
+      "why_text": "The assessment found: “Environmental and Social Policy Framework listed as governance highlight — board-level ESG oversight LEED and/or Energy Star certified buildings — operational environmental management” [E-048]. At 1.0 out of 5, this capability sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.5.5",
+        "P2C4.1.4",
+        "P3C3.8.3",
+        "P3C2.6.IB1",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "ae158e6f-af01-434a-9173-c14dbef07002",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-089",
+            "E-090",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-072"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-089",
+            "E-090",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-063",
+        "E-072",
+        "E-082",
+        "E-096",
+        "E-089",
+        "E-085",
+        "E-090",
+        "E-095"
+      ],
+      "linked_subcap_id": "P4C2.5.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Platform rationalization, integration optimization, utilization uplift -multi-workstream Zennify opportunity [E-082].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "501 premium technologies detected via Explorium",
+      "what_text": "AI Fairness & Explainability (XAI) is one of East West Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes East West Bank's ability to deliver a stronger data and technology foundation [E-072].",
+      "why_text": "The assessment found: “Fiserv Premier confirmed as core banking system — major core platform FIS Global + FIS Lending — lending platform and payments processing” [E-063]. The research report pins the maturity impact at: Platform presence strong (level 3+) but utilization evidence incomplete -ceiling estimate territory. scores 1.0/5 against a peer median of 2.2 on the current assessment.",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C3.6.9",
+        "P1C4.1.4",
+        "P1C2.6.2",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "3e9003c6-c51f-40d3-bf24-2b25a07a836f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-089",
+            "E-090",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-089",
+            "E-090",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-084",
+        "E-091",
+        "E-089",
+        "E-085",
+        "E-090",
+        "E-095"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Security posture mature -Zennify value is in security analytics/automation uplift, not foundational build [E-091].",
+      "source_rec_id": null,
+      "theme": "Cybersecurity & Privacy",
+      "title": "Global CISO Matt Fearin (CXO since 2022)",
+      "what_text": "Privileged Access & Secret/Key Lifecycle Management is one of East West Bank's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes East West Bank's ability to deliver a stronger data and technology foundation [E-084].",
+      "why_text": "The research report pins the maturity impact at: security maturity likely level 3-level 4 range; defense-in-depth architecture confirmed. averages 1.9/5 across its 30 scored capability (peer median ~ 2.8) on the current assessment [E-065, E-084].",
+      "pillar": "P4",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture -Score 2.12 vs Median 2.35 (-0.23)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience -Score 1.88 vs Median 2.38 (-0.5)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance -Score 3.23 vs Median 2.63 (+0.6)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology -Score 1.82 vs Median 2.44 (-0.62)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-EWBC-20260401-0001"
+}

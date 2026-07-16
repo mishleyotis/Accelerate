@@ -1,0 +1,142 @@
+{
+  "entity_display_id": "townebank-insurance-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.33",
+          "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Salesforce Financial Services Cloud + Sales Cloud \u2014 Producer Intelligence Platform"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.33",
+          "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce Data Cloud + Informatica MDM \u2014 Unified Client Intelligence Platform"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.33",
+          "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Salesforce Marketing Cloud + Segment CDP Integration"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+1.92",
+          "metric": "P4C2 score 2.08 \u2192 4.0 (peer median 3.30)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 2.08 \u2192 4.0 (peer median 3.30)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Agentforce \u2014 AI Orchestration Layer for Applied AI Suite"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2, P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.33",
+          "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P2C1 score 2.67 \u2192 4.0 (peer median 3.35)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Applied Epic MFA Remediation + Salesforce Shield [CLIENT/ZENNIFY]"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+1.92",
+          "metric": "P4C2 score 2.08 \u2192 4.0 (peer median 3.30)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 2.08 \u2192 4.0 (peer median 3.30)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "NAIC AI Governance Framework \u2014 NC Operations Compliance [ZENNIFY/CLIENT]"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2, P2C1"
+    }
+  ],
+  "run_request_id": "DMA-RES-TBNK-20260514-0001",
+  "total_duration_months": 12
+}

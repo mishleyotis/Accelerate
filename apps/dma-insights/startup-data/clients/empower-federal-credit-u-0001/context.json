@@ -1,0 +1,661 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Empower Federal Credit Union",
+      "amount": null,
+      "announced_on": null,
+      "body": "Origin of multi-system data fragmentation; FSC consolidation use case begins here",
+      "closed_on": null,
+      "details": "Origin of multi-system data fragmentation; FSC consolidation use case begins here",
+      "e_id": null,
+      "event_date": "2007-01-01",
+      "id": "175d58a4-d0ed-4571-8687-ebad196e3b86",
+      "source_url": null,
+      "status": null,
+      "target": "Empower FCU formation",
+      "title": "Empower FCU formation merger (Power FCU + Empire FCU)"
+    }
+  ],
+  "entity_display_id": "empower-federal-credit-u-0001",
+  "financials": {
+    "metrics": {
+      "deposits": "$419.1M",
+      "trajectory": {
+        "branches": 24,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 501,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2025"
+        ],
+        "geography": "Central New York and 8 surrounding counties; HQ Syracuse NY",
+        "headline": "$4.1B net income \u00b7 FY2025",
+        "regulator": "NCUA (NCUSO ID 3025)",
+        "series": {
+          "net_income_m": [
+            939000.0,
+            4070.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        939000000000.0,
+        4070000000.0000005
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2021,
+          2025
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          939000000000.0,
+          4070000000.0000005
+        ]
+      }
+    ],
+    "years": [
+      2021,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Central New York and 8 surrounding counties",
+      "HQ Syracuse NY"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ryan McIntyre",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jin Gwak",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chris Keller",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Marketing Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lori Verzillo",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP / Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Erin Fuller",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Keri Zavaglia",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "General Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jen Wolfe",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP / Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Patrick Piscitelli",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Chair"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jeffrey Lamb",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Fraud Operations Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Bob Padula",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Mortgage Lending"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Empower Federal Credit Union is a credit union. It reports $4.1 billion in total assets. It is regulated by NCUA (NCUSO ID 3025) and employs approximately 501 people across 24 branches. Its overall digital maturity is assessed at 2.1 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (NCUSO ID 3025)",
+    "size_tier": "community",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "9747894c-e5d2-4b3b-9f81-81e697f5db09",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Range-style citation 'EV-P1C5-001 through EV-P1C5-008' in report \u2014 violates explicit enumeration requirement"
+    },
+    {
+      "id": "eca873a7-62be-4f89-8510-272e7319c573",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Score clustering: 78.7% of P1 subcaps scored 1.5 (exceeds 60%). Driven by 148 inherited M1.5 defaults \u2014 expected for PUBLIC mode thin-evidence P1"
+    },
+    {
+      "id": "b38441b7-43df-4a1d-94aa-c12855dbf1a5",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "T2 evidence concentration: 65.5% of items are T2 \u2014 within acceptable range but noted for calibration"
+    },
+    {
+      "id": "eefe65f8-e37b-4848-83f1-04ddd53abd7a",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "P3C3 Compliance gap=-1.32 (>1.3 below peer median). Plausible real gap \u2014 Issue I-004 confirms no SOC2 attestation"
+    },
+    {
+      "id": "1bcd54f1-96c3-45f4-91ac-addd484d1456",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "ET-06 expects ERS scale [1.0-5.0] but dma-assessment v5.5 uses normalized [0.0-1.0]. Schema version mismatch."
+    },
+    {
+      "id": "7c02d028-582c-468a-8ba4-6e4508fe3b91",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Critic log has 259 DEFEND entries with args_considered=[] \u2014 no adversarial arguments documented. 0 downgrades is a strength (consistent scoring), but lack of args text reduces audit trail quality."
+    },
+    {
+      "id": "8fababcd-93fa-40b9-b163-ea34fa3978f1",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "4/9 recommendations cite document-level anchors (Layer 0 entity profile, Issue Register, score references) instead of explicit EV-XXX IDs in root_cause.evidence field. Evidence chain is valid but not explicit."
+    },
+    {
+      "id": "6ac0a770-4fea-475b-a78f-836138879ec8",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Executive summary uses 'peer median' 8 times but names no specific locked peers. \u00a77 Benchmark section correctly names all 5 peers. RC-15 requires \u22651 named peer in exec summary."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section is borrowed from the Layer 0 Client Profile Research Report (\u00a75.1 Issue Register) with assessment-layer Severity-Capped Capability Impact analysis added.",
+    "trend_md": "This section is borrowed from the Layer 0 Client Profile Research Report (\u00a73.2 Financial Trajectory + \u00a73.3 Digital Evolution Timeline + \u00a73.4 Sentiment Overview) with assessment-layer annotations added."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.93,
+        "P1C2": 2.61,
+        "P1C3": 2.14,
+        "P1C4": 2.17,
+        "P2C1": 2.27,
+        "P2C2": 2.33,
+        "P2C3": 2.58,
+        "P2C4": 2.53,
+        "P3C1": 2.58,
+        "P3C2": 2.54,
+        "P3C3": 3.0,
+        "P3C4": 2.38,
+        "P4C1": 2.04,
+        "P4C2": 1.71,
+        "P4C3": 2.38,
+        "P4C4": 2.7
+      },
+      "overall_score": 2.37,
+      "peer_name": "AAFCU",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.94,
+        "P1C2": 2.89,
+        "P1C3": 2.4,
+        "P1C4": 2.38,
+        "P1C5": 1.86,
+        "P2C1": 1.89,
+        "P2C2": 2.4,
+        "P2C3": 2.81,
+        "P2C4": 1.37,
+        "P3C1": 2.39,
+        "P3C2": 2.38,
+        "P3C3": 2.86,
+        "P3C4": 2.41,
+        "P4C1": 1.88,
+        "P4C2": 1.88,
+        "P4C3": 2.45,
+        "P4C4": 2.98
+      },
+      "overall_score": 2.36,
+      "peer_name": "Hudson Valley Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.57,
+        "P1C2": 2.64,
+        "P1C3": 2.26,
+        "P1C4": 2.39,
+        "P1C5": 1.75,
+        "P2C1": 2.22,
+        "P2C2": 2.45,
+        "P2C3": 2.22,
+        "P2C4": 2.0,
+        "P3C1": 2.42,
+        "P3C2": 2.38,
+        "P3C3": 2.69,
+        "P3C4": 2.5,
+        "P4C1": 2.14,
+        "P4C2": 1.99,
+        "P4C3": 2.23,
+        "P4C4": 2.2
+      },
+      "overall_score": 2.3,
+      "peer_name": "APG Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.49,
+        "P1C2": 1.98,
+        "P1C3": 1.99,
+        "P1C4": 2.24,
+        "P1C5": 1.11,
+        "P2C1": 1.95,
+        "P2C2": 2.25,
+        "P2C3": 1.86,
+        "P2C4": 1.48,
+        "P3C1": 2.31,
+        "P3C2": 2.83,
+        "P3C3": 3.03,
+        "P3C4": 2.29,
+        "P4C1": 1.9,
+        "P4C2": 1.92,
+        "P4C3": 2.79,
+        "P4C4": 3.12
+      },
+      "overall_score": 2.21,
+      "peer_name": "Global Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.4,
+        "P1C2": 2.48,
+        "P1C3": 2.04,
+        "P1C4": 2.04,
+        "P1C5": 1.88,
+        "P2C1": 2.45,
+        "P2C2": 2.21,
+        "P2C3": 1.78,
+        "P2C4": 1.29,
+        "P3C1": 2.49,
+        "P3C2": 1.21,
+        "P3C3": 2.35,
+        "P3C4": 2.0,
+        "P4C1": 1.82,
+        "P4C2": 1.95,
+        "P4C3": 1.58,
+        "P4C4": 1.93
+      },
+      "overall_score": 1.99,
+      "peer_name": "HAPO Community Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-EFCU-20260429-0001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "O approval at 39.43% (slipped from 40.5% B2.1 baseline) and Indeed wellbeing dimensions trending downward",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "DevOps cadence demonstrates platform readiness for additional FSC-side delivery",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-04-06",
+      "evidence_e_ids": [],
+      "id": "d944121b-1044-4132-860e-5888e573a3af",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Empower Mobile Banking App update released (Android/iOS)"
+    },
+    {
+      "body": "**MANTL Onboarding & Account Opening Suite launch** \u2014 <5 min online, <10 min branch, retail + business banking full STP. **LIVE STRATEGIC INFLECTION** \u2014 every onboarding event creates an FSC sync requirement at 15-min intervals; Marketing Cloud journey activation immediate",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-03-12",
+      "evidence_e_ids": [],
+      "id": "c159d14d-9585-487c-a133-4243b78f015c",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Mantl Onboarding & Account Opening Suite launch"
+    },
+    {
+      "body": "New CFO = budget-cycle conversation fresh start",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [],
+      "id": "dbb28110-50ad-4200-b488-5cdb7f644ed5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CFO transition (D.M. \u2192 S.T.)"
+    },
+    {
+      "body": "Assets reach $4.07B; member count ~290K. Crossing $4B = mid-Medium tier pressure for advanced digital maturity",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [],
+      "id": "76762666-97cd-4c14-9f16-7f8065e6a872",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Assets reach $4.07B"
+    },
+    {
+      "body": "Alkami acquires MANTL ($400M) \u2014 vendor consolidation event. Unified Alkami/MANTL contractual umbrella simplifies integration architecture conversation",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [],
+      "id": "74ed21c6-196c-4e3d-a056-3c4f25c7ce60",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Alkami acquires Mantl ($400M) \u2014 vendor consolidation event"
+    },
+    {
+      "body": "Lab Consulting Wave 1 PR \u2014 100+ RPA use cases identified, 150+ best practices identified. 100+ use case pipeline = backlog ready for FSC/Flow migration assessment",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [],
+      "id": "abda6f5a-b70c-40d8-8aa1-ef0513c75138",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "150+ best practices identified"
+    },
+    {
+      "body": "IllumaSHIELD scale-out: 30K members, 19 departments, 81% verification time reduction (Jeffrey Lamb Fraud Ops Manager program lead). Proof point for scaling Einstein into FSC dispute case routing + NBA scoring",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2024-06-01",
+      "evidence_e_ids": [],
+      "id": "959c9696-01e4-4b08-97da-39aa1e9f7135",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "IllumaSHIELD scale-out: 30K members, 19 departments, 81%\u2026"
+    },
+    {
+      "body": "IllumaSHIELD voice biometric launched + scaling begins. AI deployment muscle proven = Einstein activation faces no AI-skepticism friction",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "92cfd567-5fa5-4296-a030-a66c65ab754e",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "IllumaSHIELD voice biometric launched"
+    },
+    {
+      "body": "NCUA Call Report Q1 2024 \u2014 well-capitalized (NW 9.59, RBC 15.44, Fee Income $3.69M). Strong financial posture supports investment in FSC activation",
+      "date_precision": "quarter",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "03719a21-d288-4072-b934-b321cae74014",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "NCUA Call Report Q1 2024"
+    },
+    {
+      "body": "The Lab Consulting RPA program \u2014 Wave 1 deploys 5 production bots (Right-to-Offset, ACH Returns, GL Balancing, Account Warning Flag Removal, Delinquent Loan Charge Offs); Jen Wolfe (EVP/COO) program owner. **RPA\u2192FLOW HANDOFF** \u2014 RPA discipline transitions naturally to Salesforce Flow + Apex on FSC for member-facing transactional workflows",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [],
+      "id": "0e96919e-10b7-4968-bd1a-b07030abe26c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "The Lab Consulting RPA program"
+    },
+    {
+      "body": "Marketing Cloud + Experience Cloud member-engagement event activation use case",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2023-10-01",
+      "evidence_e_ids": [],
+      "id": "9ee1f12d-af8b-46e6-a3b1-6c58cfac10ac",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Empower FCU Amphitheater naming rights (17,500 capacity)"
+    },
+    {
+      "body": "NCUA Cyber Incident Notification Rule effective (72-hour reporting). Salesforce Shield + Event Monitoring fit for cyber-incident audit trail",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2023-09-01",
+      "evidence_e_ids": [],
+      "id": "372a2b58-8de5-4b69-8b77-a5fdd5aaf161",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "NCUA Cyber Incident Notification Rule effective (72-hour\u2026"
+    },
+    {
+      "body": "Chris Keller hired as CMO (ex-M&T VP Marketing). CMO transition = Marketing Cloud activation conversation owner",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2023-08-01",
+      "evidence_e_ids": [],
+      "id": "3e6eb6ba-39bf-4fdb-9cf8-2b701c5a7768",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Chris Keller hired as CMO (ex-M&T VP Marketing"
+    },
+    {
+      "body": "Ryan McIntyre named CEO (ex-VyStar CSO with Azure data lake DNA). **KEY ZENNIFY ANCHOR** \u2014 McIntyre's VyStar Azure DNA aligns directly with Salesforce Data Cloud + Hyperforce activation thesis",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [],
+      "id": "e3bdeeeb-49af-4903-ada1-4dca05700881",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Ryan McIntyre named CEO (ex-VyStar CSO with Azure data lake\u2026"
+    },
+    {
+      "body": "**FOUNDATION** \u2014 FSC + Experience Cloud already deployed = canonical Zennify activation platform installed",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [],
+      "id": "87f4788e-de3c-4097-b092-c9353e142f2a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Salesforce FSC + Experience Cloud deployment via Accellor"
+    },
+    {
+      "body": "CEO transition \u2014 John Wakefield retires after $150M\u2192$3B career; Brenda Carhart Interim CEO (38 yrs CU exp). Interim CEO continuity preserved enterprise momentum into McIntyre era",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [],
+      "id": "042cfa16-c015-4e55-9e97-13ccf59ae10c",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CEO transition"
+    },
+    {
+      "body": "FHLBNY Homebuyer Dream Program launched. 0% delinquency over 14+ years = vendor-mgmt maturity reference point",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2010-01-01",
+      "evidence_e_ids": [],
+      "id": "bed192e3-2b14-4d48-8aee-eecf9c4613e2",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Fhlbny Homebuyer Dream Program launched"
+    },
+    {
+      "body": "Six post-formation mergers \u2014 Nestegg (2008), Telco (2009), Providers (2011), Cayuga County School Employees (2013), FocalPoint (2016), Horizons (2021). Each merger = another data source to consolidate. FSC Person Account/Household model is direct answer.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2008-01-01",
+      "evidence_e_ids": [],
+      "id": "a45657ee-bdf9-4f9e-9782-8117d481f4a0",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Six post-formation mergers"
+    },
+    {
+      "body": "Origin of multi-system data fragmentation; FSC consolidation use case begins here",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2007-01-01",
+      "evidence_e_ids": [],
+      "id": "175d58a4-d0ed-4571-8687-ebad196e3b86",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Empower FCU formation merger (Power FCU + Empire FCU)"
+    }
+  ]
+}

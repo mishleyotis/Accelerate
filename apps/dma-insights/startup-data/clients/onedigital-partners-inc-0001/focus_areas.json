@@ -1,0 +1,340 @@
+{
+  "entity_display_id": "onedigital-partners-inc-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-293"
+        ],
+        "representative_quote": "10 acquisitions/year + 300+ historical = M3-M4 M&A integration playbook at scale",
+        "source_kind": "docx"
+      },
+      "id": "44e7a51f-6e2c-49ff-a29e-f777db71deca",
+      "involved_subcap_ids": [
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C1.1.7",
+        "P4C4.2.6",
+        "P4C2.4.13",
+        "P4C3.4.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$1,500,000",
+          "delta": null,
+          "kpi_label": "Integration Accelerator K",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$500,000",
+          "delta": null,
+          "kpi_label": "M&A Integration Accelerator",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "10 acquisitions/year + 300+ historical = M3-M4 M&A\u2026",
+      "verbatim_quote": "F-005 | \ud83c\udfaf\ud83c\udfaf 10 acquisitions/year + 300+ historical = M3-M4 M&A integration playbook at scale | Claud notes Mar 11 2025 [E-293 F1]: 'every acquisition requires data migration... 10 avg/year' + IB-4 OD#### folders (Bukaty 124 reports, Huntington 106, TFA 103, ARP 46) | Each acquisition = data-migration engagement + MDM extension. Active Baybridge (Dec 2025) + Propel HR PEO = pipeline | M&A Integration Accelerator ($500K-$1.5M recurring) + Salesforce M&A Cloud template + data-migration-as-a-service"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-286"
+        ],
+        "representative_quote": "15,531 Well-Architected issues (9,700 P1, 56% low-effort) = $2.6-7.2M tractable services roadmap",
+        "source_kind": "docx"
+      },
+      "id": "bba945ee-8278-4ec9-8050-109f9a07a2df",
+      "involved_subcap_ids": [
+        "P4C3.2.3",
+        "P3C1.5.4",
+        "P3C3.5.3",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C2.4.13"
+      ],
+      "kpis": [
+        {
+          "current_value": "$200",
+          "delta": null,
+          "kpi_label": "Quick wins",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "56%",
+          "delta": null,
+          "kpi_label": "Well-Architected issues P1",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$3",
+          "delta": null,
+          "kpi_label": "issues P1 low-effort",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": 1,
+      "pillars_weight": {
+        "P3": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "15,531 Well-Architected issues (9,700 P1, 56% low-effort)\u2026",
+      "verbatim_quote": "F-002 | \ud83c\udfaf\ud83c\udfaf 15,531 Well-Architected issues (9,700 P1, 56% low-effort) = $2.6-7.2M tractable services roadmap | Hubbl Diagnostics scan 2025-08-29 [E-286]: 62% P1 issues, Custom Code 7,926 + Data Model 3,988 + Reports 2,407 | 4-phase modernization: Quick wins ($200-400K) \u2192 Security ($400-800K) \u2192 Legacy ($1-3M) \u2192 Data Governance ($1-3M) | Managed Services + Copado DevOps expansion + Hubbl tooling recurring ARR + Einstein Discovery code review"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-295"
+        ],
+        "representative_quote": "17-person Sara team vs 55-person peer = 3.2\u00d7 under-resourced capacity gap",
+        "source_kind": "docx"
+      },
+      "id": "ec606120-ae28-44a1-88dc-565034ad45c1",
+      "involved_subcap_ids": [
+        "P2C3.3.4",
+        "P1C3.9.2",
+        "P2C4.5.IB1",
+        "P2C2.5.4",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$20",
+          "delta": null,
+          "kpi_label": "ARR nearshore offshore",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$50",
+          "delta": null,
+          "kpi_label": "M ARR nearshore",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$1",
+          "delta": null,
+          "kpi_label": "Managed Services scale-up",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 48,
+        "P4": 35
+      },
+      "source_path": "(unknown)",
+      "title": "17-person Sara team vs 55-person peer = 3.2\u00d7\u2026",
+      "verbatim_quote": "F-006 | \ud83c\udfaf 17-person Sara team vs 55-person peer = 3.2\u00d7 under-resourced capacity gap | Claud notes May 6 2025 [E-295 F3]: 'FSC PAC... another co. wealth/retirement 55pp supporting SF vs Sara's 17 people' | Backlog of 15,531 Hubbl issues + PEO delivery red flag = CAPACITY not skill gap; creates Managed Services expansion wedge | Managed Services scale-up ($1-3M ARR) + nearshore $50/offshore $20 augmentation + platform architect embedded 12 months ($49K/mo)"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-296",
+          "E-297"
+        ],
+        "representative_quote": "Anita 'one CRM by 2027' goal vs 10+ fragmented CRM state = strategic consolidation agenda",
+        "source_kind": "docx"
+      },
+      "id": "fd43dbf2-caf8-42e1-896b-f1cba1fbdf0e",
+      "involved_subcap_ids": [
+        "P2C1.4.6",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C2.4.13",
+        "P1C1.8.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$15",
+          "delta": null,
+          "kpi_label": "Consolidation program year",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$300,000",
+          "delta": null,
+          "kpi_label": "ODAH SF build",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "90%",
+          "delta": null,
+          "kpi_label": "SmallBiz on D365",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "Anita 'one CRM by 2027' goal vs 10+ fragmented CRM state\u2026",
+      "verbatim_quote": "F-004 | \ud83c\udfaf Anita 'one CRM by 2027' goal vs 10+ fragmented CRM state = strategic consolidation agenda | Claud notes Feb-Mar 2025 [E-296 F2, E-297 F2]: CEO Adam supports SF; R&W+PEO on SF, EB+SmallBiz on D365 (90% revenue), HRC on Zoho, ODAH on Broker Office, P&C stays on Applied Epic | Strategic CRM consolidation decision pending by end of 2027 \u2014 Zennify is incumbent SF SI + has visibility into D365 evaluation | Enterprise CRM consolidation program (2-year, $15-25M) + RFP defense + MDM/Reltio integration + ODAH SF build ($300K)"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-277"
+        ],
+        "representative_quote": "Data Governance CRITICAL: 1 of 12,191 fields classified (0.008%)",
+        "source_kind": "docx"
+      },
+      "id": "6aa5d7be-f5cc-465f-9c48-73b58fd84206",
+      "involved_subcap_ids": [
+        "P4C4.2.4",
+        "P4C4.1.2",
+        "P4C4.1.2",
+        "P4C4.1.2",
+        "P4C3.8.IB1",
+        "P4C3.4.8",
+        "P4C3.6.8",
+        "P4C3.4.8"
+      ],
+      "kpis": [
+        {
+          "current_value": "0.008%",
+          "delta": null,
+          "kpi_label": "Fields classified",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Data Governance CRITICAL: 1 of 12,191 fields classified\u2026",
+      "verbatim_quote": "F-003 | \ud83d\udea8\ud83d\udea8 Data Governance CRITICAL: 1 of 12,191 fields classified (0.008%) | Hubbl field inventory [E-277]: 12,191 custom/standard fields, only ONE has complianceGroup tagged = M1-M2 classification readiness gap | Data Cloud + Privacy Center + Shield Field-Level Encryption is technical prerequisite for regulatory defensibility post-breach | Data Cloud + Privacy Center + field classification services + MDM uplift with Reltio integration"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-298"
+        ],
+        "representative_quote": "Einstein POC underwhelming \u2192 'trying other AI solutions' urgency",
+        "source_kind": "docx"
+      },
+      "id": "9b1ee792-b285-465a-ab66-87da5ae14ba4",
+      "involved_subcap_ids": [
+        "P4C4.2.4",
+        "P4C4.1.2",
+        "P4C4.1.2",
+        "P4C4.1.2",
+        "P4C3.8.IB1",
+        "P4C3.4.8",
+        "P4C3.6.8",
+        "P4C3.4.8"
+      ],
+      "kpis": [
+        {
+          "current_value": "$2",
+          "delta": null,
+          "kpi_label": "Einstein Suite expansion",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Einstein POC underwhelming \u2192 'trying other AI solutions'\u2026",
+      "verbatim_quote": "F-007 | \ud83c\udfaf Einstein POC underwhelming \u2192 'trying other AI solutions' urgency | Claud notes Oct 22 2024 [E-298 F1]: 'Einstein AI demo underwhelming, we built free with OOB features' + 'people trying to find other solutions for AI' | Time-sensitive Einstein GPT/Trust Layer + Agentforce pitch before competitive AI vendor displaces Salesforce | Einstein Suite expansion ($2-5M ARR): Activity Capture + Conversation Insights + Pipeline Inspection + Einstein Service Agent + MCP/Data Cloud 360"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-237",
+          "E-295"
+        ],
+        "representative_quote": "Post-Drift breach (Aug-Sep 2025) \u2192 Active Shield/Security Tools conversation",
+        "source_kind": "docx"
+      },
+      "id": "48dce799-a2ef-4f54-bf6d-893d7dd93fa2",
+      "involved_subcap_ids": [
+        "P4C2.4.15",
+        "P4C4.7.1",
+        "P3C4.4.4",
+        "P4C1.1.8",
+        "P1C2.1.7",
+        "P4C1.5.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$3",
+          "delta": null,
+          "kpi_label": "tools' E-295 Active",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P3": 17,
+        "P4": 66
+      },
+      "source_path": "(unknown)",
+      "title": "Post-Drift breach (Aug-Sep 2025) \u2192 Active Shield/Security\u2026",
+      "verbatim_quote": "F-001 | \ud83d\udea8 Post-Drift breach (Aug-Sep 2025) \u2192 Active Shield/Security Tools conversation | Salesforce Drift breach named OneDigital [E-237] + consultant notes Sept 9 2025 QBR 'drift incident - shield/security tools' [E-295] | Active $3-5M Data Cloud + Shield Platform Encryption + Privacy Center ARR opportunity with regulatory mandate urgency | Trusted Services: Shield PE + Security Center + Privacy Center + Event Monitoring \u2014 POST-BREACH MODERNIZATION"
+    }
+  ]
+}

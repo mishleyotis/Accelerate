@@ -1,0 +1,263 @@
+{
+  "entity_display_id": "tri-counties-bank-trico--0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P4C3",
+        "P3C1",
+        "P2C4.5.4",
+        "P3C1.3.RB2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-001",
+      "id": "851a16c2-e4d4-4364-bd7e-5d28e046d164",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-071",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        },
+        {
+          "e_ids": [
+            "E-044",
+            "E-071",
+            "E-082",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-088",
+        "E-082",
+        "E-044",
+        "E-086",
+        "E-078"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Quality Framework & Dimensions a near-term focus for Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK): a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-082].",
+      "source_rec_id": "REC-001",
+      "theme": "Data Management & Governance",
+      "title": "Salesforce Platform Optimization & Data Cloud Deployment",
+      "what_text": "7-8 Salesforce products detected but underutilized. Management acknowledges 'overlapping vendor services and partially implemented technologies'. Engineering = 1% of workforce. 93+ tools fragmented across 6+ portals. Data Cloud + Platform Optimization (Utilization Audit) connected unlock: →: Data unification enables personalization. →: Platform consolidation enables automation. In Zennify's assessment Data Quality Framework & Dimensions scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-088].",
+      "why_text": "At 1.0 out of 5, Data Quality Framework & Dimensions sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-071, E-088].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P4C4.6.1",
+        "P3C1.3.RB2",
+        "P3C3.8.RB1",
+        "P1C1.8.4",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-003",
+      "id": "c67e0d86-e030-4bfe-ae8a-4f80a9682396",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-071",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        },
+        {
+          "e_ids": [
+            "E-071",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-086",
+        "E-053",
+        "E-087",
+        "E-077",
+        "E-074",
+        "E-073",
+        "E-072"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Regulatory Report Suite a near-term focus for Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK): a scoped investment here would lift it from 1.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-086].",
+      "source_rec_id": "REC-003",
+      "theme": "Compliance & Surveillance",
+      "title": "Shield + Compliance Automation for $10B CFPB Readiness",
+      "what_text": "'CFPB preparedness' is explicit executive strategic theme. $10B threshold triggers direct CFPB supervision + Durbin Amendment (~$15-20M revenue impact) + DFAST. Post-ransomware litigation ongoing. Shield + GRC + Compliance Modules connected unlock: (3.40) is TCB's strongest category — Shield builds on existing compliance strength. In Zennify's assessment Regulatory Report Suite scores 1.0 out of 5, versus a typical 3.5 at comparable institutions [E-071].",
+      "why_text": "The assessment found: “CFPB Consumer Complaint Database excludes complaints about depository institutions with <$10B in assets — TCB at $9.87B is below threshold. Complaints referred to FDIC, not published. Cannot assess” [E-053]. At 1.0 out of 5, Regulatory Report Suite sits 2.5 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C3.6.6",
+        "P3C1.3.RB2",
+        "P1C4.10.2",
+        "P2C2.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-004",
+      "id": "b11b61f4-befc-4d6c-9fc8-39ca68b45296",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-044",
+            "E-071",
+            "E-082",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-001"
+        },
+        {
+          "e_ids": [
+            "E-071",
+            "E-086"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-082",
+        "E-044",
+        "E-071",
+        "E-086",
+        "E-083",
+        "E-068",
+        "E-085"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make API Analytics & Monitoring a near-term focus for Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK): a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-071].",
+      "source_rec_id": "REC-004",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Integration Deepening for Portal Consolidation",
+      "what_text": "MuleSoft detected but 6+ separate login portals persist. Valley Republic Bank acquisition (2022) likely added technology layers. 'Overlapping vendor services' acknowledged. MuleSoft connected unlock: →: Integration backbone enables automation. Pre-positions for next M&A deal integration. In Zennify's assessment API Analytics & Monitoring scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-044].",
+      "why_text": "At 1.5 out of 5, API Analytics & Monitoring sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-082, E-044].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "TCB's position relative to peers by pillar reveals a consistent pattern: compliance-strong, digitally-developing.\nTCB ranks 5th or 6th in customer-facing pillars (P1, P2) but 4th in operational and technology pillars (P3, P4) — reflecting a bank that has invested in compliance and security infrastructure but not yet in digital customer experience or data architecture. The deposit growth imperative [E-091] makes the P2 weakness particularly urgent: TCB cannot defend deposits against digitally-advanced competitors while ranking last in customer experience.",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [
+          "E-091"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Customer Experience — 1.78 vs Median 2.38 (-0.60)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance — 2.68 vs Median 2.88 (-0.20)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology — 2.09 vs Median 2.38 (-0.29)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Each recommendation follows the evidence-grounded structure: ROOT CAUSE (with specific E-IDs confirming the gap) → SOLUTION (with named Zennify offering from the 12-solution catalog) → EXPECTED OUTCOMES (maturity-based, not financial). No investment amounts, cost estimates, or ROI projections are included per assessment policy."
+  },
+  "run_request_id": "DMA-ASM-TCB-20260407-0001"
+}

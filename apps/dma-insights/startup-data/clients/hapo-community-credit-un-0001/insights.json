@@ -1,0 +1,397 @@
+{
+  "entity_display_id": "hapo-community-credit-un-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.1.1",
+        "P2C2.9.1",
+        "P3C1.3.1",
+        "P4C3.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "99e2087f-969a-4db3-90dc-ccc49fde29d5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-073"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-075",
+        "E-008"
+      ],
+      "linked_subcap_id": "P4C3.1.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make EA Framework & Governance a near-term focus for HAPO Community Credit Union: a scoped investment here would lift it from 1.3 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-075].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "AWS+Azure+on-prem hybrid",
+      "what_text": "EA Framework & Governance is one of HAPO Community Credit Union's least developed data and technology capabilities, scoring 1.3 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes HAPO Community Credit Union's ability to deliver a stronger data and technology foundation [E-073].",
+      "why_text": "The assessment found: “100+ technology products detected across 14 categories — substantial technology investment for $2.4B CU Hybrid cloud: AWS (CloudFront, S3) + Microsoft Azure (AD, CDN, Blob, Front Door) + on-prem” [E-008]. At 1.3 out of 5, EA Framework & Governance sits 1.0 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.2",
+        "P4C1.1.3",
+        "P4C2.1.4",
+        "P2C4.8.5",
+        "P4C2.2.1",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "f917c6dd-546c-419d-af8e-21f96926e278",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-066",
+            "E-070",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-070",
+        "E-071"
+      ],
+      "linked_subcap_id": "P4C3.1.2",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Technology Roadmap & Investment Planning a near-term focus for HAPO Community Credit Union: a scoped investment here would lift it from 1.3 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-071].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "ZERO AI/ML, CDP, NBO, Enterprise BI deployed",
+      "what_text": "Technology Roadmap & Investment Planning is one of HAPO Community Credit Union's least developed data and technology capabilities, scoring 1.3 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes HAPO Community Credit Union's ability to deliver a stronger data and technology foundation [E-070].",
+      "why_text": "At 1.3 out of 5, Technology Roadmap & Investment Planning sits 1.0 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-066, E-070].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.4.1",
+        "P3C3",
+        "P4C2.3.4",
+        "P3C1.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "0616eb40-ea9c-414b-a976-294a1dbcf4a6",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-035",
+        "E-082",
+        "E-004"
+      ],
+      "linked_subcap_id": "P3C3.4.1",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for HAPO Community Credit Union: invest to move it toward best practice. Because it underpins the core processes that keep the institution running, the improvement reaches well beyond this single capability [E-004].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "Engineering = 2% of 606 employees",
+      "what_text": "16-year Right! Systems vendor dependency. 'Very small IT staff.' Cannot execute digital transformation internally. (, ). It underpins the core processes that keep the institution running, so its current level directly shapes HAPO Community Credit Union's ability to deliver more efficient, dependable operations [E-082].",
+      "why_text": "The assessment found: “CFB Acquisition Booklet published for business members — formal transition communication materials prepared System conversion date communicated (Aug 1, 2025). New HAPO cards mailed before conversion” [E-035]. Strengthening this capability matters because it shapes more efficient, dependable operations. It builds on the core processes that keep the institution running, so progress here lifts the wider business too.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.2",
+        "P4C2.9.CL1",
+        "P1C1.3.CL1",
+        "P2C2.2.CL1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "e394e718-e310-436f-b14c-33a6044a3905",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-083",
+        "E-085",
+        "E-011"
+      ],
+      "linked_subcap_id": "P4C3.1.2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Technology Roadmap & Investment Planning a near-term focus for HAPO Community Credit Union: a scoped investment here would lift it from 1.3 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-085].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "No commercial lending platform despite new CBO/CCO",
+      "what_text": "Technology Roadmap & Investment Planning is one of HAPO Community Credit Union's least developed data and technology capabilities, scoring 1.3 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes HAPO Community Credit Union's ability to deliver a stronger data and technology foundation [E-083].",
+      "why_text": "The assessment found: “Engineering staff = 2% of workforce — very low in-house technical capacity for 500+ person org Finance = 41%, Customer Service = 9%, Operations = 8%, Sales = 5%, Marketing = 3%” [E-011]. At 1.3 out of 5, Technology Roadmap & Investment Planning sits 1.0 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.1.2",
+        "P2C1.4.6",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "3da63e82-6830-4246-a207-9ee3aa5223b8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-008",
+        "E-031",
+        "E-043"
+      ],
+      "linked_subcap_id": "P2C4.1.2",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Behavioral Data Capture a near-term focus for HAPO Community Credit Union: a scoped investment here would lift it from 1.2 toward the 1.9 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-043].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "ActiveCampaign, Keap, Odoo, Velocify + HubSpot",
+      "what_text": "Behavioral Data Capture is one of HAPO Community Credit Union's least developed customer experience capabilities, scoring 1.2 out of 5 in Zennify's latest assessment, below the 1.9 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes HAPO Community Credit Union's ability to deliver a stronger, more personalised customer experience [E-031].",
+      "why_text": "The assessment found: “100+ technology products detected across 14 categories — substantial technology investment for $2.4B CU Hybrid cloud: AWS (CloudFront, S3) + Microsoft Azure (AD, CDN, Blob, Front Door) + on-prem” [E-008]. At 1.2 out of 5, Behavioral Data Capture sits 0.7 points below the 1.9 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.4",
+        "P4C3",
+        "P4C4.1.4",
+        "P4C2.1.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "877317f4-7c94-48f1-98ae-afb9af901f4e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-012"
+      ],
+      "linked_subcap_id": "P4C3.1.4",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for HAPO Community Credit Union: invest to move it toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the improvement reaches well beyond this single capability [E-060].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Yelp 1.5/5 from 104 reviews vs Forbes Best-in-State",
+      "what_text": "Fraud dept unresponsive (5+ months). Disputes denied. CFB transition lockout. 4 CX platforms (Zendesk+Glia+Verint+CINNOX) but broken experience. It underpins the data and technology foundation the rest of the business is built on, so its current level directly shapes HAPO Community Credit Union's ability to deliver a stronger data and technology foundation [E-060].",
+      "why_text": "The assessment found: “Consistently ranked in Forbes Best-in-State Credit Unions — external validation of member service quality Great Place To Work Certified — external validation of employee culture” [E-012]. Strengthening this capability matters because it shapes a stronger data and technology foundation. It builds on the data and technology foundation the rest of the business is built on, so progress here lifts the wider business too.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.4",
+        "P2C4.1.2",
+        "P2C3.2.7",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "9aea8d30-d51b-42bb-a9ca-e1ace50b2d9a",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-073"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-073",
+        "E-022"
+      ],
+      "linked_subcap_id": "P4C2.1.4",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 4 a near-term focus for HAPO Community Credit Union: a scoped investment here would lift it from 1.8 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-073].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "VP Marketing published AI paper, needs platform",
+      "what_text": "Capability dimension 4 is one of HAPO Community Credit Union's least developed data and technology capabilities, scoring 1.8 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes HAPO Community Credit Union's ability to deliver a stronger data and technology foundation [E-071].",
+      "why_text": "The assessment found: “Glia (digital engagement/video banking) — fintech partner providing chat, video, cobrowse, AI virtual assistants for CU member engagement Blend (digital lending/account opening) — fintech platform” [E-022]. At 1.8 out of 5, capability dimension 4 sits 1.0 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P3C2",
+        "P4C1.1.3",
+        "P4C2.1.4",
+        "P2C4.1.2",
+        "P4C3.4.9"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-003",
+      "id": "3e430a2e-4431-4997-828f-31bfbf3f0277",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-066",
+            "E-070",
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-071"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-071",
+        "E-066",
+        "E-070"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Behavioral Data Capture a near-term focus for HAPO Community Credit Union: a scoped investment here would lift it from 1.2 toward the 1.9 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-070].",
+      "source_rec_id": "REC-003",
+      "theme": "CX & Personalization",
+      "title": "Data & AI Platform",
+      "what_text": "ZERO AI/ML, CDP, NBO, Enterprise BI deployed — validated across 4 independent sources (Explorium T1, Clay/BuiltWith, Indeed, Tavily). scored 1.29 and scored 1.21, both CRITICAL. VP Marketing Jeremy O'Niel published AI paper but has no platform. (:F1,:F3) Salesforce Data Cloud + Einstein AI. In Zennify's assessment Behavioral Data Capture scores 1.2 out of 5, versus a typical 1.9 at comparable institutions [E-066].",
+      "why_text": "At 1.2 out of 5, Behavioral Data Capture sits 0.7 points below the 1.9 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-071, E-066].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 2.17 | vs Median: -0.87 | Trend: stable",
+        "heading": "6.1 Pillar 1: Strategy, governance and culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 1.93 | vs Median: -0.90 | Trend: stable",
+        "heading": "6.2 Pillar 2: Member experience and engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.01 | vs Median: -0.89 | Trend: stable",
+        "heading": "6.3 Pillar 3: Operations, risk and compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 1.82 | vs Median: -0.86 | Trend: stable",
+        "heading": "6.4 Pillar 4: Products, services and technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each includes institution-specific root cause analysis with evidence citations and expected score outcomes. Per assessment protocol, no cost estimates, investment ranges, or ROI projections are included."
+  },
+  "run_request_id": "DMA-ASM-HAPO-20260324-0001"
+}

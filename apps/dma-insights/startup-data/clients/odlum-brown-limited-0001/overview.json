@@ -1,0 +1,1073 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 169
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 231
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 103
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 172
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "odlum-brown-limited-0001",
+    "domain": null,
+    "hq": null,
+    "id": "2cb6fdbe-b8ac-4715-9992-effa216754c2",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Odlum Brown Limited",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RIA",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:43.097491Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 54,
+    "current_count": 52,
+    "dated_count": 13,
+    "median_age_months": 18.6,
+    "oldest_published_date": "2018-01-01",
+    "stale_count": 8,
+    "stale_pct": 6.3,
+    "total": 127,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "FACT": 113,
+      "INFERENCE": 14
+    },
+    "connectors": {
+      "Explorium": 1,
+      "Glassdoor": 3,
+      "Indeed": 5,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 6,
+      "NEUTRAL": 102,
+      "POSITIVE": 19
+    },
+    "tiers": {
+      "T1": 15,
+      "T2": 49,
+      "T3": 48,
+      "T5": 15
+    },
+    "total_facts": 355,
+    "total_items": 127
+  },
+  "financial_trajectory": {
+    "cagr": "11.0%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2020,
+      2026
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        15.0,
+        28.0
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "aum",
+    "aum_usd": 18000000000.0,
+    "branches": 400,
+    "cagr": "11%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "covid": "19 2020, inflation shock 2022, rate cycle",
+      "growth_model": "100% organic (no M&A confirmed)",
+      "lines": [
+        "Odlum Brown's $28B+ AUM base as of May 2026 represents an 87% increase from the $15B reported in 2020, translating to an approximately 11% compound annual growth rate — achieved entirely through organic advisor-led growth with no merger or acquisition activity confirmed.  [E-001,E-002,E-088] This growth trajectory places OB firmly in the top tier of BC-based independent wealth managers by AUM. The firm's 2022 Client Insights survey (conducted by an external facilitator) showed 96% client satisfaction and 97% advisor satisfaction — the operational base underpinning this growth.  [E-010] A 56-fold increase in the Odlum Brown Model Portfolio since its 1994 inception (managed by CIO Murray Leith) provides the long-term performance credibility that sustains client retention and new asset inflows.",
+        "Classification: ACCELERATING | 6-Year CAGR: ~11.0% | Growth model: 100% organic (no M&A confirmed)",
+        "Odlum Brown's 87% organic AUM growth over six years — from $15B in 2020 to $28B+ in 2026 — at an 11% compound annual rate is among the strongest organic growth trajectories for an independent dealer in Canada. This growth has been achieved without any merger or acquisition activity, exclusively through advisor-led client acquisition and retention. The consistency of this growth through periods of significant market volatility (COVID-19 2020, inflation shock 2022, rate cycle 2022–2024) demonstrates structural resilience and deep client trust.  [E-001,E-088,E-116,E-117] From a Salesforce Account Executive perspective, this trajectory confirms two things: first, that budget availability is strong and expanding; and second, that the constraint on further growth is now technology — the BRC data showing declining CRM scores is the single data point in an otherwise accelerating growth story."
+      ],
+      "series": {
+        "2020": 15000000000.0,
+        "2026": 28000000000.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 400,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 400,
+        "events": [
+          {
+            "fy": "FY2026",
+            "label": "Deep Fortinet history predates OB deployment"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2026"
+        ],
+        "geography": "British Columbia, Canada (6 offices)",
+        "headline": "$28.0B assets · FY2026 · +11.0% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            15.0,
+            28.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "British Columbia, Canada (6 offices)",
+    "footprint_basis": "derived:geography",
+    "founded": 1923,
+    "geography": "British Columbia, Canada (6 offices)",
+    "headcount": 400,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Warren Beach",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Current\nChief Strategy & Innovation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Sam Jiwani",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 120,
+        "title": "9 yrs (joined 2016)\nChief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Peter (Pete) Pacholko, CPA, CGA",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 480,
+        "title": "40 yrs (COO 2014, CFO 2000)\nChief Operating Officer & CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Daniel Dandar, CPA, CGA, BA",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 396,
+        "title": "33 yrs (joined 1993)\nVP, Enterprise Risk Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Neumann Lim",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Current\nManager, Infrastructure & Cybersecurity (vCISO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Deena Magtoto",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 288,
+        "title": "24 yrs (joined 2002)\nChief Marketing & Communications Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Andrea Linger",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "1 yr (joined 2025)\nVP, Sales & Business Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Caroline Schein, PhD, MBA, MA, ICD.D, CPHR",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 36,
+        "title": "3 yrs (joined 2023)\nChief People & Culture Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Debra Doucette, OBC",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 13,
+        "title": "35+ yrs (Chair 2025)\nChair (since Jun 2025)"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Odlum Brown Limited",
+    "license_type": "SEC-registered",
+    "narrative_md": "Strategic Objectives Map — 2025 Active Priorities\n\nThe following seven strategic objectives are derived from confirmed 2025 leadership statements, BRC survey data, regulatory requirements, and technology deployment signals. Each maps directly to a Salesforce ecosystem solution.\n\nEvery claim in this section is grounded in evidence IDs. Financial data covers 2020–2026.\n\nOdlum Brown was founded in 1923 by two Canadian military officers, establishing a culture of service, integrity, and disciplined investment that has persisted through the Great Depression, World War II, the Great Financial Crisis, and the COVID-19 pandemic.  [E-088] The firm has operated continuously for 103 years — a track record unmatched by any comparable independent dealer in Canada. Its 100% employee-owned model eliminates the conflicts of interest endemic to bank-owned or private-equity-backed wealth managers, and aligns team incentives directly with client outcomes.  [E-001] As of May 2026, Odlum Brown has been named one of Canada's Best Managed Companies for 26 consecutive years (since 1999) and one of Canada's Most Admired Corporate Cultures since 2017.  [E-010,E-088]\n\nThe firm maintains a wholly-owned subsidiary, Odlum Brown Financial Services Limited (OBFSL), offering insurance, estate planning, and financial planning to complement its investment advisory services (established 1988). A US registered investment adviser sub, Odlum Brown USA Investment Management Ltd (SEC CRD 132242), manages approximately $160M AUM and is subject to annual surprise examinations by KPMG.  [E-002,E-111]",
+    "primary_regulator": "SEC",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 141800000.0,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 100,
+          "score": 97.0,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.4,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "a CIRO-regulated dealer OB's structural independence (no Glassdoor specific themes from reviews: 'transparency and accountability' positive; 'a lot of nepotism' concern (1 review); 'not much information/help provided to low net worth adviso",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.4/5",
+          "signal": "Vancouver pay rating 3.4/5 (3% better than company average) Indeed rating 3.3/5 based on 7 reviews (small sample) WLB 3.6; Pay 3.3; Job security 3.5; Management 3.3; Culture 3.0 Model Portfolio reached 50-fold gain in May 2024, only 2.5 yea",
+          "source": "Indeed"
+        },
+        {
+          "rating": "97",
+          "signal": "Report Card (6 consecutive years); overall rating 9.5; NPS 97.7 Almost $40 billion AUA; founded 2017 Leith Wheeler founded 1982 by Murray Leith and Bill Wheeler; independent, employee-owned, value-based; offices Vancouver, Calgary, Toronto,",
+          "source": "Net Promoter Score"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-027",
+        "excerpt": "OB launched 'Different Makes a Difference®' podcast — equity analysts discuss market topics; published on Apple Podcasts + YouTube March 2026 episode 'Moody's: Standing Firm in an AI World' — Steve Boland +",
+        "title": "OB launched",
+        "type": "podcast",
+        "url": "https://podcasts.apple.com/ca/podcast/different-makes-a-difference/id1804206147"
+      },
+      {
+        "author": null,
+        "date": "2025-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "OB launched second podcast 'The Financial Long Game' hosted by Shelly Appleton-Benko (VP & Director). Season 1 wrapped 2024 with 41 episodes covering AI, cybersecurity, mortgages, tax, estate planning, insurance. S5E4 (M",
+        "title": "OB launched second podcast 'The Financial Long Game' hosted by Shelly…",
+        "type": "podcast",
+        "url": "https://podcasts.apple.com/ca/podcast/the-financial-long-game/id1723891225"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-029",
+        "excerpt": "OB publishes 'OB Report' — monthly client newsletter PDF. Jan 2025 issue has President's Letter by Trevor Short and CIO Article by Murray Leith. Short articulates 2025 priorities: '2024 was an excellent year for our clie",
+        "title": "OB publishes 'OB Report'",
+        "type": "article",
+        "url": "https://www.odlumbrown.com/docs/default-source/insight-article/obreport_202501.p"
+      },
+      {
+        "author": null,
+        "date": "2022-07-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "Ian Robertson recently completed his DPhil (Economic Geography) at Oxford — thesis focused on 'institutional investors' proxy voting on ESG issues' — now Dr Ian Robertson Investment Executive (RIA 2021 conference): Rober",
+        "title": "Thesis focused on 'institutional investors' proxy voting on ESG…",
+        "type": "conference",
+        "url": "https://blogs.cfainstitute.org/investor/2022/07/01/book-review-your-essential-gu"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-075",
+        "excerpt": "'Different Makes a Difference®' podcast launched March 2025; expanded to YouTube (@Different_MakesaDifference) and Instagram (@different_makesadifference) in December 2025; also on all major podcast platforms (Apple, Spo",
+        "title": "Different Makes also on all major podcast platforms (Apple, Spotify…",
+        "type": "podcast",
+        "url": "https://podcasts.apple.com/ca/podcast/different-makes-a-difference/id1804206147"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "OB publishes via Apple Podcasts, Spotify, Amazon Music — multi-platform distribution OB social media presence confirmed: LinkedIn (ca.linkedin.com/company/odlum-brown-limited — note from B1: 1,415 Instagram followers), T",
+        "title": "OB publishes via Apple Podcasts, Spotify, Amazon Music…",
+        "type": "podcast",
+        "url": "https://www.odlumbrown.com/insights/different-makes-a-difference"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "clients.odlumbrown.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.151532+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Odlum Brown Limited — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "OB vs. 4 locked peers at category level. Peer set: Leith Wheeler | Wellington-Altus | Mawer | Nicola Wealth. Scores: OB (assessed); Peers (estimated from public evidence, Grade B-C).\nThe benchmark data reveals a structurally bifurcated competitive landscape. Wellington-Altus leads 21 of 27 BRC categories and represents OB's primary competitive threat — it outperforms OB materially on (digital channels, 4.5 vs. 1.98) and (marketing, 4.0 vs. 1.49), the two categories with the largest peer gaps. Nicola Wealth, with $17.1B AUM — smaller than OB's $28B — deploys Salesforce, Marketo, Tableau, and RPA — a more advanced marketing and data technology stack than OB. Leith Wheeler and Mawer represent the traditional independent dealer posture that OB risks sliding toward if the Wellington-Altus technology gap is not addressed.\nOB leads all peers on Cybersecurity (4.05) and Compliance (3.98) — both confirmed by T1 evidence. These are genuine competitive strengths, not scoring artefacts. [E-093,E-112] Wellington-Altus leads all peers on Digital Channels (4.5) and Innovation (4.0) — consistent with its \"technology-enabled agility\" brand and BRC 9.5/10 rating for six consecutive years.",
+    "gap_prioritization_md": "6-factor priority scoring: Business Impact | Risk | Competitive Gap | Effort Inverse | Quick Win | Trend. Higher score = higher priority.\nThe priority framework confirms (Marketing Automation) as the highest commercial priority — the largest peer gap (−1.26), confirmed technology absence, and immediate named buyer (Andrea Linger, VP Sales 2025) make this the most straightforward Zennify engagement. and follow closely, each representing the mobile channel gap and data architecture gap that constrain OB's growth trajectory. The FSC deployment ranks 5th on the priority matrix but is the logical first step in the deployment sequence because all other solutions depend on FSC's financial services data model.",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "Odlum Brown Limited is a $18.0B in assets under management wealth & advisory firm regulated by SEC, operating since 1923 with 400 employees. A 11.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-111, E-023]. Zennify's assessment places overall digital maturity at 2.8/5. The deepest capability gap is Application Intake & Data Capture at 1.5/5 against a 2.8 peer median [E-088, E-055].\n\nNext is Embedded Analytics & Actionable Insights at 2.0/5 against a 3.0 peer median [E-017]. Third is Content Strategy at 2.0/5 against a 3.0 peer median [E-014, E-015]. The issue register adds 17 rationales missing E-ID refs (high severity). The issue register adds Potential banned language: ['critical gap', 'no digital strategy'].\n\nCounter-signal: Identity & Access Management already runs at 4.0/5 against a 3.2 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below. The question for Odlum Brown Limited is whether to close Application Intake & Data Capture first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Odlum Brown Limited should lead with nCino (73/100 fit) against Data Pre-Population, then sequence Twilio behind it.\n\nClosing Application Intake & Data Capture to the peer median alone is worth 1.3 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.76,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/benchmarks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:42.735219+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:42.739967+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/L2_patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:42.740361+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:42.740771+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/calculation_chain.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:42.741367+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/phase5_priority_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:42.741622+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 20
+    },
+    "stage_ms": {
+      "manifest": 24,
+      "parse": 7985,
+      "persist": 2725
+    },
+    "structured": [
+      {
+        "code": "used variant scoring CSV location",
+        "detail": "used variant scoring CSV location: 07_governance/scoring_exports/export_scoring_detail.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +709 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+127 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/L2_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=3",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 10 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 07_governance/recommendations_register.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant tech stack xlsx",
+        "detail": "used variant tech stack xlsx: OdlumBrown_Explorium_TechStack.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=OdlumBrown_ClientProfile_FINAL.docx leadership=9 focus_areas=3 facts_extracted=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/benchmarks.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/L2_patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/calculation_chain.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/phase5_priority_analysis.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 29",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/709 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant scoring CSV location: 07_governance/scoring_exports/export_scoring_detail.csv",
+      "xlsx_name_enrichment: +0 subcap names +709 rationales merged from workbook into CSV-parsed rows",
+      "INFO/evidence_facts_merged_from_json_twin: +127 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "used variant issue register: 07_governance/L2_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=0 contradictions=3",
+      "caps_applied_log: 10 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 07_governance/recommendations_register.json",
+      "used variant tech stack xlsx: OdlumBrown_Explorium_TechStack.xlsx",
+      "firmographics_from_client_profile_docx: source=OdlumBrown_ClientProfile_FINAL.docx leadership=9 focus_areas=3 facts_extracted=1",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 06_peers/benchmarks.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/L2_patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/calculation_chain.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/phase5_priority_analysis.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "timeline_events_persisted: 29",
+      "catalogue_unresolved:14/709 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 12"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 3.31,
+      "pillar_id": "P1",
+      "score": 3.0,
+      "subcaps_scored": 172
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 3.06,
+      "pillar_id": "P2",
+      "score": 2.11,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 3.18,
+      "pillar_id": "P3",
+      "score": 3.33,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 3.04,
+      "pillar_id": "P4",
+      "score": 2.76,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-27",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:43.097491Z",
+    "created_at": "2026-07-02T23:11:43.097491Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "9f6bde48-3635-431a-9adb-f64ebb5ce73c",
+    "overall_score": 2.76,
+    "request_id": "DMA-ASM-ODLB-20260527-0001",
+    "started_at": "2026-07-02T23:11:43.097491Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 100,
+        "score": 97.0,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.4,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Seven findings are ranked by commercial priority to a Zennify Account Executive. Seven findings is a priority capability gap in customer experience, scoring 1.49/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-055",
+        "E-076",
+        "E-077",
+        "E-078"
+      ],
+      "magnitude": "1.3 pts below peer median",
+      "name": "Seven findings",
+      "peer_median": 2.75,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.49,
+      "so_what": "Prioritize Seven findings in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Seven findings",
+      "what": "Seven findings are ranked by commercial priority to a Zennify Account Executive. Seven findings is a priority capability gap in customer experience, scoring 1.49/5 against a peer median of 2.75. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: OB has no public Open Banking API or developer portal Industry context: 'You can often access [OB] accounts through Open Banking aggregators like Plaid, Tink, or TrueLayer' — aggregator-mediated access is standard industry pattern, not an OB capability gap"
+    },
+    {
+      "body": "Strategic Objectives Map — 2025 Active Priorities. Strategic Objectives Map — 2025 Active Priorities is a priority capability gap in strategy and governance, scoring 2.34/5 against a peer median of 3.25. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "evidence": [
+        "E-017",
+        "E-018",
+        "E-027",
+        "E-028"
+      ],
+      "magnitude": "0.9 pts below peer median",
+      "name": "Strategic Objectives Map — 2025 Active Priorities",
+      "peer_median": 3.25,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.34,
+      "so_what": "Prioritize Strategic Objectives Map — 2025 Active Priorities in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Strategic Objectives Map — 2025 Active Priorities",
+      "what": "Strategic Objectives Map — 2025 Active Priorities. Strategic Objectives Map — 2025 Active Priorities is a priority capability gap in strategy and governance, scoring 2.34/5 against a peer median of 3.25. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "why": "The linked evidence records: Research team includes equity and fixed income analysts, wholly focused on Odlum Brown advisors and clients Does not trade with the firm's capital or engage in investment banking — structural independence eliminates classic sell-side conflicts of interest"
+    },
+    {
+      "body": "Embedded Analytics & Actionable Insights is a priority capability gap in data and technology, scoring 1.98/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-017"
+      ],
+      "magnitude": "1.0 pts below peer median",
+      "name": "Embedded Analytics & Actionable Insights",
+      "peer_median": 3.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.98,
+      "so_what": "Prioritize Embedded Analytics & Actionable Insights in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Embedded Analytics & Actionable Insights",
+      "what": "Embedded Analytics & Actionable Insights is a priority capability gap in data and technology, scoring 1.98/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: Research team includes equity and fixed income analysts, wholly focused on Odlum Brown advisors and clients Does not trade with the firm's capital or engage in investment banking — structural independence eliminates classic sell-side conflicts of interest"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-008"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Capped at 2.5: No published digital strategy = M2.5 max",
+        "166 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Strategy Document averages 2.5/5 over 166 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Capped at 2.5: No published digital strategy = M2.5 max); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-024"
+      ],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Role Definitions averages 3.5/5 over 217 scored subcaps; ceiling 4.0 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-028"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0 (best tier in T5)",
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Funding averages 2.3/5 over 190 scored subcaps; ceiling 2.8 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-059"
+      ],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Leader Role Modeling averages 3.5/5 over 205 scored subcaps; ceiling 4.0 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.6,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-072"
+      ],
+      "modifiers": [
+        "55 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Risk Appetite averages 3.0/5 over 70 scored subcaps; ceiling 3.6 reflects thin evidence density (15/70 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-074"
+      ],
+      "modifiers": [
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Content Strategy averages 2.0/5 over 289 scored subcaps; ceiling 2.5 reflects thin evidence density (0/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 1.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [
+        "cap M1.5 applied: Capped at 1.5: Confirmed absent automation = M1.5 max",
+        "286 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Application Intake & Data Capture averages 1.5/5 over 291 scored subcaps; ceiling 1.5 reflects the binding cap (cap M1.5 applied: Capped at 1.5: Confirmed absent automation = M1.5 max); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Capped at 2.5: Underutilized enterprise software = M3 max",
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Channel Handoff & Continuity averages 2.5/5 over 289 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Capped at 2.5: Underutilized enterprise software = M3 max); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-052"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Capped at 2.5: Rating 3.0-3.5 → P2 cap M2.5 per skill sentiment rules",
+        "258 of 263 subcaps on thin evidence"
+      ],
+      "rationale": "External Data Integration averages 2.5/5 over 263 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Capped at 2.5: Rating 3.0-3.5 → P2 cap M2.5 per skill sentiment rules); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [
+        "cap M2 applied: Capped at 2.0: Documented integration failure = M2 max",
+        "144 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Approval Automation averages 2.4/5 over 146 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Capped at 2.0: Documented integration failure = M2 max); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-111"
+      ],
+      "modifiers": [
+        "95 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Reporting & Analytics averages 3.5/5 over 130 scored subcaps; ceiling 4.2 reflects thin evidence density (35/130 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-008"
+      ],
+      "modifiers": [
+        "cap M3.5 applied: Capped at 3.5: CRM3 gap = M3.5 max until remediated",
+        "148 of 148 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Due Diligence averages 4.0/5 over 148 scored subcaps; ceiling 3.5 reflects the binding cap (cap M3.5 applied: Capped at 3.5: CRM3 gap = M3.5 max until remediated); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-118"
+      ],
+      "modifiers": [
+        "cap M3 applied: Capped at 3.0: Undocumented exit strategy = M3 max",
+        "110 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "DR Architecture averages 3.4/5 over 145 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: Capped at 3.0: Undocumented exit strategy = M3 max); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "202 of 202 subcaps on thin evidence"
+      ],
+      "rationale": "Enterprise Data Strategy & Roadmap averages 2.0/5 over 202 scored subcaps; ceiling 2.5 reflects thin evidence density (0/202 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-017"
+      ],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Embedded Analytics & Actionable Insights averages 2.0/5 over 270 scored subcaps; ceiling 2.5 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Legacy Modernization Strategy averages 3.5/5 over 235 scored subcaps; ceiling 4.0 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-095"
+      ],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Identity & Access Management averages 4.0/5 over 150 scored subcaps; ceiling 4.5 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Peter Pacholko, CPA, CGA — COO + CFO. 40 years at OB; COO since 2014; CFO since 2001. Board of Directors + Executive Committee + Senior Leadership Team. Active in CIRO's Conduct, Compliance and Legal Advisory Section (CCLS) + Financial and Operations Advisory Section (FOAS) + Operations Subcommittee (Jul 2025).",
+      "evidence": [
+        "E-023"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Peter Pacholko, CPA, CGA",
+      "metric": null,
+      "peer_context": "Application Intake & Data Capture runs 1.49/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Peter Pacholko, CPA, CGA — COO + CFO. 40 years at OB; COO since 2014; CFO since 2001. Board of Directors + Executive Committee + Senior Leadership Team.",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Appointed CIPF Board 2025"
+      },
+      "window": null
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Andrea Linger — VP, Sales & Business Development (joined 2025). Previously VP Practice Management + Head of Women Canadian Advisors Network at Raymond James. Certified corporate coach. Strategic hire from peer firm (Jul 2025).",
+      "evidence": [
+        "E-023"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Andrea Linger",
+      "metric": null,
+      "peer_context": "Application Intake & Data Capture runs 1.49/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Andrea Linger — VP, Sales & Business Development (joined 2025). Previously VP Practice Management + Head of Women Canadian Advisors Network at Raymond James. Certified corporate coach.",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Andrea Linger"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Career history: Started at Incor Networks (firewall team, 1504 firewall module) — 'Fortinet later acquired part of Incor Networks, Lim...' — deep Fortinet history predates OB deployment (Feb 2026).",
+      "evidence": [
+        "E-095"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Deep Fortinet history predates OB deployment (Feb 2026)",
+      "metric": null,
+      "peer_context": "Application Intake & Data Capture runs 1.49/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Data Pre-Population — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Career history: Started at Incor Networks (firewall team, 1504 firewall module) — 'Fortinet later acquired part of Incor Networks, Lim...' — deep Fortinet history predates OB deployment (Feb 2026). Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-02-01",
+        "event": "Deep Fortinet history predates OB deployment"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "In-house Financial Planning Team — Mike (VP), Debbie (Manager Estate & Insurance), AJ + Eryn (Estate & Insurance Planners), James (Senior tax/cross-border, ex-Big 4 joined 2025), Rick (senior tax/wealth continuity), Max + Kimberley (Financial Planners) (Jul 2025).",
+      "evidence": [
+        "E-040"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "In-house Financial Planning Team — Mike (VP), Debbie…",
+      "metric": null,
+      "peer_context": "Application Intake & Data Capture runs 1.49/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Data Pre-Population — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "In-house Financial Planning Team — Mike (VP), Debbie (Manager Estate & Insurance), AJ + Eryn (Estate & Insurance Planners), James (Senior tax/cross-border, ex-Big 4 joined 2025), Rick (senior tax/wealth continuity), Max",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "In-house Financial Planning Team — Mike (VP), Debbie…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Application Intake & Data Capture scores 1.49/5 vs a typical 2.75 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-088",
+        "E-055",
+        "E-076",
+        "E-077"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Application Intake & Data Capture scores 1.49/5 vs a…",
+      "metric": "Application Intake & Data Capture 1.49/5 vs peer 2.75",
+      "peer_context": "Application Intake & Data Capture runs 1.49/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Data Pre-Population — highest-fit surface at 73/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C2",
+      "text": "Application Intake & Data Capture scores 1.49/5 vs a typical 2.75 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

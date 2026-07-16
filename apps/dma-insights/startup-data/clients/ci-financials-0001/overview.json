@@ -1,0 +1,995 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 169,
+        "subcaps": 169,
+        "thin": 122
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 226,
+        "subcaps": 226,
+        "thin": 196
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 73
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 136
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "ci-financials-0001",
+    "domain": null,
+    "hq": null,
+    "id": "7149bacf-747d-4da2-9403-9a4a154ec693",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "CI Financials",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "AM",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:48.437030Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 45,
+    "current_count": 43,
+    "dated_count": 20,
+    "median_age_months": 20.7,
+    "oldest_published_date": "2016-01-01",
+    "stale_count": 17,
+    "stale_pct": 13.6,
+    "total": 125,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTEXTUAL": 1,
+      "INFORMATIVE": 5,
+      "MIXED": 2,
+      "NEGATIVE": 1,
+      "PARTIAL": 30,
+      "POSITIVE": 85,
+      "UNKNOWN": 1
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 2,
+      "LinkedIn": 2
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 9,
+      "NEUTRAL": 97,
+      "POSITIVE": 19
+    },
+    "tiers": {
+      "T1": 19,
+      "T2": 38,
+      "T3": 19,
+      "T4": 10,
+      "T5": 2,
+      "T6": 2,
+      "T7": 35
+    },
+    "total_facts": 865,
+    "total_items": 125
+  },
+  "financial_trajectory": null,
+  "firmographics": {
+    "aum_basis": "aum",
+    "aum_usd": 224000000000.0,
+    "cagr": "26%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Trend Classification: ACCELERATING (US RIA acquisition strategy (Corient) + organic Canadian WM growth + Invesco fund takeover (Jan 2026))"
+      ],
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 2932,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Stanhope Capital Group SA CIRO acquisition approval…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "CI Financial partnered with Neo Financial (Calgary…"
+          }
+        ],
+        "fy": [
+          "FY2016",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Canada (primary) + United States (Corient) + EMEA (Stonehage/Stanhope 2026) + Au",
+        "headline": "$975M net income · FY2025",
+        "regulator": "OSC (Ontario Securities Commission)",
+        "series": {
+          "net_income_m": [
+            156.0,
+            1.0,
+            975.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Canada (primary) + United States (Corient) + EMEA (Stonehage/Stanhope 2026) + Au",
+    "footprint_basis": "derived:geography",
+    "founded": 2013,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "Canada (primary) + United States (Corient) + EMEA (Stonehage/Stanhope 2026) + Au",
+    "headcount": 2932,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kurt MacAlpine",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Kambiz Vatan-Abadi",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO / Chief Innovation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Douglas J. Jamieson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Raj Sivarajah",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP, Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "William Chinkiwsky",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Enterprise Compliance + CI GAM CCO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Marc-André Lewis",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CI GAM CIO (co-head)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Andy Cheung",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Data, Analytics & Reporting"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Cheston Chiu",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Data, AI & Analytics (CI GAM)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sean Etherington",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP, Co-Head Wealth / President Assante & CIPW"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Manisha Burman",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jasnoor Chauhan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Head Business Analytics & Insights"
+      }
+    ],
+    "legal_name": "CI Financials",
+    "license_type": "Provincially registered securities firm",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "CI Financials is an asset manager. It reports $224.0 billion in assets under management. It is regulated by OSC (Ontario Securities Commission) and employs approximately 2,932 people. Its overall digital maturity is assessed at 1.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OSC (Ontario Securities Commission)",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 2700000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.3,
+          "source": "Employee (Indeed/Glassdoor)"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "Overall: 3.3/5 | Culture: 2.9/5 | Management: 2.6/5 | CEO: 62.9% (Kurt MacAlpine)",
+          "source": "Employee (Indeed/Glassdoor)"
+        },
+        {
+          "rating": "Below-sector median; talent attrition risk; supports P1C4 cap at M3",
+          "source": "Employee Signal"
+        },
+        {
+          "rating": "19 awards — most of any Canadian fund company; strong investment quality recognition [E-040]",
+          "source": "Investment Quality"
+        },
+        {
+          "rating": "Positive — premium valuation, strategic clarity for growth",
+          "source": "Media Tone — Mubadala"
+        },
+        {
+          "rating": "Positive — global ambitions recognized as market-leading for independent RIA",
+          "source": "Media Tone — Corient"
+        },
+        {
+          "rating": "Neutral — multiple issuer bids noted as disciplined balance sheet repair",
+          "source": "Media Tone — Debt"
+        },
+        {
+          "rating": "Clean — no adverse coverage; 2016 OSC settlement resolved and well outside news cycle [E-085]",
+          "source": "Regulatory Tone"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "large",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": "Manisha Burman",
+        "date": "2023-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "CI Financial named Greater Toronto Top Employer 2023 — recognized for progressive HR practices including training, skills development, employee communications, performance management, community involvement Chief Human Re",
+        "title": "CI Financial named Greater Toronto Top Employer 2023",
+        "type": "article",
+        "url": "https://www.glassdoor.ca/Overview/Working-at-CI-Financial-EI_IE354908.11,23.htm"
+      },
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "CI GAM corporate website: thought leadership content hub where 'portfolio managers and thought leaders from across CI GAM offer insights into trends, events, policies and politics creating investment risks and opportunit",
+        "title": "CI GAM corporate website: thought leadership content hub where…",
+        "type": "article",
+        "url": "https://www.cifinancial.com/ci-gam/ca/en/index.html"
+      },
+      {
+        "author": null,
+        "date": "2026-05-12",
+        "derived_from": "evidence_index",
+        "e_id": "E-064",
+        "excerpt": "No public confirmation of a named marketing automation platform (HubSpot, Marketo, Eloqua, Pardot) at CI Financial in any press release, job description or tech stack source — MAP not publicly disclosed; Salesforce Marke",
+        "title": "Salesforce Marketing Cloud NOT confirmed",
+        "type": "article",
+        "url": "https://schulich.yorku.ca/current-students/investing-in-the-future/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "cifinancial.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.123200+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# CI Financials — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "Priority Score = (0.25×Gap Size) + (0.20×Peer Comparison) + (0.15×Strategic Alignment) + (0.15×Complexity Inverse) + (0.15×Investment Efficiency) + (0.10×Stakeholder Readiness)",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "CI Financials is a $224.0B in assets under management asset manager regulated by OSC (Ontario Securities Commission) with 2,932 employees. A 26.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-018]. Zennify's assessment places overall digital maturity at 1.9/5. The deepest capability gap is Metadata Management & Data Catalog at 1.2/5 against a 2.5 peer median [E-103].\n\nNext is SMS & Mobile Marketing at 1.2/5 against a 2.5 peer median [E-113]. Third is Content Personalization at 1.3/5 against a 2.5 peer median [E-026]. The issue register adds run_manifest.json missing — required Layer 2 contract artifact (critical severity). The issue register adds contradiction_log.csv missing — Layer 2 contract artifact not generated (high severity).\n\nThe pattern is corroborated across the assessment's evidence index [E-013]. The question for CI Financials is whether to close Metadata Management & Data Catalog first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. CI Financials should lead with nCino (80/100 fit) against Life Event Detection, then sequence Tableau behind it. Closing Metadata Management & Data Catalog to the peer median alone is worth 1.3 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 1.95,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:48.415925+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:48.416403+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/Appendix_A_Capability_Definitions.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:48.416658+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/Appendix_B_Maturity_Scale.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:48.416828+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/Appendix_C_Pillar_Weights.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:48.416994+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 4,
+      "INFO": 14
+    },
+    "stage_ms": {
+      "manifest": 18,
+      "parse": 5744,
+      "persist": 2357
+    },
+    "structured": [
+      {
+        "code": "qa_verdict.json",
+        "detail": "qa_verdict.json: schema_mismatch: ValueError: qa_verdict.json: no run_id-shaped field after reconcile (strict error: empty run_id)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "synthesized run_manifest from export header",
+        "detail": "synthesized run_manifest from export header: run_id=DMA-ASM-CIF-20260512-0001, institution_name=CI Financials",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "synthesized run manifest from export CSV headers + folder name",
+        "detail": "synthesized run manifest from export CSV headers + folder name",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +694 subcap names +694 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=CI_Financial_Client_Profile_Research_2026-05-12.docx leadership=11 focus_areas=1 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 6 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 9 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 7 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 8",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/Appendix_A_Capability_Definitions.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/Appendix_B_Maturity_Scale.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/Appendix_C_Pillar_Weights.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 25",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:13/694 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 8",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "qa_verdict.json: schema_mismatch: ValueError: qa_verdict.json: no run_id-shaped field after reconcile (strict error: empty run_id)",
+      "synthesized run_manifest from export header: run_id=DMA-ASM-CIF-20260512-0001, institution_name=CI Financials",
+      "synthesized run manifest from export CSV headers + folder name",
+      "xlsx_name_enrichment: +694 subcap names +694 rationales merged from workbook into CSV-parsed rows",
+      "firmographics_from_client_profile_docx: source=CI_Financial_Client_Profile_Research_2026-05-12.docx leadership=11 focus_areas=1 facts_extracted=0",
+      "used docx-extracted recommendations: 6 rec(s) from Assessment_Report.docx §9",
+      "tech_stack_from_report_prose: 9 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "sentiment_from_csv: 7 sources",
+      "insights_from_client_profile_findings: 8",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/Appendix_A_Capability_Definitions.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/Appendix_B_Maturity_Scale.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/Appendix_C_Pillar_Weights.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "timeline_events_persisted: 25",
+      "catalogue_unresolved:13/694 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 8"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 169,
+      "peer_median": 3.0,
+      "pillar_id": "P1",
+      "score": 2.23,
+      "subcaps_scored": 169
+    },
+    {
+      "peer_benchmarked": 226,
+      "peer_median": 2.75,
+      "pillar_id": "P2",
+      "score": 1.55,
+      "subcaps_scored": 226
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.87,
+      "pillar_id": "P3",
+      "score": 2.28,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.73,
+      "pillar_id": "P4",
+      "score": 1.75,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-12",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:48.437030Z",
+    "created_at": "2026-07-02T23:11:48.437030Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "2ce620ab-2d81-4cb5-9d0c-1b963ea8f975",
+    "overall_score": null,
+    "request_id": "DMA-ASM-CIF-20260512-0001",
+    "started_at": "2026-07-02T23:11:48.437030Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": null,
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.3,
+        "source": "Employee (Indeed/Glassdoor)"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-113",
+        "E-018_CF_P2",
+        "E-048",
+        "E-049"
+      ],
+      "magnitude": "1.3 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.23,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Capability-level inference applied to 36 uncovered subcaps in P2C1 (Digital Marketing & Acquisition) — anchor evidence: CI Financial digital marketing — CI Direct Investing + Corient brand."
+    },
+    {
+      "body": "Metadata Management & Data Catalog is a priority capability gap in data and technology, scoring 1.20/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-103",
+        "E-048_CF_P4",
+        "E-055_CF_P4",
+        "E-061_CF_P4"
+      ],
+      "magnitude": "1.3 pts below peer median",
+      "name": "Metadata Management & Data Catalog",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.2,
+      "so_what": "Prioritize Metadata Management & Data Catalog in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Metadata Management & Data Catalog",
+      "what": "Metadata Management & Data Catalog is a priority capability gap in data and technology, scoring 1.20/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: VP Data Analytics Reporting (Andy Cheung, CI Financial) and VP Data AI Analytics (Cheston Chiu, CI GAM) are the primary data governance leaders — no CDO title confirmed; formal data stewardship, data quality framework, and data catalog not publicly named; data literacy"
+    },
+    {
+      "body": "Content Personalization is a priority capability gap in customer experience, scoring 1.32/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-026",
+        "E-018_CF_P2",
+        "E-034_CF_P2",
+        "E-048"
+      ],
+      "magnitude": "1.2 pts below peer median",
+      "name": "Content Personalization",
+      "peer_median": 2.5,
+      "platforms": [
+        "Salesforce",
+        "Twilio"
+      ],
+      "score": 1.32,
+      "so_what": "Prioritize Content Personalization in the next phase — Salesforce is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Content Personalization",
+      "what": "Content Personalization is a priority capability gap in customer experience, scoring 1.32/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The shortfall is relative, not absolute: 1.32/5 sits below the 2.5 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence",
+        "145 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Industry Trend Monitoring averages 2.4/5 over 165 scored subcaps; ceiling 2.9 reflects thin evidence density (20/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-109"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence",
+        "170 of 215 subcaps on thin evidence"
+      ],
+      "rationale": "Model Governance Framework averages 2.2/5 over 215 scored subcaps; ceiling 2.8 reflects thin evidence density (45/215 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-013_CF"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence | DC07:score_confidence_realign",
+        "140 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Ecosystem averages 2.5/5 over 190 scored subcaps; ceiling 3.1 reflects thin evidence density (50/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.5,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-040"
+      ],
+      "modifiers": [
+        "120 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Performance Goal Alignment averages 1.9/5 over 205 scored subcaps; ceiling 2.6 reflects thin evidence density (85/205 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.5,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "35 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Roadmap averages 2.5/5 over 70 scored subcaps; ceiling 3.2 reflects thin evidence density (35/70 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 1.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-052"
+      ],
+      "modifiers": [
+        "276 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "SMS & Mobile Marketing averages 1.2/5 over 287 scored subcaps; ceiling 1.7 reflects thin evidence density (11/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [
+        "236 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Notification Template & Alert Configuration averages 1.8/5 over 286 scored subcaps; ceiling 2.4 reflects thin evidence density (50/286 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [
+        "250 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Conversation Transcription & Summarization averages 1.8/5 over 285 scored subcaps; ceiling 2.4 reflects thin evidence density (35/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "210 of 256 subcaps on thin evidence"
+      ],
+      "rationale": "Content Personalization averages 1.3/5 over 256 scored subcaps; ceiling 1.9 reflects thin evidence density (46/256 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-069"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence",
+        "105 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Case Management & Resolution averages 2.5/5 over 142 scored subcaps; ceiling 3.1 reflects thin evidence density (37/142 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-069"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence",
+        "110 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Fraud Model Governance averages 2.1/5 over 130 scored subcaps; ceiling 2.7 reflects thin evidence density (20/130 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-109"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence | DC07:score_confidence_realign",
+        "46 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Compliance Testing averages 2.8/5 over 142 scored subcaps; ceiling 3.6 reflects thin evidence density (96/142 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025_CF_P3C3"
+      ],
+      "modifiers": [
+        "100 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Contingency Arrangements averages 1.7/5 over 145 scored subcaps; ceiling 2.3 reflects thin evidence density (45/145 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-097"
+      ],
+      "modifiers": [
+        "155 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Metadata Management & Data Catalog averages 1.2/5 over 200 scored subcaps; ceiling 1.8 reflects thin evidence density (45/200 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-034_CF_P4"
+      ],
+      "modifiers": [
+        "195 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Model Inventory & Documentation averages 1.7/5 over 270 scored subcaps; ceiling 2.3 reflects thin evidence density (75/270 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-033_CF_P4"
+      ],
+      "modifiers": [
+        "cap applied: CRITIC:downgrade_insufficient_evidence",
+        "185 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "AIOps & Intelligent Operations averages 2.1/5 over 235 scored subcaps; ceiling 2.7 reflects thin evidence density (50/235 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070_CF_P4"
+      ],
+      "modifiers": [
+        "145 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Network Security Architecture averages 2.0/5 over 150 scored subcaps; ceiling 2.5 reflects thin evidence density (5/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Stanhope Capital Group SA CIRO acquisition approval — effective December 3, 2025 (Corient International Holdings Limited acquired all shares) (Dec 2025).",
+      "evidence": [
+        "E-109"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Stanhope Capital Group SA CIRO acquisition approval…",
+      "metric": null,
+      "peer_context": "Metadata Management & Data Catalog runs 1.20/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Life Event Detection — highest-fit surface at 80/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Stanhope Capital Group SA CIRO acquisition approval — effective December 3, 2025 (Corient International Holdings Limited acquired all shares) (Dec 2025). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-12-03",
+        "event": "Stanhope Capital Group SA CIRO acquisition approval…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "May 2025: Vestmark selected as enterprise portfolio management and trading technology partner across Corient's entire ~$177B AUM network — consolidating disparate legacy trading platforms from 40+ acquired RIA firms",
+      "evidence": [
+        "E-027"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Vestmark selected as enterprise portfolio management and…",
+      "metric": "AUM $177B",
+      "peer_context": "Metadata Management & Data Catalog runs 1.20/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Life Event Detection — highest-fit surface at 80/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "May 2025: Vestmark selected as enterprise portfolio management and trading technology partner across Corient's entire ~$177B AUM network — consolidating disparate legacy trading platforms from 40+ acquired RIA firms. Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-05-01",
+        "event": "Vestmark selected as enterprise portfolio management and…"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "No public confirmation of a named marketing automation platform (HubSpot, Marketo, Eloqua, Pardot) at CI Financial in any press release, job description or tech stack source — MAP not publicly disclosed; Salesforce Marketing Cloud NOT confirmed CI Financial confirmed: AI/ML in sales processes (DT",
+      "evidence": [
+        "E-064"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Salesforce Marketing Cloud NOT confirmed",
+      "metric": null,
+      "peer_context": "Metadata Management & Data Catalog runs 1.20/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "No public confirmation of a named marketing automation platform (HubSpot, Marketo, Eloqua, Pardot) at CI Financial in any press release, job description or tech stack source — MAP not publicly disclosed; Salesforce. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "issue_register",
+      "detail": "run_manifest.json missing — required Layer 2 contract artifact",
+      "evidence": [
+        "E-072",
+        "E-098"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Run_manifest.json missing",
+      "metric": null,
+      "peer_context": "Metadata Management & Data Catalog runs 1.20/5 vs a 2.50 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "run_manifest.json missing — required Layer 2 contract artifact. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CI Board has Audit and Risk Committee with formal charter — documented oversight structure; new Mubadala directors (Merksamer, Konuk, Barker) joined Aug 2025 with alternative investment / technology backgrounds",
+      "evidence": [
+        "E-017"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "New Mubadala directors (Merksamer, Konuk, Barker) joined…",
+      "metric": null,
+      "peer_context": "Metadata Management & Data Catalog runs 1.20/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Life Event Detection — highest-fit surface at 80/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "CI Board has Audit and Risk Committee with formal charter — documented oversight structure; new Mubadala directors (Merksamer, Konuk, Barker) joined Aug 2025 with alternative investment / technology backgrounds",
+      "timeline": {
+        "date": "2025-08-01",
+        "event": "New Mubadala directors (Merksamer, Konuk, Barker) joined…"
+      },
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "active_run_id": "2dac4d47-38eb-48a3-abd9-02c7f9608f99",
+  "items": [
+    {
+      "assessment_date": "2026-03-17",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v5.5",
+      "completed_at": "2026-07-04T15:07:44.543885Z",
+      "created_at": "2026-07-02T23:11:13.208124Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "2dac4d47-38eb-48a3-abd9-02c7f9608f99",
+      "overall_score": 2.31,
+      "request_id": "DMA-ASM-PENT-20260317-0001",
+      "started_at": "2026-07-02T23:11:13.208124Z",
+      "status": "ACTIVE",
+      "subcap_count": 689,
+      "updated_at": "2026-07-04T15:07:44.543885Z"
+    }
+  ]
+}

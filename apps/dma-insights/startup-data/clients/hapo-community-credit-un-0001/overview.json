@@ -1,0 +1,1030 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 96,
+        "subcaps": 96,
+        "thin": 96
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 70,
+        "subcaps": 70,
+        "thin": 70
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 49,
+        "subcaps": 49,
+        "thin": 49
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 46,
+        "subcaps": 46,
+        "thin": 46
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "hapo-community-credit-un-0001",
+    "domain": null,
+    "hq": null,
+    "id": "ce463f61-6de8-4827-a7b8-78364dc05ea3",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "HAPO Community Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:42.624422Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 87,
+    "undated_count": 87
+  },
+  "evidence_summary": {
+    "claims": {
+      "FACT": 87
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 10,
+      "NEUTRAL": 69,
+      "POSITIVE": 8
+    },
+    "tiers": {
+      "T1": 17,
+      "T2": 34,
+      "T3": 27,
+      "T5": 9
+    },
+    "total_facts": 87,
+    "total_items": 87
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Employees: 606 (NCUA Q3 2025). 42% headcount growth over 3 years.",
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 2.39,
+        "year": null
+      },
+      {
+        "label": "Revenue",
+        "unit": "M",
+        "value": 200.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 600000000.0,
+    "branches": 20,
+    "cagr": "8.4%",
+    "cagr_basis": "report_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "assets": "2.39B (Q3 2025 NCUA), approximately $2.9B pos",
+      "branches": "20+ locations across WA and OR. 21 ATMs (C",
+      "employees": "606 (NCUA Q3 2025). 42% headcount growth ov",
+      "lines": [
+        "Assets: $2.39B (Q3 2025 NCUA), approximately $2.9B post-CFB acquisition",
+        "Members: 215,995 (Q3 2025), 220,000+ post-acquisition",
+        "Employees: 606 (NCUA Q3 2025). 42% headcount growth over 3 years.",
+        "Branches: 20+ locations across WA and OR. 21 ATMs (CO-OP network).",
+        "Net Worth: $290.7M | NW Ratio: 12.2% (vs 10.95% industry avg) | Texas Ratio: 6.99% | Health: A",
+        "Revenue: $200M-$500M (Explorium T1)"
+      ],
+      "members": "215,995 (Q3 2025), 220,000+ post-acquisitio",
+      "net_worth": "290.7M | NW Ratio: 12.2% (vs 10.95% industry a",
+      "revenue": "200M-$500M (Explorium T1)",
+      "texas_ratio": "6.99% | Health: A"
+    },
+    "footprint": "Washington, Oregon, Idaho, Texas",
+    "footprint_basis": "derived:geography",
+    "founded": 1953,
+    "geography": "Washington, Oregon, Idaho, Texas",
+    "geography_basis": "nlp:narrative",
+    "headcount": null,
+    "hq": "601 Williams Blvd, Richland, WA",
+    "hq_address": null,
+    "hq_basis": "nlp:narrative",
+    "leadership": [
+      {
+        "background": "Aug 2024). 19-year HAPO veteran, ex-EVP/CFO/CRO. Finance-first leader",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Scott Mitchell",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": "Jan 2022). SVP. Ex-CIO Hanford HMIS, ex-Lockheed Martin Sr Engineer. 18+ years enterprise tech",
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Ashley Ward",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": "Oct 2018). Published peer-reviewed AI paper (Journal of Digital Banking, Dec 2023",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jeremy O'Niel",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Marketing"
+      },
+      {
+        "background": "Nov 2024). First dedicated InfoSec leadership role at HAPO",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Daniel M",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "InfoSec Director"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "HAPO Community Credit Union",
+    "license_type": "State-chartered",
+    "narrative_md": "Legal Name: HAPO Community Credit Union\n\nHQ: 601 Williams Blvd, Richland, WA 99354 (Benton County)\n\nFounded: 1953 (Hanford Atomic Products Operations nuclear site workers). Community charter 1997.\n\nCharter: Washington State-chartered, NCUA federally insured. NMLS #477622.\n\nFOM: Anyone who lives, works, worships, or attends school in Washington state. Expanded to Oregon (2011) and partial Idaho counties.",
+    "primary_regulator": "NCUA",
+    "regulator_basis": "inferred:subvertical",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "n": 104,
+          "scale": 5,
+          "score": 1.5,
+          "source": "Yelp"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 36,
+          "scale": 5,
+          "score": 3.2,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.4,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.2/5",
+          "signal": "Glassdoor: 3.2/5 overall (36 reviews)",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.4/5",
+          "signal": "Azure (AD, CDN, Blob, Front Door) + on-prem VMware/Citrix Indeed overall rating 3.4/5; culture 3.2; management 2.7; work-life balance 3.2; compensation 3.7 CEO approval 52.38% — low for CU sector Member review: 'website absolutely atrocious",
+          "source": "Indeed"
+        },
+        {
+          "signal": "NO published service-level metrics (CSAT, NPS, FCR, AHT, wait times) found publicly",
+          "source": "Net Promoter Score"
+        },
+        {
+          "signal": "with business objectives, strategies, and plans' BBB complaint: HAPO allowed someone to open/attempt account using complainant's SSN — SECOND TIME in <10 years at same institution First incident resulted in ChexSystems Freeze, months withou",
+          "source": "Better Business Bureau"
+        },
+        {
+          "rating": "1.5/5",
+          "signal": "rowse, and AI-enabled self-service for CU member engagement Yelp average: 1.5/5 from 104 reviews — severely negative member sentiment",
+          "source": "Yelp"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": null,
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-066",
+        "excerpt": "NO AI/ML platforms detected in Explorium technographics. No TensorFlow, no AWS SageMaker, no Azure ML, no Google Vertex, no DataRobot, no H2O.ai. NO Customer Data Platform (CDP) detected. No Salesforce Data Cloud, no Seg",
+        "title": "NO AI/ML platforms detected in Explorium technographics",
+        "type": "article",
+        "url": "https://vibeprospecting.explorium.ai"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "HAPO is Equal Employment Opportunity Employer 'committed to creating a diverse workforce' Culture 'inclusive of ethnicity, age, disability, religious belief and sexual orientation, cultural backgrounds and different pers",
+        "title": "HAPO is Equal Employment Opportunity Employer",
+        "type": "article",
+        "url": "https://www.hapo.org/hapo-about/about/careers"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-044",
+        "excerpt": "Dollars & Sense podcast: 44 episodes over 3 seasons as of June 2025 — active, sustained content program Available on Buzzsprout, Spotify, Apple Podcasts — multi-platform distribution",
+        "title": "Dollars & Sense podcast: 44 episodes over 3 seasons as of June 2025",
+        "type": "podcast",
+        "url": "https://dollarssense.buzzsprout.com/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-048",
+        "excerpt": "Blog on hapo.org covering financial topics from 'budgeting basics to fraud prevention' — active content marketing 'It's a Money Thing' educational video series — third-party content syndication (common CU program via CU ",
+        "title": "It 's a Money Thing' educational video series — third-party content…",
+        "type": "blog",
+        "url": "https://www.hapo.org/services/tools-resources/blog"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "Full digital product catalog on BBB: Mobile Banking, Online Banking, Digital Wallet, CoBrowse, E-Statements, Express Pickup, Financial Coaching, Podcast, SavvyMoney, AutoBooks — 10+ digital services listed CoBrowse = Gli",
+        "title": "Full digital product catalog on BBB: Mobile Banking, Online Banking…",
+        "type": "podcast",
+        "url": "https://www.bbb.org/us/wa/richland/profile/credit-union/hapo-community-credit-un"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$2.39B",
+    "website": "hapo.org",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.157364+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# HAPO Community Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "Gaps ranked using 6-factor priority model: Business Impact (25%), Risk Exposure (20%), Competitive Gap (20%), Effort Inverse (15%), Quick Win (10%), Trend Momentum (10%). Every gap is grounded in specific evidence IDs.",
+    "page_number": null,
+    "scqa_heading": "DMA Assessment Synthesis — HAPO Community Credit Union",
+    "scqa_md": "HAPO Community Credit Union is a $600M in assets credit union regulated by NCUA, operating since 1953 with 16 employees. A 8.4% multi-year growth rate gives it the balance sheet to fund transformation [E-013, E-016]. Zennify's assessment places overall digital maturity at 2.0/5. The deepest capability gap is Device & Identity Verification at 1.2/5 against a 1.9 peer median [E-018, E-052].\n\nNext is Retention & At-Risk Intervention at 1.3/5 against a 1.9 peer median. Third is Technology Roadmap & Investment Planning at 1.6/5 against a 2.3 peer median [E-008, E-028]. The roster shows no CISO — a named ownership gap for the capabilities below. The question for HAPO Community Credit Union is whether to close Device & Identity Verification first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost.\n\nHAPO Community Credit Union should lead with Twilio (61/100 fit) against Voice-Activated Banking, then sequence Databricks behind it. Closing Device & Identity Verification to the peer median alone is worth 0.7 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"ZERO AI/ML, CDP, NBO, Enterprise BI deployed — Validated across 4 independent sources (Explorium T1, Clay/BuiltWith, Indeed, Tavily)…\"."
+  },
+  "overall_score": 2.03,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.843040+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.843778+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.844026+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 37 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.844530+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_coverage_stats.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.845196+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priorities.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.845852+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:40.846235+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 25
+    },
+    "stage_ms": {
+      "manifest": 29,
+      "parse": 7677,
+      "persist": 2010
+    },
+    "structured": [
+      {
+        "code": "xlsx fallback extracted 261 subcaps from DMA_Scoring_Workbook_HA",
+        "detail": "xlsx fallback extracted 261 subcaps from DMA_Scoring_Workbook_HAPO_20260324.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (261 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (261 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "evidence loaded from variant export_evidence_inventory.csv (08_a",
+        "detail": "evidence loaded from variant export_evidence_inventory.csv (08_appendices)",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+112 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=20 contradictions=3",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 162 cap event(s) parsed from 01_evidence/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "DEGRADED",
+        "detail": "DEGRADED:techstack_noise_dropped: 7 candidate(s) rejected by taxonomy (e.g. 'Lending; Core Banking; Marketing')",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 7 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_handoff.json",
+        "detail": "research_handoff.json: AttributeError: 'str' object has no attribute 'get'",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_HAPO_20260324.docx leadership=0 focus_areas=7 facts_extracted=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=14 subcaps=10 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "subcap coverage 37% below 80% threshold (261 of 700 expected for",
+        "detail": "subcap coverage 37% below 80% threshold (261 of 700 expected for unknown)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:total_assets",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_recommendations",
+        "detail": "insights_derived_from_recommendations: 1",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 37 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_coverage_stats.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priorities.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 1",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx fallback extracted 261 subcaps from DMA_Scoring_Workbook_HAPO_20260324.xlsx",
+      "scoring loaded from xlsx fallback (261 subcaps, dir=03_scoring_workbook)",
+      "evidence loaded from variant export_evidence_inventory.csv (08_appendices)",
+      "INFO/evidence_facts_merged_from_json_twin: +112 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "governance_audit_logs: reasoning_chain=20 contradictions=3",
+      "caps_applied_log: 162 cap event(s) parsed from 01_evidence/caps_applied_log.csv",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "DEGRADED:techstack_noise_dropped: 7 candidate(s) rejected by taxonomy (e.g. 'Lending; Core Banking; Marketing')",
+      "tech_stack_from_variant_source: 7 entries",
+      "research_handoff.json: AttributeError: 'str' object has no attribute 'get'",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_HAPO_20260324.docx leadership=0 focus_areas=7 facts_extracted=1",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=14 subcaps=10 replaced_docx_scqa=True",
+      "subcap coverage 37% below 80% threshold (261 of 700 expected for unknown)",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:total_assets",
+      "insights_derived_from_recommendations: 1",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 37 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_coverage_stats.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priorities.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 4",
+      "insight_cards_persisted: 1"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 96,
+      "peer_median": 3.11,
+      "pillar_id": "P1",
+      "score": 2.23,
+      "subcaps_scored": 96
+    },
+    {
+      "peer_benchmarked": 70,
+      "peer_median": 2.92,
+      "pillar_id": "P2",
+      "score": 1.99,
+      "subcaps_scored": 70
+    },
+    {
+      "peer_benchmarked": 49,
+      "peer_median": 2.94,
+      "pillar_id": "P3",
+      "score": 2.06,
+      "subcaps_scored": 49
+    },
+    {
+      "peer_benchmarked": 46,
+      "peer_median": 2.68,
+      "pillar_id": "P4",
+      "score": 1.82,
+      "subcaps_scored": 46
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-24",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:42.624422Z",
+    "created_at": "2026-07-02T23:11:42.624422Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "5be7de9e-865b-4360-8a3b-642217e59c6f",
+    "overall_score": null,
+    "request_id": "DMA-ASM-HAPO-20260324-0001",
+    "started_at": "2026-07-02T23:11:42.624422Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "n": 104,
+        "scale": 5,
+        "score": 1.5,
+        "source": "Yelp"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 36,
+        "scale": 5,
+        "score": 3.2,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.4,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "No commercial lending platform despite new CBO/CCO — CFB acquisition adds commercial banking (Aug 2025). New CBO Eric Pearson and CCO Matt Backlund need tools from day one. Abrigo=risk only, Ellie Mae=mortgage only. (E-083, E-085) — nCino — A+.",
+      "evidence": [
+        "E-083",
+        "E-085",
+        "E-008",
+        "E-011"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "No commercial lending platform despite new CBO/CCO",
+      "peer_median": 2.3,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.58,
+      "so_what": "Prioritize No commercial lending platform despite new CBO/CCO in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C3",
+      "theme": "Data & technology",
+      "title": "No commercial lending platform despite new CBO/CCO",
+      "what": "No commercial lending platform despite new CBO/CCO — CFB acquisition adds commercial banking (Aug 2025). New CBO Eric Pearson and CCO Matt Backlund need tools from day one. Abrigo=risk only, Ellie Mae=mortgage only. (E-083, E-085) — nCino — A+.",
+      "why": "The linked evidence records: CFB acquisition (Aug 2025) adds: commercial banking, business banking, treasury services. New leadership: Eric Pearson→CBO, Matt Backlund→CCO, Antoinette Burnside→Treasury Services Manager. HFG Trust partnership: restructured as independent entity, HAPO is investor."
+    },
+    {
+      "body": "ZERO AI/ML, CDP, NBO, Enterprise BI deployed — Validated across 4 independent sources (Explorium T1, Clay/BuiltWith, Indeed, Tavily). VP Marketing published AI paper but has no platform. (E-066, E-070, E-071) — Data Cloud + Einstein — A+.",
+      "evidence": [
+        "E-066",
+        "E-070",
+        "E-071",
+        "E-008"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "ZERO AI/ML, CDP, NBO, Enterprise BI deployed",
+      "peer_median": 2.3,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.58,
+      "so_what": "Prioritize ZERO AI/ML, CDP, NBO, Enterprise BI deployed in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C3",
+      "theme": "Data & technology",
+      "title": "ZERO AI/ML, CDP, NBO, Enterprise BI deployed",
+      "what": "ZERO AI/ML, CDP, NBO, Enterprise BI deployed — Validated across 4 independent sources (Explorium T1, Clay/BuiltWith, Indeed, Tavily). VP Marketing published AI paper but has no platform. (E-066, E-070, E-071) — Data Cloud + Einstein — A+.",
+      "why": "The linked evidence records: NO AI/ML platforms detected in Explorium technographics. No TensorFlow, no AWS SageMaker, no Azure ML, no Google Vertex, no DataRobot, no H2O.ai. NO Customer Data Platform (CDP) detected. No Salesforce Data Cloud, no Segment, no mParticle, no Tealium, no Adobe CDP."
+    },
+    {
+      "body": "30+ tools with zero integration layer — AWS+Azure+on-prem hybrid. KeyStone core has open API (KeyBridge). No MuleSoft, no Fivetran, no ETL. (E-073, E-075) — MuleSoft — A.",
+      "evidence": [
+        "E-073",
+        "E-075",
+        "E-016",
+        "E-017"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "30+ tools with zero integration layer",
+      "peer_median": 1.9,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.21,
+      "so_what": "Prioritize 30+ tools with zero integration layer in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C2",
+      "theme": "Operations",
+      "title": "30+ tools with zero integration layer",
+      "what": "30+ tools with zero integration layer — AWS+Azure+on-prem hybrid. KeyStone core has open API (KeyBridge). No MuleSoft, no Fivetran, no ETL. (E-073, E-075) — MuleSoft — A.",
+      "why": "The linked evidence records: Digital Banking: Digital Insight (NCR/Fiserv) for online and mobile banking platform. ASP.NET/IIS web framework. Web Infrastructure: HubSpot CMS Hub + Progress Sitefinity + Webflow = 3 CMS platforms. Cloudflare CDN + AWS CloudFront + Azure CDN = 3 CDN layers."
+    },
+    {
+      "body": "Engineering = 2% of 606 employees — 16-year Right! Systems vendor dependency. 'Very small IT staff.' Cannot execute digital transformation internally. (E-035, E-082) — Managed Services — A.",
+      "evidence": [
+        "E-035",
+        "E-082",
+        "E-016",
+        "E-017"
+      ],
+      "magnitude": "2%",
+      "name": "Engineering = 2% of 606 employees",
+      "peer_median": 1.9,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.21,
+      "so_what": "Prioritize Engineering = 2% of 606 employees in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C2",
+      "theme": "Operations",
+      "title": "Engineering = 2% of 606 employees",
+      "what": "Engineering = 2% of 606 employees — 16-year Right! Systems vendor dependency. 'Very small IT staff.'. Cannot execute digital transformation internally. (E-035, E-082) — Managed Services — A.",
+      "why": "The linked evidence records: CFB Acquisition Booklet published for business members — formal transition communication materials prepared System conversion date communicated (Aug 1, 2025). New HAPO cards mailed before conversion. Branch continuity confirmed."
+    },
+    {
+      "body": "4 fragmented CRMs perceived as none by frontline — ActiveCampaign, Keap, Odoo, Velocify + HubSpot. Employee stated 'No CRM.' Fragmentation so severe it feels like absence. (E-008, E-031, E-043) — Salesforce FSC — A+.",
+      "evidence": [
+        "E-008",
+        "E-031",
+        "E-043",
+        "E-016"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "4 fragmented CRMs perceived as none by frontline",
+      "peer_median": 1.9,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 1.21,
+      "so_what": "Prioritize 4 fragmented CRMs perceived as none by frontline in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C2",
+      "theme": "Operations",
+      "title": "4 fragmented CRMs perceived as none by frontline",
+      "what": "4 fragmented CRMs perceived as none by frontline — ActiveCampaign, Keap, Odoo, Velocify + HubSpot. Employee stated 'No CRM.'. Fragmentation so severe it feels like absence. (E-008, E-031, E-043) — Salesforce FSC — A+.",
+      "why": "The linked evidence records: 100+ technology products detected across 14 categories — substantial technology investment for $2.4B CU Hybrid cloud: AWS (CloudFront, S3) + Microsoft Azure (AD, CDN, Blob, Front Door) + on-prem VMware/Citrix"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "106 of 106 subcaps on thin evidence"
+      ],
+      "rationale": "Segment-Specific Journeys averages 2.4/5 over 106 scored subcaps; ceiling 2.9 reflects thin evidence density (0/106 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "120 of 120 subcaps on thin evidence"
+      ],
+      "rationale": "Third-Party Risk Management averages 2.5/5 over 120 scored subcaps; ceiling 3.0 reflects thin evidence density (0/120 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Vision averages 2.0/5 over 70 scored subcaps; ceiling 2.5 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "95 of 95 subcaps on thin evidence"
+      ],
+      "rationale": "Change Impact Assessment averages 2.0/5 over 95 scored subcaps; ceiling 2.5 reflects thin evidence density (0/95 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "61 of 61 subcaps on thin evidence"
+      ],
+      "rationale": "ESG strategy averages 1.9/5 over 61 scored subcaps; ceiling 2.4 reflects thin evidence density (0/61 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "110 of 110 subcaps on thin evidence"
+      ],
+      "rationale": "Marketing Analytics & Optimization averages 2.5/5 over 110 scored subcaps; ceiling 3.0 reflects thin evidence density (0/110 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "75 of 75 subcaps on thin evidence"
+      ],
+      "rationale": "KYC/CIP Compliance averages 2.2/5 over 75 scored subcaps; ceiling 2.7 reflects thin evidence density (0/75 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "100 of 100 subcaps on thin evidence"
+      ],
+      "rationale": "Voice-Activated Banking averages 1.8/5 over 100 scored subcaps; ceiling 2.3 reflects thin evidence density (0/100 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "65 of 65 subcaps on thin evidence"
+      ],
+      "rationale": "Retention & At-Risk Intervention averages 1.3/5 over 65 scored subcaps; ceiling 1.8 reflects thin evidence density (0/65 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "66 of 66 subcaps on thin evidence"
+      ],
+      "rationale": "Document & Data Processing averages 2.5/5 over 66 scored subcaps; ceiling 3.0 reflects thin evidence density (0/66 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 1.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "55 of 55 subcaps on thin evidence"
+      ],
+      "rationale": "Device & Identity Verification averages 1.2/5 over 55 scored subcaps; ceiling 1.7 reflects thin evidence density (0/55 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "62 of 62 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Reporting averages 2.3/5 over 62 scored subcaps; ceiling 2.8 reflects thin evidence density (0/62 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "50 of 50 subcaps on thin evidence"
+      ],
+      "rationale": "Resilience Governance averages 2.0/5 over 50 scored subcaps; ceiling 2.5 reflects thin evidence density (0/50 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "65 of 65 subcaps on thin evidence"
+      ],
+      "rationale": "Reference Data Management averages 1.8/5 over 65 scored subcaps; ceiling 2.3 reflects thin evidence density (0/65 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "53 of 53 subcaps on thin evidence"
+      ],
+      "rationale": "capability dimension 13 averages 2.0/5 over 53 scored subcaps; ceiling 2.5 reflects thin evidence density (0/53 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "47 of 47 subcaps on thin evidence"
+      ],
+      "rationale": "Technology Roadmap & Investment Planning averages 1.6/5 over 47 scored subcaps; ceiling 2.1 reflects thin evidence density (0/47 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "37 of 37 subcaps on thin evidence"
+      ],
+      "rationale": "Zero Trust Architecture Strategy averages 1.9/5 over 37 scored subcaps; ceiling 2.5 reflects thin evidence density (0/37 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Director of Information Security hired Nov 2024 (Daniel M.) — dedicated security leadership reporting under CIO",
+      "evidence": [
+        "E-018",
+        "E-079"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Director of Information Security hired Nov 2024 (Daniel M.)",
+      "metric": null,
+      "peer_context": "Device & Identity Verification runs 1.21/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Director of Information Security hired Nov 2024 (Daniel M.) — dedicated security leadership reporting under CIO",
+      "timeline": {
+        "date": "2024-11-01",
+        "event": "Director of Information Security hired Nov 2024 (Daniel M.)"
+      },
+      "window": null
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Scott Mitchell appointed President/CEO Aug 2024 after 19 years at HAPO, formerly EVP/CFO",
+      "evidence": [
+        "E-002"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Scott Mitchell appointed President/CEO Aug 2024",
+      "metric": null,
+      "peer_context": "Device & Identity Verification runs 1.21/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Scott Mitchell appointed President/CEO Aug 2024 after 19 years at HAPO, formerly EVP/CFO",
+      "timeline": {
+        "date": "2024-08-01",
+        "event": "Scott Mitchell appointed President/CEO Aug 2024"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Eric Pearson (ex-CFB CEO) brought in as Chief Banking Officer — leadership integration strategy for acquired team (Jul 2025).",
+      "evidence": [
+        "E-035"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Eric Pearson (ex-CFB CEO) brought leadership integration…",
+      "metric": null,
+      "peer_context": "Device & Identity Verification runs 1.21/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Voice-Activated Banking — highest-fit surface at 61/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Eric Pearson (ex-CFB CEO) brought in as Chief Banking Officer — leadership integration strategy for acquired team (Jul 2025). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Eric Pearson (ex-CFB CEO) brought as Chief Banking Officer…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Device & Identity Verification scores 1.21/5 vs a typical 1.90 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "evidence": [
+        "E-016",
+        "E-017",
+        "E-080",
+        "E-085"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Device & Identity Verification scores 1.21/5",
+      "metric": "Device & Identity Verification 1.21/5 vs peer 1.90",
+      "peer_context": "Device & Identity Verification runs 1.21/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Twilio conversation against Voice-Activated Banking — highest-fit surface at 61/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P3C2",
+      "text": "Device & Identity Verification scores 1.21/5 vs a typical 1.90 at similar institutions — the deepest open gap in Operations and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

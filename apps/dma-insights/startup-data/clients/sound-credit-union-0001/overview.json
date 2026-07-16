@@ -1,0 +1,1178 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 70
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 97
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 11
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 1
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "sound-credit-union-0001",
+    "domain": null,
+    "hq": null,
+    "id": "939fae5b-48d1-4b90-aadc-316fc412394c",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Sound Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:45.732455Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 18,
+    "current_count": 71,
+    "dated_count": 2,
+    "median_age_months": 14.2,
+    "oldest_published_date": "2017-04-01",
+    "stale_count": 8,
+    "stale_pct": 8.08,
+    "total": 99,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 5,
+      "NEGATIVE": 4,
+      "NEUTRAL": 19,
+      "POSITIVE": 71
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 10,
+      "LinkedIn": 4
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 8,
+      "NEUTRAL": 75,
+      "POSITIVE": 16
+    },
+    "tiers": {
+      "T1": 5,
+      "T2": 31,
+      "T3": 54,
+      "T4": 1,
+      "T5": 8
+    },
+    "total_facts": 1418,
+    "total_items": 99
+  },
+  "financial_trajectory": {
+    "cagr": "14%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "ACCELERATING asset growth (~14% CAGR) but DECLINING profitability (NI –33%). Deposit cost pressure (+64% interest expense) is the primary margin compressor [E-099:F7-F8].",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 3072000000.0,
+    "branches": "28",
+    "cagr": "14%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "409",
+    "financial_highlights": {
+      "audited_financials_from_e": "099]",
+      "explorium_addition": "145+ technologies, $6,633/mo estimated web",
+      "lines": [
+        "[Explorium addition: 145+ technologies, $6,633/mo estimated web tech spend]",
+        "[UNCHANGED — Audited financials from E-099]",
+        "ACCELERATING asset growth (~14% CAGR) but DECLINING profitability (NI –33%). Deposit cost pressure (+64% interest expense) is the primary margin compressor [E-099:F7-F8]."
+      ]
+    },
+    "footprint": "Washington State (Puget Sound + Thurston County)",
+    "footprint_basis": "derived:geography",
+    "founded": 1940,
+    "geography": "Washington State (Puget Sound + Thurston County)",
+    "headcount": 409,
+    "hq": "Tacoma, WA 98402",
+    "hq_address": "Tacoma, WA 98402",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Don Clark Jr.",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Nancy Sternitzky",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIDO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Tony del Fierro",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP/CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ryan Zilker",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP/CGO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lyman Williams",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP/CLO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Robyn LaChance",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP/CSO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jamie Mullenix",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP/CPCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Martin Walker",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Innovation"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jennifer Reed",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP PR"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Sound Credit Union",
+    "license_type": "State-chartered",
+    "members": 178000,
+    "narrative_md": "Sound Credit Union is a state-chartered, NCUA-insured cooperative founded in 1940, headquartered in Tacoma, Washington [E-001, E-006]. Serving 178,000+ members across 28 branches in the Puget Sound region and Thurston County. Dual regulatory oversight from NCUA and WA DFI [E-006, E-083]. 9-member board with analytics expertise (Dr. Demirkan) and financial oversight (Griggs CPA, Pentimonti CPA) [E-099:F10-F11]. CUSO: Sound Financial Group LLC [E-044]. CEO Don Clark Jr. (MBA, BI capstone, 73% approval) [E-022].",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 5,
+          "score": 2.5,
+          "source": "Yelp"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 91,
+          "scale": 5,
+          "score": 3.7,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "work-life balance, 3.6/5 career opportunities 91 reviews on Glassdoor as of 2025 Best place I've ever worked - supportive environment, quality training, career advancement opportunities (Jan 2025 review) Community focused organization with ",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "3.7/5",
+          "signal": "data governance awareness at governance level Overall Indeed rating 3.7/5 Tacoma; Culture 3.7; Work-life 3.8; Management 3.6; Compensation 3.6; Job security 3.5 CEO approval 72.58%; 59% recommend to friend (48 yes / 33 no) Hiring Fraud Inve",
+          "source": "Indeed"
+        },
+        {
+          "signal": "Josyula (April 2024) 50K+ downloads, 4.25K reviews on Google Play Features: balances, transfers, bill pay, P2P, mobile deposit, card mgmt, Wear OS Major mobile banking system transition caused member friction - notifications lost, text bank",
+          "source": "Google Play"
+        },
+        {
+          "rating": "2.5/5",
+          "signal": "cite poor transition communication 2.5/5 average from 409 Yelp reviews - branch service praised, digital and lending complaints 7th largest CU in WA, 149th nationally, 409 employees, 177,657 members as of Dec 2025, B+ health rating Online p",
+          "source": "Yelp"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "$3.072B Total Assets",
+    "thought_leadership": [
+      {
+        "author": "Nancy Sternitzky",
+        "date": "2025-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-090",
+        "excerpt": "Nancy Sternitzky spoke at CULytics Day 2025 on 'Smart AI Guardrails' panel — Sound CU CIDO presenting on AI governance at premier CU analytics conference CEO requested summarizing months of branch visit notes using gener",
+        "title": "Nancy Sternitzky spoke at CULytics Day 2025",
+        "type": "conference",
+        "url": "https://culytics.com/blogs/smart-ai-guardrails"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-076",
+        "excerpt": "Dedicated Fraud Investigator role: conducts thorough investigations, interviews victims/witnesses/suspects, collaborates with internal/external parties Documents findings in CASE MANAGEMENT SYSTEMS — confirms structured ",
+        "title": "Dedicated Fraud Investigator role: conducts thorough investigations…",
+        "type": "article",
+        "url": "https://to.indeed.com/aansj7vvrsxg"
+      },
+      {
+        "author": null,
+        "date": "2024-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-009",
+        "excerpt": "UW FinTech Pitch Speaker Series partnership AI in fintech webinar with Hari Prasad Josyula (April 2024)",
+        "title": "UW FinTech Pitch Speaker Series partnership AI in fintech webinar…",
+        "type": "webinar",
+        "url": "https://www.linkedin.com/company/soundcreditunion"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-051",
+        "excerpt": "P1C3.1.4 Innovation KPIs: NO direct public KPIs found; proxy: FinTech Incubator has structured evaluation criteria (committee scoring, panel judging) but no published metrics dashboard P1C3.3.5 Pilot Governance:",
+        "title": "Innovation KPIs",
+        "type": "conference",
+        "url": "N/A — proxy synthesis from existing evidence"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "P1C3.4 Scaling: Zelle integration (E-020) announced but not deployed (E-021/E-026) = demonstrates scaling/retirement challenge; Core10 APIs successfully scaled to production = successful scaling example P1C3.4.4 Knowledg",
+        "title": "Core10 APIs scaled successful scaling example",
+        "type": "article",
+        "url": "N/A — synthesized from E-044, E-045, E-053"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "NO_EVIDENCE: Innovation idea management tools/platform, innovation portfolio metrics, innovation budget allocation details, and formal scaling criteria are internal operational details not publicly disclosed Proxy: FinTe",
+        "title": "NO_EVIDENCE: are internal operational details",
+        "type": "conference",
+        "url": "N/A — no evidence found"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "soundcu.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.599114+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Sound Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Five Washington State credit unions selected as peers (locked in research phase): WECU (~$2.8B), HAPO (~$3B), iQ CU (~$3B), Numerica (~$4B), WSECU (~$5B aspirational). Peers scored at category level (17 categories) using public evidence signals. Medians, P25, and P75 calculated for gap analysis.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Assessment Report Synthesis",
+    "scqa_md": "Sound Credit Union is a $3.1B in assets credit union regulated by NCUA, operating since 1940 with 409 employees. A 14.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-004, E-003]. Zennify's assessment places overall digital maturity at 2.7/5. The deepest capability gap is Recommendations & Decisioning at 2.1/5 against a 2.5 peer median [E-073, E-014].\n\nNext is Document Generation at 2.2/5 against a 2.5 peer median [E-077, E-081]. Third is Consent Lifecycle Management at 2.4/5 against a 2.5 peer median [E-091, E-093]. Counter-signal: Network Security Architecture already runs at 3.2/5 against a 3.0 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Sound Credit Union is whether to close Recommendations & Decisioning first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Sound Credit Union should lead with nCino (70/100 fit) against Customer Data Export, then sequence Databricks behind it. Closing Recommendations & Decisioning to the peer median alone is worth 0.4 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.67,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/explorium_technographic_scan.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.697972+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/phase5_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.698321+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.698627+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A3_safeguard_gates.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.699324+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A4_tier_distribution.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.699632+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/A6_coverage_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.700373+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.701562+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.703002+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.703235+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/b5a_synthesis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.703907+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/b5b_synthesis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.704730+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/b5c_synthesis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.705267+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase0_2_3_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.705517+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase3_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.705709+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase4_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.705916+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase4_p1p2_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.706141+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/checkpoints/phase7_workbook_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.706481+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/r1_revision_delta.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.706827+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/r2_revision_delta.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:45.707089+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 31
+    },
+    "stage_ms": {
+      "manifest": 20,
+      "parse": 7252,
+      "persist": 877
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=6",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 152 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 01_evidence/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_Sound_CU_CONSOLIDATED.docx count=9",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=0 subcaps=0 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 11 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:branches,primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/explorium_technographic_scan.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/phase5_analysis.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A3_safeguard_gates.csv — no fingerprint matched (best confidence 0.20); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A4_tier_distribution.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/A6_coverage_map.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/b5a_synthesis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/b5b_synthesis.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/b5c_synthesis.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase0_2_3_complete.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase3_complete.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase4_complete.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase4_p1p2_complete.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/checkpoints/phase7_workbook_complete.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/r1_revision_delta.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/r2_revision_delta.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 10",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "governance_audit_logs: reasoning_chain=0 contradictions=6",
+      "caps_applied_log: 152 cap event(s) parsed from 03_scoring_workbook/caps_applied_log.csv",
+      "used variant recommendations source: 01_evidence/recommendations.json",
+      "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_Sound_CU_CONSOLIDATED.docx count=9",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=0 subcaps=0 replaced_docx_scqa=True",
+      "tech_stack_from_report_prose: 11 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:branches,primary_regulator",
+      "insights_from_client_profile_findings: 10",
+      "INFO/pattern_gap: 01_evidence/explorium_technographic_scan.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/phase5_analysis.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A3_safeguard_gates.csv — no fingerprint matched (best confidence 0.20); 16 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A4_tier_distribution.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/A6_coverage_map.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 04_reports/report_analysis.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/b5a_synthesis.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/b5b_synthesis.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/b5c_synthesis.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase0_2_3_complete.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase3_complete.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase4_complete.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase4_p1p2_complete.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/checkpoints/phase7_workbook_complete.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/r1_revision_delta.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/r2_revision_delta.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "timeline_events_persisted: 12",
+      "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 10"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 2.38,
+      "pillar_id": "P1",
+      "score": 2.45,
+      "subcaps_scored": 173
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.63,
+      "pillar_id": "P2",
+      "score": 2.53,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.61,
+      "pillar_id": "P3",
+      "score": 2.79,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.59,
+      "pillar_id": "P4",
+      "score": 2.91,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-07",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:45.732455Z",
+    "created_at": "2026-07-02T23:10:45.732455Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "82f83f53-84c6-4f95-870e-e89545805646",
+    "overall_score": null,
+    "request_id": "DMA-ASM-SOUND-20260407-0001",
+    "started_at": "2026-07-02T23:10:45.732455Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 5,
+        "score": 2.5,
+        "source": "Yelp"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 91,
+        "scale": 5,
+        "score": 3.7,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 18 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-049",
+        "E-014",
+        "E-036",
+        "E-046"
+      ],
+      "magnitude": null,
+      "name": "Sharpen strategic posture",
+      "peer_median": 1.0,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 1.14,
+      "so_what": "Protect Sharpen strategic posture as a proof point: use it to anchor the strategy and governance story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 18 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: NO_EVIDENCE: No ESG strategy document, sustainability report, TCFD disclosure, or climate risk assessment found publicly NO_EVIDENCE: No green lending, sustainable finance products, or ESG-specific products found"
+    },
+    {
+      "body": "Unify the 6 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-062",
+        "E-069",
+        "E-008",
+        "E-014"
+      ],
+      "magnitude": "0.2 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.84,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C2",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 6 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Online loan application: check loan status link available (loanspq.com integration) - digital loan tracking Student loans via StudentChoice portal (soundcu.studentchoice.org) - embedded partner lending"
+    },
+    {
+      "body": "Recommendations & Decisioning is a priority capability gap in customer experience, scoring 2.14/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [
+        "E-073",
+        "E-014",
+        "E-017",
+        "E-018"
+      ],
+      "magnitude": "0.4 pts below peer median",
+      "name": "Recommendations & Decisioning",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.14,
+      "so_what": "Prioritize Recommendations & Decisioning in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Recommendations & Decisioning",
+      "what": "Recommendations & Decisioning is a priority capability gap in customer experience, scoring 2.14/5 against a peer median of 2.5. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The linked evidence records: P2C4.1 Customer Intelligence: CEO's BI/Analytics project from MBA (E-007); BI overseen by CLO Lyman Williams (E-005); CIDO Sternitzky data-focused; Dr. Demirkan (analytics professor) on board — strong data leadership signals but no published customer data platform or CDH"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-099"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P1C3": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-090"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P1C4": {
+      "band": 0.4,
+      "ceiling": 2.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-054"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P1C5": {
+      "band": 0.4,
+      "ceiling": 1.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-046"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P2C1": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P2C2": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P2C4": {
+      "band": 0.4,
+      "ceiling": 2.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-071"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P3C1": {
+      "band": 0.4,
+      "ceiling": 2.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P3C2": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P3C3": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P3C4": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-084"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P4C1": {
+      "band": 0.4,
+      "ceiling": 2.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P4C2": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-090"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P4C3": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-094"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    },
+    "P4C4": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "uncertainty_register",
+      "evidence": [
+        "E-033"
+      ],
+      "modifiers": [],
+      "rationale": "Register-sourced ceiling across 1 capability rows."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Completed acquisition of Washington Business Bank June 2025. Completed acquisition of Washington Business Bank June 2025 (Jun 2025).",
+      "evidence": [
+        "E-004"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Completed acquisition of Washington Business Bank June 2025",
+      "metric": null,
+      "peer_context": "Recommendations & Decisioning runs 2.14/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Customer Data Export — highest-fit surface at 70/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Completed acquisition of Washington Business Bank June 2025. Completed acquisition of Washington Business Bank June 2025 (Jun 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-06-01",
+        "event": "Completed acquisition of Washington Business Bank June 2025"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Jamie Mullenix appointed SVP/Chief People and Culture Officer - dedicated C-suite culture role (E-005) (Apr 2026).",
+      "evidence": [
+        "E-048",
+        "E-005"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Jamie Mullenix appointed SVP/Chief People and Culture…",
+      "metric": null,
+      "peer_context": "Recommendations & Decisioning runs 2.14/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Jamie Mullenix appointed SVP/Chief People and Culture Officer - dedicated C-suite culture role (E-005) (Apr 2026). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2026-04-01",
+        "event": "Jamie Mullenix appointed SVP/Chief People and Culture…"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Lyman Williams promoted to EVP/Chief Lending & Business…. Lyman Williams promoted to EVP/Chief Lending & Business Officer - oversees BI (May 2025).",
+      "evidence": [
+        "E-005"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Lyman Williams promoted to EVP/Chief Lending & Business",
+      "metric": null,
+      "peer_context": "Recommendations & Decisioning runs 2.14/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Lyman Williams promoted to EVP/Chief Lending & Business…. Lyman Williams promoted to EVP/Chief Lending & Business Officer - oversees BI (May 2025).",
+      "timeline": {
+        "date": "2025-05-01",
+        "event": "Lyman Williams promoted to EVP/Chief Lending & Business…"
+      },
+      "window": null
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Founded 1940, 170K+ members, digital banking solutions Highest IT hiring in 12 months: Python, PHP, PowerOn, Symitar PowerOn",
+      "evidence": [
+        "E-002"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Founded 1940, 170K+ members, digital banking solutions",
+      "metric": "Highest IT hiring 12 months",
+      "peer_context": "Recommendations & Decisioning runs 2.14/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Founded 1940, 170K+ members, digital banking solutions Highest IT hiring in 12 months: Python, PHP, PowerOn, Symitar PowerOn. Window: 12-month window.",
+      "timeline": null,
+      "window": "12-month window"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "WBB ACQUISITION: completed acquisition of Washington Business Bank, increased Thurston County branch footprint, gained ~800 business clients, expanding business segment support (May 2025).",
+      "evidence": [
+        "E-099"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Completed acquisition of Washington Business Bank…",
+      "metric": null,
+      "peer_context": "Recommendations & Decisioning runs 2.14/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Customer Data Export — highest-fit surface at 70/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "WBB ACQUISITION: completed acquisition of Washington Business Bank, increased Thurston County branch footprint, gained ~800 business clients, expanding business segment support (May 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-05-01",
+        "event": "Completed acquisition of Washington Business Bank…"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Recommendations & Decisioning scores 2.14/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-073",
+        "E-014",
+        "E-017",
+        "E-018"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Recommendations & Decisioning scores 2.14/5 vs a typical…",
+      "metric": "Recommendations & Decisioning 2.14/5 vs peer 2.50",
+      "peer_context": "Recommendations & Decisioning runs 2.14/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Customer Data Export — highest-fit surface at 70/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Recommendations & Decisioning scores 2.14/5 vs a typical 2.50 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

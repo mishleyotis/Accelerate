@@ -1,0 +1,103 @@
+{
+  "catalogue_version": "v5.5",
+  "cells": [
+    {
+      "aliased_from": null,
+      "band": "M2",
+      "cap_applied": true,
+      "cap_reason": null,
+      "data_source": "direct",
+      "enrichment_evidence_ids": [],
+      "has_enrichment": false,
+      "id": "P1",
+      "is_thin_evidence": true,
+      "issue_count": 0,
+      "label": "Strategy, Governance & Culture",
+      "parent_category_id": null,
+      "parent_id": null,
+      "peer_gap": -0.66,
+      "peer_median": 2.96,
+      "score": 2.3
+    },
+    {
+      "aliased_from": null,
+      "band": "M2",
+      "cap_applied": true,
+      "cap_reason": null,
+      "data_source": "direct",
+      "enrichment_evidence_ids": [],
+      "has_enrichment": false,
+      "id": "P2",
+      "is_thin_evidence": true,
+      "issue_count": 0,
+      "label": "Customer Experience & Engagement",
+      "parent_category_id": null,
+      "parent_id": null,
+      "peer_gap": -0.99,
+      "peer_median": 3.31,
+      "score": 2.32
+    },
+    {
+      "aliased_from": null,
+      "band": "M2",
+      "cap_applied": true,
+      "cap_reason": null,
+      "data_source": "direct",
+      "enrichment_evidence_ids": [],
+      "has_enrichment": false,
+      "id": "P3",
+      "is_thin_evidence": true,
+      "issue_count": 0,
+      "label": "Process Automation & Operations",
+      "parent_category_id": null,
+      "parent_id": null,
+      "peer_gap": -0.7,
+      "peer_median": 3.15,
+      "score": 2.45
+    },
+    {
+      "aliased_from": null,
+      "band": "M2",
+      "cap_applied": true,
+      "cap_reason": null,
+      "data_source": "direct",
+      "enrichment_evidence_ids": [],
+      "has_enrichment": false,
+      "id": "P4",
+      "is_thin_evidence": true,
+      "issue_count": 0,
+      "label": "Data & AI Enablement",
+      "parent_category_id": null,
+      "parent_id": null,
+      "peer_gap": -1.16,
+      "peer_median": 3.36,
+      "score": 2.2
+    }
+  ],
+  "entity_display_id": "pentegra-retirement-serv-0001",
+  "issue_overlay": false,
+  "narrative": {
+    "benchmark_md": "Pentegra was benchmarked against four locked peers in the retirement plan administration space. Peers were selected for sub-vertical match, size proximity, and competitive relevance. Peer scoring used public evidence with Explorium technographic enrichment.",
+    "issue_register_md": "",
+    "per_pillar_md": {
+      "P1": "",
+      "P2": "",
+      "P3": "",
+      "P4": ""
+    },
+    "per_subcap_md": null,
+    "per_subcap_meta": null
+  },
+  "peer_overlay": true,
+  "run_request_id": "DMA-ASM-PENT-20260317-0001",
+  "run_status": "ACTIVE",
+  "subvertical": "RIA",
+  "value_chain_buckets": [],
+  "view_mode": "standard",
+  "warnings": [
+    "unresolved_subcap:P1C2.7.AM1",
+    "unresolved_subcap:P1C2.9.AM1",
+    "unresolved_subcap:P1C1.3.AM1"
+  ],
+  "zoom": "pillar"
+}

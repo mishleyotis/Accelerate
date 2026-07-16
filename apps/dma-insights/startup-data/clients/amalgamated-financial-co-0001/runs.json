@@ -1,0 +1,21 @@
+{
+  "active_run_id": "23e7b7f7-fa08-475d-80d7-e37be833335d",
+  "items": [
+    {
+      "assessment_date": "2026-04-28",
+      "assessment_date_source": "run_manifest",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:10:38.093273Z",
+      "created_at": "2026-07-02T23:10:38.093273Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "hybrid",
+      "id": "23e7b7f7-fa08-475d-80d7-e37be833335d",
+      "overall_score": 2.59,
+      "request_id": "DMA-ASSESS-AMAL-20260428-0001",
+      "started_at": "2026-07-02T23:10:38.093273Z",
+      "status": "ACTIVE",
+      "subcap_count": 678,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

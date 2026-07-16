@@ -1,0 +1,1129 @@
+{
+  "entity_display_id": "mission-federal-credit-u-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1.5.6",
+        "P4C2.8.6",
+        "P2C2.7.4",
+        "P2C2.7.3",
+        "P3C2.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "cc1a8e4a-1feb-4d0a-9950-652caba9357e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-127",
+        "E-131"
+      ],
+      "linked_subcap_id": "P4C1.5.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Governed Federation of External Data Sources a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-131].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "CFO Steve Hasbrooke mandate: \"ongoing evolution of data analytics and process improvement\" and \"increasing efficiencies",
+      "what_text": "Governed Federation of External Data Sources is one of Mission Federal Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Mission Federal Credit Union's ability to deliver a stronger data and technology foundation [E-127].",
+      "why_text": "At 1.5 out of 5, Governed Federation of External Data Sources sits 0.8 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-020, E-127].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.1.6",
+        "P3C1.3.CU2",
+        "P2C3.3.CU1",
+        "P1C1.3.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-004",
+      "id": "5ff4ee78-d442-4ae9-91f3-b142ba6f8243",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-065",
+        "E-021",
+        "E-056",
+        "E-035",
+        "E-057",
+        "E-058",
+        "E-063",
+        "E-059"
+      ],
+      "linked_subcap_id": "P2C1.1.6",
+      "platforms": [
+        "salesforce",
+        "twilio",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Competitive Marketing Intelligence a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Enhancing member services — Evidenced by 4.8/5 member satisfaction score, 20,000 personalized consultations in 2024, Sav",
+      "what_text": "2. Enhancing member services — Evidenced by 4.8/5 member satisfaction score, 20,000 personalized consultations in 2024, SavvyMoney credit assistance for 44,000+ members, Quick-Switch Direct Deposit, and Digital Member ID Card launch [, Annual Report 2024] [E-021].",
+      "why_text": "At 1.0 out of 5, Competitive Marketing Intelligence sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-065, E-021].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C5.2.4",
+        "P1C1.8.2",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-007",
+      "id": "c5a4e763-962d-488a-83e4-51833cf9abc8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-053"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-053"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-003"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-082",
+        "E-014"
+      ],
+      "linked_subcap_id": "P1C5.2.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make ESG governance a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-014].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "Additional strategic signals include",
+      "what_text": "ESG governance is one of Mission Federal Credit Union's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Mission Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-082].",
+      "why_text": "At 1.0 out of 5, ESG governance sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-053, E-082].",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.5.IB1",
+        "P2C4",
+        "P3C3.1.3",
+        "P1C5.6.1",
+        "P1C2.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-006",
+      "id": "891eeeb5-2e57-4d19-ae46-e3189195efd9",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-084",
+            "E-087",
+            "E-088",
+            "E-089"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-084",
+        "E-087",
+        "E-088",
+        "E-089",
+        "E-083",
+        "E-085",
+        "E-086",
+        "E-090"
+      ],
+      "linked_subcap_id": "P2C4.5.IB1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "These gaps affect assessment accuracy and must be addressed through internal evidence discovery during the first client engagement [E-088].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "These gaps affect assessment accuracy",
+      "what_text": "These gaps affect assessment accuracy and must be addressed through internal evidence discovery during the first client engagement. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes Mission Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-087].",
+      "why_text": "The assessment found: “Homepage features product-specific banners (HELOC, credit cards, Ed character) — content-based recommendations 20,000 personalized member consultations in 2024 — human-driven recommendation delivery” [E-084]. Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5.2.3",
+        "P3C4.6.2",
+        "P1C5.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-002",
+      "id": "f2730c24-2a01-4758-b9fd-6c814a1fda63",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-053"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-003"
+        },
+        {
+          "e_ids": [
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-053"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-053",
+        "E-065"
+      ],
+      "linked_subcap_id": "P1C5.2.3",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make financial inclusion a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-053].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "Record financial performance: $73.2M net income, $5.8B deposits, $4.6B loans, 34,188 new accounts in 2024 — financial ca",
+      "what_text": "Financial inclusion is one of Mission Federal Credit Union's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Mission Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-015].",
+      "why_text": "The assessment found: “Online new member application available at missionfed.com/apps/joinnow/ 34,188 new accounts opened in 2024 (annual report) — volume metric tracked” [E-065]. At 1.5 out of 5, financial inclusion sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5.2.2",
+        "P1C1.3.6",
+        "P1C5.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-003",
+      "id": "e65ca7c5-08ea-4968-a2b2-43a0f65bd59b",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-053"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-053"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-007"
+        },
+        {
+          "e_ids": [
+            "E-060",
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-067",
+        "E-068",
+        "E-053"
+      ],
+      "linked_subcap_id": "P1C5.2.2",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make community investment a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 2.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-067].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "Deepening community impact — Evidenced by $1.2M+ community giving, Juntos Avanzamos designation (first SD-based CU), Gir",
+      "what_text": "3. Deepening community impact — Evidenced by $1.2M+ community giving, Juntos Avanzamos designation (first SD-based CU), Girl Scouts San Diego Official CU partnership (1,400 new accounts), San Diego Padres brand partnership, and SD Symphony 10-year naming deal. In Zennify's assessment community investment scores 2.0 out of 5, versus a typical 2.0 at comparable institutions [E-060].",
+      "why_text": "The assessment found: “Mobile app features at activation: check balances, view history, transfer funds, deposit checks Lock/Unlock card feature — instant card control from mobile” [E-068]. At 2.0 out of 5, community investment shows a developing capability still short of the peer standard. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.8.6",
+        "P4C3.6.9",
+        "P4C4.6.4",
+        "P1C4.1.6",
+        "P4C3.1.7",
+        "P4C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-005",
+      "id": "504cce58-f191-4875-8485-8bf8ef8f8862",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-020",
+        "E-138",
+        "E-024"
+      ],
+      "linked_subcap_id": "P4C2.8.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make RAG Cost/Performance Governance a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-024].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "CIO Jojo Seva expertise: Recognized leader in AI, core banking, enterprise digital transformation, and information secur",
+      "what_text": "RAG Cost/Performance Governance is one of Mission Federal Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Mission Federal Credit Union's ability to deliver a stronger data and technology foundation [E-138].",
+      "why_text": "At 1.5 out of 5, RAG Cost/Performance Governance sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-020, E-138].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4.1.6",
+        "P4C3.1.7",
+        "P4C3.1.6",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-008",
+      "id": "e4045f94-f857-44a7-a2c1-58f99e26ee80",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-040",
+        "E-113",
+        "E-021",
+        "E-022",
+        "E-043"
+      ],
+      "linked_subcap_id": "P1C4.1.6",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make UAT Planning & Execution a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": null,
+      "theme": "Culture & Change",
+      "title": "Reinvesting in technology — Evidenced by September 2025 digital banking platform redesign (\"Fresh Design. Smarter Featur",
+      "what_text": "1. Reinvesting in technology — Evidenced by September 2025 digital banking platform redesign (\"Fresh Design. Smarter Features. Easier Access\"), Las Vegas data center upgrades in 2024, and active hiring for Data Architect ($120–140K) and Senior BA–Information Management ($102–128K). In Zennify's assessment UAT Planning & Execution scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-040].",
+      "why_text": "The assessment found: “NCUA 5300 Call Report filed quarterly — Q4 2025 data confirmed (CUScore) HMDA reporting required for mortgage lending activity” [E-113]. At 1.5 out of 5, UAT Planning & Execution sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.8.2",
+        "P1C2.7.IC1",
+        "P3C1.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-009",
+      "id": "8bb6e417-c3b6-4cad-9cb8-ad53c4a288c6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-015"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-014",
+        "E-016",
+        "E-019",
+        "E-021",
+        "E-024",
+        "E-018",
+        "E-020"
+      ],
+      "linked_subcap_id": "P1C1.8.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Strategic Integration Planning a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-016].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Mission Fed's stated 2025 strategic priorities center on three pillars",
+      "what_text": "Strategic Integration Planning is one of Mission Federal Credit Union's least developed strategy and governance capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Mission Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-014].",
+      "why_text": "At 1.0 out of 5, Strategic Integration Planning sits 1.8 points below the 2.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-015, E-014].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2.8.6",
+        "P4C3.6.9",
+        "P2C4.5.6",
+        "P3C1.3.CU2",
+        "P1C1.3.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "bf8bc5b1-53af-4b1e-9612-549ca1b5435a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-084",
+            "E-087",
+            "E-088",
+            "E-089"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-006"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-007"
+        },
+        {
+          "e_ids": [
+            "E-014"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-128",
+        "E-161",
+        "E-039",
+        "E-014",
+        "E-084",
+        "E-087",
+        "E-088",
+        "E-089"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make CLV-Based Segmentation a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-161].",
+      "source_rec_id": "REC-01",
+      "theme": "CX & Personalization",
+      "title": "Implement Salesforce Financial Services Cloud as Unified Member CRM",
+      "what_text": "Member data fragmented across CiviCRM (open-source, not FS-specific) + HubSpot (marketing only) + Symitar Episys (core banking). No unified member 360. Personalization scored 2.33 avg — peer median 2.25. Tech Stack Validation: VALIDATED: No Salesforce products detected in 100+ technology stack. CiviCRM lacks FS data model (households, financial accounts, goals). HubSpot lacks member lifecycle management. Neither connects to Symitar core. Replaces: CiviCRM (member relationships) + HubSpot (partial CRM functions)\nIntegrates With: Symitar Episys (via MuleSoft connector), Azure Databricks, Glia\nPeer Gap: MFCU=2.33 vs Star One=3.0, Patelco=2.5. Star One's boost.ai + integrated platform drives higher personalization. Financial Services Cloud + Data Cloud — pre-built CU data model, household management, financial goal tracking, member 360\nCounter-Argument & Rebuttal:. In Zennify's assessment CLV-Based Segmentation scores 1.0 out of 5, versus a typical 2.3 at comparable institutions [E-128].",
+      "why_text": "The assessment found: “Homepage features product-specific banners (HELOC, credit cards, Ed character) — content-based recommendations 20,000 personalized member consultations in 2024 — human-driven recommendation delivery” [E-084]. At 1.0 out of 5, CLV-Based Segmentation sits 1.3 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.9",
+        "P2C4.5.6",
+        "P1C2.7.3",
+        "P4C3.3.1",
+        "P4C3.3.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "5932bb50-bc8b-48af-9489-e8f4255be89d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-149",
+        "E-161",
+        "E-097",
+        "E-146",
+        "E-122",
+        "E-150",
+        "E-148",
+        "E-147"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Technology Roadmap & Investment Planning a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-097].",
+      "source_rec_id": "REC-02",
+      "theme": "Architecture & Cloud",
+      "title": "Deploy MuleSoft Anypoint for API-Led Integration Architecture",
+      "what_text": "SSIS (Microsoft SQL Server Integration Services) is the ONLY integration tool detected — batch ETL, no real-time APIs, no API governance. Integration scored 2.57 avg. Tech Stack Validation: VALIDATED: No MuleSoft, no Boomi, no Informatica, no Workato, no modern iPaaS detected. SSIS is legacy batch ETL from SQL Server stack. 100+ applications need modern API connectivity. Replaces: SSIS (as primary integration layer) — SSIS can continue for batch SQL jobs while MuleSoft handles real-time APIs\nIntegrates With: Symitar Episys (pre-built connector via MuleSoft Accelerator for FS), FSC, Glia, HubSpot (during transition), Azure Databricks, all 100+ apps\nPeer Gap: MFCU=2.57 vs Star One=3.5 (Payfinia instant payments). Patelco platform strategy (Alkami, CU Direct) shows modern integration approach. In Zennify's assessment Technology Roadmap & Investment Planning scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-161].",
+      "why_text": "At 2.0 out of 5, Technology Roadmap & Investment Planning sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-149, E-161].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.5.6",
+        "P4C2.8.6",
+        "P4C3.6.9",
+        "P2C4.5.6",
+        "P3C1.3.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "47307852-d9af-4d59-bc15-d610d650af93",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-128",
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-027",
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-128",
+        "E-161",
+        "E-123",
+        "E-125",
+        "E-130",
+        "E-027",
+        "E-124",
+        "E-126"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Governed Federation of External Data Sources a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-123].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Unify Member Data with Salesforce Data Cloud",
+      "what_text": "Member data siloed across 3+ systems: Symitar Episys (core accounts), CiviCRM (relationships), HubSpot (marketing). No MDM platform detected. No unified member profile. Data Management scored 2.48 avg. Tech Stack Validation: VALIDATED: No CDP (Customer Data Platform) detected. No MDM platform detected. Azure Data Lake + Databricks provide ANALYTICS infrastructure but not real-time unified member profiles for operational use. CiviCRM + HubSpot + Symitar = 3 separate member repositories. Replaces: Nothing directly — Data Cloud COMPLEMENTS Azure Databricks (analytics) while providing operational CDP layer\nIntegrates With: FSC (provides real-time profiles), MuleSoft (ingests from all sources), Azure Databricks (bi-directional analytics), Symitar (member account data) Peer Gap: MFCU=2.48 vs Star One=3.0. Star One's AI deployment implies better data foundation. In Zennify's assessment Governed Federation of External Data Sources scores 1.5 out of 5, versus a typical 2.3 at comparable institutions [E-161].",
+      "why_text": "At 1.5 out of 5, Governed Federation of External Data Sources sits 0.8 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-128, E-161].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.8.6",
+        "P2C2.2.6",
+        "P1C4.1.6",
+        "P4C2.1.2",
+        "P4C2.7.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "3e385d86-f8af-492f-89d4-18b4f99ddfeb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-020",
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-135",
+        "E-020",
+        "E-131",
+        "E-027",
+        "E-137",
+        "E-161",
+        "E-134",
+        "E-132"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make RAG Cost/Performance Governance a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-131].",
+      "source_rec_id": "REC-04",
+      "theme": "Analytics & AI",
+      "title": "Activate AI Member Service with Einstein AI + Agentforce",
+      "what_text": "CIO Jojo Seva is recognized AI expert. Azure Databricks deployed (ML infrastructure). Glia + LivePerson are AI-capable platforms. But NO production member-facing AI detected externally. WebChat is human-agent only. Analytics/AI scored 2.58 avg. Tech Stack Validation: VALIDATED: No Einstein, no Agentforce, no chatbot/virtual assistant detected. Glia Virtual Assistants (GVA) are AVAILABLE (pre-trained on 800+ banking scenarios) but NOT deployed — WebChat page shows human-agent model M-F 7am-7pm. Databricks provides ML infrastructure but no production AI for member-facing use cases. Replaces: Does not replace Databricks (keeps data science platform) — Agentforce provides PRODUCTION AI deployment for member-facing channels. Could replace or augment Glia WebChat with AI-first approach. In Zennify's assessment RAG Cost/Performance Governance scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-020].",
+      "why_text": "At 1.5 out of 5, RAG Cost/Performance Governance sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-135, E-020].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4.5.6",
+        "P3C1.4.4",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "4bf8b819-a393-4d05-8d4e-ebfb8b2c3e50",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-060",
+            "E-067"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-003"
+        },
+        {
+          "e_ids": [
+            "E-021",
+            "E-035",
+            "E-056",
+            "E-057"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-021"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-067",
+        "E-161",
+        "E-060",
+        "E-021",
+        "E-056",
+        "E-035",
+        "E-057"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Competitive Marketing Intelligence a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-161].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Replace HubSpot with Marketing Cloud for Member-Aware Journeys",
+      "what_text": "HubSpot Marketing Hub operates standalone — not connected to member relationship or account data from Symitar. Multi-channel marketing active (CSBimpact, Power Digital, TV, radio, OTT, programmatic) but no journey orchestration tied to member lifecycle. Marketing scored 2.3 avg. Tech Stack Validation: VALIDATED: HubSpot Marketing Hub IS present (confirmed Explorium). Marketing Cloud would REPLACE HubSpot as primary marketing automation. Current programmatic/media stack (Google Tag Manager, Facebook Pixel, PubMatic, Rubicon, Simpli.fi) would REMAIN and integrate with MC. Replaces: HubSpot Marketing Hub (marketing automation) + HubSpot Forms (lead capture)\nIntegrates With: FSC (member lifecycle data), Data Cloud (segment activation), existing ad tech stack (GTM, FB Pixel, programmatic platforms) Peer Gap: MFCU=2.3 vs SDCCU=3.0. In Zennify's assessment Competitive Marketing Intelligence scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-067].",
+      "why_text": "At 1.0 out of 5, Competitive Marketing Intelligence sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-066, E-067].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.8.6",
+        "P4C3.6.9",
+        "P2C4.5.6",
+        "P1C4.1.6",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "6bc1406b-e8df-48f4-aa20-55a65f5e6b73",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-131"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-161"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-133",
+        "E-161",
+        "E-131",
+        "E-027",
+        "E-137",
+        "E-134",
+        "E-132",
+        "E-135"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make RAG Cost/Performance Governance a near-term focus for Mission Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-131].",
+      "source_rec_id": "REC-06",
+      "theme": "Analytics & AI",
+      "title": "Consolidate BI Analytics with Tableau",
+      "what_text": "9+ separate BI/analytics tools detected: MicroStrategy, Power BI, SAP Crystal Reports, SAP Crystal Server, SSRS, Google Analytics, Lucky Orange, Matomo, Yahoo Analytics. Tool sprawl increases TCO, creates inconsistent reporting, and multiplies training requirements. scored 2.58 avg. Tech Stack Validation: VALIDATED: No Tableau detected. 9 BI tools confirmed by Explorium technographics. NOTE: Power BI has strong Azure integration. Tableau recommendation is CONSOLIDATION strategy, not full replacement — Power BI may co-exist for Azure-native workloads while Tableau provides Salesforce-native analytics. Replaces: Reduces reliance on MicroStrategy + SAP Crystal Reports/Server + SSRS + Lucky Orange + Matomo + Yahoo Analytics. Power BI may co-exist for Azure workloads. Google Analytics remains for web analytics. In Zennify's assessment RAG Cost/Performance Governance scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-161].",
+      "why_text": "At 1.5 out of 5, RAG Cost/Performance Governance sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-133, E-161].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Key Positioning Insight: Mission Fed's strongest competitive position is in P3 (Operations & Risk), where the zero-breach record and 23% fraud reduction give it a clear advantage over Patelco (ransomware) and Logix (limited investment). The weakest competitive position is P1 (Strategy), where all four peers score higher — though this is likely inflated by PUBLIC evidence mode limitations on strategy documentation.",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member Engagement (P2) — Score 2.36 vs Median 2.56 (Gap -0.2)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) — Score 2.6 vs Median 2.62 (Gap -0.02)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology (P4) — Score 2.57 vs Median 2.56 (Gap 0.01)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": ""
+  },
+  "run_request_id": "DMA-ASM-MFCU-20260412-0001"
+}

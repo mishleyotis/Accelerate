@@ -1,0 +1,1004 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "amount": null,
+      "announced_on": null,
+      "body": "San Joaquin Valley expansion \u2014 San Joaquin Valley expansion",
+      "closed_on": null,
+      "details": "San Joaquin Valley expansion \u2014 San Joaquin Valley expansion",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "id": "685e5706-6352-4ee0-a45b-868a9fd36ed1",
+      "source_url": null,
+      "status": null,
+      "target": "Valley Republic Bank",
+      "title": "Valley Republic Bank"
+    },
+    {
+      "acquirer": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Sacramento market entry \u2014 Sacramento market entry",
+      "closed_on": null,
+      "details": "Sacramento market entry \u2014 Sacramento market entry",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "id": "a8ce0f55-470b-4126-9819-c9b6c6b7dbe5",
+      "source_url": null,
+      "status": null,
+      "target": "Sierra Vista Bank",
+      "title": "Sierra Vista Bank"
+    },
+    {
+      "acquirer": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "amount": "$2B",
+      "announced_on": null,
+      "body": "$2B asset addition \u2014 largest acquisition \u2014 $2B asset addition \u2014 largest acquisition",
+      "closed_on": null,
+      "details": "$2B asset addition \u2014 largest acquisition \u2014 $2B asset addition \u2014 largest acquisition",
+      "e_id": null,
+      "event_date": "2014-01-01",
+      "id": "d4e21a2f-66e2-4d15-8c8f-e341119a51ab",
+      "source_url": null,
+      "status": null,
+      "target": "North Valley Bancorp",
+      "title": "North Valley Bancorp"
+    },
+    {
+      "acquirer": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Redding market entry \u2014 Redding market entry",
+      "closed_on": null,
+      "details": "Redding market entry \u2014 Redding market entry",
+      "e_id": null,
+      "event_date": "2007-01-01",
+      "id": "0b2a8479-c3af-4383-b3bb-b17eca2ef657",
+      "source_url": null,
+      "status": null,
+      "target": "Bank of Commerce",
+      "title": "Bank of Commerce"
+    },
+    {
+      "acquirer": "Tri Counties Bank (TriCo Bancshares, NASDAQ: TCBK)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Branch expansion \u2014 Branch expansion",
+      "closed_on": null,
+      "details": "Branch expansion \u2014 Branch expansion",
+      "e_id": null,
+      "event_date": "2003-01-01",
+      "id": "4dfe07cd-ecc2-4b08-9f7e-b48e59cf4248",
+      "source_url": null,
+      "status": null,
+      "target": "Westamerica Thrift",
+      "title": "Westamerica Thrift"
+    }
+  ],
+  "entity_display_id": "tri-counties-bank-trico--0001",
+  "financials": {
+    "lines": [
+      "Trajectory Analysis: Deposits and loans are both ACCELERATING in Q2 2025, while the efficiency ratio is IMPROVING (from 59.56% to 56.18%) \u2014 a positive signal suggesting operational optimization is underway. However, NIB deposits are DECLINING as a share of total deposits, indicating competitive pressure from interest-bearing alternatives. The institution's cost of deposits was 1.46% in Q4 2024, decreasing 6bps QoQ, suggesting effective deposit pricing management [E-091]. The $10B asset threshold crossing appears achievable within 1\u20132 years organically, or immediately through acquisition.",
+      "TCB demonstrates a financially healthy institution with accelerating growth momentum entering 2025-2026. The deposit surge in Q2 2025 (+8.3% annualized) is particularly notable, reflecting successful execution of targeted deposit acquisition strategies. However, the declining share of non-interest bearing deposits (33.2% \u2192 31.8% \u2192 30.6%) signals competitive pressure from rate-sensitive depositors migrating to interest-bearing alternatives \u2014 a trend that directly impacts net interest margin and creates urgency for digital engagement strategies to retain core deposits [E-091, E-086].",
+      "Trajectory Classification:",
+      "Deposits: ACCELERATING \u2014 $170.5M surge Q2 2025 demonstrates successful acquisition strategy. Loans: ACCELERATING \u2014 $138.2M growth Q2 2025 (+8.1% annualized), led by commercial real estate and C&I. Profitability: STABLE \u2014 NI declined slightly FY2023-2024 but trending up in 2025. ROA compressing from 2022 highs as rate environment normalizes. Efficiency: IMPROVING \u2014 59.56% \u2192 56.18% improvement in Q2 2025 signals operational optimization gains. Target: sustain below 57%. NIB Deposits: DECLINING \u2014 36.5% \u2192 30.6% over 3 years. Critical metric for NIM preservation. Requires digital engagement strategy to retain core depositors [E-091].",
+      "TCB demonstrates a STABLE-TO-ACCELERATING financial trajectory with particular strength in deposit and loan growth emerging in 2025. The efficiency ratio improvement from 59.56% (FY2024) to 56.18% (Q2 2025) is the most significant operational signal, suggesting that the technology rationalization described in investor presentations [E-071] may be beginning to yield results [E-091, E-015].",
+      "Deposit Growth Deep Dive: Deposit Growth Deep Dive: TCB's deposit strategy centers on three pillars: (1) growing non-interest bearing demand deposits and money market checking accounts to reduce rate sensitivity, (2) managing cost of deposits through customized pricing strategies ($1.05B in strategically priced deposits at 3.59% weighted average) [E-091], and (3) competing in a 'competitive landscape for deposits' by leveraging Federal Reserve rate changes [E-086]. The NIB deposit decline from 35.4% (FY2022) to 30.6% (Q2 2025) represents a 480bps erosion over three years \u2014 a structural challenge as customers migrate to interest-bearing alternatives. This creates a direct Salesforce Marketing Cloud use case: automated deposit retention journeys triggered by behavioral signals (large withdrawals, rate inquiries, competitor research patterns) combined with Data Cloud segmentation for personalized deposit product recommendations.",
+      "TCB's financial trajectory over 2022\u20132025 tells a story of post-rate-shock recovery transitioning to acceleration. The institution absorbed significant NIM compression during the Fed hiking cycle but has emerged with improving efficiency, accelerating deposit and loan growth, and a stabilizing earnings base \u2014 positioning it well for the $10B crossing [E-015, E-091].",
+      "Deposit Growth as Strategic Imperative:",
+      "The deposit trajectory is the most strategically significant financial metric for this assessment. After declining from $8.36B (FY2022) to $7.83B (FY2023) during the rate-hiking cycle, deposits have recovered to $8.33B (Q2 2025) with Q2 2025 showing an 8.3% annualized growth rate \u2014 the fastest growth in 3+ years. Management is executing a deliberate strategy of targeting non-interest bearing demand deposits and money market checking accounts, which are 'less sensitive to interest rates' [E-086]. However, NIB deposits as a percentage of total have declined from 37.8% to 30.6% over three years, reflecting customer migration to interest-bearing alternatives. This creates a dual imperative: grow total deposits while retaining the low-cost NIB funding that protects margins [E-091].",
+      "Zennify Implication: This deposit growth imperative maps directly to Marketing Cloud journey automation (deposit campaign triggers based on customer behavior and rate sensitivity), Data Cloud customer segmentation (identifying which customers are rate-shopping vs. relationship-anchored), and Experience Cloud digital banking improvements to compete with fintech deposit products. The 3-tier business banking model launched June 2025 [E-031] provides the segmentation framework \u2014 Marketing Cloud can operationalize it into targeted deposit campaigns."
+    ],
+    "metrics": {
+      "accelerating": "170.5M surge Q2 2025 demonstrates successful a",
+      "declining": "36.5% \u2192 30.6% over 3 years. Critical metric",
+      "efficiency_ratio_q4_2024": 59.56,
+      "improving": "59.56% \u2192 56.18% improvement in Q2 2025 signal",
+      "net_income": 114900000.0,
+      "ni_declined_slightly_fy2023": "2024 but trending up in 2025. ROA compressin",
+      "nim_fy2023": 3.96,
+      "nim_fy2024": 3.71,
+      "roaa_q4_2024": 1.19,
+      "roae_q4_2024": 9.3
+    },
+    "series": {
+      "value": [
+        8.36,
+        7.83
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2022,
+          2023
+        ],
+        "metric": "deposits",
+        "unit": "usd_b",
+        "values": [
+          8.36,
+          7.83
+        ]
+      }
+    ],
+    "years": [
+      2022,
+      2023
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "California (31 counties)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Richard P. Smith",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman, President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Jason Levingston",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Ken Kerrick",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP, Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Scott Robertson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP, Chief Community Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Daniel K. Bailey",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Chief Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael W. Koehnen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Vice Chairman of the Board"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cory W. Giese, CPA",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "LEAD INDEPENDENT DIRECTOR"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kirsten E. Garen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Member"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Matt Thatcher",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Judi Giem",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Human Resources Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Craig Carney",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carolyn Pena",
+        "note": "DEPARTED",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Technology Architect"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "TriCo Bancshares (NASDAQ: TCBK) is a California corporation organized in 1981 to serve as the bank holding company for Tri Counties Bank, a California-chartered commercial bank established in 1975. Headquartered at 63 Constitution Drive, Chico, California, with corporate offices in Roseville, South San Francisco, and Bakersfield, the company operates exclusively through its single banking subsidiary [E-001, E-072].\n\nThe institution has grown through a disciplined acquisition strategy, completing seven acquisitions since 2003 \u2014 most recently Valley Republic Bank in 2022, which expanded TCB's presence into the San Joaquin Valley [E-001]. This acquisition history is analytically significant: it explains the technology fragmentation observed in the current tech stack, where multiple overlapping platforms coexist across different business lines and geographic regions. Management explicitly acknowledges this challenge in its recurring executive strategic themes [E-071].\n\nThe bank's brand positioning as 'California's Local Bank' with 'Service with Solutions\u00ae' emphasizes relationship-based community banking with local decision-making \u2014 a positioning that creates natural alignment with Salesforce Financial Services Cloud's unified relationship management model [E-090].",
+    "primary_regulator": "FDIC",
+    "size_tier": "Large ($10B-$50B approaching)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-090",
+        "excerpt": "Most recent LinkedIn post (Mar 2026): AI small business survey promoted via ABA Banking Journal link. 7 likes. Active thought leadership on AI/small business. #SmallBusiness #AI #MemberFDIC hashtags.",
+        "title": "Most recent LinkedIn post (Mar 2026)",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/feed/update/urn:li:activity:7435731184791465984"
+      },
+      {
+        "author": null,
+        "date": "2021-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-005",
+        "excerpt": "TCB uses Weiland Account Analysis from Fiserv for commercial account analysis, billing, and reporting. Josh Parent (CTP, VP Senior Product Manager) quoted: 'significant value to the bank in adding Weiland Account Analysi",
+        "title": "TCB uses Weiland Account Analysis from Fiserv for commercial account\u2026",
+        "type": "article",
+        "url": "https://www.fiserv.com/en/about-fiserv/resource-center/case-studies/high-tech-high-touch-solutions-grow-commercial-relationships.html"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-024",
+        "excerpt": "PROXY UPGRADE (Conference talk found): TCB was PRESENTING SPONSOR of 25th Annual Economic Forecast Conference at Chico State (Jan 2025). 300+ business/govt/education leaders attended.",
+        "title": "Proxy Upgrade (Conference talk found): TCB was Presenting Sponsor of\u2026",
+        "type": "conference",
+        "url": "https://today.csuchico.edu/economic-forecast-2025/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "Indeed overall rating: 3.2/5. Culture & values: 3.1. Job security: 3.0. Management: 2.9. Work-life balance: 3.3. Compensation: 3.0. CEO approval: 74.68%. Recommend to friend: 52% (140 yes, 128 no). Interview: medium diff",
+        "title": "Indeed overall rating: 3.2/5. Culture & values: 3.1",
+        "type": "article",
+        "url": "https://www.indeed.com/cmp/Tri-Counties-Bank"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-079",
+        "excerpt": "AI POSTURE: Early-stage/exploratory. Gen AI Engineer hired Jun 2024 (E-006). AI small business study published Feb 2026 (E-017). AI panel at Chico State conference Jan 2025. Thought leadership present, production deploym",
+        "title": "Early-stage/exploratory",
+        "type": "conference",
+        "url": "N/A \u2014 synthesized from E-006 (Gen AI Engineer), E-017 (AI study), E-036 (GA), E-054 (SF MC), E-038 (CECL)"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "PROXY SEARCH: No publicly available digital strategy document, digital transformation roadmap, or formal digital vision statement found. Searched: 10-K, annual report, investor materials, press releases, website.",
+        "title": "No publicly available digital strategy document, digital\u2026",
+        "type": "article",
+        "url": "N/A \u2014 no evidence found"
+      }
+    ],
+    "ticker": "TCBK (NASDAQ)"
+  },
+  "issue_register": [
+    {
+      "id": "e8c0ff32-6016-411d-8441-13da6b2e260c",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "53806bc5-3d36-4249-b81b-851aa949e6c8",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "07b75877-7e6c-4352-817b-ae49d17a869d",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "7a52e71c-20c1-454c-bc67-06d29f3ec7fd",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "4e0286d4-d024-40d4-a57e-beffa2f61413",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "3c0eae2b-75b6-48c8-a9dd-b7cdaf2a572a",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Deposits declined from $8.4B (2022) to $7.8B (2023) \u2014 -6.3% CAGR. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 2.3,
+        "P1C3": 2.26,
+        "P1C4": 2.21,
+        "P1C5": 2.25,
+        "P2C1": 2.19,
+        "P2C2": 2.03,
+        "P2C3": 2.13,
+        "P2C4": 2.04,
+        "P3C1": 2.56,
+        "P3C2": 2.67,
+        "P3C3": 2.34,
+        "P3C4": 1.53,
+        "P4C1": 1.75,
+        "P4C2": 2.19,
+        "P4C3": 2.34,
+        "P4C4": 1.83
+      },
+      "overall_score": 2.2,
+      "peer_name": "Bank OZK",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.56,
+        "P1C2": 1.94,
+        "P1C3": 1.68,
+        "P1C4": 2.49,
+        "P1C5": 1.93,
+        "P2C1": 1.94,
+        "P2C2": 1.94,
+        "P2C3": 1.9,
+        "P2C4": 1.74,
+        "P3C1": 2.0,
+        "P3C2": 3.0,
+        "P3C3": 4.0,
+        "P3C4": 3.0,
+        "P4C1": 1.8,
+        "P4C2": 1.75,
+        "P4C3": 1.88,
+        "P4C4": 1.92
+      },
+      "overall_score": 2.2,
+      "peer_name": "East West Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.17,
+        "P1C2": 2.34,
+        "P1C3": 2.34,
+        "P1C4": 1.71,
+        "P1C5": 1.86,
+        "P2C1": 1.95,
+        "P2C2": 2.39,
+        "P2C3": 1.93,
+        "P2C4": 2.02,
+        "P3C1": 2.27,
+        "P3C2": 2.21,
+        "P3C3": 2.45,
+        "P3C4": 1.95,
+        "P4C1": 2.31,
+        "P4C2": 2.04,
+        "P4C3": 1.98,
+        "P4C4": 1.98
+      },
+      "overall_score": 2.17,
+      "peer_name": "TriState Capital Holdings, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.23,
+        "P1C2": 2.41,
+        "P1C3": 1.86,
+        "P1C4": 2.09,
+        "P2C1": 2.27,
+        "P2C2": 2.08,
+        "P2C3": 1.97,
+        "P2C4": 2.11,
+        "P3C1": 2.19,
+        "P3C2": 2.27,
+        "P3C3": 2.17,
+        "P3C4": 2.1,
+        "P4C1": 1.81,
+        "P4C2": 2.49,
+        "P4C3": 2.19,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.16,
+      "peer_name": "Fulton Bank, National Association",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 2.24,
+        "P1C3": 2.17,
+        "P1C4": 1.91,
+        "P2C1": 2.04,
+        "P2C2": 1.77,
+        "P2C3": 2.05,
+        "P2C4": 1.89,
+        "P3C1": 2.19,
+        "P3C2": 2.37,
+        "P3C3": 2.16,
+        "P3C4": 1.98,
+        "P4C1": 1.85,
+        "P4C2": 1.91,
+        "P4C3": 2.2,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.11,
+      "peer_name": "Frost Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TCB-20260407-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Recommend",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Work Life Balance",
+        "themes": [],
+        "value": 4.0
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Culture Values",
+        "themes": [],
+        "value": 3.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Compensation",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Career Opportunities",
+        "themes": [],
+        "value": 3.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Business Outlook Positive",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor Themes Positive",
+        "themes": [
+          "good coworkers",
+          "community-oriented",
+          "work-life balance"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Glassdoor Themes Negative",
+        "themes": [
+          "low compensation",
+          "poor management in some areas",
+          "outdated systems",
+          "limited advancement"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store Themes",
+        "themes": [
+          "recent update added budgeting features",
+          "login/transfer issues reported",
+          "mixed reviews on reliability"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Customer Themes Positive",
+        "themes": [
+          "personalized service",
+          "community focus",
+          "reliable bill pay"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Customer Themes Negative",
+        "themes": [
+          "branch closures frustration",
+          "app compatibility issues",
+          "ATM fees"
+        ],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "TCB partnered with independent research firm to study AI impact on small businesses (Feb 2026). CEO Smith: 'AI is reshaping business operations at a rapid pace.'",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "7a026753-0c88-42ee-b624-8849a08d2e38",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20260219659485/en/Tri-Counties-Bank-Releases-Study-on-Artificial-Intelligence-AI-and-its-Impact-on-Small-Businesses",
+      "subcap_ids": [],
+      "title": "TCB partnered with independent research firm"
+    },
+    {
+      "body": "New San Francisco West Portal branch opened (2025) \u2014 geographic expansion signal despite digital trend.",
+      "date_precision": "year",
+      "e_id": "E-075",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "644793e4-a3b8-4eef-9122-79f442b65490",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.tcbk.com/about/investor-relations/press-releases",
+      "subcap_ids": [],
+      "title": "New San Francisco West Portal branch opened geographic\u2026"
+    },
+    {
+      "body": "Managing Director Private Bank (Anthony Cuadro) hired April 2025 \u2014 private banking expansion.",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2025-04-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "1a1af776-79fd-4851-80de-06b1f40b4391",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.linkedin.com/company/tri-counties-bank",
+      "subcap_ids": [],
+      "title": "Managing Director Private Bank (Anthony Cuadro) hired"
+    },
+    {
+      "body": "Scott Myers joined as Head of Wholesale Banking (Sep 2024) \u2014 new senior leadership hire for commercial/wholesale segment.",
+      "date_precision": "month",
+      "e_id": "E-075",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-075"
+      ],
+      "id": "94dd43b6-0761-4436-91db-0d3cdcb257fd",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.tcbk.com/about/investor-relations/press-releases",
+      "subcap_ids": [],
+      "title": "Scott Myers joined new senior leadership hire for\u2026"
+    },
+    {
+      "body": "UTILIZATION CHECK \u2014 Gen AI Engineer: Hired Jun 2024 (~22 months ago). AI study published Feb 2026. No production AI tools, no AI-powered features in banking products, no customer-facing AI detected. Likely internal exploration/R&D phase.",
+      "date_precision": "month",
+      "e_id": "E-079",
+      "event_date": "2024-06-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "97efa8ce-2f3c-40fc-bf12-1c4d0545d7f5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from E-006 (Gen AI Engineer), E-017 (AI study), E-036 (GA), E-054 (SF MC), E-038 (CECL)",
+      "subcap_ids": [],
+      "title": "Hired Jun 2024 (~22 months ago)"
+    },
+    {
+      "body": "AI POSTURE: Early-stage/exploratory. Gen AI Engineer hired Jun 2024 (E-006). AI small business study published Feb 2026 (E-017). AI panel at Chico State conference Jan 2025. Thought leadership present, production deployment UNKNOWN.",
+      "date_precision": "month",
+      "e_id": "E-079",
+      "event_date": "2024-06-01",
+      "evidence_e_ids": [
+        "E-079",
+        "E-006",
+        "E-017"
+      ],
+      "id": "3ba188a9-d94c-415b-baaf-1070bda86af9",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from E-006 (Gen AI Engineer), E-017 (AI study), E-036 (GA), E-054 (SF MC), E-038 (CECL)",
+      "subcap_ids": [],
+      "title": "Gen AI Engineer hired Jun 2024"
+    },
+    {
+      "body": "Gen AI Engineer (Govardhan Ravula) hired June 2024 \u2014 active AI investment signal.",
+      "date_precision": "month",
+      "e_id": "E-006",
+      "event_date": "2024-06-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "9380e190-2296-41e0-a2ca-af6897cdcf31",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/tri-counties-bank",
+      "subcap_ids": [],
+      "title": "Gen AI Engineer (Govardhan Ravula) hired active AI\u2026"
+    },
+    {
+      "body": "CFPB preparedness explicitly listed as executive strategic theme (Q1 2024): 'Regulatory Focus Areas: Enterprise Risk Management, Compliance (including CRA & ESG), CFPB preparedness, and the hurdles associated with merger approvals.'",
+      "date_precision": "quarter",
+      "e_id": "E-071",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "a504f273-b966-46d6-a01b-2fad23f95db4",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000356171/000035617124000018/a2024q1investorpresentat.htm",
+      "subcap_ids": [],
+      "title": "CFPB preparedness explicitly listed as executive strategic\u2026"
+    },
+    {
+      "body": "POST-RANSOMWARE POSTURE: 2023 BlackBasta attack \u2192 CIO+CISO both pre-hired (2022). Core banking segregation preserved accounts during attack. Post-incident security investment likely significant.",
+      "date_precision": "year",
+      "e_id": "E-084",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-084"
+      ],
+      "id": "22f31069-3d21-49bb-884d-37436b9bc3d6",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from E-082 (technographics), E-023 (CISO), E-003 (IT/Cyber Committee), E-061/063 (ransomware)",
+      "subcap_ids": [],
+      "title": "POST-RANSOMWARE POSTURE: 2023 BlackBasta attack \u2192 CIO+CISO\u2026"
+    },
+    {
+      "body": "CISO background: 35+ years experience across banking, healthcare, automotive, mining, education, engineering, construction. CISO joined Jun 2022. Reports to CIO.",
+      "date_precision": "month",
+      "e_id": "E-071",
+      "event_date": "2022-06-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "3cf97e9e-c0a5-4021-9794-6003120b0f72",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.board-cybersecurity.com/annual-reports/tracker/20240229-trico-bancshares--cybersecurity-10k/",
+      "subcap_ids": [],
+      "title": "CISO joined Jun 2022"
+    },
+    {
+      "body": "CIO Jason Levingston: 30 years experience across banking, insurance, utilities, tech services, US Air Force. Joined June 2022, reports to COO.",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2022-06-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "d95e9967-4315-430f-891a-3bb4f3cdd49e",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.board-cybersecurity.com/annual-reports/tracker/20240229-trico-bancshares--cybersecurity-10k/",
+      "subcap_ids": [],
+      "title": "Joined June 2022, reports to COO"
+    },
+    {
+      "body": "Valley Republic Bank acquisition completed March 2022 \u2014 4 branches in Bakersfield + Fresno LPO, ~$174.4M transaction.",
+      "date_precision": "month",
+      "e_id": "E-001",
+      "event_date": "2022-03-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "cca72323-06f7-4707-9d8c-b2bda0293dbd",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0000356171/000035617125000012/tcbk-20241231.htm",
+      "subcap_ids": [],
+      "title": "Valley Republic Bank acquisition completed"
+    },
+    {
+      "body": "CISO Ken Kerrick: 35+ years experience in technology and security leadership across multiple industries. Joined January 2022, reports to CIO.",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "e4472f01-eb71-47b7-af16-8839cf8eaaa7",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.board-cybersecurity.com/annual-reports/tracker/20240229-trico-bancshares--cybersecurity-10k/",
+      "subcap_ids": [],
+      "title": "Joined January 2022, reports to CIO"
+    },
+    {
+      "body": "CONTEXT: CIO Jason Levingston hired Jan 2022, CISO Ken Kerrick hired Jun 2022 \u2014 BOTH pre-incident. Suggests security leadership upgrade was already underway before the attack. Post-incident security posture likely significantly strengthened.",
+      "date_precision": "month",
+      "e_id": "E-063",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-063"
+      ],
+      "id": "ec146121-e614-4f24-9375-57817798ece1",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.tcbk.com/data-event-notice",
+      "subcap_ids": [],
+      "title": "CIO Jason Levingston hired"
+    },
+    {
+      "body": "POSITIVE: Post-ransomware security posture likely significantly strengthened. CIO (Jan 2022) + CISO (Jun 2022) hired PRE-incident. Top Global CISO Award post-incident. IT/Cybersecurity Committee active. Dedicated infosec@tcbk.com.",
+      "date_precision": "month",
+      "e_id": "E-073",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-073"
+      ],
+      "id": "c42b75d8-628c-4f32-84aa-be3f87425894",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "N/A \u2014 synthesized from E-061/E-062/E-063/E-037/E-044",
+      "subcap_ids": [],
+      "title": "CIO (Jan 2022) + CISO (Jun 2022) hired PRE"
+    },
+    {
+      "body": "CIO background: 30 years experience, former USAF, former CIO at multiple banks. Reports to COO. CIO joined Jan 2022.",
+      "date_precision": "month",
+      "e_id": "E-071",
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-071"
+      ],
+      "id": "3742607d-6aec-42d8-9a5c-bdf645d0cb7d",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.board-cybersecurity.com/annual-reports/tracker/20240229-trico-bancshares--cybersecurity-10k/",
+      "subcap_ids": [],
+      "title": "CIO joined Jan 2022"
+    },
+    {
+      "body": "San Joaquin Valley expansion \u2014 San Joaquin Valley expansion",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [],
+      "id": "685e5706-6352-4ee0-a45b-868a9fd36ed1",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Valley Republic Bank"
+    },
+    {
+      "body": "Modesto/Central Valley expansion \u2014 Modesto/Central Valley expansion",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-046"
+      ],
+      "id": "231d32e8-93af-4fc0-93c4-405ad405d8db",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Bank of Commerce (2nd)"
+    },
+    {
+      "body": "Sacramento market entry \u2014 Sacramento market entry",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [],
+      "id": "a8ce0f55-470b-4126-9819-c9b6c6b7dbe5",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Sierra Vista Bank"
+    },
+    {
+      "body": "Bay Area expansion \u2014 Bay Area expansion",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2018-01-01",
+      "evidence_e_ids": [],
+      "id": "2ce21237-db95-4ece-bce3-3bf0eef7447e",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "FNB Corp (Tri Counties)"
+    },
+    {
+      "body": "$2B asset addition \u2014 largest acquisition \u2014 $2B asset addition \u2014 largest acquisition",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2014-01-01",
+      "evidence_e_ids": [],
+      "id": "d4e21a2f-66e2-4d15-8c8f-e341119a51ab",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "North Valley Bancorp"
+    },
+    {
+      "body": "Redding market entry \u2014 Redding market entry",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2007-01-01",
+      "evidence_e_ids": [],
+      "id": "0b2a8479-c3af-4383-b3bb-b17eca2ef657",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Bank of Commerce"
+    },
+    {
+      "body": "Branch expansion \u2014 Branch expansion",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2003-01-01",
+      "evidence_e_ids": [],
+      "id": "4dfe07cd-ecc2-4b08-9f7e-b48e59cf4248",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Westamerica Thrift"
+    },
+    {
+      "body": "CEO Rick Smith: Chairman since 2020, CEO since 1999. Originally joined as VP & CIO in 1994 \u2014 technology background in leadership.",
+      "date_precision": "year",
+      "e_id": "E-011",
+      "event_date": "1994-07-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "e189931f-f3bd-4f8c-a7cb-0948482f37a0",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://fintool.com/app/research/companies/TCBK/people/richard-smith",
+      "subcap_ids": [],
+      "title": "Originally joined as VP & CIO in 1994"
+    }
+  ]
+}

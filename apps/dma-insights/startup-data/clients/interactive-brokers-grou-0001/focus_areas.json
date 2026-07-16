@@ -1,0 +1,76 @@
+{
+  "entity_display_id": "interactive-brokers-grou-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-020",
+          "E-042",
+          "E-052",
+          "E-023",
+          "E-033",
+          "E-041"
+        ],
+        "representative_quote": "4.4M accounts without digital marketing automation.",
+        "source_kind": "heuristic"
+      },
+      "id": "21f4b521-5b8c-42d6-8cd4-50f237b3dd80",
+      "involved_subcap_ids": [
+        "P2C1.1.1",
+        "P2C1.1.3",
+        "P2C1.1.5",
+        "P2C1.2.1",
+        "P2C1.2.3",
+        "P2C1.2.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "20",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 20 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Change governance relies on Steering Committee bi-weekly cadence.",
+        "source_kind": "heuristic"
+      },
+      "id": "d3692da7-2681-4df8-a64c-871fe9d4d222",
+      "involved_subcap_ids": [
+        "P1C4.3.1",
+        "P1C4.3.3",
+        "P1C4.3.2",
+        "P1C4.3.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

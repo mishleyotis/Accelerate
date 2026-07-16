@@ -1,0 +1,257 @@
+{
+  "entity_display_id": "alliant-insurance-servic-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "NPS 25 \u2014 11 Points Below Insurance Broker Industry Aver",
+        "source_kind": "docx"
+      },
+      "id": "cc582149-815f-41cf-8b50-4c57c09007a5",
+      "involved_subcap_ids": [
+        "P2C2.7.2",
+        "P1C1.6.3",
+        "P2C2.8.4",
+        "P3C2.8.4",
+        "P1C1.5.5",
+        "P2C2.7.5"
+      ],
+      "kpis": [
+        {
+          "current_value": "50%",
+          "delta": null,
+          "kpi_label": "Aver Comparably NPS",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "25%",
+          "delta": null,
+          "kpi_label": "Comparably NPS promoters",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": 2,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 50,
+        "P3": 17
+      },
+      "source_path": "(unknown)",
+      "title": "11 Points Below Insurance Broker Industry Aver",
+      "verbatim_quote": "F-004 | NPS 25 \u2014 11 Points Below Insurance Broker Industry Aver | Comparably NPS 25 (50% promoters, 25% detractors). Customer service score 2.2/5. eNPS 9. Contrasts w... | P2 Customer Experience scoring capped. Despite strong growth, client satisf... | Service Cloud + Einstein for CX improvement. Experience Cloud for unified client portal (replacing 1..."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "5 AI Models in Production Without Governance Framework",
+        "source_kind": "docx"
+      },
+      "id": "79f573fc-3fa8-4690-9fd3-1bb01ed32c7a",
+      "involved_subcap_ids": [
+        "P4C1.1.4",
+        "P4C1.1.5",
+        "P4C1.1.8",
+        "P4C1.1.8",
+        "P4C2.7.4",
+        "P4C2.7.3",
+        "P4C2.7.4",
+        "P4C2.7.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "5 AI Models in Production Without Governance Framework",
+      "verbatim_quote": "F-005 | 5 AI Models in Production Without Governance Framework | QUBIE (ML+CV underwriting), NVIDIA DGX A100 hardware, SAS Viya, Alliant Analytics proprietary platfo... | Innovation outpaces governance. P4C2 AI/Advanced Analytics shows L3+ for pr... | Einstein AI Platform for governed model deployment. Agentforce for GenAI (greenfield). AI governance..."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": "Revenue ($B): 5.1 (2024)",
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Aggressive Growth Platform \u2014 #5 Global Broker With M&A",
+        "source_kind": "docx"
+      },
+      "id": "036c5574-01a1-4e69-b805-180913640db1",
+      "involved_subcap_ids": [
+        "P4C1.1.4",
+        "P4C1.1.5",
+        "P4C1.1.8",
+        "P4C1.1.8",
+        "P4C2.7.4",
+        "P4C2.7.3",
+        "P4C2.7.4",
+        "P4C2.7.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$2,000,000,000",
+          "delta": null,
+          "kpi_label": "M&A Alliant",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$5,100,000,000",
+          "delta": null,
+          "kpi_label": "Revenue",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "21.9%",
+          "delta": null,
+          "kpi_label": "Years through acquisitions",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Aggressive Growth Platform",
+      "verbatim_quote": "F-001 | Aggressive Growth Platform \u2014 #5 Global Broker With M&A | Alliant grew from ~$2B to $5.1B revenue in 3 years through 59 acquisitions and 21.9% organic growth,... | Growth outpaces integration \u2014 200+ tech tools, dual AMS, 4 MDM platforms, 7... | Platform consolidation is the #1 opportunity. Salesforce as unifying CRM across all 8 business units..."
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Data Quality Crisis Confirmed \u2014 'Incomplete Data Is a H",
+        "source_kind": "docx"
+      },
+      "id": "9862cbc4-c7cf-43ca-97f7-5480f6cc1042",
+      "involved_subcap_ids": [
+        "P4C1.1.4",
+        "P4C1.1.5",
+        "P4C1.1.8",
+        "P4C1.1.8",
+        "P4C2.7.4",
+        "P4C2.7.3",
+        "P4C2.7.4",
+        "P4C2.7.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Data Quality Crisis Confirmed",
+      "verbatim_quote": "F-003 | Data Quality Crisis Confirmed \u2014 'Incomplete Data Is a H | Internal RTM documents 26 BenefitPoint pain points. Client names overwritable by end users (no field... | P4C1 Data Governance ceiling LOWERED by internal evidence: L1.5 \u00b10.3 for Da... | Data Cloud + validation rules + duplicate management + field-level security. The 26 pain points ARE ..."
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Alliant Employee Benefits has a live Salesforce implementation ('Client Central') with Zennify \u2014 FSC...",
+        "source_kind": "docx"
+      },
+      "id": "9093d18d-72f8-48e7-9c20-225a4d56dbd9",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C3.2.2",
+        "P2C3.6.6",
+        "P1C2.8.3",
+        "P1C2.8.7",
+        "P2C4.7.6"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P2": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Existing Zennify Client",
+      "verbatim_quote": "F-002 | EXISTING Zennify Client \u2014 Employee Benefits Salesforce | Alliant Employee Benefits has a live Salesforce implementation ('Client Central') with Zennify \u2014 FSC... | Salesforce maturity higher than public evidence showed for EB division. Exp... | CRITICAL: Not a prospect \u2014 an existing client. EB success story becomes the proof point for enterpri..."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Innovation Engine \u2014 QUBIE, ALPS, 123OCP Demonstrate Pro",
+        "source_kind": "docx"
+      },
+      "id": "9380b579-389e-4b86-b05b-d70c72c281d3",
+      "involved_subcap_ids": [
+        "P1C2.8.4",
+        "P1C2.7.3",
+        "P1C2.2.4",
+        "P1C2.4.1",
+        "P1C3.1.2",
+        "P1C3.2.2",
+        "P1C3.4.4",
+        "P1C3.1.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Innovation Engine",
+      "verbatim_quote": "F-007 | Innovation Engine \u2014 QUBIE, ALPS, 123OCP Demonstrate Pro | QUBIE: ML+CV auto-underwriting for residential RE (PropTech Innovation 2023). ALPS: first-of-kind Lo... | P3C1 STP and P2C2 Product Innovation show L3.5-L4.0. Alliant innovates fast... | Salesforce Platform as the foundation for next-gen products. Einstein for AI-powered underwriting. H..."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "No Enterprise Integration Platform \u2014 200+ Tools Connect",
+        "source_kind": "docx"
+      },
+      "id": "f4ecfcf4-f97d-476c-b666-125f1a95985b",
+      "involved_subcap_ids": [
+        "P4C3.3.1",
+        "P4C1.3.1",
+        "P4C2.2.1",
+        "P4C2.1.1",
+        "P2C1.4.6",
+        "P2C2.9.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "No Enterprise Integration Platform",
+      "verbatim_quote": "F-006 | No Enterprise Integration Platform \u2014 200+ Tools Connect | 200+ technologies detected (Vibe). Azure Service Bus is only middleware. No MuleSoft, Boomi, Workato... | P4C3 Architecture ceiling constrained at L2.5. Integration complexity grows... | MuleSoft is the #1 architecture opportunity. Enterprise integration backbone connecting Applied Epic..."
+    }
+  ]
+}

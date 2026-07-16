@@ -1,0 +1,1128 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 173
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 233
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "hudson-valley-credit-uni-0001",
+    "domain": null,
+    "hq": null,
+    "id": "57a3aa1c-b11f-412f-82de-69452c458a2d",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Hudson Valley Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:58.304958Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 90,
+    "undated_count": 90
+  },
+  "evidence_summary": {
+    "claims": {
+      "CEILING_ESTIMATE": 1,
+      "CONTEXTUAL": 1,
+      "FACT": 84,
+      "INFERENCE": 4
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "Indeed": 4,
+      "LinkedIn": 4
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 5,
+      "NEUTRAL": 76,
+      "POSITIVE": 9
+    },
+    "tiers": {
+      "T1": 1,
+      "T2": 41,
+      "T3": 31,
+      "T4": 16,
+      "T5": 1
+    },
+    "total_facts": 90,
+    "total_items": 90
+  },
+  "financial_trajectory": {
+    "cagr": "5.5%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2023,
+      2024
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        7.06,
+        7.45
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 7950000000.0,
+    "branches": 40,
+    "cagr": "9.7%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "2019": 5000000000.0,
+      "2021": 5800000000.0,
+      "2022": 6200000000.0,
+      "2023": 6800000000.0,
+      "2024": 1500000.0,
+      "2025": 14200000000.0,
+      "series": {
+        "2023": 7060000000.0,
+        "2024": 7450000000.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 40,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 1110,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "William Lionhood promoted to SVP, Senior Director of…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Annette Gabriel hired SVP Head of Human Resources — 20…"
+          }
+        ],
+        "fy": [
+          "FY2019",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "National FOM (effective Jan 2, 2026); HQ: Poughkeepsie, NY",
+        "headline": "$7.5B assets · FY2024 · +5.5% CAGR",
+        "regulator": "NCUA (post Jan 2026)",
+        "series": {
+          "net_income_m": [
+            5000.0,
+            5800.0,
+            6200.0,
+            6800.0,
+            1.5,
+            14200.0
+          ],
+          "total_assets": [
+            null,
+            null,
+            null,
+            7.06,
+            7.45,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "National FOM (effective Jan 2, 2026); HQ: Poughkeepsie, NY",
+    "footprint_basis": "derived:geography",
+    "founded": 1963,
+    "geography": "National FOM (effective Jan 2, 2026); HQ: Poughkeepsie, NY",
+    "headcount": 1110,
+    "hq": "Poughkeepsie, NY",
+    "hq_address": null,
+    "hq_basis": "nlp:narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jonathan W. Roberts",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 48,
+        "title": "CEO / Sept 2022"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Rehan Kausar",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "SVP / CAIO / Aug 2025"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "John Fede",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP / CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Timmerman",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP / CRO + General Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Debra Leone",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "SVP / CCO + Deputy GC / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Sarah Gillespie",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "SVP / Senior Director PMO / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tina Ludwig",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP / Head Experience Administration"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Steve Goodwine",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP / Director Contact Center"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Michael Burke",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "SVP / Senior Director Internal Audit / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Charlie Thompson",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 12,
+        "title": "SVP / Physical Ops + Security / May 2025"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "John Brozycki",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "AVP / Information Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Benjamin Smith",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Board Secretary (external)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Nancy K. Boehm",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Board Member (external)"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Hudson Valley Credit Union",
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Hudson Valley Credit Union is a credit union. It reports $8.0 billion in total assets and has operated since 1963. It is regulated by NCUA (post Jan 2026) and employs approximately 1,110 people across 40 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (post Jan 2026)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.0,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.0/5",
+          "signal": "75% employees recommend to friend (Glassdoor)",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "BBB complaints include: Catskill Hudson Bank integration-era call center/loan quality issues, credit life insurance opt-out difficulty, 1099-C form delays, fraud dispute handling gaps",
+          "source": "Better Business Bureau"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-034",
+        "excerpt": "Hudson Valley AI Summit co-hosted by Dutchess County + Marist University — annual conference in HVCU's backyard (Poughkeepsie). 2025 edition featured IBM, Amazon, Meta; 200+ attendees. 2026",
+        "title": "Hudson Valley AI Summit co-hosted by Dutchess County + Marist…",
+        "type": "conference",
+        "url": "https://library.marist.edu/web/guest/w/ai-summit-2025"
+      },
+      {
+        "author": "Debra Leone",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-075",
+        "excerpt": "Debra Leone (SVP CCO + Deputy General Counsel) spoke at America's Credit Unions Regulatory Compliance Certification eSchool 2025 on 'mortgage lending regulations and compliance challenges' — external compliance thought l",
+        "title": "Debra Leone (SVP CCO + Deputy General Counsel) spoke at America's…",
+        "type": "article",
+        "url": "https://www.americascreditunions.org/events-training/eschool/regulatory-complian"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "HVCU offers Solar Panel Loan: fixed rate up to $30,000, 15-year term, 9.00% APR (as of 2/1/26), 100% of solar panel invoice, no closing costs. HVCU pays all associated fees.",
+        "title": "HVCU offers Solar Panel Loan: fixed rate up to $30,000, 15-year term…",
+        "type": "conference",
+        "url": "https://www.hvcu.org/Personal/Home-Finance-Center/Home-Equity-Solar-Panel-Financ"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-046",
+        "excerpt": "Glia CONFIRMED as HVCU's live chat / co-browsing platform (from 2021 press release: HVCU partners with Posh+Glia). Glia enables seamless handoff from Posh chatbot to live agent without re-authentication.",
+        "title": "Glia Confirmed as HVCU's live chat / co-browsing platform (from 2021…",
+        "type": "article",
+        "url": "https://www.glia.com/news/posh-and-glia-help-modernize-member-service-for-seven-"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "HVCU LinkedIn posts use hubs.la shortlinks (HubSpot-exclusive) — confirms full HubSpot Marketing Hub deployment, not just analytics. HVCU social: Facebook 13,659 likes, LinkedIn 4,664 followers, Instagram 1,702 posts. So",
+        "title": "HVCU LinkedIn posts use hubs.la shortlinks (HubSpot-exclusive)",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/hvcu"
+      },
+      {
+        "author": "Rehan Kausar",
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-026",
+        "excerpt": "HVCU CAIO Rehan Kausar publicly tagged #CAIO #responsibleAI #creditunions — communicating responsible AI agenda externally. Kausar presented on 'ethical business conduct' at Prudential's Ethical Leadership Conference — d",
+        "title": "HVCU CAIO Rehan Kausar tagged #CAIO",
+        "type": "conference",
+        "url": "https://www.linkedin.com/posts/rehankausar_caio-responsibleai-creditunions-activ"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "hudson-valley-union.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.437389+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Hudson Valley Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Hudson Valley Credit Union is a $8.0B in assets credit union regulated by NCUA (post Jan 2026), operating since 1963 with 1,110 employees. A 9.7% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-002, E-011]. Zennify's assessment places overall digital maturity at 2.3/5. The deepest capability gap is Dynamic Journey Pivoting at 1.4/5 against a 2.0 peer median. Next is Social Responsibility — a lower-scoring capability area at 1.9/5 against a 2.2 peer median [E-072, E-049]. Third is Synthetic Data Generation at 1.9/5 against a 2.0 peer median [E-083].\n\nThe issue register adds Citation density 39 unique E-IDs is above Layer 1 threshold (30) but below Layer 2 aspirational target of 50…. The issue register adds contradiction_log.csv and reasoning_chain_log.json were generated during governance audit rather than during Layer 1 scoring phase…. Counter-signal: Dynamic Data Masking for Sensitive Attributes already runs at 3.0/5 against a 2.5 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-024]. The roster shows no CDO — a named ownership gap for the capabilities below. The question for Hudson Valley Credit Union is whether to close Dynamic Journey Pivoting first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost.\n\nHudson Valley Credit Union should lead with nCino (69/100 fit) against Life Event Detection, then sequence Tableau behind it. Closing Dynamic Journey Pivoting to the peer median alone is worth 0.6 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Post-Merger Integration Risk Visible — Catskill Hudson Bank acquisition 2024 [E-081]. BBB: service collapsed post-acquisition [E-064]. H1 2025 earnings -75% [E-003]…\"."
+  },
+  "overall_score": 2.34,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/Public_Evidence_Sources_Reference.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.272144+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.273833+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.274642+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/maturity_scale_reference.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.275527+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/pillar_weights_SV2_CreditUnions.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:58.275851+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 2,
+      "DEGRADED": 1,
+      "INFO": 18
+    },
+    "stage_ms": {
+      "manifest": 14,
+      "parse": 4706,
+      "persist": 1340
+    },
+    "structured": [
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+90 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/gov_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=707 contradictions=4",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 8 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA-RES-HVCU-20260427-0001_ClientProfile_FINAL.docx leadership=13 focus_areas=7 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 10 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_derived_from_scores",
+        "detail": "scqa_derived_from_scores",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 7",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/Public_Evidence_Sources_Reference.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/maturity_scale_reference.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/pillar_weights_SV2_CreditUnions.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:CU",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 15",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 7",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "xlsx_name_enrichment: +0 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "INFO/evidence_facts_merged_from_json_twin: +90 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "used variant issue register: 07_governance/gov_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=707 contradictions=4",
+      "caps_applied_log: 8 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "firmographics_from_client_profile_docx: source=DMA-RES-HVCU-20260427-0001_ClientProfile_FINAL.docx leadership=13 focus_areas=7 facts_extracted=0",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "tech_stack_from_report_prose: 10 vendors mentioned",
+      "scqa_derived_from_scores",
+      "insights_from_client_profile_findings: 7",
+      "INFO/pattern_gap: 02_research_workbook/Public_Evidence_Sources_Reference.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/maturity_scale_reference.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/pillar_weights_SV2_CreditUnions.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "subvertical_inferred_from_name:CU",
+      "timeline_events_persisted: 15",
+      "catalogue_unresolved:15/707 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 7",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 2.65,
+      "pillar_id": "P1",
+      "score": 2.58,
+      "subcaps_scored": 173
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 2.45,
+      "pillar_id": "P2",
+      "score": 2.14,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.63,
+      "pillar_id": "P3",
+      "score": 2.51,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.23,
+      "pillar_id": "P4",
+      "score": 2.23,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-27",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:58.304958Z",
+    "created_at": "2026-07-02T23:10:58.304958Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "4e09ff2c-6417-4b68-ae61-b34be623a4c6",
+    "overall_score": 2.34,
+    "request_id": "DMA-ASM-HVCU-20260427-0001",
+    "started_at": "2026-07-02T23:10:58.304958Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.0,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Post-Merger Integration Risk Visible — Catskill Hudson Bank acquisition 2024 [E-081]. BBB: service collapsed post-acquisition [E-064]. H1 2025 earnings -75% [E-003]. — P2C3.5 case management, P3C1.7 exception management — both capped by ISS-002. — Salesforce Service Cloud case management = immediate post-merger stabilization opportunity.",
+      "evidence": [
+        "E-081",
+        "E-064",
+        "E-003",
+        "E-008"
+      ],
+      "magnitude": "-75%",
+      "name": "Post-Merger Integration Risk Visible",
+      "peer_median": 2.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Post-Merger Integration Risk Visible in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Post-Merger Integration Risk Visible",
+      "what": "Post-Merger Integration Risk Visible — Catskill Hudson Bank acquisition 2024. [E-081]. BBB: service collapsed post-acquisition. [E-064]. H1 2025 earnings -75%. [E-003]. — P2C3.5 case management, P3C1.7 exception management — both capped by ISS-002. Salesforce Service Cloud case management = immediate post-merger stabilization opportunity.",
+      "why": "The linked evidence records: HVCU executed Catskill Hudson Bank acquisition (Jan 2024 announcement, 2024 completion) — a major vendor/system exit and integration exercise. Migration of accounts, systems, and documentation required active contingency planning."
+    },
+    {
+      "body": "AI Leadership Without Data Foundation — CAIO Kausar (MIT AI, ex-Citi CTO) hired Aug 2025 [E-082]. Data stack: SQL Server + S3 + GCP; no data warehouse or CDP confirmed [E-089, E-067]. — P4C1 Data ~M2; P4C2 Analytics ~M2. Strategy is ahead of infrastructure. — CAIO is the champion. Salesforce Data Cloud = the platform his mandate requires. Zennify delivers CU-specialist implementation.",
+      "evidence": [
+        "E-082",
+        "E-089",
+        "E-067",
+        "E-010"
+      ],
+      "magnitude": "0.1 pts below peer median",
+      "name": "AI Leadership Without Data Foundation",
+      "peer_median": 2.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.88,
+      "so_what": "Salesforce Data Cloud = the platform his mandate requires.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "AI Leadership Without Data Foundation",
+      "what": "AI Leadership Without Data Foundation — CAIO Kausar (MIT AI, ex-Citi CTO) hired Aug 2025. [E-082]. Data stack: SQL Server + S3 + GCP; no data warehouse or CDP confirmed [E-089, E-067]. — P4C1 Data ~M2; P4C2 Analytics ~M2. Strategy is ahead of infrastructure. CAIO is the champion. Zennify delivers CU-specialist implementation.",
+      "why": "The linked evidence records: Rehan Kausar: SVP CAIO at HVCU (Aug 2025, newly created role). Prior: CTO at Citi, COO Transformation Technology at Morgan Stanley, Director Technology Strategy at Deloitte, Director Strategy at Accenture. MBA Northwestern Kellogg, MS AI MIT Sloan."
+    },
+    {
+      "body": "MuleSoft Confirms Salesforce Ecosystem Entry — MuleSoft Cloud confirmed in HVCU SaaS stack via Cloud Services Admin job posting [E-085]. MuleSoft is a Salesforce product. — P4C3.3 Integration ~M2.5 — professional iPaaS confirmed. — Land-and-expand. FSC + Data Cloud + Einstein extend the existing MuleSoft investment. No new vendor introduction required.",
+      "evidence": [
+        "E-085",
+        "E-047",
+        "E-088"
+      ],
+      "magnitude": "0.1 pts below peer median",
+      "name": "MuleSoft Confirms Salesforce Ecosystem Entry",
+      "peer_median": 2.0,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.88,
+      "so_what": "Prioritize MuleSoft Confirms Salesforce Ecosystem Entry in the next phase — Tableau is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "MuleSoft Confirms Salesforce Ecosystem Entry",
+      "what": "MuleSoft Confirms Salesforce Ecosystem Entry — MuleSoft Cloud confirmed in HVCU. SaaS stack via Cloud Services Admin job posting [E-085]. MuleSoft is a Salesforce product. P4C3.3 Integration ~M2.5 — professional iPaaS confirmed. Land-and-expand. FSC + Data Cloud + Einstein extend the existing MuleSoft investment. No new vendor introduction required.",
+      "why": "The linked evidence records: HVCU SaaS stack confirmed (Cloud Services Admin job): 'Google Workspaces, Oracle Cloud, MuleSoft Cloud, LogicMonitor Azure' — MuleSoft Cloud = Salesforce's integration/API platform CONFIRMED at HVCU."
+    },
+    {
+      "body": "Enterprise Security = Procurement Fast-Track — Entra ID + SailPoint + CyberArk + Palo Alto + 24/7 SOC confirmed [E-084]. NYDFS Part 500 all Nov 2025 deadlines met [E-087]. — P4C4 Cybersecurity ~M3 — strongest P4 category. — Security compliance objection = eliminated. Accelerate procurement timeline. Shield extends existing posture.",
+      "evidence": [
+        "E-084",
+        "E-087",
+        "E-005",
+        "E-013"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Enterprise Security = Procurement Fast-Track",
+      "peer_median": 2.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Enterprise Security = Procurement Fast-Track in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Enterprise Security = Procurement Fast-Track",
+      "what": "Enterprise Security = Procurement Fast-Track — Entra ID + SailPoint + CyberArk + Palo Alto + 24/7 SOC confirmed [E-084]. NYDFS Part 500 all Nov 2025 deadlines met [E-087]. P4C4 Cybersecurity ~M3 — strongest P4 category. Security compliance objection = eliminated. Accelerate procurement timeline. Shield extends existing posture.",
+      "why": "The linked evidence records: HVCU VP Cybersecurity Engineering & Operations job reveals full security stack: SIEM = Microsoft Sentinel OR CrowdStrike, SOAR confirmed, XDR confirmed, EDR = Microsoft Defender, NDR/NTA, Email Security, Firewall = Palo Alto Networks, IAM = CyberArk (PAM) | SailPoint"
+    },
+    {
+      "body": "AI Contact Center + Zero CRM = Agent Gap — Posh Casey: 201% ROI, 89% FCR, 150 agents [E-045]. Illuma: 17.1s auth [E-051, E-052]. No CRM in any source [E-067]. — P2C3 contact center ~M3.5 (strong); P2C3.4.1 Agent 360 = M1 (critical gap). — Salesforce FSC + Service Cloud + Symitar = the missing CRM spine. VP Contact Center Goodwine = natural champion.",
+      "evidence": [
+        "E-045",
+        "E-051",
+        "E-052",
+        "E-067"
+      ],
+      "magnitude": "201%",
+      "name": "AI Contact Center + Zero CRM = Agent Gap",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.8,
+      "so_what": "Protect AI Contact Center + Zero CRM = Agent Gap as a proof point: use it to anchor the customer experience story while the true gaps close — Twilio is the platform surface that addresses it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "AI Contact Center + Zero CRM = Agent Gap",
+      "what": "AI Contact Center + Zero CRM = Agent Gap. Posh Casey: 201% ROI, 89% FCR, 150 agents. [E-045]. Illuma: 17.1s auth. [E-051, E-052]. No CRM in any source [E-067]. — P2C3 contact center ~M3.5 (strong); P2C3.4.1 Agent 360 = M1 (critical gap). Salesforce FSC + Service Cloud + Symitar = the missing CRM spine. VP Contact Center Goodwine = natural champion.",
+      "why": "The linked evidence records: Posh AI Lee (Digital Assistant): saved 200,000+ minutes, 24/7 support. Live chat volume growing without headcount additions — 'handle more with less.' Posh Casey (GenAI Knowledge Assistant, deployed summer 2023):"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "167 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Business Outcome Linkage averages 2.9/5 over 167 scored subcaps; ceiling 3.4 reflects thin evidence density (0/167 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Governance Structure averages 2.9/5 over 217 scored subcaps; ceiling 3.4 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "192 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Accelerator/Incubator Engagement averages 2.4/5 over 192 scored subcaps; ceiling 2.9 reflects thin evidence density (0/192 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Change Management Framework averages 2.4/5 over 205 scored subcaps; ceiling 2.9 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Social Responsibility — Subcap 2 averages 1.9/5 over 70 scored subcaps; ceiling 2.4 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "293 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Educational Content averages 1.9/5 over 293 scored subcaps; ceiling 2.4 reflects thin evidence density (0/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Onboarding Communication & Engagement averages 2.4/5 over 291 scored subcaps; ceiling 2.9 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2 applied: ISS-002: Post-merger service degradation cap M2.0",
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Agent Desktop averages 2.8/5 over 289 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: ISS-002: Post-merger service degradation cap M2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 1.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2 applied: ISS-001: HVCU Rewards! outage cap M2.0",
+        "cap M1 applied: ISS-004: CDP confirmed absent, floor M1.0",
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Dynamic Journey Pivoting averages 1.4/5 over 259 scored subcaps; ceiling 1.0 reflects the binding cap (cap M2 applied: ISS-001: HVCU Rewards! outage cap M2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Multi-Channel Transaction Orchestration averages 2.4/5 over 146 scored subcaps; ceiling 2.9 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2 applied: ISS-005: AML platform unconfirmed cap M2.0",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Validation averages 2.4/5 over 130 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: ISS-005: AML platform unconfirmed cap M2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2 applied: ISS-005: AML platform unconfirmed cap M2.0",
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Due Diligence averages 2.9/5 over 142 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: ISS-005: AML platform unconfirmed cap M2.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Financial & Operational Assessment averages 2.4/5 over 145 scored subcaps; ceiling 2.9 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Synthetic Data Generation averages 1.9/5 over 200 scored subcaps; ceiling 2.4 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Agent Control Plane & Action Governance averages 1.9/5 over 270 scored subcaps; ceiling 2.4 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Technology Roadmap & Investment Planning averages 2.5/5 over 235 scored subcaps; ceiling 3.0 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Dynamic Data Masking for Sensitive Attributes averages 3.0/5 over 150 scored subcaps; ceiling 3.5 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "William Lionhood promoted to SVP, Senior Director of Strategy & Transformation — signals formal transformation management structure (Nov 2025).",
+      "evidence": [
+        "E-010"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "William Lionhood promoted to SVP, Senior Director of…",
+      "metric": null,
+      "peer_context": "Dynamic Journey Pivoting runs 1.36/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "William Lionhood promoted to SVP, Senior Director of Strategy & Transformation — signals formal transformation management structure (Nov 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "William Lionhood promoted to SVP, Senior Director of…"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Steve Goodwine promoted to SVP, Head of Contact Center. Steve Goodwine promoted to SVP, Head of Contact Center (Nov 2025).",
+      "evidence": [
+        "E-010"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Steve Goodwine promoted to SVP, Head of Contact Center",
+      "metric": null,
+      "peer_context": "Dynamic Journey Pivoting runs 1.36/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Steve Goodwine promoted to SVP, Head of Contact Center. Steve Goodwine promoted to SVP, Head of Contact Center (Nov 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Steve Goodwine promoted to SVP, Head of Contact Center"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "HVCU 'reassesses its vendors and partners every three years' as part of a 'routine Request for Proposal (RFP) process' — formal TPRM vendor review cycle confirmed. HVCU reviewed 3 background screening providers, uses iCIMS (HR/recruiting platform) as integration reference.",
+      "evidence": [
+        "E-021"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Formal TPRM vendor review cycle confirmed",
+      "metric": null,
+      "peer_context": "Dynamic Journey Pivoting runs 1.36/5 vs a 2.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "HVCU 'reassesses its vendors and partners every three years' as part of a 'routine Request for Proposal (RFP) process' — formal TPRM vendor review cycle confirmed. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "HVCU Charitable Foundation launched Feb/March 2025 as official 501(c)(3). Board of Directors authorized $3,000,000 endowment. Focus: education, food, health, housing (Mar 2025).",
+      "evidence": [
+        "E-044"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "HVCU Charitable Foundation launched as official 501(c)",
+      "metric": "Directors authorized $3,000,000",
+      "peer_context": "Dynamic Journey Pivoting runs 1.36/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Life Event Detection — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "HVCU Charitable Foundation launched Feb/March 2025 as official 501(c)(3). Board of Directors authorized $3,000,000 endowment. Focus: education, food, health, housing (Mar 2025).",
+      "timeline": {
+        "date": "2025-03-01",
+        "event": "HVCU Charitable Foundation launched as official 501(c)"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Marist Red Fox Financial launched Feb 25, 2025 — HVCU's first cashless branch, first branch with ITM (Interactive Teller Machine) with live agent. Staffed by 12 student 'relationship advisors' Monday–Friday noon–5:30pm (Feb 2025).",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Marist Red Fox Financial launched",
+      "metric": null,
+      "peer_context": "Dynamic Journey Pivoting runs 1.36/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Life Event Detection — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Marist Red Fox Financial launched Feb 25, 2025 — HVCU's first cashless branch, first branch with ITM (Interactive Teller Machine) with live agent.",
+      "timeline": {
+        "date": "2025-02-25",
+        "event": "Marist Red Fox Financial launched"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Dynamic Journey Pivoting scores 1.36/5 vs a typical 2.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-005",
+        "E-013",
+        "E-026",
+        "E-027"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Dynamic Journey Pivoting scores",
+      "metric": "Dynamic Journey Pivoting 1.36/5 vs peer 2.00",
+      "peer_context": "Dynamic Journey Pivoting runs 1.36/5 vs a 2.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Life Event Detection — highest-fit surface at 69/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Dynamic Journey Pivoting scores 1.36/5 vs a typical 2.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

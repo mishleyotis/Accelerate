@@ -1,0 +1,637 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Wescom Financial (Wescom Central Credit Union)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Merged with CCFCU adding 4 branches and ~15K members in Monterey County",
+      "closed_on": null,
+      "details": "Merged with CCFCU adding 4 branches and ~15K members in Monterey County",
+      "e_id": "E-003",
+      "event_date": "2025-03-01",
+      "id": "a2997f75-1452-44d0-b3ec-5fcca7940737",
+      "source_url": "https://news.wescom.org/presidents-message-to-members/",
+      "status": null,
+      "target": "Ccfcu",
+      "title": "Merged with Ccfcu adding 4 branches"
+    },
+    {
+      "acquirer": "Wescom Financial (Wescom Central Credit Union)",
+      "amount": null,
+      "announced_on": null,
+      "body": "Merged with Central Coast FCU in 2024, adding ~15K members and 4 branches in Monterey County",
+      "closed_on": null,
+      "details": "Merged with Central Coast FCU in 2024, adding ~15K members and 4 branches in Monterey County",
+      "e_id": "E-002",
+      "event_date": "2024-07-01",
+      "id": "96cab31a-b0fb-4408-a8d3-bc10c34a44ca",
+      "source_url": "https://en.wikipedia.org/wiki/Wescom_Financial",
+      "status": null,
+      "target": "Central Coast FCU",
+      "title": "Merged with Central Coast FCU in 2024"
+    }
+  ],
+  "entity_display_id": "wescom-financial-wescom--0001",
+  "financials": {
+    "metrics": {
+      "Branches": "30 (2025)",
+      "Employees": "~730 (2025)",
+      "Google Play Rating": "4.8 (2025)",
+      "Members": "252,039 (2025)",
+      "Mortgage Originations": "1,931 (2024)",
+      "Net Income ($M)": "18+ (2024)",
+      "Net Worth ($M)": "513 (2025)",
+      "Net Worth Ratio (%)": "8.05 (2025)",
+      "Texas Ratio (%)": "2.07 (2025)",
+      "Total Assets ($B)": "6.4 (2025)",
+      "WRG Client Orgs": "120+ (2025)",
+      "WRG Revenue Growth (%)": "18.7 (2024)",
+      "net_income": 18000000000.0,
+      "trajectory": {
+        "branches": 30,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 730,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Merged with Ccfcu adding 4 branches"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Palo Alto Networks firewalls deployed for enterprise\u2026"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Ccfcu merger announced Aug 2023"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "California (21 counties)",
+        "headline": "$6.4B assets \u00b7 FY2025 \u00b7 +2.2% CAGR",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            6.0,
+            6.2,
+            6.3,
+            6.4
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        6.0,
+        6.2,
+        6.3,
+        6.4
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "metric": "total_assets_b",
+        "unit": "unknown",
+        "values": [
+          6.0,
+          6.2,
+          6.3,
+          6.4
+        ]
+      }
+    ],
+    "years": [
+      2022,
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "California (21 counties)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Farmers Insurance",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Darren Williams",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Hani Bhimji",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Pouria Abbassi",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chair"
+      }
+    ],
+    "license_type": "Federal credit union",
+    "narrative_md": "Wescom Central Credit Union, operating as Wescom Financial since its 2025 rebrand, was chartered in 1934 as a federal credit union (NCUA charter #66703). The institution maintains two wholly-owned subsidiaries: Wescom Resources Group LLC, a Credit Union Service Organization (CUSO) providing technology services to 120+ credit unions and financial institutions nationwide, and Wescom Financial Services LLC. Headquartered at 123 South Marengo Avenue, Pasadena, California 91101, the credit union is led by CEO Darren Williams, who has served for 28+ years and was named to the Los Angeles Business Journal\u2019s LA500 list in 2025. [E-001, E-002, E-003, E-004]\n\nThe 2025 rebrand from \u201cWescom Credit Union\u201d to \u201cWescom Financial\u201d with the \u201cBank Better\u201d tagline signals strategic intent to position as a full-service financial institution competing beyond traditional credit union boundaries. This positioning is supported by the May 2025 LPL Financial wealth management partnership, the UCLA affinity relationship ($38M, 10-year contract), and EVERFI financial education modules (25 adult + 14 youth courses). [E-003, E-037, E-047]",
+    "primary_regulator": "NCUA",
+    "size_tier": "Large ($6.4B total assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "Williams keynoted 'Enhancing CU Relevance in a Quickly-Changing World' at Corelation 11th Annual Conference CU market share stagnant at ~8%; bank advantages in rates/fees/digital eroding CU differentiators",
+        "title": "Williams keynoted",
+        "type": "conference",
+        "url": "https://wescomresources.com/enhancing-credit-union-relevance-in-a-quickly-changing-world/"
+      },
+      {
+        "author": null,
+        "date": "2023-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-033",
+        "excerpt": "DEIB Committee/Council: 15+ volunteers, Misbah Mayet as Inclusion & Diversity Director Team Inclusion Groups (TIGs), Team Affinity Groups (TAGs), annual I&D Summit",
+        "title": "DEIB Committee/Council: 15+ volunteers, Misbah Mayet as Inclusion\u2026",
+        "type": "conference",
+        "url": "https://www.businesswire.com/news/home/20231212022424/en/"
+      },
+      {
+        "author": null,
+        "date": "2024-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-024",
+        "excerpt": "Mark Dy-Ragos serves as VP, CISO at Wescom; MBA Cal State Fullerton Presented on Zero Trust Architecture at FutureCon Orange County 2024 cybersecurity conference",
+        "title": "Mark Dy-Ragos serves as VP, CISO at Wescom; MBA Cal State Fullerton\u2026",
+        "type": "conference",
+        "url": "https://rocketreach.co/mark-dy-ragos-email_12482786"
+      },
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-015",
+        "excerpt": "CEO Williams presented at Corelation 11th Annual Client Conference on 'Enhancing CU Relevance' Wescom uses Corelation KeyStone as primary core processing system",
+        "title": "CEO Williams presented at Corelation 11th Annual Client Conference",
+        "type": "conference",
+        "url": "https://news.wescom.org/wescom-ceo-on-how-credit-unions-can-enhance-relevance-in-a-quickly-changing-world/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "083b68e7-7288-4a22-b818-a651eae047eb",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Missing governance artifact: caps_applied_log.csv"
+    },
+    {
+      "id": "00fe91cf-b36f-4502-9538-88a6fc726716",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Missing governance artifact: contradiction_log.csv"
+    },
+    {
+      "id": "5adc5342-3919-4b12-8c1c-e45f8a743220",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Missing governance artifact: reasoning_chain_log.json"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Wescom's digital evolution accelerated markedly after CIO Pellissery's 2023 arrival from Bank of America. Pre-2023 investments focused on foundational platforms: Corelation KeyStone core banking partnership (2010), Iron Mountain AZP-1 DR facility (2016), Temenos Infinity LOS launch (2021), and Snowflake data warehouse deployment (2022). Post-2023, the pace intensified: CISO Dy-Ragos hired and Palo Alto NGFW deployed (2024), Informatica IDMC unified 35+ systems (2024), OpenAI moved from PoC to production (2024), Red Hat Linux migration completed for 7 UNITRI clients (2024). The January 2025 wildfire response tested BCP operationally, and the February 2026 Tellerix partnership and SFMC evaluation represent the current leading edge. The Barracuda breach (October 2022-May 2023) sits at the pre-/post-Pellissery inflection point and appears to have catalyzed security investment."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 1.85,
+        "P1C2": 2.36,
+        "P1C3": 2.31,
+        "P1C4": 2.15,
+        "P2C1": 3.11,
+        "P2C2": 2.87,
+        "P2C3": 3.06,
+        "P2C4": 3.22,
+        "P3C1": 2.71,
+        "P3C2": 2.56,
+        "P3C3": 2.69,
+        "P3C4": 2.81,
+        "P4C1": 3.34,
+        "P4C2": 3.28,
+        "P4C3": 3.67,
+        "P4C4": 3.57
+      },
+      "overall_score": 2.85,
+      "peer_name": "Members 1st Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.28,
+        "P1C2": 3.26,
+        "P1C3": 2.96,
+        "P1C4": 3.09,
+        "P1C5": 3.28,
+        "P2C1": 3.3,
+        "P2C2": 2.99,
+        "P2C3": 3.14,
+        "P2C4": 3.27,
+        "P3C1": 1.87,
+        "P3C2": 2.5,
+        "P3C3": 2.72,
+        "P3C4": 2.5,
+        "P4C1": 2.99,
+        "P4C2": 2.02,
+        "P4C3": 2.21,
+        "P4C4": 1.82
+      },
+      "overall_score": 2.78,
+      "peer_name": "iQ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.49,
+        "P1C2": 3.44,
+        "P1C3": 3.0,
+        "P1C4": 3.15,
+        "P1C5": 2.0,
+        "P2C1": 3.01,
+        "P2C2": 3.0,
+        "P2C3": 2.98,
+        "P2C4": 1.68,
+        "P3C1": 3.56,
+        "P3C2": 2.79,
+        "P3C3": 2.86,
+        "P3C4": 2.14,
+        "P4C1": 2.88,
+        "P4C2": 1.74,
+        "P4C3": 2.99,
+        "P4C4": 1.77
+      },
+      "overall_score": 2.73,
+      "peer_name": "OneAZ Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-WSCM-20260323-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 6110,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [
+          "Mobile banking UX, quick balance checks, deposit ease"
+        ],
+        "trend": "STABLE (excellent)",
+        "value": 4.8
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 2000,
+        "polarity": "neutral",
+        "source": "Apple App Store",
+        "themes": [
+          "Feature requests, login issues occasional"
+        ],
+        "trend": "STABLE (good)",
+        "value": 4.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Newsweek Best CU",
+        "themes": [
+          "Overall member satisfaction"
+        ],
+        "trend": "IMPROVING",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Great Place to Work",
+        "themes": [
+          "Employee satisfaction, culture"
+        ],
+        "trend": "STABLE (positive)",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Glassdoor (IT dept)",
+        "themes": [
+          "Promotion difficulty, change resistance"
+        ],
+        "trend": "CONCERNING",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "BBB",
+        "themes": [
+          "Debit card disputes, auto loan servicing, fee complaints"
+        ],
+        "trend": "STABLE",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Media (wildfire)",
+        "themes": [
+          "Community commitment, crisis response, debt relief"
+        ],
+        "trend": "POSITIVE surge Jan-Nov 2025",
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "UCLA partnership",
+        "themes": [
+          "NIL deals, campus branch, financial education"
+        ],
+        "trend": "GROWING",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Albert Chang appointed VP Marketing Sep 2025 under CMO Ashley White",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "202ad448-c50d-4f9b-86da-348ca5b22740",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/wescom-financial/5a1d83b924000024005e4567",
+      "subcap_ids": [],
+      "title": "Albert Chang appointed VP Marketing Sep 2025"
+    },
+    {
+      "body": "Merged with CCFCU adding 4 branches and ~15K members in Monterey County",
+      "date_precision": "publish_fallback",
+      "e_id": "E-003",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "a2997f75-1452-44d0-b3ec-5fcca7940737",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://news.wescom.org/presidents-message-to-members/",
+      "subcap_ids": [],
+      "title": "Merged with Ccfcu adding 4 branches"
+    },
+    {
+      "body": "Knott's Berry Farm: 8-year exclusive banking partnership (2023); in-park branch opened Sep 2024 (30th branch)",
+      "date_precision": "month",
+      "e_id": "E-048",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "d4e0391f-7b35-46a3-a91a-185769bd2b98",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://news.wescom.org/wescom-knotts-berry-farm-branch-opens/",
+      "subcap_ids": [],
+      "title": "In-park branch opened Sep 2024 (30th branch"
+    },
+    {
+      "body": "Palo Alto Networks firewalls deployed for enterprise security in 2024",
+      "date_precision": "year",
+      "e_id": "E-029",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "a23c4836-ce4e-472e-b559-77c8a11ac794",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.multimodal.dev/pioneers-content/wescoms-tech-arsenal-enterprise-solutions-on-a-credit-union-scale",
+      "subcap_ids": [],
+      "title": "Palo Alto Networks firewalls deployed for enterprise\u2026"
+    },
+    {
+      "body": "Infrastructure migrated from IBM AIX P-Series to Red Hat Linux servers in 2024",
+      "date_precision": "year",
+      "e_id": "E-029",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "5f468ece-edd4-402c-a099-cb8fe66e5c6d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.multimodal.dev/pioneers-content/wescoms-tech-arsenal-enterprise-solutions-on-a-credit-union-scale",
+      "subcap_ids": [],
+      "title": "Infrastructure migrated from IBM AIX P-Series"
+    },
+    {
+      "body": "7 UNITRI KeyStone clients migrated AIX\u2192Red Hat Linux H1 2024",
+      "date_precision": "year",
+      "e_id": "E?",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E?"
+      ],
+      "id": "8a9f381b-6291-4641-9be4-555d67aaedf8",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://wescomresources.com/wescom-resources-group-reports-strong-growth-in-first-half-of-2024/",
+      "subcap_ids": [],
+      "title": "7 Unitri KeyStone clients migrated AIX\u2192Red Hat Linux H1 2024"
+    },
+    {
+      "body": "Merged with Central Coast FCU in 2024, adding ~15K members and 4 branches in Monterey County",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "96cab31a-b0fb-4408-a8d3-bc10c34a44ca",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://en.wikipedia.org/wiki/Wescom_Financial",
+      "subcap_ids": [],
+      "title": "Merged with Central Coast FCU in 2024"
+    },
+    {
+      "body": "CCFCU merger announced Aug 2023, completed Q2 2024. $187M assets, ~15K members, 4 branches Monterey",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2023-08-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "7950df06-556b-4f28-a0a5-e7be83745620",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.businesswire.com/news/home/20230822844955/en/",
+      "subcap_ids": [],
+      "title": "Ccfcu merger announced Aug 2023"
+    },
+    {
+      "body": "Voice VA launched spring 2023: balance, history, deposits, call routing",
+      "date_precision": "year",
+      "e_id": "E?",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E?"
+      ],
+      "id": "c8ac8be9-872f-483c-87f8-ff7ca1df58bb",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.wescom.org/phone",
+      "subcap_ids": [],
+      "title": "Voice VA launched"
+    },
+    {
+      "body": "Instagram @wescomfinancial: ~10K followers, ~1,203 posts; named Financial Brand Top 100 CUs on Instagram (Q3 2020)",
+      "date_precision": "quarter",
+      "e_id": "E-038",
+      "event_date": "2020-08-01",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "c749c31c-975f-44e1-8a3d-7531ee75c677",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.instagram.com/wescomfinancial/",
+      "subcap_ids": [],
+      "title": "Named Financial Brand Top 100 CUs on Instagram (Q3 2020)"
+    }
+  ]
+}

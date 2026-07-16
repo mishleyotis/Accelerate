@@ -1,0 +1,743 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "trustco-bank-0001",
+  "financials": {
+    "lines": [
+      "tier 1 risk based pct: 13.98"
+    ],
+    "metrics": {
+      "net_income": "$61.1M",
+      "nim_pct": 2.79,
+      "roa_pct": 0.8
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (national)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Robert J. McCormick",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "John R. George",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Bankers Association",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Robert M. Leonard",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Corporate Services",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Treasurer Eric",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chief Risk",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Chief Compliance",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      }
+    ],
+    "license_type": "National bank charter (OCC)",
+    "narrative_md": "TrustCo Bank is a regional bank. It reports $6.4 billion in total assets. It is regulated by OCC and employs approximately 771 people across 136 branches. Its overall digital maturity is assessed at 1.7 out of 5 across the DMA capability framework.",
+    "primary_regulator": "OCC",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-047",
+        "excerpt": "CONTRADICTION: Fiserv Architect press release (2021) claims 'online account opening' deployed. But 2026 website FAQs direct all account opening to branches. Either capability was rolled back, or it's branch-initiated dig",
+        "title": "Fiserv Architect press release (2021) claims",
+        "type": "article",
+        "url": "https://smartasset.com/checking-account/trustco-bank-banking-review"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-028",
+        "excerpt": "NO fintech partnerships announced or disclosed. Search exhausted Tiers 1-10 including vendor reverse search, patent search, conference search. NO innovation lab, accelerator, hackathon, or formal innovation program found",
+        "title": "NO fintech partnerships announced",
+        "type": "conference",
+        "url": "https://www.trustcobank.com/about-trustco-bank/"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-052",
+        "excerpt": "H6 VERDICT: CEO mentions 'teller platforms in our branches' were improved (E-012). Fiserv Signature core + Fiserv Architect digital suggests Connected Teller for Signature is LIKELY but NOT confirmed by case study or pre",
+        "title": "CEO mentions",
+        "type": "article",
+        "url": "https://www.trustcobank.com/page/corporate-sustainability-a-message-from-our-ceo-172.html"
+      }
+    ],
+    "ticker": "TRST"
+  },
+  "issue_register": [
+    {
+      "id": "8f8425ad-691b-4c56-99d1-7cacbb722b8a",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 DMA-ASM-TRST-20260330-0001 consistent across all artifacts"
+    },
+    {
+      "id": "b7fb55a1-feb6-4a6d-a745-0db6118dbbc9",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 TrustCo Bank Corp NY consistent"
+    },
+    {
+      "id": "8e318735-5ca3-4c63-abbb-07961b001795",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 SV1 Regional Banks throughout"
+    },
+    {
+      "id": "53f1d751-b000-4e34-a4d4-333e5d1f033d",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 186 rows (min 170)"
+    },
+    {
+      "id": "267f3939-61b9-424d-b2d7-0992ff78d625",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 232 rows (min 210)"
+    },
+    {
+      "id": "08b03c43-f78e-4c35-b8ef-cbf5305bd1ca",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 118 rows (min 105)"
+    },
+    {
+      "id": "cfb29805-3b1a-4581-966f-eab429a688c2",
+      "issue_id": "GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 172 rows (min 155)"
+    },
+    {
+      "id": "9e8929b6-37c6-4e8d-96d0-af51fa8c39b2",
+      "issue_id": "GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 6 unique scores"
+    },
+    {
+      "id": "1d0e34f5-cc1d-414b-8b24-ffe1128e5484",
+      "issue_id": "GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 4 unique scores"
+    },
+    {
+      "id": "a1f35485-76fc-4533-97b6-c0c65fb99174",
+      "issue_id": "GOV-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 7 unique scores"
+    },
+    {
+      "id": "37de6138-370f-49ac-a3c9-fcc5945337f8",
+      "issue_id": "GOV-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 5 unique scores"
+    },
+    {
+      "id": "f04e13ec-bc5a-4084-bb58-1958054f3091",
+      "issue_id": "GOV-012",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 100.0% subcaps have evidence"
+    },
+    {
+      "id": "a88bbd26-d637-43dc-be6f-32a9d3258d1b",
+      "issue_id": "GOV-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    },
+    {
+      "id": "7e7e0190-28d4-4bce-8014-83305dea028f",
+      "issue_id": "GOV-014",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 computed 2.03 vs stored 2.03 (\u03940.000)"
+    },
+    {
+      "id": "ff85e412-b57a-4a7b-aac5-2f226ef82be7",
+      "issue_id": "GOV-015",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 computed 1.42 vs stored 1.42 (\u03940.000)"
+    },
+    {
+      "id": "99203261-6b56-482d-8eed-9129b2a62dd6",
+      "issue_id": "GOV-016",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 computed 2.14 vs stored 2.14 (\u03940.000)"
+    },
+    {
+      "id": "71734fe6-7f5f-459b-84cb-2621dbec022b",
+      "issue_id": "GOV-017",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 computed 1.52 vs stored 1.52 (\u03940.000)"
+    },
+    {
+      "id": "9287c58c-10cf-4e8a-9a8a-d35954713834",
+      "issue_id": "GOV-018",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "INFO \u2014 0 subcaps have caps applied"
+    },
+    {
+      "id": "9179efa0-1f9a-45d1-9110-ced26b9ae77d",
+      "issue_id": "GOV-019",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 5 peers scored (NBTB, FISI, TMP, CNOB, FFIC)"
+    },
+    {
+      "id": "efec60a8-dc75-4ef9-90b2-b37187a4895d",
+      "issue_id": "GOV-020",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "INFO \u2014 1/17 above peer median, 16/17 below"
+    },
+    {
+      "id": "132f8455-d169-403d-ab51-eec7154f44f5",
+      "issue_id": "GOV-021",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "INFO \u2014 Mean 1.74, Std 0.68, Range 1.0-4.0"
+    },
+    {
+      "id": "e87922c3-d59f-46bc-84c6-dee05199f759",
+      "issue_id": "GOV-022",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 Most common: 1.5 (30.8%)"
+    },
+    {
+      "id": "c3ab9fae-a168-43b4-a77d-13eec02367c9",
+      "issue_id": "GOV-023",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "HIGH:616 MED:92 LOW:0"
+    },
+    {
+      "id": "4b0c7a2d-7548-42a3-8bb3-2bda20098501",
+      "issue_id": "GOV-024",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 RESEARCH_HANDOFF mode, 86 items, 385 facts"
+    },
+    {
+      "id": "945c7999-86d7-42c7-812d-557bbcaf6085",
+      "issue_id": "GOV-025",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 12/12 inherited"
+    },
+    {
+      "id": "e45609f2-03fe-4d6c-8c2d-61fe2129e617",
+      "issue_id": "GOV-026",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS \u2014 10 confirmed, 3 corrected"
+    },
+    {
+      "id": "af28e92a-83c9-4002-a658-7efd06adfeae",
+      "issue_id": "GOV-027",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    },
+    {
+      "id": "7ce4a483-eef1-46f8-bd87-4526de6cdc44",
+      "issue_id": "GOV-028",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    },
+    {
+      "id": "258e0af7-ea72-4a3f-9245-de0c38c7dfc5",
+      "issue_id": "GOV-029",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    },
+    {
+      "id": "f467c9fb-cbed-4577-b92a-7d57bb88c434",
+      "issue_id": "GOV-030",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    },
+    {
+      "id": "e09ef344-f467-4ebf-b06d-8644f5852be0",
+      "issue_id": "GOV-031",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    },
+    {
+      "id": "2568c77d-ea62-4c78-83b7-dd2cd7d6e3d7",
+      "issue_id": "GOV-032",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PASS"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Latest available financials show net income of $61.1M.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.29,
+        "P1C2": 2.85,
+        "P1C3": 2.37,
+        "P1C4": 2.56,
+        "P2C1": 1.82,
+        "P2C2": 2.13,
+        "P2C3": 2.44,
+        "P2C4": 1.94,
+        "P3C1": 2.18,
+        "P3C2": 1.6,
+        "P3C3": 1.0,
+        "P3C4": 1.0,
+        "P4C1": 1.44,
+        "P4C2": 1.12,
+        "P4C3": 1.66,
+        "P4C4": 1.67
+      },
+      "overall_score": 1.88,
+      "peer_name": "Rockland Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.65,
+        "P1C2": 2.6,
+        "P1C3": 2.5,
+        "P1C4": 1.99,
+        "P2C1": 1.34,
+        "P2C2": 1.24,
+        "P2C3": 1.17,
+        "P2C4": 1.41,
+        "P3C1": 1.9,
+        "P3C2": 1.63,
+        "P3C3": 2.45,
+        "P3C4": 2.5,
+        "P4C1": 1.54,
+        "P4C2": 1.42,
+        "P4C3": 1.68,
+        "P4C4": 1.78
+      },
+      "overall_score": 1.86,
+      "peer_name": "First Citizens BancShares, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.46,
+        "P1C2": 1.77,
+        "P1C3": 1.01,
+        "P1C4": 1.49,
+        "P1C5": 2.04,
+        "P2C1": 1.53,
+        "P2C2": 1.0,
+        "P2C3": 1.97,
+        "P2C4": 1.04,
+        "P3C1": 1.88,
+        "P3C2": 2.52,
+        "P3C3": 2.97,
+        "P3C4": 1.41,
+        "P4C1": 1.04,
+        "P4C2": 1.51,
+        "P4C3": 2.03,
+        "P4C4": 2.23
+      },
+      "overall_score": 1.76,
+      "peer_name": "Community West Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.5,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 1.5,
+        "P1C5": 2.0,
+        "P2C1": 1.5,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 1.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 1.5,
+        "P4C3": 1.5,
+        "P4C4": 1.5
+      },
+      "overall_score": 1.74,
+      "peer_name": "Cathay Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.86,
+        "P1C2": 2.01,
+        "P1C3": 2.06,
+        "P1C4": 2.16,
+        "P1C5": 2.15,
+        "P2C1": 1.52,
+        "P2C2": 1.96,
+        "P2C3": 1.91,
+        "P2C4": 1.18,
+        "P3C1": 1.66,
+        "P3C2": 1.93,
+        "P3C3": 1.7,
+        "P3C4": 1.16,
+        "P4C1": 1.21,
+        "P4C2": 1.23,
+        "P4C3": 1.51,
+        "P4C4": 2.01
+      },
+      "overall_score": 1.72,
+      "peer_name": "Manasquan Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TRST-20260330-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Glassdoor overall: 3.1/5 (347 reviews)",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 347,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.1
+      },
+      {
+        "drilldown": "Indeed: No IT Support salary data available \u2014 insufficient IT roles to generate salary benchmarks",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Google Play: 1,019 user reviews",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "BBB complaints include: overdraft fee disputes (deceptive practices allegation), counterfeit cash from branch, CD inheritance processing delays",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "CONTRADICTION: Business Data Analyst hired Aug 2025 (first data role ever?) \u2014 signals nascent awareness of data needs. But no CDO, no governance framework, no tools to support the role. One analyst cannot build a data program alone.",
+      "date_precision": "month",
+      "e_id": "E-076",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-076"
+      ],
+      "id": "a0e21266-abb5-4e37-89ad-b81197255184",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.trustcobank.com",
+      "subcap_ids": [],
+      "title": "Business Data Analyst hired Aug 2025 (first data role ever"
+    },
+    {
+      "body": "Cannabis banking = only new initiative announced (2024 earnings call). Not a technology innovation.",
+      "date_precision": "year",
+      "e_id": "E-028",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "ba04d822-a40a-47ff-b0d7-a6cd5a8b040f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.trustcobank.com/about-trustco-bank/",
+      "subcap_ids": [],
+      "title": "Cannabis banking = only new initiative announced (2024\u2026"
+    },
+    {
+      "body": "RECENT HIRING: 5 of 16 hired since 2024 (Tom M., Treavor Smith, Jasmine Burke, Jeremiah Lahnum, Bryan Cusi). BSA/AML function is GROWING while engineering is FLAT. Bank is investing in compliance, not technology.",
+      "date_precision": "year",
+      "e_id": "E-066",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-066"
+      ],
+      "id": "31d86790-27d1-4c87-9f18-1e9e0053174a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/trustco-bank",
+      "subcap_ids": [],
+      "title": "5 of 16 hired since 2024"
+    },
+    {
+      "body": "Leadership Program launched 2021 for management: 4 components (Assess, Learn, Coach, Apply). Experiential learning.",
+      "date_precision": "year",
+      "e_id": "E-029",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "a3d13948-df4c-4913-b45f-0084ac32cb97",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.trustcobank.com/resource/social/",
+      "subcap_ids": [],
+      "title": "Leadership Program launched 2021 4 components (Assess\u2026"
+    },
+    {
+      "body": "CONTRADICTION: Fiserv Architect press release (2021) claims 'online account opening' deployed. But 2026 website FAQs direct all account opening to branches. Either capability was rolled back, or it's branch-initiated digital (not self-service).",
+      "date_precision": "year",
+      "e_id": "E-047",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "b94f813b-ebc0-4dc1-b237-c814ede08656",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://smartasset.com/checking-account/trustco-bank-banking-review",
+      "subcap_ids": [],
+      "title": "Fiserv Architect press release (2021) claims"
+    },
+    {
+      "body": "29% of employees promoted internally in 2021 (247 people). Promote-from-within policy.",
+      "date_precision": "year",
+      "e_id": "E-029",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "665e379d-c471-4da7-b24e-ccaea089eea7",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.trustcobank.com/resource/social/",
+      "subcap_ids": [],
+      "title": "29% of employees promoted in 2021"
+    }
+  ]
+}

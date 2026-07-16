@@ -1,0 +1,150 @@
+{
+  "entity_display_id": "tii-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Agent certification completion rate": "91% (Magellan 2025 [E-133]) \u2192 95%+ (in-platform curriculum)",
+        "P3C1 Process Automation cap": "Capped M3 (P4C3 < 2.5) \u2192 Cap removed (P4C3 \u2265 2.5 post-MuleSoft)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Agent certification completion rate: 91% (Magellan 2025 [E-133]) \u2192 95%+ (in-platform curriculum)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Experience Cloud Partner Community build + Certified Specialist Programme integration + TRAMS/ClientBase API connector",
+          "maturity_lift": null,
+          "metric": "Agent certification completion rate: 91% (Magellan 2025 [E-133]) \u2192 95%+ (in-platform curriculum)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Agent certification completion rate: 91% (Magellan 2025 [E-133]) \u2192 95%+ (in-platform curriculum)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Experience Cloud Agent Portal \u2014 25,000 Agents, Zero Desktops"
+        },
+        {
+          "feature": "Lightning migration completion + MuleSoft implementation connecting TII proprietary systems to Salesforce",
+          "maturity_lift": "+1.98",
+          "metric": "P3C1 Process Automation cap: Capped M3 (P4C3 < 2.5) \u2192 Cap removed (P4C3 \u2265 2.5 post-MuleSoft)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 Process Automation cap: Capped M3 (P4C3 < 2.5) \u2192 Cap removed (P4C3 \u2265 2.5 post-MuleSoft)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Lightning Completion + MuleSoft Integration Layer \u2014 Complete the Platform Foundation"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C1, P4C3"
+    },
+    {
+      "customer_impact": {
+        "P2C1 Digital Marketing score": "2.06 (vs peer 3.5) \u2192 M3+ with distribution architecture improvement",
+        "Underwriting turnaround time": "Not publicly measured (S&S was 35% longer pre-AI) \u2192 Target S&S UP benchmark: 35% reduction"
+      },
+      "dependencies": [
+        "REC-02",
+        "REC-03"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C1 Digital Marketing score: 2.06 (vs peer 3.5) \u2192 M3+ with distribution architecture improvement",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Revenue Cloud configuration + FSC Insurance Brokerages deployment + commission workflow build + Experience Cloud integra",
+          "maturity_lift": "+1.94",
+          "metric": "P2C1 Digital Marketing score: 2.06 (vs peer 3.5) \u2192 M3+ with distribution architecture improvement",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 Digital Marketing score: 2.06 (vs peer 3.5) \u2192 M3+ with distribution architecture improvement",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Revenue Cloud + FSC Insurance Brokerages \u2014 Commission Clarity for 25,000 Agents"
+        },
+        {
+          "feature": "Einstein AI configuration for TII A&H use cases + Agentforce underwriting intake automation + C&F AI Gateway integration",
+          "maturity_lift": null,
+          "metric": "Underwriting turnaround time: Not publicly measured (S&S was 35% longer pre-AI) \u2192 Target S&S UP benchmark: 35% reduction",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Underwriting turnaround time: Not publicly measured (S&S was 35% longer pre-AI) \u2192 Target S&S UP benchmark: 35% reduction",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Einstein AI + Agentforce Underwriting \u2014 Extend the S&S Playbook to A&H"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    },
+    {
+      "customer_impact": {
+        "% claims handled autonomously (Agentforce first-touch)": "0% (all human-routed) \u2192 50%+ routine claims (Engine.com benchmark)",
+        "P2C4 Personalisation cap status": "Capped M3 (P4C1 < 2.5) \u2192 Cap removed (P4C1 \u2265 2.5)"
+      },
+      "dependencies": [
+        "REC-05"
+      ],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "% claims handled autonomously (Agentforce first-touch): 0% (all human-routed) \u2192 50%+ routine claims (Engine.com benchmark)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Service Cloud implementation + Agentforce configuration + ProNavigator API integration",
+          "maturity_lift": "+2.91",
+          "metric": "% claims handled autonomously (Agentforce first-touch): 0% (all human-routed) \u2192 50%+ routine claims (Engine.com benchmark)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "% claims handled autonomously (Agentforce first-touch): 0% (all human-routed) \u2192 50%+ routine claims (Engine.com benchmark)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Service Cloud + Agentforce Claims AI \u2014 Digital Claims in Weeks, Not Months"
+        },
+        {
+          "feature": "Data Cloud configuration + unified traveller profile build + multi-channel attribution setup + Marketing Cloud journey u",
+          "maturity_lift": "+2.91",
+          "metric": "P2C4 Personalisation cap status: Capped M3 (P4C1 < 2.5) \u2192 Cap removed (P4C1 \u2265 2.5)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 Personalisation cap status: Capped M3 (P4C1 < 2.5) \u2192 Cap removed (P4C1 \u2265 2.5)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Salesforce Data Cloud Activation \u2014 Unlock the Marketing Cloud You Already Own"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4, P4C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-TII-20260427-0001",
+  "total_duration_months": 12
+}

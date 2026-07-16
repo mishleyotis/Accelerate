@@ -1,0 +1,836 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "alma-bank-0001",
+  "financials": {
+    "lines": [
+      "5-Year Asset Growth (2021\u20132024) \u2014 Classification: ACCELERATING  |  CAGR est. ~8.4%",
+      "ACCELERATING  |  CAGR est. ~8.4%  |  Evidence: E-002, E-003, E-038",
+      "Interpretation: 98.4% L/D ratio vs 77.2% peer avg signals aggressive CRE lending deployment \u2014 Salesforce FSC LOS reactivation directly addresses the bank's primary revenue driver. [E-002, E-003]"
+    ],
+    "metrics": {
+      "interpretation": "98.4% L/D ratio vs 77.2% peer avg signals ag"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "New York"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Michael P. Psyllos",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul Kalamaras",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman of the Board"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jeanne Kelley",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO / Senior Executive VP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Hugh Donlon",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP / Chief Lending Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Richard Koll",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP / Head of Alma Wealth Management (AWM)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Pasquale Fedele",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "FVP IT Director"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Donald S.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marguerite Tiberia",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Basil Ahmad",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Sr. BSA Data Analyst"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "Alma Bank was founded in 2007 to serve the Greek-American immigrant community in Astoria, Queens \u2014 one of the largest Greek-American concentrations in the United States. Over 18 years the bank expanded to serve the broader NYC immigrant population and commercial real estate market, growing to $1.492B in assets. The bank operates as an independent institution with no holding company, reporting directly to the FDIC and NY DFS. [E-002, E-003, E-015]",
+    "primary_regulator": "FDIC",
+    "size_tier": "Small ($1B\u2013$2B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-034",
+        "excerpt": "PROXY CONFIRMED ABSENT: No AI/GenAI strategy announcement, no AI chatbot, no AI-powered financial tools found in Alma Bank's public footprint \u2014 website, press releases, LinkedIn, job postings all sear",
+        "title": "No AI/GenAI strategy announcement, no AI chatbot, no AI-powered\u2026",
+        "type": "article",
+        "url": "https://www.almabank.com/Careers"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "574be419-7786-43a5-aa82-f2c679b4c8cd",
+      "issue_id": "ISS-GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "gov_auditor.py v2.0 computes unweighted pillar average (2.004) vs correct P1\u00d70.25+P2\u00d70.30+P3\u00d70.20+P4\u00d70.25=1.969. Delta=0.035. True weighted calc verified: 1.9694 vs manifest 1.9690 (delta 0.0004 < 0.001 tolerance). NOT a scoring error."
+    },
+    {
+      "id": "69f7504c-73d4-4a06-8072-b7ae4135598a",
+      "issue_id": "ISS-GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "v5.5 assessment produces: P1_Subcap_Scoring, P2_Subcap_Scoring, Executive_Summary. v2.4 expects: P1_Scoring_Detail, P2_Scoring_Detail, Summary, Calculation_Chain. v2.4 alias sheets added as workaround but auditor does not recognize all data rows."
+    },
+    {
+      "id": "7550e788-bb4a-4159-8f6a-4308cc5efdf4",
+      "issue_id": "ISS-GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "gov_auditor.py SI-01 check fails because P*_Scoring_Detail sheet names don't match v5.5 naming. 698 subcap rows exist in P*_Subcap_Scoring sheets \u2014 not a data gap."
+    },
+    {
+      "id": "fe10a709-f874-40b8-ab68-b2338819774c",
+      "issue_id": "ISS-GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "v2.4 expects a Calculation_Chain sheet with OVERALL\u2192P1\u2192P2\u2192P3\u2192P4\u2192Category\u2192Subcap hierarchy. v5.5 computes aggregation programmatically in Python, not in a dedicated sheet. Calculation_Chain placeholder sheet added with OVERALL+pillar rows."
+    },
+    {
+      "id": "3cb8de59-a9fe-49f2-8ad8-b1c0f4c29b90",
+      "issue_id": "ISS-GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "RC-02 requires 'peer proxy disclosure' with required phrases in Section 2. Peer Benchmark Note added to Section 2 methodology table. Auditor flags as missing \u2014 likely looking for specific required phrases not yet confirmed."
+    },
+    {
+      "id": "132b3c04-ab98-438b-a3cf-5503589bc1bf",
+      "issue_id": "ISS-GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "PV-01 sample of 15 subcaps: 93% PASS (14/15), 7% PARTIAL (1/15 \u2014 P4C4.6.4 missing Counter + Constraints). PARTIAL subcaps are primarily mid-range scorers (2.5-3.0) without explicit cap/dependency language."
+    },
+    {
+      "id": "fa258ebe-2632-4502-bc88-268db7a1a07c",
+      "issue_id": "ISS-GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "PV-02 automated check flags P3C1 subcaps scoring 2.5 that contain 'absent' keyword. Root cause: these subcaps cite 'FedNow/RTP absent' as one negative signal within a broader payment processing subcap that has active ACH/ZBA/wire capabilities (E-010, E-069, E-070). Score of 2.5 is justified by present capabilities; FedNow absence is documented but not score-determinative. FALSE POSITIVE from automated keyword matching."
+    },
+    {
+      "id": "346aaccd-2a7f-4212-88be-9fd4f68a3598",
+      "issue_id": "ISS-GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PV-03: 78% of subcaps have counter-evidence signals (above 75% threshold \u2192 PASS_WITH_WARNINGS). 22% of subcaps lack explicit counterclaims, primarily subcaps with M1 scores where absence is unambiguous."
+    },
+    {
+      "id": "28cf8421-276d-4e4d-a3b5-71af5cc67668",
+      "issue_id": "ISS-GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "RC-14 automated check uses 2000-char window from first REC-0X occurrence (summary table, no E-IDs). ROOT CAUSE blocks appear later in the section. All 7 ROOT CAUSE blocks confirmed present with \u22652 E-IDs each in SBR3 QA (C10: 7/7 PASS). RC-14 is a FALSE POSITIVE."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "Borrowed from Client Profile Research Report Section 5.1 with assessment scoring impact annotations. Issue Register is the AE's urgency framework \u2014 each issue maps to a Zennify recommendation entry point.",
+    "trend_md": "This section is borrowed from the Client Profile Research Report (DMA-RES-ALMA-20260519-0001, Section 3) per data borrowing protocol. Contextual sections are COPY operations \u2014 not re-scored. Assessment-layer maturity signal annotations have been added."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.88,
+      "peer_name": "Northfield Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.74,
+      "peer_name": "Hanover Community Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.44,
+      "peer_name": "Ponce Financial Group / Ponce Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.38,
+      "peer_name": "Northeast Community Bancorp",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.0,
+        "P2C3": 2.0,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.94,
+      "peer_name": "Magyar Bancorp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-ALMA-20260519-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "2018 - all labeled 'bug fixes and performance improvements' Glassdoor overall: 3.4/5 (53 reviews); 57% would recommend; WLB 3.2, culture 3.2, career opps 3.1, comp 3.0 177 employees (March 2025); annual revenue ~$35M; HQ 28-31 31st Street A",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 53,
+        "polarity": "positive",
+        "source": "Glassdoor",
+        "themes": [],
+        "trend": "Improving",
+        "value": 3.4
+      },
+      {
+        "drilldown": "door: 53 reviews, 3.4/5 overall \u2014 substantially higher than Indeed's 2.3/5 (40 reviews) \u2014 significant source divergence, Glassdoor likely reflects more recent employee cohort with growth-mode mes Current AVP Human Resources Manager (Rosette",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 53,
+        "polarity": "positive",
+        "source": "Indeed",
+        "themes": [],
+        "trend": "Improving",
+        "value": 3.4
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Electronic Banking Specialist role (May 2026) \u2014 digital banking operations specialist being hired",
+      "date_precision": "month",
+      "e_id": "E-023",
+      "event_date": "2026-05-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "12214f10-0e67-41f9-9649-6df0c62b1a2b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.indeed.com/q-alma-bank-jobs.html",
+      "subcap_ids": [],
+      "title": "Electronic Banking Specialist role (May 2026)"
+    },
+    {
+      "body": "CEO Michael Psyllos joined US Treasury Secretary Scott Bessent + New York Bankers Association community banking roundtable \u2014 industry leadership engagement, macro policy awareness",
+      "date_precision": "publish_fallback",
+      "e_id": "E-024",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "e3fcce58-5f94-4aa8-8e93-cf490658b436",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://rankings.newsweek.com/profile/alma-bank",
+      "subcap_ids": [],
+      "title": "CEO Michael Psyllos joined US Treasury Secretary Scott\u2026"
+    },
+    {
+      "body": "CONFIRMED: CyberArk PAM + DarkTrace already deployed at Alma Bank align with NYCRR 500 Nov 2025 requirements for privileged access management and automated monitoring \u2014 Alma Bank is materially compliant on these controls",
+      "date_precision": "month",
+      "e_id": "E-105",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-105"
+      ],
+      "id": "392d1805-76c9-4a99-a75c-dee7be37ed8c",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://natlawreview.com/article/are-you-ready-new-york-dfs-cybersecurity-regulation-approaches-its-final-compliance",
+      "subcap_ids": [],
+      "title": "Alma Bank is materially compliant on these controls"
+    },
+    {
+      "body": "Cetera Financial Institutions partnered with Alma Bank to strengthen/grow Alma Wealth Management (AWM) program, Sep 15, 2025",
+      "date_precision": "day",
+      "e_id": "E-006",
+      "event_date": "2025-09-15",
+      "evidence_e_ids": [
+        "E-006",
+        "E-101"
+      ],
+      "id": "0cf8622b-4dbe-4ac4-99e4-2c87f2776225",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/alma-bank-partners-with-cetera-in-pursuit-of-growth-302555595.html",
+      "subcap_ids": [],
+      "title": "Cetera Financial Institutions partnered with Alma Bank"
+    },
+    {
+      "body": "Richard Koll hired as head of AWM; formerly SVP Client Experience at Osaic Institutions and wealth program leader at Investors Bancorp",
+      "date_precision": "publish_fallback",
+      "e_id": "E-006",
+      "event_date": "2025-09-15",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "7c588762-ac16-4954-9bdc-56a4f8165f8a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/alma-bank-partners-with-cetera-in-pursuit-of-growth-302555595.html",
+      "subcap_ids": [],
+      "title": "Richard Koll hired as head of AWM"
+    },
+    {
+      "body": "NYDFS enforcement precedent: Gemini Trust fined $37M (2024) for inadequate TPSP oversight; Block Inc. fined $40M (2025) for lack of board-reviewed third-party cybersecurity policies \u2014 enforcement risk elevates Alma Bank's TPRM compliance incentive",
+      "date_precision": "year",
+      "e_id": "E-085",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-085"
+      ],
+      "id": "3c55f96d-408e-493c-89b4-d2240a7569dd",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.dfs.ny.gov/industry_guidance/cybersecurity",
+      "subcap_ids": [],
+      "title": "Enforcement risk elevates Alma Bank's TPRM compliance\u2026"
+    },
+    {
+      "body": "Industry context: 73% of global banks deployed AI chatbots by 2025; Alma Bank is in the non-adopting minority \u2014 significant competitive and operational gap",
+      "date_precision": "year",
+      "e_id": "E-034",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "9b22e18a-cc85-4f4e-b820-db7919a4d2e0",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.almabank.com/Careers",
+      "subcap_ids": [],
+      "title": "Industry context: 73% of global banks deployed AI chatbots\u2026"
+    },
+    {
+      "body": "PRESENT \u2014 Tableau: Sr. BSA Data Analyst Basil Ahmad uses Tableau (Jul 2025) \u2014 BI/analytics visualization tool deployed in BSA compliance context; enterprise-wide BI reach unclear",
+      "date_precision": "month",
+      "e_id": "E-094",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-094"
+      ],
+      "id": "3e382e32-1c0a-4bb2-b0e5-1d9d6b02c415",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.almabank.com/",
+      "subcap_ids": [],
+      "title": "Tableau: Sr. BSA Data Analyst Basil Ahmad uses Tableau (Jul\u2026"
+    },
+    {
+      "body": "PROXY: Tableau confirmed deployed (Basil Ahmad, Jul 2025) \u2014 Tableau is an enterprise BI tool capable of connecting to FIS exports, SQL databases, and Python data pipelines; Alma Bank's BSA analytics uses this stack",
+      "date_precision": "month",
+      "e_id": "E-098",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-098"
+      ],
+      "id": "88644317-4228-47af-a5a5-4f4d7690395e",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.fisglobal.com/en/insights/banking",
+      "subcap_ids": [],
+      "title": "SQL databases"
+    },
+    {
+      "body": "PROXY: 58% of community banks using or planning e-signature for CRE/multifamily/ag RE loans (Wolters Kluwer 2025 survey) \u2014 Alma Bank has ShareFile/RightSignature already deployed (confirmed via E-091); ahead of 42% of peers on e-signature",
+      "date_precision": "year",
+      "e_id": "E-103",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-103",
+        "E-091"
+      ],
+      "id": "f591259b-ca2a-4a17-8a1e-9547d9905296",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://jupid.com/blog/state-of-community-banking-2025",
+      "subcap_ids": [],
+      "title": "58% of community banks using or planning e-signature for\u2026"
+    },
+    {
+      "body": "Earth Day 2025 (April 22): Alma Bank partnered with One Tree Planted to plant 5,000 trees globally \u2014 first documented environmental commitment",
+      "date_precision": "year",
+      "e_id": "E-050",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-050"
+      ],
+      "id": "644075e8-5459-444e-be1a-853308418ff9",
+      "kind": "partnership",
+      "signal": "neutral",
+      "source_url": "https://www.almabank.com/EarthDay",
+      "subcap_ids": [],
+      "title": "Earth Day 2025 (April 22): Alma Bank partnered with One\u2026"
+    },
+    {
+      "body": "No public DFS termination order found for the 2015 Consent Order (search of dfs.ny.gov returned only the original 2015 order and a May 2025 branch approval \u2014 consent order likely served its purpose but formal termination not publicly disclosed)",
+      "date_precision": "month",
+      "e_id": "E-016",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "26de1350-fe1c-48c1-8088-616664241397",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://complianceconcourse.willkie.com/articles/news-alerts-2019-06-june-20190604-1-million-bank-secrecy-act-settlement/",
+      "subcap_ids": [],
+      "title": "Consent order served its purpose but"
+    },
+    {
+      "body": "Hugh Donlon recently appointed EVP & Chief Lending Officer; Nancy Papaioannou as Senior Advisor",
+      "date_precision": "publish_fallback",
+      "e_id": "E-011",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "85d7825a-c6fa-4da1-9bdb-8ac51f9ce119",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/alma-bank/5a1d8a8a2400002400643170",
+      "subcap_ids": [],
+      "title": "Hugh Donlon appointed EVP & Chief Lending Officer"
+    },
+    {
+      "body": "PRESENT: Relationship banker model (named RMs documented: VP/RM, FVP/Director Business Banking) \u2014 personal service compensates for digital gaps in high-value segments",
+      "date_precision": "publish_fallback",
+      "e_id": "E-065",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-065"
+      ],
+      "id": "a2dbc742-340f-43fd-8ef9-203fbde8e97f",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.almabank.com/",
+      "subcap_ids": [],
+      "title": "Relationship banker model (named RMs documented: VP/RM\u2026"
+    },
+    {
+      "body": "Relationship-banker model at Alma Bank suggests informal sales pipeline management \u2014 14 branches with named RMs (VP/RM, FVP/Director Business Banking, VP/Regional Sales Manager) operating in personal relationship mode rather than CRM-driven pipeline",
+      "date_precision": "publish_fallback",
+      "e_id": "E-068",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "56043ef9-1b3c-4519-bf7d-0ea1c4bebcdf",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/alma-bank/5a1d8a8a2400002400643170",
+      "subcap_ids": [],
+      "title": "Relationship-banker model at Alma Bank suggests informal\u2026"
+    },
+    {
+      "body": "Frangos departed December 2024 \u2014 current marketing led by G. Alma (Marketing Director, 15 years tenure, Jul 2010-present)",
+      "date_precision": "month",
+      "e_id": "E-057",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-057"
+      ],
+      "id": "0c7b0325-a72f-4fe7-9a61-5e2f0ff5192e",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://linkedin.com/in/georgejfrangos",
+      "subcap_ids": [],
+      "title": "Frangos departed"
+    },
+    {
+      "body": "PRESENT \u2014 AI content creation: George Frangos piloted AI content generation for website/marketing (E-057, departed Dec 2024) \u2014 GenAI for marketing content exists or existed; current status post-Frangos unclear",
+      "date_precision": "month",
+      "e_id": "E-094",
+      "event_date": "2024-12-01",
+      "evidence_e_ids": [
+        "E-094",
+        "E-057"
+      ],
+      "id": "fecc61ce-8b0e-421f-9202-821cdab35774",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.almabank.com/",
+      "subcap_ids": [],
+      "title": "GenAI for marketing content exists"
+    },
+    {
+      "body": "ABSENT: No CDO (Chief Data Officer) or equivalent data leadership role \u2014 Alma Bank has FVP IT Director (Pasquale Fedele), VP ISO (Donald S.), but no data strategy executive; Bessas held CIO role (departed Oct 2024) \u2014 data strategy is now leaderless",
+      "date_precision": "month",
+      "e_id": "E-093",
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [
+        "E-093"
+      ],
+      "id": "c00a39db-60c1-4799-8f95-40221d7545c0",
+      "kind": "leadership",
+      "signal": "negative",
+      "source_url": "https://www.almabank.com/",
+      "subcap_ids": [],
+      "title": "Data strategy is leaderless"
+    },
+    {
+      "body": "PROXY: Nick Bessas (SVP/CIO) departed October 2024; George Frangos (FVP Marketing) departed December 2024 \u2014 both digital transformation leaders left within 3 months; FVP IT Director Pasquale Fedele (ITIL, hired Dec 2024) replaced CIO with an IT operations-focused role (not transformation-focused)",
+      "date_precision": "month",
+      "e_id": "E-099",
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [
+        "E-099"
+      ],
+      "id": "a36783d4-5559-472b-a302-93d747f3fce3",
+      "kind": "leadership",
+      "signal": "negative",
+      "source_url": "https://linkedin.com/in/nickbessas",
+      "subcap_ids": [],
+      "title": "Nick Bessas (SVP/CIO) departed"
+    },
+    {
+      "body": "NYDFS enforcement precedent: Gemini Trust fined $37M (2024) for inadequate TPSP oversight; Block Inc. fined $40M (2025) for lack of board-reviewed third-party cybersecurity policies \u2014 enforcement risk elevates Alma Bank's TPRM compliance incentive",
+      "date_precision": "year",
+      "e_id": "E-085",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-085"
+      ],
+      "id": "11625dc7-429e-4a22-a6d6-0991084f1605",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.dfs.ny.gov/industry_guidance/cybersecurity",
+      "subcap_ids": [],
+      "title": "Nydfs enforcement precedent: Gemini Trust fined $37M (2024)\u2026"
+    },
+    {
+      "body": "New branch opened Nassau County Jan 2024 (upper-income census tract; drive-thru window); Bayside branch relocated to Flushing (moderate-income) Jun 2022",
+      "date_precision": "month",
+      "e_id": "E-002",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "6c09f2ce-6f2c-46f2-82a8-4c83545404b5",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.dfs.ny.gov/system/files/documents/2025/12/cr24almabank.pdf",
+      "subcap_ids": [],
+      "title": "New branch opened Nassau County"
+    },
+    {
+      "body": "Alma Private Wealth and Alma Residential Lending launched as new products under Frangos marketing tenure (2022-2024) \u2014 product expansion confirmed",
+      "date_precision": "year",
+      "e_id": "E-061",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-061"
+      ],
+      "id": "8b3dfb11-15d2-46ec-9c0c-0d1e55b0f76d",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.almabank.com/Personal-Banking/Personal-Checking-Accounts",
+      "subcap_ids": [],
+      "title": "Product expansion confirmed"
+    },
+    {
+      "body": "Richard Koll background: SVP Client Experience at Osaic Institutions; previously at Investors Bancorp wealth program (also Cetera); Investors Bancorp acquired by Citizens Financial Group 2022 \u2014 Koll brings institutional wealth management experience",
+      "date_precision": "year",
+      "e_id": "E-101",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "a33a3667-9654-4649-946f-5263537ca8ff",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.prnewswire.com/news-releases/alma-bank-partners-with-cetera-in-pursuit-of-growth-302555595.html",
+      "subcap_ids": [],
+      "title": "Koll brings institutional wealth management experience"
+    },
+    {
+      "body": "2019 review (BSA Analyst): entire BSA team departed due to toxic management \u2014 high turnover confirmed in compliance-critical function",
+      "date_precision": "year",
+      "e_id": "E-045",
+      "event_date": "2019-07-01",
+      "evidence_e_ids": [
+        "E-045"
+      ],
+      "id": "58f0b195-a3f0-4dd3-9dff-faaf8bc82299",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.indeed.com/cmp/Alma-Bank/reviews",
+      "subcap_ids": [],
+      "title": "2019 review (BSA Analyst): entire BSA team departed due to\u2026"
+    },
+    {
+      "body": "FDIC imposed $1.25 million civil money penalty on Alma Bank (April 4, 2019) for BSA violations from February 2013 through April 2017 \u2014 second major BSA enforcement action (following 2015 DFS Consent Order)",
+      "date_precision": "day",
+      "e_id": "E-016",
+      "event_date": "2019-04-04",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "d36cb31b-2d41-4a1a-bb62-2a49e8fff05d",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://complianceconcourse.willkie.com/articles/news-alerts-2019-06-june-20190604-1-million-bank-secrecy-act-settlement/",
+      "subcap_ids": [],
+      "title": "FDIC imposed $1.25 million civil money penalty on Alma Bank\u2026"
+    },
+    {
+      "body": "CONFIRMED: Salesforce Loan Origination and Portfolio Management deployed with FIS CodeConnect during 2017-2022 \u2014 Salesforce was actively used at Alma Bank for CRE lending workflow; e-signatures and Company Assets Database integrated into Salesforce",
+      "date_precision": "year",
+      "e_id": "E-091",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "027589e6-9294-41ae-b5c9-87ad42f1f20a",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/nickbessas",
+      "subcap_ids": [],
+      "title": "Salesforce was used lending workflow"
+    },
+    {
+      "body": "Consent Order issued June 3, 2015 requiring: comprehensive BSA Compliance Program, BSA Officer designation, OFAC controls, SAR monitoring, independent testing, Look Back Review",
+      "date_precision": "day",
+      "e_id": "E-004",
+      "event_date": "2015-06-03",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "ec582dbe-9e29-4b06-ac93-a169ce3ae0a6",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.dfs.ny.gov/system/files/documents/2020/04/ea150603_alma_bank.pdf",
+      "subcap_ids": [],
+      "title": "Consent Order issued Review"
+    },
+    {
+      "body": "Enforcement timeline: April 2014 FDIC joint exam \u2192 2015 DFS Consent Order (BSA/AML) \u2192 February-April 2017 violations \u2192 April 2019 FDIC $1.25M CMP \u2014 persistent BSA compliance issues across 4-year span",
+      "date_precision": "month",
+      "e_id": "E-028",
+      "event_date": "2014-04-01",
+      "evidence_e_ids": [
+        "E-028"
+      ],
+      "id": "582da746-1be9-47b2-ab05-76ba5ccb56cc",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.bankersonline.com/penalty/alma-bank-bsaaml-penalty",
+      "subcap_ids": [],
+      "title": "Enforcement timeline: April 2014 FDIC joint exam \u2192 2015 DFS\u2026"
+    },
+    {
+      "body": "CONFIRMED: 'AML look-back system using Splunk with stringent rule sets' \u2014 Splunk originally deployed for AML analytics (2013-2017 period); confirms dual role as SIEM + AML analytics",
+      "date_precision": "year",
+      "e_id": "E-091",
+      "event_date": "2013-07-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "f2c51e1e-4ccc-4984-8c82-6dfd28903e4d",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/nickbessas",
+      "subcap_ids": [],
+      "title": "'AML look-back system using Splunk with stringent rule\u2026"
+    },
+    {
+      "body": "Yiannis Stroumbakis (SVP): joined Alma Bank Nov 2009, 15+ year tenured employee in retail then commercial lending \u2014 exemplifies Greek-affiliated leadership advancement pattern",
+      "date_precision": "month",
+      "e_id": "E-047",
+      "event_date": "2009-11-01",
+      "evidence_e_ids": [
+        "E-047"
+      ],
+      "id": "fe7a0b02-09f5-424f-89b6-8b3877230793",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://linkedin.com/in/rxsette",
+      "subcap_ids": [],
+      "title": "Yiannis Stroumbakis (SVP): joined Alma Bank Nov 2009"
+    },
+    {
+      "body": "Historical context: Michael B. served as CTO at Alma Bank's founding (Dec 2006-Aug 2007) but no successor CTO appointed in 17 years \u2014 technology deprioritized at C-suite level",
+      "date_precision": "month",
+      "e_id": "E-033",
+      "event_date": "2006-12-01",
+      "evidence_e_ids": [
+        "E-033"
+      ],
+      "id": "8a2bda1e-7767-4b69-b438-1c4471777698",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/alma-bank/5a1d8a8a2400002400643170",
+      "subcap_ids": [],
+      "title": "Historical context: Michael B. served as CTO at Alma Bank's\u2026"
+    }
+  ]
+}

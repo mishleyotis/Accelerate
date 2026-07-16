@@ -1,0 +1,172 @@
+{
+  "entity_display_id": "loandepot-inc-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P3C3 score 2.56 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P3C3 score 2.56 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.44",
+          "metric": "P3C3 score 2.56 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P3C3 score 2.56 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "AI Governance & Model Risk Management Framework"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.27",
+          "metric": "P2C4 score 1.73 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.73 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Salesforce Data Cloud + Einstein NBA for Customer Personalization"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.72",
+          "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Data Governance Framework & CDO Enablement"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C5, P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.72",
+          "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Operational Risk & Fraud Analytics Platform"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.72",
+          "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "TPRM Framework & Vendor Risk Governance"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.72",
+          "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Post-Breach Cybersecurity Transformation"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C5"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+2.72",
+          "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C5 score 1.28 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Service Platform Consolidation (Genesys\u2194SFDC Integration)"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.27",
+          "metric": "P2C4 score 1.73 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.73 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-08",
+          "title": "CRM Platform Consolidation (6\u21921 Salesforce)"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P1C5, P2C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-LOANDEPOT-20260324-0001",
+  "total_duration_months": 12
+}

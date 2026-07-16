@@ -1,0 +1,157 @@
+{
+  "entity_display_id": "boeing-employees-credit--0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.64",
+          "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-005",
+          "title": "Data Cloud + Snowflake Integration"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+1.64",
+          "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-001",
+          "title": "Deploy MuleSoft Integration Platform"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.64",
+          "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-002",
+          "title": "Expand Salesforce Marketing Cloud"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+1.64",
+          "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C3 score 2.36 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-003",
+          "title": "Implement Service Cloud"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.09",
+          "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-004",
+          "title": "Deploy Financial Services Cloud"
+        },
+        {
+          "feature": "CRM Analytics",
+          "maturity_lift": "+1.5",
+          "metric": "P4C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-006",
+          "title": "Consolidate Analytics (Tableau/CRM Analytics)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C4, P2C3"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.09",
+          "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-007",
+          "title": "Einstein AI / Agentforce"
+        },
+        {
+          "feature": null,
+          "maturity_lift": "+2.09",
+          "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C4 score 1.91 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-008",
+          "title": "Data Governance Advisory"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C4"
+    }
+  ],
+  "run_request_id": "DMA-ASM-BECU-20260325-0001",
+  "total_duration_months": 8
+}

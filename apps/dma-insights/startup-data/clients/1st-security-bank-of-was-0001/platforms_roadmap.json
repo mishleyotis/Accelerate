@@ -1,0 +1,157 @@
+{
+  "entity_display_id": "1st-security-bank-of-was-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.44",
+          "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "(untitled)"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.4",
+          "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "(untitled)"
+        },
+        {
+          "feature": "CRM Analytics",
+          "maturity_lift": "+2.44",
+          "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "(untitled)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2, P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.4",
+          "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "(untitled)"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.4",
+          "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "(untitled)"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.4",
+          "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 1.60 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "(untitled)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+2.44",
+          "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.56 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "(untitled)"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-1SB-20260317-0001",
+  "total_duration_months": 12
+}

@@ -1,0 +1,844 @@
+{
+  "entity_display_id": "ccu-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C2.4",
+        "P4C2.7",
+        "P4C2.4.4",
+        "P3C3.8.1",
+        "P1C3.4.2",
+        "P3C3.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "ec9e76f3-31dc-48f5-ad01-34c973c6f55c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-170",
+            "E-199",
+            "E-211",
+            "E-212"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-168"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-165",
+            "E-168",
+            "E-170",
+            "E-171"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-168",
+        "E-165",
+        "E-199",
+        "E-174",
+        "E-170",
+        "E-212",
+        "E-211",
+        "E-171"
+      ],
+      "linked_subcap_id": "P4C2.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: AGENTFORCE: BCU achieved 82% digital resolution. CCU has no comparable capability. Greenfield Agentforce opportunity — zero competition [E-199].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Zero Production AI — Einstein + Agentforce Greenfield",
+      "what_text": "AI Process Automation is one of CCU's least developed data and technology capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes CCU's ability to deliver a stronger data and technology foundation [E-168].",
+      "why_text": "The assessment found: “Mark Baron (VP Payments) holds Harvard Extension School Certificate in AI — executive-level AI education investment. As VP Payments, Baron oversees RTP/FedNow infrastructure, making AI for payments” [E-165]. The research report pins the maturity impact at: / at level 1.5–level 2; platform ready, execution absent. averages 1.1/5 across its 16 scored capability (peer median ~ 3.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3.3",
+        "P4C3.6.1",
+        "P1C4.1.2",
+        "P4C2.1.4",
+        "P4C3.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-192",
+        "E-207",
+        "E-208"
+      ],
+      "ic_id": "CP-F-007",
+      "id": "99ddee6e-1f51-4a1f-9afd-1ed54c1fd8da",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-192",
+            "E-207",
+            "E-208"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3.3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-097",
+        "E-200",
+        "E-011",
+        "E-014",
+        "E-176",
+        "E-177",
+        "E-204",
+        "E-178"
+      ],
+      "linked_subcap_id": "P4C3.3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: MULESOFT: KCT integration is live pain today. Rapid win opportunity — delivers proof of value before broader Salesforce platform pitch [E-200].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Post-Merger Fragmentation — MuleSoft Immediate Need",
+      "what_text": "API Lifecycle Management is one of CCU's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes CCU's ability to deliver a stronger data and technology foundation [E-097].",
+      "why_text": "The assessment found: “Bob Dunning = CIO at CCU (current role since Jul 2022 promotion from VP Technology). Career path internal: Systems Assistant → Sys Admin → IT Manager → VP Technology → CIO. ~22 year tenure. OnBase” [E-011]. The research report pins the maturity impact at: at level 1.5–level 2; point-to-point integrations only. averages 1.9/5 across its 7 scored capability (peer median ~ 3.0) on the current assessment.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.1",
+        "P4C2.4.4",
+        "P4C3.6.1",
+        "P2C4.4.1",
+        "P3C3.1.6",
+        "P3C4.3.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "cf50c4d7-b355-44b2-8514-8f4eb720cda3",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-164",
+            "E-173"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-164"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-173",
+            "E-192"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-173",
+        "E-164",
+        "E-192"
+      ],
+      "linked_subcap_id": "P4C1.8.1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Data Lifecycle Management a near-term focus for CCU: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-164].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days → 1 hour [E",
+      "what_text": "Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days → 1 hour. Creatio is Phase 1 — FSC is Phase 2 (nCino integration + FSI-native data models + AI). In Zennify's assessment Data Lifecycle Management scores 1.5 out of 5, versus a typical 3.3 at comparable institutions [E-173].",
+      "why_text": "The assessment found: “Creatio at CCU operational metrics (confirmed from Creatio's 2026 credit union software page): 45,000 member cases processed yearly through Creatio platform; 3 administrators serving 200,000 members” [E-192]. At 1.5 out of 5, Data Lifecycle Management sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.1",
+        "P2C4.4.1",
+        "P2C1.4.6",
+        "P4C3.1.4",
+        "P4C2.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-002",
+      "id": "39df3204-cd71-4fb0-9645-376a425a26d5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-164",
+            "E-173"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-160"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-164"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-164",
+        "E-173",
+        "E-160"
+      ],
+      "linked_subcap_id": "P4C1.8.1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Data Lifecycle Management a near-term focus for CCU: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-160].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Priority 4 — Member Data Unification via Creatio CRM",
+      "what_text": "Data Lifecycle Management is one of CCU's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes CCU's ability to deliver a stronger data and technology foundation [E-173].",
+      "why_text": "The assessment found: “Privacy Policy revised March 31, 2025 — active privacy governance with formal review cycle. Policy covers CCPA and GLBA data protection requirements for all member data categories” [E-164]. At 1.5 out of 5, Data Lifecycle Management sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.8.1",
+        "P4C2.4.4",
+        "P1C1.4.3",
+        "P2C4.8.5",
+        "P3C3.8.1",
+        "P1C3.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-004",
+      "id": "3f2a8d61-7d22-4c3d-bacf-b557734e57cf",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-164"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-164"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-159"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-159",
+        "E-168",
+        "E-164"
+      ],
+      "linked_subcap_id": "P4C1.8.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Data Lifecycle Management a near-term focus for CCU: a scoped investment here would lift it from 1.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-164].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Snowflake EDW under active construction ('making data AI-ready' [E-159]). Databricks ML provisioned, pre-production [E-1",
+      "what_text": "Snowflake EDW under active construction ('making data AI-ready'). Databricks ML provisioned, pre-production. 2025 intern: 'starting our journey to AI in Domo.' Zero production ML models deployed. Einstein + Agentforce is the enterprise AI execution layer this data investment needs. In Zennify's assessment Data Lifecycle Management scores 1.5 out of 5, versus a typical 3.3 at comparable institutions [E-168].",
+      "why_text": "The assessment found: “Three-layer cloud data architecture confirmed: Snowflake (enterprise data warehouse, cloud-native) + Databricks (ML-ready data platform) + Coalesce (data transformation/ETL pipeline) — modern” [E-159]. At 1.5 out of 5, Data Lifecycle Management sits 1.8 points below the 3.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.5.2",
+        "P4C2.1.3",
+        "P4C3.1.3",
+        "P4C4.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-005",
+      "id": "a24d41f5-d517-4961-ab4e-71cd768a9f38",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-195"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-121",
+        "E-195",
+        "E-108"
+      ],
+      "linked_subcap_id": "P2C4.5.2",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Staff Cross-Sell Enablement a near-term focus for CCU: a scoped investment here would lift it from 2.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-108].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Priority 3 — Digital Member Experience",
+      "what_text": "Staff Cross-Sell Enablement is one of CCU's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes CCU's ability to deliver a stronger, more personalised customer experience [E-195].",
+      "why_text": "The assessment found: “Product Management Intern (Summer 2026) leads dormant account reactivation: 'design targeted strategies — personalized campaigns, offers, outreach scripts — targeting inactive accounts to boost” [E-121]. At 2.0 out of 5, Staff Cross-Sell Enablement sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.5.1",
+        "P4C2.4.4",
+        "P4C3.6.1",
+        "P2C4.4.1",
+        "P1C4.4.3",
+        "P1C4.5.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "XS-TABLEAU",
+      "id": "c4bed238-dd3f-43c2-a4d7-12066f8a6cd9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-173"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-173"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-173"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-029",
+        "E-173",
+        "E-175",
+        "E-161"
+      ],
+      "linked_subcap_id": "P4C1.5.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Tableau conversation now — the talent build shows budget and intent before a platform has been chosen [E-175].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Hiring signals ahead of a Tableau foundation",
+      "what_text": "Hiring signals show investment intent while no Tableau platform is detected in the stack. The research recorded: \"Documented core values (per CCU job postings): 'Be Helpful, Act with Integrity, Be Transparent, Keep it Simple, Be Positive, Embrace Inclusion and Diversity.' Six explicit values, formal articulation.\". In Zennify's assessment Enterprise Data Catalog & Discovery scores 1.5 out of 5, versus a typical 3.3 at comparable institutions [E-173].",
+      "why_text": "The client's own stated priority — \"Creatio deployed 2024 via Technology Advisors Inc.; 15-system consolidation; 45K cases/year; mortgage 6 days → 1 hour. Creatio is Phase 1 — FSC is Phase 2 (nCino integration + FSI-native data models + AI).\" — needs the Tableau capability that is currently absent. scores 1.5/5 on the current assessment [E-029, E-173].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C2.1",
+        "P2C4.4.1",
+        "P4C2.1.3",
+        "P4C3.1.3",
+        "P4C4.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "7b97db42-a245-4cb7-a74b-cf3d8f7e84d1",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-173",
+            "E-192"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-173"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-192"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-010"
+        }
+      ],
+      "linked_e_ids": [
+        "E-173",
+        "E-194",
+        "E-192"
+      ],
+      "linked_subcap_id": "P2C2.1",
+      "platforms": [
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: FSC UPGRADE: Phase 1 = Creatio (consolidation). Phase 2 = FSC (nCino + AI + NCUA-native). Pitch as evolution, not replacement [E-194].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Creatio CRM Incumbent — FSC is Upgrade, Not Greenfield",
+      "what_text": "Pre-Qualification Capabilities is one of CCU's developing customer experience capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes CCU's ability to deliver a stronger, more personalised customer experience [E-173].",
+      "why_text": "The assessment found: “Creatio at CCU operational metrics (confirmed from Creatio's 2026 credit union software page): 45,000 member cases processed yearly through Creatio platform; 3 administrators serving 200,000 members” [E-192]. The research report pins the maturity impact at: at level 2.5–level 3; lacks FSI-native capabilities. averages 2.8/5 across its 5 scored capability (peer median ~ 3.5) on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.4",
+        "P4C1.1.3",
+        "P2C4.4.1",
+        "P1C1.3.CU2",
+        "P3C1.3.CU2",
+        "P1C1.3.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "6194b99a-06f1-4ddf-949f-09234d70c65f",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-160"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-159"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-170",
+            "E-199",
+            "E-211",
+            "E-212"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-159",
+        "E-170",
+        "E-157",
+        "E-199",
+        "E-209",
+        "E-212",
+        "E-211",
+        "E-160"
+      ],
+      "linked_subcap_id": "P4C1.4",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: DATA CLOUD: Pure greenfield; zero incumbent CDP. Unifies Creatio + Finastra + Lumin + Marketo + nCino in real time [E-170].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "No CDP — Salesforce Data Cloud Greenfield",
+      "what_text": "MDM Strategy & Golden Record is one of CCU's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes CCU's ability to deliver a stronger data and technology foundation [E-159].",
+      "why_text": "The assessment found: “VP Enterprise Data Solutions (Russ Moore) — confirmed senior leader responsible for CCU's data strategy. Data analytics function has VP-level executive ownership and dedicated Director of Data” [E-157]. The research report pins the maturity impact at: at level 2.0; no real-time member profile. averages 2.0/5 across its 3 scored capability (peer median ~ 3.2) on the current assessment.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.4",
+        "P2C4.4.1",
+        "P2C4.4.3",
+        "P2C1.5.3",
+        "P2C2.6.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "3e141468-b08e-4931-b862-69a47916abc8",
+      "interconnections": [],
+      "linked_e_ids": [
+        "E-073",
+        "E-022",
+        "E-023",
+        "E-089",
+        "E-197",
+        "E-208",
+        "E-034",
+        "E-087"
+      ],
+      "linked_subcap_id": "P2C1.4",
+      "platforms": [
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Lead Capture Forms a near-term focus for CCU: a scoped investment here would lift it from 2.5 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Marketo Engage Confirmed — SFMC Journey Builder Upgrade",
+      "what_text": "Lead Capture Forms is one of CCU's developing customer experience capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes CCU's ability to deliver a stronger, more personalised customer experience [E-073].",
+      "why_text": "The assessment found: “James Reichart has served as CCU's VP Marketing since July 2022 (3+ yrs)” [E-087]. The research report pins the maturity impact at: at level 2.0–level 2.5; campaign execution, no journey orchestration. averages 2.6/5 across its 8 scored capability (peer median ~ 3.2) on the current assessment.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.9.CL1",
+        "P4C2",
+        "P1C5.4.2",
+        "P1C1.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-008",
+      "id": "bf79992b-2f3b-466d-a229-df58c6fa0c48",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-170",
+            "E-199",
+            "E-211",
+            "E-212"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-168"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-004"
+        },
+        {
+          "e_ids": [
+            "E-165",
+            "E-168",
+            "E-170",
+            "E-171"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-165",
+        "E-199",
+        "E-168",
+        "E-174",
+        "E-170",
+        "E-212",
+        "E-211",
+        "E-171"
+      ],
+      "linked_subcap_id": "P4C2.9.CL1",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for CCU: invest to move it toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the improvement reaches well beyond this single capability [E-168].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Priority 2 — Commercial Lending Modernisation via nCino",
+      "what_text": "This capability was flagged in Zennify's assessment of CCU as a data and technology capability where focused investment would strengthen digital maturity. It underpins the data and technology foundation the rest of the business is built on, so its current level directly shapes CCU's ability to deliver a stronger data and technology foundation [E-199].",
+      "why_text": "The assessment found: “Mark Baron (VP Payments) holds Harvard Extension School Certificate in AI — executive-level AI education investment. As VP Payments, Baron oversees RTP/FedNow infrastructure, making AI for payments” [E-165]. Strengthening this capability matters because it shapes a stronger data and technology foundation. It builds on the data and technology foundation the rest of the business is built on, so progress here lifts the wider business too.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.1",
+        "P4C4.1.4",
+        "P4C3.1.4",
+        "P4C2.1.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-010",
+      "id": "6c095db4-776f-4026-8716-45ba0bd67598",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-192"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-195"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-005"
+        },
+        {
+          "e_ids": [
+            "E-192"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-195",
+        "E-192",
+        "E-181"
+      ],
+      "linked_subcap_id": "P4C3.6.1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make CI/CD Pipeline & Automation a near-term focus for CCU: a scoped investment here would lift it from 1.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-181].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "KCT Credit Union branches joining CCU network early 2026 per CEO [E-195]. 4 mergers in 5 years; 20+ platforms; no iPaaS.",
+      "what_text": "KCT Credit Union branches joining CCU network early 2026 per CEO. 4 mergers in 5 years; 20+ platforms; no iPaaS. MuleSoft is the architectural response — KCT integration is the active pain point. In Zennify's assessment CI/CD Pipeline & Automation scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [E-195].",
+      "why_text": "The assessment found: “Creatio at CCU operational metrics (confirmed from Creatio's 2026 credit union software page): 45,000 member cases processed yearly through Creatio platform; 3 administrators serving 200,000 members” [E-192]. At 1.0 out of 5, CI/CD Pipeline & Automation sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.4.1",
+        "P1C2.1.7",
+        "P1C1.8.2",
+        "P1C1.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-012",
+      "id": "924def55-1ed4-417d-87e2-658381a4de3f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-207",
+        "E-120",
+        "E-206"
+      ],
+      "linked_subcap_id": "P2C4.4.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Transaction-Based Triggers a near-term focus for CCU: a scoped investment here would lift it from 2.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-120].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Five strategic imperatives confirmed from public evidence, ranked by Salesforce platform relevance",
+      "what_text": "Transaction-Based Triggers is one of CCU's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes CCU's ability to deliver a stronger, more personalised customer experience [E-207].",
+      "why_text": "The assessment found: “ESG signals from public evidence: CCU contributed $5,000+ to Food for Greater Elgin (Thanksgiving turkeys for 500 families, 145K annual families served); 1,300+ employee volunteer hours; 70 community” [E-206]. At 2.0 out of 5, Transaction-Based Triggers sits 1.3 points below the 3.3 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Overall P1 Score: 2.502 | Peer Median: 3.12 | Gap: −0.62\nP1 profile: sharp contrast between people-facing capabilities (=2.77, =2.64) and strategy formalisation capabilities (=2.49, =2.33). CCU innovates through vendor selections rather than a published digital strategy document. ESG is active in practice but not formalised.",
+        "heading": "6.1  Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Overall P2 Score: 2.558 | Peer Median: 3.47 | Gap: −0.91 | Largest Pillar by Weight (30%)\nP2 pattern: 'good tools, no intelligence layer.' Lumin Digital (=2.77) matches BCU's platform spec exactly — BCU overlays FSC+Agentforce to achieve 82% digital resolution [E-194]; CCU has Creatio+Talkdesk only. Creatio (=2.56) has hit its ceiling. is architecturally capped by <2.5.",
+        "heading": "6.2  Pillar 2: Member Experience & Products",
+        "linked_e_ids": [
+          "E-194"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Overall P3 Score: 2.535 | Peer Median: 3.37 | Gap: −0.83\nP3 is CCU's most balanced pillar: genuine anchor strength in (RTP+FedNow + Zerto DR); structurally constrained (cross-capped by <2.5); well-grounded but not yet automated and.",
+        "heading": "6.3  Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Overall P4 Score: 2.027 | Peer Median: 3.17 | Gap: −1.14\nP4 tells the sharpest story: Security (2.80) is an outlier strength — more sophisticated than most $4.3B credit unions. (Data, 1.73) and (AI, 1.73) are the two weakest categories across the entire four-pillar assessment. (Integration, 2.06) fires two connected caps. PATTERN-2 (AI Infrastructure Gap) and PATTERN-3 (Four-Merger Integration Deficit) define P4.",
+        "heading": "6.4  Pillar 4: Data, Analytics & Technology  ← WEAKEST PILLAR",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Technographic validation: All 5 modules confirmed NOT deployed. Creatio=incumbent CRM [E-173]; Marketo=incumbent [E-073]; no CDP [E-159,E-170]; no Agentforce [E-168]; no MuleSoft [E-200]. No investment amounts or ROI projections per R6."
+  },
+  "run_request_id": "DMA-ASM-CCUIL-20260504-0001"
+}

@@ -1,0 +1,313 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "lpl-financials-7f12",
+  "financials": {
+    "metrics": {
+      "total_assets": "$11.0B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (national)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rich Steinmeier",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Renana Friedlich",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Vaughn Harvey",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Beth Hiatt",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "LPL Financials is a wealth & advisory firm. It reports $11.0 billion in total assets and has operated since 1989. It is regulated by SEC and employs approximately 6,500 people. Its overall digital maturity is assessed at 3.4 out of 5 across the DMA capability framework.",
+    "primary_regulator": "SEC",
+    "size_tier": "Large (>$500B AUM)",
+    "thought_leadership": null,
+    "ticker": "LPLA"
+  },
+  "issue_register": [
+    {
+      "id": "aac3a3bf-4976-4ae7-9d38-46157b86c4e8",
+      "issue_id": "GAP-1-P3C3.2.1",
+      "linked_subcap_ids": [
+        "P3C3.2.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 2.0/5. [EVIDENCE] 4 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring. [MATURITY] Maps to M2. [GAP] basic capabilities present; gaps in standardization and consistency [CEILING] Category P3",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Transaction Monitoring"
+    },
+    {
+      "id": "2e53a88b-034d-44e4-9741-3bc4369ccd6d",
+      "issue_id": "GAP-2-P3C3.2.2",
+      "linked_subcap_ids": [
+        "P3C3.2.2"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 2.0/5. [EVIDENCE] 4 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring. [MATURITY] Maps to M2. [GAP] basic capabilities present; gaps in standardization and consistency [CEILING] Category P3",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Customer Due Diligence"
+    },
+    {
+      "id": "9e0e1f2a-a822-41b4-ae76-97adc11a69d5",
+      "issue_id": "GAP-3-P3C3.2.3",
+      "linked_subcap_ids": [
+        "P3C3.2.3"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 2.0/5. [EVIDENCE] 4 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring. [MATURITY] Maps to M2. [GAP] basic capabilities present; gaps in standardization and consistency [CEILING] Category P3",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Sanctions Screening"
+    },
+    {
+      "id": "d8fb26b0-f7f9-4d55-a704-59fc5681c16d",
+      "issue_id": "GAP-4-P3C3.2.4",
+      "linked_subcap_ids": [
+        "P3C3.2.4"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 2.0/5. [EVIDENCE] 4 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring. [MATURITY] Maps to M2. [GAP] basic capabilities present; gaps in standardization and consistency [CEILING] Category P3",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Regulatory Reporting"
+    },
+    {
+      "id": "a7413779-0d5e-413a-b84a-6fdfc1ddd48e",
+      "issue_id": "GAP-5-P4C1.5.1",
+      "linked_subcap_ids": [
+        "P4C1.5.1"
+      ],
+      "opened_on": null,
+      "rationale": "Maturity 2.0/5. [EVIDENCE] 5 sources (T1 regulatory quality) (ERS 3.9) provide basis for scoring. [MATURITY] Maps to M2. [GAP] basic capabilities present; gaps in standardization and consistency [CEILING] Category P4",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Enterprise Data Catalog & Discovery"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": null,
+    "trend_md": "Latest available financials show total assets of $11.0B.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.12,
+        "P1C2": 3.19,
+        "P1C3": 2.66,
+        "P1C4": 2.72,
+        "P1C5": 2.7,
+        "P2C1": 2.59,
+        "P2C2": 2.34,
+        "P2C3": 2.72,
+        "P2C4": 2.48,
+        "P3C1": 3.13,
+        "P3C2": 3.13,
+        "P3C3": 3.13,
+        "P3C4": 3.14,
+        "P4C1": 2.85,
+        "P4C2": 2.61,
+        "P4C3": 2.72,
+        "P4C4": 3.15
+      },
+      "overall_score": 2.85,
+      "peer_name": "Commerce Trust Company",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.46,
+        "P1C2": 3.51,
+        "P1C3": 2.34,
+        "P1C4": 3.51,
+        "P1C5": 3.0,
+        "P2C1": 1.98,
+        "P2C2": 1.49,
+        "P2C3": 2.5,
+        "P2C4": 2.48,
+        "P3C1": 2.4,
+        "P3C2": 3.52,
+        "P3C3": 3.98,
+        "P3C4": 3.43,
+        "P4C1": 1.99,
+        "P4C2": 1.98,
+        "P4C3": 3.52,
+        "P4C4": 4.05
+      },
+      "overall_score": 2.83,
+      "peer_name": "Odlum Brown Limited",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.66,
+        "P1C2": 2.7,
+        "P1C3": 1.96,
+        "P1C4": 2.35,
+        "P1C5": 2.34,
+        "P2C1": 2.31,
+        "P2C2": 1.98,
+        "P2C3": 1.82,
+        "P2C4": 2.13,
+        "P3C1": 2.53,
+        "P3C2": 2.35,
+        "P3C3": 2.77,
+        "P3C4": 2.5,
+        "P4C1": 2.61,
+        "P4C2": 2.68,
+        "P4C3": 2.89,
+        "P4C4": 2.55
+      },
+      "overall_score": 2.42,
+      "peer_name": "Vestgen Wealth Partners",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.47,
+        "P1C2": 2.27,
+        "P1C3": 2.73,
+        "P1C4": 2.35,
+        "P1C5": 2.27,
+        "P2C1": 1.8,
+        "P2C2": 2.39,
+        "P2C3": 2.27,
+        "P2C4": 2.16,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.19,
+        "P3C4": 2.45,
+        "P4C1": 2.09,
+        "P4C2": 2.65,
+        "P4C3": 2.74,
+        "P4C4": 2.35
+      },
+      "overall_score": 2.36,
+      "peer_name": "Interactive Brokers Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.78,
+        "P1C2": 2.18,
+        "P1C3": 2.32,
+        "P1C4": 2.32,
+        "P1C5": 2.14,
+        "P2C1": 1.65,
+        "P2C2": 1.34,
+        "P2C3": 2.18,
+        "P2C4": 1.82,
+        "P3C1": 2.34,
+        "P3C2": 3.0,
+        "P3C3": 2.95,
+        "P3C4": 2.0,
+        "P4C1": 2.23,
+        "P4C2": 2.7,
+        "P4C3": 3.14,
+        "P4C4": 2.78
+      },
+      "overall_score": 2.35,
+      "peer_name": "Fisher Investments",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "REQ-11C17F12",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "ings, annual reports, press releases, analyst coverage, and app store ratings",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": ", NPS comparisons LPL Financials is a $11.0B in assets wealth & advisory firm regulated by SEC, operating since 1989 with 6,500 employees",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": 11,
+        "polarity": "positive",
+        "source": "Net Promoter",
+        "themes": [],
+        "trend": "Improving",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of LPL Financials. Overall digital maturity scored 3.36/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-07-02",
+      "evidence_e_ids": [],
+      "id": "9a0d16c7-53c9-4328-8972-f95c9d9df876",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    },
+    {
+      "body": "LPL Financials was established in 1989.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "1989-01-01",
+      "evidence_e_ids": [],
+      "id": "8d719e57-d70f-437f-be6d-508dc23e8602",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Founded"
+    }
+  ]
+}

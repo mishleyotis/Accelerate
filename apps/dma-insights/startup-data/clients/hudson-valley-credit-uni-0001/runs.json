@@ -1,0 +1,21 @@
+{
+  "active_run_id": "4e09ff2c-6417-4b68-ae61-b34be623a4c6",
+  "items": [
+    {
+      "assessment_date": "2026-04-27",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:10:58.304958Z",
+      "created_at": "2026-07-02T23:10:58.304958Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "4e09ff2c-6417-4b68-ae61-b34be623a4c6",
+      "overall_score": 2.34,
+      "request_id": "DMA-ASM-HVCU-20260427-0001",
+      "started_at": "2026-07-02T23:10:58.304958Z",
+      "status": "ACTIVE",
+      "subcap_count": 692,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "active_run_id": "aed6003a-a074-45c5-8f62-89e0186c558d",
+  "items": [
+    {
+      "assessment_date": "2026-05-12",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:11:55.303179Z",
+      "created_at": "2026-07-02T23:11:55.303179Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "aed6003a-a074-45c5-8f62-89e0186c558d",
+      "overall_score": 2.267254038179148,
+      "request_id": "DMA-ASM-VNO-20260512-0001",
+      "started_at": "2026-07-02T23:11:55.303179Z",
+      "status": "ACTIVE",
+      "subcap_count": 681,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

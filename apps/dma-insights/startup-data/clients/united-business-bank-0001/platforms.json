@@ -1,0 +1,1817 @@
+{
+  "cards": [
+    {
+      "absent_count": 5,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.3.4",
+        "P2C1.2.1",
+        "P2C1.2.2",
+        "P2C1.2.3",
+        "P2C1.2.4",
+        "P2C1.3.1",
+        "P2C1.3.2",
+        "P2C3.2.1",
+        "P2C3.2.2",
+        "P2C3.2.3",
+        "P2C3.2.4",
+        "P3C1.1.1",
+        "P3C1.1.2",
+        "P3C1.1.3",
+        "P3C1.1.4",
+        "P3C1.2.1",
+        "P3C1.2.2",
+        "P3C1.2.3",
+        "P3C1.2.4",
+        "P3C2.1.1",
+        "P3C2.1.3",
+        "P3C2.2.2",
+        "P3C3.1.1",
+        "P3C3.1.2",
+        "P3C3.1.3",
+        "P3C3.1.4",
+        "P3C3.2.2",
+        "P3C4.1.1",
+        "P3C4.1.2",
+        "P3C4.1.3",
+        "P3C4.1.4",
+        "P3C4.2.1",
+        "P3C4.2.2",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.2.4",
+        "P4C3.1.1",
+        "P4C3.1.2",
+        "P4C3.2.1",
+        "P4C3.2.2",
+        "P4C3.2.3",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C4.1.1",
+        "P4C4.1.2",
+        "P4C4.2.1",
+        "P4C4.2.2",
+        "P4C4.2.3",
+        "P4C4.2.4"
+      ],
+      "conversation_starter": "Salesforce (pillar P2) addresses 111 subcaps, starting with P1C1.1.1; fit is 46/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.1 (prereq 'Customer data foundation': current 1.0 vs. threshold 3.0, status UNMET).\n3. Sequence: outline a 111-subcap roadmap starting at P1C1.1.1 and extending to 110 additional subcaps.\nNext step: book a Salesforce workshop scoped to P2, covering the 111-subcap addressable surface.",
+      "conversation_starters": [
+        "United Business Bank scores 1.0 on Digital Strategy Document (P1C1.1.1) — 0.8 points below the peer median 1.8 [E-042, E-001]. Ask who owns it today, what tooling backs it, and what the review cadence is — Salesforce addresses 111 linked subcaps here and is not ready (prerequisites block deployment) (fit 46/100).",
+        "Probe the blocker first: 'Customer data foundation' (P4C1.1.1) sits at 1.0 vs the 3.0 readiness threshold (UNMET). Their own evidence quantifies the cost: assets acquired $2.3B [E-001].",
+        "Peer framing: Five Star Bancorp and Heritage Commerce Corp are in United Business Bank's benchmark cohort holding the 1.8 median on Digital Strategy Document. Sequence Salesforce after Databricks → Tableau; next step is a Salesforce workshop scoped to P2."
+      ],
+      "display_name": "Salesforce",
+      "evidence_ids": [
+        "E-042",
+        "E-001",
+        "E-011",
+        "E-015",
+        "E-006",
+        "E-007",
+        "E-022",
+        "E-039"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.8542,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 32,
+            "points": 20.5,
+            "value": 0.8205
+          },
+          "opportunity": {
+            "points": 54.3,
+            "value": 0.9043
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -28.4
+          }
+        },
+        "n_addressable": 111,
+        "prereqs": {
+          "P1C2.2.1": {
+            "current_score": 2.5,
+            "name": "Identity & access management",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P2C1.1.1": {
+            "current_score": 1.0,
+            "name": "Sales process digitization",
+            "status": "UNMET",
+            "threshold": 2.5
+          },
+          "P4C1.1.1": {
+            "current_score": 1.0,
+            "name": "Customer data foundation",
+            "status": "UNMET",
+            "threshold": 3.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks",
+            "tableau",
+            "twilio",
+            "ncino"
+          ],
+          "rank": 5
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Digital Strategy Document",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Business Alignment",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-015",
+              "E-006",
+              "E-007"
+            ],
+            "gap": 3.0,
+            "name": "Change Methodology",
+            "opportunity": 0.968,
+            "peer_median": 2.25,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C4.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Customer Segment Definition",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-022"
+            ],
+            "gap": 3.0,
+            "name": "Omnichannel Vision",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.4.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-039",
+              "E-027",
+              "E-040"
+            ],
+            "gap": 3.0,
+            "name": "Enterprise Integration Strategy",
+            "opportunity": 0.945,
+            "peer_median": 2.25,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C3.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.925,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-011",
+              "E-015"
+            ],
+            "gap": 3.0,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.922,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-029",
+              "E-008"
+            ],
+            "gap": 3.0,
+            "name": "Idea Sourcing Channels",
+            "opportunity": 0.92,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C3.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-017",
+              "E-027",
+              "E-028"
+            ],
+            "gap": 3.0,
+            "name": "Enterprise Data Strategy & Roadmap",
+            "opportunity": 0.92,
+            "peer_median": 1.5,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C1.1.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Vision Communication",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.4",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 46.4,
+      "pillar": "P2",
+      "platform_id": "salesforce",
+      "prereq_checks": [
+        {
+          "current_score": 1.0,
+          "name": "Customer data foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.1",
+          "status": "UNMET",
+          "threshold": 3.0
+        },
+        {
+          "current_score": 1.0,
+          "name": "Sales process digitization",
+          "note": null,
+          "required_subcap_id": "P2C1.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.5,
+          "name": "Identity & access management",
+          "note": null,
+          "required_subcap_id": "P1C2.2.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 5,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Business Alignment"
+      ],
+      "opportunity_md": "**Salesforce** at 46/100 fit addresses 111 scored capability gaps in P2, led by Digital Strategy Document. Digital Strategy Document scores 1.0/5 against a 1.8 peer median; Business Alignment is the next surface. 2 prerequisites gate deployment (e.g. Customer data foundation: 1.0 vs 3.0 threshold)."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C4.1.1",
+        "P2C4.1.2",
+        "P2C4.1.3",
+        "P3C2.2.1",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.2.4",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C3.3.1",
+        "P4C3.3.2"
+      ],
+      "conversation_starter": "Databricks (pillar P4) addresses 58 subcaps, starting with P1C1.1.1; fit is 61/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.2 (prereq 'Data lake / lakehouse foundation': current 1.0 vs. threshold 2.5, status UNMET).\n3. Sequence: outline a 58-subcap roadmap starting at P1C1.1.1 and extending to 57 additional subcaps.\nNext step: book a Databricks workshop scoped to P4, covering the 58-subcap addressable surface.",
+      "conversation_starters": [
+        "United Business Bank scores 1.0 on Digital Strategy Document (P1C1.1.1) — 0.8 points below the peer median 1.8 [E-042, E-001]. Ask who owns it today, what tooling backs it, and what the review cadence is — Databricks addresses 58 linked subcaps here and is not ready (prerequisites block deployment) (fit 61/100). Databricks is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Data lake / lakehouse foundation' (P4C1.1.2) sits at 1.0 vs the 2.5 readiness threshold (UNMET). Their own evidence quantifies the cost: assets acquired $2.3B [E-001].",
+        "Peer framing: Five Star Bancorp and Heritage Commerce Corp are in United Business Bank's benchmark cohort holding the 1.8 median on Digital Strategy Document. Sequence Databricks after Tableau → Twilio; next step is a Databricks workshop scoped to P4."
+      ],
+      "display_name": "Databricks",
+      "evidence_ids": [
+        "E-042",
+        "E-001",
+        "E-011",
+        "E-039",
+        "E-027",
+        "E-040",
+        "E-015",
+        "E-018"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Databricks"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.8296,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 68,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 58.4,
+            "value": 0.9741
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -37.4
+          }
+        },
+        "n_addressable": 58,
+        "prereqs": {
+          "P3C1.1.1": {
+            "current_score": 1.5,
+            "name": "Cloud infrastructure baseline",
+            "status": "UNMET",
+            "threshold": 2.5
+          },
+          "P4C1.1.2": {
+            "current_score": 1.0,
+            "name": "Data lake / lakehouse foundation",
+            "status": "UNMET",
+            "threshold": 2.5
+          },
+          "P4C2.1.1": {
+            "current_score": 2.0,
+            "name": "Data governance",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "twilio",
+            "ncino"
+          ],
+          "rank": 4
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Digital Strategy Document",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Business Alignment",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Customer Segment Definition",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-039",
+              "E-027",
+              "E-040"
+            ],
+            "gap": 3.0,
+            "name": "Enterprise Integration Strategy",
+            "opportunity": 0.945,
+            "peer_median": 2.25,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C3.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.925,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-011",
+              "E-015"
+            ],
+            "gap": 3.0,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.922,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-027",
+              "E-018",
+              "E-021"
+            ],
+            "gap": 3.0,
+            "name": "Customer Data Foundation (CDP)",
+            "opportunity": 0.92,
+            "peer_median": 1.5,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C4.1.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-017",
+              "E-027",
+              "E-028"
+            ],
+            "gap": 3.0,
+            "name": "Enterprise Data Strategy & Roadmap",
+            "opportunity": 0.92,
+            "peer_median": 1.5,
+            "pillar": "P4",
+            "score": 1.0,
+            "subcap_id": "P4C1.1.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Vision Communication",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Resource Planning",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Dependency Management",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.4",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 61.0,
+      "pillar": "P4",
+      "platform_id": "databricks",
+      "prereq_checks": [
+        {
+          "current_score": 1.0,
+          "name": "Data lake / lakehouse foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.2",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.0,
+          "name": "Data governance",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 1.5,
+          "name": "Cloud infrastructure baseline",
+          "note": null,
+          "required_subcap_id": "P3C1.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 4,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Business Alignment"
+      ],
+      "opportunity_md": "**Databricks** at 61/100 fit addresses 58 scored capability gaps in P4, led by Digital Strategy Document. Digital Strategy Document scores 1.0/5 against a 1.8 peer median; Business Alignment is the next surface. The platform family is confirmed absent from the current stack (Databricks) — greenfield rather than displacement. 2 prerequisites gate deployment (e.g. Data lake / lakehouse foundation: 1.0 vs 2.5 threshold)."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P2C1.1.1",
+        "P2C3.1.1",
+        "P2C3.1.2",
+        "P2C3.1.3",
+        "P2C3.1.4",
+        "P4C2.1.1",
+        "P4C2.1.2",
+        "P4C2.2.1",
+        "P4C2.2.2"
+      ],
+      "conversation_starter": "Tableau (pillar P4) addresses 55 subcaps, starting with P1C1.1.1; fit is 84/100 and the platform is near-ready (one or two prereqs to close).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C2.1.1 (prereq 'Governed reporting layer': current 2.0 vs. threshold 2.5, status PARTIAL).\n3. Sequence: outline a 55-subcap roadmap starting at P1C1.1.1 and extending to 54 additional subcaps.\nNext step: book a Tableau workshop scoped to P4, covering the 55-subcap addressable surface.",
+      "conversation_starters": [
+        "United Business Bank scores 1.0 on Digital Strategy Document (P1C1.1.1) — 0.8 points below the peer median 1.8 [E-042, E-001]. Ask who owns it today, what tooling backs it, and what the review cadence is — Tableau addresses 55 linked subcaps here and is near-ready (one or two prereqs to close) (fit 84/100). Tableau is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Governed reporting layer' (P4C2.1.1) sits at 2.0 vs the 2.5 readiness threshold (PARTIAL). Their own evidence quantifies the cost: assets acquired $2.3B [E-001].",
+        "Peer framing: Five Star Bancorp and Heritage Commerce Corp are in United Business Bank's benchmark cohort holding the 1.8 median on Digital Strategy Document. Sequence Tableau after nCino; next step is a Tableau workshop scoped to P4."
+      ],
+      "display_name": "Tableau",
+      "evidence_ids": [
+        "E-042",
+        "E-001",
+        "E-011",
+        "E-015",
+        "E-006",
+        "E-007",
+        "E-022",
+        "E-024"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Tableau"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.8448,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 59,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 59.4,
+            "value": 0.9894
+          },
+          "readiness": {
+            "light": "amber",
+            "multiplier": 0.85,
+            "penalty_points": -14.9
+          }
+        },
+        "n_addressable": 55,
+        "prereqs": {
+          "P4C2.1.1": {
+            "current_score": 2.0,
+            "name": "Governed reporting layer",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          },
+          "P4C3.1.1": {
+            "current_score": 2.0,
+            "name": "BI / analytics literacy",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "ncino"
+          ],
+          "rank": 2
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Digital Strategy Document",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Business Alignment",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-015",
+              "E-006",
+              "E-007"
+            ],
+            "gap": 3.0,
+            "name": "Change Methodology",
+            "opportunity": 0.968,
+            "peer_median": 2.25,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C4.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Customer Segment Definition",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-022"
+            ],
+            "gap": 3.0,
+            "name": "Omnichannel Vision",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.4.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.925,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-011",
+              "E-015"
+            ],
+            "gap": 3.0,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.922,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-024",
+              "E-009",
+              "E-010"
+            ],
+            "gap": 3.0,
+            "name": "Digital Marketing Strategy Document",
+            "opportunity": 0.92,
+            "peer_median": 1.75,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C1.1.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-003",
+              "E-004",
+              "E-027"
+            ],
+            "gap": 3.0,
+            "name": "Channel Strategy & Mix",
+            "opportunity": 0.92,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.1.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Vision Communication",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Resource Planning",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.3",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 84.5,
+      "pillar": "P4",
+      "platform_id": "tableau",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Governed reporting layer",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.0,
+          "name": "BI / analytics literacy",
+          "note": null,
+          "required_subcap_id": "P4C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "amber",
+      "sequence_rank": 2,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Business Alignment"
+      ],
+      "opportunity_md": "**Tableau** at 84/100 fit addresses 55 scored capability gaps in P4, led by Digital Strategy Document. Digital Strategy Document scores 1.0/5 against a 1.8 peer median; Business Alignment is the next surface. The platform family is confirmed absent from the current stack (Tableau) — greenfield rather than displacement."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.1",
+        "P1C4.3.2",
+        "P1C4.3.3",
+        "P1C4.3.4",
+        "P2C3.3.1",
+        "P2C3.3.2"
+      ],
+      "conversation_starter": "Twilio (pillar P2) addresses 42 subcaps, starting with P1C1.1.1; fit is 62/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P2C3.1.1 (prereq 'Omnichannel CX baseline': current 1.0 vs. threshold 2.5, status UNMET).\n3. Sequence: outline a 42-subcap roadmap starting at P1C1.1.1 and extending to 41 additional subcaps.\nNext step: book a Twilio workshop scoped to P2, covering the 42-subcap addressable surface.",
+      "conversation_starters": [
+        "United Business Bank scores 1.0 on Digital Strategy Document (P1C1.1.1) — 0.8 points below the peer median 1.8 [E-042, E-001]. Ask who owns it today, what tooling backs it, and what the review cadence is — Twilio addresses 42 linked subcaps here and is not ready (prerequisites block deployment) (fit 62/100). Twilio is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Omnichannel CX baseline' (P2C3.1.1) sits at 1.0 vs the 2.5 readiness threshold (UNMET). Their own evidence quantifies the cost: assets acquired $2.3B [E-001].",
+        "Peer framing: Five Star Bancorp and Heritage Commerce Corp are in United Business Bank's benchmark cohort holding the 1.8 median on Digital Strategy Document. Sequence Twilio after Tableau → nCino; next step is a Twilio workshop scoped to P2."
+      ],
+      "display_name": "Twilio",
+      "evidence_ids": [
+        "E-042",
+        "E-001",
+        "E-011",
+        "E-015",
+        "E-006",
+        "E-007",
+        "E-022",
+        "E-016"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Twilio"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.8402,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 70,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 60.0,
+            "value": 1.0
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -38.0
+          }
+        },
+        "n_addressable": 42,
+        "prereqs": {
+          "P1C3.2.1": {
+            "current_score": 1.0,
+            "name": "Communications compliance",
+            "status": "UNMET",
+            "threshold": 3.0
+          },
+          "P2C3.1.1": {
+            "current_score": 1.0,
+            "name": "Omnichannel CX baseline",
+            "status": "UNMET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "ncino"
+          ],
+          "rank": 3
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Digital Strategy Document",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Business Alignment",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-015",
+              "E-006",
+              "E-007"
+            ],
+            "gap": 3.0,
+            "name": "Change Methodology",
+            "opportunity": 0.968,
+            "peer_median": 2.25,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C4.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Customer Segment Definition",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-022"
+            ],
+            "gap": 3.0,
+            "name": "Omnichannel Vision",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.4.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.925,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-029",
+              "E-008"
+            ],
+            "gap": 3.0,
+            "name": "Idea Sourcing Channels",
+            "opportunity": 0.92,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C3.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-027",
+              "E-029",
+              "E-026"
+            ],
+            "gap": 3.0,
+            "name": "Contact Center Excellence",
+            "opportunity": 0.92,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C3.3.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Vision Communication",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Resource Planning",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Dependency Management",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.4",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 62.0,
+      "pillar": "P2",
+      "platform_id": "twilio",
+      "prereq_checks": [
+        {
+          "current_score": 1.0,
+          "name": "Omnichannel CX baseline",
+          "note": null,
+          "required_subcap_id": "P2C3.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 1.0,
+          "name": "Communications compliance",
+          "note": null,
+          "required_subcap_id": "P1C3.2.1",
+          "status": "UNMET",
+          "threshold": 3.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 3,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Business Alignment"
+      ],
+      "opportunity_md": "**Twilio** at 62/100 fit addresses 42 scored capability gaps in P2, led by Digital Strategy Document. Digital Strategy Document scores 1.0/5 against a 1.8 peer median; Business Alignment is the next surface. The platform family is confirmed absent from the current stack (Twilio) — greenfield rather than displacement. 2 prerequisites gate deployment (e.g. Omnichannel CX baseline: 1.0 vs 2.5 threshold)."
+    },
+    {
+      "absent_count": 0,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P2C2.1.1",
+        "P2C2.1.2",
+        "P2C2.1.3",
+        "P2C2.1.4",
+        "P2C2.2.1",
+        "P2C2.2.2",
+        "P2C2.2.3",
+        "P2C2.2.4",
+        "P2C4.1.4",
+        "P2C4.2.1",
+        "P2C4.2.2",
+        "P2C4.2.3",
+        "P2C4.2.4",
+        "P3C2.1.2",
+        "P3C2.1.4",
+        "P3C3.2.1"
+      ],
+      "conversation_starter": "nCino (pillar P3) addresses 70 subcaps, starting with P1C1.1.1; fit is 82/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 70-subcap roadmap starting at P1C1.1.1 and extending to 69 additional subcaps.\nNext step: book a nCino workshop scoped to P3, covering the 70-subcap addressable surface.",
+      "conversation_starters": [
+        "United Business Bank scores 1.0 on Digital Strategy Document (P1C1.1.1) — 0.8 points below the peer median 1.8 [E-042, E-001]. Ask who owns it today, what tooling backs it, and what the review cadence is — nCino addresses 70 linked subcaps here and is ready to land now (fit 82/100).",
+        "Prerequisites are MET, so move to value: their own evidence shows assets acquired $2.3B [E-001] — confirm United Business Bank's appetite to close the Digital Strategy Document gap (currently 1.0/5) this fiscal year and open scoping.",
+        "Peer framing: Five Star Bancorp and Heritage Commerce Corp are in United Business Bank's benchmark cohort holding the 1.8 median on Digital Strategy Document. Sequence nCino; next step is a nCino workshop scoped to P3."
+      ],
+      "display_name": "nCino",
+      "evidence_ids": [
+        "E-042",
+        "E-001",
+        "E-011",
+        "E-015",
+        "E-006",
+        "E-007",
+        "E-022",
+        "E-016"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.8406,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 65,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 57.1,
+            "value": 0.9518
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 70,
+        "prereqs": {
+          "P3C2.1.1": {
+            "current_score": 2.5,
+            "name": "Loan origination digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P3C2.2.1": {
+            "current_score": 2.0,
+            "name": "Commercial lending workflow",
+            "status": "MET",
+            "threshold": 2.0
+          },
+          "P3C3.1.1": {
+            "current_score": 3.0,
+            "name": "Document management",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [],
+          "rank": 1
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Digital Strategy Document",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-001",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Business Alignment",
+            "opportunity": 1.0,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-015",
+              "E-006",
+              "E-007"
+            ],
+            "gap": 3.0,
+            "name": "Change Methodology",
+            "opportunity": 0.968,
+            "peer_median": 2.25,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C4.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-011"
+            ],
+            "gap": 3.0,
+            "name": "Customer Segment Definition",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.3.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-022"
+            ],
+            "gap": 3.0,
+            "name": "Omnichannel Vision",
+            "opportunity": 0.95,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.4.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Initiative Prioritization",
+            "opportunity": 0.925,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.2",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-011",
+              "E-015"
+            ],
+            "gap": 3.0,
+            "name": "Target Architecture Vision",
+            "opportunity": 0.922,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-016",
+              "E-029",
+              "E-008"
+            ],
+            "gap": 3.0,
+            "name": "Idea Sourcing Channels",
+            "opportunity": 0.92,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C3.2.1",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Strategy Refresh Cadence",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Vision Communication",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Resource Planning",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.3",
+            "tier": 1
+          },
+          {
+            "e_ids": [
+              "E-042",
+              "E-042",
+              "E-042"
+            ],
+            "gap": 3.0,
+            "name": "Dependency Management",
+            "opportunity": 0.9,
+            "peer_median": 1.75,
+            "pillar": "P1",
+            "score": 1.0,
+            "subcap_id": "P1C1.2.4",
+            "tier": 1
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 82.1,
+      "pillar": "P3",
+      "platform_id": "ncino",
+      "prereq_checks": [
+        {
+          "current_score": 2.5,
+          "name": "Loan origination digitization",
+          "note": null,
+          "required_subcap_id": "P3C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.0,
+          "name": "Commercial lending workflow",
+          "note": null,
+          "required_subcap_id": "P3C2.2.1",
+          "status": "MET",
+          "threshold": 2.0
+        },
+        {
+          "current_score": 3.0,
+          "name": "Document management",
+          "note": null,
+          "required_subcap_id": "P3C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 1,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Digital Strategy Document",
+        "Business Alignment"
+      ],
+      "opportunity_md": "**nCino** at 82/100 fit addresses 70 scored capability gaps in P3, led by Digital Strategy Document. Digital Strategy Document scores 1.0/5 against a 1.8 peer median; Business Alignment is the next surface."
+    }
+  ],
+  "entity_display_id": "united-business-bank-0001",
+  "narrative": {
+    "gap_prioritization_md": "",
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each recommendation includes institution-specific root cause analysis and expected score outcomes. Deep search validation confirmed all recommendations against industry case studies and vendor capabilities.",
+    "roadmap_md": ""
+  },
+  "pillar_offerings": {
+    "P1": [],
+    "P2": [],
+    "P3": [],
+    "P4": []
+  },
+  "run_request_id": "DMA-ASM-UBB-20260401-0001"
+}

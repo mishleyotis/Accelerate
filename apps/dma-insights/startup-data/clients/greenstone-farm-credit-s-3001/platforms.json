@@ -1,0 +1,2194 @@
+{
+  "cards": [
+    {
+      "absent_count": 4,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.3.5",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C2.4.5",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C2.6.1",
+        "P1C2.6.2",
+        "P1C2.6.3",
+        "P1C2.6.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C3.2.5",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.3.4",
+        "P1C3.3.5",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C3.4.5",
+        "P1C3.5.1",
+        "P1C3.5.2",
+        "P1C3.5.3",
+        "P1C3.5.4",
+        "P1C3.6.1",
+        "P1C3.6.2",
+        "P1C3.6.3",
+        "P1C3.6.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.3",
+        "P1C4.3.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.1",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C1.2.1",
+        "P2C1.2.2",
+        "P2C1.2.3",
+        "P2C1.2.4",
+        "P2C1.2.5",
+        "P2C1.3.1",
+        "P2C1.3.2",
+        "P2C1.3.3",
+        "P2C1.3.4",
+        "P2C1.3.5",
+        "P2C1.4.1",
+        "P2C1.4.2",
+        "P2C1.4.3",
+        "P2C1.4.4",
+        "P2C1.4.5",
+        "P2C1.8.1",
+        "P2C1.8.2",
+        "P2C1.8.3",
+        "P2C1.8.4",
+        "P2C1.8.5",
+        "P2C3.2.1",
+        "P2C3.2.2",
+        "P2C3.2.3",
+        "P2C3.2.4",
+        "P2C3.2.5",
+        "P2C3.3.4",
+        "P2C3.4.1",
+        "P2C3.4.2",
+        "P2C3.4.3",
+        "P2C3.4.4",
+        "P2C3.5.1",
+        "P2C3.5.2",
+        "P2C3.5.3",
+        "P2C3.5.4",
+        "P2C3.5.5",
+        "P2C3.6.1",
+        "P2C3.6.2",
+        "P2C3.6.3",
+        "P2C3.6.4",
+        "P2C3.6.5",
+        "P2C3.7.5",
+        "P2C3.9.1",
+        "P2C3.9.2",
+        "P2C3.9.3",
+        "P2C3.9.4",
+        "P2C4.3.2",
+        "P2C4.7.3",
+        "P3C1.1.1",
+        "P3C1.1.2",
+        "P3C1.1.3",
+        "P3C1.1.4",
+        "P3C1.2.1",
+        "P3C1.2.2",
+        "P3C1.2.3",
+        "P3C1.2.4",
+        "P3C1.2.5",
+        "P3C1.3.2",
+        "P3C1.4.1",
+        "P3C1.4.2",
+        "P3C1.4.3",
+        "P3C1.4.4",
+        "P3C1.5.2",
+        "P3C1.5.3",
+        "P3C1.5.4",
+        "P3C1.5.5",
+        "P3C1.6.1",
+        "P3C1.6.2",
+        "P3C1.6.3",
+        "P3C1.6.4",
+        "P3C1.7.1",
+        "P3C2.1.1",
+        "P3C2.1.3",
+        "P3C2.2.2",
+        "P3C2.2.3",
+        "P3C2.3.1",
+        "P3C2.3.2",
+        "P3C2.3.3",
+        "P3C2.3.4",
+        "P3C2.4.1",
+        "P3C2.4.2",
+        "P3C2.4.3",
+        "P3C2.5.2",
+        "P3C2.5.3",
+        "P3C2.5.4",
+        "P3C3.1.1",
+        "P3C3.1.2",
+        "P3C3.1.3",
+        "P3C3.1.4",
+        "P3C3.2.2",
+        "P3C3.2.3",
+        "P3C3.2.4",
+        "P3C3.3.1",
+        "P3C3.3.2",
+        "P3C3.3.3",
+        "P3C3.3.4",
+        "P3C3.5.2",
+        "P3C3.5.4",
+        "P3C3.6.2",
+        "P3C3.6.3",
+        "P3C3.6.4",
+        "P3C4.1.1",
+        "P3C4.1.3",
+        "P3C4.1.4",
+        "P3C4.2.1",
+        "P3C4.2.2",
+        "P3C4.3.1",
+        "P3C4.3.2",
+        "P3C4.3.3",
+        "P3C4.3.4",
+        "P3C4.4.1",
+        "P3C4.4.3",
+        "P3C4.4.4",
+        "P3C4.5.2",
+        "P3C4.5.4",
+        "P3C4.6.1",
+        "P3C4.6.3",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.1.5",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.2.4",
+        "P4C1.3.1",
+        "P4C1.3.2",
+        "P4C1.3.3",
+        "P4C1.3.4",
+        "P4C1.3.5",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.4.3",
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.6.1",
+        "P4C1.6.2",
+        "P4C1.7.1",
+        "P4C1.7.2",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.4.4",
+        "P4C2.4.5",
+        "P4C2.5.1",
+        "P4C2.5.2",
+        "P4C2.5.3",
+        "P4C2.5.4",
+        "P4C2.5.5",
+        "P4C2.6.1",
+        "P4C2.6.2",
+        "P4C2.6.3",
+        "P4C2.6.4",
+        "P4C2.6.5",
+        "P4C2.7.1",
+        "P4C2.7.2",
+        "P4C2.7.3",
+        "P4C2.7.4",
+        "P4C3.1.1",
+        "P4C3.1.2",
+        "P4C3.2.1",
+        "P4C3.2.2",
+        "P4C3.2.3",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C3.3.3",
+        "P4C3.3.4",
+        "P4C3.3.5",
+        "P4C3.4.1",
+        "P4C3.4.2",
+        "P4C3.4.3",
+        "P4C3.4.4",
+        "P4C3.4.5",
+        "P4C3.5.1",
+        "P4C3.5.2",
+        "P4C3.5.3",
+        "P4C3.5.4",
+        "P4C3.5.5",
+        "P4C3.7.1",
+        "P4C3.7.2",
+        "P4C3.7.3",
+        "P4C4.1.1",
+        "P4C4.1.2",
+        "P4C4.2.1",
+        "P4C4.2.2",
+        "P4C4.2.3",
+        "P4C4.2.4",
+        "P4C4.2.5",
+        "P4C4.4.1",
+        "P4C4.4.2",
+        "P4C4.4.3",
+        "P4C4.4.4",
+        "P4C4.4.5",
+        "P4C4.5.1",
+        "P4C4.5.2",
+        "P4C4.5.3",
+        "P4C4.5.4",
+        "P4C4.5.5",
+        "P4C4.7.1",
+        "P4C4.7.2",
+        "P4C4.7.3"
+      ],
+      "conversation_starter": "Salesforce (pillar P2) addresses 311 subcaps, starting with P1C1.1.1; fit is 34/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C1.1.1 (prereq 'Customer data foundation': current 2.0 vs. threshold 3.0, status UNMET).\n3. Sequence: outline a 311-subcap roadmap starting at P1C1.1.1 and extending to 310 additional subcaps.\nNext step: book a Salesforce workshop scoped to P2, covering the 311-subcap addressable surface.",
+      "conversation_starters": [
+        "GreenStone Farm Credit Services ACA scores 1.0 on Co-Branded Marketing (P2C1.8.3) — 1.2 points below the peer median 2.2 [E-056]. Ask who owns it today, what tooling backs it, and what the review cadence is — Salesforce addresses 311 linked subcaps here and is not ready (prerequisites block deployment) (fit 34/100).",
+        "Probe the blocker first: 'Customer data foundation' (P4C1.1.1) sits at 2.0 vs the 3.0 readiness threshold (UNMET). That gap is what keeps GreenStone Farm Credit Services ACA from landing Salesforce now.",
+        "Peer framing: Farm Credit Mid-America, ACA and Capital Farm Credit are in GreenStone Farm Credit Services ACA's benchmark cohort holding the 2.2 median on Co-Branded Marketing. Sequence Salesforce after Databricks → Tableau; next step is a Salesforce workshop scoped to P2."
+      ],
+      "display_name": "Salesforce",
+      "evidence_ids": [
+        "E-056",
+        "E-085",
+        "E-091"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5941,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 235,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 30.4,
+            "value": 0.5061
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -21.1
+          }
+        },
+        "n_addressable": 311,
+        "prereqs": {
+          "P1C2.2.1": {
+            "current_score": 3.0,
+            "name": "Identity & access management",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P2C1.1.1": {
+            "current_score": 2.0,
+            "name": "Sales process digitization",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          },
+          "P4C1.1.1": {
+            "current_score": 2.0,
+            "name": "Customer data foundation",
+            "status": "UNMET",
+            "threshold": 3.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "databricks",
+            "tableau",
+            "twilio",
+            "ncino"
+          ],
+          "rank": 5
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-056"
+            ],
+            "gap": 3.0,
+            "name": "Co-Branded Marketing",
+            "opportunity": 0.795,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C1.8.3",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Statistical Analysis & Modeling",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Data Science Platform & Workbench",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.3.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Predictive Analytics & Intelligence",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.4.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Next Best Actions & Recommendations",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.4.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Model Validation & Testing",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.5.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "GenAI Model Risk Management",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.5.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "AI Fairness & Explainability (XAI)",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.5.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Data Warehouse & Data Lake",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.6.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Data Virtualization & Federation",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.6.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Assistive AI Agent",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.7.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Agent Control Plane & Action Governance",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.7.4",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 34.3,
+      "pillar": "P2",
+      "platform_id": "salesforce",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Customer data foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.1",
+          "status": "UNMET",
+          "threshold": 3.0
+        },
+        {
+          "current_score": 2.0,
+          "name": "Sales process digitization",
+          "note": null,
+          "required_subcap_id": "P2C1.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 3.0,
+          "name": "Identity & access management",
+          "note": null,
+          "required_subcap_id": "P1C2.2.1",
+          "status": "MET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 5,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Co-Branded Marketing",
+        "Statistical Analysis & Modeling"
+      ],
+      "opportunity_md": "**Salesforce** at 34/100 fit addresses 311 scored capability gaps in P2, led by Co-Branded Marketing. Co-Branded Marketing scores 1.0/5 against a 2.2 peer median; Statistical Analysis & Modeling is the next surface. 1 prerequisite gate deployment (e.g. Customer data foundation: 2.0 vs 3.0 threshold)."
+    },
+    {
+      "absent_count": 1,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C2.4.5",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.3.4",
+        "P1C3.3.5",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.1",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C1.5.1",
+        "P2C1.5.2",
+        "P2C1.5.3",
+        "P2C1.5.4",
+        "P2C1.5.5",
+        "P2C1.7.1",
+        "P2C1.7.2",
+        "P2C1.7.3",
+        "P2C1.7.4",
+        "P2C1.7.5",
+        "P2C4.1.1",
+        "P2C4.1.2",
+        "P2C4.1.3",
+        "P2C4.1.5",
+        "P2C4.4.1",
+        "P2C4.4.3",
+        "P2C4.4.5",
+        "P3C2.2.1",
+        "P3C2.7.1",
+        "P4C1.1.1",
+        "P4C1.1.2",
+        "P4C1.1.3",
+        "P4C1.1.4",
+        "P4C1.1.5",
+        "P4C1.2.1",
+        "P4C1.2.2",
+        "P4C1.2.3",
+        "P4C1.2.4",
+        "P4C1.3.1",
+        "P4C1.3.2",
+        "P4C1.3.3",
+        "P4C1.3.4",
+        "P4C1.3.5",
+        "P4C1.4.1",
+        "P4C1.4.2",
+        "P4C1.4.3",
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.6.1",
+        "P4C1.6.2",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.2.4",
+        "P4C2.2.5",
+        "P4C2.3.1",
+        "P4C2.3.2",
+        "P4C2.4.1",
+        "P4C2.4.2",
+        "P4C2.4.3",
+        "P4C2.4.4",
+        "P4C2.4.5",
+        "P4C2.5.1",
+        "P4C2.5.2",
+        "P4C2.5.3",
+        "P4C2.5.4",
+        "P4C2.5.5",
+        "P4C2.6.1",
+        "P4C2.6.2",
+        "P4C2.6.3",
+        "P4C2.6.4",
+        "P4C2.6.5",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P4C3.3.3",
+        "P4C3.3.4",
+        "P4C3.3.5"
+      ],
+      "conversation_starter": "Databricks (pillar P4) addresses 142 subcaps, starting with P1C1.1.1; fit is 36/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C2.1.1 (prereq 'Data governance': current 1.5 vs. threshold 2.5, status UNMET).\n3. Sequence: outline a 142-subcap roadmap starting at P1C1.1.1 and extending to 141 additional subcaps.\nNext step: book a Databricks workshop scoped to P4, covering the 142-subcap addressable surface.",
+      "conversation_starters": [
+        "GreenStone Farm Credit Services ACA scores 1.0 on Trigger-Based Campaigns (P2C1.5.5) — 1.2 points below the peer median 2.2 [E-056]. Ask who owns it today, what tooling backs it, and what the review cadence is — Databricks addresses 142 linked subcaps here and is not ready (prerequisites block deployment) (fit 36/100).",
+        "Probe the blocker first: 'Data governance' (P4C2.1.1) sits at 1.5 vs the 2.5 readiness threshold (UNMET). That gap is what keeps GreenStone Farm Credit Services ACA from landing Databricks now.",
+        "Peer framing: Farm Credit Mid-America, ACA and Capital Farm Credit are in GreenStone Farm Credit Services ACA's benchmark cohort holding the 2.2 median on Trigger-Based Campaigns. Sequence Databricks after Tableau → Twilio; next step is a Databricks workshop scoped to P4."
+      ],
+      "display_name": "Databricks",
+      "evidence_ids": [
+        "E-056",
+        "E-085",
+        "E-091"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.5941,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 302,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 33.1,
+            "value": 0.5516
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -22.1
+          }
+        },
+        "n_addressable": 142,
+        "prereqs": {
+          "P3C1.1.1": {
+            "current_score": 1.5,
+            "name": "Cloud infrastructure baseline",
+            "status": "UNMET",
+            "threshold": 2.5
+          },
+          "P4C1.1.2": {
+            "current_score": 2.0,
+            "name": "Data lake / lakehouse foundation",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          },
+          "P4C2.1.1": {
+            "current_score": 1.5,
+            "name": "Data governance",
+            "status": "UNMET",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "twilio",
+            "ncino"
+          ],
+          "rank": 4
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-056"
+            ],
+            "gap": 3.0,
+            "name": "Trigger-Based Campaigns",
+            "opportunity": 0.795,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 1.0,
+            "subcap_id": "P2C1.5.5",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Enterprise Reporting Platform",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Self-Service BI & Analytics",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Embedded Analytics & Actionable Insights",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Natural Language Query (NLQ)",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Regulatory Reporting Automation",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Statistical Analysis & Modeling",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Data Science Platform & Workbench",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.3.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Predictive Analytics & Intelligence",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.4.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Next Best Actions & Recommendations",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.4.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Model Validation & Testing",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.5.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "GenAI Model Risk Management",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.5.3",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 36.0,
+      "pillar": "P4",
+      "platform_id": "databricks",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Data lake / lakehouse foundation",
+          "note": null,
+          "required_subcap_id": "P4C1.1.2",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 1.5,
+          "name": "Data governance",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 1.5,
+          "name": "Cloud infrastructure baseline",
+          "note": null,
+          "required_subcap_id": "P3C1.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 4,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Trigger-Based Campaigns",
+        "Enterprise Reporting Platform"
+      ],
+      "opportunity_md": "**Databricks** at 36/100 fit addresses 142 scored capability gaps in P4, led by Trigger-Based Campaigns. Trigger-Based Campaigns scores 1.0/5 against a 2.2 peer median; Enterprise Reporting Platform is the next surface. 2 prerequisites gate deployment (e.g. Data governance: 1.5 vs 2.5 threshold)."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.3.5",
+        "P1C2.5.1",
+        "P1C2.5.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P1C2.5.5",
+        "P1C2.6.1",
+        "P1C2.6.2",
+        "P1C2.6.3",
+        "P1C2.6.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.3.4",
+        "P1C3.3.5",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C3.4.5",
+        "P1C3.5.1",
+        "P1C3.5.2",
+        "P1C3.5.3",
+        "P1C3.5.4",
+        "P1C3.6.1",
+        "P1C3.6.2",
+        "P1C3.6.3",
+        "P1C3.6.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.5.1",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C1.1.1",
+        "P2C1.1.5",
+        "P2C1.6.1",
+        "P2C1.6.2",
+        "P2C1.6.3",
+        "P2C1.6.4",
+        "P2C1.6.5",
+        "P2C3.1.1",
+        "P2C3.1.2",
+        "P2C3.1.3",
+        "P2C3.1.4",
+        "P2C3.1.5",
+        "P2C3.7.1",
+        "P2C3.7.2",
+        "P2C3.7.3",
+        "P2C3.7.4",
+        "P2C3.8.1",
+        "P2C3.8.2",
+        "P2C3.8.3",
+        "P2C3.8.4",
+        "P2C3.8.5",
+        "P2C3.9.5",
+        "P4C1.5.1",
+        "P4C1.5.2",
+        "P4C1.5.3",
+        "P4C1.5.4",
+        "P4C1.5.5",
+        "P4C1.6.1",
+        "P4C1.6.2",
+        "P4C2.1.1",
+        "P4C2.1.2",
+        "P4C2.2.1",
+        "P4C2.2.2",
+        "P4C2.2.3",
+        "P4C2.2.4",
+        "P4C2.2.5"
+      ],
+      "conversation_starter": "Tableau (pillar P4) addresses 126 subcaps, starting with P1C1.1.1; fit is 43/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P4C2.1.1 (prereq 'Governed reporting layer': current 1.5 vs. threshold 2.5, status UNMET).\n3. Sequence: outline a 126-subcap roadmap starting at P1C1.1.1 and extending to 125 additional subcaps.\nNext step: book a Tableau workshop scoped to P4, covering the 126-subcap addressable surface.",
+      "conversation_starters": [
+        "GreenStone Farm Credit Services ACA scores 1.5 on Enterprise Analytics Strategy (P4C2.1.1) — 1.2 points below the peer median 2.8 [E-085, E-091]. Ask who owns it today, what tooling backs it, and what the review cadence is — Tableau addresses 126 linked subcaps here and is not ready (prerequisites block deployment) (fit 43/100). Tableau is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Governed reporting layer' (P4C2.1.1) sits at 1.5 vs the 2.5 readiness threshold (UNMET). That gap is what keeps GreenStone Farm Credit Services ACA from landing Tableau now.",
+        "Peer framing: Farm Credit Mid-America, ACA and Capital Farm Credit are in GreenStone Farm Credit Services ACA's benchmark cohort holding the 2.8 median on Enterprise Analytics Strategy. Sequence Tableau after nCino; next step is a Tableau workshop scoped to P4."
+      ],
+      "display_name": "Tableau",
+      "evidence_ids": [
+        "E-085",
+        "E-091",
+        "E-056",
+        "E-010"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Tableau"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.5594,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 274,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 29.7,
+            "value": 0.4948
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -26.5
+          }
+        },
+        "n_addressable": 126,
+        "prereqs": {
+          "P4C2.1.1": {
+            "current_score": 1.5,
+            "name": "Governed reporting layer",
+            "status": "UNMET",
+            "threshold": 2.5
+          },
+          "P4C3.1.1": {
+            "current_score": 2.0,
+            "name": "BI / analytics literacy",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [
+            "ncino"
+          ],
+          "rank": 2
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Enterprise Analytics Strategy",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.1.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "AI & ML Strategy & Governance",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.1.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Enterprise Reporting Platform",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Self-Service BI & Analytics",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Embedded Analytics & Actionable Insights",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Natural Language Query (NLQ)",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085",
+              "E-091"
+            ],
+            "gap": 2.5,
+            "name": "Regulatory Reporting Automation",
+            "opportunity": 0.7013,
+            "peer_median": 2.75,
+            "pillar": "P4",
+            "score": 1.5,
+            "subcap_id": "P4C2.2.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-056"
+            ],
+            "gap": 2.5,
+            "name": "Funnel Analytics",
+            "opportunity": 0.6625,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C1.6.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-010"
+            ],
+            "gap": 2.5,
+            "name": "Service Journey Design",
+            "opportunity": 0.6462,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.1.2",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-010"
+            ],
+            "gap": 2.5,
+            "name": "Feedback Collection",
+            "opportunity": 0.6462,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 1.5,
+            "subcap_id": "P2C3.7.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-085"
+            ],
+            "gap": 2.0,
+            "name": "Enterprise Data Catalog & Discovery",
+            "opportunity": 0.5495,
+            "peer_median": 2.25,
+            "pillar": "P4",
+            "score": 2.0,
+            "subcap_id": "P4C1.5.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-085"
+            ],
+            "gap": 2.0,
+            "name": "Semantic Layer & Knowledge Graph",
+            "opportunity": 0.5495,
+            "peer_median": 2.25,
+            "pillar": "P4",
+            "score": 2.0,
+            "subcap_id": "P4C1.5.2",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 43.2,
+      "pillar": "P4",
+      "platform_id": "tableau",
+      "prereq_checks": [
+        {
+          "current_score": 1.5,
+          "name": "Governed reporting layer",
+          "note": null,
+          "required_subcap_id": "P4C2.1.1",
+          "status": "UNMET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.0,
+          "name": "BI / analytics literacy",
+          "note": null,
+          "required_subcap_id": "P4C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 2,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Enterprise Analytics Strategy",
+        "AI & ML Strategy & Governance"
+      ],
+      "opportunity_md": "**Tableau** at 43/100 fit addresses 126 scored capability gaps in P4, led by Enterprise Analytics Strategy. Enterprise Analytics Strategy scores 1.5/5 against a 2.8 peer median; AI & ML Strategy & Governance is the next surface. The platform family is confirmed absent from the current stack (Tableau) — greenfield rather than displacement. 1 prerequisite gate deployment (e.g. Governed reporting layer: 1.5 vs 2.5 threshold)."
+    },
+    {
+      "absent_count": 2,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C3.2.5",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C3.4.5",
+        "P1C3.6.1",
+        "P1C3.6.2",
+        "P1C3.6.3",
+        "P1C3.6.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.3.3",
+        "P1C4.3.4",
+        "P1C4.4.1",
+        "P1C4.4.2",
+        "P1C4.4.3",
+        "P1C4.5.1",
+        "P1C4.5.3",
+        "P1C4.5.4",
+        "P1C4.5.5",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C3.3.1",
+        "P2C3.3.2",
+        "P2C3.3.3",
+        "P2C3.3.5",
+        "P3C3.6.1"
+      ],
+      "conversation_starter": "Twilio (pillar P2) addresses 67 subcaps, starting with P1C1.1.1; fit is 41/100 and the platform is not ready (prerequisites block deployment).\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Pain: probe on P1C3.2.1 (prereq 'Communications compliance': current 2.0 vs. threshold 3.0, status UNMET).\n3. Sequence: outline a 67-subcap roadmap starting at P1C1.1.1 and extending to 66 additional subcaps.\nNext step: book a Twilio workshop scoped to P2, covering the 67-subcap addressable surface.",
+      "conversation_starters": [
+        "GreenStone Farm Credit Services ACA scores 2.0 on Role Definitions (P1C2.1.4) — 0.5 points below the peer median 2.5. Ask who owns it today, what tooling backs it, and what the review cadence is — Twilio addresses 67 linked subcaps here and is not ready (prerequisites block deployment) (fit 41/100). Twilio is confirmed absent from their detected stack — a greenfield entry.",
+        "Probe the blocker first: 'Communications compliance' (P1C3.2.1) sits at 2.0 vs the 3.0 readiness threshold (UNMET). That gap is what keeps GreenStone Farm Credit Services ACA from landing Twilio now.",
+        "Peer framing: Farm Credit Mid-America, ACA and Capital Farm Credit are in GreenStone Farm Credit Services ACA's benchmark cohort holding the 2.5 median on Role Definitions. Sequence Twilio after Tableau → nCino; next step is a Twilio workshop scoped to P2."
+      ],
+      "display_name": "Twilio",
+      "evidence_ids": [
+        "E-044",
+        "E-010",
+        "E-001"
+      ],
+      "fit_breakdown": {
+        "absent_families": [
+          "Twilio"
+        ],
+        "engine": "v2",
+        "evidence_strength": 0.4174,
+        "factors": {
+          "absent_boost": {
+            "points": 15.0,
+            "value": 1.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 332,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 25.6,
+            "value": 0.4269
+          },
+          "readiness": {
+            "light": "red",
+            "multiplier": 0.62,
+            "penalty_points": -24.9
+          }
+        },
+        "n_addressable": 67,
+        "prereqs": {
+          "P1C3.2.1": {
+            "current_score": 2.0,
+            "name": "Communications compliance",
+            "status": "UNMET",
+            "threshold": 3.0
+          },
+          "P2C3.1.1": {
+            "current_score": 2.0,
+            "name": "Omnichannel CX baseline",
+            "status": "PARTIAL",
+            "threshold": 2.5
+          }
+        },
+        "sequence": {
+          "after": [
+            "tableau",
+            "ncino"
+          ],
+          "rank": 3
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Role Definitions",
+            "opportunity": 0.5467,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C2.1.4",
+            "tier": null
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Stakeholder Analysis",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Champion Coordination",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.3.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Champion Recognition",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.3.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "User Feedback Collection",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.6.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Adoption Interventions",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.6.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-010"
+            ],
+            "gap": 2.0,
+            "name": "Contact Center Excellence",
+            "opportunity": 0.517,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C3.3.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-010"
+            ],
+            "gap": 2.0,
+            "name": "Digital Messaging & Chat",
+            "opportunity": 0.517,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C3.3.2",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-010"
+            ],
+            "gap": 2.0,
+            "name": "Video Banking",
+            "opportunity": 0.517,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C3.3.3",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-010"
+            ],
+            "gap": 2.0,
+            "name": "Voice-Activated Banking",
+            "opportunity": 0.517,
+            "peer_median": 2.75,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C3.3.5",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-001"
+            ],
+            "gap": 2.0,
+            "name": "Digital Strategy Document",
+            "opportunity": 0.4975,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C1.1.1",
+            "tier": 3
+          },
+          {
+            "e_ids": [
+              "E-001"
+            ],
+            "gap": 2.0,
+            "name": "Business Alignment",
+            "opportunity": 0.4975,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C1.1.2",
+            "tier": 3
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 40.7,
+      "pillar": "P2",
+      "platform_id": "twilio",
+      "prereq_checks": [
+        {
+          "current_score": 2.0,
+          "name": "Omnichannel CX baseline",
+          "note": null,
+          "required_subcap_id": "P2C3.1.1",
+          "status": "PARTIAL",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.0,
+          "name": "Communications compliance",
+          "note": null,
+          "required_subcap_id": "P1C3.2.1",
+          "status": "UNMET",
+          "threshold": 3.0
+        }
+      ],
+      "readiness_index": "red",
+      "sequence_rank": 3,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Role Definitions",
+        "Stakeholder Analysis"
+      ],
+      "opportunity_md": "**Twilio** at 41/100 fit addresses 67 scored capability gaps in P2, led by Role Definitions. Role Definitions scores 2.0/5 against a 2.5 peer median; Stakeholder Analysis is the next surface. The platform family is confirmed absent from the current stack (Twilio) — greenfield rather than displacement. 1 prerequisite gate deployment (e.g. Communications compliance: 2.0 vs 3.0 threshold)."
+    },
+    {
+      "absent_count": 0,
+      "addressable_subcap_ids": [
+        "P1C1.1.1",
+        "P1C1.1.2",
+        "P1C1.1.3",
+        "P1C1.1.4",
+        "P1C1.1.5",
+        "P1C1.2.1",
+        "P1C1.2.2",
+        "P1C1.2.3",
+        "P1C1.2.4",
+        "P1C1.2.5",
+        "P1C1.3.1",
+        "P1C1.3.2",
+        "P1C1.3.3",
+        "P1C1.3.4",
+        "P1C1.3.5",
+        "P1C1.4.1",
+        "P1C1.4.2",
+        "P1C1.4.3",
+        "P1C1.5.1",
+        "P1C1.5.2",
+        "P1C1.5.3",
+        "P1C1.5.4",
+        "P1C1.5.5",
+        "P1C1.6.1",
+        "P1C1.6.2",
+        "P1C1.6.3",
+        "P1C1.6.4",
+        "P1C1.6.5",
+        "P1C2.1.1",
+        "P1C2.1.2",
+        "P1C2.1.3",
+        "P1C2.1.4",
+        "P1C2.1.5",
+        "P1C2.2.1",
+        "P1C2.2.2",
+        "P1C2.2.3",
+        "P1C2.2.4",
+        "P1C2.2.5",
+        "P1C2.3.1",
+        "P1C2.3.2",
+        "P1C2.3.3",
+        "P1C2.3.4",
+        "P1C2.3.5",
+        "P1C2.4.1",
+        "P1C2.4.2",
+        "P1C2.4.3",
+        "P1C2.4.4",
+        "P1C2.4.5",
+        "P1C2.6.1",
+        "P1C2.6.2",
+        "P1C2.6.3",
+        "P1C2.6.4",
+        "P1C3.1.1",
+        "P1C3.1.2",
+        "P1C3.1.3",
+        "P1C3.1.4",
+        "P1C3.2.1",
+        "P1C3.2.2",
+        "P1C3.2.3",
+        "P1C3.2.4",
+        "P1C3.2.5",
+        "P1C3.3.1",
+        "P1C3.3.2",
+        "P1C3.3.3",
+        "P1C3.3.4",
+        "P1C3.3.5",
+        "P1C3.4.1",
+        "P1C3.4.2",
+        "P1C3.4.3",
+        "P1C3.4.4",
+        "P1C3.4.5",
+        "P1C3.5.1",
+        "P1C3.5.2",
+        "P1C3.5.3",
+        "P1C3.5.4",
+        "P1C3.6.1",
+        "P1C3.6.2",
+        "P1C3.6.3",
+        "P1C3.6.4",
+        "P1C4.1.1",
+        "P1C4.1.2",
+        "P1C4.1.3",
+        "P1C4.1.4",
+        "P1C4.2.1",
+        "P1C4.2.2",
+        "P1C4.2.3",
+        "P1C4.2.4",
+        "P1C4.6.1",
+        "P1C4.6.2",
+        "P1C4.6.3",
+        "P1C4.6.4",
+        "P2C2.1.1",
+        "P2C2.1.2",
+        "P2C2.1.3",
+        "P2C2.1.4",
+        "P2C2.1.5",
+        "P2C2.2.1",
+        "P2C2.2.2",
+        "P2C2.2.3",
+        "P2C2.2.4",
+        "P2C2.2.5",
+        "P2C2.3.1",
+        "P2C2.3.2",
+        "P2C2.3.3",
+        "P2C2.3.4",
+        "P2C2.3.5",
+        "P2C2.4.1",
+        "P2C2.4.2",
+        "P2C2.4.3",
+        "P2C2.4.4",
+        "P2C2.4.5",
+        "P2C2.5.1",
+        "P2C2.5.2",
+        "P2C2.5.3",
+        "P2C2.5.4",
+        "P2C2.5.5",
+        "P2C2.6.1",
+        "P2C2.6.2",
+        "P2C2.6.3",
+        "P2C2.6.4",
+        "P2C2.6.5",
+        "P2C2.7.1",
+        "P2C2.7.2",
+        "P2C2.7.3",
+        "P2C2.7.4",
+        "P2C2.7.5",
+        "P2C2.8.1",
+        "P2C2.8.2",
+        "P2C2.8.3",
+        "P2C2.8.4",
+        "P2C2.9.1",
+        "P2C2.9.2",
+        "P2C2.9.3",
+        "P2C2.9.4",
+        "P2C4.1.4",
+        "P2C4.2.1",
+        "P2C4.2.2",
+        "P2C4.2.3",
+        "P2C4.2.4",
+        "P2C4.2.5",
+        "P2C4.3.1",
+        "P2C4.3.3",
+        "P2C4.3.4",
+        "P2C4.3.5",
+        "P2C4.4.2",
+        "P2C4.4.4",
+        "P2C4.5.1",
+        "P2C4.5.2",
+        "P2C4.5.3",
+        "P2C4.5.4",
+        "P2C4.5.5",
+        "P2C4.6.1",
+        "P2C4.6.2",
+        "P2C4.6.3",
+        "P2C4.6.4",
+        "P2C4.6.5",
+        "P2C4.7.1",
+        "P2C4.7.2",
+        "P2C4.7.4",
+        "P2C4.7.5",
+        "P2C4.8.1",
+        "P2C4.8.2",
+        "P2C4.8.3",
+        "P2C4.8.4",
+        "P2C4.8.5",
+        "P3C1.3.1",
+        "P3C1.5.1",
+        "P3C2.1.2",
+        "P3C2.1.4",
+        "P3C2.5.1",
+        "P3C3.2.1",
+        "P3C3.7.1"
+      ],
+      "conversation_starter": "nCino (pillar P3) addresses 172 subcaps, starting with P1C1.1.1; fit is 51/100 and the platform is ready to land now.\n1. Discovery: ask how they handle P1C1.1.1 today — what tool, what owner, what review cadence.\n2. Value: confirm appetite to close the gap this fiscal year — prerequisites are MET, so the call can move to scoping.\n3. Sequence: outline a 172-subcap roadmap starting at P1C1.1.1 and extending to 171 additional subcaps.\nNext step: book a nCino workshop scoped to P3, covering the 172-subcap addressable surface.",
+      "conversation_starters": [
+        "GreenStone Farm Credit Services ACA scores 2.0 on Key Risk Indicators (P3C2.1.4) — 0.5 points below the peer median 2.5 [E-070]. Ask who owns it today, what tooling backs it, and what the review cadence is — nCino addresses 172 linked subcaps here and is ready to land now (fit 51/100).",
+        "Prerequisites are MET, so move to value: confirm GreenStone Farm Credit Services ACA's appetite to close the Key Risk Indicators gap (currently 2.0/5) this fiscal year and open scoping.",
+        "Peer framing: Farm Credit Mid-America, ACA and Capital Farm Credit are in GreenStone Farm Credit Services ACA's benchmark cohort holding the 2.5 median on Key Risk Indicators. Sequence nCino; next step is a nCino workshop scoped to P3."
+      ],
+      "display_name": "nCino",
+      "evidence_ids": [
+        "E-070",
+        "E-044"
+      ],
+      "fit_breakdown": {
+        "absent_families": [],
+        "engine": "v2",
+        "evidence_strength": 0.3451,
+        "factors": {
+          "absent_boost": {
+            "points": 0.0,
+            "value": 0.0
+          },
+          "interconnect": {
+            "dependent_subcaps": 350,
+            "points": 25.0,
+            "value": 1.0
+          },
+          "opportunity": {
+            "points": 26.0,
+            "value": 0.4336
+          },
+          "readiness": {
+            "light": "green",
+            "multiplier": 1.0,
+            "penalty_points": -0.0
+          }
+        },
+        "n_addressable": 172,
+        "prereqs": {
+          "P3C2.1.1": {
+            "current_score": 2.5,
+            "name": "Loan origination digitization",
+            "status": "MET",
+            "threshold": 2.5
+          },
+          "P3C2.2.1": {
+            "current_score": 2.5,
+            "name": "Commercial lending workflow",
+            "status": "MET",
+            "threshold": 2.0
+          },
+          "P3C3.1.1": {
+            "current_score": 3.0,
+            "name": "Document management",
+            "status": "MET",
+            "threshold": 2.0
+          }
+        },
+        "sequence": {
+          "after": [],
+          "rank": 1
+        },
+        "target_band": "M4",
+        "top_subcaps": [
+          {
+            "e_ids": [
+              "E-070"
+            ],
+            "gap": 2.0,
+            "name": "Key Risk Indicators",
+            "opportunity": 0.5625,
+            "peer_median": 2.5,
+            "pillar": "P3",
+            "score": 2.0,
+            "subcap_id": "P3C2.1.4",
+            "tier": 1
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Role Definitions",
+            "opportunity": 0.5467,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C2.1.4",
+            "tier": null
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Ongoing Monitoring",
+            "opportunity": 0.5467,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C2.3.3",
+            "tier": null
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "Exit Planning",
+            "opportunity": 0.5467,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C2.3.5",
+            "tier": null
+          },
+          {
+            "e_ids": [],
+            "gap": 2.0,
+            "name": "CISO Function",
+            "opportunity": 0.5467,
+            "peer_median": 2.5,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C2.6.2",
+            "tier": null
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Stakeholder Analysis",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.1.3",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "User Feedback Collection",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.6.2",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Adoption Interventions",
+            "opportunity": 0.5346,
+            "peer_median": 2.75,
+            "pillar": "P1",
+            "score": 2.0,
+            "subcap_id": "P1C4.6.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Personalized Pricing",
+            "opportunity": 0.5346,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C4.2.4",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Content Personalization",
+            "opportunity": 0.5346,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C4.2.5",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Proactive Financial Guidance",
+            "opportunity": 0.5346,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C4.3.1",
+            "tier": 2
+          },
+          {
+            "e_ids": [
+              "E-044"
+            ],
+            "gap": 2.0,
+            "name": "Product Propensity Modeling",
+            "opportunity": 0.5346,
+            "peer_median": 2.25,
+            "pillar": "P2",
+            "score": 2.0,
+            "subcap_id": "P2C4.5.1",
+            "tier": 2
+          }
+        ],
+        "weights": {
+          "absent_boost": 0.15,
+          "interconnect": 0.25,
+          "opportunity": 0.6
+        }
+      },
+      "fit_score": 51.0,
+      "pillar": "P3",
+      "platform_id": "ncino",
+      "prereq_checks": [
+        {
+          "current_score": 2.5,
+          "name": "Loan origination digitization",
+          "note": null,
+          "required_subcap_id": "P3C2.1.1",
+          "status": "MET",
+          "threshold": 2.5
+        },
+        {
+          "current_score": 2.5,
+          "name": "Commercial lending workflow",
+          "note": null,
+          "required_subcap_id": "P3C2.2.1",
+          "status": "MET",
+          "threshold": 2.0
+        },
+        {
+          "current_score": 3.0,
+          "name": "Document management",
+          "note": null,
+          "required_subcap_id": "P3C3.1.1",
+          "status": "MET",
+          "threshold": 2.0
+        }
+      ],
+      "readiness_index": "green",
+      "sequence_rank": 1,
+      "state": "READY",
+      "story_md": null,
+      "story_source": null,
+      "top_subcap_names": [
+        "Key Risk Indicators",
+        "Role Definitions"
+      ],
+      "opportunity_md": "**nCino** at 51/100 fit addresses 172 scored capability gaps in P3, led by Key Risk Indicators. Key Risk Indicators scores 2.0/5 against a 2.5 peer median; Role Definitions is the next surface."
+    }
+  ],
+  "entity_display_id": "greenstone-farm-credit-s-3001",
+  "narrative": {
+    "gap_prioritization_md": "",
+    "recommendations_md": "Nine evidence-grounded recommendations map identified capability gaps to Zennify solution offerings. Each recommendation has been validated against the Zennify solutions catalog 'When to Recommend' and 'When NOT to Recommend' criteria. Four recommendations require special notation: R4 (Power BI caveat), R7 (modified trigger), R8 (P4 prerequisite), R9 (non-standard positioning).",
+    "roadmap_md": ""
+  },
+  "pillar_offerings": {
+    "P1": [],
+    "P2": [],
+    "P3": [],
+    "P4": []
+  },
+  "run_request_id": "DMA-ASM-GFCS-20260323-001"
+}

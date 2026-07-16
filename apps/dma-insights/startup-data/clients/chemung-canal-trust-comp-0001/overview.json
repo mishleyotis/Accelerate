@@ -1,0 +1,1040 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 157,
+        "subcaps": 157,
+        "thin": 100
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 213
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 106
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 146
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "chemung-canal-trust-comp-0001",
+    "domain": null,
+    "hq": null,
+    "id": "427b50de-e8f2-4c75-9f20-a9ac73e834cd",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Chemung Canal Trust Company",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "AM",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:38.735239Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 62,
+    "current_count": 18,
+    "dated_count": 21,
+    "median_age_months": 28.7,
+    "oldest_published_date": "1999-01-01",
+    "stale_count": 15,
+    "stale_pct": 12.93,
+    "total": 116,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 1,
+      "NEGATIVE": 4,
+      "NEUTRAL": 20,
+      "POSITIVE": 91
+    },
+    "connectors": {
+      "Indeed": 1,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 7,
+      "NEUTRAL": 90,
+      "POSITIVE": 19
+    },
+    "tiers": {
+      "T1": 12,
+      "T2": 37,
+      "T3": 24,
+      "T4": 12,
+      "T5": 31
+    },
+    "total_facts": 504,
+    "total_items": 116
+  },
+  "financial_trajectory": {
+    "cagr": "28.0%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        2.28,
+        2.42,
+        2.65,
+        2.71,
+        6.12
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 2200000000.0,
+    "branches": 30,
+    "cagr": "7.9%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "asset_cagr_2020": "2024: 7.9%. Loan CAGR 2020–2024: 6.2%.",
+      "lines": [
+        "Five-year trajectory sourced from SEC 10-K filings and FFIEC Call Reports [E-001, E-004, E-005, E-006, E-032]. Trend: STABLE with ACCELERATING commercial lending. Asset CAGR 2020–2024: 7.9%. Loan CAGR 2020–2024: 6.2%.",
+        "Key Financial Observations (2024):",
+        "Total loans +5.0% YoY ($1.973B → $2.071B) — commercial loan growth the primary driver (Capital Bank C&I milestone $1.1B, Canal Bank launch) [E-001]",
+        "Net interest margin compressed 9bps (2.85% → 2.76%) — reflects industry-wide rate environment pressure on liability-sensitive community banks [E-001, E-004]",
+        "Efficiency ratio deteriorated 269bps (66.20% → 68.89%) — data processing cost +$253K (new contracts, cybersecurity), partially offset by outsourcing savings [E-001]",
+        "WMG AUA $2.212B (record) — WMG fee income $11.6M (+10.6% YoY) — fee income growth offsetting NIM compression [E-001, E-040]",
+        "5-Year Asset CAGR 2020–2024: 7.9% | 5-Year Loan CAGR: 6.2% | Trend: STABLE-GROWING [E-001, E-004, E-005, E-006]",
+        "5-year growth with CAGR calculated. Trend classification: STABLE-GROWING with ACCELERATING commercial lending trajectory. All data sourced from SEC 10-K filings and FFIEC Call Reports [E-001, E-004, E-005, E-006, E-032].",
+        "Key Trend Analysis:",
+        "ASSET GROWTH (7.9% CAGR): Driven by Fort Orange Financial integration (Capital Bank), consistent commercial loan expansion, and now Canal Bank de novo launch. Well above US community bank median CAGR (~4%) for $2-4B peers. [E-001]",
+        "LOAN GROWTH ACCELERATION (2022-2024): $1.518B → $2.071B = +36% in 3 years. Capital Bank C&I milestone $1.1B; Canal Bank Year 1 growth exceeded expectations. Commercial pipeline remains strong. [E-001, E-022]",
+        "NIM COMPRESSION SIGNAL: NIM declined from 3.12% (2020) to 2.76% (2024) = 36bps over 5 years. Liability-sensitive balance sheet exposed to rate environment. ALCO actively managing IRR. [E-001, E-103]",
+        "EFFICIENCY RATIO PRESSURE: Rose to 68.89% (2024) from 66.20% (2023) — 269bps deterioration. Data processing expense +$253K YoY due to new contracts and cybersecurity spend. Fiserv renewal + outsourcing = management response. [E-001]",
+        "WMG ACCELERATION: $2.212B AUA (record) vs ~$1.8B in 2020 = +23% in 5 years. Fee income $11.6M (+10.6% YoY). Fee income growth is the strategic offset to NIM compression — Zennify FSC multiplier opportunity. [E-001, E-040]"
+      ],
+      "series": {
+        "2020": 2279451000.0,
+        "2021": 2418475000.0,
+        "2022": 2645553000.0,
+        "2023": 2710529000.0,
+        "2024": 6120000000.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 30,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 310,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Canal Bank division launched Western NY expansion"
+          },
+          {
+            "fy": "FY2023",
+            "label": "2023 10-K: '$0.1 million additional restitution regarding…"
+          },
+          {
+            "fy": "FY2022",
+            "label": "Digital wallet/NFC payments confirmed"
+          },
+          {
+            "fy": "FY2021",
+            "label": "De novo Canal Bank expansion (Erie County / Western NY)"
+          }
+        ],
+        "fy": [
+          "FY2019",
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$6.1B assets · FY2024 · +28.0% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            776000.0,
+            null,
+            null,
+            518000.0,
+            null,
+            15.1,
+            7.7
+          ],
+          "total_assets": [
+            null,
+            2.28,
+            2.42,
+            2.65,
+            2.71,
+            6.12,
+            null
+          ]
+        },
+        "unit": "B"
+      },
+      "wmg_acceleration": "2.212B AUA (record) vs ~$1.8B in 2020 = +23% i",
+      "year_asset_cagr_2020": "2024: 7.9% | 5-Year Loan CAGR: 6.2% | Trend:"
+    },
+    "founded": 2016,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "New York, Nevada, Pennsylvania",
+    "geography_basis": "nlp:evidence+narrative",
+    "headcount": 310,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Anders M. Tomson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "L. Dale Cole",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP & Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dale M. McKim III",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP, Chief Financial Officer & Treasurer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mary E. Meisner",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP & Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Thomas W. Wirth",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP, Wealth Management Group"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Vincent Cutrona",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President, Canal Bank"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Daniel Fariello",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President, Capital Bank"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Christopher Conklin",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Darick Harriger",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Vice President, IT Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jebb Dennis",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Enterprise Project Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kimberly Hazelton",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP, Senior Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jeffrey Kenefick",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Regional President"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Chemung Canal Trust Company",
+    "license_type": "SEC-registered",
+    "narrative_md": "Comprehensive organizational context grounded in public filings, regulatory documents, and third-party analysis. All financial data sourced from SEC filings and FFIEC Call Reports. Evidence IDs cited per claim.",
+    "primary_regulator": "SEC",
+    "regulator_basis": "inferred:subvertical",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 1054000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "n": 2300,
+          "scale": 5,
+          "score": 4.8,
+          "source": "App Store"
+        },
+        {
+          "metric": "Overall",
+          "n": 1090,
+          "scale": 5,
+          "score": 4.5,
+          "source": "Google Play"
+        },
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "n": 14,
+          "scale": 5,
+          "score": 2.5,
+          "source": "Yelp"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.9,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.9/5",
+          "signal": "Kraus (Northwest/KeyBank/M&T), Vincent Cutrona (M&T/Evans) Indeed overall rating: 3.9/5 (Culture 3.5, Job Security 3.6, Management 3.4, Work-Life Balance 3.9, Compensation 3.9) CEO approval rate: 70.22% — moderate executive leadership satis",
+          "source": "Indeed"
+        },
+        {
+          "rating": "4.8/5",
+          "signal": "controls, account alerts, bill pay, branch locator iOS App Store rating: 4.8 out of 5 (2,300 ratings) App last updated January 22, 2025 (Version 24.2.60) - active maintenance Investment Services team: Shelby M",
+          "source": "App Store"
+        },
+        {
+          "rating": "4.5/5",
+          "signal": "Committee oversees privacy policy - annual review process Google Play rating: 4.5 out of 5 (1,090 reviews) as of late 2024 App features: mobile deposit, Zelle, card controls, account alerts, bill pay, branch locator iOS App Store rating: 4.",
+          "source": "Google Play"
+        },
+        {
+          "signal": "allet/NFC payments confirmed; Google/Apple No CCTC-specific CFPB complaints found in proxy search — consistent with clean 2023 CRA exam finding of 'no evidence of discriminatory or other illegal credit practices' CRA public files include 'C",
+          "source": "CFPB complaints"
+        },
+        {
+          "rating": "2.5/5",
+          "signal": "Henry, Q2 — core vendors engage community banks on fintech Yelp: 2.5/5 (14 reviews, 2021 era) — customer frustration specifically with online banking quality ('poorly designed, confusing, least functional') — confirms GoBanking 2024 upgrade",
+          "source": "Yelp"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": null,
+    "ticker": "NASDAQ: CHMG",
+    "ticker_basis": "prose:entity-scoped",
+    "tl_synced_at": null,
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "chemungcanal.com",
+    "website_basis": "evidence_urls:own-domain",
+    "footprint": [
+      "New York",
+      "Nevada",
+      "Pennsylvania"
+    ]
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.903486+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Chemung Canal Trust Company — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Four peers were selected and locked during the research phase (GATE_B1) for SV-04 community bank comparability: Arrow Financial Corporation (AROW, $4.3B assets), Canandaigua National Corporation (~$2.3B, private), Financial Institutions Inc / Five Star Bank (FISI, $6.1B), and Evans Bancorp (EVBN, $2.2B). All four operate in overlapping NYS geography with comparable community banking mandates and trust/wealth capabilities. Peers were scored at category level (17 categories x 4 peers = 68 scored data points) and peer medians computed for all 17 categories. Peer scores are immutable for this assessment.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "1.1 SCQA Context",
+    "scqa_md": "Chemung Canal Trust Company is a $2.2B in assets asset manager regulated by SEC with 310 employees. A 7.9% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-004, E-005]. Zennify's assessment places overall digital maturity at 2.1/5. The deepest capability gap is Employee Experience Enablement at 1.8/5 against a 2.5 peer median [E-011, E-012].\n\nNext is Leadership Communication at 1.9/5 against a 2.5 peer median [E-036, E-060]. Third is API Lifecycle Management at 2.0/5 against a 2.2 peer median [E-113, E-115]. The issue register adds 1 rationales lack evidence ID citations (high severity). The issue register adds 35 rationale text duplicates found (high severity).\n\nCounter-signal: Automated Incident Response & Playbooks already runs at 2.6/5 against a 2.5 peer median — a strength to build on, not rebuild. The roster shows no CDO — a named ownership gap for the capabilities below. The question for Chemung Canal Trust Company is whether to close Employee Experience Enablement first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Chemung Canal Trust Company should lead with nCino (80/100 fit) against Idea Evaluation Criteria, then sequence Tableau behind it.\n\nClosing Employee Experience Enablement to the peer median alone is worth 0.7 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.07,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:38.714816+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_CCTRUST_Governance_AuditSummary.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:38.715200+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_CCTRUST_Governance_IssueRegister.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:38.715678+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_CCTRUST_Governance_PatchBlock.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:38.715910+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/DMA_CCTRUST_Priority_Rankings.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:38.716774+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 17
+    },
+    "stage_ms": {
+      "manifest": 84,
+      "parse": 7856,
+      "persist": 1484
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 08_appendices/DMA_CCTRUST_Run_Manifest.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 698 subcaps from DMA_CCTRUST_Assessment_",
+        "detail": "xlsx fallback extracted 698 subcaps from DMA_CCTRUST_Assessment_Workbook.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_w",
+        "detail": "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_CCTRUST_ClientProfile_Report.docx leadership=12 focus_areas=3 facts_extracted=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 7 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 12 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 1",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 3 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_CCTRUST_Governance_AuditSummary.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_CCTRUST_Governance_IssueRegister.csv — no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_CCTRUST_Governance_PatchBlock.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/DMA_CCTRUST_Priority_Rankings.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 16",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:28/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 1",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 08_appendices/DMA_CCTRUST_Run_Manifest.json",
+      "xlsx fallback extracted 698 subcaps from DMA_CCTRUST_Assessment_Workbook.xlsx",
+      "scoring loaded from xlsx fallback (698 subcaps, dir=03_scoring_workbook)",
+      "firmographics_from_client_profile_docx: source=DMA_CCTRUST_ClientProfile_Report.docx leadership=12 focus_areas=3 facts_extracted=1",
+      "used docx-extracted recommendations: 7 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "tech_stack_from_report_prose: 12 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 1",
+      "acquisitions_from_client_profile_docx: 3 events",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_CCTRUST_Governance_AuditSummary.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_CCTRUST_Governance_IssueRegister.csv — no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_CCTRUST_Governance_PatchBlock.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/DMA_CCTRUST_Priority_Rankings.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "timeline_events_persisted: 16",
+      "catalogue_unresolved:28/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 1"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 157,
+      "peer_median": 2.21,
+      "pillar_id": "P1",
+      "score": 2.1,
+      "subcaps_scored": 157
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.15,
+      "pillar_id": "P2",
+      "score": 1.91,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.56,
+      "pillar_id": "P3",
+      "score": 2.37,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 1.96,
+      "pillar_id": "P4",
+      "score": 1.92,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-29",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:38.735239Z",
+    "created_at": "2026-07-02T23:09:38.735239Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "3ec6ef17-833f-4ba9-beb8-1c134be21b20",
+    "overall_score": null,
+    "request_id": "DMA-ASM-CCTRUST-20260429-0001",
+    "started_at": "2026-07-02T23:09:38.735239Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "n": 2300,
+        "scale": 5,
+        "score": 4.8,
+        "source": "App Store"
+      },
+      {
+        "metric": "Overall",
+        "n": 1090,
+        "scale": 5,
+        "score": 4.5,
+        "source": "Google Play"
+      },
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "n": 14,
+        "scale": 5,
+        "score": 2.5,
+        "source": "Yelp"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.9,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-059",
+        "E-064",
+        "E-002",
+        "E-037"
+      ],
+      "magnitude": null,
+      "name": "Sharpen strategic posture",
+      "peer_median": 1.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.76,
+      "so_what": "Protect Sharpen strategic posture as a proof point: use it to anchor the strategy and governance story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P1C3",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 4 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: GoBanking Android: 4.5/5 (1,060+ reviews) — high customer satisfaction with mobile platform Release notes: 'We are continually releasing new updates to further improve your mobile banking experience."
+    },
+    {
+      "body": "Unify the 14 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-011",
+        "E-012",
+        "E-013",
+        "E-025"
+      ],
+      "magnitude": "0.7 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.5,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.84,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 14 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: GoBanking Mobile Banking App powered by Fiserv - core platform vendor confirmed Enterprise Risk Committee oversees privacy policy - annual review process"
+    },
+    {
+      "body": "Treat the 6 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "evidence": [
+        "E-107",
+        "E-103",
+        "E-105",
+        "E-106"
+      ],
+      "magnitude": null,
+      "name": "Build the data foundation",
+      "peer_median": 1.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 1.64,
+      "so_what": "Protect Build the data foundation as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Build the data foundation",
+      "what": "Treat the 6 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "why": "The linked evidence records: Bank Director 2024 Technology Survey (community banks): Only 11% report extensive data use across decisions; 40% use data in several areas but see room for improvement; 34% in early stages of data strategy; 16% have no strategy — industry ceiling for $2-3B community"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-032"
+      ],
+      "modifiers": [
+        "115 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Business Outcome Linkage averages 2.1/5 over 165 scored subcaps; ceiling 2.8 reflects thin evidence density (50/165 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-049"
+      ],
+      "modifiers": [
+        "85 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Portfolio Management averages 2.5/5 over 217 scored subcaps; ceiling 3.3 reflects thin evidence density (132/217 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-055"
+      ],
+      "modifiers": [
+        "150 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Customer-Driven Innovation averages 1.8/5 over 190 scored subcaps; ceiling 2.4 reflects thin evidence density (40/190 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-057"
+      ],
+      "modifiers": [
+        "150 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Leadership Communication averages 1.9/5 over 205 scored subcaps; ceiling 2.6 reflects thin evidence density (55/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-009"
+      ],
+      "modifiers": [
+        "257 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Partner & Indirect Marketing averages 2.0/5 over 287 scored subcaps; ceiling 2.6 reflects thin evidence density (30/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025"
+      ],
+      "modifiers": [
+        "262 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Welcome Journey averages 2.1/5 over 287 scored subcaps; ceiling 2.6 reflects thin evidence density (25/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025"
+      ],
+      "modifiers": [
+        "275 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Employee Experience Enablement averages 1.8/5 over 286 scored subcaps; ceiling 2.4 reflects thin evidence density (11/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-013"
+      ],
+      "modifiers": [
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Cross-Sell & Deepening averages 1.6/5 over 255 scored subcaps; ceiling 2.1 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-098"
+      ],
+      "modifiers": [
+        "142 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Approval Automation averages 2.1/5 over 143 scored subcaps; ceiling 2.6 reflects thin evidence density (1/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-009"
+      ],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Emerging Threat Monitoring averages 2.4/5 over 130 scored subcaps; ceiling 2.9 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-099"
+      ],
+      "modifiers": [
+        "111 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Exam Preparation averages 2.6/5 over 141 scored subcaps; ceiling 3.2 reflects thin evidence density (30/141 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [
+        "135 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Exit & Contingency averages 2.4/5 over 145 scored subcaps; ceiling 3.0 reflects thin evidence density (10/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-103"
+      ],
+      "modifiers": [
+        "175 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Stewardship Program averages 1.6/5 over 200 scored subcaps; ceiling 2.2 reflects thin evidence density (25/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.6,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-103"
+      ],
+      "modifiers": [
+        "230 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "AI Fairness & Explainability (XAI) averages 1.7/5 over 270 scored subcaps; ceiling 2.3 reflects thin evidence density (40/270 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-114"
+      ],
+      "modifiers": [
+        "205 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "API Lifecycle Management averages 2.0/5 over 235 scored subcaps; ceiling 2.5 reflects thin evidence density (30/235 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-116"
+      ],
+      "modifiers": [
+        "120 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Automated Incident Response & Playbooks averages 2.6/5 over 150 scored subcaps; ceiling 3.2 reflects thin evidence density (30/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Named Executive Officers 2024: Anders M. Tomson (CEO), Dale M. McKim III (CFO), Loren D. Cole (EVP & CIO), Peter K. Cosgrove (EVP, CCO & CRO), Daniel D. Fariello (President, Capital Bank) (Jul 2024).",
+      "evidence": [
+        "E-021"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Named Executive Officers 2024",
+      "metric": null,
+      "peer_context": "Employee Experience Enablement runs 1.84/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Named Executive Officers 2024: Anders M. Tomson (CEO), Dale M. McKim III (CFO), Loren D. Cole (EVP & CIO), Peter K. Cosgrove (EVP, CCO & CRO), Daniel D. Fariello (President, Capital Bank) (Jul 2024).",
+      "timeline": {
+        "date": "2024-07-01",
+        "event": "Named Executive Officers 2024"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Cross-Sell & Deepening at 1.64/5 is one of Chemung Canal Trust Company's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-012",
+        "E-013",
+        "E-087",
+        "E-088"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Cross-Sell & Deepening at 1.64/5 is one of Chemung Canal…",
+      "metric": null,
+      "peer_context": "Employee Experience Enablement runs 1.84/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Evaluation Criteria — highest-fit surface at 80/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Cross-Sell & Deepening at 1.64/5 is one of Chemung Canal Trust Company's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Data Stewardship Program at 1.64/5 is one of Chemung Canal Trust Company's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-103",
+        "E-105",
+        "E-106",
+        "E-107"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Data Stewardship Program is one of Chemung Canal Trust…",
+      "metric": null,
+      "peer_context": "Employee Experience Enablement runs 1.84/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Idea Evaluation Criteria — highest-fit surface at 80/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Data Stewardship Program at 1.64/5 is one of Chemung Canal Trust Company's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "active_run_id": "b64eea1a-e326-4169-8cf8-2c4ac99a3571",
+  "items": [
+    {
+      "assessment_date": null,
+      "assessment_date_source": null,
+      "ccg_catalog_version": "v7.0",
+      "completed_at": "2026-07-02T23:10:50.136514Z",
+      "created_at": "2026-07-02T23:10:50.136514Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "b64eea1a-e326-4169-8cf8-2c4ac99a3571",
+      "overall_score": 3.3609715242881073,
+      "request_id": "REQ-11C17F12",
+      "started_at": "2026-07-02T23:10:50.136514Z",
+      "status": "ACTIVE",
+      "subcap_count": 597,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

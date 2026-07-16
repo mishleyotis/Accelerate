@@ -1,0 +1,505 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "First United Bank",
+      "amount": "$12.5B",
+      "announced_on": null,
+      "body": "Acquired American Bank of Texas \u2014 doubled geographic footprint to 73 locations, $12.5B assets. Post-merger tech integration challenge; Salesforce needed to unify.",
+      "closed_on": null,
+      "details": "Acquired American Bank of Texas \u2014 doubled geographic footprint to 73 locations, $12.5B assets. Post-merger tech integration challenge; Salesforce needed to unify.",
+      "e_id": "E-009",
+      "event_date": "2016-01-01",
+      "id": "ab07e92e-7dc4-41db-bff3-77e29931f47d",
+      "source_url": null,
+      "status": "integrating",
+      "target": "American Bank of Texas",
+      "title": "Acquired American Bank of Texas \u2014 doubled geographic\u2026"
+    },
+    {
+      "acquirer": "First United Bank",
+      "amount": "$12.5B",
+      "announced_on": null,
+      "body": "Doubled geographic footprint to 73 locations and $12.5B assets. Major integration event. [E-009]",
+      "closed_on": null,
+      "details": "Doubled geographic footprint to 73 locations and $12.5B assets. Major integration event. [E-009]",
+      "e_id": "E-009",
+      "event_date": "2016-01-01",
+      "id": "699eb6be-986a-4de8-8a76-a589479cc03a",
+      "source_url": null,
+      "status": "integrating",
+      "target": "American Bank of Texas",
+      "title": "American Bank of Texas"
+    }
+  ],
+  "entity_display_id": "first-united-bank-0001",
+  "financials": {
+    "lines": [
+      "Trend Classification: STABLE | Asset CAGR (2016\u20132024): ~3.4% | Source: FDIC Call Reports (T1)",
+      "* Post-American Bank of Texas merger (2016). \u2020 Estimated from ~3.4% CAGR trajectory. \u2021 Private bank; NIM/Efficiency/ROA estimated from peer range (BancFirst NIM 3.5%, Prosperity NIM 3.3%). Full disclosure requires internal financial data."
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Arizona (Tucson-based",
+      "19 branches)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Tadd Tobkin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Greg Massey",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Arctic Wolf",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tim Schneider",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "First Bank",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kevin Georgetti",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Vision\tHIGH",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Maximum Score",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "First United Bank is a regional bank headquartered in Phoenix, AZ. It reports $16.3 billion in total assets and has operated since 1951. It is regulated by NCUA and employs approximately 1,001 people across 25 branches. Its overall digital maturity is assessed at 2.7 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "size_tier": "$1B-$10B (post-acquisition $4.3B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-413",
+        "excerpt": "Active social media presence: Facebook (firstunited1), Twitter (@firstunitedbank), Instagram (@first.united.bank with 1,238 followers), LinkedIn company page",
+        "title": "Active social media presence: Facebook (firstunited1), Twitter\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/firstunitedbank"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-414",
+        "excerpt": "Financial literacy educational resources available: online banking tutorials with step-by-step guides, regularly updated blog articles, newsletter subscription options, financial wellness content",
+        "title": "Financial literacy educational resources available: online banking\u2026",
+        "type": "blog",
+        "url": "https://www.firstunitedbank.com/spendlifewisely/financial-literacy-day-sparks-smart-financial-decisions"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-513",
+        "excerpt": "Financial education resources: Financial Education Center with articles/videos, personalized financial health scoring, retirement guidance content, emergency budget planning tools available",
+        "title": "Financial education resources: personalized financial health scoring\u2026",
+        "type": "article",
+        "url": "https://www.firstunitedbank.com/spendlifewisely/getting-right-track-retirement"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-701",
+        "excerpt": "First United Bank has deployed Cloud Services Engineer role with responsibilities including cloud infrastructure deployment, security, monitoring, disaster recovery, and SLA management",
+        "title": "First United Bank has deployed Cloud Services Engineer role",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/jacktneely_i-am-very-excited-to-announce-my-new-role-activity-7025815094513029121-Sxqw"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-910",
+        "excerpt": "First United Bank pioneered mass timber sustainable building using CLT panels with Southern Yellow Pine, achieving net-zero energy goals and demonstrating climate action strategy.",
+        "title": "First United Bank pioneered mass timber sustainable building using\u2026",
+        "type": "conference",
+        "url": "https://www.gensler.com/blog/mass-timber-first-united-bank-creating-a-sustainable-future"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "88fb7f3f-67f4-4a35-8325-785d745bdfd8",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Mixed mobile app reviews; not BBB accredited; WalletHub/BBB complaints about mortgage forbearance practices and customer service"
+    },
+    {
+      "id": "952b1db1-a4a3-41e4-9d53-02f92edfdf75",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "CDO role absent after exhaustive 10-tier proxy search; no Chief Data Officer identified publicly"
+    },
+    {
+      "id": "3a19a0ea-25cd-4906-9d5a-b1b4c5db5572",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "CISO role not publicly identified; cybersecurity leadership structure unclear"
+    },
+    {
+      "id": "21380d15-d1ee-4ca0-91c2-f5752f436e8d",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "PUBLIC evidence mode \u2014 415 of 698 subcaps have NO_EVIDENCE. Coverage ceiling for public assessment of private bank."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "assessment's scoring methodology:",
+    "trend_md": "Trend Classification: STABLE | Asset CAGR (2016\u20132024): ~3.4% | Source: FDIC Call Reports (T1). Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 3.5,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.85,
+      "peer_name": "Arvest Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.5,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.47,
+      "peer_name": "Prosperity Bancshares",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.0,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.38,
+      "peer_name": "BancFirst Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.0,
+        "P2C4": 2.0,
+        "P3C1": 2.0,
+        "P3C2": 2.0,
+        "P3C3": 2.0,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.0
+      },
+      "overall_score": 2.21,
+      "peer_name": "CrossFirst Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.0,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 2.5,
+        "P3C4": 2.0,
+        "P4C1": 2.0,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.06,
+      "peer_name": "Independent Bank Group",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-FUB-20260312-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Banks to Work For 9-year recognition streak (2025), 3.9/5 Glassdoor rating (305 reviews), 71% recommend employer, 4.1/5 work-life balance and culture scores Technology leadership: CTO Tadd Tobkin appointed to Salesforce Financial Services C",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 305,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.9
+      },
+      {
+        "drilldown": "nism: 'Tell Us What You Think' survey available on website, Trustpilot and WalletHub review platforms monitored, employee engagement survey (71% recommend employer) Complaint management: support for CFPB complaints, BBB rating tracking (Dur",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "mployer) Complaint management: support for CFPB complaints, BBB rating tracking (Durant OK location, not BBB accredited), customer complaint response processes, regulatory compliance reporting mechanisms Financial hardship support: loss mit",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "delays, fee issues, and poor customer service communication CFPB complaint volume: First United Bank receives relatively few CFPB complaints compared to national averages, indicating strong regulatory compliance Email marketing infrastructu",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "CTO Tadd Tobkin: ORBIE finalist + Google Cloud partnership + Salesforce FSC Advisory Board. Technology leadership recognition at national level.",
+      "date_precision": "year",
+      "e_id": "E-003",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-003",
+        "E-608",
+        "E-901"
+      ],
+      "id": "080af3ba-010e-4c23-9b2e-016b62116e43",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CTO Tadd Tobkin: Orbie finalist + Google Cloud partnership\u2026"
+    },
+    {
+      "body": "Banno mobile app refresh (4.5-star ratings iOS/Android). Digital Banking+ platform enhancements. Digital channel maturity improving. App accessibility issues flagged in reviews.",
+      "date_precision": "year",
+      "e_id": "E-500",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-500",
+        "E-505"
+      ],
+      "id": "1aa1fe2c-607c-4783-9cf1-83891f50b56c",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Banno mobile app refresh (4.5-star ratings iOS/Android)"
+    },
+    {
+      "body": "Gallup Exceptional Workplace Award (70% engagement). Creatio CRM platform with no-code architecture. Culture maturity validated externally. Creatio parallel to Salesforce \u2014 potential consolidation.",
+      "date_precision": "year",
+      "e_id": "E-908",
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-908",
+        "E-903"
+      ],
+      "id": "0a6ee1e3-ac34-483d-b56d-323eb510596c",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Gallup Exceptional Workplace Award (70% engagement)"
+    },
+    {
+      "body": "nCino LOS implementation for commercial and mortgage lending automation. Lending process digitization. Integration with Salesforce via MuleSoft.",
+      "date_precision": "year",
+      "e_id": "E-006",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "f6b7535f-98c5-457a-9528-2cd1c9c26ba4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "NCino LOS implementation for commercial and mortgage\u2026"
+    },
+    {
+      "body": "Salesforce ecosystem deployment: CRM, FSC, Service Cloud, Experience Cloud, Marketing Cloud, MuleSoft. Deep Salesforce investment signals strategic CRM commitment. Zennify optimization target.",
+      "date_precision": "year",
+      "e_id": "E-004",
+      "event_date": "2020-01-01",
+      "evidence_e_ids": [
+        "E-004",
+        "E-005",
+        "E-037"
+      ],
+      "id": "2bee8c2d-e3b7-4d2d-a59b-12bc352d2b21",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Salesforce ecosystem deployment: CRM, FSC, Service Cloud\u2026"
+    },
+    {
+      "body": "Acquired American Bank of Texas \u2014 doubled geographic footprint to 73 locations, $12.5B assets. Post-merger tech integration challenge; Salesforce needed to unify.",
+      "date_precision": "year",
+      "e_id": "E-009",
+      "event_date": "2016-01-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "ab07e92e-7dc4-41db-bff3-77e29931f47d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Acquired American Bank of Texas \u2014 doubled geographic\u2026"
+    },
+    {
+      "body": "Doubled geographic footprint to 73 locations and $12.5B assets. Major integration event. [E-009]",
+      "date_precision": "year",
+      "e_id": "E-009",
+      "event_date": "2016-01-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "699eb6be-986a-4de8-8a76-a589479cc03a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "American Bank of Texas"
+    }
+  ]
+}

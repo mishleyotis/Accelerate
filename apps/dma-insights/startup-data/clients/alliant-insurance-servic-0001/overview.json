@@ -1,0 +1,1390 @@
+{
+  "assumptions_register": [
+    {
+      "assumption": "Applied Epic is primary AMS across all retail",
+      "basis": "Tech stack + JDs [E-029, E-039]",
+      "confidence": "MEDIUM",
+      "id": "ASM-001",
+      "validation_method": "Confirm AMS by division"
+    },
+    {
+      "assumption": "Blue Sentinel SOC used internally by Alliant Insurance",
+      "basis": "Affiliate operates SOC [E-111]",
+      "confidence": "LOW",
+      "id": "ASM-002",
+      "validation_method": "Confirm internal security ops"
+    },
+    {
+      "assumption": "Snowflake actively deployed for analytics",
+      "basis": "Detected in tech stack [E-029]",
+      "confidence": "LOW",
+      "id": "ASM-003",
+      "validation_method": "Confirm data domains in Snowflake"
+    },
+    {
+      "assumption": "Informatica MDM actively deployed",
+      "basis": "Detected [E-029]",
+      "confidence": "LOW",
+      "id": "ASM-004",
+      "validation_method": "Confirm MDM modules and scope"
+    },
+    {
+      "assumption": "NVIDIA DGX A100 used for internal ML",
+      "basis": "Detected [E-029]",
+      "confidence": "LOW",
+      "id": "ASM-005",
+      "validation_method": "Confirm models running on DGX"
+    },
+    {
+      "assumption": "Salesforce FSC scope limited to EB only",
+      "basis": "RTM covers EB [INT-001]",
+      "confidence": "HIGH",
+      "id": "ASM-006",
+      "validation_method": "Confirm other BU SF plans"
+    },
+    {
+      "assumption": "Data quality issues extend beyond EB",
+      "basis": "EB pain points documented [INT-002]",
+      "confidence": "MEDIUM",
+      "id": "ASM-007",
+      "validation_method": "Interview other BU leaders"
+    },
+    {
+      "assumption": "No formal enterprise digital strategy exists",
+      "basis": "Not found in public search",
+      "confidence": "MEDIUM",
+      "id": "ASM-008",
+      "validation_method": "Request strategy document"
+    },
+    {
+      "assumption": "AI governance absent at enterprise level",
+      "basis": "Client workshop found [E-105]",
+      "confidence": "MEDIUM",
+      "id": "ASM-009",
+      "validation_method": "Confirm governance committee"
+    },
+    {
+      "assumption": "Carrier normalization gap affects all divisions",
+      "basis": "Confirmed for EB (Vertafore) [INT-002]",
+      "confidence": "MEDIUM",
+      "id": "ASM-010",
+      "validation_method": "Confirm across P&C, Specialty"
+    }
+  ],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 157,
+        "subcaps": 157,
+        "thin": 93
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 228,
+        "subcaps": 228,
+        "thin": 151
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 116,
+        "subcaps": 116,
+        "thin": 55
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 173,
+        "subcaps": 173,
+        "thin": 92
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "alliant-insurance-servic-0001",
+    "domain": null,
+    "hq": null,
+    "id": "2b0c311f-e23e-4539-8077-d24f8c77c377",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Alliant Insurance Services",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "IB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:09:46.924526Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 15,
+    "current_count": 95,
+    "dated_count": 3,
+    "median_age_months": 11.4,
+    "oldest_published_date": "2015-11-01",
+    "stale_count": 6,
+    "stale_pct": 5.04,
+    "total": 119,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "MIXED": 28,
+      "NEGATIVE": 8,
+      "NEUTRAL": 1,
+      "POSITIVE": 82
+    },
+    "connectors": {
+      "Clay": 1,
+      "Glassdoor": 1,
+      "Indeed": 3,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 12,
+      "NEUTRAL": 95,
+      "POSITIVE": 12
+    },
+    "tiers": {
+      "T1": 44,
+      "T2": 28,
+      "T3": 29,
+      "T4": 11,
+      "T5": 7
+    },
+    "total_facts": 1160,
+    "total_items": 119
+  },
+  "financial_trajectory": {
+    "cagr": "36.6%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        0.0,
+        0.0,
+        0.0,
+        0.01
+      ]
+    },
+    "trend": null,
+    "unit": "K"
+  },
+  "firmographics": {
+    "aum_basis": "premium_volume",
+    "aum_usd": 47000000000.0,
+    "cagr": "35%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "Acquisitions (#)": "6 (2024)",
+      "Employees": "14,000+ (2024)",
+      "Headcount Growth (%)": "15% YoY (2024)",
+      "Organic Growth (%)": "21.9% (2024)",
+      "Premium Placed ($B)": "47 (2024)",
+      "Revenue ($B)": "5.1 (2024)",
+      "Total Acquisitions (cumulative)": "59 (2024)",
+      "US Ranking": "#5 globally, #1 private (2024)",
+      "series": {
+        "2021": 2.0,
+        "2022": 3.0,
+        "2023": 4.0,
+        "2024": 5.1
+      },
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 14000,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Greg Zimmer appointed CEO"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024"
+        ],
+        "geography": "National (all 50 states) + 9 countries",
+        "headline": "$5.1B assets · FY2024 · +36.6% CAGR",
+        "regulator": "State Departments of Insurance (DOI)",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            2.0,
+            3.0,
+            4.0,
+            5.1
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "National (all 50 states) + 9 countries",
+    "footprint_basis": "derived:geography",
+    "founded": 1925,
+    "geography": "National (all 50 states) + 9 countries",
+    "headcount": 14000,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Greg Zimmer",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Thomas W. Corbett",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Executive Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ralph Hurst",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ilene Anders",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "Alliant Insurance Services",
+    "license_type": "State-licensed insurer",
+    "narrative_md": "Alliant Insurance Services, Inc. was founded in 1925 and rebranded in 2001. The firm operates as a PE-backed holding company controlled by Stone Point Capital and PSP Investments, with CEO Greg Zimmer (appointed April 2024, formerly of Lockton) leading the executive team [E-001, E-013]. The structure encompasses 10+ subsidiaries including Confie, Alliant Cyber, AUS, Imperium, and CSURMA [E-005, E-029]. Headquarters in Irvine, California with national presence across all 50 states and 9 countries [E-001, E-004].",
+    "primary_regulator": "State Departments of Insurance (DOI)",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 5100000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 540,
+          "scale": 5,
+          "score": 3.9,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.4,
+          "source": "Indeed"
+        },
+        {
+          "metric": "Overall",
+          "scale": 100,
+          "score": 25.0,
+          "source": "Comparably NPS"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 2.2,
+          "source": "Comparably Customer Svc"
+        },
+        {
+          "metric": "Overall",
+          "scale": 100,
+          "score": 9.0,
+          "source": "Comparably eNPS"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.2,
+          "source": "Comparably Company Culture"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.9/5",
+          "source": "Glassdoor",
+          "themes": "68% recommend",
+          "trend": "Stable",
+          "volume": "540 reviews"
+        },
+        {
+          "rating": "3.4/5",
+          "source": "Indeed",
+          "themes": "Culture 3.0, Mgmt 2.9, WLB 3.4, Comp 3.3",
+          "trend": "Stable",
+          "volume": "N/A"
+        },
+        {
+          "rating": "25",
+          "source": "Comparably NPS",
+          "themes": "50% Promoters, 25% Passives, 25% Detractors",
+          "trend": "Concern",
+          "volume": "N/A"
+        },
+        {
+          "rating": "2.2/5",
+          "source": "Comparably Customer Svc",
+          "themes": "Significantly below average",
+          "trend": "Concern",
+          "volume": "N/A"
+        },
+        {
+          "rating": "9",
+          "source": "Comparably eNPS",
+          "themes": "Very low employee advocacy",
+          "trend": "Concern",
+          "volume": "N/A"
+        },
+        {
+          "rating": "3.2/5",
+          "source": "Comparably Company Culture",
+          "themes": "Bottom 45% of similar-sized companies",
+          "trend": "Below avg",
+          "volume": "N/A"
+        },
+        {
+          "rating": "Best Large Employer 2026",
+          "source": "Forbes",
+          "themes": "Top employer recognition",
+          "trend": "Positive",
+          "volume": "National"
+        },
+        {
+          "rating": "Mixed",
+          "source": "WalletHub",
+          "themes": "Some positive, some fraud allegations",
+          "trend": "Volatile",
+          "volume": "14 reviews"
+        },
+        {
+          "rating": "Broker NPS avg: 36",
+          "source": "ClearlyRated (industry)",
+          "themes": "Alliant 11 points below",
+          "trend": "Benchmark",
+          "volume": "Industry benchmark"
+        },
+        {
+          "rating": "Average overall",
+          "source": "Indeed Wellbeing",
+          "themes": "Satisfaction: Above Avg, Learning: Above Avg, Stress: Below Avg",
+          "trend": "Mixed",
+          "volume": "N/A"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mega (>$50B premium placed)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-078",
+        "excerpt": "Alliant publishes structured Fraud & Controls Assessment methodology: fraud risk identification, control gap detection, remediation roadmap prioritization — thought leadership AND client-facing service Assessment covers:",
+        "title": "Alliant publishes structured Fraud & Controls Assessment methodology…",
+        "type": "article",
+        "url": "https://alliant.com/news-resources/article-how-to-reduce-fraud-risk-in-the-age-of-cyber-and-financial-threats/"
+      },
+      {
+        "author": null,
+        "date": "2023-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "Alliant Insurance Podcast: dedicated to insurance/risk management solutions and market trends — ranked in top 100 insurance podcasts Features senior leaders (Kevin Kenny EVP, Alex Littlejohn EVP) discussing market insigh",
+        "title": "Alliant Insurance Podcast: dedicated to insurance/risk management…",
+        "type": "podcast",
+        "url": "https://alliant.com/news-resources/podcast-insurance-market-insights-and-predictions-for-2023"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "alliant.com/news-resources: centralized content hub for press releases, articles, podcasts, reports — active content marketing Cyber newsletter: 'latest cyber trends, market updates, critical cyber risk & security consid",
+        "title": "Alliant.com/news-resources: centralized content hub for press…",
+        "type": "podcast",
+        "url": "https://alliant.com/news-resources/"
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-037",
+        "excerpt": "12-month rotational program for Class of 2026 undergraduates from RMI programs (St. John's etc.); starting Aug 2026 Three rotations across specialties and geographies with senior executive mentors; professional developme",
+        "title": "12-month rotational program for Class of 2026 undergraduates from RMI…",
+        "type": "conference",
+        "url": "https://alliant.com/about/why-alliant/rotational-associates-program/"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-061",
+        "excerpt": "CASE MANAGEMENT: ServiceNow CSM + Freshdesk — dual case management/ticketing platforms CONTACT CENTER: Five9 (cloud contact center), Cisco VoIP/Unified Communications, GoToMeeting/GoToWebinar — multi-channel assisted ser",
+        "title": "ServiceNow CSM + Freshdesk",
+        "type": "webinar",
+        "url": "https://alliant.com"
+      },
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-058",
+        "excerpt": "LinkedIn: 10,001+ employees listed; active posting of awards, acquisitions, thought leadership, culture content Facebook page active (AlliantInsuranceServices), Twitter/X presence, YouTube for podcasts/webinars",
+        "title": "LinkedIn: 10,001+ employees listed; active posting of awards…",
+        "type": "podcast",
+        "url": "https://www.linkedin.com/company/alliant-insurance-services/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "alliant.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.885273+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Alliant Insurance Services — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Peer set (locked): Hub International, Brown & Brown, Lockton, Acrisure, USI Insurance Services. Scored at category level. Medians used for gap analysis.",
+    "gap_prioritization_md": "Priority scores computed using 6 factors: Business Impact, Risk, Competitive Gap, Effort Inverse, Quick Win potential, Trend direction. P2 categories receive additional weight due to 35% SV7 Weighting.",
+    "page_number": null,
+    "scqa_heading": "Assessment Report Synthesis — Alliant Insurance Services",
+    "scqa_md": "Alliant Insurance Services is a $47.0B in annual premium insurance broker regulated by State Departments of Insurance (DOI), operating since 1925 with 14,000 employees. A 35.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-048, E-016]. Zennify's assessment places overall digital maturity at 3.1/5. The deepest capability gap is Agile Governance at 2.2/5 against a 3.0 peer median [E-003, E-012]. Next is Loyalty Program Design at 2.2/5 against a 2.5 peer median [E-020, E-053].\n\nThird is Financial Distress Early Warning at 2.4/5 against a 3.0 peer median [E-052]. The issue register adds MMA poaching lawsuit — TRO issued Jan 2025, 16 clients moved (high severity). The issue register adds WalletHub VP fraud allegation — illusory policy claim (high severity). Counter-signal: Cybersecurity Strategy & Program already runs at 4.4/5 against a 3.0 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for Alliant Insurance Services is whether to close Agile Governance first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Alliant Insurance Services should lead with nCino (85/100 fit) against Strategy Refresh Cadence, then sequence Twilio behind it. Closing Agile Governance to the peer median alone is worth 0.8 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"5 AI Models in Production Without Governance Framework — QUBIE (ML+CV underwriting), NVIDIA DGX A100 hardware, SAS Viya, Alliant Analytics proprietary platfo…\"."
+  },
+  "overall_score": 3.1,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/internal_rtm_extract.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.854961+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.855314+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/safeguard_gates.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.855623+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sv7_taxonomy_p1p2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.873476+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sv7_taxonomy_p3p4.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.875294+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/04_rollups.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.875897+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.876388+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/research_report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.879697+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/scqa.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.880144+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.882238+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.882481+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/analysis_output.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.882795+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/phase_0_3_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.883114+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/phase_5_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.883319+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/phase_7_complete.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.883698+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/phase_7a_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.883882+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_coverage_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 142 generic sections mined",
+        "recorded_at": "2026-07-02T23:09:46.886515+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 2,
+      "INFO": 31
+    },
+    "stage_ms": {
+      "manifest": 18,
+      "parse": 6828,
+      "persist": 1302
+    },
+    "structured": [
+      {
+        "code": "synthesized run_manifest from handoff",
+        "detail": "synthesized run_manifest from handoff: source=research_handoff.json, run_id=DMA-RES-ALLI-20260331-0001, institution_name=Alliant Insurance Services",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 03_scoring_workbook/export_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "assumptions_register",
+        "detail": "assumptions_register: 10 entry(ies) parsed from 08_appendices/A8_assumptions_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 04_reports/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 42 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['legal_name'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client_Profile_Alliant_Insurance_20260331.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=27 subcaps=22 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_trends_csv",
+        "detail": "financial_highlights_from_trends_csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 10 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 2 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_healed",
+        "detail": "firmographics_leadership_healed: count=4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/internal_rtm_extract.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/safeguard_gates.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sv7_taxonomy_p1p2.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sv7_taxonomy_p3p4.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/04_rollups.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/research_report_analysis.json — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/scqa.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/README.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/analysis_output.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/phase_0_3_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/phase_5_complete.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/phase_7_complete.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/phase_7a_checkpoint.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_coverage_map.csv — no fingerprint matched (best confidence 0.00); 142 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 23",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:27/701 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 14",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "synthesized run_manifest from handoff: source=research_handoff.json, run_id=DMA-RES-ALLI-20260331-0001, institution_name=Alliant Insurance Services",
+      "used variant issue register: 03_scoring_workbook/export_issue_register.csv",
+      "assumptions_register: 10 entry(ies) parsed from 08_appendices/A8_assumptions_register.csv",
+      "used variant recommendations source: 04_reports/recommendations.json",
+      "tech_stack_from_variant_source: 42 entries",
+      "firmographics_from_entity_profile_json: fields=['legal_name'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=Client_Profile_Alliant_Insurance_20260331.docx count=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=27 subcaps=22 replaced_docx_scqa=True",
+      "financial_highlights_from_trends_csv",
+      "sentiment_from_csv: 10 sources",
+      "insights_from_client_profile_findings: 10",
+      "acquisitions_from_client_profile_docx: 2 events",
+      "firmographics_leadership_healed: count=4",
+      "INFO/pattern_gap: 01_evidence/internal_rtm_extract.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/safeguard_gates.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sv7_taxonomy_p1p2.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sv7_taxonomy_p3p4.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/04_rollups.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 04_reports/research_report_analysis.json — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 04_reports/scqa.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/README.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/analysis_output.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/phase_0_3_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/phase_5_complete.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/phase_7_complete.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/phase_7a_checkpoint.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_coverage_map.csv — no fingerprint matched (best confidence 0.00); 142 generic sections mined",
+      "timeline_events_persisted: 23",
+      "catalogue_unresolved:27/701 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 14"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 157,
+      "peer_median": 2.88,
+      "pillar_id": "P1",
+      "score": 2.75,
+      "subcaps_scored": 157
+    },
+    {
+      "peer_benchmarked": 228,
+      "peer_median": 2.89,
+      "pillar_id": "P2",
+      "score": 2.72,
+      "subcaps_scored": 228
+    },
+    {
+      "peer_benchmarked": 116,
+      "peer_median": 2.75,
+      "pillar_id": "P3",
+      "score": 3.77,
+      "subcaps_scored": 116
+    },
+    {
+      "peer_benchmarked": 173,
+      "peer_median": 2.73,
+      "pillar_id": "P4",
+      "score": 3.14,
+      "subcaps_scored": 173
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-31",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:09:46.924526Z",
+    "created_at": "2026-07-02T23:09:46.924526Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "hybrid",
+    "id": "26c281e9-741c-43b1-b934-9941b85c4572",
+    "overall_score": null,
+    "request_id": "DMA-RES-ALLI-20260331-0001",
+    "started_at": "2026-07-02T23:09:46.924526Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": null,
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 540,
+        "scale": 5,
+        "score": 3.9,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.4,
+        "source": "Indeed"
+      },
+      {
+        "metric": "Overall",
+        "scale": 100,
+        "score": 25.0,
+        "source": "Comparably NPS"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 2.2,
+        "source": "Comparably Customer Svc"
+      },
+      {
+        "metric": "Overall",
+        "scale": 100,
+        "score": 9.0,
+        "source": "Comparably eNPS"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.2,
+        "source": "Comparably Company Culture"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Innovation Engine — QUBIE, ALPS, 123OCP Demonstrate Pro — QUBIE: ML+CV auto-underwriting for residential RE (PropTech Innovation 2023). ALPS: first-of-kind Lo... — P3C1 STP and P2C2 Product Innovation show L3.5-L4.0. Alliant innovates fast... — Salesforce Platform as the foundation for next-gen products. Einstein for AI-powered underwriting. H.",
+      "evidence": [
+        "E-003",
+        "E-012",
+        "E-013",
+        "E-014"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Innovation Engine",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.17,
+      "so_what": "Prioritize Innovation Engine in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C2",
+      "theme": "Strategy & governance",
+      "title": "Innovation Engine",
+      "what": "Innovation Engine — QUBIE, ALPS, 123OCP Demonstrate Pro — QUBIE: ML+CV auto-underwriting for residential RE (PropTech Innovation 2023). ALPS: first-of-kind Lo... — P3C1 STP and P2C2 Product Innovation show L3.5-L4.0. Alliant innovates fast... — Salesforce Platform as the foundation for next-gen products. Einstein for AI-powered underwriting. H.",
+      "why": "The linked evidence records: Greg Zimmer appointed CEO effective April 2024; joined 1998 as CFO, president since 2007 Tom Corbett transitioned to Executive Chairman after 30+ years as CEO"
+    },
+    {
+      "body": "Data Quality Crisis Confirmed — 'Incomplete Data Is a H — Internal RTM documents 26 BenefitPoint pain points. Client names overwritable by end users (no field... — P4C1 Data Governance ceiling LOWERED by internal evidence: L1.5 ±0.3 for Da... — Data Cloud + validation rules + duplicate management + field-level security. The 26 pain points ARE.",
+      "evidence": [
+        "E-095",
+        "E-103",
+        "E-007",
+        "E-008"
+      ],
+      "magnitude": "0.1 pts below peer median",
+      "name": "Data Quality Crisis Confirmed",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.41,
+      "so_what": "Prioritize Data Quality Crisis Confirmed in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Data Quality Crisis Confirmed",
+      "what": "Data Quality Crisis Confirmed — 'Incomplete Data Is a H — Internal RTM documents 26 BenefitPoint pain points. Client names overwritable by end users (no field... — P4C1 Data Governance ceiling LOWERED by internal evidence: L1.5 ±0.3 for Da... — Data Cloud + validation rules + duplicate management + field-level security. The 26 pain points ARE.",
+      "why": "The linked evidence records: DATA GOVERNANCE TOOLS (E-029): Informatica MDM + DQ (master data management + data quality), SAS Data Management, Profisee MDM, Census (data sync) — enterprise-grade data governance tooling across 4 platforms DATA WAREHOUSE/LAKE:"
+    },
+    {
+      "body": "5 AI Models in Production Without Governance Framework — QUBIE (ML+CV underwriting), NVIDIA DGX A100 hardware, SAS Viya, Alliant Analytics proprietary platfo... — Innovation outpaces governance. P4C2 AI/Advanced Analytics shows L3+ for pr... — Einstein AI Platform for governed model deployment. Agentforce for GenAI (greenfield). AI governance.",
+      "evidence": [
+        "E-095",
+        "E-103",
+        "E-007",
+        "E-008"
+      ],
+      "magnitude": "0.1 pts below peer median",
+      "name": "5 AI Models in Production",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.41,
+      "so_what": "Prioritize 5 AI Models in Production in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "5 AI Models in Production",
+      "what": "5 AI Models in Production Without Governance Framework — QUBIE (ML+CV underwriting), NVIDIA DGX A100 hardware, SAS Viya, Alliant Analytics proprietary platfo... — Innovation outpaces governance. P4C2 AI/Advanced Analytics shows L3+ for pr... — Einstein AI Platform for governed model deployment. Agentforce for GenAI (greenfield). AI governance.",
+      "why": "The linked evidence records: DATA GOVERNANCE TOOLS (E-029): Informatica MDM + DQ (master data management + data quality), SAS Data Management, Profisee MDM, Census (data sync) — enterprise-grade data governance tooling across 4 platforms DATA WAREHOUSE/LAKE:"
+    },
+    {
+      "body": "Aggressive Growth Platform — #5 Global Broker With M&A — Alliant grew from ~$2B to $5.1B revenue in 3 years through 59 acquisitions and 21.9% organic growth,... — Growth outpaces integration — 200+ tech tools, dual AMS, 4 MDM platforms, 7... — Platform consolidation is the #1 opportunity. Salesforce as unifying CRM across all 8 business units.",
+      "evidence": [
+        "E-095",
+        "E-103",
+        "E-007",
+        "E-008"
+      ],
+      "magnitude": "$2B",
+      "name": "Aggressive Growth Platform",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.41,
+      "so_what": "Prioritize Aggressive Growth Platform in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Aggressive Growth Platform",
+      "what": "Aggressive Growth Platform — #5 Global Broker With M&A — Alliant grew from ~$2B to $5.1B revenue in 3 years through 59 acquisitions and 21.9% organic growth,... — Growth outpaces integration — 200+ tech tools, dual AMS, 4 MDM platforms, 7... — Platform consolidation is the #1 opportunity. Salesforce as unifying CRM across all 8 business units.",
+      "why": "The linked evidence records: DATA GOVERNANCE TOOLS (E-029): Informatica MDM + DQ (master data management + data quality), SAS Data Management, Profisee MDM, Census (data sync) — enterprise-grade data governance tooling across 4 platforms DATA WAREHOUSE/LAKE:"
+    },
+    {
+      "body": "EXISTING Zennify Client — Employee Benefits Salesforce — Alliant Employee Benefits has a live Salesforce implementation ('Client Central') with Zennify — FSC... — Salesforce maturity higher than public evidence showed for EB division. Exp... — CRITICAL: Not a prospect — an existing client. EB success story becomes the proof point for enterpri.",
+      "evidence": [
+        "E-003",
+        "E-012",
+        "E-013",
+        "E-014"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "EXISTING Zennify Client",
+      "peer_median": 3.0,
+      "platforms": [
+        "nCino",
+        "Twilio"
+      ],
+      "score": 2.17,
+      "so_what": "Prioritize EXISTING Zennify Client in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C2",
+      "theme": "Strategy & governance",
+      "title": "EXISTING Zennify Client",
+      "what": "EXISTING Zennify Client — Employee Benefits Salesforce — Alliant Employee Benefits has a live Salesforce implementation ('Client Central') with Zennify — FSC... — Salesforce maturity higher than public evidence showed for EB division. Exp... — CRITICAL: Not a prospect — an existing client. EB success story becomes the proof point for enterpri.",
+      "why": "The linked evidence records: Greg Zimmer appointed CEO effective April 2024; joined 1998 as CFO, president since 2007 Tom Corbett transitioned to Executive Chairman after 30+ years as CEO"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.5,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-018"
+      ],
+      "modifiers": [
+        "91 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Business Outcome Linkage averages 2.8/5 over 166 scored subcaps; ceiling 3.5 reflects thin evidence density (75/166 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-017"
+      ],
+      "modifiers": [
+        "cap M3 applied: Issue cap 3.0 (P1C2)",
+        "151 of 216 subcaps on thin evidence"
+      ],
+      "rationale": "Agile Governance averages 2.2/5 over 216 scored subcaps; ceiling 2.8 reflects the binding cap (cap M3 applied: Issue cap 3.0 (P1C2)); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.5,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "95 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Innovation Themes averages 2.5/5 over 190 scored subcaps; ceiling 3.2 reflects thin evidence density (95/190 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.5,
+      "ceiling": 4.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-035"
+      ],
+      "modifiers": [
+        "120 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Champion Recognition averages 3.7/5 over 205 scored subcaps; ceiling 4.4 reflects thin evidence density (85/205 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "187 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Producer Marketing Support averages 3.5/5 over 287 scored subcaps; ceiling 4.2 reflects thin evidence density (100/287 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-060"
+      ],
+      "modifiers": [
+        "237 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Product Fit Assessment averages 2.8/5 over 287 scored subcaps; ceiling 3.4 reflects thin evidence density (50/287 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Issue cap 2.5 (P2C3)",
+        "106 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Financial Distress Early Warning averages 2.4/5 over 286 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Issue cap 2.5 (P2C3)); band ±0.4 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-053"
+      ],
+      "modifiers": [
+        "201 of 256 subcaps on thin evidence"
+      ],
+      "rationale": "Loyalty Program Design averages 2.2/5 over 256 scored subcaps; ceiling 2.8 reflects thin evidence density (55/256 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.5,
+      "ceiling": 4.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "INT-003"
+      ],
+      "modifiers": [
+        "58 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Automation Vision & Strategy averages 3.9/5 over 143 scored subcaps; ceiling 4.7 reflects thin evidence density (85/143 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.4,
+      "ceiling": 5.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-078"
+      ],
+      "modifiers": [
+        "17 of 132 subcaps on thin evidence"
+      ],
+      "rationale": "Application Fraud Prevention averages 4.2/5 over 132 scored subcaps; ceiling 5.0 reflects thin evidence density (115/132 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.5,
+      "ceiling": 4.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-093"
+      ],
+      "modifiers": [
+        "85 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Regulatory Reporting averages 3.4/5 over 140 scored subcaps; ceiling 4.1 reflects thin evidence density (55/140 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 4.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-090"
+      ],
+      "modifiers": [
+        "95 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Contract Management averages 3.8/5 over 145 scored subcaps; ceiling 4.4 reflects thin evidence density (50/145 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.6,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "INT-002"
+      ],
+      "modifiers": [
+        "cap M2.5 applied: Issue cap 2.5 (P4C1)",
+        "131 of 201 subcaps on thin evidence"
+      ],
+      "rationale": "Data Products & Data as a Product averages 2.4/5 over 201 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Issue cap 2.5 (P4C1)); band ±0.6 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.4,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-094"
+      ],
+      "modifiers": [
+        "cap M3 applied: Issue cap 3.0 (P4C2)",
+        "65 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Agent Control Plane & Action Governance averages 2.6/5 over 270 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: Issue cap 3.0 (P4C2)); band ±0.4 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.6,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "INT-001"
+      ],
+      "modifiers": [
+        "156 of 236 subcaps on thin evidence"
+      ],
+      "rationale": "Technology Roadmap & Investment Planning averages 3.5/5 over 236 scored subcaps; ceiling 4.2 reflects thin evidence density (80/236 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 5.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-112"
+      ],
+      "modifiers": [
+        "100 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Cybersecurity Strategy & Program averages 4.4/5 over 150 scored subcaps; ceiling 5.0 reflects thin evidence density (50/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Named Forbes America's Best Employers 2026. Named Forbes America's Best Employers 2026 (Jul 2026).",
+      "evidence": [
+        "E-002"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Named Forbes America's Best Employers 2026",
+      "metric": null,
+      "peer_context": "Agile Governance runs 2.17/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategy Refresh Cadence — highest-fit surface at 85/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Named Forbes America's Best Employers 2026. Named Forbes America's Best Employers 2026 (Jul 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "Named Forbes America's Best Employers 2026"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Sodalis already launched cyber/tech E&O brokerage (Mar 2026) — rapid execution from platform",
+      "evidence": [
+        "E-046"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Sodalis launched cyber/tech E&O brokerage (Mar 2026)…",
+      "metric": null,
+      "peer_context": "Agile Governance runs 2.17/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategy Refresh Cadence — highest-fit surface at 85/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Sodalis already launched cyber/tech E&O brokerage (Mar 2026) — rapid execution from platform. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Sodalis launched cyber/tech E&O brokerage (Mar 2026)…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Actively hiring Senior Salesforce Developer (posted Mar 30, 2026), $120-150K, remote — confirms ongoing Salesforce investment Role at SMS (Senior Market Sales) — Alliant subsidiary IMO operating in all 50 states",
+      "evidence": [
+        "E-039"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Actively hiring Senior Salesforce Developer",
+      "metric": "Mar $120",
+      "peer_context": "Agile Governance runs 2.17/5 vs a 3.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Actively hiring Senior Salesforce Developer (posted Mar 30, 2026), $120-150K, remote — confirms ongoing Salesforce investment Role at SMS (Senior Market Sales) — Alliant subsidiary IMO operating in all 50 states. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "NOTE: Multiple overlapping platforms (6 marketing automation tools, 2 CRMs, multiple CMSs) signals M&A integration debt — acquired companies brought their own stacks (Mar 2026).",
+      "evidence": [
+        "E-056"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Multiple overlapping platforms",
+      "metric": null,
+      "peer_context": "Agile Governance runs 2.17/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategy Refresh Cadence — highest-fit surface at 85/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "NOTE: Multiple overlapping platforms (6 marketing automation tools, 2 CRMs, multiple CMSs) signals M&A integration debt — acquired companies brought their own stacks (Mar 2026). Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Multiple overlapping platforms"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "M&A VENDOR DUE DILIGENCE: Internal audit performs controls assessment of acquired companies (E-077) — M&A due diligence serves as TPRM proxy for acquisition targets (Mar 2026).",
+      "evidence": [
+        "E-091",
+        "E-077"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "M&A due diligence serves as TPRM proxy for acquisition…",
+      "metric": null,
+      "peer_context": "Agile Governance runs 2.17/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategy Refresh Cadence — highest-fit surface at 85/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "M&A VENDOR DUE DILIGENCE: Internal audit performs controls assessment of acquired companies (E-077) — M&A due diligence serves as TPRM proxy for acquisition targets (Mar 2026). Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "M&A due diligence serves as TPRM proxy for acquisition…"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Agile Governance scores 2.17/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-003",
+        "E-012",
+        "E-013",
+        "E-014"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Agile Governance scores 2.17/5",
+      "metric": "Agile Governance 2.17/5 vs peer 3.00",
+      "peer_context": "Agile Governance runs 2.17/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Strategy Refresh Cadence — highest-fit surface at 85/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C2",
+      "text": "Agile Governance scores 2.17/5 vs a typical 3.00 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "entity_display_id": "1st-security-bank-of-was-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-049",
+          "E-067",
+          "E-068"
+        ],
+        "representative_quote": "[EVIDENCE]: E-049 provides limited signal for Enterprise Data Catalog & Discovery.",
+        "source_kind": "heuristic"
+      },
+      "id": "d89f1b33-aa74-4791-ac54-55f2f6bb8e4b",
+      "involved_subcap_ids": [
+        "P4C1.5.1",
+        "P4C1.6.1",
+        "P4C2.6.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 3 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-001"
+        ],
+        "representative_quote": "[EVIDENCE]: No direct evidence found for Audience Segmentation at 1st Security Bank.",
+        "source_kind": "heuristic"
+      },
+      "id": "1e974604-b11d-44ff-b00c-12d4cd6f0ad2",
+      "involved_subcap_ids": [
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C1.1.5",
+        "P2C1.1.6",
+        "P2C1.1.RB1"
+      ],
+      "kpis": [
+        {
+          "current_value": "27",
+          "delta": null,
+          "kpi_label": "Branches",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 6 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-004",
+          "E-012",
+          "E-020"
+        ],
+        "representative_quote": "[EVIDENCE]: E-004 and E-012 address Idea Sourcing Channels (2 items total).",
+        "source_kind": "heuristic"
+      },
+      "id": "97edc7fb-9252-42dc-9aaa-9fcb1578c556",
+      "involved_subcap_ids": [
+        "P1C3.2.1",
+        "P1C3.3.2",
+        "P1C3.4.1",
+        "P1C3.6.1",
+        "P1C3.8.1",
+        "P1C3.9.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 15 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

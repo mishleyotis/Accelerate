@@ -1,0 +1,208 @@
+{
+  "entity_display_id": "royal-business-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "ITSC": "8x",
+        "LinkedIn": "+23%",
+        "Zero CRM across $": "4.2B",
+        "outcome $": "712.7M"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "Zero CRM across $4.2B",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": null,
+          "metric": "Zero CRM across $4.2B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Zero CRM across $4.2B",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Unified Relationship Platform"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.41",
+          "metric": "LinkedIn +23%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "LinkedIn +23%",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Digital Marketing & Lead Capture Engine"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": null,
+          "metric": "outcome $712.7M",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome $712.7M",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-03",
+          "title": "Digital Loan Origination Platform"
+        },
+        {
+          "feature": "CRM Analytics",
+          "maturity_lift": null,
+          "metric": "ITSC 8x",
+          "outcomes": {
+            "effort": "L",
+            "metric": "ITSC 8x",
+            "peer": "BI",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Modern Analytics Platform"
+        }
+      ],
+      "target": null
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C3 score 1.95 \u2192 4.0 (peer median 2.50)",
+        "outcome": "60%",
+        "outcome $": "2.25B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C3 score 1.95 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.05",
+          "metric": "P4C3 score 1.95 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C3 score 1.95 \u2192 4.0 (peer median 2.50)",
+            "peer": "RBB 2",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-05",
+          "title": "Integration Orchestration Layer"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+2.41",
+          "metric": "outcome $2.25B",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome $2.25B",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Customer Data Platform"
+        },
+        {
+          "feature": "Service Cloud",
+          "maturity_lift": "+2.41",
+          "metric": "outcome 60%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "outcome 60%",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Omnichannel Service Modernization"
+        },
+        {
+          "feature": "Agentforce",
+          "maturity_lift": "+2.66",
+          "metric": "P4C2 score 1.34 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C2 score 1.34 \u2192 4.0 (peer median 2.00)",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-08",
+          "title": "AI-Powered Intelligence Layer"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P4C2, P4C3"
+    },
+    {
+      "customer_impact": {
+        "CRA Committee": "4x",
+        "consent order resolved": "10 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "consent order resolved 10 months",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+2.41",
+          "metric": "consent order resolved 10 months",
+          "outcomes": {
+            "effort": "M",
+            "metric": "consent order resolved 10 months",
+            "peer": "RBB 2",
+            "time": "10 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-09",
+          "title": "Compliance Automation Extension"
+        },
+        {
+          "feature": null,
+          "maturity_lift": null,
+          "metric": "CRA Committee 4x",
+          "outcomes": {
+            "effort": "L",
+            "metric": "CRA Committee 4x",
+            "peer": "RBB 1",
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-10",
+          "title": "Community Impact Measurement [CLIENT/ZENNIFY]"
+        }
+      ],
+      "target": null
+    }
+  ],
+  "run_request_id": "DMA-RES-RBB-20260413-0001",
+  "total_duration_months": 12
+}

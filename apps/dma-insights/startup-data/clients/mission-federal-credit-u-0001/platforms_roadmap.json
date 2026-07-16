@@ -1,0 +1,157 @@
+{
+  "entity_display_id": "mission-federal-credit-u-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 2.33 \u2192 4.0 (peer median 2.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 2.33 \u2192 4.0 (peer median 2.25)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.67",
+          "metric": "P2C4 score 2.33 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.33 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Implement Salesforce Financial Services Cloud as Unified Member CRM"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.43",
+          "metric": "P4C3 score 2.57 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C3 score 2.57 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Deploy MuleSoft Anypoint for API-Led Integration Architecture"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.52",
+          "metric": "P4C1 score 2.48 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.48 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Unify Member Data with Salesforce Data Cloud"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C4, P4C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C1 score 2.30 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C1 score 2.30 \u2192 4.0 (peer median 2.50)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.7",
+          "metric": "P2C1 score 2.30 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C1 score 2.30 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Replace HubSpot with Marketing Cloud for Member-Aware Journeys"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.42",
+          "metric": "P4C2 score 2.58 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.58 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-04",
+          "title": "Activate AI Member Service with Einstein AI + Agentforce"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.42",
+          "metric": "P4C2 score 2.58 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.58 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-06",
+          "title": "Consolidate BI Analytics with Tableau"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C1, P4C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 2.48 \u2192 4.0 (peer median 2.25)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C1 score 2.48 \u2192 4.0 (peer median 2.25)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.52",
+          "metric": "P4C1 score 2.48 \u2192 4.0 (peer median 2.25)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 2.48 \u2192 4.0 (peer median 2.25)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Deepen Slack Integration with Salesforce for Service Swarming"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P4C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-MFCU-20260412-0001",
+  "total_duration_months": 12
+}

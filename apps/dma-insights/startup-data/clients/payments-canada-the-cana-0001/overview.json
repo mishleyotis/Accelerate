@@ -1,0 +1,968 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 182,
+        "subcaps": 182,
+        "thin": 182
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 222,
+        "subcaps": 222,
+        "thin": 222
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 111,
+        "subcaps": 111,
+        "thin": 111
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "payments-canada-the-cana-0001",
+    "domain": null,
+    "hq": null,
+    "id": "1cf0083f-dbfc-49e5-9c9b-fce47d5568a0",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Payments Canada (The Canadian Payments Association)",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CIB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:46.488109Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 1,
+    "current_count": 5,
+    "dated_count": 0,
+    "median_age_months": 7.2,
+    "oldest_published_date": "2025-01-08",
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 7,
+    "undated_count": 1
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 7
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 4,
+      "POSITIVE": 3
+    },
+    "tiers": {
+      "T2": 6,
+      "T3": 1
+    },
+    "total_facts": 21,
+    "total_items": 7
+  },
+  "financial_trajectory": {
+    "cagr": "5.9%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "ACSS Volume CAGR 2021→2025: +5.9%/year | ACSS Value CAGR: +4.5%/year | Trend: STABLE-GROWING",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": null,
+    "cagr": "5.9%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "cheques": "27% (secular decline) | AFT credits +14% |",
+      "lines": [
+        "ACSS Volume CAGR 2021→2025: +5.9%/year | ACSS Value CAGR: +4.5%/year | Trend: STABLE-GROWING",
+        "Sub-trends: POS debits +36% (5yr, fastest growing) | Online transfers +175% volume (5yr) | Cheques -27% (secular decline) | AFT credits +14% | EDI +20%",
+        "STABLE-GROWING trajectory with POS acceleration and cheque secular decline.",
+        "ACSS Volume CAGR (2021→2025): +5.9%/year; ACSS Value CAGR: +4.5%/year",
+        "POS debits: +36% (5yr) — ACCELERATING; Mobile contactless +28% YoY to 3.4B transactions",
+        "Online transfers: +175% volume, +219% value (5yr) — fastest growing ACSS category",
+        "Cheques: -27% volume (5yr) — secular DECLINING; MICR processing standard remains",
+        "Revenue model: Member-funded (dues, voting rights, direct clearer fees); supplemental from PFVS subscriptions + API access",
+        "Member investment: 93% of Canadian FIs have payments modernization programs; $19.4M average institution investment [E-222]"
+      ],
+      "member_investment": "93% of Canadian FIs have payments moderniz",
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 320,
+        "events": [],
+        "fy": [
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "Canada — National (federal jurisdiction)",
+        "headline": "$103.0T assets · FY2025 · +1.2% CAGR",
+        "regulator": "Bank of Canada / OSFI",
+        "series": {
+          "net_income_m": [
+            8420.0,
+            9110.0,
+            9840.0,
+            10300.0,
+            10610.0
+          ],
+          "total_assets": [
+            98000.0,
+            100000.0,
+            102000.0,
+            107000.0,
+            103000.0
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "Canada — National (federal jurisdiction)",
+    "footprint_basis": "derived:geography",
+    "geography": "Canada — National (federal jurisdiction)",
+    "headcount": 320,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Susan Hawkins",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Jude Pinto",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Delivery Officer (CDO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Donna Kinoshita",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Payments Officer (CPO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lisa Ford",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Legal & Privacy Officer (CLPO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kristina Logue",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jon Purther",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director, Research"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kevan Cowan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Board Chair-elect (June 17, 2026)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Garry Foster",
+        "recent_hire": true,
+        "tenure": null,
+        "tenure_months": 0,
+        "title": "Board Chair (outgoing June 2026)"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "Payments Canada (The Canadian Payments Association)",
+    "license_type": "Federally regulated financial institution (OSFI, Canada)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Payments Canada (The Canadian Payments Association) is a corporate & investment bank. It reports $103.00 trillion in total assets. It is regulated by Bank of Canada / OSFI and employs approximately 320 people. Its overall digital maturity is assessed at 3.0 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Bank of Canada / OSFI",
+    "regulator_basis": "inferred:subvertical",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "research_report_prose",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.9,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.9,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.9/5",
+          "signal": "Culture & Change (3.02): Glassdoor 4.9/5 with 100% CEO approval",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "4.9/5",
+          "signal": "(3.02): Glassdoor 4.9/5 with 100% CEO approval; Indeed 4.2/5",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mega",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-234",
+        "excerpt": "SUMMIT 2026 theme: 'Accelerate Economic Growth'. 320+ organizations, 2,000+ delegates. 6 content streams: NEW 'Accelerated payments' + Connected, Data-powered, Digital, Risk resilience, Customer experience. BoC Supervisi",
+        "title": "Summit 2026 theme: 'Accelerate Economic Growth'",
+        "type": "conference",
+        "url": null
+      },
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-240",
+        "excerpt": "Payments Canada is ISO 20022 knowledge leader for Canada. Governance: ISO 20022 Task Force (technical experts from FIs) → Senior Operational Committee → Payments Canada Board final approval. Manages Canadian ISO 20022 us",
+        "title": "Payments Canada is ISO 20022 knowledge leader for Canada",
+        "type": "conference",
+        "url": null
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "payments.ca",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v2.4",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.139158+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Payments Canada (The Canadian Payments Association) — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "1.1 SCQA Context",
+    "scqa_md": "Situation:\nPayments Canada — Canada's singular national clearing and settlement authority — is Canada's federally mandated Financial Market Infrastructure (FMI), operating under the Canadian Payments Act since 1980. It owns and operates Lynx (RTGS, $386B daily average, 16 direct participants ), the Automated Clearing Settlement System (ACSS, 10.61B items annually at $10.0T ), and the forthcoming Real-Time Rail (RTR), targeting Phase 1 launch in Q4 2026. With approximately 320 full-time employees, a public-purpose non-profit mandate, and 111 member financial institutions plus a growing PSP cohort — Wise, Float, KOHO, Meridian Credit Union (first credit union) — Payments Canada processes $103 trillion annually [E-236, E-237].\n\nComplication:\nDespite world-class technical infrastructure maturity (P4C3 Technology Architecture 3.53, M4 Advanced — the assessment's sole above-3.5 category, anchored by 100% ISO 20022 MX Lynx adoption November 2025 [E-238], GCP production, and IBM/CGI/Interac delivery ecosystem ), Payments Canada scores 3.12 overall (level 3 Established). The critical complication is three-dimensional: Core Process Automation scores 3.21 (-0.59 vs. peer median of 3.8) because IBM Canada externalized the automation CoE function, leaving RTR launching into a 24/7/365 environment with no internal workflow automation infrastructure; four Bank of Canada supervisory critical findings formally cap (≤2.0) and (≤2.5); and Salesforce is confirmed absent from all 40 validated technology signals while 1,800 PSPs are pre-registered with the Bank of Canada for RTR access.\n\nQuestion:\nHow can Payments Canada successfully launch RTR Phase 1 in Q4 2026, remediate four active BoC critical governance findings under an incoming Risk-Committee-Chair-turned-Board-Chair, and scale PSP onboarding from 111 legacy members to 1,800+ entities — without the CRM, case management, compliance automation, and data intelligence infrastructure that these functions require at national scale? Answer:\nA three-phase Salesforce-powered transformation (Phase 1: Q3-Q4 2026; Phase 2: Q1-Q2 2027; Phase 3: Q3-Q4 2027) deploying Service Cloud + FSC for RTR participant onboarding, Compliance Cloud for BoC finding remediation, Data Cloud + Tableau for CPMT modernization, and MuleSoft bridging existing ServiceNow ITSM, can advance Payments Canada from level 3 (3.12) to level 4 (3.70) — closing the most critical gaps while directly enabling RTR launch readiness, payment sovereignty, and the governance remediation timeline the Bank of Canada requires."
+  },
+  "overall_score": 3.04,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/evidence_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.470845+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/sbr3_supplemental_evidence.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.471241+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/01_Executive_Summary_Methodology_Issues_Scorecard.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.471648+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/02_Pillar1_Pillar2_Deep_Dives.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.471937+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/03_Pillar3_Pillar4_Benchmarks_Recommendations_Roadmap.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.472423+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/04_Evidence_Sources_Capability_Definitions_Appendices.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.472764+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/calculation_chain.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.473170+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set_registry.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.473879+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:46.474194+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 1,
+      "DEGRADED": 1,
+      "INFO": 20
+    },
+    "stage_ms": {
+      "manifest": 10,
+      "parse": 1714,
+      "persist": 530
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/qa_verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +674 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from non-canonical layout evidence_register.json",
+        "detail": "evidence loaded from non-canonical layout evidence_register.json (7 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=Payments_Canada_Client_Profile_Research_Report.docx leadership=8 focus_areas=1 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 2 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 7 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 6",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_from_client_profile_docx",
+        "detail": "timeline_from_client_profile_docx: 5 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/evidence_register.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/sbr3_supplemental_evidence.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/01_Executive_Summary_Methodology_Issues_Scorecard.md — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/02_Pillar1_Pillar2_Deep_Dives.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/03_Pillar3_Pillar4_Benchmarks_Recommendations_Roadmap.md — no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/04_Evidence_Sources_Capability_Definitions_Appendices.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/calculation_chain.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set_registry.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 5",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:26/712 subcaps unresolved against v2.4",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 6",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/qa_verdict.json",
+      "xlsx_name_enrichment: +0 subcap names +674 rationales merged from workbook into CSV-parsed rows",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from non-canonical layout evidence_register.json (7 rows)",
+      "firmographics_from_client_profile_docx: source=Payments_Canada_Client_Profile_Research_Report.docx leadership=8 focus_areas=1 facts_extracted=0",
+      "used docx-extracted recommendations: 2 rec(s) from Assessment_Report.docx §9",
+      "tech_stack_from_report_prose: 7 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 6",
+      "timeline_from_client_profile_docx: 5 events",
+      "INFO/pattern_gap: 01_evidence/evidence_register.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/sbr3_supplemental_evidence.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/01_Executive_Summary_Methodology_Issues_Scorecard.md — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/02_Pillar1_Pillar2_Deep_Dives.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/03_Pillar3_Pillar4_Benchmarks_Recommendations_Roadmap.md — no fingerprint matched (best confidence 0.00); 27 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/04_Evidence_Sources_Capability_Definitions_Appendices.md — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/calculation_chain.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set_registry.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "timeline_events_persisted: 5",
+      "catalogue_unresolved:26/712 subcaps unresolved against v2.4",
+      "insight_cards_persisted: 6"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 182,
+      "peer_median": 3.11,
+      "pillar_id": "P1",
+      "score": 3.14,
+      "subcaps_scored": 182
+    },
+    {
+      "peer_benchmarked": 222,
+      "peer_median": 3.36,
+      "pillar_id": "P2",
+      "score": 2.72,
+      "subcaps_scored": 222
+    },
+    {
+      "peer_benchmarked": 111,
+      "peer_median": 3.58,
+      "pillar_id": "P3",
+      "score": 3.12,
+      "subcaps_scored": 111
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.32,
+      "pillar_id": "P4",
+      "score": 3.17,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-05-11",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v2.4",
+    "completed_at": "2026-07-02T23:11:46.488109Z",
+    "created_at": "2026-07-02T23:11:46.488109Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "97f87a7e-6ba0-40a7-907e-9c4516382055",
+    "overall_score": null,
+    "request_id": "DMA-ASM-PMTCAN-20260511-0001",
+    "started_at": "2026-07-02T23:11:46.488109Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "research_report_prose",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.9,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.9,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-236",
+        "E-237"
+      ],
+      "magnitude": "0.8 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 3.6,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.85,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C3",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Finance Minister Champagne: 'This significant milestone is made possible by the Government of Canada's recent legislative changes to expand Payments Canada membership eligibility..."
+    },
+    {
+      "body": "Ethical AI in Personalization is a priority capability gap in customer experience, scoring 1.72/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "evidence": [],
+      "magnitude": "1.3 pts below peer median",
+      "name": "Ethical AI in Personalization",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.72,
+      "so_what": "Prioritize Ethical AI in Personalization in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Ethical AI in Personalization",
+      "what": "Ethical AI in Personalization is a priority capability gap in customer experience, scoring 1.72/5 against a peer median of 3.0. Strengthening it is among the highest-leverage moves to lift maturity in customer experience.",
+      "why": "The shortfall is relative, not absolute: 1.72/5 sits below the 3.0 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Customer Experience Metrics is a priority capability gap in strategy and governance, scoring 2.91/5 against a peer median of 3.2. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "evidence": [
+        "E-234",
+        "E-235",
+        "E-236",
+        "E-237"
+      ],
+      "magnitude": "0.3 pts below peer median",
+      "name": "Customer Experience Metrics",
+      "peer_median": 3.2,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 2.91,
+      "so_what": "Prioritize Customer Experience Metrics in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Customer Experience Metrics",
+      "what": "Customer Experience Metrics is a priority capability gap in strategy and governance, scoring 2.91/5 against a peer median of 3.2. Strengthening it is among the highest-leverage moves to lift maturity in strategy and governance.",
+      "why": "The linked evidence records: SUMMIT 2026 theme: 'Accelerate Economic Growth'. 320+ organizations, 2,000+ delegates. 6 content streams: NEW 'Accelerated payments' + Connected, Data-powered, Digital, Risk resilience, Customer experience. BoC Supervision MD Anne Butler on financial stability panel."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-235"
+      ],
+      "modifiers": [
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Experience Metrics averages 2.9/5 over 165 scored subcaps; ceiling 3.4 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-240"
+      ],
+      "modifiers": [
+        "215 of 215 subcaps on thin evidence"
+      ],
+      "rationale": "Benefits Realization averages 3.2/5 over 215 scored subcaps; ceiling 3.7 reflects thin evidence density (0/215 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-234"
+      ],
+      "modifiers": [
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Pilot & Experimentation averages 3.2/5 over 190 scored subcaps; ceiling 3.7 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Leadership & Sponsorship averages 3.0/5 over 205 scored subcaps; ceiling 3.5 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "122 of 122 subcaps on thin evidence"
+      ],
+      "rationale": "Social Impact averages 3.4/5 over 122 scored subcaps; ceiling 3.9 reflects thin evidence density (0/122 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Acquisition Cost (CAC) Analysis averages 3.1/5 over 285 scored subcaps; ceiling 3.6 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-235"
+      ],
+      "modifiers": [
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Credit Bureau Integration averages 3.1/5 over 285 scored subcaps; ceiling 3.6 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-237"
+      ],
+      "modifiers": [
+        "cap applied: FMI overlay N/A — retail vulnerable consumer concept inapplicable to FMI",
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Financial Distress Early Warning averages 2.9/5 over 285 scored subcaps; ceiling 3.4 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: FMI overlay N/A — retail consumer personalization/loyalty concept inapplicable to national",
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Ethical AI in Personalization averages 1.7/5 over 255 scored subcaps; ceiling 2.2 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-235"
+      ],
+      "modifiers": [
+        "cap applied: No enterprise automation CoE evidenced; BoC found process governance gaps",
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Automation Strategy & Governance averages 3.2/5 over 140 scored subcaps; ceiling 3.7 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-234"
+      ],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Quantification Methods averages 3.1/5 over 130 scored subcaps; ceiling 3.6 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Policy & Training Management averages 3.1/5 over 140 scored subcaps; ceiling 3.6 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Fourth-Party Risk averages 3.1/5 over 145 scored subcaps; ceiling 3.6 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-238"
+      ],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Domain Data Ownership Model averages 3.0/5 over 200 scored subcaps; ceiling 3.5 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Semantic Search & Retrieval (RAG) averages 3.0/5 over 270 scored subcaps; ceiling 3.5 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-238"
+      ],
+      "modifiers": [
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Domain/DMU Delivery Factory averages 3.5/5 over 235 scored subcaps; ceiling 4.0 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Row-Level Security & Column-Level Security averages 3.1/5 over 150 scored subcaps; ceiling 3.6 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "issue_register",
+      "detail": "IS-002/IS-003 TPRM Cap Not Enforced on Two P3C4 Subcaps",
+      "evidence": [],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "IS-002/IS-003 TPRM Cap Not Enforced on Two P3C4 Subcaps",
+      "metric": null,
+      "peer_context": "Ethical AI in Personalization runs 1.72/5 vs a 3.00 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "IS-002/IS-003 TPRM Cap Not Enforced on Two P3C4 Subcaps. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "firmographics.leadership",
+      "detail": "Garry Foster is newly in seat as Board Chair (outgoing June 2026) at Payments Canada (The Canadian Payments Association) — new executives set platform direction in their first two quarters.",
+      "evidence": [
+        "E-240",
+        "E-236",
+        "E-237",
+        "E-234"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Garry Foster is in seat as Board Chair (outgoing June 2026)",
+      "metric": null,
+      "peer_context": "Ethical AI in Personalization runs 1.72/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Garry Foster is newly in seat as Board Chair (outgoing June 2026) at Payments Canada (The Canadian Payments Association) — new executives set platform direction in their first two quarters. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "RTR system-level testing begins. PSP expansion (Wave 1); RTR system-level testing begins (Jan 2025).",
+      "evidence": [
+        "E-236"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "RTR system-level testing begins",
+      "metric": null,
+      "peer_context": "Ethical AI in Personalization runs 1.72/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Next Best Action (NBA) — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "RTR system-level testing begins. PSP expansion (Wave 1); RTR system-level testing begins (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "RTR system-level testing begins"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "LOW",
+      "derived_from": "subcap_scores",
+      "detail": "Ethical AI in Personalization scores 1.72/5 vs a typical 3.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-234"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Ethical AI in Personalization scores 1.72/5 vs a typical…",
+      "metric": "Ethical AI in Personalization 1.72/5 vs peer 3.00",
+      "peer_context": "Ethical AI in Personalization runs 1.72/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the nCino conversation against Next Best Action (NBA) — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Ethical AI in Personalization scores 1.72/5 vs a typical 3.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

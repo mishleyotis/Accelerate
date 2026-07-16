@@ -1,0 +1,557 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "amalgamated-financial-co-0001",
+  "financials": {
+    "metrics": {
+      "trend_period": "FY2017 - FY2025"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "NY",
+      "DC",
+      "SF",
+      "Boston"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Priscilla Sims Brown",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Darby",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Adrian Glace",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Sean Searby",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO / COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ina Narula",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Stephanie Parker",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CCRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Thomas O'Brien",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CCO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tye Graham",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CHRO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dawn Zappetti",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CMO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ivan Frishberg",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CSO-Sustainability"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Leanne Ocampo",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Audit Executive"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Phil Armas",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Transformation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brad Fiery",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Head of Data Governance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Zinoviy L.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP IT Governance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kent Doren",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP InfoSec Operations"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal Reserve-regulated bank",
+    "narrative_md": "This section provides a comprehensive profile of Amalgamated Bank across eleven dimensions, anchored in primary regulatory sources, public disclosures, and direct internal evidence from the Zennify engagement. Each subsection cites evidence inline using the [E-xxx:Fy] notation.",
+    "primary_regulator": "FDIC (Cert 413), Federal Reserve (Fed ID 661308), NYSDFS",
+    "size_tier": "Mid-cap regional ($5-15B)",
+    "thought_leadership": null,
+    "ticker": "NASDAQ: AMAL"
+  },
+  "issue_register": [
+    {
+      "id": "9fa520fb-5a4d-4093-905d-add19e1a746a",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "8 evidence IDs cited in scoring subcaps not present in evidence_index.csv (E-034, E-045, E-050, E-051, E-057, E-065, E-076, E-094)",
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "8 evidence IDs cited in scoring subcaps not present in evidence_index.csv (E-034, E-045, E-050, E-051, E-057, E-065, E-076, E-094)"
+    },
+    {
+      "id": "b16ece98-29f6-46e7-9c28-90ae6e95c502",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "Section title keyword check failed for Sections 2 and 3 using label-style keywords ('Assessment Context', 'Trend Analysis')",
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Section title keyword check failed for Sections 2 and 3 using label-style keywords ('Assessment Context', 'Trend Analysis')"
+    },
+    {
+      "id": "767476b2-0586-47b9-b437-6a3dc656d7bc",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "Range-style evidence reference 'E-073 through E-143' found in Section 12 of final report",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Range-style evidence reference 'E-073 through E-143' found in Section 12 of final report"
+    },
+    {
+      "id": "2cde1cf7-09b4-4eb8-a745-6f98a325af60",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "24 subcaps (baseline-scored categories: M&A integration, BaaS, innovation labs, RAG, fraud intelligence) had empty evidence_ids fields",
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "24 subcaps (baseline-scored categories: M&A integration, BaaS, innovation labs, RAG, fraud intelligence) had empty evidence_ids fields"
+    },
+    {
+      "id": "530fa73c-4f22-44c5-9f7c-1db407923a84",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "CAP-01 and CAP-02 chained delta inconsistency: both showed raw_score=2.50 and delta=-0.25 when correct chained application requires intermediate intermediate score tracking",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "CAP-01 and CAP-02 chained delta inconsistency: both showed raw_score=2.50 and delta=-0.25 when correct chained application requires intermediate intermediate score tracking"
+    },
+    {
+      "id": "e9d5c67f-8b6a-4dd2-8484-a4bcd56e0866",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "24 subcap rationales in baseline-scored categories do not cite E-IDs directly in rationale text (evidence cited via evidence_ids field only)",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "24 subcap rationales in baseline-scored categories do not cite E-IDs directly in rationale text (evidence cited via evidence_ids field only)"
+    },
+    {
+      "id": "8f5e0eda-ea39-45f9-85b8-b8fdee49b814",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "Report contains 28 unique E-IDs vs. 30 minimum threshold for AP-06/RC-13 strict PASS",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Report contains 28 unique E-IDs vs. 30 minimum threshold for AP-06/RC-13 strict PASS"
+    },
+    {
+      "id": "d239f30b-5271-48f5-b6e0-0e14e10fc766",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "Formal peer benchmark scores not present in report \u2014 peer benchmarking was skipped per Q2 engagement directive",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Formal peer benchmark scores not present in report \u2014 peer benchmarking was skipped per Q2 engagement directive"
+    },
+    {
+      "id": "9379faa0-db78-4606-81ff-08ad583930fe",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "3/8 aspirational phrases detected in 50-paragraph sample: 'world-class', 'best-in-class', 'mission-driven'",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "3/8 aspirational phrases detected in 50-paragraph sample: 'world-class', 'best-in-class', 'mission-driven'"
+    },
+    {
+      "id": "fa6c1b81-b1de-40c1-8c5b-dc0537e2428e",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "PV-01 initially returned FAIL (0%) due to incorrect pattern matching \u2014 looked for 'E-NNN' in rationale text when actual format uses '[EVIDENCE]:' structured tags",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "PV-01 initially returned FAIL (0%) due to incorrect pattern matching \u2014 looked for 'E-NNN' in rationale text when actual format uses '[EVIDENCE]:' structured tags"
+    },
+    {
+      "id": "1e039015-d126-4801-8e76-5b4cc7904fab",
+      "issue_id": "ISS-011",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-28",
+      "rationale": "CR-01 initially returned FAIL due to decision enum mismatch \u2014 checked for 'DOWNGRADE' but critic log uses 'DOWNGRADE_0.5' format",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "CR-01 initially returned FAIL due to decision enum mismatch \u2014 checked for 'DOWNGRADE' but critic log uses 'DOWNGRADE_0.5' format"
+    }
+  ],
+  "narrative": null,
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.3,
+        "P1C2": 2.5,
+        "P1C3": 3.33,
+        "P1C4": 3.25,
+        "P1C5": 2.5,
+        "P2C1": 2.75,
+        "P2C2": 2.5,
+        "P2C3": 2.63,
+        "P2C4": 2.0,
+        "P3C1": 2.33,
+        "P3C2": 2.83,
+        "P3C3": 2.5,
+        "P3C4": 2.67,
+        "P4C1": 2.25,
+        "P4C2": 3.0,
+        "P4C3": 2.83,
+        "P4C4": 3.25
+      },
+      "overall_score": 2.73,
+      "peer_name": "Bank of Utah",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.79,
+        "P1C2": 2.78,
+        "P1C3": 2.78,
+        "P1C4": 2.77,
+        "P1C5": 2.25,
+        "P2C1": 2.77,
+        "P2C2": 2.75,
+        "P2C3": 2.77,
+        "P2C4": 2.76,
+        "P3C1": 2.77,
+        "P3C2": 2.77,
+        "P3C3": 2.76,
+        "P3C4": 2.78,
+        "P4C1": 2.76,
+        "P4C2": 2.75,
+        "P4C3": 2.78,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.71,
+      "peer_name": "Cornerstone Capital Bank, SSB",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.88,
+        "P1C2": 3.0,
+        "P1C3": 2.19,
+        "P1C4": 2.35,
+        "P1C5": 3.11,
+        "P2C1": 3.02,
+        "P2C2": 2.49,
+        "P2C3": 1.77,
+        "P2C4": 2.59,
+        "P3C1": 2.99,
+        "P3C2": 3.0,
+        "P3C3": 2.98,
+        "P3C4": 2.43,
+        "P4C1": 3.04,
+        "P4C2": 2.46,
+        "P4C3": 2.24,
+        "P4C4": 2.25
+      },
+      "overall_score": 2.63,
+      "peer_name": "SouthState Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.77,
+        "P1C2": 1.86,
+        "P1C3": 1.83,
+        "P1C4": 3.16,
+        "P1C5": 1.43,
+        "P2C1": 3.01,
+        "P2C2": 2.56,
+        "P2C3": 3.31,
+        "P2C4": 2.84,
+        "P3C1": 2.35,
+        "P3C2": 2.88,
+        "P3C3": 2.83,
+        "P3C4": 2.64,
+        "P4C1": 2.31,
+        "P4C2": 2.81,
+        "P4C3": 3.1,
+        "P4C4": 3.05
+      },
+      "overall_score": 2.57,
+      "peer_name": "First United Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 3.03,
+        "P1C3": 2.05,
+        "P1C4": 2.46,
+        "P1C5": 2.68,
+        "P2C1": 2.43,
+        "P2C2": 2.02,
+        "P2C3": 2.52,
+        "P2C4": 2.68,
+        "P3C1": 2.81,
+        "P3C2": 2.63,
+        "P3C3": 3.07,
+        "P3C4": 2.84,
+        "P4C1": 2.21,
+        "P4C2": 2.09,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.55,
+      "peer_name": "CalPrivate Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASSESS-AMAL-20260428-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "iOS App Store - Amalgamated Bank",
+        "themes": [
+          "Mobile RDC, biometric auth, easy login"
+        ],
+        "value": 4.7
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play - Amalgamated Bank",
+        "themes": [
+          "Solid usability"
+        ],
+        "value": 4.4
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "BBB - Amalgamated Bank",
+        "themes": [
+          "13+ month onboarding, deposit holds, account closures"
+        ],
+        "value": 1.13
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "TrustPilot",
+        "themes": [
+          "CX issues, trust concerns"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "WalletHub",
+        "themes": [
+          "Service hours, agent training"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Indeed (Employee)",
+        "themes": [
+          "Mission alignment positive, growth concerns"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "BankTruth (Third-party review)",
+        "themes": [
+          "Mission products strong, no spending analytics/round-ups"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Kiplinger (Industry)",
+        "themes": [
+          "Mission bank, fossil fuel-free portfolio differentiation"
+        ],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "NYDFS CRA Performance Evaluation",
+        "themes": [
+          "Community Development Lending OUTSTANDING, Service Test High Sat"
+        ],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of Amalgamated Financial Corp / Amalgamated Bank. Overall digital maturity scored 2.52/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-04-28",
+      "evidence_e_ids": [],
+      "id": "149ebc0f-7f46-455a-a35a-d1704578555f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    },
+    {
+      "body": "Amalgamated Financial Corp / Amalgamated Bank was established in 1923.",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "1923-01-01",
+      "evidence_e_ids": [],
+      "id": "3fec53d0-34be-4bd6-a560-d9e0a99945e7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Founded"
+    }
+  ]
+}

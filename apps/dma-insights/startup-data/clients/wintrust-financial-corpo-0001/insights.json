@@ -1,0 +1,552 @@
+{
+  "entity_display_id": "wintrust-financial-corpo-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C1",
+        "P2C3",
+        "P4C2.4.7",
+        "P2C4.2.2",
+        "P2C1.1.4",
+        "P2C2.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "dfaf9d8e-4738-4592-b5e6-afb4d9690a80",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-027",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-054",
+        "E-059",
+        "E-068",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-068].",
+      "source_rec_id": "REC-01",
+      "theme": "Data Management & Governance",
+      "title": "Deploy Agentforce for Customer AI & Personalization",
+      "what_text": "Agentforce + Einstein AI + Financial Services Cloud connected unlock: Data Cloud (customer 360 across 16 charters) → feeds Agentforce personalization models. Service Cloud (omnichannel) → provides delivery channel for AI responses. In Zennify's assessment Data Mesh Strategy & Domain Ownership scores 3.0 out of 5, versus a typical 3.0 at comparable institutions [E-059].",
+      "why_text": "At 3.0 out of 5, Data Mesh Strategy & Domain Ownership shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-054, E-059].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P2C4",
+        "P4C1",
+        "P4C2.4.7",
+        "P2C4.2.2",
+        "P2C1.1.4"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "9e70ebbd-6d2e-432b-9a3e-89477b545357",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-048",
+        "E-052",
+        "E-056",
+        "E-037"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Policy Self-Service a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 2.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": "REC-02",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Unify Omnichannel Experience with Service Cloud",
+      "what_text": "Service Cloud + Digital Engagement + Omni-Channel Routing connected unlock: omnichannel → provides delivery channel for Agentforce personalization. Unified view enables Data Cloud customer 360. In Zennify's assessment Policy Self-Service scores 2.0 out of 5, versus a typical 3.5 at comparable institutions [E-052].",
+      "why_text": "At 2.0 out of 5, Policy Self-Service sits 1.5 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-048, E-052].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P1C1",
+        "P2C4.2.2",
+        "P1C1.5.5",
+        "P2C1.5.1",
+        "P2C4.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "fc400ce3-9852-43d8-82f0-a309b2228c5a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-050",
+        "E-055",
+        "E-049"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Real-Time Decisioning a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-049].",
+      "source_rec_id": "REC-03",
+      "theme": "CX & Personalization",
+      "title": "Rationalize Marketing Cloud (3 Platforms → 1)",
+      "what_text": "Real-Time Decisioning is one of Wintrust Financial Corporation's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver a stronger, more personalised customer experience [E-055].",
+      "why_text": "At 1.5 out of 5, Real-Time Decisioning sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-050, E-055].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P2C4",
+        "P2C1",
+        "P4C2.4.7",
+        "P2C4.2.2",
+        "P1C1.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "05113ad9-fe3a-49ec-b0eb-24fa8782e3a5",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-027",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-027",
+        "E-042"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Mesh Strategy & Domain Ownership a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 3.0 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-042].",
+      "source_rec_id": "REC-04",
+      "theme": "Data Management & Governance",
+      "title": "Deploy Data Cloud for 16-Charter Customer 360",
+      "what_text": "Data Mesh Strategy & Domain Ownership is one of Wintrust Financial Corporation's solid data and technology capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, roughly in line with the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver a stronger data and technology foundation [E-027].",
+      "why_text": "At 3.0 out of 5, Data Mesh Strategy & Domain Ownership shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-068, E-027].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C3.6.3",
+        "P3C1.5.2",
+        "P2C2.9.1",
+        "P4C3.3.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "36906987-3ad1-4b23-9c82-164c9ee45d50",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-065",
+        "E-064"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Real-Time API Development a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-064].",
+      "source_rec_id": "REC-06",
+      "theme": "Architecture & Cloud",
+      "title": "Expand MuleSoft to External APIs (Open Banking)",
+      "what_text": "Real-Time API Development is one of Wintrust Financial Corporation's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver a stronger data and technology foundation [E-065].",
+      "why_text": "At 2.5 out of 5, Real-Time API Development sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-027, E-065].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P2C4",
+        "P4C2.4.7",
+        "P2C4.2.2",
+        "P4C2.4.2",
+        "P2C1.6.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "4b519704-9b08-4b06-8ee5-fdf0dcb15a05",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-054",
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-064",
+        "E-054",
+        "E-068"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Generative AI Strategy & Use Cases a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-068].",
+      "source_rec_id": "REC-07",
+      "theme": "Analytics & AI",
+      "title": "Deploy CRM Analytics for Customer Intelligence",
+      "what_text": "Generative AI Strategy & Use Cases is one of Wintrust Financial Corporation's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver a stronger data and technology foundation [E-054].",
+      "why_text": "At 2.0 out of 5, Generative AI Strategy & Use Cases sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-064, E-054].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C1.1.2",
+        "P1C4.1.1",
+        "P1C1.1.1",
+        "P1C1.4.7",
+        "P1C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "cd3d9227-cdf7-4cb7-beb4-412bd1901816",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-031",
+        "E-068",
+        "E-044"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Business Alignment a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 3.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-044].",
+      "source_rec_id": "REC-08",
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy Workshop (CIO Entry Point)",
+      "what_text": "Business Alignment is one of Wintrust Financial Corporation's solid strategy and governance capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver sharper strategic direction and stronger oversight [E-068].",
+      "why_text": "At 3.0 out of 5, Business Alignment sits 0.5 points below the 3.5 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-031, E-068].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C3.3.2",
+        "P1C2.4.4",
+        "P2C4.4.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "fbd0ed01-ee35-40c4-8376-afb961e69c98",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-039",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Fine-Grained Entitlement Design a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 3.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": "REC-09",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Shield + Event Monitoring for SFDC Security",
+      "what_text": "Fine-Grained Entitlement Design is one of Wintrust Financial Corporation's solid data and technology capabilities, scoring 3.5 out of 5 in Zennify's latest assessment, ahead of the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver a stronger data and technology foundation [E-039].",
+      "why_text": "At 3.5 out of 5, Fine-Grained Entitlement Design shows a maturing capability within reach of best practice. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-060, E-039].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C1.1.4",
+        "P1C1.5.5",
+        "P1C5.8.3",
+        "P1C1.5.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-10",
+      "id": "689f6704-fb56-4e5a-b3a6-acb78c85efd7",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        }
+      ],
+      "linked_e_ids": [
+        "E-023",
+        "E-051",
+        "E-058"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Developer Portal & Experience a near-term focus for Wintrust Financial Corporation: a scoped investment here would lift it from 1.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-051].",
+      "source_rec_id": "REC-10",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Experience Cloud for Digital Onboarding",
+      "what_text": "Developer Portal & Experience is one of Wintrust Financial Corporation's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Wintrust Financial Corporation's ability to deliver a stronger, more personalised customer experience [E-023].",
+      "why_text": "The assessment found: “Macatawa Bank systems upgraded Apr 25 2025 to Wintrust platform — confirms post-acquisition technology integration executed. New teller system creates virtual documents automatically” [E-058]. At 1.5 out of 5, Developer Portal & Experience sits 2.0 points below the 3.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-ASM-WTFC-20260408-0001"
+}

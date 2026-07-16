@@ -1,0 +1,1878 @@
+{
+  "entity_display_id": "acuity-a-mutual-insuranc-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C1",
+        "P4C3",
+        "P4C1.7.3",
+        "P4C3.6.3",
+        "P2C4.9.4",
+        "P1C1.7.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-001",
+      "id": "29914198-d61c-40b7-9893-d1bfe7c04166",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-030",
+            "E-047",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-030",
+            "E-047",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-047",
+        "E-018",
+        "E-052",
+        "E-078",
+        "E-030"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Recommended play: open the FSC/MC consolidation advisory + multi-year roadmap conversation — the trigger evidence is already on file [E-052].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Salesforce Multi-Org Unification — FSC/MC consolidation advisory + multi-year roadmap",
+      "what_text": "Salesforce Multi-Org Unification. The research recorded: \"Acuity operates a multi-org Salesforce environment including Salesforce Marketing Cloud and Financial Services Cloud Hiring Salesforce Strategist to develop strategic vision, expansion roadmaps, data governance protocols, and integrations with downstream systems\". In Zennify's assessment Abandonment Recovery scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-018].",
+      "why_text": "The assessment found: “Acuity operates a multi-org Salesforce environment including Salesforce Marketing Cloud and Financial Services Cloud Hiring Salesforce Strategist to develop strategic vision, expansion roadmaps, data” [E-047]. The analyst's opportunity map rates this CRITICAL priority. Entry-point signal: SF Strategist hire confirms active need. Pillar alignment:. averages 3.0/5 across its 40 scored capability (peer median ~ 3.0) on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C5.3.2",
+        "P1C5",
+        "P1C5.1.4",
+        "P1C2.2.8",
+        "P1C1.5.1",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "902c73d9-5734-44d4-93a6-9c505b30933c",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-044",
+            "E-045",
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-012"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-044",
+            "E-045",
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-045",
+        "E-051",
+        "E-087",
+        "E-031",
+        "E-053"
+      ],
+      "linked_subcap_id": "P1C5.3.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make this capability a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 1.5 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-051].",
+      "source_rec_id": "REC-01",
+      "theme": "ESG & Sustainability",
+      "title": "Strategy and governance capability",
+      "what_text": "This capability is one of Acuity, A Mutual Insurance Company's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 1.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver sharper strategic direction and stronger oversight [E-045].",
+      "why_text": "The assessment found: “Acuity philanthropy totaled $1.6M for 2025; $680K employee-directed in 2024, $700K in 2025 Since 1999, nearly $28 million donated to charitable organizations” [E-044]. At 1.5 out of 5, this capability sits 0.3 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.5.5",
+        "P3C4",
+        "P2C4.9.4",
+        "P1C1.5.1",
+        "P3C2.5.5",
+        "P3C3.5.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "5d41351b-0e79-4090-8b3b-d68345d708a1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-061",
+        "E-062",
+        "E-081",
+        "E-069"
+      ],
+      "linked_subcap_id": "P3C4.5.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make capability dimension 25 a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-081].",
+      "source_rec_id": "REC-02",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Capability dimension 25",
+      "what_text": "Capability dimension 25 is one of Acuity, A Mutual Insurance Company's least developed operations capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver more efficient, dependable operations [E-062].",
+      "why_text": "scores 1.5/5 against a peer median of 2.5 on the latest assessment; this recommendation targets 6 capabilities [E-061, E-062].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P4C2.7.5",
+        "P4C3.6.3",
+        "P2C4.9.4",
+        "P4C3.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-008",
+        "E-010",
+        "E-039",
+        "E-040",
+        "E-080"
+      ],
+      "ic_id": "Z-OPP-002",
+      "id": "fe44994a-bae7-4a09-99f0-beefae964ed8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-008",
+            "E-010",
+            "E-039",
+            "E-040",
+            "E-080"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-036",
+            "E-047",
+            "E-057",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-089",
+        "E-066",
+        "E-082",
+        "E-057",
+        "E-059",
+        "E-036",
+        "E-047",
+        "E-020"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the API-led connectivity for SaaS-to-legacy core conversation — the trigger evidence is already on file [E-066].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Integration Layer — API-led connectivity for SaaS-to-legacy core",
+      "what_text": "MuleSoft Integration Layer. The research recorded: \"VALIDATED /F3 and /F3: No AWS, Azure, GCP, no DevOps, no containerization, no cloud architect roles found after exhaustive search. Architecture is SaaS-consumption (Salesforce, ServiceNow) + on-prem legacy (IBM AIX) + cloud API consumption (GenAI). No IaaS or PaaS layer\". In Zennify's assessment Domain/DMU Delivery Factory scores 2.5 out of 5, versus a typical 3.5 at comparable institutions [E-089].",
+      "why_text": "The assessment found: “Expanding connectivity with ACORD eDocs and messages download for agent management systems Policy download supported with 20+ different agency management systems” [E-020]. The analyst's opportunity map rates this HIGH priority. Entry-point signal: Hybrid architecture requires integration fabric. Pillar alignment:. averages 2.9/5 across its 40 scored capability (peer median ~ 3.5) on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P3C1",
+        "P4C2.7.5",
+        "P2C4.9.4",
+        "P1C4.8.5",
+        "P1C3.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-083"
+      ],
+      "ic_id": "Z-OPP-003",
+      "id": "7a333733-8d12-415e-b396-d91715123784",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-083"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-057",
+        "E-058",
+        "E-056",
+        "E-011",
+        "E-085",
+        "E-066",
+        "E-088",
+        "E-075"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Enterprise AI strategy on Salesforce platform conversation — the trigger evidence is already on file [E-056].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Einstein AI / Agentforce — Enterprise AI strategy on Salesforce platform",
+      "what_text": "Einstein AI / Agentforce. The research recorded: \"Actively hiring Senior Software Engineer to design, build, maintain production-ready Generative AI capabilities within existing applications and platforms Requirements: 5+ years software engineering, experience integrating AI capabilities into production apps using external servi\". In Zennify's assessment Next Best Actions & Recommendations scores 2.5 out of 5, versus a typical 2.8 at comparable institutions [E-058].",
+      "why_text": "The assessment found: “Actively hiring Senior Software Engineer to design, build, maintain production-ready Generative AI capabilities within existing applications and platforms Requirements: 5+ years software engineering” [E-057]. The analyst's opportunity map rates this HIGH priority. Entry-point signal: GenAI + Data Science hires signal readiness. Pillar alignment:. averages 2.9/5 across its 35 scored capability (peer median ~ 2.8) on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.4.IC1",
+        "P2C1",
+        "P2C3.4.4",
+        "P1C4.8.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "7cfc8425-03f9-4cc3-851e-c98cea8f7d74",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-030",
+            "E-047",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-013"
+        }
+      ],
+      "linked_e_ids": [
+        "E-018",
+        "E-047",
+        "E-052",
+        "E-078",
+        "E-030"
+      ],
+      "linked_subcap_id": "P2C1.4.IC1",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for Acuity, A Mutual Insurance Company: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-052].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Acuity's agent-centric digital ecosystem leads the P&C mutual segment, with more Acord…",
+      "what_text": "Acuity's agent-centric digital ecosystem leads the P&C mutual segment, with more ACORD awards than any other carrier. It underpins the day-to-day experience customers have across every channel, so its current level directly shapes Acuity, A Mutual Insurance Company's ability to deliver a stronger, more personalised customer experience [E-018].",
+      "why_text": "The assessment found: “Acuity operates a multi-org Salesforce environment including Salesforce Marketing Cloud and Financial Services Cloud Hiring Salesforce Strategist to develop strategic vision, expansion roadmaps, data” [E-047]. Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C2.7.5",
+        "P4C3.6.3",
+        "P2C4.9.4",
+        "P2C1.4.6",
+        "P3C1.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-023"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "ce528da0-c5a0-4bf0-8e60-b0038b02a143",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-023"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-089",
+        "E-082",
+        "E-071",
+        "E-066",
+        "E-057",
+        "E-059",
+        "E-036",
+        "E-047"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Domain/DMU Delivery Factory a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-082].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Acuity runs IBM AIX on-premises as its core system [E-089], with Salesforce (CRM),…",
+      "what_text": "Acuity runs IBM AIX on-premises as its core system, with Salesforce (CRM), ServiceNow (ITSM), and cloud APIs (GenAI) at the edges. No AWS, Azure, or GCP infrastructure detected. No DevOps or containerization evidence found. This caps at L2.5. MuleSoft integration layer to connect SaaS islands to legacy core is a natural engagement opportunity. In Zennify's assessment Domain/DMU Delivery Factory scores 2.5 out of 5, versus a typical 3.5 at comparable institutions [E-089].",
+      "why_text": "The assessment found: “Acuity operates a multi-org Salesforce environment including Salesforce Marketing Cloud and Financial Services Cloud Hiring Salesforce Strategist to develop strategic vision, expansion roadmaps, data” [E-047]. At 2.5 out of 5, Domain/DMU Delivery Factory sits 1.0 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1.3.3",
+        "P3C1.8.IC3",
+        "P2C3.3.6",
+        "P2C3.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "3de4d034-7e33-42f7-ac2d-1bb2834f4bb8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-055",
+        "E-085",
+        "E-036",
+        "E-074",
+        "E-012",
+        "E-021",
+        "E-088"
+      ],
+      "linked_subcap_id": "P3C1.3.3",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 13 a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 3.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-036].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Claims straight-through processing via CCC Smart Estimate reveals unexpected maturity…",
+      "what_text": "Capability dimension 13 is one of Acuity, A Mutual Insurance Company's solid operations capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, below the 3.3 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver more efficient, dependable operations [E-085].",
+      "why_text": "At 3.0 out of 5, capability dimension 13 sits 0.3 points below the 3.3 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-055, E-085].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3.4.2",
+        "P3C3.1.3",
+        "P2C3.15.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "687d461d-34be-40d5-9357-923d126ad4fb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-002",
+            "E-015",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-014",
+        "E-015",
+        "E-077",
+        "E-002",
+        "E-056",
+        "E-063",
+        "E-034",
+        "E-064"
+      ],
+      "linked_subcap_id": "P3C3.4.2",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Compliance & Surveillance discovery conversation — the finding is documented in the client's research report [E-015].",
+      "source_rec_id": null,
+      "theme": "Compliance & Surveillance",
+      "title": "XLSX toolkit parsing was unavailable",
+      "what_text": "1. capability taxonomy is representative (71 vs ~836): XLSX toolkit parsing was unavailable. Diagnostic questions fallback provides representative coverage across all 17 capabilities but full capability granularity awaits Layer 1 assessment. In Zennify's assessment capability dimension 17 scores 4.0 out of 5, versus a typical 3.0 at comparable institutions [E-014].",
+      "why_text": "The assessment found: “AM Best Financial Strength Rating A+ (Superior) for 23rd consecutive year (2025) S&P A+ rating — top 19 carriers nationally” [E-002]. At 4.0 out of 5, capability dimension 17 is a relative strength worth protecting and extending. Sustaining it keeps Acuity, A Mutual Insurance Company ahead while peers keep investing, and it anchors the core processes that keep the institution running.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.7.5",
+        "P4C3.6.3",
+        "P1C3.8.1",
+        "P1C1.5.5",
+        "P4C3.2.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "4bca2e91-4051-46ee-9b57-dd5f1d669cb9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-056",
+        "E-057",
+        "E-058",
+        "E-011",
+        "E-085",
+        "E-066",
+        "E-088",
+        "E-075"
+      ],
+      "linked_subcap_id": "P4C2.7.5",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 35 a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-058].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Active GenAI investment signals a cloud-API-first modernization approach",
+      "what_text": "Capability dimension 35 is one of Acuity, A Mutual Insurance Company's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver a stronger data and technology foundation [E-056].",
+      "why_text": "The assessment found: “Actively hiring Senior Software Engineer to design, build, maintain production-ready Generative AI capabilities within existing applications and platforms Requirements: 5+ years software engineering” [E-057]. At 2.5 out of 5, capability dimension 35 sits 0.3 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3",
+        "P4C3",
+        "P4C3.6.3",
+        "P2C4.9.4",
+        "P1C1.5.2",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-034"
+      ],
+      "ic_id": "CP-F-006",
+      "id": "22e3c018-8e66-4001-acae-36fcebc6b5e9",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-034"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-013"
+        },
+        {
+          "e_ids": [
+            "E-020"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-005",
+        "E-006",
+        "E-007",
+        "E-008",
+        "E-009",
+        "E-019",
+        "E-020",
+        "E-025"
+      ],
+      "linked_subcap_id": "P2C3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Segment & Line-of-Business CX discovery conversation — the finding is documented in the client's research report [E-006].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Acuity has built the most connected agent technology platform among P&C mutuals",
+      "what_text": "Acuity has built the most connected agent technology platform among P&C mutuals. The company maintains integrations with 20+ agency management systems, was the first-mover on GloveBox book-of-business integration, served as Vertafore's Personal Lines Rating design partner, and earned IVANS Gold Spark recognition. This positions (Channel Integration) and (Platform Architecture) ceilings at L3.5-4.0 for agent-facing digital capabilities. For Zennify, this signals readiness for Salesforce FSC multi-org optimization. In Zennify's assessment capability dimension 58 scores 3.0 out of 5, versus a typical 3.5 at comparable institutions [E-005].",
+      "why_text": "The assessment found: “Expanding connectivity with ACORD eDocs and messages download for agent management systems Policy download supported with 20+ different agency management systems” [E-020]. At 3.0 out of 5, capability dimension 58 sits 0.5 points below the 3.5 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2.6.3",
+        "P1C5.1.4",
+        "P1C5.2.1",
+        "P1C2.1.11",
+        "P1C5.2.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "12514ada-a541-4852-85d5-170caf31636d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-04"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-015",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-003",
+            "E-004",
+            "E-015"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-077",
+        "E-042",
+        "E-002",
+        "E-024",
+        "E-003",
+        "E-004",
+        "E-033"
+      ],
+      "linked_subcap_id": "P1C2.6.3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Cyber Risk Appetite a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "ESG framework entirely absent",
+      "what_text": "Cyber Risk Appetite is one of Acuity, A Mutual Insurance Company's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver sharper strategic direction and stronger oversight [E-015].",
+      "why_text": "The assessment found: “AM Best Financial Strength Rating A+ (Superior) for 23rd consecutive year (2025) S&P A+ rating — top 19 carriers nationally” [E-002]. At 2.0 out of 5, Cyber Risk Appetite sits 1.5 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.7.5",
+        "P4C3.6.3",
+        "P1C4.8.5",
+        "P1C3.8.2",
+        "P1C3.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-008",
+      "id": "e77993c4-3089-421e-94ef-d8fe50c870c0",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-057",
+        "E-058",
+        "E-066",
+        "E-056",
+        "E-011",
+        "E-085",
+        "E-088",
+        "E-075"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Next Best Actions & Recommendations a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-066].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Acuity is hiring a Senior GenAI Engineer ($79K-$130K) and Data Scientist for Strategic…",
+      "what_text": "Acuity is hiring a Senior GenAI Engineer ($79K-$130K) and Data Scientist for Strategic Analytics ($95K-$130K). Job descriptions reveal a cloud-API approach using managed services with a Java/Python/JavaScript stack. (Data & AI) is in active build phase with ceiling rising from L2.5 to L3.0 as production deployments mature. In Zennify's assessment Next Best Actions & Recommendations scores 2.5 out of 5, versus a typical 2.8 at comparable institutions [E-058].",
+      "why_text": "The assessment found: “Actively hiring Senior Software Engineer to design, build, maintain production-ready Generative AI capabilities within existing applications and platforms Requirements: 5+ years software engineering” [E-057]. At 2.5 out of 5, Next Best Actions & Recommendations sits 0.3 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P4C3",
+        "P4C1.7.3",
+        "P4C3.6.3",
+        "P2C4.9.4",
+        "P1C2.6.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-009",
+      "id": "01af6e5f-3c47-427f-b584-3adaa605f4ab",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-018",
+            "E-030",
+            "E-047",
+            "E-052"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-013"
+        }
+      ],
+      "linked_e_ids": [
+        "E-047",
+        "E-018",
+        "E-052",
+        "E-078",
+        "E-030"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Abandonment Recovery a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-052].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "A Salesforce Strategist job posting reveals Acuity operates Marketing Cloud and Financial…",
+      "what_text": "A Salesforce Strategist job posting reveals Acuity operates Marketing Cloud and Financial Services Cloud in separate Salesforce orgs. The role calls for a multi-year roadmap, data governance, and downstream integration planning. While the platform presence elevates and, multi-org fragmentation caps maturity. This is Zennify's core competency and represents a direct sales conversation for Salesforce advisory engagement. In Zennify's assessment Abandonment Recovery scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-018].",
+      "why_text": "The assessment found: “Acuity operates a multi-org Salesforce environment including Salesforce Marketing Cloud and Financial Services Cloud Hiring Salesforce Strategist to develop strategic vision, expansion roadmaps, data” [E-047]. At 2.5 out of 5, Abandonment Recovery sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C2.7.5",
+        "P2C3.2.IC2",
+        "P4C3.8.CIB4",
+        "P3C2.6.IC4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-011",
+      "id": "d74a59fe-42e7-44ee-b565-c3850bceda71",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-012",
+            "E-021",
+            "E-036",
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-074",
+        "E-088",
+        "E-036",
+        "E-012",
+        "E-055",
+        "E-021"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 13 a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 3.0 toward the 3.3 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-088].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Acuity deployed photo-based auto-estimation and automatic payment",
+      "what_text": "Acuity deployed photo-based auto-estimation and automatic payment through CCC Smart Estimate, built proprietary Next Generation Claims and Next Generation Loss Entry platforms, and operates claims analytics covering severity forecasting, reserves, and fraud detection. The company earned Claims Champion of the Year 2024 and ranked #1 on CRASH Network for Great Lakes and Plains regions. This revises (Claims Processing) ceiling upward from L2.5-3.0 to L3.0-3.5. In Zennify's assessment capability dimension 13 scores 3.0 out of 5, versus a typical 3.3 at comparable institutions [E-074].",
+      "why_text": "At 3.0 out of 5, capability dimension 13 sits 0.3 points below the 3.3 typically seen at comparable institutions — a maturing capability within reach of best practice. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-085, E-074].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P3C3.5.5",
+        "P1C5.1.4",
+        "P3C2.6.3",
+        "P4C1.6.3",
+        "P1C2.2.7"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-012",
+      "id": "127570a6-676c-4b26-84d9-feaa9a142ce4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-044",
+            "E-045",
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-044",
+            "E-045",
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "Z-OPP-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-087",
+        "E-053",
+        "E-044",
+        "E-045",
+        "E-051",
+        "E-031"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make green IT a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 1.5 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-053].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "Acuity has given $28M in cumulative charitable contributions through an employee-directed…",
+      "what_text": "Acuity has given $28M in cumulative charitable contributions through an employee-directed giving model. However, no ESG report, sustainability framework, DEI disclosure, or climate risk assessment exists. This caps at L1.5, creating a material gap versus peers and emerging regulatory expectations. In Zennify's assessment green IT scores 1.5 out of 5, versus a typical 1.8 at comparable institutions [E-087].",
+      "why_text": "The assessment found: “Acuity philanthropy totaled $1.6M for 2025; $680K employee-directed in 2024, $700K in 2025 Since 1999, nearly $28 million donated to charitable organizations” [E-044]. At 1.5 out of 5, green IT sits 0.3 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.6.3",
+        "P4C3.7.2",
+        "P1C1.5.5",
+        "P4C3.2.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-013",
+      "id": "6a560210-d05b-4310-b931-8d8c94cfb0ba",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-036",
+            "E-047",
+            "E-057",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-057",
+        "E-059",
+        "E-066",
+        "E-036",
+        "E-047",
+        "E-020",
+        "E-010",
+        "E-089"
+      ],
+      "linked_subcap_id": "P4C3.6.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Domain/DMU Delivery Factory a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.5 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Hybrid architecture with SaaS edges around a legacy IBM AIX core and no cloud migration…",
+      "what_text": "Domain/DMU Delivery Factory is one of Acuity, A Mutual Insurance Company's developing data and technology capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver a stronger data and technology foundation [E-057].",
+      "why_text": "The assessment found: “Expanding connectivity with ACORD eDocs and messages download for agent management systems Policy download supported with 20+ different agency management systems” [E-020]. At 2.5 out of 5, Domain/DMU Delivery Factory sits 1.0 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.10.1",
+        "P2C4",
+        "P1C1.5.1",
+        "P2C1.10.1",
+        "P2C3.10.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "48219c72-04a1-4d64-8259-0804fc85acd4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        },
+        {
+          "e_ids": [
+            "E-047"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-080",
+        "E-047",
+        "E-027",
+        "E-046"
+      ],
+      "linked_subcap_id": "P2C4.10.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 46 a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": "REC-03",
+      "theme": "CX & Personalization",
+      "title": "Capability dimension 46",
+      "what_text": "Capability dimension 46 is one of Acuity, A Mutual Insurance Company's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver a stronger, more personalised customer experience [E-080].",
+      "why_text": "The assessment found: “Acuity operates a multi-org Salesforce environment including Salesforce Marketing Cloud and Financial Services Cloud Hiring Salesforce Strategist to develop strategic vision, expansion roadmaps, data” [E-047]. At 2.0 out of 5, capability dimension 46 sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2.6.3",
+        "P1C2",
+        "P4C4.6.5",
+        "P1C1.5.1",
+        "P1C2.2.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "f0be3d55-eeeb-4f67-bed2-45c172b6c570",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-003",
+            "E-004",
+            "E-015"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-015",
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-015",
+        "E-077",
+        "E-042",
+        "E-002",
+        "E-024",
+        "E-003",
+        "E-004",
+        "E-033"
+      ],
+      "linked_subcap_id": "P1C2.6.3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Cyber Risk Appetite a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.0 toward the 3.5 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": "REC-04",
+      "theme": "Governance & Risk",
+      "title": "Cyber Risk Appetite",
+      "what_text": "Cyber Risk Appetite is one of Acuity, A Mutual Insurance Company's developing strategy and governance capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.5 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver sharper strategic direction and stronger oversight [E-015].",
+      "why_text": "The assessment found: “AM Best Financial Strength Rating A+ (Superior) for 23rd consecutive year (2025) S&P A+ rating — top 19 carriers nationally” [E-002]. At 2.0 out of 5, Cyber Risk Appetite sits 1.5 points below the 3.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4.7.3",
+        "P4C4",
+        "P4C4.6.5",
+        "P2C4.9.4",
+        "P3C4.5.5",
+        "P1C1.5.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "d26adcfa-3cf4-4a09-b83e-7b424f730d62",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-042"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-063",
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-073",
+        "E-042",
+        "E-059",
+        "E-063",
+        "E-068",
+        "E-064"
+      ],
+      "linked_subcap_id": "P4C4.7.3",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "medium",
+      "so_what_text": "Make Cyber Resilience & Recovery a near-term focus for Acuity, A Mutual Insurance Company: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-059].",
+      "source_rec_id": "REC-05",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Cyber Resilience & Recovery",
+      "what_text": "Cyber Resilience & Recovery is one of Acuity, A Mutual Insurance Company's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Acuity, A Mutual Insurance Company's ability to deliver a stronger data and technology foundation [E-042].",
+      "why_text": "The assessment found: “Illinois law REQUIRES AG notification for breaches affecting 500+ people. No Acuity Insurance breach notification found in IL AG database as of March 2026. No class action lawsuit filed against” [E-073]. At 2.0 out of 5, Cyber Resilience & Recovery sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C2",
+        "P4C2.7.5",
+        "P3C1.3.3",
+        "P3C1.8.IC3",
+        "P2C3.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-004",
+      "id": "4582b7ef-81b4-4b26-90c8-babc7be09d71",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-036"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-012",
+            "E-021",
+            "E-036",
+            "E-055"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-088"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-088",
+        "E-055",
+        "E-036",
+        "E-074",
+        "E-012",
+        "E-021"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: open the Claims triage optimization and ML augmentation conversation — the trigger evidence is already on file [E-055].",
+      "source_rec_id": null,
+      "theme": "Core Automation",
+      "title": "Data Cloud for Claims Analytics — Claims triage optimization and ML augmentation",
+      "what_text": "Data Cloud for Claims Analytics. The research recorded: \"INVALIDATED /F4: Acuity HAS straight-through processing for auto claims, introduced past 12-18 months. CCC Smart Estimate partnership enables claims processing without human intervention. Photo-based auto-estimation: customer uploads photo → automatic estimate → automatic pa\". In Zennify's assessment capability dimension 13 scores 3.0 out of 5, versus a typical 3.3 at comparable institutions [E-088].",
+      "why_text": "The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: CCC Smart Estimate + claims analytics existing. Pillar alignment:. averages 3.4/5 across its 30 scored capability (peer median ~ 3.2) on the current assessment — the gap this opportunity addresses [E-085, E-088].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C5",
+        "P1C2.6.3",
+        "P1C5.1.4",
+        "P2C3.3.RIA1",
+        "P1C5.2.1",
+        "P1C2.3.7"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "Z-OPP-005",
+      "id": "f09205ea-e6f3-43f6-9b83-eca1eb7a2191",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "related_rec",
+          "note": "recommendation targeting the same capability",
+          "target_id": "REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-044",
+            "E-045",
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-012"
+        },
+        {
+          "e_ids": [
+            "E-031",
+            "E-044",
+            "E-045",
+            "E-051"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-087",
+        "E-044",
+        "E-045",
+        "E-051",
+        "E-031",
+        "E-053"
+      ],
+      "linked_subcap_id": "P1C5",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "medium",
+      "so_what_text": "Recommended play: open the Framework development as relationship builder conversation — the trigger evidence is already on file [E-045].",
+      "source_rec_id": null,
+      "theme": "ESG & Sustainability",
+      "title": "ESG Governance Advisory — Framework development as relationship builder",
+      "what_text": "ESG Governance Advisory. The research recorded: \"VALIDATED /F1: Acuity Charitable Foundation exists — structured philanthropy: $21M+ over 10 years, employee-directed giving ($500K year-end allocation to employee-chosen charities), Health Challenge, Neonatal Run/Walk.\". In Zennify's assessment green IT scores 1.5 out of 5, versus a typical 1.8 at comparable institutions [E-087].",
+      "why_text": "The assessment found: “Acuity philanthropy totaled $1.6M for 2025; $680K employee-directed in 2024, $700K in 2025 Since 1999, nearly $28 million donated to charitable organizations” [E-044]. The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: Total ESG gap creates easy advisory win. Pillar alignment:. averages 1.7/5 across its 20 scored capability (peer median ~ 1.8) on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C2",
+        "P1C1.7.4",
+        "P1C4.8.5",
+        "P2C3.3.RIA1",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-086"
+      ],
+      "ic_id": "Z-OPP-006",
+      "id": "5b6b3ac3-6643-4655-979a-48d9d972dc2a",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-086"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-010"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-013"
+        },
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-010",
+        "E-049",
+        "E-003",
+        "E-079",
+        "E-035",
+        "E-076",
+        "E-043",
+        "E-048"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: open the Fractional CDO/CTO counsel for tech elevation conversation — the trigger evidence is already on file [E-049].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Digital Strategy Advisory — Fractional CDO/CTO counsel for tech elevation",
+      "what_text": "Digital Strategy Advisory. The research recorded: \"Keith Baierl named VP-Enterprise Technology Feb 2025, succeeding Marcus Knuth (33yr tenure) Baierl shaped claims technology, created proprietary claims system\". In Zennify's assessment Regulatory Trend Analysis scores 2.5 out of 5, versus a typical 3.3 at comparable institutions [E-010].",
+      "why_text": "The assessment found: “In March 2020, board agreed to form Abuzz — an insurance agency to provide/manage an online digital channel for Acuity to directly sell policies or refer customers to other carriers Renamed from” [E-043]. The analyst's opportunity map rates this MEDIUM priority. Entry-point signal: VP-level ceiling limits strategic visibility. Pillar alignment:. averages 3.1/5 across its 38 scored capability (peer median ~ 3.2) on the current assessment — the gap this opportunity addresses.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "6.1 Pillar 1: Strategy, Governance & Culture (Score: 2.79)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "6.2 Pillar 2: Customer Experience (Score: 3.07)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "6.3 Pillar 3: Operations, Risk & Compliance (Score: 3.08)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "6.4 Pillar 4: Data, Analytics & Technology (Score: 2.90)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": null
+  },
+  "run_request_id": "DMA-ASM-ACUI-20260309-0001"
+}

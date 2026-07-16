@@ -1,0 +1,1320 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 196,
+        "subcaps": 196,
+        "thin": 196
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 344,
+        "subcaps": 344,
+        "thin": 344
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 163,
+        "subcaps": 163,
+        "thin": 163
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 240,
+        "subcaps": 240,
+        "thin": 240
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "wescom-financial-wescom--0001",
+    "domain": null,
+    "hq": null,
+    "id": "037a157e-47aa-4d36-b7e4-756f458a86da",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Wescom Financial (Wescom Central Credit Union)",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:17.668346Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 16,
+    "current_count": 26,
+    "dated_count": 6,
+    "median_age_months": 18.9,
+    "oldest_published_date": "2013-06-01",
+    "stale_count": 2,
+    "stale_pct": 4.0,
+    "total": 50,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "NEGATIVE": 5,
+      "NEUTRAL": 13,
+      "POSITIVE": 32
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "Indeed": 2,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 3,
+      "NEUTRAL": 38,
+      "POSITIVE": 9
+    },
+    "tiers": {
+      "T1": 5,
+      "T2": 24,
+      "T3": 19,
+      "T5": 2
+    },
+    "total_facts": 171,
+    "total_items": 50
+  },
+  "financial_trajectory": {
+    "cagr": "2.2%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        0.01,
+        0.01,
+        0.01,
+        0.01
+      ]
+    },
+    "trend": null,
+    "unit": "K"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 6400000000.0,
+    "branches": 30,
+    "cagr": "2.2%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "employees_approx": "730",
+    "financial_highlights": {
+      "Branches": "30 (2025)",
+      "Employees": "~730 (2025)",
+      "Google Play Rating": "4.8 (2025)",
+      "Members": "252,039 (2025)",
+      "Mortgage Originations": "1,931 (2024)",
+      "Net Income ($M)": "18+ (2024)",
+      "Net Worth ($M)": "513 (2025)",
+      "Net Worth Ratio (%)": "8.05 (2025)",
+      "Texas Ratio (%)": "2.07 (2025)",
+      "Total Assets ($B)": "6.4 (2025)",
+      "WRG Client Orgs": "120+ (2025)",
+      "WRG Revenue Growth (%)": "18.7 (2024)",
+      "net_income": 18000000000.0,
+      "series": {
+        "2022": 6.0,
+        "2023": 6.2,
+        "2024": 6.3,
+        "2025": 6.4
+      },
+      "trajectory": {
+        "branches": 30,
+        "currency": "USD",
+        "derived_from": "trends_csv",
+        "employees": 730,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Merged with Ccfcu adding 4 branches"
+          },
+          {
+            "fy": "FY2024",
+            "label": "Palo Alto Networks firewalls deployed for enterprise…"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Ccfcu merger announced Aug 2023"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "California (21 counties)",
+        "headline": "$6.4B assets · FY2025 · +2.2% CAGR",
+        "regulator": "NCUA",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            6.0,
+            6.2,
+            6.3,
+            6.4
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "California (21 counties)",
+    "footprint_basis": "derived:geography",
+    "founded": 1934,
+    "geography": "California (21 counties)",
+    "headcount": 730,
+    "hq": "Pasadena, California",
+    "hq_address": "Pasadena, California",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Farmers Insurance",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Darren Williams",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Hani Bhimji",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Pouria Abbassi",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chair"
+      }
+    ],
+    "legal_name": "Wescom Central Credit Union",
+    "license_type": "Federal credit union",
+    "members": 252039,
+    "narrative_md": "Wescom Central Credit Union, operating as Wescom Financial since its 2025 rebrand, was chartered in 1934 as a federal credit union (NCUA charter #66703). The institution maintains two wholly-owned subsidiaries: Wescom Resources Group LLC, a Credit Union Service Organization (CUSO) providing technology services to 120+ credit unions and financial institutions nationwide, and Wescom Financial Services LLC. Headquartered at 123 South Marengo Avenue, Pasadena, California 91101, the credit union is led by CEO Darren Williams, who has served for 28+ years and was named to the Los Angeles Business Journal’s LA500 list in 2025. [E-001, E-002, E-003, E-004]\n\nThe 2025 rebrand from “Wescom Credit Union” to “Wescom Financial” with the “Bank Better” tagline signals strategic intent to position as a full-service financial institution competing beyond traditional credit union boundaries. This positioning is supported by the May 2025 LPL Financial wealth management partnership, the UCLA affinity relationship ($38M, 10-year contract), and EVERFI financial education modules (25 adult + 14 youth courses). [E-003, E-037, E-047]",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "n": 6110,
+          "scale": 5,
+          "score": 4.8,
+          "source": "Google Play"
+        },
+        {
+          "metric": "Overall",
+          "n": 2000,
+          "scale": 5,
+          "score": 4.7,
+          "source": "Apple App Store"
+        }
+      ],
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.8/5",
+          "source": "Google Play",
+          "themes": "Mobile banking UX, quick balance checks, deposit ease",
+          "trend": "STABLE (excellent)",
+          "volume": "6,110+ reviews"
+        },
+        {
+          "rating": "4.7/5",
+          "source": "Apple App Store",
+          "themes": "Feature requests, login issues occasional",
+          "trend": "STABLE (good)",
+          "volume": "~2,000 reviews"
+        },
+        {
+          "rating": "Top rated",
+          "source": "Newsweek Best CU",
+          "themes": "Overall member satisfaction",
+          "trend": "IMPROVING",
+          "volume": "3 consecutive years (2024-2026)"
+        },
+        {
+          "rating": "Certified",
+          "source": "Great Place to Work",
+          "themes": "Employee satisfaction, culture",
+          "trend": "STABLE (positive)",
+          "volume": "2023-2024, 2024-2025"
+        },
+        {
+          "rating": "Mixed",
+          "source": "Glassdoor (IT dept)",
+          "themes": "Promotion difficulty, change resistance",
+          "trend": "CONCERNING",
+          "volume": "Limited reviews"
+        },
+        {
+          "rating": "A+ rating",
+          "source": "BBB",
+          "themes": "Debit card disputes, auto loan servicing, fee complaints",
+          "trend": "STABLE",
+          "volume": "Standard volume"
+        },
+        {
+          "rating": "Very positive",
+          "source": "Media (wildfire)",
+          "themes": "Community commitment, crisis response, debt relief",
+          "trend": "POSITIVE surge Jan-Nov 2025",
+          "volume": "10+ articles"
+        },
+        {
+          "rating": "Positive",
+          "source": "UCLA partnership",
+          "themes": "NIL deals, campus branch, financial education",
+          "trend": "GROWING",
+          "volume": "Institutional"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Large ($6.4B total assets)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-019",
+        "excerpt": "Williams keynoted 'Enhancing CU Relevance in a Quickly-Changing World' at Corelation 11th Annual Conference CU market share stagnant at ~8%; bank advantages in rates/fees/digital eroding CU differentiators",
+        "title": "Williams keynoted",
+        "type": "conference",
+        "url": "https://wescomresources.com/enhancing-credit-union-relevance-in-a-quickly-changing-world/"
+      },
+      {
+        "author": null,
+        "date": "2023-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-033",
+        "excerpt": "DEIB Committee/Council: 15+ volunteers, Misbah Mayet as Inclusion & Diversity Director Team Inclusion Groups (TIGs), Team Affinity Groups (TAGs), annual I&D Summit",
+        "title": "DEIB Committee/Council: 15+ volunteers, Misbah Mayet as Inclusion…",
+        "type": "conference",
+        "url": "https://www.businesswire.com/news/home/20231212022424/en/"
+      },
+      {
+        "author": null,
+        "date": "2024-09-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-024",
+        "excerpt": "Mark Dy-Ragos serves as VP, CISO at Wescom; MBA Cal State Fullerton Presented on Zero Trust Architecture at FutureCon Orange County 2024 cybersecurity conference",
+        "title": "Mark Dy-Ragos serves as VP, CISO at Wescom; MBA Cal State Fullerton…",
+        "type": "conference",
+        "url": "https://rocketreach.co/mark-dy-ragos-email_12482786"
+      },
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-015",
+        "excerpt": "CEO Williams presented at Corelation 11th Annual Client Conference on 'Enhancing CU Relevance' Wescom uses Corelation KeyStone as primary core processing system",
+        "title": "CEO Williams presented at Corelation 11th Annual Client Conference",
+        "type": "conference",
+        "url": "https://news.wescom.org/wescom-ceo-on-how-credit-unions-can-enhance-relevance-in-a-quickly-changing-world/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "wescom.org",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.774385+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Wescom Financial (Wescom Central Credit Union) — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Wescom's overall score of 2.71 tracks near the peer median across most categories. Notable positive gaps: Analytics & AI (2.38 vs peer 2.5, +-0.12 driven by OpenAI and SAS), Business Model Innovation (3.17 vs peer 2.5, +0.67 driven by CUSO model). Notable negative gaps: Cybersecurity (2.05 vs peer 2.5, -0.45 driven by SOC 2 absence and breach), Strategy & Governance (2.22 vs peer 2.5, -0.28 driven by missing strategy document and governance conflict). Wescom's unique competitive advantage is WRG — no peer operates a comparable CUSO serving 120+ organizations with $150B in assets.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Wescom Financial Client Profile",
+    "scqa_md": "Wescom Financial (Wescom Central Credit Union) is a $6.4B in assets credit union regulated by NCUA, operating since 1934 with 730 employees. A 2.2% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-001, E-006]. Zennify's assessment places overall digital maturity at 2.7/5. The deepest capability gap is Budget Allocation & ROI at 2.5/5 against a 3.0 peer median [E-003, E-002].\n\nThe issue register adds Missing governance artifact: caps_applied_log.csv. The issue register adds Missing governance artifact: contradiction_log.csv. Counter-signal: Event-Driven Integration already runs at 4.0/5 against a 2.5 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-004, E-005].\n\nThe question for Wescom Financial (Wescom Central Credit Union) is whether to close Budget Allocation & ROI first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Wescom Financial (Wescom Central Credit Union) should lead with Tableau (62/100 fit) against Digital Strategy Document, then sequence nCino behind it. Closing Budget Allocation & ROI to the peer median alone is worth 0.5 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Informatica IDMC is integration backbone, not MuleSoft — 35+ systems unified via IDMC; KeyStone→IDMC→Snowflake→Dynamics→BI — Integration maturity higher than expected…\"."
+  },
+  "overall_score": 2.71,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/PARAMETER_LOCK.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.492514+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.493136+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.493537+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/P1_subcaps_taxonomy.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.494641+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/P2_subcaps_taxonomy.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.497614+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/P3_subcaps_taxonomy.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.498525+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/P4_subcaps_taxonomy.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.499408+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.500111+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.500727+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/assessment_report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.501514+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.502298+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/assessment_04_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.502760+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/assessment_qa_error_log.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.503262+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.503735+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/research_batch_1_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.504065+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/research_batch_2_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.504442+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/research_batch_3_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.504771+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/research_batch_5_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.505003+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/research_batch_6_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.505222+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_coverage_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.506115+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/priority_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.507005+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/recommendations.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:17.507307+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 0,
+      "INFO": 40
+    },
+    "stage_ms": {
+      "manifest": 17,
+      "parse": 4892,
+      "persist": 14186
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'Credit Unions (Large)'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_index.json",
+        "detail": "evidence_index.json: 1 validation error for EvidenceRow\ne_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 36 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'founded', 'hq', 'legal_name'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Wescom_Financial_Client_Profile_Research_Report.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=1 subcaps=11 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 16 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_trends_csv",
+        "detail": "financial_highlights_from_trends_csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "sentiment_from_csv",
+        "detail": "sentiment_from_csv: 8 sources",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 10",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/PARAMETER_LOCK.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/P1_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/P2_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/P3_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/P4_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/report_analysis.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/assessment_report_analysis.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/assessment_04_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/assessment_qa_error_log.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/research_batch_1_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/research_batch_2_checkpoint.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/research_batch_3_checkpoint.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/research_batch_5_checkpoint.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/research_batch_6_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_coverage_map.csv — no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/priority_analysis.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 8",
+        "severity": "INFO"
+      },
+      {
+        "code": "shallow_alias_bridge",
+        "detail": "shallow_alias_bridge:43203 subcap_scores rows broadcast from 17 category-level parents (P1C1, P1C2, P1C3, P1C4, P1C5, P2C1, P2C2, P2C3, P2C4, P3C1, P3C2, P3C3, P3C4, P4C1, P4C2, P4C3, P4C4) -- bot pipeline should re-emit at subcap depth for full fidelity; UI surfaces 'broadcast' disclosure via data_source='shallow_broadcast'",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 10",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'Credit Unions (Large)'",
+      "xlsx_name_enrichment: +707 subcap names +707 rationales merged from workbook into CSV-parsed rows",
+      "evidence_index.json: 1 validation error for EvidenceRow\ne_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "tech_stack_from_variant_source: 36 entries",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'founded', 'hq', 'legal_name'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=Wescom_Financial_Client_Profile_Research_Report.docx count=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=1 subcaps=11 replaced_docx_scqa=True",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 16 categories",
+      "financial_highlights_from_trends_csv",
+      "sentiment_from_csv: 8 sources",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "insights_from_client_profile_findings: 10",
+      "INFO/pattern_gap: 01_evidence/PARAMETER_LOCK.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/P1_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/P2_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/P3_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/P4_subcaps_taxonomy.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/report_analysis.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/critic_log.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 04_reports/assessment_report_analysis.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 07_governance/assessment_04_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/assessment_qa_error_log.md — no fingerprint matched (best confidence 0.00); 19 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/research_batch_1_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/research_batch_2_checkpoint.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 07_governance/research_batch_3_checkpoint.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 07_governance/research_batch_5_checkpoint.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/research_batch_6_checkpoint.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_coverage_map.csv — no fingerprint matched (best confidence 0.25); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/priority_analysis.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/recommendations.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 8",
+      "shallow_alias_bridge:43203 subcap_scores rows broadcast from 17 category-level parents (P1C1, P1C2, P1C3, P1C4, P1C5, P2C1, P2C2, P2C3, P2C4, P3C1, P3C2, P3C3, P3C4, P4C1, P4C2, P4C3, P4C4) -- bot pipeline should re-emit at subcap depth for full fidelity; UI surfaces 'broadcast' disclosure via data_source='shallow_broadcast'",
+      "insight_cards_persisted: 10"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 196,
+      "peer_median": 2.49,
+      "pillar_id": "P1",
+      "score": 3.47,
+      "subcaps_scored": 196
+    },
+    {
+      "peer_benchmarked": 344,
+      "peer_median": 2.66,
+      "pillar_id": "P2",
+      "score": 2.88,
+      "subcaps_scored": 344
+    },
+    {
+      "peer_benchmarked": 163,
+      "peer_median": 2.62,
+      "pillar_id": "P3",
+      "score": 3.11,
+      "subcaps_scored": 163
+    },
+    {
+      "peer_benchmarked": 240,
+      "peer_median": 2.23,
+      "pillar_id": "P4",
+      "score": 3.6,
+      "subcaps_scored": 240
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-23",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:17.668346Z",
+    "created_at": "2026-07-02T23:10:17.668346Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "ba2b8d0e-dc08-4af9-a0bf-c691f1d023db",
+    "overall_score": 2.71,
+    "request_id": "DMA-ASM-WSCM-20260323-0001",
+    "started_at": "2026-07-02T23:10:17.668346Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "n": 6110,
+        "scale": 5,
+        "score": 4.8,
+        "source": "Google Play"
+      },
+      {
+        "metric": "Overall",
+        "n": 2000,
+        "scale": 5,
+        "score": 4.7,
+        "source": "Apple App Store"
+      }
+    ],
+    "derived_from": null,
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Informatica IDMC is integration backbone, not MuleSoft — 35+ systems unified via IDMC; KeyStone→IDMC→Snowflake→Dynamics→BI [E-051] — Integration maturity higher than expected; data platform is strategic asset — MuleSoft deprioritized. Salesforce CDP on Informatica pipeline. FSC+Einstein on unified 360-degree member view.",
+      "evidence": [
+        "E-051"
+      ],
+      "magnitude": null,
+      "name": "Informatica IDMC",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.5,
+      "so_what": "Protect Informatica IDMC as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "Informatica IDMC",
+      "what": "Informatica IDMC is integration backbone, not MuleSoft — 35+ systems unified via IDMC; KeyStone→IDMC→Snowflake→Dynamics→BI. [E-051] — Integration maturity higher than expected; data platform is strategic asset — MuleSoft deprioritized. Salesforce CDP on Informatica pipeline. FSC+Einstein on unified 360-degree member view.",
+      "why": "At 2.5/5 the capability is mid-build; the assessment ties its trajectory to the wider data and technology programme."
+    },
+    {
+      "body": "Barracuda breach exposed 34,515 individuals; 7-month attacker dwell time — CVE-2023-2868, Chinese-nexus UNC4841, SSNs compromised; 5-month notification lag; class action settled [E-069] — TPRM failure; WRG client data also exposed. No SOC 2 or ISO 27001 for WRG despite hosting $150B in CU assets. — Shield (event monitoring, encryption). Security Cloud. TPRM assessment consulting. SOC 2 readiness engagement.",
+      "evidence": [
+        "E-069"
+      ],
+      "magnitude": "$150B",
+      "name": "Barracuda breach exposed 34",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.5,
+      "so_what": "Protect Barracuda breach exposed 34 as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "Barracuda breach exposed 34",
+      "what": "Barracuda breach exposed 34,515 individuals; 7-month attacker dwell time — CVE-2023-2868, Chinese-nexus UNC4841, SSNs compromised; 5-month notification lag; class action settled [E-069] — TPRM failure; WRG client data also exposed. No SOC 2 or ISO 27001 for WRG despite hosting $150B in CU assets. Shield (event monitoring, encryption). Security Cloud.",
+      "why": "At 2.5/5 the capability is mid-build; the assessment ties its trajectory to the wider data and technology programme."
+    },
+    {
+      "body": "OpenAI in production for call center QA — beyond PoC — 50K calls/month analyzed; automated 0-5 QA scoring replacing manual sampling [E-052] — AI maturity L3+ for specific use case; CIO validates production GenAI capability — Einstein AI/Copilot as next-gen AI expansion. Service Cloud Voice + Einstein Conversation Mining natural fit.",
+      "evidence": [
+        "E-052",
+        "E-025",
+        "E-029"
+      ],
+      "magnitude": null,
+      "name": "OpenAI in production",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.5,
+      "so_what": "Protect OpenAI in production as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "OpenAI in production",
+      "what": "OpenAI in production for call center QA — beyond PoC — 50K calls/month analyzed; automated 0-5 QA scoring replacing manual sampling [E-052] — AI maturity L3+ for specific use case; CIO validates production GenAI capability — Einstein AI/Copilot as next-gen AI expansion. Service Cloud Voice + Einstein Conversation Mining natural fit.",
+      "why": "The linked evidence records: Uses SAS analytics: 2.5M records, 350 economic indexes, 30 years of data for 60-month rolling forecasts Board-approved risk appetite paired to portfolio risk levels monthly"
+    },
+    {
+      "body": "No Spanish digital services in 44.6% Hispanic LA County — English-only website, app, and digital channels in heavily Hispanic SoCal market [E-042, E-050] — Material DEI and market penetration gap. Regulators may scrutinize under fair lending. — Experience Cloud (multilingual portal). FSC (Spanish-language member journeys). Marketing Cloud (Spanish campaigns).",
+      "evidence": [
+        "E-042",
+        "E-050",
+        "E-003",
+        "E-002"
+      ],
+      "magnitude": "44.6%",
+      "name": "No Spanish digital services in 44.6% Hispanic LA County",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.5,
+      "so_what": "Prioritize No Spanish digital services in 44.6% Hispanic LA County in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "No Spanish digital services in 44.6% Hispanic LA County",
+      "what": "No Spanish digital services in 44.6% Hispanic LA County — English-only website, app, and digital channels in heavily Hispanic SoCal market [E-042, E-050] — Material DEI and market penetration gap. Regulators may scrutinize under fair lending. Experience Cloud (multilingual portal). FSC (Spanish-language member journeys). Marketing Cloud (Spanish campaigns).",
+      "why": "The linked evidence records: Phone: Mon-Fri 7am-8pm, Sat 8am-5pm (1-888-4WESCOM); virtual assistant for call routing Authenticated chat and secure email via Online Banking; SMS messaging with reps"
+    },
+    {
+      "body": "Actively evaluating SFMC/HubSpot + personalization tools — Feb 2026 Digital Marketing Manager posting seeks SFMC, HubSpot, Optimizely, Dynamic Yield, Adobe Target [E-039] — Active buying window; marketing automation is current gap being filled NOW — SFMC + Marketing Cloud Personalization — HIGHEST PRIORITY. Timing is optimal.",
+      "evidence": [
+        "E-039"
+      ],
+      "magnitude": null,
+      "name": "Actively evaluating SFMC/HubSpot + personalization tools",
+      "peer_median": 2.5,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 2.5,
+      "so_what": "Protect Actively evaluating SFMC/HubSpot + personalization tools as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "Actively evaluating SFMC/HubSpot + personalization tools",
+      "what": "Actively evaluating SFMC/HubSpot + personalization tools — Feb 2026 Digital Marketing Manager posting seeks SFMC, HubSpot, Optimizely, Dynamic Yield, Adobe Target. [E-039] — Active buying window; marketing automation is current gap being filled NOW — SFMC + Marketing Cloud Personalization — HIGHEST PRIORITY. Timing is optimal.",
+      "why": "The linked evidence records: Feb 2026 job posting (Digital Experience Sr PM): requires Optimizely/Dynamic Yield/Adobe Target, HubSpot or Salesforce Marketing Cloud, Semrush/Ahrefs Confirmed stack: AdRoll (retargeting), Snowflake (data warehouse), Cloudflare (CDN), EVERFI (education)"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-003"
+      ],
+      "modifiers": [
+        "181 of 181 subcaps on thin evidence"
+      ],
+      "rationale": "Synergy Identification averages 2.5/5 over 181 scored subcaps; ceiling 3.0 reflects thin evidence density (0/181 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-026"
+      ],
+      "modifiers": [
+        "228 of 228 subcaps on thin evidence"
+      ],
+      "rationale": "Role Definitions averages 4.0/5 over 228 scored subcaps; ceiling 4.5 reflects thin evidence density (0/228 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "191 of 191 subcaps on thin evidence"
+      ],
+      "rationale": "Scale Decision Framework averages 4.0/5 over 191 scored subcaps; ceiling 4.5 reflects thin evidence density (0/191 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-001"
+      ],
+      "modifiers": [
+        "207 of 207 subcaps on thin evidence"
+      ],
+      "rationale": "Cultural Due Diligence averages 3.5/5 over 207 scored subcaps; ceiling 4.0 reflects thin evidence density (0/207 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-034"
+      ],
+      "modifiers": [
+        "41 of 41 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Strategy Document averages 3.0/5 over 41 scored subcaps; ceiling 3.5 reflects thin evidence density (0/41 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-037"
+      ],
+      "modifiers": [
+        "cap applied: ISS cap P2C1→3.0",
+        "320 of 320 subcaps on thin evidence"
+      ],
+      "rationale": "Budget Allocation & ROI averages 2.5/5 over 320 scored subcaps; ceiling 3.0 reflects thin evidence density (0/320 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-041"
+      ],
+      "modifiers": [
+        "312 of 312 subcaps on thin evidence"
+      ],
+      "rationale": "Aggregator Integration averages 3.5/5 over 312 scored subcaps; ceiling 4.0 reflects thin evidence density (0/312 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-042"
+      ],
+      "modifiers": [
+        "cap applied: ISS cap P2C3→3.0",
+        "316 of 316 subcaps on thin evidence"
+      ],
+      "rationale": "Channel Strategy & Mix averages 3.0/5 over 316 scored subcaps; ceiling 3.5 reflects thin evidence density (0/316 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-044"
+      ],
+      "modifiers": [
+        "cap applied: Ev ceil→2.5",
+        "280 of 280 subcaps on thin evidence"
+      ],
+      "rationale": "Behavior-Based Rewards averages 2.5/5 over 280 scored subcaps; ceiling 3.0 reflects thin evidence density (0/280 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-028"
+      ],
+      "modifiers": [
+        "cap applied: Ev ceil→2.5",
+        "157 of 157 subcaps on thin evidence"
+      ],
+      "rationale": "capability dimension 39 averages 2.5/5 over 157 scored subcaps; ceiling 3.0 reflects thin evidence density (0/157 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-004"
+      ],
+      "modifiers": [
+        "144 of 144 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Identification & Assessment averages 3.5/5 over 144 scored subcaps; ceiling 4.0 reflects thin evidence density (0/144 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "152 of 152 subcaps on thin evidence"
+      ],
+      "rationale": "Exam Preparation averages 4.0/5 over 152 scored subcaps; ceiling 4.5 reflects thin evidence density (0/152 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-026"
+      ],
+      "modifiers": [
+        "cap applied: Ev ceil→2.5",
+        "154 of 154 subcaps on thin evidence"
+      ],
+      "rationale": "DR Testing averages 2.5/5 over 154 scored subcaps; ceiling 3.0 reflects thin evidence density (0/154 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-029"
+      ],
+      "modifiers": [
+        "219 of 219 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Data + AI Asset Governance Control Plane averages 4.0/5 over 219 scored subcaps; ceiling 4.5 reflects thin evidence density (0/219 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-025"
+      ],
+      "modifiers": [
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "AI Vision & Image Recognition averages 3.5/5 over 287 scored subcaps; ceiling 4.0 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-006"
+      ],
+      "modifiers": [
+        "257 of 257 subcaps on thin evidence"
+      ],
+      "rationale": "Event-Driven Integration averages 4.0/5 over 257 scored subcaps; ceiling 4.5 reflects thin evidence density (0/257 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Ev ceil→2.5",
+        "161 of 161 subcaps on thin evidence"
+      ],
+      "rationale": "Network Security Architecture averages 2.5/5 over 161 scored subcaps; ceiling 3.0 reflects thin evidence density (0/161 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Albert Chang appointed VP Marketing Sep 2025. Albert Chang appointed VP Marketing Sep 2025 under CMO Ashley White",
+      "evidence": [
+        "E-039"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Albert Chang appointed VP Marketing",
+      "metric": null,
+      "peer_context": "Budget Allocation & ROI runs 2.50/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Albert Chang appointed VP Marketing Sep 2025. Albert Chang appointed VP Marketing Sep 2025 under CMO Ashley White. Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2025-09-01",
+        "event": "Albert Chang appointed VP Marketing Sep 2025"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Palo Alto Networks firewalls deployed for enterprise…. Palo Alto Networks firewalls deployed for enterprise security in 2024 (Jul 2024).",
+      "evidence": [
+        "E-029"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Palo Alto Networks firewalls deployed for enterprise",
+      "metric": null,
+      "peer_context": "Budget Allocation & ROI runs 2.50/5 vs a 3.00 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Palo Alto Networks firewalls deployed for enterprise…. Palo Alto Networks firewalls deployed for enterprise security in 2024 (Jul 2024).",
+      "timeline": {
+        "date": "2024-07-01",
+        "event": "Palo Alto Networks firewalls deployed for enterprise…"
+      },
+      "window": null
+    },
+    {
+      "category": "core_migration",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Infrastructure migrated from IBM AIX P-Series. Infrastructure migrated from IBM AIX P-Series to Red Hat Linux servers in 2024 (Jul 2024).",
+      "evidence": [
+        "E-029"
+      ],
+      "impact": "Determines the integration stack the next 5+ years build on.",
+      "kind": "MIGRATION",
+      "label": "Infrastructure migrated from IBM AIX P-Series",
+      "metric": null,
+      "peer_context": "Budget Allocation & ROI runs 2.50/5 vs a 3.00 median at comparable institutions.",
+      "play": "Engage before integration decisions lock — position the platform conversation as part of the migration's integration layer, not after it.",
+      "risk": "Integration and data-architecture decisions lock in at go-live; waiting cedes that conversation to the core vendor.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Infrastructure migrated from IBM AIX P-Series. Infrastructure migrated from IBM AIX P-Series to Red Hat Linux servers in 2024 (Jul 2024).",
+      "timeline": {
+        "date": "2024-07-01",
+        "event": "Infrastructure migrated from IBM AIX P-Series"
+      },
+      "window": null
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Feb 2026 job posting (Digital Experience Sr PM): requires Optimizely/Dynamic Yield/Adobe Target, HubSpot or Salesforce Marketing Cloud, Semrush/Ahrefs Confirmed stack: AdRoll (retargeting), Snowflake (data warehouse), Cloudflare (CDN), EVERFI (education)",
+      "evidence": [
+        "E-039"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Feb 2026 job posting (Digital Experience Sr PM): requires…",
+      "metric": null,
+      "peer_context": "Budget Allocation & ROI runs 2.50/5 vs a 3.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Feb 2026 job posting (Digital Experience Sr PM): requires Optimizely/Dynamic Yield/Adobe Target, HubSpot or Salesforce Marketing Cloud, Semrush/Ahrefs Confirmed stack: AdRoll (retargeting), Snowflake (data warehouse). Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Merged with Ccfcu adding 4 branches. Merged with CCFCU adding 4 branches and ~15K members in Monterey County (Mar 2025).",
+      "evidence": [
+        "E-003"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Merged with Ccfcu adding 4 branches",
+      "metric": "branches 4 branches",
+      "peer_context": "Budget Allocation & ROI runs 2.50/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Strategy Document — highest-fit surface at 62/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Merged with Ccfcu adding 4 branches. Merged with CCFCU adding 4 branches and ~15K members in Monterey County (Mar 2025). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2025-03-01",
+        "event": "Merged with Ccfcu adding 4 branches"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Budget Allocation & ROI scores 2.50/5 vs a typical 3.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-003",
+        "E-002",
+        "E-020",
+        "E-037"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Budget Allocation & ROI scores 2.50/5 vs a typical 3.00 at…",
+      "metric": "Budget Allocation & ROI 2.50/5 vs peer 3.00",
+      "peer_context": "Budget Allocation & ROI runs 2.50/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Digital Strategy Document — highest-fit surface at 62/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C1",
+      "text": "Budget Allocation & ROI scores 2.50/5 vs a typical 3.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

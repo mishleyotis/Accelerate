@@ -1,0 +1,477 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "oneaz-credit-union-0001",
+  "financials": {
+    "metrics": {
+      "total_assets": "$4.3B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Arizona (statewide)"
+    ],
+    "leadership": [
+      {
+        "background": "leads strategic vision including Backbase transformation [E-001",
+        "critical_role": false,
+        "name": "Brandon Michaels",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": "dedicated security governance, previously at Navigant CU [E-143",
+        "critical_role": true,
+        "name": "Monique M",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State-chartered",
+    "narrative_md": "OneAZ Credit Union is an Arizona state-chartered, NCUA-insured credit union headquartered in Phoenix, AZ. Founded in 1951 as Arizona Federal Credit Union, it rebranded to OneAZ in 2014 as part of a growth strategy. The credit union operates as a member-owned cooperative serving over 170,000 members across Arizona [E-001]. In 2023, OneAZ completed the absorption of Pinal County Federal Credit Union, expanding its branch network and member base [E-009].",
+    "primary_regulator": "NCUA",
+    "regulatory_standing": {
+      "as_of": "2026-03-01",
+      "e_id": "E-012",
+      "label": "Clean regulatory standing",
+      "note": "Absence of enforcement is informative for P3C3 compliance scoring \u2014 indicates regulatory standing within acceptable bounds."
+    },
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-053",
+        "excerpt": "Financial Resources hub: articles, videos, calculators, coaching partnerships (GreenPath, Banzai).",
+        "title": "Financial Resources hub: articles, videos, calculators, coaching\u2026",
+        "type": "article",
+        "url": "https://www.oneazcu.com/about/financial-resources/"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "Local First Arizona + State Forty Eight collaborations for financial literacy, podcasts, networking.",
+        "title": "Local First Arizona + State Forty Eight collaborations for financial\u2026",
+        "type": "podcast",
+        "url": "https://www.oneazcu.com/community/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "3299685e-9b8a-4718-b2cf-cd3dd2797ba7",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Evidence IDs referenced but not in registry: ['E-202', 'E-206']"
+    },
+    {
+      "id": "cd78e78d-b1fd-4f07-abf2-c528e4894297",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "132 subcaps (18.7%) have missing/generic URLs"
+    },
+    {
+      "id": "67ec9cd8-c0e2-46bb-90c2-1102139758a9",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "132 subcaps (18.7%) lack evidence IDs"
+    },
+    {
+      "id": "cc105ee7-ed0d-4255-8396-a244a13624b3",
+      "issue_id": "GOV-P2-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Only 9 peer mentions"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Latest available financials show total assets of $4.3B.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.28,
+        "P1C2": 3.26,
+        "P1C3": 2.96,
+        "P1C4": 3.09,
+        "P1C5": 3.28,
+        "P2C1": 3.3,
+        "P2C2": 2.99,
+        "P2C3": 3.14,
+        "P2C4": 3.27,
+        "P3C1": 1.87,
+        "P3C2": 2.5,
+        "P3C3": 2.72,
+        "P3C4": 2.5,
+        "P4C1": 2.99,
+        "P4C2": 2.02,
+        "P4C3": 2.21,
+        "P4C4": 1.82
+      },
+      "overall_score": 2.78,
+      "peer_name": "iQ Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.57,
+        "P1C2": 3.09,
+        "P1C3": 3.42,
+        "P1C4": 3.46,
+        "P1C5": 2.11,
+        "P2C1": 2.69,
+        "P2C2": 2.45,
+        "P2C3": 2.12,
+        "P2C4": 2.89,
+        "P3C1": 2.2,
+        "P3C2": 3.13,
+        "P3C3": 2.55,
+        "P3C4": 2.95,
+        "P4C1": 1.95,
+        "P4C2": 2.89,
+        "P4C3": 2.19,
+        "P4C4": 3.08
+      },
+      "overall_score": 2.75,
+      "peer_name": "Baxter Credit Union (BCU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.6,
+        "P1C2": 2.07,
+        "P1C3": 2.09,
+        "P1C4": 1.65,
+        "P1C5": 1.56,
+        "P2C1": 2.31,
+        "P2C2": 2.13,
+        "P2C3": 2.45,
+        "P2C4": 3.09,
+        "P3C1": 2.94,
+        "P3C2": 2.96,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.79,
+        "P4C2": 3.74,
+        "P4C3": 3.98,
+        "P4C4": 4.0
+      },
+      "overall_score": 2.73,
+      "peer_name": "Corporate America Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.91,
+        "P1C2": 2.49,
+        "P1C3": 2.72,
+        "P1C4": 1.91,
+        "P1C5": 3.0,
+        "P2C1": 2.51,
+        "P2C2": 2.81,
+        "P2C3": 2.36,
+        "P2C4": 3.02,
+        "P3C1": 2.4,
+        "P3C2": 2.58,
+        "P3C3": 2.76,
+        "P3C4": 2.28,
+        "P4C1": 2.5,
+        "P4C2": 3.02,
+        "P4C3": 2.61,
+        "P4C4": 3.13
+      },
+      "overall_score": 2.65,
+      "peer_name": "Boeing Employees Credit Union (BECU)",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.4,
+        "P1C2": 2.61,
+        "P1C3": 3.17,
+        "P1C4": 2.14,
+        "P1C5": 2.28,
+        "P2C1": 2.31,
+        "P2C2": 2.63,
+        "P2C3": 2.46,
+        "P2C4": 2.67,
+        "P3C1": 2.19,
+        "P3C2": 2.79,
+        "P3C3": 2.94,
+        "P3C4": 2.25,
+        "P4C1": 2.76,
+        "P4C2": 2.6,
+        "P4C3": 2.71,
+        "P4C4": 2.81
+      },
+      "overall_score": 2.63,
+      "peer_name": "Kitsap Credit Union",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-ONEAZ-20260313-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "3.2/5 overall Glassdoor rating, 104 reviews, 57% recommend",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 104,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 3.2
+      },
+      {
+        "drilldown": "Trustpilot 4.8/5 from 458+ reviews \u2014 strong member satisfaction signal",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 458,
+        "polarity": "positive",
+        "source": "Trustpilot",
+        "themes": [],
+        "value": 4.8
+      },
+      {
+        "drilldown": "BBB complaints 2024-2025: member disputes include lending documentation issues, account freezing incidents, fraud handling concerns",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "No CFPB enforcement actions found against OneAZ Credit Union",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": 3.2
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Mike Boden named President & CEO Jan 13 2026.",
+      "date_precision": "day",
+      "e_id": "E-007",
+      "event_date": "2026-01-13",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "d153bc69-8941-43ec-a6e4-dc6e5efea260",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.oneazcu.com/about/news/2026/oneaz-announces-mike-boden-named-new-president-ceo/",
+      "subcap_ids": [],
+      "title": "Mike Boden named President & CEO Jan 13 2026"
+    },
+    {
+      "body": "All-cash acquisition of 1st Bank Yuma closed Nov 21 2025.",
+      "date_precision": "day",
+      "e_id": "E-006",
+      "event_date": "2025-11-21",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "c43d5261-7913-4a3c-85b4-c8f0d1736503",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.oneazcu.com/about/news/2025/1st-bank-yuma-is-now-oneaz/",
+      "subcap_ids": [],
+      "title": "All-cash acquisition of 1st Bank Yuma closed"
+    },
+    {
+      "body": "Total assets exceeded $4B after 1st Bank Yuma acquisition closed Nov 2025. 230K+ members, 25 branches.",
+      "date_precision": "month",
+      "e_id": "E-001",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "b1b186f3-137a-4d6c-9c37-51521d5670ca",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.oneazcu.com/about/news/2025/1st-bank-yuma-is-now-oneaz/",
+      "subcap_ids": [],
+      "title": "Total assets exceeded $4B after 1st Bank Yuma acquisition"
+    },
+    {
+      "body": "OneAZ Credit Union announced strategic partnership with Backbase in September 2024 to modernize technology architecture and digital banking platform.",
+      "date_precision": "month",
+      "e_id": "E-110",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-110"
+      ],
+      "id": "dc5d4580-ec09-4ba8-96db-9222327f0fc7",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.oneazcu.com/about/news/2024/oneaz-credit-union-announces-strategic-partnership-with-backbase/",
+      "subcap_ids": [],
+      "title": "OneAZ Credit Union announced strategic partnership with\u2026"
+    },
+    {
+      "body": "OneAZ launched strategic partnership with Backbase in September 2024 to modernize technology architecture",
+      "date_precision": "month",
+      "e_id": "E-095",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "7b963ab0-42f5-45b4-9175-764df3c4ed6c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.oneazcu.com/about/news/2024/oneaz-credit-union-announces-strategic-partnership-with-backbase/",
+      "subcap_ids": [],
+      "title": "OneAZ launched strategic partnership with Backbase"
+    },
+    {
+      "body": "Strategic partnership with Backbase announced Sep 2024.",
+      "date_precision": "month",
+      "e_id": "E-009",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-009"
+      ],
+      "id": "caac478c-8dc9-43c9-aa96-28a72d51a8a3",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.oneazcu.com/about/news/2024/oneaz-credit-union-announces-strategic-partnership-with-backbase/",
+      "subcap_ids": [],
+      "title": "Strategic partnership with Backbase announced Sep 2024"
+    },
+    {
+      "body": "OneAZ Credit Union Backbase partnership announced September 2024 as major digital transformation milestone.",
+      "date_precision": "month",
+      "e_id": "E-138",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-138"
+      ],
+      "id": "c8407389-2f9b-4ae7-8914-321da56dd33a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.prweb.com/releases/oneaz-credit-union-announces-strategic-partnership-with-backbase-302253528.html",
+      "subcap_ids": [],
+      "title": "OneAZ Credit Union Backbase partnership announced as major\u2026"
+    },
+    {
+      "body": "OneAZ joined Filene Research Institute's Centers of Excellence in July 2024",
+      "date_precision": "month",
+      "e_id": "E-099",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-099"
+      ],
+      "id": "a5ed747b-2e49-4a72-87ea-9b0c7975fe75",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.oneazcu.com/about/news/2024/oneaz-launches-transformational-partnership-with-filene/",
+      "subcap_ids": [],
+      "title": "OneAZ joined Filene Research Institute's Centers of\u2026"
+    },
+    {
+      "body": "Chris Flores joined as EVP Chief People and Culture Officer Jul 2024.",
+      "date_precision": "month",
+      "e_id": "E-008",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-008"
+      ],
+      "id": "6abb9980-5871-4282-80e6-c2579e6a53bb",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.oneazcu.com/about/news/2024/oneaz-welcomes-new-chief-people-and-culture-officer/",
+      "subcap_ids": [],
+      "title": "Chris Flores joined as EVP Chief People and Culture Officer"
+    },
+    {
+      "body": "Sandeep Uthra appointed EVP Chief Technology Officer at OneAZ to lead technology transformation.",
+      "date_precision": "publish_fallback",
+      "e_id": "E-134",
+      "event_date": "2024-03-01",
+      "evidence_e_ids": [
+        "E-134"
+      ],
+      "id": "2c143538-f56a-49a3-a23e-9ab455c576b4",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.cuinsight.com/press-release/oneaz-credit-union-announces-three-new-executives/",
+      "subcap_ids": [],
+      "title": "Sandeep Uthra appointed EVP Chief Technology Officer"
+    },
+    {
+      "body": "Arizona State Department of Financial Institutions and Insurance and NCUA jointly completed annual regulatory examination as of Sept 30, 2023",
+      "date_precision": "day",
+      "e_id": "E-094",
+      "event_date": "2023-09-30",
+      "evidence_e_ids": [
+        "E-094"
+      ],
+      "id": "788eb328-d5a2-4fce-a04d-b4049b18b4ef",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.oneazcu.com/about/annual-reports/2023-annual-report/",
+      "subcap_ids": [],
+      "title": "Arizona State Department of Financial Institutions and\u2026"
+    },
+    {
+      "body": "Joined OneAZ 2014 as CFO, served as interim CEO before permanent appointment.",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "2014-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "c56b6f0e-16a0-4674-b71e-e6a10eec713b",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.oneazcu.com/about/news/2026/oneaz-announces-mike-boden-named-new-president-ceo/",
+      "subcap_ids": [],
+      "title": "Joined OneAZ 2014 as CFO"
+    }
+  ]
+}

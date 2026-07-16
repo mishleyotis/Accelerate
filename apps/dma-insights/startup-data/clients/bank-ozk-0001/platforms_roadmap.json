@@ -1,0 +1,255 @@
+{
+  "entity_display_id": "bank-ozk-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "BC/DR plans for": "95%",
+        "Outcome": "3 (Data Observability Platform) score 1.5; OZK currently uses manual, siloed data quality checks in core system (Fiserv)",
+        "identity resolution accuracy": "~85%",
+        "stewardship model within": "6 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "stewardship model within 6 months",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.5",
+          "metric": "stewardship model within 6 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "stewardship model within 6 months",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Establish Enterprise Data Governance Operating Model for Bank OZK"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.5",
+          "metric": "3 (Data Observability Platform) score 1.5; OZK currently uses manual, siloed data quality checks in core system (Fiserv)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "3 (Data Observability Platform) score 1.5; OZK currently uses manual, siloed data quality checks in core system (Fiserv)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Implement Automated Data Quality Monitoring and Observability Platform"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.5",
+          "metric": "identity resolution accuracy ~85%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "identity resolution accuracy ~85%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Deploy Master Data Management (MDM) Golden Record Solution for Customer 360"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+3.0",
+          "metric": "BC/DR plans for 95%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "BC/DR plans for 95%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Establish Integrated Business Continuity and Disaster Recovery Program"
+        },
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.0",
+          "metric": "1 (Risk Identification & Assessment) scores 1.5; OZK depends on 800+ third-party vendors (core, payments, cloud, outsourcing) with limited centralized TPRM",
+          "outcomes": {
+            "effort": "L",
+            "metric": "1 (Risk Identification & Assessment) scores 1.5; OZK depends on 800+ third-party vendors (core, payments, cloud, outsourcing) with limited centralized TPRM",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Develop Comprehensive Third-Party Risk Management and Vendor Resilience Program"
+        }
+      ],
+      "target": "M2 \u2192 M5 in P3C4, P4C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "2 (Legacy Modernization Strategy) scores 2.5; OZK's Fiserv Premier core (2021 deployment) is still deployed on-premises",
+        "completion rate increases": "40%",
+        "employees": "25 employees",
+        "within": "12 months"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "completion rate increases 40%",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 Tableau",
+      "recommendations": [
+        {
+          "feature": "Slack",
+          "maturity_lift": "+1.5",
+          "metric": "completion rate increases 40%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "completion rate increases 40%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Launch Structured Digital Skills Development Program for Frontline and Back-Office Staff"
+        },
+        {
+          "feature": "Experience Cloud",
+          "maturity_lift": "+1.5",
+          "metric": "employees 25 employees",
+          "outcomes": {
+            "effort": "L",
+            "metric": "employees 25 employees",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-07",
+          "title": "Establish Digital Champions Network to Drive Organizational Change and Adoption"
+        },
+        {
+          "feature": "Tableau",
+          "maturity_lift": "+1.0",
+          "metric": "within 12 months",
+          "outcomes": {
+            "effort": "L",
+            "metric": "within 12 months",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "tableau",
+          "platform_name": "Tableau",
+          "rec_id": "REC-08",
+          "title": "Enable Data-Driven Decision Culture through Self-Service Analytics and Insights"
+        },
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+1.0",
+          "metric": "2 (Legacy Modernization Strategy) scores 2.5; OZK's Fiserv Premier core (2021 deployment) is still deployed on-premises",
+          "outcomes": {
+            "effort": "L",
+            "metric": "2 (Legacy Modernization Strategy) scores 2.5; OZK's Fiserv Premier core (2021 deployment) is still deployed on-premises",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-09",
+          "title": "Evaluate Cloud-Native Modernization Path for Core Banking System"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+1.0",
+          "metric": "4 (Settlement Automation) scores 2.5; OZK's payment processing is T+1 for ACH, T+0 for some wire but fragmented",
+          "outcomes": {
+            "effort": "M",
+            "metric": "4 (Settlement Automation) scores 2.5; OZK's payment processing is T+1 for ACH, T+0 for some wire but fragmented",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-10",
+          "title": "Implement Real-Time and Near-Real-Time Payment Processing Infrastructure"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P1C4, P3C1"
+    },
+    {
+      "customer_impact": {
+        "Automated extraction": "95%",
+        "Outcome": "2 (AI & ML Strategy & Governance) scores 2.5; OZK has launched 3 AI pilots (loan decisioning, fraud detection, chatbot) but no enterprise governance, risk frame",
+        "effort score CES": "25%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "Automated extraction 95%",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": null,
+          "maturity_lift": "+1.0",
+          "metric": "Automated extraction 95%",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Automated extraction 95%",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-11",
+          "title": "Deploy Intelligent Document Processing for Loan Origination and Account Opening"
+        },
+        {
+          "feature": "Data Cloud",
+          "maturity_lift": "+1.5",
+          "metric": "effort score CES 25%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "effort score CES 25%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-12",
+          "title": "Build Unified Omnichannel Customer Experience Platform on Salesforce"
+        },
+        {
+          "feature": "Salesforce Shield",
+          "maturity_lift": "+1.5",
+          "metric": "2 (AI & ML Strategy & Governance) scores 2.5; OZK has launched 3 AI pilots (loan decisioning, fraud detection, chatbot) but no enterprise governance, risk frame",
+          "outcomes": {
+            "effort": "L",
+            "metric": "2 (AI & ML Strategy & Governance) scores 2.5; OZK has launched 3 AI pilots (loan decisioning, fraud detection, chatbot) but no enterprise governance, risk frame",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-13",
+          "title": "Establish AI/ML Governance Framework and Prioritized Use Case Roadmap"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P2C3, P4C2"
+    }
+  ],
+  "run_request_id": "DMA-RES-OZK-20260306-0001",
+  "total_duration_months": 12
+}

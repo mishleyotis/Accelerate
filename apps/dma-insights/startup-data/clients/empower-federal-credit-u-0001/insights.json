@@ -1,0 +1,662 @@
+{
+  "entity_display_id": "empower-federal-credit-u-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C1",
+        "P4C3",
+        "P2C4",
+        "P4C3.6.10",
+        "P2C4.1.4",
+        "P2C2.6.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "6ea29b41-b0ae-439b-9fc6-bcc2d5c6f6c4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-P1C1-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "EV-P4C3-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-P1C1-008",
+        "EV-P4C3-002",
+        "EV-P3C4-002"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Activate Salesforce Marketing Cloud + Journey Builder triggered by MANTL onboarding events — addressable via salesforce [EV--002] [EV-P3C4-002].",
+      "source_rec_id": "REC-01",
+      "theme": "Core Automation",
+      "title": "Activate Salesforce Marketing Cloud + Journey Builder triggered by MANTL onboarding events",
+      "what_text": "Evidence: EV--003 (Alkami/MANTL Mar 12, 2026 announcement: <5 min online / <10 min branch onboarding for retail AND business banking) + EV--003 (Alkami Digital Banking Platform integration) + Layer 1 score 2.27 vs peer median 3.20 (gap -0.93) Specific Gap: MANTL/Alkami launched March 12, 2026 — every onboarding event creates an FSC Person Account at the standard 15-min sync interval, but there is no Marketing Cloud Journey Builder to orchestrate post-onboarding member journeys (welcome series, product education, cross-sell triggers). 12,000 SEG (Select Employer Group) member companies represent un-orchestrated cross-sell pipeline. Why This Matters for Empower: Without Journey Builder, the MANTL launch only solves the onboarding moment — not the 30-90 day window where new members decide whether to consolidate banking with Empower. In Zennify's assessment Member Transaction Processing scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [EV--002] [EV--002] [EV-P4C3-002].",
+      "why_text": "At 1.5 out of 5, Member Transaction Processing sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [EV-P1C1-008, EV-P4C3-002].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P3C2",
+        "P4C2",
+        "P4C2.2.6",
+        "P2C4.1.4",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "54ad709a-d694-4a25-895a-fbd8fdaeaf25",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-P4C2-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "EV-P2C4-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-P4C2-001",
+        "EV-P2C4-005",
+        "EV-P4C4-004"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Activate Salesforce Einstein across FSC org (Lead/Opportunity Scoring + Einstein Bots + Discovery) — addressable via salesforce [EV--004] [EV-P4C4-004].",
+      "source_rec_id": "REC-02",
+      "theme": "Core Automation",
+      "title": "Activate Salesforce Einstein across FSC org (Lead/Opportunity Scoring + Einstein Bots + Discovery)",
+      "what_text": "Evidence: EV--004 (FSC + Experience Cloud deployed via Accellor 2023: 5 systems consolidated, 8 minutes per dispute, 300+ hours saved in 2 months) + EV--001 (IllumaSHIELD voice biometric: 30K members, 19 internal departments, 81% verification time reduction) + Layer 1 score 2.05 vs peer median 2.50 (gap -0.45) Specific Gap: Empower has FSC + proven AI scaling discipline (IllumaSHIELD across 19 depts) but no Einstein activation visible in FSC org. PenFed (2.9M members), BCU ($6B), BayPort are the publicly-confirmed CU Einstein deployers — Empower's $4.07B Medium-tier peer. Layer 0 OPPORTUNITY: 'no named AI/ML platform'. Why This Matters for Empower: FSC subscription likely already includes Einstein entitlements that aren't activated. In Zennify's assessment Member Transaction Processing scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [EV--005] [EV--005] [EV-P2C4-005].",
+      "why_text": "At 1.5 out of 5, Member Transaction Processing sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [EV-P4C2-001, EV-P2C4-005].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.6",
+        "P2C4.1.4",
+        "P1C2.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "5c70e43a-bb96-4132-a133-0ee9e9daf169",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-09"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-XB1-001",
+        "EV-P3C3-001",
+        "EV-P2C2-024"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Activate Salesforce Data Cloud as canonical Person Account / Household model across 7-charter consolidation — addressable via salesforce [EV--024] [EV-P2C2-024].",
+      "source_rec_id": "REC-03",
+      "theme": "Data Management & Governance",
+      "title": "Activate Salesforce Data Cloud as canonical Person Account / Household model across 7-charter consolidation",
+      "what_text": "Evidence: Layer 0 entity profile §4.4 Acquisition History (Power+Empire 2007 formation merger + 6 post-formation: Nestegg 2008, Telco 2009, Providers 2011, Cayuga 2013, FocalPoint 2016, Horizons 2021 = 7 charters consolidated) + Layer 1 score 2.09 vs peer median 2.50 (gap -0.41) + Layer 0 OPPORTUNITY area 'no named CDP' + 'no named data lake/warehouse'\nSpecific Gap: 7 charter consolidations have created member data fragmentation. Each merger inherited member records, account histories, and SEG sponsorships from the predecessor charter. Without a canonical Person Account / Household / Group / Relationship model, Empower's 300K members are likely partially duplicated, sibling/spouse relationships are inferred manually, and household-level cross-sell is impossible. In Zennify's assessment Self-Service Adoption KPIs scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [EV--001] [EV--001] [EV-P3C3-001].",
+      "why_text": "At 1.5 out of 5, Self-Service Adoption KPIs sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [EV-XB1-001, EV-P3C3-001].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C3",
+        "P4C2.2.6",
+        "P4C3.6.10",
+        "P2C4.1.4",
+        "P3C1.3.CU1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "b9592626-7217-4858-8f97-f808d2a5d597",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-P1C1-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "EV-P4C2-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "EV-P3C1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "EV-P1C1-008",
+        "EV-P3C1-001",
+        "EV-P4C2-001"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Deploy MuleSoft Anypoint Platform as integration backbone for MANTL + RPA→Flow handoff — addressable via salesforce [EV--001] [EV-P4C2-001].",
+      "source_rec_id": "REC-04",
+      "theme": "Core Automation",
+      "title": "Deploy MuleSoft Anypoint Platform as integration backbone for MANTL + RPA→Flow handoff",
+      "what_text": "Evidence: EV--001 + EV--002 (Lab Consulting RPA Wave 1: 5 production bots — Right-to-Offset, ACH Returns, GL Balancing, Account Warning Flag Removal, Delinquent Loan Charge Offs; 100+ use cases in pipeline) + EV--003 (MANTL/Alkami March 2026 launch) + EV--008 (AngularJS EOL technographic) + Layer 1 score 2.06 vs peer median 2.50 (gap -0.44) + Layer 0 OPPORTUNITY area 'no named API platform'\nSpecific Gap: MANTL/Alkami March 2026 launch created an integration architecture inflection point. Each onboarding event needs to flow to FSC, downstream to Marketing Cloud, trigger Einstein scoring, and update Data Cloud. Without an API platform, these integrations become point-to-point. Lab Consulting RPA glue is good for cross-system handoffs, but FSC-native workflows belong in Flow + Apex via API platform. In Zennify's assessment Member Transaction Processing scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [EV--001] [EV--001] [EV-P3C1-001].",
+      "why_text": "At 1.5 out of 5, Member Transaction Processing sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [EV-P1C1-008, EV-P3C1-001].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P3C3",
+        "P2C4.1.4",
+        "P3C3.1.3",
+        "P4C2.6.3",
+        "P1C5.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "494d64ab-928b-45e6-9acd-bfac1087b40f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "EV-P3C1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-XB1-001",
+        "EV-P3C1-001",
+        "EV-P4C4-008"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Activate Salesforce Shield (Platform Encryption + Event Monitoring + Field Audit Trail) — supports SOC 2 / PCI Level 1 attestation pursuit — addressable via salesforce [EV--008] [EV-P4C4-008].",
+      "source_rec_id": "REC-05",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Activate Salesforce Shield (Platform Encryption + Event Monitoring + Field Audit Trail) — supports SOC 2 / PCI Level 1 attestation pursuit",
+      "what_text": "Evidence: Layer 0 Issue Register I-004 (no public SOC 2 Type II / PCI Level 1 attestation found for Empower FCU) + Layer 0 OPPORTUNITY area 'no named SIEM' + Layer 1 score 2.13 vs peer median 3.00 (gap -0.87) + Layer 1 score 2.17 vs peer median 3.20 (gap -1.03) — third highest priority gap\nSpecific Gap: Empower has no publicly-disclosed SOC 2 Type II / PCI Level 1 attestation (I-004 MINOR severity). FSC org has standard Salesforce platform security but not Shield-grade Field Audit Trail or Event Monitoring. NCUA Part 748 Appendix B compliance is regulator-mandated baseline; SOC 2 Type II would be additive transparency play. Why This Matters for Empower: Layer 1 score 2.13 places Empower below peer median (3.00). Issue I-004 caps related subcaps at level 4. In Zennify's assessment Identity Governance & Administration scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [EV--001] [EV--001] [EV-P3C1-001].",
+      "why_text": "At 2.0 out of 5, Identity Governance & Administration sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [EV-XB1-001, EV-P3C1-001].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C2",
+        "P4C2.2.6",
+        "P2C2.7.6",
+        "P3C2.4.1",
+        "P3C2.7.2",
+        "P4C2.6.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "ad7296ac-fcba-4775-90d7-edf28a53a580",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-P2C4-005"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-XB1-001",
+        "EV-P3C2-002",
+        "EV-P2C4-005"
+      ],
+      "linked_subcap_id": "P3C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Deploy Service Cloud Einstein for fraud case routing — extends IllumaSHIELD partnership — addressable via salesforce [EV--005] [EV-P2C4-005].",
+      "source_rec_id": "REC-06",
+      "theme": "Operational Workflow & Risk",
+      "title": "Deploy Service Cloud Einstein for fraud case routing — extends IllumaSHIELD partnership",
+      "what_text": "Evidence: EV--001 (IllumaSHIELD voice biometric: 30K members enrolled, 19 internal departments using, 81% verification time reduction — Jeffrey Lamb Fraud Operations Manager) + EV--004 + EV--005 (force-placed insurance dispute pattern on BBB and Wallethub since June 2020) + Layer 1 score 2.43 vs peer median 3.00 (gap -0.57) + Layer 0 OPPORTUNITY area 'no named fraud platform (Verafin)'\nSpecific Gap: Empower has voice-channel fraud authentication via IllumaSHIELD (industry-leading 30K enrollment) but no Service Cloud Einstein for case routing or named enterprise fraud platform (Verafin, Featurespace, NICE Actimize used by 3,800+ banks/CUs). Layer 0 OPPORTUNITY area: 'no named fraud platform'. Force-placed insurance dispute pattern (BBB+Wallethub since June 2020) suggests case routing also impacts member service quality. In Zennify's assessment Operational Risk Framework scores 1.0 out of 5, versus a typical 3.0 at comparable institutions [EV--002] [EV--002] [EV-P3C2-002].",
+      "why_text": "At 1.0 out of 5, Operational Risk Framework sits 2.0 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [EV-XB1-001, EV-P3C2-002].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P3C1",
+        "P1C4.1.3",
+        "P1C1.5.5",
+        "P2C2.8.4",
+        "P4C3.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "24fbcfba-3f7a-4a91-b893-fb82a32869d2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-P4C3-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "EV-P4C3-008",
+        "EV-P4C3-002",
+        "EV-P1C1-002"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Migrate AngularJS web stack to Lightning Web Components on Experience Cloud — resolves I-003 EOL technical debt — addressable via salesforce [EV--002] [EV-P1C1-002].",
+      "source_rec_id": "REC-07",
+      "theme": "Architecture & Cloud",
+      "title": "Migrate AngularJS web stack to Lightning Web Components on Experience Cloud — resolves I-003 EOL technical debt",
+      "what_text": "Evidence: EV--008 (LeadIQ technographic: AngularJS in production at Empower) + Layer 0 Issue I-003 (AngularJS EOL Dec 2021 — MATERIAL severity caps subcaps at level 3) + EV--004 (Experience Cloud already deployed via Accellor 2023) + Layer 1 score 2.06 vs peer median 2.50 (gap -0.44) Specific Gap: AngularJS reached End-of-Life Dec 2021 (Google official EOL). Continued production use creates security exposure (no patches), tech debt accumulation, and recruitment friction (developers want modern stacks). Experience Cloud is already deployed via Accellor 2023 — LWC migration uses platform Empower already pays for. Why This Matters for Empower: Issue I-003 caps subcaps at level 3 ceiling. In Zennify's assessment Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [EV--002] [EV--002] [EV-P4C3-002].",
+      "why_text": "At 1.5 out of 5, Cost Allocation Model (Domain/DMU + Product/Workspace Tagging Standards) sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [EV-P4C3-008, EV-P4C3-002].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1",
+        "P1C2",
+        "P4C3",
+        "P4C3.6.10",
+        "P2C4.1.4",
+        "P1C1.2.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-08",
+      "id": "c493b1a5-a472-47ce-9cdb-f74a9e2eedb2",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-CONN-003",
+        "EV-CONN-001",
+        "EV-P1C1-003",
+        "EV-P1C1-004"
+      ],
+      "linked_subcap_id": "P1C1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Activate Salesforce DevOps Center + run Digital Strategy Workshop FY26 — supports CEO McIntyre 3-yr tenure milestone strategic refresh — addressable via salesforce [EV--003] [EV-P1C1-003].",
+      "source_rec_id": "REC-08",
+      "theme": "Digital Strategy & Vision",
+      "title": "Activate Salesforce DevOps Center + run Digital Strategy Workshop FY26 — supports CEO McIntyre 3-yr tenure milestone strategic refresh",
+      "what_text": "Evidence: Entity profile §2 CEO McIntyre tenure (Jan 2023, 3-yr milestone Jan 2026 — strategic plan refresh moment) + Layer 1 score 1.89 vs peer median 2.92 (gap -1.03) + Layer 1 score 1.97 vs peer median 3.00 (gap -1.03) + Layer 0 OPPORTUNITY area 'no named CI/CD'\nSpecific Gap: Two intertwined gaps. Strategy: below peer median by 1.03 points. McIntyre's 3-year tenure milestone (Jan 2026) is a natural strategic plan refresh moment, but Layer 0 found no public board-approved digital strategy with multi-year horizon. Architecture: OPPORTUNITY 'no named CI/CD'. DevOps Center is FSC-resident — it activates without acquiring a new vendor. Why This Matters for Empower: Digital Strategy Workshop produces board-approved strategic plan with measurable digital KPIs aligned to Salesforce activation roadmap (RECs 01-07). In Zennify's assessment Board Engagement scores 1.5 out of 5, versus a typical 3.0 at comparable institutions [EV-CONN-001] [EV-CONN-001] [EV-CONN-001].",
+      "why_text": "At 1.5 out of 5, Board Engagement sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [EV-CONN-003, EV-CONN-001].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P3C3",
+        "P2C4.1.4",
+        "P3C3.1.3",
+        "P1C5.4.2",
+        "P2C4.5.IB1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "fd16dac8-ed60-4791-b583-11dadb561115",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "EV-P3C1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "EV-P3C1-001",
+            "EV-P4C4-008",
+            "EV-XB1-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "EV-XB1-001",
+        "EV-P3C1-001",
+        "EV-P4C4-008",
+        "EV-P2C3-017"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "ncino",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Pursue SOC 2 Type II + PCI Level 1 attestation — independent audit body engagement — addressable via salesforce [EV--008] [EV-P4C4-008].",
+      "source_rec_id": "REC-09",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Pursue SOC 2 Type II + PCI Level 1 attestation — independent audit body engagement",
+      "what_text": "Evidence: Layer 0 Issue Register I-004 (no public SOC 2 Type II / PCI Level 1 attestation found — MINOR severity caps + subcaps at level 4) + Layer 1 score 2.13 vs peer median 3.00 (gap -0.87) + Layer 1 score 2.17 vs peer median 3.20 (gap -1.03 — third highest priority gap) Specific Gap: Empower has no publicly-disclosed independent SOC 2 Type II or PCI Level 1 attestation. Peer median = 3.00 reflects sector-wide voluntary attestation pursuit. NCUA Part 748 Appendix B compliance is regulator-mandated baseline; SOC 2 Type II is voluntary transparency. Why This Matters for Empower: Closes Issue I-004 cap on + subcaps. Pairs with Salesforce Shield activation provides audit-trail evidence supporting attestation. Empower's 'Best Companies NYS' brand extends naturally to compliance brand. Platform:. In Zennify's assessment Identity Governance & Administration scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [EV--001] [EV--001] [EV-P3C1-001].",
+      "why_text": "At 2.0 out of 5, Identity Governance & Administration sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [EV-XB1-001, EV-P3C1-001].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Empower trails the peer median in every one of the 17 categories assessed. Narrowest gaps cluster in ESG (−0.38) and Data Management (−0.36); widest gap is Compliance (−1.32). The pattern is gap-everywhere, with widest gaps concentrated in P1 cluster (governance + strategy + culture) and (compliance attestation transparency).",
+        "heading": "Strategic Positioning Matrix",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience  —  Score 2.32 vs Peer Median 3 (Gap -0.68)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance  —  Score 2.15 vs Peer Median 3.13 (Gap -0.98)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data, Analytics & Technology  —  Score 2.1 vs Peer Median 2.5 (Gap -0.4)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Each recommendation follows the structure: [ROOT CAUSE] with E-IDs → [SOLUTION] mapped to a Zennify offering from the 12-solution catalog → [EXPECTED OUTCOMES] table with qualitative metrics → [STRATEGIC ALIGNMENT] to entity objectives → [TECH VALIDATION] confirming technology not already deployed → [COUNTER-ARGUMENTS] for honest discussion. Per Rule R6, no investment amounts, ROI projections, or fixed-date timelines are included.\nTag legend: [ZENNIFY] = Zennify-scoped consulting engagement; [CLIENT] = independent client-led action (out of Zennify scope)."
+  },
+  "run_request_id": "DMA-ASM-EFCU-20260429-0001"
+}

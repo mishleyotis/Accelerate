@@ -1,0 +1,327 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "greenstone-farm-credit-s-3001",
+  "financials": {
+    "metrics": {
+      "net_income": "$296.6M"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Michigan and northeast Wisconsin",
+      "USA"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Travis Jones",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kimberly Brunner",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Brett Dutcher",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ian McGonigal",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Chief Sales & Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Melissa Rogers",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Marketing & PR"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Pete Lemmer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Legal Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Melissa Stolicker",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Internal Auditor"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_md": "GreenStone Farm Credit Services ACA is a farm-credit institution. It reports $15.0 billion in assets under management. It is regulated by Farm Credit Administration (FCA) and operates 35 branches. Its overall digital maturity is assessed at 2.5 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "size_tier": "Large",
+    "thought_leadership": null
+  },
+  "issue_register": [
+    {
+      "id": "d8b4b78d-3370-4632-8920-28a6c040028c",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Overall score recomputation mismatch: Computed=2.46 from workbook data vs Stated=2.51 (delta=0.055). Exceeds \u00b10.01 threshold."
+    },
+    {
+      "id": "ccd4c485-9a11-4aa4-a3f2-5252e74211fa",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Evidence count mismatch: run_manifest states 102 items but tier sum in evidence_index.csv only has 16 key items (T1:7+T2:21+T3:9+T5:9=46, not 102)."
+    },
+    {
+      "id": "89e70fa8-e1bf-46b5-bb4f-492fe36f53e2",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Workbook missing expected sheets: Summary, Calculation_Chain, P1-P4_Scoring_Detail (expected format), Evidence_Index, Caps_Applied_Log, Contradiction_Log, Absent_Evidence."
+    },
+    {
+      "id": "8d275a7c-3205-485f-8353-edc3f5f00d97",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "No scoring detail rows found in pillar sheets with expected column format (Columns R/S/T proof structure)."
+    },
+    {
+      "id": "8ec3f204-1c67-4d7d-b8e3-09e5b949cbdb",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "No Calculation_Chain sheet in workbook. Cannot verify weighted rollup from subcaps \u2192 categories \u2192 pillars \u2192 overall."
+    },
+    {
+      "id": "633c9c25-a6aa-4e2f-8073-006009fdb795",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Evidence ID registry (evidence_index.csv) contains only 16 items. Report cites 58 unique E-IDs. 42 E-IDs in the report are not in the registry."
+    },
+    {
+      "id": "2ed91f37-eda0-4850-a933-44cddb99e5d7",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Score propagation check: Computed from pillar scores (P1:2.55\u00d70.20 + P2:2.20\u00d70.20 + P3:2.89\u00d70.35 + P4:2.18\u00d70.25) = 2.5065, not 2.51. Delta = 0.0035."
+    },
+    {
+      "id": "31029f0f-cd53-4b34-b648-1b3b8458f2e8",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "0/653 subcaps have \u226550 character rationale in the expected workbook column format. Proof structure uses simplified column layout without R/S/T proof triples."
+    },
+    {
+      "id": "7c437960-2524-402d-aeaa-fa9ca61f1c71",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "8 cap entries use non-standard cap types ('ABSENCE') instead of expected SEVERITY/SENTIMENT types."
+    },
+    {
+      "id": "02b2af08-0cf4-43cd-b624-72e69a89e8e3",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "No 'peer proximity' or 'peer prox' language found in report. The auditor expects explicit peer proximity classification language."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Latest available financials show net income of $296.6M.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.98,
+        "P1C2": 2.65,
+        "P1C3": 3.19,
+        "P1C4": 3.3,
+        "P1C5": 3.07,
+        "P2C1": 2.53,
+        "P2C2": 3.16,
+        "P2C3": 2.55,
+        "P2C4": 2.87,
+        "P3C1": 3.59,
+        "P3C2": 3.14,
+        "P3C3": 3.88,
+        "P3C4": 3.52,
+        "P4C1": 3.39,
+        "P4C2": 3.3,
+        "P4C3": 3.24,
+        "P4C4": 3.72
+      },
+      "overall_score": 3.18,
+      "peer_name": "Farm Credit Mid-America, ACA",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.82,
+        "P1C2": 1.66,
+        "P1C3": 1.55,
+        "P1C4": 1.67,
+        "P1C5": 2.07,
+        "P2C1": 1.58,
+        "P2C2": 1.6,
+        "P2C3": 1.65,
+        "P2C4": 1.74,
+        "P3C1": 2.14,
+        "P3C2": 1.98,
+        "P3C3": 1.88,
+        "P3C4": 2.03,
+        "P4C1": 1.58,
+        "P4C2": 1.81,
+        "P4C3": 2.09,
+        "P4C4": 2.0
+      },
+      "overall_score": 1.81,
+      "peer_name": "Capital Farm Credit",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-GFCS-20260323-001",
+  "sentiment": {
+    "derived_from": "research_report_prose",
+    "sources": [
+      {
+        "drilldown": "sustained for 21+ consecutive years, T2), 4.2/5 Glassdoor with 4.3/5 culture sub-score, T3), Top-5 Detroit Free Press Top Workplaces large companies, T3), ATD-certified Credit Learning Partner program, ADKAR change management methodology in",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.2
+      },
+      {
+        "drilldown": "case study, Moody's credit opinion (AgriBank Aa3), app store ratings, Enlyft/ZoomInfo tech profiles, Glassdoor reviews (T3)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Google Play rating of 2.6/5 with member reports of login lockouts and authentication failures, T3) versus 96% satisfaction on relationship channels, T2)",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": 2.6
+      },
+      {
+        "drilldown": "BBB: not accredited with at least one complaint regarding unauthorized hard credit inquiry",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "trend": "Declining",
+        "value": 3.3
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of GreenStone Farm Credit Services ACA. Overall digital maturity scored 2.41/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-03-23",
+      "evidence_e_ids": [],
+      "id": "fdf57eb2-abe8-405c-ba99-7b26e63db6a7",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    }
+  ]
+}

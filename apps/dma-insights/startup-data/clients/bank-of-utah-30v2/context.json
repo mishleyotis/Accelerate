@@ -1,0 +1,778 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "bank-of-utah-30v2",
+  "financials": {
+    "metrics": {
+      "total_assets": "$3.7B"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Utah"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ben Browning",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Vice Chairman & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Branden Hansen",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Justin Nalder",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Chief Strategy & Innovation Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ronald Ross",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Advanced Analytics & AI"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jay Weaver",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Technology Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ema Jones",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Banking Initiatives & Delivery"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Sean Morrison",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Human Resources"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Roger Shumway",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Chief Credit Officer"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "FDIC-insured bank",
+    "narrative_md": "Bank of Utah is a regional bank. It reports $3.7 billion in total assets and has operated since 1952. It is regulated by FDIC and employs approximately 459 people across 18 branches. Its overall digital maturity is assessed at 2.8 out of 5 across the DMA capability framework.",
+    "primary_regulator": "FDIC (state-chartered, FDIC-supervised)",
+    "size_tier": "Medium ($2B-$10B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-057",
+        "excerpt": "NO published ESG/sustainability report found after searching bankofutah.com, SEC, annual reports, and press releases. Proxy searches exhausted. NO TCFD disclosure, CDP filing, or climate risk assessment found. Bank websi",
+        "title": "NO published ESG/sustainability report found after searching\u2026",
+        "type": "article",
+        "url": "https://www.bankofutah.com/cra-public-file"
+      },
+      {
+        "author": "Ben Browning",
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-034",
+        "excerpt": "CEO Ben Browning authored blog post on community banking values \u2014 personal engagement Browning describes himself as inspired by family legacy and meaningful relationships",
+        "title": "CEO Ben Browning authored blog post on community banking values",
+        "type": "blog",
+        "url": "https://www.bankofutah.com/insights/what-makes-community-banking-different-it-starts-with-relationships"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "cf4f7176-4b50-4501-9bbd-27999d3a964f",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "f34efbd3-a7f5-421b-863c-9bd3e6660e8e",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "6d0820a9-4354-4ecb-96af-8879810689db",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": ""
+    },
+    {
+      "id": "e18d7b63-6a79-45ec-9703-e6411b37f1e2",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": ""
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "ISS-001 is the dominant constraint affecting 9 subcaps. Remediation: SVP Risk (Jul 2024) [E-095:F2], VP Compliance (Sept 2025) [E-095:F1], VP InfoSec (Jan 2024) [E-092], CRA Officer (Sept 2025) [E-101], Verafin BSA/AML [E-071], fintech strategy excludes BaaS [E-011]. connected: at 2.50 is at threshold (<2.5 would cap ALL P3 at 3.0).",
+    "trend_md": "Growth: $2.9B (2020) \u2192 $3.72B (2025), ~5.1% CAGR. Headcount: 296\u2192459 (+54.94%) [E-104]. 12-month growth 12.09% accelerating [E-104:F2]. Classification: STABLE-TO-ACCELERATING. Peer context: growth exceeds Cache Valley and Altabank, comparable to Banner Bank."
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.2,
+        "P1C2": 3.2,
+        "P1C3": 2.68,
+        "P1C4": 3.16,
+        "P1C5": 2.82,
+        "P2C1": 1.66,
+        "P2C2": 2.78,
+        "P2C3": 2.33,
+        "P2C4": 1.79,
+        "P3C1": 3.0,
+        "P3C2": 3.25,
+        "P3C3": 3.21,
+        "P3C4": 3.12,
+        "P4C1": 3.01,
+        "P4C2": 2.57,
+        "P4C3": 2.85,
+        "P4C4": 3.2
+      },
+      "overall_score": 2.81,
+      "peer_name": "American National Bank of Texas",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.79,
+        "P1C2": 2.78,
+        "P1C3": 2.78,
+        "P1C4": 2.77,
+        "P1C5": 2.25,
+        "P2C1": 2.77,
+        "P2C2": 2.75,
+        "P2C3": 2.77,
+        "P2C4": 2.76,
+        "P3C1": 2.77,
+        "P3C2": 2.77,
+        "P3C3": 2.76,
+        "P3C4": 2.78,
+        "P4C1": 2.76,
+        "P4C2": 2.75,
+        "P4C3": 2.78,
+        "P4C4": 2.28
+      },
+      "overall_score": 2.71,
+      "peer_name": "Cornerstone Capital Bank, SSB",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.88,
+        "P1C2": 3.0,
+        "P1C3": 2.19,
+        "P1C4": 2.35,
+        "P1C5": 3.11,
+        "P2C1": 3.02,
+        "P2C2": 2.49,
+        "P2C3": 1.77,
+        "P2C4": 2.59,
+        "P3C1": 2.99,
+        "P3C2": 3.0,
+        "P3C3": 2.98,
+        "P3C4": 2.43,
+        "P4C1": 3.04,
+        "P4C2": 2.46,
+        "P4C3": 2.24,
+        "P4C4": 2.25
+      },
+      "overall_score": 2.63,
+      "peer_name": "SouthState Corporation",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.65,
+        "P1C2": 3.14,
+        "P1C3": 2.37,
+        "P1C4": 2.82,
+        "P1C5": 3.44,
+        "P2C1": 2.33,
+        "P2C2": 2.56,
+        "P2C3": 1.9,
+        "P2C4": 2.13,
+        "P3C1": 2.4,
+        "P3C2": 2.46,
+        "P3C3": 2.76,
+        "P3C4": 2.53,
+        "P4C1": 2.88,
+        "P4C2": 2.3,
+        "P4C3": 2.73,
+        "P4C4": 2.73
+      },
+      "overall_score": 2.6,
+      "peer_name": "Amalgamated Financial Corp / Amalgamated Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 1.77,
+        "P1C2": 1.86,
+        "P1C3": 1.83,
+        "P1C4": 3.16,
+        "P1C5": 1.43,
+        "P2C1": 3.01,
+        "P2C2": 2.56,
+        "P2C3": 3.31,
+        "P2C4": 2.84,
+        "P3C1": 2.35,
+        "P3C2": 2.88,
+        "P3C3": 2.83,
+        "P3C4": 2.64,
+        "P4C1": 2.31,
+        "P4C2": 2.81,
+        "P4C3": 3.1,
+        "P4C4": 3.05
+      },
+      "overall_score": 2.57,
+      "peer_name": "First United Bank",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASS-BKUT-20260330-V2",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "P1C4 Culture strong, compensation below market",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Explorium Employer",
+        "themes": [
+          "Work-life balance (4.2), Culture (3.6), Comp (3.5), Career (3.3)"
+        ],
+        "trend": "Stable",
+        "value": 4.1
+      },
+      {
+        "drilldown": "P1C4 Leadership alignment",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "CEO Approval (Explorium)",
+        "themes": [
+          "Leadership confidence"
+        ],
+        "trend": "Positive",
+        "value": 100.0
+      },
+      {
+        "drilldown": "P1C4 Employer brand",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "positive",
+        "source": "Recommend to Friend",
+        "themes": [
+          "Employee advocacy"
+        ],
+        "trend": "Positive",
+        "value": 80.0
+      },
+      {
+        "drilldown": "P2C2/P2C3 Digital experience gap",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": 200,
+        "polarity": "negative",
+        "source": "Google Play Store",
+        "themes": [
+          "Reliability issues, login problems, feature requests"
+        ],
+        "trend": "Negative",
+        "value": null
+      },
+      {
+        "drilldown": "P2C1 Brand strength",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Awards: Nasdaq Best Bank UT 2025",
+        "themes": [
+          "Market recognition"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": "P1C1 Strategic positioning",
+        "evidence_e_id": null,
+        "kind": "industry",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Awards: S&P Global #14 Community Bank",
+        "themes": [
+          "Financial performance peer recognition"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": "P1C1 Growth momentum",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Awards: Utah 100 Fastest Growing 2025",
+        "themes": [
+          "Growth trajectory recognized"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": "P1C5 ESG/community",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Awards: Monitor Best Community Impact 2026",
+        "themes": [
+          "Community engagement"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": "P2C1 Brand credibility",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Awards: GOBankingRates Gold Medal 2025",
+        "themes": [
+          "Consumer banking quality"
+        ],
+        "trend": "Positive",
+        "value": null
+      },
+      {
+        "drilldown": "P2C1 Limited digital brand reach",
+        "evidence_e_id": null,
+        "kind": "social",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "LunarCrush Social Metrics",
+        "themes": [
+          "Private community bank \u2014 minimal social media presence"
+        ],
+        "trend": "Neutral",
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Named '2026 Best Company for Community Impact' by Monitor",
+      "date_precision": "year",
+      "e_id": "E-048",
+      "event_date": "2026-07-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "6d3c73cb-0dbc-471c-ac83-33298c4c07db",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/feed/update/urn:li:activity:7434297844506902528",
+      "subcap_ids": [],
+      "title": "Named '2026 Best Company for Community Impact' by Monitor"
+    },
+    {
+      "body": "Q2+Stablecore partnership for digital asset capabilities announced March 24, 2026",
+      "date_precision": "day",
+      "e_id": "E-103",
+      "event_date": "2026-03-24",
+      "evidence_e_ids": [
+        "E-103"
+      ],
+      "id": "8c7240df-aa5f-4204-a2f6-65a2ebeb6fb0",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.bankofutah.com/news",
+      "subcap_ids": [],
+      "title": "Q2+Stablecore partnership for digital asset capabilities\u2026"
+    },
+    {
+      "body": "VP Compliance Manager (Sept 2025) hired AFTER consent order (Feb 2024) \u2014 likely remediation-driven hire to strengthen compliance function",
+      "date_precision": "month",
+      "e_id": "E-095",
+      "event_date": "2025-09-01",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "5d52f94b-2fae-4d00-8f2b-3d704b39b10b",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "VP Compliance Manager (Sept 2025) hired likely\u2026"
+    },
+    {
+      "body": "Launched redesigned online banking dashboard Aug 25, 2025 \u2014 tile-based card UI for balances, activity, spending insights, quick actions",
+      "date_precision": "day",
+      "e_id": "E-024",
+      "event_date": "2025-08-25",
+      "evidence_e_ids": [
+        "E-024"
+      ],
+      "id": "23b2fd8c-dc1d-41c4-85fd-09dda1f38f0f",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.bankofutah.com/news/online-banking-is-getting-a-new-look",
+      "subcap_ids": [],
+      "title": "Launched redesigned online banking dashboard Aug 25, 2025\u2026"
+    },
+    {
+      "body": "Ema Jones appointed VP Banking Initiatives & Delivery Aug 2025 \u2014 delivery/execution focus",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "98cf4346-00c2-4d8f-8c64-27021587493f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "Ema Jones appointed VP Banking Initiatives & Delivery Aug\u2026"
+    },
+    {
+      "body": "Also named Gold Medal in GOBankingRates 2025 Best Banks by State",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "65cfeec0-9a19-4326-8524-438b5e1734e4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.bankofutah.com/news/bank-of-utah-ranked-among-top-community-banks-by-sp-global-market-intelligence",
+      "subcap_ids": [],
+      "title": "Also named Gold Medal in GOBankingRates 2025 Best Banks by\u2026"
+    },
+    {
+      "body": "Qualtrics deployed (customer survey platform) \u2014 customer survey drove 2025 dashboard redesign, confirms feedback loop",
+      "date_precision": "year",
+      "e_id": "E-058",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-058"
+      ],
+      "id": "a3131adb-00e8-49d0-ac41-1819debec377",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://vibeprospecting.explorium.ai",
+      "subcap_ids": [],
+      "title": "Customer survey drove 2025 dashboard redesign"
+    },
+    {
+      "body": "Job postings cite 'Named Nasdaq's Best Bank in Utah for 2025 and a Top 100 Fastest Growing Company'",
+      "date_precision": "year",
+      "e_id": "E-087",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-087"
+      ],
+      "id": "cfebfa7f-652e-4497-b06b-0ee93c03426f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "Job postings cite"
+    },
+    {
+      "body": "8 of 9 data team members hired in 2025-2026 \u2014 massive data team buildout in <18 months",
+      "date_precision": "year",
+      "e_id": "E-094",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-094"
+      ],
+      "id": "9417da3e-4394-4f1b-b652-06c035278a77",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "8 of 9 data team members hired in 2025-2026"
+    },
+    {
+      "body": "Named to Utah 100 Fastest-Growing Companies of 2025",
+      "date_precision": "year",
+      "e_id": "E-018",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "d00a2f66-f018-43ad-b31f-3cd4ed6081d4",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.bankofutah.com/news/bank-of-utah-ranked-among-top-community-banks-by-sp-global-market-intelligence",
+      "subcap_ids": [],
+      "title": "Named to Utah 100 Fastest-Growing Companies of 2025"
+    },
+    {
+      "body": "Card Manager launched March 2025 replacing separate CardValet app \u2014 consolidated into main mobile app",
+      "date_precision": "month",
+      "e_id": "E-025",
+      "event_date": "2025-03-01",
+      "evidence_e_ids": [
+        "E-025"
+      ],
+      "id": "bc63fecf-bd58-4f55-a5a2-f19b325c82f0",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.bankofutah.com/personal/services-benefits/card-manager",
+      "subcap_ids": [],
+      "title": "Card Manager launched"
+    },
+    {
+      "body": "Justin Nalder appointed EVP Chief Strategy & Innovation Officer Jan 2025 \u2014 dedicated C-suite innovation role",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "129b312a-5661-4f69-bd3c-8aacaff67080",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "Justin Nalder appointed EVP Chief Strategy & Innovation\u2026"
+    },
+    {
+      "body": "Zelle launched Oct 2024 at Bank of Utah \u2014 P2P digital payments capability",
+      "date_precision": "month",
+      "e_id": "E-039",
+      "event_date": "2024-10-01",
+      "evidence_e_ids": [
+        "E-039"
+      ],
+      "id": "4794b4f1-e191-4f63-acac-0872c96195ba",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.utahbusiness.com/bank-of-utah-zelle/",
+      "subcap_ids": [],
+      "title": "Zelle launched Oct 2024"
+    },
+    {
+      "body": "Ronald Ross appointed VP Advanced Analytics and AI Sept 2024 \u2014 dedicated AI leadership",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "d557d3b1-53a6-402e-994d-031e5cd8a836",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "Ronald Ross appointed VP Advanced Analytics and AI Sept 2024"
+    },
+    {
+      "body": "SVP Strategic Risk Officer (July 2024) hired 5 months after consent order \u2014 risk governance response to enforcement action",
+      "date_precision": "month",
+      "e_id": "E-095",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-095"
+      ],
+      "id": "74d55b15-3a57-4f52-a242-224940e4efbc",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.linkedin.com/company/bank-of-utah",
+      "subcap_ids": [],
+      "title": "SVP Strategic Risk Officer (July 2024) hired risk\u2026"
+    },
+    {
+      "body": "Launched bank-wide internship program in 2024",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "adcf993b-7865-4148-acbc-fb1a76a2439c",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.bankofutah.com/annual-reports/2024-annual-report",
+      "subcap_ids": [],
+      "title": "Launched bank-wide internship program in 2024"
+    },
+    {
+      "body": "Sean Morrison hired as SVP HR in 2024 focused on enhancing benefits and team development programs",
+      "date_precision": "year",
+      "e_id": "E-022",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "3fe6ef0c-ff91-4010-a969-4b68df32ad2f",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.bankofutah.com/annual-reports/2024-annual-report",
+      "subcap_ids": [],
+      "title": "Sean Morrison hired as SVP HR"
+    },
+    {
+      "body": "Active FDIC Consent Order dated Feb 27, 2024 for safety & soundness concerns",
+      "date_precision": "day",
+      "e_id": "E-015",
+      "event_date": "2024-02-27",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "cce8db5c-481c-466d-a95d-2b2ad8b17867",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://orders.fdic.gov/sfc/servlet.shepherd/document/download/0693d00000CMxbNAAT",
+      "subcap_ids": [],
+      "title": "Active FDIC Consent Order dated Feb 27, 2024"
+    },
+    {
+      "body": "One of two banks hit with similar consent orders in Feb 2024 for third-party risk management",
+      "date_precision": "month",
+      "e_id": "E-016",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "8efa20eb-1f50-4c0c-bb28-5179057c6ea4",
+      "kind": "regulatory",
+      "signal": "neutral",
+      "source_url": "https://www.consumerfinancemonitor.com/2024/04/09/recent-fdic-consent-orders-show-increased-regulation-scrutiny-of-bank-relationships-with-fintech-partners/",
+      "subcap_ids": [],
+      "title": "One of two banks hit with similar consent orders in Feb\u2026"
+    },
+    {
+      "body": "Bank of Utah was one of two banks targeted in Feb 2024 FDIC BaaS consent orders \u2014 part of industry-wide enforcement wave, not isolated failure",
+      "date_precision": "month",
+      "e_id": "E-077",
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-077"
+      ],
+      "id": "1212c6c7-7064-4a6e-8143-6740091da344",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinancemonitor.com/2024/04/09/recent-fdic-consent-orders-show-increased-regulation-scrutiny-of-bank-relationships-with-fintech-partners/",
+      "subcap_ids": [],
+      "title": "Bank of Utah was one of two banks targeted in Feb 2024 FDIC\u2026"
+    },
+    {
+      "body": "Consent order triggered by interagency guidance on third-party relationships (June 2023)",
+      "date_precision": "month",
+      "e_id": "E-016",
+      "event_date": "2023-06-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "ded5a964-4beb-4882-8689-48578d696d04",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinancemonitor.com/2024/04/09/recent-fdic-consent-orders-show-increased-regulation-scrutiny-of-bank-relationships-with-fintech-partners/",
+      "subcap_ids": [],
+      "title": "Consent order triggered by interagency guidance on\u2026"
+    },
+    {
+      "body": "Board-led CEO/President succession: DeFries retired after 37 years, Hansen appointed President effective Jan 2023",
+      "date_precision": "month",
+      "e_id": "E-014",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "1ffe5cc3-136d-4823-ab87-5092e59c0c0a",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.ogdenweberchamber.com/bank-of-utah-announces-leadership-succession/",
+      "subcap_ids": [],
+      "title": "Board-led CEO/President succession"
+    },
+    {
+      "body": "Verafin uses consortium approach aggregating data across customer base \u2014 modern ML-based fraud detection platform (acquired by Nasdaq 2021 for $2.75B)",
+      "date_precision": "year",
+      "e_id": "E-080",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-080"
+      ],
+      "id": "18f56f9a-ba03-4200-baa1-0a55f7eb6689",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://verafin.com",
+      "subcap_ids": [],
+      "title": "Verafin uses consortium approach"
+    }
+  ]
+}

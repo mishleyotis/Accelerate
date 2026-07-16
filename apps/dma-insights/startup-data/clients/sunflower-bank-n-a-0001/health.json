@@ -1,0 +1,2076 @@
+{
+  "alerts": [],
+  "audit_logs": null,
+  "caps_applied": [
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.1",
+      "trigger_condition": "ADJ -0.2 HomeStreet",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.2",
+      "trigger_condition": "ADJ -0.2 HomeStreet",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.2.1",
+      "trigger_condition": "ADJ -0.2 HomeStreet",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.2.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.2.2",
+      "trigger_condition": "ADJ -0.2 HomeStreet",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.3.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.3.1",
+      "trigger_condition": "ADJ -0.2 HomeStreet",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C1.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C1.1.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C1.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C1.1.2",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.1.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.1.2",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C2.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C2.2.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C3.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C3.1.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C3.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C3.1.2",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C3.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C3.2.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C4.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C4.1.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0; P4C1<2.5 \u2192 cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C4.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C4.1.2",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0; P4C1<2.5 \u2192 cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C4.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C4.2.1",
+      "trigger_condition": "Sentiment cap: Indeed 2.4 < 3.0 \u2192 P2 cap 2.0; P4C1<2.5 \u2192 cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C1.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C1.1.1",
+      "trigger_condition": "Cherwell EOL cap 2.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.1",
+      "trigger_condition": "ADJ -0.3 CFPB complaint",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.2",
+      "trigger_condition": "ADJ -0.3 CFPB complaint",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.3",
+      "trigger_condition": "ADJ -0.3 CFPB complaint",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.2.1",
+      "trigger_condition": "ADJ -0.3 CFPB complaint",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.2.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.2.2",
+      "trigger_condition": "ADJ -0.3 CFPB complaint",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.3.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.3.1",
+      "trigger_condition": "ADJ -0.3 CFPB complaint",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C4.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C4.2.1",
+      "trigger_condition": "MOVEit cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C4.2.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C4.2.2",
+      "trigger_condition": "MOVEit cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C4.2.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C4.2.3",
+      "trigger_condition": "MOVEit cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.1.1",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.1.2",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.2.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.2.1",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.2.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.2.2",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.3.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.3.1",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.3.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.3.2",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.4.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.4.1",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P4C4.4.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P4C4.4.2",
+      "trigger_condition": "ADJ -0.3 MOVEit",
+      "trigger_evidence": []
+    }
+  ],
+  "entity_display_id": "sunflower-bank-n-a-0001",
+  "evidence_age": [
+    {
+      "e_id": "E-007:F1, E-007:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-008:F1, E-008:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-009:F1, E-009:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-010:F1, E-010:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-012:F1, E-012:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-013:F1, E-013:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-017:F1, E-017:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-019:F1, E-019:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-020:F1, E-020:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-021:F1, E-021:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-022:F1, E-022:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-024:F1, E-024:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-025:F1, E-025:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-026:F1, E-026:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-029:F1, E-029:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-030:F1, E-030:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-054:F1, E-054:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-055:F1, E-055:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-056:F1, E-056:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-057:F1, E-057:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-058:F1, E-058:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-059:F1, E-059:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-060:F1, E-060:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-061:F1, E-061:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-062:F1, E-062:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-063:F1, E-063:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-064:F1, E-064:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-065:F1, E-065:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-066:F1, E-066:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-067:F1, E-067:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-068:F1, E-068:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-069:F1, E-069:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-070:F1, E-070:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-071:F1, E-071:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-072:F1, E-072:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-073:F1, E-073:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-074:F1, E-074:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-075:F1, E-075:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-076:F1, E-076:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-077:F1, E-077:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-078:F1, E-078:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-079:F1, E-079:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-080:F1, E-080:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-081:F1, E-081:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 1
+    },
+    {
+      "e_id": "E-082:F1, E-082:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-083:F1, E-083:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-084:F1, E-084:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-085:F1, E-085:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-086:F1, E-086:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-087:F1, E-087:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-088:F1, E-088:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-089:F1, E-089:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-090:F1, E-090:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-091:F1, E-091:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-092:F1, E-092:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-093:F1, E-093:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-094:F1, E-094:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-095:F1, E-095:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-096:F1, E-096:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-097:F1, E-122:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-098:F1, E-122:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-099:F1, E-099:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-100:F1, E-100:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-101:F1, E-101:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-109:F1, E-109:",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "(unknown)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-019",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "FirstSun 10-K Cybersecurity Governance Disclosure",
+      "tier": 2
+    },
+    {
+      "e_id": "E-065",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "10-K Cybersecurity Governance \u2014 IRP Evidence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-135",
+      "freshness_band": "dated",
+      "published_date": "2024-03-01",
+      "recency_months": 25,
+      "source_name": "Cybersecurity Posture \u2014 CISO + Cisco Stack + Post-Merger Gaps",
+      "tier": 2
+    },
+    {
+      "e_id": "E-108",
+      "freshness_band": "aging",
+      "published_date": "2024-04-01",
+      "recency_months": 24,
+      "source_name": "Risk Governance Structure \u2014 CRO + Risk Committee + VP Op Risk",
+      "tier": 2
+    },
+    {
+      "e_id": "E-020",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 23,
+      "source_name": "FirstSun IR Governance Documents",
+      "tier": 2
+    },
+    {
+      "e_id": "E-021",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 23,
+      "source_name": "OCC CRA Evaluation \u2014 Sunflower Bank",
+      "tier": 1
+    },
+    {
+      "e_id": "E-081",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 23,
+      "source_name": "CRA Evaluation + HMDA \u2014 Fair Lending Proxy",
+      "tier": 1
+    },
+    {
+      "e_id": "E-111",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 23,
+      "source_name": "BSA/AML Program + Compliance Training Evidence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-113",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 23,
+      "source_name": "CRA Lending Test \u2014 Fair Lending Performance",
+      "tier": 1
+    },
+    {
+      "e_id": "E-130",
+      "freshness_band": "aging",
+      "published_date": "2024-05-01",
+      "recency_months": 23,
+      "source_name": "Compliance Ecosystem \u2014 OCC Supervision + CRA + BSA",
+      "tier": 1
+    },
+    {
+      "e_id": "E-026",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Info-Tech Case Study \u2014 Brian Mulcahey CIO Sunflower Bank",
+      "tier": 2
+    },
+    {
+      "e_id": "E-044",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Info-Tech CIO Case Study \u2014 CXO/CIO Alignment Diagnostic",
+      "tier": 2
+    },
+    {
+      "e_id": "E-045",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Info-Tech CIO Case Study \u2014 Strategy Refresh Evidence",
+      "tier": 3
+    },
+    {
+      "e_id": "E-070",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "CIO Case Study \u2014 Data Governance Workshop Initiative",
+      "tier": 2
+    },
+    {
+      "e_id": "E-082",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "CIO Network Rebuild + 10-K Resilience Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-086",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Infrastructure Redundancy \u2014 RTO/RPO Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-114",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "10-K Cybersecurity + CIO Infrastructure \u2014 DR/IRP Evidence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-117",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Data Governance Initiative + Privacy \u2014 Framework Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-132",
+      "freshness_band": "aging",
+      "published_date": "2024-06-01",
+      "recency_months": 22,
+      "source_name": "Data Management Landscape \u2014 Workshop + DPO + CDP + Gaps",
+      "tier": 3
+    },
+    {
+      "e_id": "E-025",
+      "freshness_band": "aging",
+      "published_date": "2024-10-01",
+      "recency_months": 18,
+      "source_name": "FirstSun-HomeStreet Merger Withdrawal",
+      "tier": 2
+    },
+    {
+      "e_id": "E-008",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FirstSun 10-K Strategic Insights (Explorium/SEC)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-009",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FirstSun 10-K Risk Factors (Explorium/SEC)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-011",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FirstSun 10-K Competitive Landscape (Explorium/SEC)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-041",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "First Foundation 10-K Strategic Insights (Explorium/SEC)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-046",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "FirstSun 10-K \u2014 Digital Risk Appetite Proxy",
+      "tier": 2
+    },
+    {
+      "e_id": "E-047",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "CRA/Community Impact \u2014 ESG Metrics Proxy",
+      "tier": 5
+    },
+    {
+      "e_id": "E-066",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "MOVEit Breach + 10-K TPRM Disclosure",
+      "tier": 2
+    },
+    {
+      "e_id": "E-084",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "MOVEit Breach \u2014 Vendor BCP Failure Evidence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-093",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "10-K + nCino \u2014 AI/ML for Business Decisions Proxy",
+      "tier": 2
+    },
+    {
+      "e_id": "E-094",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "Model Risk Management \u2014 Regulatory Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-115",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "Vendor Risk Synthesis \u2014 MOVEit + Fiserv Concentration",
+      "tier": 2
+    },
+    {
+      "e_id": "E-121",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "AI/ML Absence + MRM Regulatory Proxy",
+      "tier": 2
+    },
+    {
+      "e_id": "E-131",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 13,
+      "source_name": "Resilience + TPRM \u2014 10-K + CIO + Regulatory Requirements",
+      "tier": 2
+    },
+    {
+      "e_id": "E-030",
+      "freshness_band": "current",
+      "published_date": "2025-04-01",
+      "recency_months": 12,
+      "source_name": "Trustpilot/DepositAccounts \u2014 CFPB Complaint Reference",
+      "tier": 3
+    },
+    {
+      "e_id": "E-028",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "Explorium Website Changes \u2014 Sunflower Bank",
+      "tier": 3
+    },
+    {
+      "e_id": "E-035",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "nSight 2025 \u2014 From Integration Challenges to Intelligent Banking",
+      "tier": 2
+    },
+    {
+      "e_id": "E-063",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "nCino Platform \u2014 Loan Origination Automation",
+      "tier": 2
+    },
+    {
+      "e_id": "E-105",
+      "freshness_band": "current",
+      "published_date": "2025-05-01",
+      "recency_months": 11,
+      "source_name": "nCino + Adobe Sign/DocuSign \u2014 Document/Loan Workflow",
+      "tier": 3
+    },
+    {
+      "e_id": "E-013",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 8,
+      "source_name": "Sunflower Bank Website \u2014 Digital Banking",
+      "tier": 5
+    },
+    {
+      "e_id": "E-014",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 8,
+      "source_name": "Apple App Store \u2014 Sunflower Bank App",
+      "tier": 3
+    },
+    {
+      "e_id": "E-015",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 8,
+      "source_name": "Google Play \u2014 Sunflower Bank App",
+      "tier": 3
+    },
+    {
+      "e_id": "E-023",
+      "freshness_band": "current",
+      "published_date": "2025-10-01",
+      "recency_months": 6,
+      "source_name": "Sunflower Bank Wealth Management",
+      "tier": 5
+    },
+    {
+      "e_id": "E-029",
+      "freshness_band": "current",
+      "published_date": "2025-10-01",
+      "recency_months": 6,
+      "source_name": "Sunflower Bank \u2014 Digital Account Opening",
+      "tier": 5
+    },
+    {
+      "e_id": "E-075",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "Sunflower Bank Treasury Fraud Mitigation Services",
+      "tier": 5
+    },
+    {
+      "e_id": "E-076",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "Treasury Management + Ops Analysis \u2014 Automation Proxy",
+      "tier": 5
+    },
+    {
+      "e_id": "E-106",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "Treasury Management Suite \u2014 Operational Automation",
+      "tier": 5
+    },
+    {
+      "e_id": "E-107",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "SB Fraud Mitigation \u2014 Positive Pay + ACH Controls",
+      "tier": 5
+    },
+    {
+      "e_id": "E-128",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "Loan/Document/Treasury Ops \u2014 Workflow Evidence",
+      "tier": 5
+    },
+    {
+      "e_id": "E-136",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 5,
+      "source_name": "SB Fraud Education + Nacha Resources \u2014 Cross-Channel Awareness",
+      "tier": 5
+    },
+    {
+      "e_id": "E-036",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 4,
+      "source_name": "Sunflower Bank Culture Page + Awards",
+      "tier": 5
+    },
+    {
+      "e_id": "E-052",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 4,
+      "source_name": "Sunflower Bank VerityPay B2C Payment Partnership",
+      "tier": 2
+    },
+    {
+      "e_id": "E-112",
+      "freshness_band": "current",
+      "published_date": "2025-12-01",
+      "recency_months": 4,
+      "source_name": "DepositAccounts.com \u2014 Consumer Complaints Detail",
+      "tier": 5
+    },
+    {
+      "e_id": "E-010",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "Explorium Workforce Trends",
+      "tier": 3
+    },
+    {
+      "e_id": "E-053",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "FirstSun FY2025 Financial Results",
+      "tier": 2
+    },
+    {
+      "e_id": "E-127",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 3,
+      "source_name": "10-K Operational Efficiency + Merger Integration",
+      "tier": 2
+    },
+    {
+      "e_id": "E-027",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 1,
+      "source_name": "Explorium LinkedIn Posts \u2014 Sunflower Bank",
+      "tier": 5
+    },
+    {
+      "e_id": "E-007",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Technographics (Vibe Prospecting)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-012",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Indeed Company Data \u2014 Sunflower Bank",
+      "tier": 3
+    },
+    {
+      "e_id": "E-016",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Webstack Tech Discovery",
+      "tier": 1
+    },
+    {
+      "e_id": "E-017",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Corporate Hierarchy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-018",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Company Ratings (Glassdoor)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-022",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "First Foundation Merger \u2014 Wealth Platform",
+      "tier": 2
+    },
+    {
+      "e_id": "E-024",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium + 10-K \u2014 Personalization Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-031",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Proxy Search \u2014 Sunflower Bank ESG/Sustainability",
+      "tier": 5
+    },
+    {
+      "e_id": "E-032",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Indeed Job Search \u2014 Sunflower Bank Tech Roles",
+      "tier": 3
+    },
+    {
+      "e_id": "E-033",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "First Foundation Inc. Wealth Platform",
+      "tier": 5
+    },
+    {
+      "e_id": "E-034",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Brian Mulcahey CIO Deep Profile \u2014 LinkedIn/ZoomInfo/ContactOut",
+      "tier": 3
+    },
+    {
+      "e_id": "E-037",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Indeed Job Search \u2014 Zero Tech Hiring Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-038",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Combined Evidence \u2014 Fraud/AML/Compliance Tech",
+      "tier": 3
+    },
+    {
+      "e_id": "E-039",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "ESG Proxy Search Exhaustion Log",
+      "tier": 5
+    },
+    {
+      "e_id": "E-040",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Technographics \u2014 First Foundation Inc.",
+      "tier": 3
+    },
+    {
+      "e_id": "E-042",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Proxy Evidence \u2014 BCP/TPRM/Data Governance from CIO Case Study + 10-K",
+      "tier": 3
+    },
+    {
+      "e_id": "E-043",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Compliance Tech Synthesis \u2014 Sunflower + First Foundation Combined",
+      "tier": 3
+    },
+    {
+      "e_id": "E-048",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Proxy Search Exhaustion \u2014 Climate Risk Integration",
+      "tier": 5
+    },
+    {
+      "e_id": "E-049",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Marketing Tech + LinkedIn \u2014 Channel Integration",
+      "tier": 3
+    },
+    {
+      "e_id": "E-050",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Website + Tech Stack Analysis \u2014 Personalization Capability",
+      "tier": 5
+    },
+    {
+      "e_id": "E-051",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Comprehensive AI/ML Capability Assessment",
+      "tier": 3
+    },
+    {
+      "e_id": "E-054",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 Stephanie Noble CRO + Eric Spence VP Op Risk",
+      "tier": 3
+    },
+    {
+      "e_id": "E-055",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 CRO + Risk Committee Charter proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-056",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 Alissa Foth CCO + Tricia Wilton SOX Director",
+      "tier": 3
+    },
+    {
+      "e_id": "E-057",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 Dana Blum BSA Director + Lola Ajayi AML Analyst",
+      "tier": 3
+    },
+    {
+      "e_id": "E-058",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 SOX Director + CCO + regulatory structure proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-059",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech + Clay \u2014 Compliance Training Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-060",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 Jen Cooper Data Privacy Officer",
+      "tier": 3
+    },
+    {
+      "e_id": "E-061",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 Daniel App SVP Sr Director of Operations",
+      "tier": 3
+    },
+    {
+      "e_id": "E-062",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium + Indeed \u2014 RPA Absence Evidence",
+      "tier": 3
+    },
+    {
+      "e_id": "E-064",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay \u2014 Jason Martinez SVP Treasury Ops + VerityPay",
+      "tier": 3
+    },
+    {
+      "e_id": "E-067",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 SailPoint IAM + Azure AD + Cisco ISE",
+      "tier": 3
+    },
+    {
+      "e_id": "E-068",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 Cisco AMP Endpoint Security",
+      "tier": 3
+    },
+    {
+      "e_id": "E-069",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 Cisco IronPort Cloud + DMARC",
+      "tier": 3
+    },
+    {
+      "e_id": "E-071",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 Dell Boomi iPaaS Integration",
+      "tier": 3
+    },
+    {
+      "e_id": "E-072",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 JIRA + Review Board DevOps Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-073",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 Nessus + SolarWinds Monitoring",
+      "tier": 3
+    },
+    {
+      "e_id": "E-074",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Clay CISO + Tech Stack \u2014 SOC Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-077",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "nCino + Fiserv STP Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-078",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech \u2014 Document Processing Tools",
+      "tier": 3
+    },
+    {
+      "e_id": "E-079",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Fiserv Core + Operations Leadership",
+      "tier": 3
+    },
+    {
+      "e_id": "E-080",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "CFPB Complaint + CRA \u2014 Consumer Complaint Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-083",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Fiserv Dual-Platform Vendor Concentration",
+      "tier": 3
+    },
+    {
+      "e_id": "E-085",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Operational Footprint \u2014 Remote/Distributed Ops Proxy",
+      "tier": 5
+    },
+    {
+      "e_id": "E-087",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Segment CDP + BI Tools \u2014 Data Quality Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-088",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Tech Stack Absence \u2014 MDM and Data Catalog",
+      "tier": 3
+    },
+    {
+      "e_id": "E-089",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Data Catalog Absence \u2014 Proxy Search",
+      "tier": 5
+    },
+    {
+      "e_id": "E-090",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Data Lineage Absence \u2014 Proxy Search",
+      "tier": 5
+    },
+    {
+      "e_id": "E-091",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Regulatory Requirement \u2014 Data Retention Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-092",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "BI Tools Presence \u2014 Predictive Analytics Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-095",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "BI Adoption \u2014 Analytics Tracking Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-096",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Power BI + Tableau \u2014 Self-Service Analytics Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-097",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Analytics ROI \u2014 No Evidence",
+      "tier": 5
+    },
+    {
+      "e_id": "E-098",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "NLP/Text Analytics \u2014 Absence",
+      "tier": 5
+    },
+    {
+      "e_id": "E-099",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Data Warehouse \u2014 FF has IBM Cognos/DW, SB Unknown",
+      "tier": 3
+    },
+    {
+      "e_id": "E-100",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Legacy Tech Debt \u2014 FoxPro/Win2008 Evidence",
+      "tier": 3
+    },
+    {
+      "e_id": "E-101",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Infrastructure \u2014 Virtualization Without Containerization",
+      "tier": 3
+    },
+    {
+      "e_id": "E-102",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Security Certification Search \u2014 No SOC2/ISO27001 Found",
+      "tier": 5
+    },
+    {
+      "e_id": "E-103",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Indeed Apr 2026 \u2014 SB Hiring Confirms Non-Automation Focus",
+      "tier": 3
+    },
+    {
+      "e_id": "E-104",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Fiserv Signature Core \u2014 Platform-Native Automation Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-109",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Cross-Channel Fraud Tools \u2014 Actimize AML + CardControl",
+      "tier": 3
+    },
+    {
+      "e_id": "E-110",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Compliance Leadership Structure \u2014 CCO + BSA + SOX Directors",
+      "tier": 3
+    },
+    {
+      "e_id": "E-116",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Distributed Ops + VDI \u2014 Pandemic/Resilience Metrics Proxy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-118",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Tech Stack Scan \u2014 No MDM/Data Catalog Detected",
+      "tier": 3
+    },
+    {
+      "e_id": "E-119",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Privacy/Retention \u2014 DPO + Regulatory Requirements",
+      "tier": 3
+    },
+    {
+      "e_id": "E-120",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "BI Tool Landscape \u2014 Reporting Without Prediction",
+      "tier": 3
+    },
+    {
+      "e_id": "E-122",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Advanced Analytics Absence \u2014 NLP, DW, ROI Measurement",
+      "tier": 3
+    },
+    {
+      "e_id": "E-123",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Integration + Tech Debt \u2014 Boomi iPaaS + Legacy",
+      "tier": 3
+    },
+    {
+      "e_id": "E-124",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "DevOps/IaC \u2014 Traditional VM Infrastructure",
+      "tier": 3
+    },
+    {
+      "e_id": "E-125",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Security Tooling \u2014 Nessus + SolarWinds + CISO",
+      "tier": 3
+    },
+    {
+      "e_id": "E-126",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Security Stack \u2014 Cisco Suite + Post-Merger Dual Platforms",
+      "tier": 3
+    },
+    {
+      "e_id": "E-129",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Fraud Platform Synthesis \u2014 Actimize + Positive Pay + CardControl",
+      "tier": 3
+    },
+    {
+      "e_id": "E-133",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Analytics Maturity Synthesis \u2014 BI Present, Predictive Absent",
+      "tier": 3
+    },
+    {
+      "e_id": "E-134",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Technology Architecture Synthesis \u2014 EA + Integration + DevOps",
+      "tier": 3
+    },
+    {
+      "e_id": "E-137",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Cherwell ITSM + Oracle Banking + Smartsheet",
+      "tier": 3
+    },
+    {
+      "e_id": "E-138",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Dell EMC DR/Backup Infrastructure",
+      "tier": 3
+    },
+    {
+      "e_id": "E-139",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Veritas Enterprise Vault Data Archiving",
+      "tier": 3
+    },
+    {
+      "e_id": "E-140",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 LexisNexis Regulatory Research",
+      "tier": 3
+    },
+    {
+      "e_id": "E-141",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Microsoft Intune MDM/Endpoint",
+      "tier": 3
+    },
+    {
+      "e_id": "E-142",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 VividCortex DB Analytics + FactSet + DecisionPro",
+      "tier": 3
+    },
+    {
+      "e_id": "E-143",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Solifi Lending Software",
+      "tier": 3
+    },
+    {
+      "e_id": "E-144",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Camtasia + eLearning Suite",
+      "tier": 3
+    },
+    {
+      "e_id": "E-145",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Boardvantage Board Governance",
+      "tier": 3
+    },
+    {
+      "e_id": "E-146",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Events \u2014 No Outages/Breaches/Lawsuits Last 90 Days",
+      "tier": 3
+    },
+    {
+      "e_id": "E-147",
+      "freshness_band": "current",
+      "published_date": "2026-04-01",
+      "recency_months": 0,
+      "source_name": "Explorium Tech Discovery \u2014 Back-Office Automation Tools",
+      "tier": 3
+    }
+  ],
+  "narrative": null,
+  "qa_verdict_l1": null,
+  "qa_verdict_l2": {
+    "governance_skill_version": null,
+    "recommendation": null,
+    "verdict": "PASS",
+    "verdict_basis": null
+  },
+  "run_request_id": "DMA-ASM-SNFB-20260410-0001",
+  "safeguard_gates": [],
+  "thin_evidence_subcap_ids": []
+}

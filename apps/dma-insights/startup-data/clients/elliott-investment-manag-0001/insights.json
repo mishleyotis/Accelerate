@@ -1,0 +1,233 @@
+{
+  "entity_display_id": "elliott-investment-manag-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4.2.1",
+        "P1C2.1.7",
+        "P4C2.6.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "16f2db71-465d-49c4-aa68-b88b499bab70",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-012",
+            "E-025"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-012",
+        "E-050"
+      ],
+      "linked_subcap_id": "P2C4.2.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Next Best Action (NBA) a near-term focus for Elliott Investment Management L.P.: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-050].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Seven headline findings — each tied to a triple-validated, confirmed-absence Salesforce…",
+      "what_text": "Next Best Action (NBA) is one of Elliott Investment Management L.P.'s least developed customer experience capabilities, scoring 1.0 out of 5 in Zennify's latest assessment, below the 2.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Elliott Investment Management L.P.'s ability to deliver a stronger, more personalised customer experience [E-012].",
+      "why_text": "At 1.0 out of 5, Next Best Action (NBA) sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-025, E-012].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4.2.1",
+        "P2C4.5.IB1",
+        "P1C2.1.7",
+        "P2C2.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-002",
+      "id": "54b4c8fb-4f94-4e69-83a6-49a79983d603",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-012",
+            "E-025"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-056",
+        "E-012"
+      ],
+      "linked_subcap_id": "P2C4.2.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Next Best Action (NBA) a near-term focus for Elliott Investment Management L.P.: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-056].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Five evidence-anchored gaps each maps to a confirmed Salesforce white space and aligns to…",
+      "what_text": "Five evidence-anchored gaps frame the land-and-expand thesis; each maps to a confirmed Salesforce white space and aligns to the engagement objectives (4-pillar maturity, locked-peer benchmark, validated recommendations — no cost/ROI figures, R6):. In Zennify's assessment Next Best Action (NBA) scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-025].",
+      "why_text": "The assessment found: “Firmographic match confirmed; Explorium business_id ce8d8333fc3f225ab596b0505fbdb2cf (reserved for Batch 3 technographic enrichment)” [E-012]. At 1.0 out of 5, Next Best Action (NBA) sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C1.8.2",
+        "P3C3.1.3",
+        "P1C2.3.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "e86b478a-3893-4023-bf28-9a64adc63e7a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-008",
+        "E-048"
+      ],
+      "linked_subcap_id": "P1C1.8.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Prioritize a Digital Strategy & Vision discovery conversation — the finding is documented in the client's research report [E-008].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Most Recent Strategic Objectives (2024–2026)",
+      "what_text": "Strategic Integration Planning is one of Elliott Investment Management L.P.'s solid strategy and governance capabilities, scoring 3.5 out of 5 in Zennify's latest assessment, ahead of the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Elliott Investment Management L.P.'s ability to deliver sharper strategic direction and stronger oversight [E-008].",
+      "why_text": "The assessment found: “Elliott files Form 13F-HR every quarter without interruption from 2020 through 2026-Q1 (most recent 2026-05-15, report date 2026-03-31), evidencing a standing, repeatable regulatory data-assembly and” [E-048]. At 3.5 out of 5, Strategic Integration Planning shows a maturing capability within reach of best practice. Because it feeds the planning and oversight the rest of the business relies on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "Pillar 1: Strategy, Governance & Culture (P1) — Score 3.36 vs Median 2.90 (+0.46)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Client / Investor Experience (P2) — Score 2.72 vs Median 2.25 (+0.47)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations & Risk (P3) — Score 3.72 vs Median 3.00 (+0.72)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "Pillar 4: Data & Technology (P4) — Score 3.31 vs Median 2.62 (+0.69)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "Nine recommendations follow — eight Zennify-delivered and one client-owned — each traced to root-cause evidence, validated as a confirmed technology absence (connector re-validated June 2026 via Explorium match-business, Exa and Dice), aligned to at least one stated Elliott strategic objective, and framed as complementary unification above the proprietary platform (E-018), never displacement. Expected outcomes are expressed as maturity deltas and qualitative impact only; no cost, ROI or timeline figures are asserted (Rule R6)."
+  },
+  "run_request_id": "DMA-ASM-EIM-20260604-0001"
+}

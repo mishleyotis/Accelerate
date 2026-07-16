@@ -1,0 +1,146 @@
+{
+  "entity_display_id": "beacon-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "AUM $": "3B",
+        "Outcome": "P3C2 score 2.15 \u2192 4.0 (peer median 3.00)",
+        "Regional Presidents Across $": "22.2B"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P3C2 score 2.15 \u2192 4.0 (peer median 3.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "FSC Implementation \u2014 Compliance Cloud + Service Cloud + MuleSoft FIS IBS/Narmi integration",
+          "maturity_lift": "+1.85",
+          "metric": "P3C2 score 2.15 \u2192 4.0 (peer median 3.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C2 score 2.15 \u2192 4.0 (peer median 3.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-01",
+          "title": "Activate Salesforce FSC Compliance Cloud to Remediate Marshall-Mandated BSA/AML Capability Gap"
+        },
+        {
+          "feature": "Agentforce for Financial Services implementation \u2014 FIU CAMS agents, Branch Ops agents, FP&A agents",
+          "maturity_lift": "+1.35",
+          "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-02",
+          "title": "Deploy Agentforce Financial Services Internally to Close 11.5pp Operating Efficiency Gap"
+        },
+        {
+          "feature": "Data Cloud activation + Snowflake connector + MuleSoft FIS/Narmi pipeline",
+          "maturity_lift": "+1.35",
+          "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-03",
+          "title": "Activate Salesforce Data Cloud on Beacon's Existing Snowflake to Execute Macero CDO 'Monetize Data' Mandate"
+        },
+        {
+          "feature": "FSC Relationship Banking implementation \u2014 Commercial Banking Workspace for 6 regional presidents + Household View + Refe",
+          "maturity_lift": "+1.49",
+          "metric": "Regional Presidents Across $22.2B",
+          "outcomes": {
+            "effort": "M",
+            "metric": "Regional Presidents Across $22.2B",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Deploy FSC Relationship Banking to Unify 6 Regional Presidents Across $22.2B Post-Merger Commercial Franchise"
+        },
+        {
+          "feature": "FSC Wealth Management implementation \u2014 Advisor Console, Client Portal, Referral Management integration with REC-04",
+          "maturity_lift": "+1.49",
+          "metric": "AUM $3B",
+          "outcomes": {
+            "effort": "M",
+            "metric": "AUM $3B",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Implement FSC Wealth Management to Grow Clarendon Private's $3B AUM Platform Through Cross-Bank Referrals"
+        },
+        {
+          "feature": "Salesforce Shield implementation + Privacy Center for NYDFS compliance",
+          "maturity_lift": "+1.35",
+          "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "6\u201312 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-06",
+          "title": "Deploy Salesforce Shield + Privacy Center to Extend Beacon's Zero-Trust Architecture to the Salesforce Platform Layer"
+        }
+      ],
+      "target": "M2 \u2192 M4 in P3C2, P4C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [
+        "REC-03"
+      ],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud Growth activation \u2014 Narmi One user journey orchestration + brand campaign automation + cross-sell trigge",
+          "maturity_lift": "+1.35",
+          "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "M",
+            "metric": "P4C2 score 2.65 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-07",
+          "title": "Activate Marketing Cloud Growth to Support New CMO's Brand Rollout and Cross-Sell Activation on 55K Narmi Users"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P4C2"
+    }
+  ],
+  "run_request_id": "DMA-ASM-BBT-20260511-0001",
+  "total_duration_months": 8
+}

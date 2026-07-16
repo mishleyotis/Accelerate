@@ -1,0 +1,38 @@
+{
+  "entity_display_id": "fulton-bank-national-ass-8001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-020",
+          "E-025",
+          "E-015"
+        ],
+        "representative_quote": "[EV]: .",
+        "source_kind": "heuristic"
+      },
+      "id": "e0353bd0-cf08-4bb5-8d64-1b76e9a70172",
+      "involved_subcap_ids": [
+        "P1C3.2.1",
+        "P1C3.3.4",
+        "P1C3.4.1",
+        "P1C3.4.4",
+        "P1C3.9.1",
+        "P1C3.9.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 22 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "entity_display_id": "bridgecrest-30v3",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-012",
+          "E-014"
+        ],
+        "representative_quote": "1.4/5 Sitejabber, 1.1/5 Trustpilot, 1,600+ BBB complaints",
+        "source_kind": "docx"
+      },
+      "id": "e1232b92-8841-4a8f-8feb-2720ab377c95",
+      "involved_subcap_ids": [
+        "P1C1.6.3",
+        "P3C4.4.1",
+        "P3C4.4.3",
+        "P2C3.6.6",
+        "P2C2.8.4",
+        "P2C3.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 50,
+        "P3": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Customer experience crisis",
+      "verbatim_quote": "F-002 | Customer experience crisis | 1.4/5 Sitejabber, 1.1/5 Trustpilot, 1,600+ BBB complaints [E-012, E-014] | Caps P2C3 at M2.5 \u2014 most impactful constraint | Service Cloud CX transformation \u2014 HIGHEST PRIORITY opportunity"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-086",
+          "E-088"
+        ],
+        "representative_quote": "Gregory Kline (Dir Data Strategy), Adam Loftus (Head Analytics), Brian Burke (MD Data Eng)",
+        "source_kind": "docx"
+      },
+      "id": "42b406fd-1514-4b04-b39a-711664173137",
+      "involved_subcap_ids": [
+        "P1C2.5.1",
+        "P1C2.6.2",
+        "P1C2.5.3",
+        "P1C2.5.4",
+        "P4C1.1.4",
+        "P4C2.6.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "Distributed CDO function",
+      "verbatim_quote": "F-005 | Distributed CDO function | Gregory Kline (Dir Data Strategy), Adam Loftus (Head Analytics), Brian Burke (MD Data Eng) [E-086, E-088] | M3 data governance via 4 senior leaders | Data Cloud to formalize entity-level governance; leadership already in place"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-017"
+        ],
+        "representative_quote": "Cloud-native ML platform launched Sep 2022",
+        "source_kind": "docx"
+      },
+      "id": "001c0d90-5b1d-4bfb-a290-819587f40f04",
+      "involved_subcap_ids": [
+        "P4C2.4.13",
+        "P4C2.4.9",
+        "P4C2.4.13",
+        "P4C2.5.7",
+        "P4C4.2.6",
+        "P4C4.4.1",
+        "P4C4.4.1",
+        "P4C4.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "GoFi AI/ML lending platform",
+      "verbatim_quote": "F-001 | GoFi AI/ML lending platform | Cloud-native ML platform launched Sep 2022 [E-017] | M3+ Innovation capability | Technology modernization partnership \u2014 GoFi demonstrates cloud-native readiness"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-073",
+          "E-089"
+        ],
+        "representative_quote": "MS Access, IIS 8.5, jQuery alongside React, Angular 15/16, Snowflake",
+        "source_kind": "docx"
+      },
+      "id": "0893aa71-e099-4900-af9d-5054d9bdf992",
+      "involved_subcap_ids": [
+        "P4C2.4.13",
+        "P4C2.4.9",
+        "P4C2.4.13",
+        "P4C2.5.7",
+        "P4C4.2.6",
+        "P4C4.4.1",
+        "P4C4.4.1",
+        "P4C4.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Legacy tech debt coexists with modern stack",
+      "verbatim_quote": "F-007 | Legacy tech debt coexists with modern stack | MS Access, IIS 8.5, jQuery alongside React, Angular 15/16, Snowflake [E-073, E-089] | M3 architecture but fragility risk from dual-track | MuleSoft API integration to decouple legacy from modern platforms"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-090"
+        ],
+        "representative_quote": "275 premium techs at DriveTime: ServiceNow BCM/ITSM, Collibra, Alation, Okta, Splunk, Pega",
+        "source_kind": "docx"
+      },
+      "id": "16e74b9d-ef35-4e30-9511-94a5d5f7bcce",
+      "involved_subcap_ids": [
+        "P4C1.3.1",
+        "P4C1.1.1",
+        "P4C3.3.1",
+        "P4C2.1.1",
+        "P4C1.5.1",
+        "P4C2.2.1"
+      ],
+      "kpis": [],
+      "page_number": 3,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Parent enterprise IT stack",
+      "verbatim_quote": "F-004 | Parent enterprise IT stack | 275 premium techs at DriveTime: ServiceNow BCM/ITSM, Collibra, Alation, Okta, Splunk, Pega [E-090] | Shared services raise effective maturity across P3/P4 | Data Cloud + Shield leverage existing parent infrastructure"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-087",
+          "E-090"
+        ],
+        "representative_quote": "Scott Dickinson Sr. Dir InfoSec at DriveTime (since 2020)",
+        "source_kind": "docx"
+      },
+      "id": "6b39be6f-8c61-4f47-ac53-3cc28a4c8f8a",
+      "involved_subcap_ids": [
+        "P4C4.5.3",
+        "P1C3.9.2",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6",
+        "P4C2.4.13"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "Parent-level InfoSec team",
+      "verbatim_quote": "F-006 | Parent-level InfoSec team | Scott Dickinson Sr. Dir InfoSec at DriveTime (since 2020); Okta + Splunk + Sophos [E-087, E-090] | CISO-equivalent exists; entity SOC2 gap remains | Shield + GRC for entity-level SOC2 readiness (security capability exists)"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-089",
+          "E-090"
+        ],
+        "representative_quote": "ExactTarget/SFMC Email at entity; Salesforce CRM + Mobile +",
+        "source_kind": "docx"
+      },
+      "id": "22eaff39-e368-47be-aac9-7ed3e3cd6e62",
+      "involved_subcap_ids": [
+        "P1C2.1.7",
+        "P1C1.5.5",
+        "P4C3.4.1",
+        "P4C3.4.6",
+        "P4C3.4.7",
+        "P4C3.4.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P4": 67
+      },
+      "source_path": "(unknown)",
+      "title": "Salesforce in corporate family",
+      "verbatim_quote": "F-003 | Salesforce in corporate family | ExactTarget/SFMC Email at entity [E-089]; Salesforce CRM + Mobile + Marketing Cloud at DriveTime parent [E-090] | Existing SFCRM foundation for extension | EXTENSION opportunity \u2014 not greenfield. Service Cloud + Data Cloud to Bridgecrest ops"
+    }
+  ]
+}

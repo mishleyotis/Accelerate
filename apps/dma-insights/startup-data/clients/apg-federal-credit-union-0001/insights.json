@@ -1,0 +1,916 @@
+{
+  "entity_display_id": "apg-federal-credit-union-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C3.6.1",
+        "P2C3.4.1",
+        "P2C3.5",
+        "P4C2.3.2",
+        "P2C4.1.1",
+        "P2C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "fad23da7-1b8b-413f-baa2-8e6b98515ab5",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-085",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-085",
+        "E-108",
+        "E-001",
+        "E-002",
+        "E-010",
+        "E-011",
+        "E-019",
+        "E-022"
+      ],
+      "linked_subcap_id": "P2C3.6.1",
+      "platforms": [
+        "salesforce",
+        "databricks"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: Salesforce FSC: Primary platform opportunity with zero displacement cost. New CEO (<18 months) = open procurement cycle. Optimal first call: Stehl (CXO) + Shuba (VP Marketing) [E-108].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "GREENFIELD CRM — No Salesforce Deployed",
+      "what_text": "Unified Agent Desktop is one of APG Federal Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-085].",
+      "why_text": "The assessment found: “APGFCU operates 19 physical branches — high branch density relative to digital-first competitors; significant branch-network operational footprint” [E-022]. The research report pins the maturity impact at: =level 1.5 (unified agent desktop absent); =level 2.0 (no 360 member view); =level 1.5 (no case management). scores 1.5/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.5.1",
+        "P2C1.4.4",
+        "P2C1.3.1",
+        "P2C4.1.1",
+        "P3C1.1.3",
+        "P2C1.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-002",
+        "E-011"
+      ],
+      "ic_id": "CP-F-002",
+      "id": "55daf865-d0bc-4937-b8ec-d00e9b43eb43",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-002",
+            "E-011"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1.5.1"
+        },
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-087",
+            "E-088",
+            "E-092",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-093",
+        "E-092",
+        "E-087",
+        "E-088",
+        "E-095"
+      ],
+      "linked_subcap_id": "P2C1.5.1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: Marketing Cloud: VP Jo Anna Shuba (Apr 2025, 30+ yrs, prior credit card portfolio) is the immediate champion. SavvyMoney's 94,672 enrolled members = day-one audience for first automated campaign. [E-092].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "No Marketing Automation: 183K Members, Periodic Newsletter",
+      "what_text": "Marketing Automation Platform is one of APG Federal Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-093].",
+      "why_text": "The research report pins the maturity impact at: =level 1.5 (marketing automation); =level 1.5 (lead management); =level 2.0 (digital content). scores 1.5/5 against a peer median of 3.0 on the current assessment [E-091, E-093].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.1.1",
+        "P4C2",
+        "P4C1.4.2",
+        "P4C1.5.1",
+        "P4C2.3.2",
+        "P1C1.3.CU2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-010",
+        "E-025"
+      ],
+      "ic_id": "CP-F-003",
+      "id": "6a0e0fa8-e221-4955-957d-7dc54c88e896",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-010",
+            "E-025"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4.1.1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-085",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-108",
+        "E-085",
+        "E-037",
+        "E-056"
+      ],
+      "linked_subcap_id": "P2C4.1.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: Data Cloud: LiveRamp + Neustar already deployed — the DMP-to-CDP bridge is pre-built. Position: 'You already have the identity infrastructure; Data Cloud unifies it across all 5 systems.' [E-037].",
+      "source_rec_id": null,
+      "theme": "CX & Personalization",
+      "title": "Member Data in 5 Silos — 'Missed Loan Opportunities' Self-Identified",
+      "what_text": "Customer Data Foundation (CDP) is one of APG Federal Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-085].",
+      "why_text": "The assessment found: “DEFINITIVE TECH STACK 2026 (echoloc.ai): Microsoft Azure + Microsoft 365/Intune + Active Directory + VMware/ESXi + SQL Server + Windows IIS + Linux + AWS + Workday (HR/Finance). = HYBRID CLOUD” [E-108]. The research report pins the maturity impact at: =level 1.5 (no CDP); =level 1.99 (analytics overall); =level 3.0 (identity resolution — LiveRamp + Neustar confirmed Datanyze). scores 1.5/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P1C5.1.2",
+        "P1C5",
+        "P1C1.1.7",
+        "P1C1.5.1",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "a40d49b4-e29b-41f9-8d57-44b4b6b03cae",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-001"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        }
+      ],
+      "linked_e_ids": [
+        "E-001",
+        "E-020",
+        "E-096",
+        "E-057",
+        "E-058",
+        "E-059",
+        "E-062",
+        "E-069"
+      ],
+      "linked_subcap_id": "P1C5.1.2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-01"
+      ],
+      "severity": "high",
+      "so_what_text": "Make ESG metrics a near-term focus for APG Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.3 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-020].",
+      "source_rec_id": "REC-01",
+      "theme": "ESG & Sustainability",
+      "title": "ESG metrics",
+      "what_text": "ESG metrics is one of APG Federal Credit Union's least developed strategy and governance capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.3 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes APG Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-001].",
+      "why_text": "The assessment found: “APGFCU 'Ram Branch' at Edgewood High School/Academy of Finance — FIRST student-run credit union in Harford County, opened February 2012. EHS/AOF juniors/seniors serve as tellers and run daily” [E-096]. At 1.5 out of 5, ESG metrics sits 0.8 points below the 2.3 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C4.2.2",
+        "P2C4",
+        "P4C2.3.2",
+        "P1C1.5.1",
+        "P4C3.3.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "533bde5e-2b14-4e99-be0d-a629c0689c7e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-010",
+            "E-085"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-083",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-056",
+        "E-094",
+        "E-010",
+        "E-025",
+        "E-097",
+        "E-083",
+        "E-037",
+        "E-085"
+      ],
+      "linked_subcap_id": "P2C4.2.2",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-02"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Real-Time Decisioning a near-term focus for APG Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-010].",
+      "source_rec_id": "REC-02",
+      "theme": "CX & Personalization",
+      "title": "Real-Time Decisioning",
+      "what_text": "Real-Time Decisioning is one of APG Federal Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-094].",
+      "why_text": "scores 1.5/5 against a peer median of 2.8 on the latest assessment; this recommendation targets 6 capabilities [E-056, E-094].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.4.13",
+        "P4C2",
+        "P4C2.3.2",
+        "P4C2.3.6",
+        "P1C1.5.1",
+        "P4C2.4.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "f59f0aaa-8b1d-4da0-beee-2d24cd63bac4",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-011",
+            "E-085"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-063"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-111",
+        "E-011",
+        "E-098",
+        "E-110",
+        "E-042",
+        "E-063",
+        "E-085",
+        "E-091"
+      ],
+      "linked_subcap_id": "P4C2.4.13",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-03"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Experiment Tracking + Model Registry Operating Model a near-term focus for APG Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-098].",
+      "source_rec_id": "REC-03",
+      "theme": "Analytics & AI",
+      "title": "Experiment Tracking + Model Registry Operating Model",
+      "what_text": "Experiment Tracking + Model Registry Operating Model is one of APG Federal Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger data and technology foundation [E-011].",
+      "why_text": "scores 1.5/5 against a peer median of 2.8 on the latest assessment; this recommendation targets 6 capabilities [E-111, E-011].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.5.1",
+        "P4C1",
+        "P1C1.5.1",
+        "P4C1.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "1478fb66-2214-42fc-9c1a-e77a1ac43b66",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-107",
+            "E-108",
+            "E-110"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-107",
+        "E-108",
+        "E-110"
+      ],
+      "linked_subcap_id": "P4C1.5.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino"
+      ],
+      "related_rec_ids": [
+        "REC-04"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Enterprise Data Catalog & Discovery a near-term focus for APG Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-108].",
+      "source_rec_id": "REC-04",
+      "theme": "Data Management & Governance",
+      "title": "Enterprise Data Catalog & Discovery",
+      "what_text": "Enterprise Data Catalog & Discovery is one of APG Federal Credit Union's least developed data and technology capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger data and technology foundation [E-107].",
+      "why_text": "scores 1.5/5 against a peer median of 3.0 on the latest assessment; this recommendation targets 6 capabilities [E-002, E-107].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C1.6.7",
+        "P2C1",
+        "P4C2.3.2",
+        "P1C1.5.1",
+        "P4C2.4.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "3d0dfb53-7834-4d8e-b1c1-a0ede0611928",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-011"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-087",
+            "E-088",
+            "E-092",
+            "E-095"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-002"
+        },
+        {
+          "e_ids": [
+            "E-002"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-002",
+        "E-011",
+        "E-023",
+        "E-092",
+        "E-087",
+        "E-088",
+        "E-095",
+        "E-041"
+      ],
+      "linked_subcap_id": "P2C1.6.7",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [
+        "REC-05"
+      ],
+      "severity": "high",
+      "so_what_text": "Make Predictive Analytics a near-term focus for APG Federal Credit Union: a scoped investment here would lift it from 1.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-011].",
+      "source_rec_id": "REC-05",
+      "theme": "Digital Channels",
+      "title": "Predictive Analytics",
+      "what_text": "Predictive Analytics is one of APG Federal Credit Union's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger, more personalised customer experience [E-002].",
+      "why_text": "The assessment found: “APGFCU offers iPhone and Android mobile banking apps via App Store and Google Play; Mobile Deposit for Business available; ABBY Telephone Teller (legacy IVR); Member Service Center M-F 8am-8pm +” [E-023]. At 1.5 out of 5, Predictive Analytics sits 1.5 points below the 3.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.5.4",
+        "P3C4.6.2",
+        "P1C2.8.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "edd13ff5-d3c4-4936-bc98-6a76d44ab726",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        }
+      ],
+      "linked_e_ids": [
+        "E-098",
+        "E-068",
+        "E-002",
+        "E-107",
+        "E-108",
+        "E-110"
+      ],
+      "linked_subcap_id": "P4C1.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Investment capacity at 23-year high. Budget surplus vs. prior years. $10.5M existing tech spend baseline. — Investment conversation: CFO has headroom. Reference loan growth (+$230M) as technology ROI signal. Scienaptic AI's 90% underwriting automation is the proof-of-concept story for Einstein NBA expansion. [E-002].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Strongest Financial Position in 23 Years",
+      "what_text": "Unified Data + AI Asset Governance Control Plane is one of APG Federal Credit Union's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes APG Federal Credit Union's ability to deliver a stronger data and technology foundation [E-068].",
+      "why_text": "At 2.0 out of 5, Unified Data + AI Asset Governance Control Plane sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-098, E-068].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2.4.1",
+        "P4C2.4.7",
+        "P4C2.3.2",
+        "P3C1.1.3",
+        "P3C3.3.4",
+        "P1C2.9.BK1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-007",
+      "id": "8b04d116-7bed-4746-ab48-1bb9f008594d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-083",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-101",
+        "E-105",
+        "E-068",
+        "E-097",
+        "E-083"
+      ],
+      "linked_subcap_id": "P2C2.4.1",
+      "platforms": [
+        "ncino",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended play: Einstein NBA + Agentforce: Scienaptic proves 'APGFCU can govern and operate AI in production.' Now scale from credit → member service (Agentforce) and cross-sell/retention (Einstein NBA). The governance model is already in place. [E-068].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "Scienaptic AI Live: APGFCU Proved AI in Production",
+      "what_text": "Deployed November 2025. 90% manual underwriting automation. Fair lending monitoring under AVP John Golding. Chief Consumer Lending Officer Robyn Mannone quoted in press release. In Zennify's assessment Automated Credit Decisioning scores 3.5 out of 5, versus a typical 3.0 at comparable institutions [E-105].",
+      "why_text": "The research report pins the maturity impact at: =level 3.5 (AI-powered credit decisioning — strongest P2 capability); =level 2.5 (MLOps via vendor). scores 3.5/5 against a peer median of 3.0 on the current assessment [E-101, E-105].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3.8.1",
+        "P4C2.1.1",
+        "P4C2.3.2",
+        "P1C2.1.7",
+        "P1C4.1.3",
+        "P4C1.1.8"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "c022ee13-d507-4678-b3bf-1c97df84424f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-007"
+        },
+        {
+          "e_ids": [
+            "E-037"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-068"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-037",
+        "E-063",
+        "E-068"
+      ],
+      "linked_subcap_id": "P1C3.8.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Agentforce + Einstein + Data Cloud: Stehl is the primary champion for ALL Salesforce AI products. Frame Zennify as 'helping Stehl deliver his SECU playbook at APGFCU.' He knows the destination — Zennify provides the path. [E-063].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "AI-Ready Leadership: MIT AI-Certified CXO + CEO from SECU",
+      "what_text": "GenAI Strategy is one of APG Federal Credit Union's solid strategy and governance capabilities, scoring 3.0 out of 5 in Zennify's latest assessment, ahead of the 2.8 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes APG Federal Credit Union's ability to deliver sharper strategic direction and stronger oversight [E-037].",
+      "why_text": "The assessment found: “Robyn Mannone's current title is CHIEF CONSUMER LENDING OFFICER (upgraded from SVP Consumer Lending in earlier reports). Her Scienaptic quote: 'We can evaluate credit needs with greater care” [E-068]. The research report pins the maturity impact at: =level 3.0 (AI leadership signal); =level 3.0 (analytics strategy elevated on Stehl hire). scores 3.0/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    },
+    {
+      "affects": [
+        "P1C1.3.1",
+        "P1C5.1.1",
+        "P2C1.1.CU2",
+        "P1C1.3.CU2",
+        "P1C4.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-003"
+      ],
+      "ic_id": "CP-F-006",
+      "id": "67c8b7a1-6f47-47cb-8e1c-948ac9f1548a",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-003"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C1.3.1"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        }
+      ],
+      "linked_e_ids": [
+        "E-099",
+        "E-064",
+        "E-028",
+        "E-051"
+      ],
+      "linked_subcap_id": "P1C1.3.1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "low",
+      "so_what_text": "Recommended play: Marketing Cloud + FSC: New branch = new member acquisition funnels. Canton branch = CEO's 'community hub' model. Digital onboarding for Baltimore City = Q2 + FSC + Marketing Cloud integrated new-member journey. [E-028].",
+      "source_rec_id": null,
+      "theme": "Digital Strategy & Vision",
+      "title": "Baltimore City Expansion: Digital-First, Now Physical",
+      "what_text": "Baltimore City/County grew 13K→26K+ members (+100%) 2021–2024 via digital-first FOM expansion. First Baltimore City physical branch (Canton, The Can Company) announced April 2026, opening early 2027. In Zennify's assessment Customer Segment Definition scores 3.0 out of 5, versus a typical 2.8 at comparable institutions [E-099].",
+      "why_text": "The assessment found: “Becky Smith named to Baltimore Business Journal Faces to Watch 2026 list. Key quote from context: 'APGFCU will double its investment in digital in 2025.' — strongest public signal of innovation” [E-064]. The research report pins the maturity impact at: =level 3.0 (geographic expansion strategy); =level 3.0 (community impact hub). scores 3.0/5 against a peer median of 2.8 on the current assessment.",
+      "pillar": "P1",
+      "flag": "MONITOR"
+    }
+  ],
+  "narrative": null,
+  "run_request_id": "DMA-RES-APGFCU-20260504-0001"
+}

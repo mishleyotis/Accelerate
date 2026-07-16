@@ -1,0 +1,1279 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 186,
+        "subcaps": 186,
+        "thin": 13
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 232,
+        "subcaps": 232,
+        "thin": 36
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 118,
+        "subcaps": 118,
+        "thin": 0
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 172,
+        "subcaps": 172,
+        "thin": 1
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "farm-credit-mid-america--0001",
+    "domain": null,
+    "hq": null,
+    "id": "e44ad49e-cf09-4148-bb54-66c5160aecdc",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Farm Credit Mid-America, ACA",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "FC",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:12:14.307837Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 54,
+    "current_count": 106,
+    "dated_count": 26,
+    "median_age_months": 22.3,
+    "oldest_published_date": "2006-01-01",
+    "stale_count": 23,
+    "stale_pct": 10.7,
+    "total": 215,
+    "undated_count": 6
+  },
+  "evidence_summary": {
+    "claims": {
+      "CONTRADICTORY": 4,
+      "MIXED": 16,
+      "NEGATIVE": 2,
+      "NEUTRAL": 10,
+      "POSITIVE": 183
+    },
+    "connectors": {
+      "Glassdoor": 2,
+      "Indeed": 1,
+      "LinkedIn": 11
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 14,
+      "NEUTRAL": 176,
+      "POSITIVE": 25
+    },
+    "tiers": {
+      "T1": 155,
+      "T2": 35,
+      "T3": 25
+    },
+    "total_facts": 2700,
+    "total_items": 215
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 48.9,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "earning_assets",
+    "aum_usd": 48900000000.0,
+    "branches": 88,
+    "cagr": "11.2%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "2021": 430000000.0,
+      "2022": 475000000.0,
+      "total_assets": "$48.9B",
+      "trajectory": {
+        "branches": 88,
+        "currency": "USD",
+        "derived_from": "financial_highlights",
+        "employees": 1700,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Midsouth merger in-progress + portfolio repositioning"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2026"
+        ],
+        "geography": "Arkansas, Indiana, Kentucky, Missouri, Ohio, Tennessee (6 states)",
+        "headline": "$48.9B assets · FY2026 · +0.0% CAGR",
+        "regulator": "Farm Credit Administration (FCA)",
+        "series": {
+          "net_income_m": [
+            null,
+            430.0,
+            475.0,
+            null,
+            null,
+            null
+          ],
+          "total_assets": [
+            48.9,
+            32.0,
+            36.0,
+            40.8,
+            0.6,
+            48.9
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "KY, TN, OH, IN, AR, MO",
+    "footprint_basis": "nlp:report_prose",
+    "founded": 2001,
+    "founded_basis": "nlp:evidence+narrative",
+    "geography": "Arkansas, Indiana, Kentucky, Missouri, Ohio, Tennessee (6 states)",
+    "headcount": 1700,
+    "hq": "St Paul MN",
+    "hq_address": null,
+    "hq_basis": "nlp:evidence+narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dan Wagner",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President and Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Kevin Geron",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Hanna",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Risk Officer (EVP)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Steve Zagar",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Financial Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Chuck Millhollan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Operating Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Heather Vidourek",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Administrative Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tara Durbin",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Lending Officer Agriculture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Derrick Waggoner",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Lending Officer Diversified Markets"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Art Whaley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Lending Officer Rural 1st"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kevin Kuper",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Credit Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Daniel Brittain",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Head of Product Strategy, Data and Architecture"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Tiffany Smith",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Security Officer + Head of IT Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Joe E. Martinez",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director of Information Security"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kevin Kleinholter",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director of Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Fred Gordon",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director of Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Glenn Choat",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director Business Applications"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Marc Miles",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Senior Technology Strategist"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Daro Mott",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP of Process Improvement & Execution"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Dan Robertson",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "General Counsel — Lending and Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Kristie Phillips",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "General Counsel — Corporate Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Lindsey Bridges",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Head of Brand Experience"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Leili Ghazi",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Managing Director Capital Markets"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Michael Jones",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Human Resources Officer (per ZoomInfo)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Camille Moore",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Auditor"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Rebecca Mark",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Head of Lending Support"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Gary Book",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Director Retail Credit Underwriting"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "James Mills",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Security Architect (CISSP)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Security Engineer Sinclair",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Security Engineer Lambdin",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Security Engineer McGurgan",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Security Engineer Collin L",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Security Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Matt Kelley",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Access Management Technician"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Network Engineer Mathews",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Network Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Network Engineer Sageser",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Network Engineer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Charissa O'Daniel",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "PR/Comms support"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "Farm Credit Mid-America, ACA",
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "Farm Credit Mid-America, ACA is a farm-credit institution. It reports $48.9 billion in earning assets. It is regulated by Farm Credit Administration (FCA) and employs approximately 1,700 people across 88 branches. Its overall digital maturity is assessed at 3.1 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "metric": "Overall",
+          "scale": 100,
+          "score": 60.0,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "ownership of social impact reporting Peer NPS benchmark (Comparably Brand Intelligence): FCSA NPS 60 (LEADER among FCS peers) | CoBank 50 | Rabobank 25 | Wells Fargo 7 | American AgCredit 0 — FCMA NPS not publicly captured in Comparably (A-",
+          "source": "Comparably"
+        },
+        {
+          "rating": "60",
+          "signal": "CAO-level ownership of social impact reporting Peer NPS benchmark (Comparably Brand Intelligence): FCSA NPS 60 (LEADER among FCS peers) | CoBank 50 | Rabobank 25 | Wells Fargo 7 | American AgCredit 0 — FCMA NPS not publicly captured in Comp",
+          "source": "Net Promoter Score"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mid-size",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2024-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-131",
+        "excerpt": "🚨 GROWING FORWARD® (registered trademark) — formal YBS content/nurture program: 'offers young and first time farmers the loan and financing options, financial education, network of experts and support to guide them on th",
+        "title": "🚨 offers KNOW formal",
+        "type": "conference",
+        "url": "https://fcma.com/about/growing-forward"
+      },
+      {
+        "author": "Kristie Phillips",
+        "date": "2025-07-24",
+        "derived_from": "evidence_index",
+        "e_id": "E-142",
+        "excerpt": "🚨 FCMA BYLAWS (July 24, 2025) authored by KRISTIE PHILLIPS (General Counsel Corporate Ops) — formal legal structure. Association = Farm Credit Mid-America, ACA. Subsidiaries = MidAm, FLCA (Federal Land Bank Association) ",
+        "title": "🚨 FCMA Bylaws (July 24, 2025) authored by Kristie Phillips (General…",
+        "type": "article",
+        "url": "https://www.fcma.com/docs/src/pdf/farm-credit-mid-america-bylaws.pdf"
+      },
+      {
+        "author": null,
+        "date": "2026-01-08",
+        "derived_from": "evidence_index",
+        "e_id": "E-151",
+        "excerpt": "🚨 FARMER BRIDGE ASSISTANCE PROGRAM (FBA) LAUNCHED Jan 8, 2026 (Business Insights article): 'critical financial relief to producers in 2026, bridging the gap until new farm bill provisions take effect' — FORMAL VULNERABLE",
+        "title": "🚨 Farmer Bridge Assistance Program (FBA) Launched Jan 8, 2026…",
+        "type": "article",
+        "url": "https://www.fcma.com/"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-158",
+        "excerpt": "🚨 FORWARD THINKER AWARD — formal milestone recognition program: $5,000 + personalized plaque + recognized at Know to Grow® conference. Self-nominated. Judged on leadership + involvement + goals + unique practices. Applic",
+        "title": "🚨 Forward Thinker Award",
+        "type": "conference",
+        "url": "https://fcma.com/about/forward-thinker"
+      },
+      {
+        "author": null,
+        "date": "2013-02-13",
+        "derived_from": "evidence_index",
+        "e_id": "E-187",
+        "excerpt": "🚨🚨 FCMA DR INFRASTRUCTURE MATURITY (2013 press release — 12-year DR journey): 'Farm Credit Mid-America, an agricultural cooperative serving more than 95,000 farmers [then], selected EMC VNX unified storage over NetApp an",
+        "title": "🚨🚨 FCMA DR Infrastructure Maturity (2013 press release",
+        "type": "article",
+        "url": "https://www.prnewswire.com/news-releases/farm-credit-mid-america-cultivates-improved-business-performance-and-efficiency-with-emc-191005641.html"
+      },
+      {
+        "author": null,
+        "date": "2025-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-072",
+        "excerpt": "Bylaws Article VII Committees specifies formal charters: Executive Committee (700), Human Resources Committee (705, formerly Compensation Committee), Loan Committee (710), Audit Committee (715, must include financial exp",
+        "title": "Executive Committee (700), Human Resources Committee (705, formerly…",
+        "type": "article",
+        "url": "https://www.fcma.com/docs/src/pdf/farm-credit-mid-america-bylaws.pdf?sfvrsn=528c133c_11"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "fcma.com",
+    "website_basis": "profile_prose:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v2.4",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:34.521692+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Farm Credit Mid-America, ACA — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "Farm Credit Mid-America, ACA is a $48.9B in assets farm-credit institution regulated by Farm Credit Administration (FCA) with 1,700 employees. A 11.2% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-063, E-066]. Zennify's assessment places overall digital maturity at 3.2/5. The deepest capability gap is AI Claims Estimation at 2.6/5 against a 2.8 peer median [E-001, E-007].\n\nThe issue register adds FCA Enforcement History — NONE 1998-2025. The issue register adds CFPB Enforcement — NONE (Jurisdictional Scope Limited). Counter-signal: Exam Execution already runs at 3.9/5 against a 3.0 peer median — a strength to build on, not rebuild. The pattern is corroborated across the assessment's evidence index [E-003].\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for Farm Credit Mid-America, ACA is whether to close AI Claims Estimation first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. Farm Credit Mid-America, ACA should lead with Tableau (68/100 fit) against Initiative Prioritization, then sequence Twilio behind it. Closing AI Claims Estimation to the peer median alone is worth 0.2 maturity points, and the capabilities that depend on it compound the gain.\n\nThe analyst's own priority framing: \"Existing Zennify Salesforce partnership with proven ROI — FCMA + Zennify implemented Salesforce FSC + Marketing Cloud + MC Personalization + MC Intelligence…\"."
+  },
+  "overall_score": 3.18,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/FCMA_Evidence_Corroboration_Map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 200 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.175756+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/FCMA_Peer_Synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.176675+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/DMA_Governance_Patch_Block_FCMA_2026-04-18.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.177534+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/FCMA_Appendix_A4_Technology_Gaps_Register.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 24 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.193619+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/FCMA_Appendix_A5_Subvertical_NA_Log.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.193961+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/FCMA_Appendix_A6_Safeguard_Gates.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.194465+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "README.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:14.195080+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 3,
+      "DEGRADED": 1,
+      "INFO": 19
+    },
+    "stage_ms": {
+      "manifest": 15,
+      "parse": 16690,
+      "persist": 3210
+    },
+    "structured": [
+      {
+        "code": "run_manifest from case-insensitive verdict fallback",
+        "detail": "run_manifest from case-insensitive verdict fallback: 07_governance/DMA_Governance_QA_Verdict_FCMA_2026-04-18.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 1416 subcaps from DMA_Assessment_Workboo",
+        "detail": "xlsx fallback extracted 1416 subcaps from DMA_Assessment_Workbook_FCMA_2026-04-18.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (1416 subcaps, dir=03_scoring_",
+        "detail": "scoring loaded from xlsx fallback (1416 subcaps, dir=03_scoring_workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +708 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from non-canonical layout FCMA_Merged_Evidence_I",
+        "detail": "evidence loaded from non-canonical layout FCMA_Merged_Evidence_Index.json (225 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 08_appendices/FCMA_Scoring_Export_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_FCMA_2026-04-18.docx leadership=35 focus_areas=7 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_derived_from_scores",
+        "detail": "scqa_derived_from_scores",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/FCMA_Evidence_Corroboration_Map.json — no fingerprint matched (best confidence 0.00); 200 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/FCMA_Peer_Synthesis.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/DMA_Governance_Patch_Block_FCMA_2026-04-18.md — no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/FCMA_Appendix_A4_Technology_Gaps_Register.csv — no fingerprint matched (best confidence 0.20); 24 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/FCMA_Appendix_A5_Subvertical_NA_Log.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/FCMA_Appendix_A6_Safeguard_Gates.csv — no fingerprint matched (best confidence 0.20); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "README.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "subvertical_inferred_from_name",
+        "detail": "subvertical_inferred_from_name:FC",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 48",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "run_manifest from case-insensitive verdict fallback: 07_governance/DMA_Governance_QA_Verdict_FCMA_2026-04-18.json",
+      "xlsx fallback extracted 1416 subcaps from DMA_Assessment_Workbook_FCMA_2026-04-18.xlsx",
+      "scoring loaded from xlsx fallback (1416 subcaps, dir=03_scoring_workbook)",
+      "xlsx_name_enrichment: +0 subcap names +708 rationales merged from workbook into CSV-parsed rows",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from non-canonical layout FCMA_Merged_Evidence_Index.json (225 rows)",
+      "used variant issue register: 08_appendices/FCMA_Scoring_Export_issue_register.csv",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_FCMA_2026-04-18.docx leadership=35 focus_areas=7 facts_extracted=0",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "scqa_derived_from_scores",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 01_evidence/FCMA_Evidence_Corroboration_Map.json — no fingerprint matched (best confidence 0.00); 200 generic sections mined",
+      "INFO/pattern_gap: 06_peers/FCMA_Peer_Synthesis.md — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 07_governance/DMA_Governance_Patch_Block_FCMA_2026-04-18.md — no fingerprint matched (best confidence 0.00); 34 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/FCMA_Appendix_A4_Technology_Gaps_Register.csv — no fingerprint matched (best confidence 0.20); 24 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/FCMA_Appendix_A5_Subvertical_NA_Log.csv — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/FCMA_Appendix_A6_Safeguard_Gates.csv — no fingerprint matched (best confidence 0.20); 16 generic sections mined",
+      "INFO/pattern_gap: README.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "subvertical_inferred_from_name:FC",
+      "timeline_events_persisted: 48",
+      "insight_cards_persisted: 12",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 186,
+      "peer_median": 2.7,
+      "pillar_id": "P1",
+      "score": 3.03,
+      "subcaps_scored": 186
+    },
+    {
+      "peer_benchmarked": 232,
+      "peer_median": 2.51,
+      "pillar_id": "P2",
+      "score": 2.77,
+      "subcaps_scored": 232
+    },
+    {
+      "peer_benchmarked": 118,
+      "peer_median": 2.94,
+      "pillar_id": "P3",
+      "score": 3.54,
+      "subcaps_scored": 118
+    },
+    {
+      "peer_benchmarked": 172,
+      "peer_median": 2.63,
+      "pillar_id": "P4",
+      "score": 3.38,
+      "subcaps_scored": 172
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-18",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v2.4",
+    "completed_at": "2026-07-02T23:12:14.307837Z",
+    "created_at": "2026-07-02T23:12:14.307837Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "7f420588-bc98-42b4-9376-c7ba92a1ca17",
+    "overall_score": null,
+    "request_id": "DMA-ASM-FCMA-20260418-0001",
+    "started_at": "2026-07-02T23:12:14.307837Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "metric": "Overall",
+        "scale": 100,
+        "score": 60.0,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "ServiceNow Now Assist Gen AI roadmap = Agentforce competitive threat — Tiffany Smith (CSO) quoted: 'ServiceNow USED OUR OWN DATA to demonstrate Now Assist, and time after time it CAME UP WITH THE RIGHT ANSWERS'. FSO + IRM + ITSM + Legal Service Delivery + Now Assist = 5-product ServiceNow footprint expanding to Gen AI. NewRocket implementation partner.",
+      "evidence": [
+        "E-043",
+        "E-203",
+        "E-191",
+        "E-212"
+      ],
+      "magnitude": null,
+      "name": "ServiceNow Now Assist Gen AI roadmap = Agentforce competitive",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 3.24,
+      "so_what": "Protect ServiceNow Now Assist Gen AI roadmap = Agentforce competitive as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C3",
+      "theme": "Data & technology",
+      "title": "ServiceNow Now Assist Gen AI roadmap = Agentforce competitive",
+      "what": "ServiceNow Now Assist Gen AI roadmap = Agentforce competitive threat — Tiffany Smith (CSO) quoted: 'ServiceNow USED OUR OWN DATA to demonstrate Now Assist, and time after time it CAME UP WITH THE RIGHT ANSWERS'. FSO + IRM + ITSM + Legal Service Delivery +. Now Assist = 5-product ServiceNow footprint expanding to Gen AI. NewRocket implementation partner.",
+      "why": "The linked evidence records: FCMA leverages ServiceNow AI Platform across: lending support, business applications management, information security, IT operations management."
+    },
+    {
+      "body": "FCA Cyber Rule compliance + UNC6040 Salesforce attack defense — FCA 12 CFR 609.930 effective Jan 1, 2025 mandates 7 cyber program elements. Farmers Insurance Salesforce breach May 29, 2025 (1.1M customers) via UNC6040/UNC6240 (ShinyHunters)",
+      "evidence": [
+        "E-178",
+        "E-215",
+        "E-216",
+        "E-217"
+      ],
+      "magnitude": null,
+      "name": "FCA Cyber Rule compliance + UNC6040 Salesforce attack defense",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 3.14,
+      "so_what": "Protect FCA Cyber Rule compliance + UNC6040 Salesforce attack defense as a proof point: use it to anchor the operations story while the true gaps close — nCino is the platform surface that addresses it.",
+      "subcap_id": "P3C2",
+      "theme": "Operations",
+      "title": "FCA Cyber Rule compliance + UNC6040 Salesforce attack defense",
+      "what": "FCA Cyber Rule compliance + UNC6040 Salesforce attack defense — FCA 12 CFR 609.930 effective Jan 1, 2025 mandates 7 cyber program elements. Farmers Insurance Salesforce breach May 29, 2025 (1.1M customers) via UNC6040/UNC6240 (ShinyHunters).",
+      "why": "The linked evidence records: 🚨🚨 FCA FINAL RULE ON CYBER RISK MANAGEMENT (announced Oct 5 2023, approved by notational vote Sept 25 2023, EFFECTIVE JAN 1, 2025): 'The Farm Credit Administration board has approved a final rule on cyber risk management."
+    },
+    {
+      "body": "Data fragmentation + explicit Data Cloud opportunity — Kevin Kleinholter (Director of Business Applications) quote: 'Connecting disparate data sources and deepening their understanding of their customers'. FCMA runs Fiserv DNA core + Salesforce FSC + nCino + ServiceNow + AWS + VMware + Ceridian HCM + Sitefinity + OnBase ECM — no explicitly disclosed MDM platform [E-197,E-150,E-165] — P4C1 Data Management foundational but MDM/Data Cloud gap at M2-M3.",
+      "evidence": [
+        "E-197",
+        "E-150",
+        "E-165",
+        "E-191"
+      ],
+      "magnitude": null,
+      "name": "Data fragmentation + explicit Data Cloud opportunity",
+      "peer_median": 2.75,
+      "platforms": [
+        "Tableau",
+        "Databricks"
+      ],
+      "score": 3.24,
+      "so_what": "Protect Data fragmentation + explicit Data Cloud opportunity as a proof point: use it to anchor the data and technology story while the true gaps close — Tableau is the platform surface that addresses it.",
+      "subcap_id": "P4C3",
+      "theme": "Data & technology",
+      "title": "Data fragmentation + explicit Data Cloud opportunity",
+      "what": "Data fragmentation + explicit Data Cloud opportunity — Kevin Kleinholter (Director of Business Applications) quote: 'Connecting disparate data sources and deepening their understanding of their customers'. FCMA runs Fiserv DNA core +.",
+      "why": "The linked evidence records: 🚨🚨 FCMA DATA SILO ADMISSION (Zennify case study): 'Traditional systems and SILOED DATA presented challenges in maintaining a COMPLETE VIEW OF CUSTOMER INTERACTIONS, making it more difficult to drive consistency and engagement' — formal admission of pre-Salesforce data"
+    },
+    {
+      "body": "Existing Zennify Salesforce partnership with proven ROI — FCMA + Zennify implemented Salesforce FSC + Marketing Cloud + MC Personalization + MC Intelligence, delivering 33x customer engagement, 82x faster email creation, 385% increase in engaged leads [E-197] — Marketing/sales capability foundation already at M3-M4 with proven incremental value. Expansion-ready. — REFERENCE ACCOUNT.",
+      "evidence": [
+        "E-197",
+        "E-001",
+        "E-004",
+        "E-023"
+      ],
+      "magnitude": "33x",
+      "name": "Existing Zennify Salesforce partnership",
+      "peer_median": 2.25,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.53,
+      "so_what": "Protect Existing Zennify Salesforce partnership as a proof point: use it to anchor the customer experience story while the true gaps close — Twilio is the platform surface that addresses it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Existing Zennify Salesforce partnership",
+      "what": "Existing Zennify Salesforce partnership with proven ROI — FCMA + Zennify implemented Salesforce FSC + Marketing Cloud + MC Personalization + MC Intelligence, delivering 33x customer engagement, 82x faster email creation, 385% increase in engaged leads. [E-197] — Marketing/sales capability foundation already at M3-M4 with proven incremental value.",
+      "why": "The linked evidence records: 🚨🚨 FCMA DATA SILO ADMISSION (Zennify case study): 'Traditional systems and SILOED DATA presented challenges in maintaining a COMPLETE VIEW OF CUSTOMER INTERACTIONS, making it more difficult to drive consistency and engagement' — formal admission of pre-Salesforce data"
+    },
+    {
+      "body": "Active Salesforce hiring = buying signal for expansion — FCMA careers page Mar 2026: (1) BT Student Specialist (AI), (2) Salesforce Administrator, (3) Salesforce Software Systems Engineer / Platform Developer, (4) ServiceNow Platform Developer, (5) ServiceNow Administrator. 4/5 technical positions. [E-204,E-209] — Active technology team expansion. AI program formalizing. — MORE Salesforce licenses coming + new SF developer will drive customization.",
+      "evidence": [
+        "E-204",
+        "E-209",
+        "E-001",
+        "E-004"
+      ],
+      "magnitude": null,
+      "name": "Active Salesforce hiring = buying",
+      "peer_median": 2.25,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.53,
+      "so_what": "Protect Active Salesforce hiring = buying as a proof point: use it to anchor the customer experience story while the true gaps close — Twilio is the platform surface that addresses it.",
+      "subcap_id": "P2C1",
+      "theme": "Customer experience",
+      "title": "Active Salesforce hiring = buying",
+      "what": "Active Salesforce hiring = buying signal for expansion — FCMA careers page Mar 2026: (1) BT Student Specialist (AI), (2) Salesforce Administrator, (3) Salesforce Software Systems Engineer / Platform Developer, (4) ServiceNow Platform Developer, (5) ServiceNow Administrator. 4/5 technical positions. [E-204,E-209] — Active technology team expansion.",
+      "why": "The linked evidence records: 🚨🚨 nCINO nIQ AUTOMATED SPREADING AI PLATFORM (trusted by 2,700+ FIs): 'Through optical character recognition technology, nIQ automates information gathering procedures, reducing manual data entry'. OCR +"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.3,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-061"
+      ],
+      "modifiers": [
+        "5 of 168 subcaps on thin evidence"
+      ],
+      "rationale": "Data Strategy Alignment averages 3.0/5 over 168 scored subcaps; ceiling 4.0 reflects thin evidence density (163/168 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.4,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "35 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "Adoption-to-Value Measurement & Instrumentation averages 2.6/5 over 221 scored subcaps; ceiling 3.6 reflects thin evidence density (186/221 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.3,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-078"
+      ],
+      "modifiers": [
+        "5 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Accelerator/Incubator Engagement averages 3.2/5 over 190 scored subcaps; ceiling 4.2 reflects thin evidence density (185/190 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.3,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-066"
+      ],
+      "modifiers": [],
+      "rationale": "Adoption Management averages 3.3/5 over 205 scored subcaps; ceiling 4.3 reflects solid evidence density (205/205 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.4,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-070"
+      ],
+      "modifiers": [
+        "19 of 125 subcaps on thin evidence"
+      ],
+      "rationale": "Green IT Strategy averages 3.1/5 over 125 scored subcaps; ceiling 4.0 reflects thin evidence density (106/125 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.4,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-127"
+      ],
+      "modifiers": [
+        "53 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "SMS & Mobile Marketing averages 2.5/5 over 291 scored subcaps; ceiling 3.4 reflects thin evidence density (238/291 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.4,
+      "ceiling": 4.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-076"
+      ],
+      "modifiers": [
+        "43 of 294 subcaps on thin evidence"
+      ],
+      "rationale": "White-Label Experience Platform averages 3.2/5 over 294 scored subcaps; ceiling 4.1 reflects thin evidence density (251/294 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.4,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-146"
+      ],
+      "modifiers": [
+        "43 of 300 subcaps on thin evidence"
+      ],
+      "rationale": "AI Claims Estimation averages 2.6/5 over 300 scored subcaps; ceiling 3.5 reflects thin evidence density (257/300 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.4,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-098"
+      ],
+      "modifiers": [
+        "35 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Optimization & Learning averages 2.9/5 over 255 scored subcaps; ceiling 3.8 reflects thin evidence density (220/255 full-evidence cells); band ±0.4 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.3,
+      "ceiling": 4.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-147"
+      ],
+      "modifiers": [],
+      "rationale": "RPA Platform & Bot Management averages 3.6/5 over 161 scored subcaps; ceiling 4.6 reflects solid evidence density (161/161 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.3,
+      "ceiling": 4.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-087"
+      ],
+      "modifiers": [],
+      "rationale": "Behavioral Analytics averages 3.1/5 over 130 scored subcaps; ceiling 4.1 reflects solid evidence density (130/130 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.3,
+      "ceiling": 4.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-007"
+      ],
+      "modifiers": [],
+      "rationale": "Exam Execution averages 3.9/5 over 140 scored subcaps; ceiling 4.9 reflects solid evidence density (140/140 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.3,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-185"
+      ],
+      "modifiers": [],
+      "rationale": "Concentration Risk Management averages 3.5/5 over 145 scored subcaps; ceiling 4.5 reflects solid evidence density (145/145 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.3,
+      "ceiling": 4.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-197"
+      ],
+      "modifiers": [],
+      "rationale": "Unstructured Data Support averages 3.4/5 over 200 scored subcaps; ceiling 4.4 reflects solid evidence density (200/200 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.3,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-178"
+      ],
+      "modifiers": [],
+      "rationale": "AI & Machine Learning averages 3.3/5 over 273 scored subcaps; ceiling 4.3 reflects solid evidence density (273/273 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.3,
+      "ceiling": 4.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-209"
+      ],
+      "modifiers": [
+        "5 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Green IT & Technology Sustainability averages 3.2/5 over 235 scored subcaps; ceiling 4.2 reflects thin evidence density (230/235 full-evidence cells); band ±0.3 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.3,
+      "ceiling": 4.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-181"
+      ],
+      "modifiers": [],
+      "rationale": "SOAR & Security Automation averages 3.7/5 over 150 scored subcaps; ceiling 4.7 reflects solid evidence density (150/150 full-evidence cells); band ±0.3 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Active Salesforce Platform Developer role at FCMA (posted Nov 2025, Louisville KY hybrid): design/develop/implement Salesforce ecosystem solutions using Apex, Visualforce, Lightning, HTML, CSS, JavaScript, SQL Job description: 'Provides technical and systems design expertise to assist in the",
+      "evidence": [
+        "E-047"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Active Salesforce Platform Developer role at FCMA",
+      "metric": null,
+      "peer_context": "AI Claims Estimation runs 2.56/5 vs a 2.75 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Active Salesforce Platform Developer role at FCMA (posted Nov 2025, Louisville KY hybrid): design/develop/implement Salesforce ecosystem solutions using Apex, Visualforce, Lightning, HTML, CSS, JavaScript, SQL Job. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "AI Claims Estimation scores 2.56/5 vs a typical 2.75 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-001",
+        "E-007",
+        "E-011",
+        "E-024"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "AI Claims Estimation scores 2.56/5",
+      "metric": "AI Claims Estimation 2.56/5 vs peer 2.75",
+      "peer_context": "AI Claims Estimation runs 2.56/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Initiative Prioritization — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C3",
+      "text": "AI Claims Estimation scores 2.56/5 vs a typical 2.75 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "SMS & Mobile Marketing at 2.53/5 is one of Farm Credit Mid-America, ACA's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-132",
+        "E-001",
+        "E-004",
+        "E-023"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "SMS & Mobile Marketing at 2.53/5 is one of Farm Credit…",
+      "metric": null,
+      "peer_context": "AI Claims Estimation runs 2.56/5 vs a 2.75 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Initiative Prioritization — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C1",
+      "text": "SMS & Mobile Marketing at 2.53/5 is one of Farm Credit Mid-America, ACA's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

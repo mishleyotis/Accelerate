@@ -1,0 +1,494 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "americu-credit-union-0001",
+  "financials": {
+    "metrics": {
+      "currency": "USD",
+      "review_count_minimum": 36,
+      "schema": "dma_financial_baseline_v1"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Albany NY (Capital Region",
+      "Capital District",
+      "NY upstate)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Ron Belle",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President and CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Nick Fabrizio",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BOARD CHAIR"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "Credit union (NCUA-regulated)",
+    "narrative_md": "AmeriCU Credit Union is a credit union. It reports $2.8 billion in total assets and has operated since 1950. It is regulated by NCUA (federal share insurance) and employs approximately 704 people across 25 branches. Its overall digital maturity is assessed at 2.5 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (federal share insurance) + NYDFS (state charter)",
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": "Ron Belle",
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-012",
+        "excerpt": "CEO Ron Belle quoted: AmeriCU has 'invested in a digital-first approach that gives members online and mobile tools to manage finances at their convenience.' First-party strategy framing.",
+        "title": "CEO Ron Belle quoted",
+        "type": "article",
+        "url": "https://oswegocountybusiness.com/credit-unions-continue-to-see-growth-in-membership-assets/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "ba6cd8f1-d328-45e4-9f65-f01c5c64560a",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "4068 tier mismatches between scoring detail Column M and Evidence_Index"
+    },
+    {
+      "id": "e483351b-8211-4c69-ba36-32593f076074",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "critical",
+      "status": "OPEN",
+      "title": "Auditor rejects CRITIC_CHALLENGE as invalid cap_type"
+    },
+    {
+      "id": "055016d6-ea21-4717-a397-c92e0fa057d6",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "94 rationales lack inline E-ID citations"
+    },
+    {
+      "id": "f7cbdb78-dabe-4924-b9ab-0077d1c287f2",
+      "issue_id": "ISS-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "1 rationale mentions contradictions without citing resolution rule"
+    },
+    {
+      "id": "be461476-4a5f-4f3c-960e-a157146609f5",
+      "issue_id": "ISS-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "864 rationale pairs across 4 pillars share >80% Jaccard text similarity"
+    },
+    {
+      "id": "801e512b-225c-4a21-9053-f213389fe877",
+      "issue_id": "ISS-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Auditor flags 2 trend-arrow contradictions"
+    },
+    {
+      "id": "56ec5395-4a15-45b7-8652-4bf47a11c3bb",
+      "issue_id": "ISS-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "0 unique rule IDs cited in proof_links JSON across 707 subcaps"
+    },
+    {
+      "id": "341fcf0b-44d9-4dc1-8a04-a1ba4de9279c",
+      "issue_id": "ISS-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "0 substantive counterclaims \u2014 counterclaim field missing across all subcaps"
+    },
+    {
+      "id": "9971f6c9-1a06-4e71-b69b-754631059717",
+      "issue_id": "ISS-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "27 unique E-IDs cited in report (target \u226550, fail <30)"
+    },
+    {
+      "id": "251192b8-523c-4dd3-b926-33002a128707",
+      "issue_id": "ISS-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "T JSON shows pre-downgrade score; final_score column shows post-downgrade score"
+    },
+    {
+      "id": "ba9a2fc7-27ba-4cac-93d3-5f9c3e212cf2",
+      "issue_id": "ISS-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "5 evidence items collected but never cited"
+    },
+    {
+      "id": "01361efc-31d0-4fc1-bda7-5133f7758504",
+      "issue_id": "ISS-012",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "22 evidence items cited by >15% of all subcaps"
+    },
+    {
+      "id": "3a43f616-ef26-4ca7-89b5-b34d083aee38",
+      "issue_id": "ISS-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "39.8% of paragraphs (80 of 201) flagged as lacking institution anchors"
+    },
+    {
+      "id": "48a1b815-a7f7-4cf3-b389-1f30cca23809",
+      "issue_id": "ISS-014",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "No Adjudication/Resolution column found \u2014 Layer 1 used 'Decision' column name"
+    }
+  ],
+  "narrative": null,
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.18,
+        "P1C2": 2.2,
+        "P1C3": 2.28,
+        "P1C4": 2.29,
+        "P2C1": 2.61,
+        "P2C2": 2.11,
+        "P2C3": 2.69,
+        "P2C4": 2.47,
+        "P3C1": 2.53,
+        "P3C2": 2.83,
+        "P3C3": 2.76,
+        "P3C4": 2.57,
+        "P4C1": 2.48,
+        "P4C2": 2.61,
+        "P4C3": 2.81,
+        "P4C4": 2.62
+      },
+      "overall_score": 2.5,
+      "peer_name": "Financial Partners Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.84,
+        "P1C2": 2.69,
+        "P1C3": 1.76,
+        "P1C4": 2.79,
+        "P1C5": 1.68,
+        "P2C1": 2.85,
+        "P2C2": 2.11,
+        "P2C3": 3.2,
+        "P2C4": 2.83,
+        "P3C1": 1.97,
+        "P3C2": 2.38,
+        "P3C3": 2.84,
+        "P3C4": 2.67,
+        "P4C1": 2.03,
+        "P4C2": 2.7,
+        "P4C3": 2.35,
+        "P4C4": 2.48
+      },
+      "overall_score": 2.48,
+      "peer_name": "Langley Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.84,
+        "P1C2": 2.26,
+        "P1C3": 2.27,
+        "P1C4": 2.22,
+        "P1C5": 2.28,
+        "P2C1": 2.42,
+        "P2C2": 2.01,
+        "P2C3": 2.19,
+        "P2C4": 2.06,
+        "P3C1": 2.18,
+        "P3C2": 2.5,
+        "P3C3": 2.47,
+        "P3C4": 2.6,
+        "P4C1": 3.54,
+        "P4C2": 3.11,
+        "P4C3": 2.5,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.48,
+      "peer_name": "United Federal Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.29,
+        "P1C2": 2.63,
+        "P1C3": 2.33,
+        "P1C4": 2.33,
+        "P1C5": 2.57,
+        "P2C1": 2.39,
+        "P2C2": 2.31,
+        "P2C3": 2.05,
+        "P2C4": 2.33,
+        "P3C1": 2.26,
+        "P3C2": 2.56,
+        "P3C3": 2.48,
+        "P3C4": 2.48,
+        "P4C1": 2.33,
+        "P4C2": 2.47,
+        "P4C3": 2.47,
+        "P4C4": 3.02
+      },
+      "overall_score": 2.43,
+      "peer_name": "Spokane Teachers Credit Union",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.64,
+        "P1C3": 2.34,
+        "P1C4": 2.77,
+        "P1C5": 2.0,
+        "P2C1": 2.54,
+        "P2C2": 2.57,
+        "P2C3": 2.79,
+        "P2C4": 2.31,
+        "P3C1": 2.36,
+        "P3C2": 2.5,
+        "P3C3": 2.59,
+        "P3C4": 2.81,
+        "P4C1": 1.73,
+        "P4C2": 1.73,
+        "P4C3": 2.06,
+        "P4C4": 2.8
+      },
+      "overall_score": 2.41,
+      "peer_name": "CCU",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-AMERICU-20260427-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "iOS App Store",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "iOS App",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "External awards",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Hudson Valley CU \u2014 Poughkeepsie NY; ~$7.95B assets (Q3 2025); ~385,907 members; ~1,110 FT/PT employees; 40 branches; founded 1963 (IBM employees); state-chartered 2019, Federal charter approved Oct 2025 (effective Jan 1 2026); CEO Jonathan Roberts (since Sept 2022). Selected for: NY peer, larger size tier (Medium upper end), recent governance event (charter conversion).",
+      "date_precision": "day",
+      "e_id": "E-015",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-015"
+      ],
+      "id": "11e399ca-0c0a-43b9-81ed-31c08342c4e5",
+      "kind": "regulatory",
+      "signal": "neutral",
+      "source_url": "https://ncuso.org/credit-union/68705/",
+      "subcap_ids": [],
+      "title": "Federal charter approved Oct 2025 (effective Jan 1 2026"
+    },
+    {
+      "body": "Mountain Valley FCU (Peru NY, $57M assets) merger with AmeriCU completed Dec 1, 2025 after NYDFS approval Oct 30, 2025 and member vote Sept 18, 2025. Post-merger AmeriCU: 200K+ members, $2.8B assets, 25 locations.",
+      "date_precision": "day",
+      "e_id": "E-005",
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-005"
+      ],
+      "id": "2d589097-cef7-45c2-a6cb-68088f0165f2",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.romesentinel.com/news/americu-completes-merger-with-north-country-credit-union/article_086da038-58a9-4f10-9fe2-ea7be3fcf6b3.html",
+      "subcap_ids": [],
+      "title": "Mountain Valley FCU (Peru NY, $57M assets) merger with\u2026"
+    },
+    {
+      "body": "AmeriCU launched 'new Digital Innovation role to elevate member experience' (mid-2025). Amber Cooleen joined as new SVP Marketing in Aug 2025 \u2014 leadership refresh in customer-facing digital functions.",
+      "date_precision": "month",
+      "e_id": "E-007",
+      "event_date": "2025-08-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "7352fc78-dac2-477b-8959-c7b26b712b4b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://leadiq.com/c/americu-credit-union/5a1d966d2300005a00850eb3",
+      "subcap_ids": [],
+      "title": "Amber Cooleen joined as new SVP Marketing in Aug 2025"
+    },
+    {
+      "body": "AmeriCU named 2025 American Banker Best Credit Unions to Work For (highest in NY State, ranked 27th nationally) \u2014 successive recognition (2024, 2025) signals stable culture amid growth.",
+      "date_precision": "year",
+      "e_id": "E-007",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-007"
+      ],
+      "id": "35887489-2cbb-473a-a78a-979f6afaf3e2",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://leadiq.com/c/americu-credit-union/5a1d966d2300005a00850eb3",
+      "subcap_ids": [],
+      "title": "Successive recognition (2024, 2025) signals stable culture"
+    },
+    {
+      "body": "Broadview FCU \u2014 Albany NY; formed by SEFCU + CAP COM merger (Aug 1, 2022); ~$8.99B assets (Dec 31 2025); ~500K members; ~1,400 employees; ~60+ branches; ranked top 30 nationwide / top 5 NY. Net worth ratio 8.82%. Tech: SEFCU/Broadview was a PLANNET cloud + IT modernization client (case study confirms data center cloud migration, VDI, network/security overhaul). Selected for: NY peer, larger size tier (Medium upper end), active digital modernization program.",
+      "date_precision": "day",
+      "e_id": "E-014",
+      "event_date": "2022-08-01",
+      "evidence_e_ids": [
+        "E-014"
+      ],
+      "id": "76e88f81-fc72-4793-8783-e5321a8c7841",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.bestcashcow.com/credit-unions/broadview-51",
+      "subcap_ids": [],
+      "title": "Formed by Sefcu + CAP COM merger (Aug 1, 2022)"
+    }
+  ]
+}

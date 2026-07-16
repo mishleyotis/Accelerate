@@ -1,0 +1,999 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 227,
+        "subcaps": 227,
+        "thin": 227
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "first-united-bank-0001",
+    "domain": null,
+    "hq": null,
+    "id": "104d7da9-16b9-44a4-98c5-c3569cf18a3c",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "First United Bank",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:22.099280Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 0,
+    "current_count": 0,
+    "dated_count": 0,
+    "median_age_months": null,
+    "oldest_published_date": null,
+    "stale_count": 0,
+    "stale_pct": 0.0,
+    "total": 275,
+    "undated_count": 275
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 275
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 14,
+      "NEUTRAL": 228,
+      "POSITIVE": 33
+    },
+    "tiers": {
+      "T1": 140,
+      "T2": 63,
+      "T3": 14,
+      "T4": 1,
+      "T7": 32,
+      "T8": 25
+    },
+    "total_facts": 275,
+    "total_items": 275
+  },
+  "financial_trajectory": {
+    "cagr": "3.4%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "Trend Classification: STABLE | Asset CAGR (2016–2024): ~3.4% | Source: FDIC Call Reports (T1)",
+    "highlights": [],
+    "series": {},
+    "trend": "STABLE",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 16260000000.0,
+    "branches": 25,
+    "cagr": "3.4%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "lines": [
+        "Trend Classification: STABLE | Asset CAGR (2016–2024): ~3.4% | Source: FDIC Call Reports (T1)",
+        "* Post-American Bank of Texas merger (2016). † Estimated from ~3.4% CAGR trajectory. ‡ Private bank; NIM/Efficiency/ROA estimated from peer range (BancFirst NIM 3.5%, Prosperity NIM 3.3%). Full disclosure requires internal financial data."
+      ]
+    },
+    "footprint": "Arizona (Tucson-based, 19 branches)",
+    "footprint_basis": "derived:geography",
+    "founded": 1951,
+    "geography": "Arizona (Tucson-based, 19 branches)",
+    "headcount": 1001,
+    "hq": "Phoenix, AZ",
+    "hq_address": "Phoenix, AZ",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Tadd Tobkin",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Greg Massey",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Arctic Wolf",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Tim Schneider",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "First Bank",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Kevin Georgetti",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief Compliance Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Vision\tHIGH",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Maximum Score",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "OneAZ Credit Union",
+    "license_type": "Credit union (NCUA-regulated)",
+    "members": 230000,
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "First United Bank is a regional bank headquartered in Phoenix, AZ. It reports $16.3 billion in total assets and has operated since 1951. It is regulated by NCUA and employs approximately 1,001 people across 25 branches. Its overall digital maturity is assessed at 2.7 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 305,
+          "scale": 5,
+          "score": 3.9,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.9/5",
+          "signal": "Banks to Work For 9-year recognition streak (2025), 3.9/5 Glassdoor rating (305 reviews), 71% recommend employer, 4.1/5 work-life balance and culture scores Technology leadership: CTO Tadd Tobkin appointed to Salesforce Financial Services C",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "nism: 'Tell Us What You Think' survey available on website, Trustpilot and WalletHub review platforms monitored, employee engagement survey (71% recommend employer) Complaint management: support for CFPB complaints, BBB rating tracking (Dur",
+          "source": "Trustpilot"
+        },
+        {
+          "signal": "mployer) Complaint management: support for CFPB complaints, BBB rating tracking (Durant OK location, not BBB accredited), customer complaint response processes, regulatory compliance reporting mechanisms Financial hardship support: loss mit",
+          "source": "Better Business Bureau"
+        },
+        {
+          "signal": "delays, fee issues, and poor customer service communication CFPB complaint volume: First United Bank receives relatively few CFPB complaints compared to national averages, indicating strong regulatory compliance Email marketing infrastructu",
+          "source": "CFPB complaints"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "$1B-$10B (post-acquisition $4.3B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-413",
+        "excerpt": "Active social media presence: Facebook (firstunited1), Twitter (@firstunitedbank), Instagram (@first.united.bank with 1,238 followers), LinkedIn company page",
+        "title": "Active social media presence: Facebook (firstunited1), Twitter…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/firstunitedbank"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-414",
+        "excerpt": "Financial literacy educational resources available: online banking tutorials with step-by-step guides, regularly updated blog articles, newsletter subscription options, financial wellness content",
+        "title": "Financial literacy educational resources available: online banking…",
+        "type": "blog",
+        "url": "https://www.firstunitedbank.com/spendlifewisely/financial-literacy-day-sparks-smart-financial-decisions"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-513",
+        "excerpt": "Financial education resources: Financial Education Center with articles/videos, personalized financial health scoring, retirement guidance content, emergency budget planning tools available",
+        "title": "Financial education resources: personalized financial health scoring…",
+        "type": "article",
+        "url": "https://www.firstunitedbank.com/spendlifewisely/getting-right-track-retirement"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-701",
+        "excerpt": "First United Bank has deployed Cloud Services Engineer role with responsibilities including cloud infrastructure deployment, security, monitoring, disaster recovery, and SLA management",
+        "title": "First United Bank has deployed Cloud Services Engineer role",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/posts/jacktneely_i-am-very-excited-to-announce-my-new-role-activity-7025815094513029121-Sxqw"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-910",
+        "excerpt": "First United Bank pioneered mass timber sustainable building using CLT panels with Southern Yellow Pine, achieving net-zero energy goals and demonstrating climate action strategy.",
+        "title": "First United Bank pioneered mass timber sustainable building using…",
+        "type": "conference",
+        "url": "https://www.gensler.com/blog/mass-timber-first-united-bank-creating-a-sustainable-future"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$4.3B",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "firstunitedbank.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.274682+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# First United Bank — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "PEER SET LOCK: Once approved in this section, the peer set is immutable for the remainder of the assessment. Locked at 2026-03-12T18:30:00Z.",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "First United Bank is a $16.3B in assets regional bank regulated by NCUA, operating since 1951 with 1,001 employees. A 3.4% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-001, E-003]. Zennify's assessment places overall digital maturity at 2.6/5. The deepest capability gap is ESG Strategy at 1.4/5 against a 2.5 peer median [E-015]. Next is Target Architecture Vision at 1.8/5 against a 2.5 peer median [E-016, E-200].\n\nThird is Stage-Gate Funding at 1.8/5 against a 2.5 peer median [E-202]. The issue register adds PUBLIC evidence mode — 415 of 698 subcaps have NO_EVIDENCE. Coverage ceiling for public assessment of private bank. (critical severity). The issue register adds Mixed mobile app reviews; not BBB accredited; WalletHub/BBB complaints about mortgage forbearance practices and customer service (high severity).\n\nCounter-signal: Case Management & Resolution already runs at 3.3/5 against a 2.5 peer median — a strength to build on, not rebuild. The question for First United Bank is whether to close ESG Strategy first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. First United Bank should lead with Databricks (68/100 fit) against Digital Strategy Document, then sequence nCino behind it. Closing ESG Strategy to the peer median alone is worth 1.1 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"No CDO or Formal Data Governance — Exhaustive 10-tier search found no Chief Data Officer, no data governance committee, no BCBS 239 references despite Snowflake, Tableau…\"."
+  },
+  "overall_score": 2.63,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:21.620030+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_Coverage_Map.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 142 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:21.622938+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/DMA_Execution_Plan_v2_FUB.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 40 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:21.624242+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 6,
+      "INFO": 17
+    },
+    "stage_ms": {
+      "manifest": 18,
+      "parse": 7106,
+      "persist": 678
+    },
+    "structured": [
+      {
+        "code": "used variant scoring CSV location",
+        "detail": "used variant scoring CSV location: 08_appendices/export_scoring_detail.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+304 rows gained facts[], +304 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=3",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 11 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_scores_Arvest_Bank.json",
+        "detail": "peer_scores_Arvest_Bank.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_BancFirst_Corporation.json",
+        "detail": "peer_scores_BancFirst_Corporation.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_CrossFirst_Bank.json",
+        "detail": "peer_scores_CrossFirst_Bank.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_Independent_Bank_Group.json",
+        "detail": "peer_scores_Independent_Bank_Group.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "peer_scores_Prosperity_Bancshares.json",
+        "detail": "peer_scores_Prosperity_Bancshares.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 31 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=Client Profile_Report_FirstUnitedBank.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 10 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 11",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 1 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_Coverage_Map.csv — no fingerprint matched (best confidence 0.25); 142 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/DMA_Execution_Plan_v2_FUB.md — no fingerprint matched (best confidence 0.00); 40 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 11",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant scoring CSV location: 08_appendices/export_scoring_detail.csv",
+      "xlsx_name_enrichment: +0 subcap names +698 rationales merged from workbook into CSV-parsed rows",
+      "INFO/evidence_facts_merged_from_json_twin: +304 rows gained facts[], +304 gained excerpts from the JSON evidence twin",
+      "governance_audit_logs: reasoning_chain=0 contradictions=3",
+      "caps_applied_log: 11 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "peer_scores_Arvest_Bank.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_BancFirst_Corporation.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_CrossFirst_Bank.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_Independent_Bank_Group.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "peer_scores_Prosperity_Bancshares.json: schema_mismatch: TypeError: float() argument must be a string or a real number, not 'dict'",
+      "tech_stack_from_variant_source: 31 entries",
+      "firmographics_leadership_merged_from_docx: source=Client Profile_Report_FirstUnitedBank.docx count=0",
+      "used docx-extracted recommendations: 10 rec(s) from Assessment_Report.docx §9",
+      "peer_benchmarks_filled: 17 categories",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 11",
+      "acquisitions_from_client_profile_docx: 1 events",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_Coverage_Map.csv — no fingerprint matched (best confidence 0.25); 142 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/DMA_Execution_Plan_v2_FUB.md — no fingerprint matched (best confidence 0.00); 40 generic sections mined",
+      "timeline_events_persisted: 12",
+      "catalogue_unresolved:14/698 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 11"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.5,
+      "pillar_id": "P1",
+      "score": 2.11,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 227,
+      "peer_median": 2.39,
+      "pillar_id": "P2",
+      "score": 2.93,
+      "subcaps_scored": 227
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.5,
+      "pillar_id": "P3",
+      "score": 2.67,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.38,
+      "pillar_id": "P4",
+      "score": 2.81,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-12",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:22.099280Z",
+    "created_at": "2026-07-02T23:11:22.099280Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "3b8820d1-a164-4bb9-9553-9e67fae2fc79",
+    "overall_score": null,
+    "request_id": "DMA-ASM-FUB-20260312-0001",
+    "started_at": "2026-07-02T23:11:22.099280Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 305,
+        "scale": 5,
+        "score": 3.9,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "No CDO or Formal Data Governance — Exhaustive 10-tier search found no Chief Data Officer, no data governance committee, no BCBS 239 references despite Snowflake, Tableau, and Power BI deployments [Proxy escalation complete, E-019] — P4C1 Data Governance capped at M2 for organizational subcaps. Impact across 40+ subcapabilities. — Greenfield: data governance strategy, CDO advisory, Salesforce Data Cloud as governance platform, data quality program, BCBS 239 readiness.",
+      "evidence": [
+        "E-019",
+        "E-020",
+        "E-021",
+        "E-903"
+      ],
+      "magnitude": null,
+      "name": "No CDO or Formal Data Governance",
+      "peer_median": 2.0,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.31,
+      "so_what": "Protect No CDO or Formal Data Governance as a proof point: use it to anchor the data and technology story while the true gaps close — Databricks is the platform surface that addresses it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "No CDO or Formal Data Governance",
+      "what": "No CDO or Formal Data Governance — Exhaustive 10-tier search found no Chief Data Officer, no data governance committee, no BCBS 239 references despite Snowflake, Tableau, and Power BI deployments. [Proxy escalation complete, E-019] — P4C1 Data Governance capped at M2 for organizational subcaps. Impact across 40+ subcapabilities.",
+      "why": "The linked evidence records: First United Bank employs Data Analysts specializing in reporting and Business Intelligence using Power BI and Excel, developing dashboards and collaborating on strategic insights."
+    },
+    {
+      "body": "Culture & Employee Investment — Gallup Exceptional Workplace Award 2024 with 70% employee engagement (vs. 33% national avg). 9 consecutive years on American Banker Best Banks to Work For. Dedicated Chief Culture Officer (Melissa Perrin). Spend Life Wisely 4-pillar wellness program [E-908, E-905, E-919] — P1C4 Culture ceiling L3.5–4.0 (above average for $16B regional banks) — Strong culture = higher adoption likelihood for new Salesforce implementations.",
+      "evidence": [
+        "E-908",
+        "E-905",
+        "E-919",
+        "E-003"
+      ],
+      "magnitude": "70%",
+      "name": "Culture & Employee Investment",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "nCino"
+      ],
+      "score": 1.43,
+      "so_what": "Prioritize Culture & Employee Investment in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Culture & Employee Investment",
+      "what": "Culture & Employee Investment — Gallup Exceptional Workplace Award 2024 with 70% employee engagement (vs. 33% national avg). 9 consecutive years on American Banker Best Banks to Work For. Dedicated Chief Culture Officer (Melissa Perrin).",
+      "why": "The linked evidence records: First United Bank recognized with 2024 Gallup Exceptional Workplace Award with 70% employee engagement (vs. 33% national average), demonstrating sustained culture excellence and employee empowerment."
+    },
+    {
+      "body": "Salesforce Ecosystem Depth — Full Salesforce stack confirmed: CRM, Sales Cloud, Service Cloud, Experience Cloud, FSC, Marketing Cloud, MuleSoft. 14 Salesforce products detected via Explorium T1 scan [E-004, E-005, E-014, E-037] — M3+ for CRM-adjacent subcaps across P2 and P4 — Existing multi-cloud Salesforce customer with expansion potential: Data Cloud, Einstein AI, Industry Cloud optimization, Agentforce. High-value account.",
+      "evidence": [
+        "E-004",
+        "E-005",
+        "E-014",
+        "E-037"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Salesforce Ecosystem Depth",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "nCino"
+      ],
+      "score": 1.43,
+      "so_what": "Prioritize Salesforce Ecosystem Depth in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Salesforce Ecosystem Depth",
+      "what": "Salesforce Ecosystem Depth — Full Salesforce stack confirmed: CRM, Sales Cloud, Service Cloud, Experience Cloud, FSC, Marketing Cloud, MuleSoft.",
+      "why": "The linked evidence records: First United Bank emphasized that ensuring employees are fully aligned with business goals is critical for 2025, indicating strategic refresh alignment focus."
+    },
+    {
+      "body": "Google Cloud Strategic Partnership — Google Cloud partnership confirmed alongside existing AWS and Azure presence, creating a triple-cloud environment unusual for a $16B bank [E-608, E-016] — P4C3 cloud ceiling elevated to L3.0+, but multi-cloud complexity risk applies — Multi-cloud creates integration complexity. MuleSoft + Salesforce Data Cloud can unify data layer. Cloud strategy advisory + MuleSoft implementation consulting opportunity.",
+      "evidence": [
+        "E-608",
+        "E-016",
+        "E-003",
+        "E-023"
+      ],
+      "magnitude": "$16B",
+      "name": "Google Cloud Strategic Partnership",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "nCino"
+      ],
+      "score": 1.43,
+      "so_what": "Prioritize Google Cloud Strategic Partnership in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Google Cloud Strategic Partnership",
+      "what": "Google Cloud Strategic Partnership — Google Cloud partnership confirmed alongside existing AWS and Azure presence, creating a triple-cloud environment unusual for a $16B bank. [E-608, E-016] — P4C3 cloud ceiling elevated to L3.0+, but multi-cloud complexity risk applies — Multi-cloud creates integration complexity.",
+      "why": "The linked evidence records: First United Bank uses Verafin (Nasdaq) for fraud detection and anti-money laundering compliance, replacing legacy AML system"
+    },
+    {
+      "body": "Fraud & Security Tooling Confirmed — Verafin AML/BSA/OFAC platform (Nasdaq vendor case study). Arctic Wolf MDR with 24/7 SOC monitoring. Okta IAM + SailPoint IGA + Fortinet + Proofpoint email security [E-804, E-805, E-102, E-137, E-138] — P3C2 fraud ceiling L3.0+; P4C4 security tooling ceiling L3.0+ — Security stack is vendor-managed. Opportunity for Salesforce Shield integration, security posture assessment, and identity governance optimization.",
+      "evidence": [
+        "E-804",
+        "E-805",
+        "E-102",
+        "E-137"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Fraud & Security Tooling Confirmed",
+      "peer_median": 2.5,
+      "platforms": [
+        "Databricks",
+        "nCino"
+      ],
+      "score": 1.43,
+      "so_what": "Prioritize Fraud & Security Tooling Confirmed in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Fraud & Security Tooling Confirmed",
+      "what": "Fraud & Security Tooling Confirmed — Verafin AML/BSA/OFAC platform (Nasdaq vendor case study). Arctic Wolf MDR with 24/7 SOC monitoring. Okta IAM + SailPoint IGA +. Fortinet + Proofpoint email security. [E-804, E-805, E-102, E-137, E-138] — P3C2 fraud ceiling L3.0+; P4C4 security tooling ceiling L3.0. + — Security stack is vendor-managed.",
+      "why": "The linked evidence records: First United Bank and Trust uses Verafin for AML/BSA compliance, fraud detection, and OFAC screening with behavior-based monitoring"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "165 of 165 subcaps on thin evidence"
+      ],
+      "rationale": "Target Architecture Vision averages 1.8/5 over 165 scored subcaps; ceiling 2.3 reflects thin evidence density (0/165 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "TPRM Framework averages 1.9/5 over 217 scored subcaps; ceiling 2.4 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Stage-Gate Funding averages 1.8/5 over 190 scored subcaps; ceiling 2.3 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Cultural Due Diligence averages 3.2/5 over 205 scored subcaps; ceiling 3.7 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 1.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Strategy averages 1.4/5 over 70 scored subcaps; ceiling 1.9 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Predictive Analytics averages 3.0/5 over 287 scored subcaps; ceiling 3.5 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "287 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Notification Template & Alert Configuration averages 2.6/5 over 287 scored subcaps; ceiling 3.1 reflects thin evidence density (0/287 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "286 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Case Management & Resolution averages 3.3/5 over 286 scored subcaps; ceiling 3.8 reflects thin evidence density (0/286 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Transaction-Based Triggers averages 2.8/5 over 255 scored subcaps; ceiling 3.3 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "143 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "RPA Platform & Bot Management averages 2.3/5 over 143 scored subcaps; ceiling 2.8 reflects thin evidence density (0/143 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M3 applied: ; P1C2<2.5→P3 cap 3.0",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Model Change Management averages 2.9/5 over 130 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: ; P1C2<2.5→P3 cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M3 applied: ; P1C2<2.5→P3 cap 3.0",
+        "cap applied: Evidence ceiling 2.0",
+        "141 of 141 subcaps on thin evidence"
+      ],
+      "rationale": "Sanctions Screening averages 2.8/5 over 141 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: ; P1C2<2.5→P3 cap 3.0); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "RTO/RPO Achievement averages 2.6/5 over 145 scored subcaps; ceiling 3.1 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: CDO absence cap 2.5",
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Canonical Structured Data Support averages 2.3/5 over 200 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: CDO absence cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Citation & Source Attribution averages 2.8/5 over 270 scored subcaps; ceiling 3.3 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "cap applied: Evidence ceiling 3.0",
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Runbooks for Data Pipelines averages 3.1/5 over 235 scored subcaps; ceiling 3.6 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: CISO absence cap 2.5",
+        "cap applied: Evidence ceiling 2.5",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Network Security Architecture averages 3.0/5 over 150 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: CISO absence cap 2.5); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "First United Bank with 153 active job openings indicates continuous technology hiring and capability development",
+      "evidence": [
+        "E-616"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "First United Bank with 153 active job openings indicates…",
+      "metric": null,
+      "peer_context": "ESG Strategy runs 1.43/5 vs a 2.50 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "First United Bank with 153 active job openings indicates continuous technology hiring and capability development. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "issue_register",
+      "detail": "PUBLIC evidence mode — 415 of 698 subcaps have NO_EVIDENCE. Coverage ceiling for public assessment of private bank.",
+      "evidence": [
+        "E-319",
+        "E-520",
+        "E-521",
+        "E-522"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Public evidence mode — 415 of 698 subcaps have NO_EVIDENCE",
+      "metric": null,
+      "peer_context": "ESG Strategy runs 1.43/5 vs a 2.50 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "PUBLIC evidence mode — 415 of 698 subcaps have NO_EVIDENCE. Coverage ceiling for public assessment of private bank. Window: closes ~Q3 2027.",
+      "timeline": null,
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "CTO Tadd Tobkin: ORBIE finalist + Google Cloud partnership + Salesforce FSC Advisory Board. Technology leadership recognition at national level (Jan 2025).",
+      "evidence": [
+        "E-003",
+        "E-608",
+        "E-901"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "CTO Tadd Tobkin: Orbie finalist + Google Cloud partnership",
+      "metric": null,
+      "peer_context": "ESG Strategy runs 1.43/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Digital Strategy Document — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "CTO Tadd Tobkin: ORBIE finalist + Google Cloud partnership + Salesforce FSC Advisory Board. Technology leadership recognition at national level (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "CTO Tadd Tobkin: Orbie finalist + Google Cloud partnership…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Banno mobile app refresh (4.5-star ratings iOS/Android). Digital Banking+ platform enhancements. Digital channel maturity improving. App accessibility issues flagged in reviews (Jan 2025).",
+      "evidence": [
+        "E-500",
+        "E-505"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Banno mobile app refresh (4.5-star ratings iOS/Android)",
+      "metric": null,
+      "peer_context": "ESG Strategy runs 1.43/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Digital Strategy Document — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Banno mobile app refresh (4.5-star ratings iOS/Android). Digital Banking+ platform enhancements. Digital channel maturity improving. App accessibility issues flagged in reviews (Jan 2025).",
+      "timeline": {
+        "date": "2025-01-01",
+        "event": "Banno mobile app refresh (4.5-star ratings iOS/Android)"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "ESG Strategy scores 1.43/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-003",
+        "E-023",
+        "E-312",
+        "E-313"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "ESG Strategy scores 1.43/5 vs a typical 2.50 at similar…",
+      "metric": "ESG Strategy 1.43/5 vs peer 2.50",
+      "peer_context": "ESG Strategy runs 1.43/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Digital Strategy Document — highest-fit surface at 68/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "ESG Strategy scores 1.43/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

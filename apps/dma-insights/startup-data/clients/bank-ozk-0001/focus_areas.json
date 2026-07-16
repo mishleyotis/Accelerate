@@ -1,0 +1,63 @@
+{
+  "entity_display_id": "bank-ozk-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Self-Service Adoption KPIs at Bank OZK assessed at M1 (Ad hoc, no formal process)",
+        "source_kind": "heuristic"
+      },
+      "id": "d34e0090-ebf4-490f-ac55-409c64a43807",
+      "involved_subcap_ids": [
+        "P4C1.1.6",
+        "P4C1.1.7",
+        "P4C1.1.8",
+        "P4C1.3.6",
+        "P4C1.3.7",
+        "P4C1.5.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Build the data foundation",
+      "verbatim_quote": "Treat the 7 P4 gaps as the prerequisite layer \u2014 data + AI cannot land without modern foundation, integration, and governance."
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Resilience Reporting at Bank OZK assessed at M1 (Ad hoc, no formal process) based on proxy research.",
+        "source_kind": "heuristic"
+      },
+      "id": "290deed9-7b36-4a9c-b0d1-65ae6d009272",
+      "involved_subcap_ids": [
+        "P3C4.1.4",
+        "P3C4.2.3",
+        "P3C4.2.4",
+        "P3C4.4.4",
+        "P3C4.5.1",
+        "P3C4.5.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Operationalize process automation",
+      "verbatim_quote": "Address the 17 P3 capability gaps as one operations + automation programme \u2014 payments, lending ops, and core."
+    }
+  ]
+}

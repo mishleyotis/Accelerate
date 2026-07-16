@@ -1,0 +1,387 @@
+{
+  "entity_display_id": "southstate-corporation-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-069",
+          "E-070"
+        ],
+        "representative_quote": "$2.3M deposits in 3 weeks via AI + neural network deposit pricing \u2014 proven ROI but concentrated in marketing only",
+        "source_kind": "docx"
+      },
+      "id": "fd7c0925-9e5f-4217-a268-e0cdc4267f90",
+      "involved_subcap_ids": [
+        "P4C1.5.4",
+        "P1C1.5.4",
+        "P3C1.6.4",
+        "P2C4.6.5",
+        "P2C3.6.3",
+        "P4C2.7.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$2,300,000",
+          "delta": null,
+          "kpi_label": "Deposits",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "E-069, E-070",
+      "title": "$2.3M deposits in 3 weeks via AI + neural network deposit\u2026",
+      "verbatim_quote": "5 | $2.3M deposits in 3 weeks via AI + neural network deposit pricing \u2014 proven ROI but concentrated in marketing only | E-069, E-070 | Obj #2: Digital capabilities + efficiency | Einstein AI + Agentforce (scale AI cross-product)"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-089",
+          "E-082"
+        ],
+        "representative_quote": "fewer resources than larger competitors",
+        "source_kind": "docx"
+      },
+      "id": "dffbe775-55ad-4179-a0fa-19b2bc8c4662",
+      "involved_subcap_ids": [
+        "P2C3.8.3",
+        "P4C3.2.3",
+        "P3C1.5.4",
+        "P1C1.2.4",
+        "P1C1.2.3",
+        "P2C2.7.3"
+      ],
+      "kpis": [
+        {
+          "current_value": "$67,000,000,000",
+          "delta": null,
+          "kpi_label": "Engineers for",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "1%",
+          "delta": null,
+          "kpi_label": "for B bank",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P2": 33,
+        "P3": 17,
+        "P4": 17
+      },
+      "source_path": "E-089, E-082",
+      "title": "62 engineers for $67B bank (1% of workforce)",
+      "verbatim_quote": "6 | ~62 engineers for $67B bank (1% of workforce) \u2014 \"fewer resources than larger competitors\" (10-K) | E-089, E-082 | Obj #2: Operational efficiency | Low-code Salesforce Platform (reduce dev dependency)"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-101",
+          "E-107",
+          "E-098"
+        ],
+        "representative_quote": "7+ BI tools + 3 RPA tools + 200+ total technologies \u2014 massive fragmentation despite Atlan data governance + Snowflake investment",
+        "source_kind": "docx"
+      },
+      "id": "2fd46422-b344-4166-8493-80472e7e173b",
+      "involved_subcap_ids": [
+        "P4C3.5.4",
+        "P4C3.6.5",
+        "P4C3.4.4",
+        "P4C3.5.2",
+        "P4C4.2.4",
+        "P4C4.6.4",
+        "P4C4.7.5",
+        "P4C4.5.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$67,000,000,000",
+          "delta": null,
+          "kpi_label": "For SSB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "E-101, E-107, E-098",
+      "title": "7+ BI tools + 3 RPA tools + 200+ total technologies",
+      "verbatim_quote": "7 | 7+ BI tools + 3 RPA tools + 200+ total technologies \u2014 massive fragmentation despite Atlan data governance + Snowflake investment | E-101, E-107, E-098 | Obj #2: Cost structure improvement | Tableau CRM + Data Cloud + MuleSoft Composer"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-068",
+          "E-072",
+          "E-074"
+        ],
+        "representative_quote": "8 siloed channels, 20% caller resolution, NO unified CX platform \u2014 Oracle Siebel + Desk.com (DEPRECATED) co-exist with Salesforce",
+        "source_kind": "docx"
+      },
+      "id": "99b64fb2-ce6a-4a2f-a89f-e97470ce35f1",
+      "involved_subcap_ids": [
+        "P2C3.9.5",
+        "P2C3.4.1",
+        "P2C3.5.2",
+        "P2C3.5.3",
+        "P2C2.6.4",
+        "P2C2.3.5",
+        "P2C2.3.1",
+        "P2C2.3.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "20%",
+          "delta": null,
+          "kpi_label": "Siloed channels",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "E-068, E-072, E-074",
+      "title": "8 siloed channels, 20% caller resolution, NO unified CX\u2026",
+      "verbatim_quote": "4 | 8 siloed channels, 20% caller resolution, NO unified CX platform \u2014 Oracle Siebel + Desk.com (DEPRECATED) co-exist with Salesforce | E-068, E-072, E-074 | Obj #2: Customer experience | Service Cloud + Agentforce (omnichannel unification)"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Headed into 2026, our pipelines are full and SouthState is poised to continue on our growth trajectory.",
+        "source_kind": "docx"
+      },
+      "id": "ce151d5f-c2f7-455a-9afb-29554226b602",
+      "involved_subcap_ids": [
+        "P2C4.5.4",
+        "P4C3.6.2",
+        "P4C3.6.5",
+        "P4C3.6.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "8%",
+          "delta": null,
+          "kpi_label": "Deposit growth accelerated",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "32%",
+          "delta": null,
+          "kpi_label": "EPS",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 25,
+        "P4": 75
+      },
+      "source_path": "docx:strategic_section",
+      "title": "CEO John C. Corbett (Q4 2025 Earnings, Jan 22, 2026): \"Headed into 2026\u2026",
+      "verbatim_quote": "CEO John C. Corbett (Q4 2025 Earnings, Jan 22, 2026): \"Headed into 2026, our pipelines are full and SouthState is poised to continue on our growth trajectory.\" Loan and deposit growth accelerated to 8% annualized; EPS +32% YoY; 2M shares repurchased; new 5.56M share buyback authorized."
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "2026 Guidance: Mid-to-upper single-digit loan growth; NIM 380-390bps; continued investment in technology platforms including AI and FX.",
+        "source_kind": "docx"
+      },
+      "id": "721826fc-c5d0-4f00-b858-216560e25ec8",
+      "involved_subcap_ids": [
+        "P4C3.5.4",
+        "P4C3.6.5",
+        "P4C3.4.4",
+        "P4C3.5.2",
+        "P4C4.2.4",
+        "P4C4.6.4",
+        "P4C4.7.5",
+        "P4C4.5.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$67,000,000,000",
+          "delta": null,
+          "kpi_label": "For SSB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "docx:strategic_section",
+      "title": "Guidance: Mid-to-upper single-digit loan growth; NIM 380-390bps\u2026",
+      "verbatim_quote": "2026 Guidance: Mid-to-upper single-digit loan growth; NIM 380-390bps; continued investment in technology platforms including AI and FX. 5th largest regional bank in the South, present in 12 of 15 fastest-growing MSAs in the US."
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-025",
+          "E-064",
+          "E-077"
+        ],
+        "representative_quote": "IBTX integration (#1 pain) \u2014 data loss, missing statements, 2 core systems needing rationalization",
+        "source_kind": "docx"
+      },
+      "id": "f7dadaca-ccae-456e-a584-540578546733",
+      "involved_subcap_ids": [
+        "P2C4.1.3",
+        "P2C2.9.4",
+        "P4C3.3.1",
+        "P4C3.3.2",
+        "P2C3.4.4",
+        "P2C3.3.4"
+      ],
+      "kpis": [
+        {
+          "current_value": "$67,000,000,000",
+          "delta": null,
+          "kpi_label": "For SSB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 67,
+        "P4": 33
+      },
+      "source_path": "E-025, E-064, E-077",
+      "title": "IBTX integration (#1 pain)",
+      "verbatim_quote": "2 | IBTX integration (#1 pain) \u2014 data loss, missing statements, 2 core systems needing rationalization | E-025, E-064, E-077 | Obj #1: M&A integration | MuleSoft + Data Cloud (unified customer 360)"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-084"
+        ],
+        "representative_quote": "OCC Heightened Standards Q4 2026 \u2014 written governance framework mandatory for >$50B banks",
+        "source_kind": "docx"
+      },
+      "id": "a6fcb51a-f31c-47c2-9b80-94a84c3f3268",
+      "involved_subcap_ids": [
+        "P4C3.1.3",
+        "P4C2.1.3",
+        "P4C4.1.3",
+        "P3C2.7.1",
+        "P4C1.5.4",
+        "P3C1.1.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "$50,000,000,000",
+          "delta": null,
+          "kpi_label": "Framework mandatory for",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P3": 38,
+        "P4": 62
+      },
+      "source_path": "E-084",
+      "title": "OCC Heightened Standards Q4 2026",
+      "verbatim_quote": "3 | OCC Heightened Standards Q4 2026 \u2014 written governance framework mandatory for >$50B banks | E-084 | Obj #3: Risk management + compliance | Shield + GRC (regulatory budget mandate)"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-030",
+          "E-060",
+          "E-074"
+        ],
+        "representative_quote": "FSC + Data Cloud + Einstein + Agentforce",
+        "source_kind": "docx"
+      },
+      "id": "7637bbe1-0fde-4925-b843-232cd519f6b7",
+      "involved_subcap_ids": [
+        "P4C1.5.4",
+        "P1C1.5.5",
+        "P4C3.4.1"
+      ],
+      "kpis": [
+        {
+          "current_value": "$67,000,000,000",
+          "delta": null,
+          "kpi_label": "For SSB",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 33,
+        "P4": 67
+      },
+      "source_path": "E-030, E-060, E-074",
+      "title": "Salesforce CRM + Marketing Cloud + Interaction Studio\u2026",
+      "verbatim_quote": "1 | Salesforce CRM + Marketing Cloud + Interaction Studio + MuleSoft + AutoRABIT + OwnBackup ALREADY IN STACK \u2014 expand, don't replace | E-030, E-060, E-074 | Obj #2: Enhance digital capabilities | FSC + Data Cloud + Einstein + Agentforce"
+    }
+  ]
+}

@@ -1,0 +1,1478 @@
+{
+  "entity_display_id": "southstate-corporation-0001",
+  "items": [
+    {
+      "affects": [
+        "P4C3.5.4",
+        "P4C2.1.4",
+        "P4C3.1.2",
+        "P1C1.5.4",
+        "P1C1.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-007",
+        "E-008",
+        "E-009",
+        "E-010",
+        "E-011"
+      ],
+      "ic_id": "CP-S-002",
+      "id": "9478fddd-161f-4f86-80f8-688a9122d83f",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-007",
+            "E-008",
+            "E-009",
+            "E-010",
+            "E-011"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3.5.4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-022",
+            "E-027",
+            "E-030",
+            "E-045"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-045",
+        "E-107",
+        "E-022",
+        "E-027",
+        "E-030",
+        "E-048",
+        "E-088",
+        "E-103"
+      ],
+      "linked_subcap_id": "P4C3.5.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Chaos Engineering & Resilience Testing a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-022].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Guidance: Mid-to-upper single-digit loan growth; NIM 380-390bps; continued investment in technology platforms including",
+      "what_text": "2026 Guidance: Mid-to-upper single-digit loan growth; NIM 380-390bps; continued investment in technology platforms including AI and FX. 5th largest regional bank in the South, present in 12 of 15 fastest-growing MSAs in the US. In Zennify's assessment Chaos Engineering & Resilience Testing scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-107].",
+      "why_text": "At 2.0 out of 5, Chaos Engineering & Resilience Testing sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-045, E-107].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P3C4.7.3",
+        "P3C3.8.CU1",
+        "P3C3.8.3",
+        "P3C1.3.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-007",
+      "id": "126827ae-35ad-4cb3-b8d4-820b3f61bfcb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-094",
+            "E-097"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-092",
+            "E-094",
+            "E-096"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-044",
+        "E-028",
+        "E-092",
+        "E-094",
+        "E-096",
+        "E-095",
+        "E-097"
+      ],
+      "linked_subcap_id": "P3C4.7.3",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Periodic Reassessment a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-092].",
+      "source_rec_id": null,
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Guiding Principles (CSR Report): Soundness, Profitability, Growth. Core Values: building trust, fostering lasting relati",
+      "what_text": "Periodic Reassessment is one of SouthState Corporation's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes SouthState Corporation's ability to deliver more efficient, dependable operations [E-028].",
+      "why_text": "At 2.0 out of 5, Periodic Reassessment sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-044, E-028].",
+      "pillar": "P3",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3.5.4",
+        "P4C1.2.5",
+        "P3C1.8.1",
+        "P1C2.1.3",
+        "P4C1.1.8",
+        "P4C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "792bea30-ffb4-4e8b-bf00-b0bbbfa0e6fb",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-022",
+            "E-027",
+            "E-030",
+            "E-045"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-101",
+        "E-107",
+        "E-098",
+        "E-045",
+        "E-022",
+        "E-027",
+        "E-030",
+        "E-048"
+      ],
+      "linked_subcap_id": "P4C3.5.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Chaos Engineering & Resilience Testing a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-098].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "7+ BI tools + 3 RPA tools + 200+ total technologies",
+      "what_text": "Chaos Engineering & Resilience Testing is one of SouthState Corporation's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes SouthState Corporation's ability to deliver a stronger data and technology foundation [E-107].",
+      "why_text": "At 2.0 out of 5, Chaos Engineering & Resilience Testing sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-101, E-107].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.3",
+        "P2C4.10.4",
+        "P4C1.1.8",
+        "P4C1.5.4",
+        "P4C4.2.6"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-003",
+      "id": "4a725690-3697-4f58-899f-591fdf20d8d3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        }
+      ],
+      "linked_e_ids": [
+        "E-030",
+        "E-060",
+        "E-074",
+        "E-107",
+        "E-048",
+        "E-103"
+      ],
+      "linked_subcap_id": "P4C3.1.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 3 a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-074].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Salesforce CRM + Marketing Cloud + Interaction Studio + MuleSoft + AutoRABIT + OwnBackup…",
+      "what_text": "Capability dimension 3 is one of SouthState Corporation's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes SouthState Corporation's ability to deliver a stronger data and technology foundation [E-060].",
+      "why_text": "At 2.0 out of 5, capability dimension 3 sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-030, E-060].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3.9.5",
+        "P2C4.10.4",
+        "P4C1.4.2",
+        "P2C3.1.8",
+        "P3C4.4.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-004",
+      "id": "5b04a61e-43f8-4a00-a6b8-773346d1136f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-052",
+            "E-053",
+            "E-059",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-068",
+        "E-072",
+        "E-074",
+        "E-059",
+        "E-077",
+        "E-066",
+        "E-052",
+        "E-053"
+      ],
+      "linked_subcap_id": "P2C3.9.5",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Vulnerable Customer Reporting a near-term focus for SouthState Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-072].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "8 siloed channels, 20% caller resolution, NO unified CX platform",
+      "what_text": "Vulnerable Customer Reporting is one of SouthState Corporation's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes SouthState Corporation's ability to deliver a stronger, more personalised customer experience [E-068].",
+      "why_text": "The assessment found: “CFPB complaints on record for SSB covering fraud resolution disputes, provisional credit handling, account servicing issues No formal CFPB enforcement action against SSB — complaints are” [E-059]. At 1.5 out of 5, Vulnerable Customer Reporting sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C2.1.3",
+        "P3C2.7.1",
+        "P1C2.5.1",
+        "P3C1.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-005",
+      "id": "92abc82a-23ed-4cb3-abaa-7e32aec89b78",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-08"
+        }
+      ],
+      "linked_e_ids": [
+        "E-084",
+        "E-020",
+        "E-021",
+        "E-023",
+        "E-024"
+      ],
+      "linked_subcap_id": "P1C2.1.3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Executive Sponsorship a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-021].",
+      "source_rec_id": null,
+      "theme": "Governance & Risk",
+      "title": "OCC Heightened Standards Q4 2026",
+      "what_text": "Executive Sponsorship is one of SouthState Corporation's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes SouthState Corporation's ability to deliver sharper strategic direction and stronger oversight [E-084].",
+      "why_text": "The assessment found: “14 board nominees (12 of 14 independent); average independent tenure 4.0 years; majority-independent board Board committees: Audit, Risk, Compensation, Governance & Nominating — all chaired by” [E-020]. At 2.5 out of 5, Executive Sponsorship sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3.8.3",
+        "P2C1.1.RB1",
+        "P2C3.13.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-008",
+      "id": "53215956-3678-41f9-9a79-977c34b14417",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-052",
+            "E-053",
+            "E-059",
+            "E-066"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-089",
+        "E-082",
+        "E-059",
+        "E-077",
+        "E-066",
+        "E-052",
+        "E-053",
+        "E-067"
+      ],
+      "linked_subcap_id": "P2C3.8.3",
+      "platforms": [
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Workforce Management a near-term focus for SouthState Corporation: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-082].",
+      "source_rec_id": null,
+      "theme": "Segment & Line-of-Business CX",
+      "title": "62 engineers for $67B bank (1% of workforce)",
+      "what_text": "Workforce Management is one of SouthState Corporation's least developed customer experience capabilities, scoring 1.5 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes SouthState Corporation's ability to deliver a stronger, more personalised customer experience [E-089].",
+      "why_text": "The assessment found: “CFPB complaints on record for SSB covering fraud resolution disputes, provisional credit handling, account servicing issues No formal CFPB enforcement action against SSB — complaints are” [E-059]. At 1.5 out of 5, Workforce Management sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.1.3",
+        "P4C3.8.CIB2",
+        "P3C2.1.3",
+        "P2C2.9.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-009",
+      "id": "cc6bc3aa-c84b-45c0-b200-2d29ec756a20",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-048",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-025",
+        "E-064",
+        "E-077",
+        "E-107",
+        "E-030",
+        "E-048",
+        "E-103"
+      ],
+      "linked_subcap_id": "P4C3.1.3",
+      "platforms": [
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 3 a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "IBTX integration (#1 pain)",
+      "what_text": "Capability dimension 3 is one of SouthState Corporation's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes SouthState Corporation's ability to deliver a stronger data and technology foundation [E-064].",
+      "why_text": "At 2.0 out of 5, capability dimension 3 sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-025, E-064].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.1.4",
+        "P3C1.8.RB1",
+        "P4C3.1.3",
+        "P4C2.1.3"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-010",
+      "id": "e79422b4-4d2a-45a1-9985-06dce2d42d2c",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-101",
+            "E-102"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-069",
+        "E-070",
+        "E-101",
+        "E-102"
+      ],
+      "linked_subcap_id": "P4C2.1.4",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 4 a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-101].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "$2.3M deposits in 3 weeks via AI + neural network deposit pricing",
+      "what_text": "Capability dimension 4 is one of SouthState Corporation's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.5 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes SouthState Corporation's ability to deliver a stronger data and technology foundation [E-070].",
+      "why_text": "At 2.0 out of 5, capability dimension 4 sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-069, E-070].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2.1.CU2",
+        "P2C2",
+        "P4C3.6.2",
+        "P4C3.6.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-006",
+      "id": "c4e634ac-ed27-4be5-97da-df790460e9bb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-053",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-053",
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        },
+        {
+          "e_ids": [
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-009"
+        }
+      ],
+      "linked_e_ids": [
+        "E-059",
+        "E-058",
+        "E-061",
+        "E-062",
+        "E-064",
+        "E-065",
+        "E-057",
+        "E-053"
+      ],
+      "linked_subcap_id": "P2C2.1.CU2",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make this capability a near-term focus for SouthState Corporation: invest to move it toward best practice. Because it underpins the day-to-day experience customers have across every channel, the improvement reaches well beyond this single capability [E-061].",
+      "source_rec_id": null,
+      "theme": "Customer Journeys & Servicing",
+      "title": "CEO John C. Corbett (Q4 2025 Earnings, Jan 22, 2026): \"Headed into 2026, our pipelines are full and SouthState is poised",
+      "what_text": "CEO John C. Corbett (Q4 2025 Earnings, Jan 22, 2026): \"Headed into 2026, our pipelines are full and SouthState is poised to continue on our growth trajectory.\" Loan and deposit growth accelerated to 8% annualized; EPS +32% YoY; 2M shares repurchased; new 5.56M share buyback authorized [E-058].",
+      "why_text": "The assessment found: “CFPB complaints on record for SSB covering fraud resolution disputes, provisional credit handling, account servicing issues No formal CFPB enforcement action against SSB — complaints are” [E-059]. Strengthening this capability matters because it shapes a stronger, more personalised customer experience. It builds on the day-to-day experience customers have across every channel, so progress here lifts the wider business too.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P2C4",
+        "P2C4.10.4",
+        "P2C1.9.5",
+        "P2C2.10.4",
+        "P3C1.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-089"
+      ],
+      "ic_id": "INS-REC-01",
+      "id": "d2776339-1fde-4c36-ac96-df7f583936d4",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-089"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P3C1"
+        },
+        {
+          "e_ids": [
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-066",
+            "E-068",
+            "E-072",
+            "E-074"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-062",
+            "E-064"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-068",
+        "E-074",
+        "E-072",
+        "E-064",
+        "E-062",
+        "E-076",
+        "E-087"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make STP Architecture & Design a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-074].",
+      "source_rec_id": "REC-01",
+      "theme": "Core Automation",
+      "title": "Omnichannel CX Transformation",
+      "what_text": "8 siloed service channels, Cisco on-prem contact center, Oracle Siebel legacy CRM + Desk.com Chat (deprecated 2020) co-exist with Salesforce, 20% caller resolution rate. Consumer sentiment: Yelp 2.3/5 despite B2B Greenwich Top 3. No unified CX platform detected. Sentiment cap applied at 2.0. connected unlock: Operations (unified workflow); Personalization (unified customer data) [E-068].",
+      "why_text": "At 2.5 out of 5, STP Architecture & Design sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-066, E-068].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C4",
+        "P1C2",
+        "P4C1.2.5",
+        "P4C4.1.3",
+        "P3C3.3.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-102"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "3d817be6-6a97-4843-963f-c23acb371669",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-102"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1"
+        },
+        {
+          "e_ids": [
+            "E-103"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-103"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-023",
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-023",
+        "E-097",
+        "E-106",
+        "E-103",
+        "E-034",
+        "E-094",
+        "E-084",
+        "E-007"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Data Strategy & Roadmap a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-106].",
+      "source_rec_id": "REC-02",
+      "theme": "Data Management & Governance",
+      "title": "Post-Breach Security Modernization",
+      "what_text": "Feb 2024 cybersecurity breach exposed ~2M individuals; $1.5M class action settlement (prelim approved Feb 17, 2026, final hearing Jun 22, 2026). 25+ security tools detected but gap in detection. Windows 7 EOL still in stack. CISO Rodney Anthony (since 2020, CISSP). Root cause and specific remediation steps NOT disclosed publicly (validated Apr 2026). Breach S2 cap 3.0 applied. connected unlock: Data Governance (if rises >2.5, removes connected cap on ); Governance (OCC compliance). In Zennify's assessment Enterprise Data Strategy & Roadmap scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-097].",
+      "why_text": "At 2.5 out of 5, Enterprise Data Strategy & Roadmap shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-023, E-097].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2",
+        "P1C1",
+        "P4C1.2.5",
+        "P4C2.1.4",
+        "P4C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-068",
+        "E-074"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "f770065e-118c-4fe4-ab1c-23dd84cf61e6",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-068",
+            "E-074"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4"
+        },
+        {
+          "e_ids": [
+            "E-098",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-098",
+        "E-100",
+        "E-069",
+        "E-101",
+        "E-077",
+        "E-025",
+        "E-099",
+        "E-012"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-069].",
+      "source_rec_id": "REC-03",
+      "theme": "CX & Personalization",
+      "title": "Unified Customer Data Platform",
+      "what_text": "Data Intelligence Program with Atlan catalog, Snowflake warehouse, MuleSoft iPaaS. AI Governance Committee. $2.3M AI deposit campaign proves personalization ROI. BUT: 7+ BI tools fragmented, separate consumer (Q2) and business (Treasury Navigator) platforms, IBTX customer data integration is #1 pain. SSB has GOVERNANCE but lacks ACTIVATION layer. connected unlock: Personalization (unified profile); Analytics (governed data for BI consolidation); Strategy (data-driven strategy execution). In Zennify's assessment Customer Data Foundation (CDP) scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-100].",
+      "why_text": "At 2.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-098, E-100].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P2C2",
+        "P4C3.1.3",
+        "P2C4.10.4",
+        "P3C1.8.1",
+        "P4C3.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-089"
+      ],
+      "ic_id": "INS-REC-04",
+      "id": "f9fa6c40-ed04-405a-9685-b130901f7e33",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-089"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P3C1"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-088",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-030",
+            "E-103",
+            "E-107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-103",
+        "E-107",
+        "E-077",
+        "E-030",
+        "E-104",
+        "E-088",
+        "E-087",
+        "E-081"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make STP Architecture & Design a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-077].",
+      "source_rec_id": "REC-04",
+      "theme": "Core Automation",
+      "title": "API-Led Architecture Modernization",
+      "what_text": "200+ technologies across 16 categories. Separate consumer (Q2 Holdings) and business (Treasury Navigator) platforms. Fiserv Premier core banking. Legacy debt: Windows 7 EOL, IBM Tivoli, VB.NET. MuleSoft already in stack but utilization scope unknown. connected unlock: Operations (connected workflows); Onboarding (unified journey across Q2 + Salesforce). In Zennify's assessment STP Architecture & Design scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-107].",
+      "why_text": "At 2.5 out of 5, STP Architecture & Design sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-103, E-107].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P1C1",
+        "P2C4.10.4",
+        "P2C1.9.5",
+        "P3C1.8.1",
+        "P3C3.3.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-068",
+        "E-074"
+      ],
+      "ic_id": "INS-REC-05",
+      "id": "97ad9780-27c2-416a-a5fb-9b8bbb20d9b7",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-068",
+            "E-074"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C4"
+        },
+        {
+          "e_ids": [
+            "E-060"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-003"
+        },
+        {
+          "e_ids": [
+            "E-077"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-004"
+        },
+        {
+          "e_ids": [
+            "E-057",
+            "E-058",
+            "E-065"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-006"
+        }
+      ],
+      "linked_e_ids": [
+        "E-057",
+        "E-065",
+        "E-060",
+        "E-077",
+        "E-058",
+        "E-012"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-060].",
+      "source_rec_id": "REC-05",
+      "theme": "CX & Personalization",
+      "title": "Digital Onboarding Acceleration",
+      "what_text": "8 product types digital but geographic restriction (must have physical address in SSB market). STP rate unknown [ proxy]. Q2 platform for consumer separate from business. Socure KYC deployed. ~10 min application time. connected unlock: Personalization (unified customer profile from onboarding); Strategy (digital growth execution). In Zennify's assessment Customer Data Foundation (CDP) scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-065].",
+      "why_text": "At 2.0 out of 5, Customer Data Foundation (CDP) sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-057, E-065].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P4C4",
+        "P4C2.1.4",
+        "P4C4.1.3",
+        "P3C3.3.5",
+        "P1C2.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-097"
+      ],
+      "ic_id": "INS-REC-06",
+      "id": "b94af444-39c7-4a07-8855-3f381a9528fe",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-097"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P3C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-092",
+            "E-094",
+            "E-096"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-007"
+        },
+        {
+          "e_ids": [
+            "E-082"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        }
+      ],
+      "linked_e_ids": [
+        "E-084",
+        "E-094",
+        "E-036",
+        "E-090",
+        "E-082",
+        "E-093",
+        "E-092",
+        "E-096"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Transaction Monitoring a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-094].",
+      "source_rec_id": "REC-06",
+      "theme": "Compliance & Surveillance",
+      "title": "OCC Compliance Governance Platform",
+      "what_text": "OCC heightened standards effective Q4 2026 — requires written governance framework, risk appetite with concentration limits. NON-DISCRETIONARY spend. Dec 23, 2025 OCC proposed rulemaking may raise $50B threshold — potential relief but uncertain. RSA Archer GRC already deployed. Board Risk Committee chaired by Martin Davis (ex-CTO Wells Fargo). connected unlock: Compliance (automated reporting); Cybersecurity (Shield event monitoring). In Zennify's assessment Transaction Monitoring scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-084].",
+      "why_text": "The assessment found: “SSB crossed >$50B assets Jan 1 2025; OCC heightened standards effective Q4 2026 — requires written governance framework, risk appetite statement, concentration limits, stress testing 6,190 FT” [E-036]. At 2.5 out of 5, Transaction Monitoring sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P3C1",
+        "P4C1.2.5",
+        "P4C2.1.4",
+        "P1C2.1.3",
+        "P4C2.1.7"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "92de88f2-b8b6-4e7e-b931-5a8ed0c871ba",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-098",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-101",
+            "E-102"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-010"
+        },
+        {
+          "e_ids": [
+            "E-007"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-101",
+        "E-102",
+        "E-098",
+        "E-069",
+        "E-007",
+        "E-009",
+        "E-016",
+        "E-013"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Data Strategy & Roadmap a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-098].",
+      "source_rec_id": "REC-07",
+      "theme": "Data Management & Governance",
+      "title": "BI Consolidation & Governed Analytics",
+      "what_text": "17 tools in Explorium BI category including 7+ active BI tools: Snowflake, Tableau, Power BI, ThoughtSpot, MicroStrategy, Cognos, SAP Crystal. Fragmentation = duplicated licensing, inconsistent reporting, governance burden. connected unlock: Data Governance (governed analytics); Operations (operational analytics). In Zennify's assessment Enterprise Data Strategy & Roadmap scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-102].",
+      "why_text": "At 2.5 out of 5, Enterprise Data Strategy & Roadmap shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business [E-101, E-102].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C4",
+        "P1C3",
+        "P3C1",
+        "P3C1.8.1",
+        "P1C3.1.5",
+        "P1C3.9.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-032",
+        "E-051",
+        "E-025",
+        "E-026"
+      ],
+      "ic_id": "INS-REC-08",
+      "id": "390297de-6baa-4f4b-87a9-b8fc09bc6bcc",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-032",
+            "E-051",
+            "E-025",
+            "E-026"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P1C4"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-005"
+        },
+        {
+          "e_ids": [
+            "E-082",
+            "E-089"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-008"
+        },
+        {
+          "e_ids": [
+            "E-084"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-089",
+        "E-082",
+        "E-033",
+        "E-047",
+        "E-040",
+        "E-084",
+        "E-016",
+        "E-013"
+      ],
+      "linked_subcap_id": "P1C4",
+      "platforms": [],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Change Methodology a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-082].",
+      "source_rec_id": "REC-08",
+      "theme": "Culture & Change",
+      "title": "Low-Code Digital Workforce Enablement",
+      "what_text": "~62 engineers (1% of 6,190 FTE) for $67B bank. 10-K states 'fewer resources than larger competitors'. Indeed wellbeing 'Below average'; job security 2.8/5. Sentiment cap 2.5 on. No formal innovation lab. connected unlock: Innovation (structured innovation via Platform); Operations (process automation) [E-089].",
+      "why_text": "The assessment found: “SSB subject to OCC heightened standards effective Q4 2026 due to >$50B assets post-IBTX; requires written governance framework, risk appetite statement, concentration risk limits, capital/liquidity” [E-084]. At 2.0 out of 5, Change Methodology sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P3C1",
+        "P4C2.1.4",
+        "P2C4.10.4",
+        "P3C1.8.1",
+        "P1C2.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-09",
+      "id": "2eff5908-e2e8-449a-b50f-3f699030e9e3",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-098"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-070"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-010"
+        },
+        {
+          "e_ids": [
+            "E-069",
+            "E-098",
+            "E-100"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-069",
+        "E-070",
+        "E-100",
+        "E-071",
+        "E-098",
+        "E-055",
+        "E-054",
+        "E-056"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make capability dimension 47 a near-term focus for SouthState Corporation: a scoped investment here would lift it from 2.5 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-100].",
+      "source_rec_id": "REC-09",
+      "theme": "Digital Channels",
+      "title": "Enterprise AI Scaling (Einstein + Agentforce)",
+      "what_text": "$2.3M new deposits in 3 weeks via AI campaign. Neural network models for deposit pricing. AI Governance Committee ~2 years old. But AI concentrated in deposit marketing only — no evidence of cross-product personalization. AutoGPT email personalization with $423K results. connected unlock: Marketing (Einstein Engagement); Operations (Agentforce process automation). In Zennify's assessment capability dimension 47 scores 2.5 out of 5, versus a typical 3.0 at comparable institutions [E-070].",
+      "why_text": "At 2.5 out of 5, capability dimension 47 sits 0.5 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-069, E-070].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 2.71 | vs Peer Median: -0.19 | Trend: ↑ Improving",
+        "heading": "6.1 Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 2.47 | vs Peer Median: -0.41 | Trend: ↑↓ Mixed",
+        "heading": "6.2 Pillar 2: Customer Experience",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 2.85 | vs Peer Median: -0.15 | Trend: ↑ Improving",
+        "heading": "6.3 Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 2.50 | vs Peer Median: -0.13 | Trend: ↑↓ Mixed",
+        "heading": "6.4 Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each recommendation includes institution-specific root cause analysis and expected score outcomes. All solutions are within Zennify's 12-solution portfolio. Items requiring client-side action (hiring, organizational changes) are tagged [CLIENT]."
+  },
+  "run_request_id": "DMA-ASM-SSB-20260408-0001"
+}

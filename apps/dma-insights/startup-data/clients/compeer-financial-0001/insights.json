@@ -1,0 +1,355 @@
+{
+  "entity_display_id": "compeer-financial-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C4",
+        "P4C3.5.8",
+        "P2C3.1.7",
+        "P2C3.1.8",
+        "P2C3.1.10"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "44f2137f-6883-4f3a-b3c2-4e15d2467821",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "basis",
+          "note": "thin evidence — scores + peer benchmark",
+          "target_id": null
+        }
+      ],
+      "linked_e_ids": [
+        "E-040"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Data Foundation (CDP) a near-term focus for Compeer Financial: a scoped investment here would lift it from 2.0 toward the 2.4 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-040].",
+      "source_rec_id": "REC-01",
+      "theme": "CX & Personalization",
+      "title": "Customer Data Foundation (CDP)",
+      "what_text": "Customer Data Foundation (CDP) is one of Compeer Financial's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.4 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Compeer Financial's ability to deliver a stronger, more personalised customer experience [E-040].",
+      "why_text": "At 2.0 out of 5, Customer Data Foundation (CDP) sits 0.4 points below the 2.4 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-040].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C4",
+        "P3C3.1.2",
+        "P1C1.5.4",
+        "P3C3.2.4",
+        "P3C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "92bd8f6d-e5a3-4de3-9033-b21ad7bfe8a1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-056",
+        "E-033",
+        "E-058"
+      ],
+      "linked_subcap_id": "P3C4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Resilience Strategy a near-term focus for Compeer Financial: a scoped investment here would lift it from 2.0 toward the 2.6 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-058].",
+      "source_rec_id": "REC-02",
+      "theme": "Business Resilience & Third-Party Management",
+      "title": "Resilience Strategy",
+      "what_text": "Resilience Strategy is one of Compeer Financial's developing operations capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.6 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Compeer Financial's ability to deliver more efficient, dependable operations [E-033].",
+      "why_text": "At 2.0 out of 5, Resilience Strategy sits 0.6 points below the 2.6 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-056, E-033].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C3",
+        "P3C3.1.2",
+        "P4C4.2.7",
+        "P4C4.7.1",
+        "P1C2.7.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "8ebe9a52-6739-4d6d-a3a3-6fb3f313c95e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-056"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-041",
+        "E-042",
+        "E-031",
+        "E-029",
+        "E-051",
+        "E-030",
+        "E-056",
+        "E-048"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Compliance Program Framework a near-term focus for Compeer Financial: a scoped investment here would lift it from 2.5 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-031].",
+      "source_rec_id": "REC-03",
+      "theme": "Compliance & Surveillance",
+      "title": "Compliance Program Framework",
+      "what_text": "Compliance Program Framework is one of Compeer Financial's developing operations capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the core processes that keep the institution running, so where it stands today directly shapes Compeer Financial's ability to deliver more efficient, dependable operations [E-042].",
+      "why_text": "At 2.5 out of 5, Compliance Program Framework sits 0.4 points below the 2.9 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business [E-041, E-042].",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P4C2.9.CL1",
+        "P4C2.1.2",
+        "P3C2.3.2",
+        "P2C1.6.7"
+      ],
+      "confidence_band": "high",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "df1cbb3a-25c8-428d-b3be-0154fbd81f0a",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-048"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-060",
+        "E-048",
+        "E-028",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Commercial Lending: Credit Risk Analytics & Monitoring a near-term focus for Compeer Financial: a scoped investment here would lift it from 2.0 toward the 2.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-028].",
+      "source_rec_id": "REC-04",
+      "theme": "Analytics & AI",
+      "title": "Commercial Lending: Credit Risk Analytics & Monitoring",
+      "what_text": "Commercial Lending: Credit Risk Analytics & Monitoring is one of Compeer Financial's developing data and technology capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 2.8 typically seen at comparable institutions. It underpins the data and technology foundation the rest of the business is built on, so where it stands today directly shapes Compeer Financial's ability to deliver a stronger data and technology foundation [E-048].",
+      "why_text": "At 2.0 out of 5, Commercial Lending: Credit Risk Analytics & Monitoring sits 0.8 points below the 2.8 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-060, E-048].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P1C1.3.3",
+        "P4C1.1.4",
+        "P1C1.8.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "9f9af620-a4ee-4412-960d-c7e3b838de1d",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-039"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-06"
+        }
+      ],
+      "linked_e_ids": [
+        "E-053",
+        "E-065",
+        "E-035",
+        "E-037",
+        "E-038",
+        "E-039",
+        "E-034"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Commercial Credit Pre-Qualification a near-term focus for Compeer Financial: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-035].",
+      "source_rec_id": "REC-05",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Commercial Credit Pre-Qualification",
+      "what_text": "Commercial Credit Pre-Qualification is one of Compeer Financial's developing customer experience capabilities, scoring 2.0 out of 5 in Zennify's latest assessment, below the 3.0 typically seen at comparable institutions. It underpins the day-to-day experience customers have across every channel, so where it stands today directly shapes Compeer Financial's ability to deliver a stronger, more personalised customer experience [E-065].",
+      "why_text": "At 2.0 out of 5, Commercial Credit Pre-Qualification sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-053, E-065].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P1C3",
+        "P1C4.1.2",
+        "P1C3.4.7",
+        "P1C3.4.6",
+        "P1C4.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-06",
+      "id": "7cf42042-43a0-4321-92a0-e5c64eec8ed8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-039"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-043",
+        "E-039"
+      ],
+      "linked_subcap_id": "P1C3",
+      "platforms": [
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Innovation Vision a near-term focus for Compeer Financial: a scoped investment here would lift it from 2.5 toward the 2.9 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-039].",
+      "source_rec_id": "REC-06",
+      "theme": "Innovation & Investment",
+      "title": "Innovation Vision",
+      "what_text": "Innovation Vision is one of Compeer Financial's developing strategy and governance capabilities, scoring 2.5 out of 5 in Zennify's latest assessment, below the 2.9 typically seen at comparable institutions. It underpins the planning and oversight the rest of the business relies on, so where it stands today directly shapes Compeer Financial's ability to deliver sharper strategic direction and stronger oversight [E-039].",
+      "why_text": "At 2.5 out of 5, Innovation Vision sits 0.4 points below the 2.9 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business [E-043, E-039].",
+      "pillar": "P1",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "P1 Average = (3.0 + 3.5 + 2.5 + 2.5 + 2.5) / 5 = 14.0 / 5 = 2.8, adjusted to 3.0 based on high-confidence governance score",
+        "heading": "Pillar 1 Score Calculation",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "Pillar 2: Member/Customer Experience (P2) – Score 2.50 vs Median 2.90 (-0.40)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "Pillar 3: Operations, Risk & Compliance (P3) – Score 2.55 vs Median 2.65 (-0.10)",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "P4 Average = (3.0 + 2.5 + 3.5 + 3.0) / 4 = 12.0 / 4 = 3.0",
+        "heading": "Pillar 4 Score Calculation",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": null
+  },
+  "run_request_id": "DMA-RES-COMPEER-20260305-0001"
+}

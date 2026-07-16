@@ -1,0 +1,143 @@
+{
+  "entity_display_id": "wescom-financial-wescom--0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+        "Spanish": "-language digital services 44.6%"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Marketing Cloud + Marketing Cloud Personalization",
+          "maturity_lift": "+1.5",
+          "metric": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-001",
+          "title": "Deploy Salesforce Marketing Cloud"
+        },
+        {
+          "feature": "Experience Cloud + Lightning Web Components",
+          "maturity_lift": null,
+          "metric": "Spanish-language digital services 44.6%",
+          "outcomes": {
+            "effort": "L",
+            "metric": "Spanish-language digital services 44.6%",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-002",
+          "title": "Launch Experience Cloud Multilingual Portal"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud + Einstein + Data Cloud",
+          "maturity_lift": "+1.5",
+          "metric": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 2.50 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-003",
+          "title": "Implement Financial Services Cloud + Einstein"
+        },
+        {
+          "feature": "Service Cloud Voice + Einstein Conversation Mining",
+          "maturity_lift": "+1.5",
+          "metric": "P3C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-004",
+          "title": "Deploy Service Cloud Voice for Contact Center"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P2C4, P3C1"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P1C1 score 2.50 \u2192 4.0 (peer median 2.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P1C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": null,
+      "recommendations": [
+        {
+          "feature": "Shield (Event Monitoring + Field-Level Encryption + Audit Trail)",
+          "maturity_lift": "+1.5",
+          "metric": "P1C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-005",
+          "title": "Enable Shield for Security & Governance"
+        },
+        {
+          "feature": "Digital Strategy Workshop + Advisory",
+          "maturity_lift": "+1.5",
+          "metric": "P1C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P1C1 score 2.50 \u2192 4.0 (peer median 2.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-006",
+          "title": "Digital Strategy Workshop & Governance Framework"
+        }
+      ],
+      "target": "M3 \u2192 M4 in P1C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-WSCM-20260323-0001",
+  "total_duration_months": 12
+}

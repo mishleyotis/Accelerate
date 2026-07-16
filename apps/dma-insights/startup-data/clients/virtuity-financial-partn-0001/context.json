@@ -1,0 +1,457 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "virtuity-financial-partn-0001",
+  "financials": {
+    "lines": [
+      "VFP's scale must be understood at two levels: the VFP entity itself and the WFG ecosystem it operates within, as the ecosystem determines the platforms, carriers, and growth trajectory available to VFP agents.",
+      "VFP Entity Level:",
+      "VFP reports 'over 600 licensed associates' on its opportunities page and 'over 400 licensed associates and offices across the nation' on its company page \u2014 a discrepancy that may reflect different counting periods or page update timing [E-145]. Vibe Prospecting classifies VFP in the 501-1,000 employee range. Revenue estimates vary significantly: ZoomInfo reports $31.5 million while Vibe reports a $200-500 million range (likely conflating VFP with the broader WFG ecosystem revenue). Our estimate of $20-50 million for the VFP LLC reflects the ZoomInfo data point calibrated against the independent co-brand structure [E-003, E-004].",
+      "WFG Ecosystem Level (Aegon 6-K, February 19, 2026):",
+      "The WFG distribution network reached 95,740 licensed agents in H2 2025, an 11% increase from 86,142 in H2 2024. Multi-ticket agents (those selling multiple policies) grew more modestly to 36,871 (+2%), suggesting that much of the agent growth comes from newer, less productive agents \u2014 a dynamic that creates demand for agent enablement and onboarding tools. WFG's total new life sales reached $360 million in H2 2025 (+16% YoY), while annuity gross deposits surged to $2,311 million (+19%). Individual Life new sales were $341 million (+49%), with IUL at $221 million (+33%) and Traditional Life at $121 million (+93% \u2014 the fastest-growing segment). Indexed Annuity net deposits reached $1,139 million (+18%). Transamerica's market share of WFG US Life sales increased to 67% from 62%, indicating that WFG agents are increasingly selling Transamerica's own products rather than third-party carriers. The 2027 targets are $900 million in annual WFG life sales (14% CAGR) and $5.0 billion in annuity sales (7% CAGR), with 110,000 licensed agents [E-140].",
+      "Trend Classification: ACCELERATING",
+      "Every major WFG financial metric accelerated in H2 2025 versus H2 2024. Agent count: +11%. Life sales: +16%. Annuity sales: +19%. Individual Life: +49%. IUL: +33%. Traditional Life: +93%. Indexed Annuity deposits: +18%. Transamerica's WFG US Life market share: +8% (relative). At the parent level, Aegon's FY2025 operating result grew 15% to EUR 1.7 billion, net result grew 45% to EUR 980 million, and the dividend of EUR 0.40/share met the target. The CEO characterized this as 'record' performance that 'gives us confidence that our plans have a robust foundation.' This is not a company planning to cut costs \u2014 it is a company investing for growth, with WFG as the primary distribution engine [E-140]."
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US Nationwide",
+      "HQ San Diego + Westlake Village CA"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Hanna Horenstein",
+        "recent_hire": false,
+        "tenure_months": 276,
+        "title": "CEO of VFP and Executive Vice Chairman of WFG, is the primary decision maker for any VFP engagement. Her 23+ years in financial services and dual title give her"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CTO / CIO"
+      }
+    ],
+    "license_type": "State-licensed insurer",
+    "narrative_md": "VFP's entity structure is critical for assessment purposes. VFP is explicitly 'not an affiliated company of World Financial Group, Inc.' per its own website disclaimer \u2014 it is an independent co-brand whose agents are licensed through WFGIA. This means VFP has limited control over the technology platforms its agents use (WFG-provided), the compliance framework they operate under (TFA/WFGIA), and the carrier relationships they access (WFG-negotiated). Yet VFP maintains its own brand, training program, leadership team, and market positioning. This dual nature \u2014 independent brand, dependent infrastructure \u2014 is the central tension that defines VFP's digital maturity profile [E-001, E-145].\n\nVirtuity Financial Partners LLC is a privately held limited liability company co-founded by Hanna Horenstein and Sofia Estrada, operating as an independent co-brand within the World Financial Group ecosystem since approximately 2019. The co-brand structure is a critical legal and operational distinction: VFP is explicitly 'not an affiliated company of World Financial Group, Inc.' per its website disclaimer, yet its agents are licensed through and operate under the regulatory umbrella of WFGIA (World Financial Group Insurance Agency, LLC). This creates a unique organizational dynamic where VFP controls its brand, training, culture, and market positioning while depending on WFG for technology platforms, carrier relationships, compliance infrastructure, and commission processing [E-001, E-145].\n\nThe corporate chain is: Aegon N.V. (Bermuda holding company, formerly Netherlands-domiciled) \u2192 Transamerica Corporation (US subsidiary, headquartered in Baltimore MD with major operations in Cedar Rapids IA and Denver CO) \u2192 World Financial Group (distribution network, HQ in Johns Creek GA) \u2192 WFGIA and state entities (CA, HI, MA, PR) \u2192 VFP agents (independent contractors). VFP's CEO Hanna Horenstein holds the dual title of Executive Vice Chairman at WFG, indicating senior standing within the WFG hierarchy. VFP maintains two physical offices: a primary office at 9246 Lightwave Ave #140, San Diego, CA 92123 (phone 858-200-7277) and a secondary office at 515 Marin St PH 408, Thousand Oaks, CA 91360 (phone 818-402-9396). The entity is classified under SIC 6411 (Insurance agents, brokers, and service) and NAICS 52 [E-001].",
+    "primary_regulator": "State DOI (50 states via WFGIA)",
+    "size_tier": "Small-Mid",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-046",
+        "excerpt": "VFP website webstack: ASP.NET 4.0 on IIS 10, Amazon S3 CDN, CPanel, GoDaddy DNS, Comodo PositiveSSL. Framework: ASP.NET Ajax, Facebook Domain Verification, Organization Schema.",
+        "title": "VFP website webstack: ASP.NET 4.0 on IIS 10, Amazon S3 CDN, CPanel\u2026",
+        "type": "conference",
+        "url": "https://vibeprospecting.explorium.ai"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-059",
+        "excerpt": "WFG provides pre-approved marketing materials: emails, social media posts, infographics, images, videos. Library of professionally designed content for agent marketing campaigns.",
+        "title": "WFG provides pre-approved marketing materials",
+        "type": "linkedin-post",
+        "url": "https://www.worldfinancialgroup.com/opportunity/technology-marketing"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-074",
+        "excerpt": "WFG agent onboarding: work with trainer from day one (experienced agent from team), comprehensive online training library, past webinars/videos, courses on products/technology/tools. Learn at own pace.",
+        "title": "WFG agent onboarding: work with trainer",
+        "type": "webinar",
+        "url": "https://www.worldfinancialgroup.com/opportunity/training-support"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-082",
+        "excerpt": "WFG provides pre-approved, professionally designed emails and social media posts for agents. Content pre-approval indicates marketing compliance governance exists at WFG parent level.",
+        "title": "WFG provides pre-approved, professionally designed emails and social\u2026",
+        "type": "linkedin-post",
+        "url": "https://www.worldfinancialgroup.com/opportunity/technology-marketing"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-005",
+        "excerpt": "WFG target market: middle-market individuals and families \u2014 'people from all backgrounds', diverse force representing 75+ languages. WFG served 7 million+ families. Agents use broad range of perspectives, languages, cult",
+        "title": "WFG target market: middle-market individuals and families",
+        "type": "article",
+        "url": "https://www.worldfinancialgroup.com/our-story"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "Most recent VFP LinkedIn post: 'Financial literacy at its finest!' \u2014 47 days ago, 1 like. Very low engagement and infrequent posting. 137 LinkedIn followers. Minimal social media strategy. Posts are motivational/educatio",
+        "title": "Most recent VFP LinkedIn post: 'Financial literacy at its finest!'",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/virtuity-financial"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "9a22831f-e487-4f27-af20-26726a671da4",
+      "issue_id": "GAP-1-P1C1.4.IB1",
+      "linked_subcap_ids": [
+        "P1C1.4.IB1"
+      ],
+      "opened_on": "2026-04-14",
+      "rationale": "Maturity 1.0/5 \u2014 2.0 pts below the IB peer median (3.0/5). [EVIDENCE]: NO_EVIDENCE found for P1C1.4.IB1. [MATURITY]: Scored M1 Foundational (absent/ad-hoc). [GAP]: No public evidence of capability. [CAP]: T5-only ceiling 2.0. [SO WHAT]: For VFP, this capability appears absent or entirely manual \u2014 internal discovery needed to validate.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Producer/Advisor Channel Strategy"
+    },
+    {
+      "id": "47e32c66-9a27-4705-a92e-10dd69e0e09a",
+      "issue_id": "GAP-2-P1C2.1.7",
+      "linked_subcap_ids": [
+        "P1C2.1.7"
+      ],
+      "opened_on": "2026-04-14",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the IB peer median (2.5/5). [EVIDENCE]: NO_EVIDENCE found for P1C2.1.7. [MATURITY]: Scored M1 Foundational (absent/ad-hoc). [GAP]: No public evidence of capability. [CAP]: T5-only ceiling 2.0. [SO WHAT]: For VFP, this capability appears absent or entirely manual \u2014 internal discovery needed to validate.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Salesforce Platform Center of Excellence"
+    },
+    {
+      "id": "2e56679e-3add-43c3-b32f-f8a4e2b89f00",
+      "issue_id": "GAP-3-P1C2.1.8",
+      "linked_subcap_ids": [
+        "P1C2.1.8"
+      ],
+      "opened_on": "2026-04-14",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the IB peer median (2.5/5). [EVIDENCE]: NO_EVIDENCE found for P1C2.1.8. [MATURITY]: Scored M1 Foundational (absent/ad-hoc). [GAP]: No public evidence of capability. [CAP]: T5-only ceiling 2.0. [SO WHAT]: For VFP, this capability appears absent or entirely manual \u2014 internal discovery needed to validate.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: AI & Agent Governance Council"
+    },
+    {
+      "id": "b48099d1-6d47-44e1-91c5-b262622ed145",
+      "issue_id": "GAP-4-P1C2.5.3",
+      "linked_subcap_ids": [
+        "P1C2.5.3"
+      ],
+      "opened_on": "2026-04-14",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the IB peer median (2.5/5). [EVIDENCE]: NO_EVIDENCE found for P1C2.5.3. [MATURITY]: Scored M1 Foundational (absent/ad-hoc). [GAP]: No public evidence of capability. [CAP]: T5-only ceiling 2.0. [SO WHAT]: For VFP, this capability appears absent or entirely manual \u2014 internal discovery needed to validate.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Data Quality Governance"
+    },
+    {
+      "id": "0654af4b-d655-43a3-89e6-38f29465e515",
+      "issue_id": "GAP-5-P1C2.5.4",
+      "linked_subcap_ids": [
+        "P1C2.5.4"
+      ],
+      "opened_on": "2026-04-14",
+      "rationale": "Maturity 1.0/5 \u2014 1.5 pts below the IB peer median (2.5/5). [EVIDENCE]: NO_EVIDENCE found for P1C2.5.4. [MATURITY]: Scored M1 Foundational (absent/ad-hoc). [GAP]: No public evidence of capability. [CAP]: T5-only ceiling 2.0. [SO WHAT]: For VFP, this capability appears absent or entirely manual \u2014 internal discovery needed to validate.",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "Capability gap: Data Privacy Governance"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "The WFG distribution network reached 95,740 licensed agents in H2 2025, an 11% increase from 86,142 in H2 2024. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.75,
+        "P1C2": 2.15,
+        "P1C3": 2.45,
+        "P1C4": 3.7,
+        "P2C1": 3.44,
+        "P2C2": 2.76,
+        "P2C3": 2.37,
+        "P2C4": 2.25,
+        "P3C1": 3.85,
+        "P3C2": 4.07,
+        "P3C3": 3.39,
+        "P3C4": 3.76,
+        "P4C1": 2.41,
+        "P4C2": 2.65,
+        "P4C3": 3.49,
+        "P4C4": 4.43
+      },
+      "overall_score": 3.12,
+      "peer_name": "Alliant Insurance Services",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.74,
+        "P1C2": 3.25,
+        "P1C3": 3.33,
+        "P1C4": 3.41,
+        "P2C1": 3.06,
+        "P2C2": 2.99,
+        "P2C3": 3.11,
+        "P2C4": 3.22,
+        "P3C1": 3.18,
+        "P3C2": 3.25,
+        "P3C3": 3.37,
+        "P3C4": 3.4,
+        "P4C1": 3.13,
+        "P4C2": 3.36,
+        "P4C3": 2.81,
+        "P4C4": 1.97
+      },
+      "overall_score": 3.1,
+      "peer_name": "OneDigital Partners, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.93,
+        "P1C2": 2.97,
+        "P1C3": 3.5,
+        "P1C4": 2.99,
+        "P1C5": 1.57,
+        "P2C1": 2.99,
+        "P2C2": 2.97,
+        "P2C3": 2.51,
+        "P2C4": 2.02,
+        "P3C1": 2.97,
+        "P3C2": 2.96,
+        "P3C3": 2.98,
+        "P3C4": 2.02,
+        "P4C1": 2.51,
+        "P4C2": 2.02,
+        "P4C3": 2.97,
+        "P4C4": 2.52
+      },
+      "overall_score": 2.67,
+      "peer_name": "IMA Financial Group, Inc.",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.84,
+        "P1C2": 2.74,
+        "P1C3": 2.58,
+        "P1C4": 2.84,
+        "P1C5": 2.25,
+        "P2C1": 2.67,
+        "P2C2": 3.0,
+        "P2C3": 2.92,
+        "P2C4": 2.69,
+        "P3C1": 2.6,
+        "P3C2": 2.3,
+        "P3C3": 2.79,
+        "P3C4": 2.55,
+        "P4C1": 2.21,
+        "P4C2": 2.08,
+        "P4C3": 2.29,
+        "P4C4": 2.52
+      },
+      "overall_score": 2.58,
+      "peer_name": "TowneBank Insurance",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-VFP-20260414-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": "overall: 5.0, culture: 5.0, management: 5.0",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Employee Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "reviews: 1, note: 1 review only",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": 1,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Mixed. Positive: mentorship culture, financial education mission, NFL Alumni partnership. Negative: WFG parent carries MLM perception risk; TikTok/social media shows WFG-related MLM criticism",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Public Perception",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Mike Brodeur appointed WFG President (Jan 2026), formerly COO who 'spearheaded WFG's technology roadmap, strengthened its data analytics strategy'.",
+      "date_precision": "month",
+      "e_id": "E-004",
+      "event_date": "2026-01-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "9d7fd3f0-5de4-46e8-9a8e-30a203bd3524",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.worldfinancialgroup.com/press-releases/transamerica-names-mike-brodeur-president-world-financial-group",
+      "subcap_ids": [],
+      "title": "Mike Brodeur appointed WFG President (Jan 2026), formerly\u2026"
+    },
+    {
+      "body": "Financial Foundation IUL II Express with Transamerica (2025): new IUL product launched in months using cloud-based platform. Demonstrates carrier-level innovation that VFP agents can leverage.",
+      "date_precision": "year",
+      "e_id": "E-032",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-032",
+        "E-061"
+      ],
+      "id": "a9dbe830-e032-480d-9e3c-55f7e1dbe4c5",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.bestow.com/post/recapping-bestows-2024-a-year-in-innovation",
+      "subcap_ids": [],
+      "title": "Financial Foundation IUL II Express with Transamerica\u2026"
+    },
+    {
+      "body": "June 10, 2025: Investigation completed. Determined unauthorized access confirmed. Internal network NOT compromised. No other TA systems impacted.",
+      "date_precision": "day",
+      "e_id": "E-146",
+      "event_date": "2025-06-10",
+      "evidence_e_ids": [
+        "E-146"
+      ],
+      "id": "66a7cc63-474b-4a8c-93ce-0f63d1a64447",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": "https://www.napa-net.org/news/2025/6/transamerica-hacked-by-data-breach/",
+      "subcap_ids": [],
+      "title": "Investigation completed"
+    },
+    {
+      "body": "WFG hired Anissa Benich as head of Customer Experience and Marketing (Jan 2025) \u2014 indicates formal marketing leadership at parent level.",
+      "date_precision": "month",
+      "e_id": "E-068",
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-068"
+      ],
+      "id": "7a8766a0-dc18-435f-bf9d-b722cb02c2ad",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.worldfinancialgroup.com/opportunity/technology-marketing",
+      "subcap_ids": [],
+      "title": "WFG hired Anissa Benich"
+    },
+    {
+      "body": "Transamerica FE Express Solution: digital final expense product, 11-min median submit time. Developed and launched in 7 months (2024).",
+      "date_precision": "year",
+      "e_id": "E-032",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-032"
+      ],
+      "id": "13441178-516e-4542-822c-97297bd1995a",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.bestow.com/post/recapping-bestows-2024-a-year-in-innovation",
+      "subcap_ids": [],
+      "title": "Developed and launched in 7 months (2024)."
+    },
+    {
+      "body": "May 2024: FSRA fined WFG $50K for compensating unlicensed Canadian agent who sold 58 life insurance policies (Oct 2021-Jul 2022).",
+      "date_precision": "month",
+      "e_id": "E-017",
+      "event_date": "2024-05-01",
+      "evidence_e_ids": [
+        "E-017"
+      ],
+      "id": "5c0f19e6-f839-4ad3-acda-e45b7ed1d508",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://en.wikipedia.org/wiki/World_Financial_Group",
+      "subcap_ids": [],
+      "title": "FSRA fined WFG"
+    },
+    {
+      "body": "Transamerica appointed CDO Rob Carney (Apr 2024) for Individual Solutions division. Multiple C-suite appointments suggest structured program governance at parent.",
+      "date_precision": "month",
+      "e_id": "E-018",
+      "event_date": "2024-04-01",
+      "evidence_e_ids": [
+        "E-018"
+      ],
+      "id": "9e350616-e476-40f6-83ff-167c1027d9c2",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.transamerica.com/press-release",
+      "subcap_ids": [],
+      "title": "Transamerica appointed CDO Rob Carney (Apr 2024)"
+    },
+    {
+      "body": "Aegon launched international I&D Survey (2023) \u2014 82% response rate. Global Head of I&D appointed (Siobhan Martin, 2022). Women's Impact Network active.",
+      "date_precision": "year",
+      "e_id": "E-042",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "745b7d89-a3c9-42e9-a584-489e79048d19",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.transamerica.com/why-transamerica/inclusion-diversity",
+      "subcap_ids": [],
+      "title": "Aegon launched international I&D Survey (2023) \u2014 82%\u2026"
+    },
+    {
+      "body": "Aegon launched international I&D Survey (2023) \u2014 82% response rate. Global Head of I&D appointed (Siobhan Martin, 2022). Women's Impact Network active.",
+      "date_precision": "year",
+      "e_id": "E-042",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-042"
+      ],
+      "id": "bb583769-d8fd-457d-a35e-2e79dfe48ee0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.transamerica.com/why-transamerica/inclusion-diversity",
+      "subcap_ids": [],
+      "title": "Global Head of I&D appointed"
+    }
+  ]
+}

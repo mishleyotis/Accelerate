@@ -1,0 +1,1317 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 182,
+        "subcaps": 182,
+        "thin": 143
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 288,
+        "subcaps": 288,
+        "thin": 264
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 202,
+        "subcaps": 202,
+        "thin": 202
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 187,
+        "subcaps": 187,
+        "thin": 170
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "ci-segall-bryant-hamill--0001",
+    "domain": null,
+    "hq": null,
+    "id": "2811d095-7541-4a66-b932-037e1fb776c4",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "CI Segall Bryant & Hamill, LLC",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "AM",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:12:02.801638Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 27,
+    "current_count": 35,
+    "dated_count": 6,
+    "median_age_months": 21.0,
+    "oldest_published_date": "2015-07-01",
+    "stale_count": 11,
+    "stale_pct": 13.92,
+    "total": 79,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "NEGATIVE": 8,
+      "NEUTRAL": 16,
+      "POSITIVE": 55
+    },
+    "connectors": {
+      "Clay": 1,
+      "Glassdoor": 1,
+      "Indeed": 2,
+      "LinkedIn": 3
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 72,
+      "POSITIVE": 7
+    },
+    "tiers": {
+      "T1": 15,
+      "T2": 37,
+      "T3": 27
+    },
+    "total_facts": 452,
+    "total_items": 79
+  },
+  "financial_trajectory": {
+    "cagr": "-5.7%",
+    "currency": "USD",
+    "events": [],
+    "fy": [
+      2021,
+      2024
+    ],
+    "headline": null,
+    "series": {
+      "total_assets": [
+        25.4,
+        21.27
+      ]
+    },
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 7030000000.0,
+    "branches": 6,
+    "cagr": "-5.8%",
+    "cagr_basis": "computed:year_series",
+    "clay_synced_at": null,
+    "employees_approx": "{'range': '102-122', 'source': 'Clay/LeadIQ Aug 2025'}",
+    "financial_highlights": {
+      "aum_growth": "23.6B at CI acquisition (Apr 2021) → $25.4B (",
+      "corient_platform": "224B aggregate. Mubadala backing brings sove",
+      "f_equity": "7.1B (Q2 2025).",
+      "lines": [
+        "Revenue Growth: $35M (2024) → $63.9M (2026 est.) = +83% in two years (E-053). This growth reflects both organic AUM appreciation and the Roosevelt Investments integration (May 2024).",
+        "AUM Growth: $23.6B at CI acquisition (Apr 2021) → $25.4B (Mar 2024) = +7.6% over 3 years. 13F equity: $7.1B (Q2 2025).",
+        "M&A History: Four acquisitions integrated: Philadelphia International Advisors (2015), Denver Investment Advisors (2018), Roosevelt Investments (2024), plus Barrett Asset Management was acquired by CI Financial in the same wave but operates separately.",
+        "Parent Context: Corient platform: $224B aggregate. Mubadala backing brings sovereign-fund discipline. SBH is one of 14+ RIAs in the CI/Corient family, each at different stages of FSC standardization."
+      ],
+      "revenue_growth": "35M (2024) → $63.9M (2026 est.) = +83% in t",
+      "series": {
+        "2021": 25400000000.0,
+        "2024": 21267060906.0
+      },
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 6,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 100,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Jim Rogers hired May 2024"
+          },
+          {
+            "fy": "FY2021",
+            "label": "CI Financial Corp (TSX:CIX) acquired"
+          }
+        ],
+        "fy": [
+          "FY2021",
+          "FY2024"
+        ],
+        "geography": null,
+        "headline": "$21.3B assets · FY2024 · -5.8% CAGR",
+        "regulator": "SEC (Investment Advisers Act)",
+        "series": {
+          "net_income_m": null,
+          "total_assets": [
+            25.4,
+            21.27
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "founded": 1994,
+    "headcount": 100,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Carolyn Goldhaber",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Executive Sponsor (SBH)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Adam Konrad",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Client PM / Technical SME"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Ryan Koshar",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Client Technical Resource"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Philip Hildebrandt",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO (status unclear)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Jasper Frontz",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CCO (CFA, CPA)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Mark Rewey",
+        "recent_hire": false,
+        "tenure": null,
+        "tenure_months": 336,
+        "title": "Head of Distribution (28yr)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Scott Decatur, PhD",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Quant Team Lead"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Suresh Rajagopal",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Dir. ESG Research (CFA)"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "CI Segall Bryant & Hamill, LLC",
+    "license_type": "SEC-registered investment adviser",
+    "narrative_md": "CI Segall Bryant & Hamill (SBH) is a Chicago-headquartered, SEC-registered investment adviser founded in 1994, managing approximately $25.4 billion in combined AUM/AUA as of March 2024 (INT-005:F1). The firm is wholly owned within a multi-layered corporate structure: SBH reports to Corient Management LLC, which sits under Corient Holdings Inc., itself a subsidiary of CI Financial Corp. (TSX:CIX, NYSE:CIXX). In August 2025, CI Financial was taken private by Mubadala Capital (Abu Dhabi sovereign wealth fund) at C$12.1B enterprise value (E-078). SBH operates from six U.S. offices — Chicago (HQ), Denver, Philadelphia (Ardmore), St. Louis, Naples FL, and Cincinnati OH — with 115–124 employees (INT-005:F2). The firm serves institutional clients (foundations, endowments, pension plans), intermediary channels, and high-net-worth individuals through 27+ investment strategies, 16 mutual funds, 1 ETF (USSE), 9 collective investment trusts, and 3+ private funds (INT-005).\n\nSBH’s stated mission is \"to exceed our clients’ expectations by helping them realize their long-term investment goals across complex market environments and by delivering a customized, high-touch service experience. The result is long-lasting relationships with our clients built on trust\" (E-084, SBH About Us page). This mission anchors all strategic priorities and defines how technology investments — including the current FSC migration — should be evaluated.",
+    "primary_regulator": "SEC (Investment Advisers Act)",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 63900000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 15,
+          "scale": 5,
+          "score": 4.3,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "4.3/5",
+          "signal": "Glassdoor overall rating: 4.3/5 stars based on 15 reviews",
+          "source": "Glassdoor"
+        },
+        {
+          "signal": "Minimal Indeed presence suggests small headcount and limited employer brand investment SBH HQ at 10 S Wacker Dr Suite 3100, Chicago IL 60606",
+          "source": "Indeed"
+        },
+        {
+          "signal": "Searched: 'SBH client survey satisfaction NPS feedback service quality' — zero SBH-specific results",
+          "source": "Net Promoter Score"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Mid-Size AM ($10B-$50B AUM)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-06-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-042",
+        "excerpt": "SBH is a signatory to the United Nations Principles for Responsible Investment (UN PRI). Confirmed in CI GAM press release and cisbh.com article. ESG factors integrated into investment process across strategies. Roosevel",
+        "title": "SBH is a signatory to the United Nations Principles for Responsible…",
+        "type": "article",
+        "url": "https://cisbh.com/insights/the-advantages-of-a-quantitative-investing-approach"
+      },
+      {
+        "author": null,
+        "date": "2024-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-049",
+        "excerpt": "SBH has a dedicated 'Advisor Solutions' segment targeting financial advisors. Positions strategies as 'Institutional-Quality Strategies for Your Clients'. 'Latest Insights' section provides thought leadership content to ",
+        "title": "SBH has a dedicated 'Advisor Solutions' segment targeting financial…",
+        "type": "article",
+        "url": "https://www.sbhic.com/backup-advisor-solutions/"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "Active LinkedIn presence with regular market commentary posts (Fixed Income recaps, EM insights, quarterly newsletters). Content topics: Fixed income market recaps, EM valuation analysis, dot-com bubble parallels, award ",
+        "title": "Active LinkedIn presence with regular market commentary posts (Fixed…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/company/segall-bryant-&-hamill"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-043",
+        "excerpt": "Glassdoor overall rating: 4.3/5 stars based on 15 reviews. 100% of employees recommend working at SBH to a friend. 100% positive interview experience. 77% positive business outlook — some uncertainty, likely related to o",
+        "title": "Glassdoor overall rating: 4.3/5 stars based on 15 reviews",
+        "type": "article",
+        "url": "https://www.glassdoor.com/Overview/Working-at-Segall-Bryant-Hamill-EI_IE1341202.11,31.htm"
+      },
+      {
+        "author": null,
+        "date": "2025-12-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "Digital channels: LinkedIn (active, regular posts), 3 websites (sbhic.com, cisbh.com, sbhfunds.com), Vimeo (video hosting). No Twitter/X, no YouTube, no podcast, no webinar platform detected. LinkedIn content: quarterly ",
+        "title": "Digital channels: LinkedIn (active, regular posts), 3 websites…",
+        "type": "podcast",
+        "url": "https://www.linkedin.com/company/segall-bryant-&-hamill"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "website": "https://www.sbhic.com (institutional) / https://cisbh.com (funds/wealth)",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:34.841523+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# CI Segall Bryant & Hamill, LLC — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Above Peer (4): Culture 3.17 vs 3.0, ESG 2.77 vs 2.0, Onboarding 2.70 vs 2.5, Automation 3.23 vs 2.5.\nLargest Gaps (4): Cybersecurity -1.00, Analytics -0.90, Digital Strategy -0.63, Innovation -0.49.\nCongress Wealth (organizational peer): As fellow CI Financial/Corient subsidiary, Congress Wealth is the direct benchmark for FSC standardization maturity. If Congress has completed FSC migration, it provides the reference architecture for SBH.",
+    "gap_prioritization_md": "",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "CI Segall Bryant & Hamill, LLC is a $7.0B in assets asset manager regulated by SEC (Investment Advisers Act), operating since 1994 with 100 employees. Zennify's assessment places overall digital maturity at 2.1/5. The deepest capability gap is Multi-Year Roadmap at 1.4/5 against a 2.5 peer median [E-014, E-016]. Next is Data Architecture & Modeling at 1.5/5 against a 2.0 peer median [E-073, E-075].\n\nThird is Vendor Security Assessment at 1.5/5 against a 2.5 peer median [E-064, E-079]. The issue register adds Capability gap: Business Alignment (high severity) [E-017]. The issue register adds Capability gap: Strategy Refresh Cadence (high severity). Counter-signal: Training Content Development & Delivery already runs at 3.3/5 against a 3.0 peer median — a strength to build on, not rebuild.\n\nThe roster shows no CISO — a named ownership gap for the capabilities below. The question for CI Segall Bryant & Hamill, LLC is whether to close Multi-Year Roadmap first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. CI Segall Bryant & Hamill, LLC should lead with Tableau (59/100 fit) against Business Alignment, then sequence nCino behind it. Closing Multi-Year Roadmap to the peer median alone is worth 1.1 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.15,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/ceiling_estimates.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.757418+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/connector_validation.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.757759+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_1_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.758245+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_2a_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.758567+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_2b_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.758887+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_2c_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.759219+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_2d_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.759518+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_2e_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.759911+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_2f_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.760241+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_3a_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.760468+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_3b_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.760700+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_3c_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.760931+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_3d_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.761201+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_3e_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.761456+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_3f_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.761736+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/batch_4_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.761934+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.762386+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_research_workbook/subvertical_classification.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.762689+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/category_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.763033+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/p1_subcaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.764242+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/p2_subcaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.765598+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/p3_subcaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.766426+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_scoring_workbook/p4_subcaps.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.767248+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.767972+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.768396+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/report_audit.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.768670+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "Untitled document.docx",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:12:02.776432+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 38
+    },
+    "stage_ms": {
+      "manifest": 52,
+      "parse": 5246,
+      "persist": 3106
+    },
+    "structured": [
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Client_Research_Report_CISBH.docx count=8",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 7 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "peer_benchmarks_filled",
+        "detail": "peer_benchmarks_filled: 17 categories",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 4 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 4",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/ceiling_estimates.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/connector_validation.md — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_1_checkpoint.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_2a_checkpoint.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_2b_checkpoint.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_2c_checkpoint.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_2d_checkpoint.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_2e_checkpoint.json — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_2f_checkpoint.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_3a_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_3b_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_3c_checkpoint.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_3d_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_3e_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_3f_checkpoint.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/batch_4_checkpoint.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_research_workbook/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/category_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/p1_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/p2_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/p3_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_scoring_workbook/p4_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/report_audit.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "Untitled document.docx — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 24",
+        "severity": "INFO"
+      },
+      {
+        "code": "shallow_alias_bridge",
+        "detail": "shallow_alias_bridge:8367 subcap_scores rows broadcast from 4 category-level parents (P3C1, P3C2, P3C3, P3C4) -- bot pipeline should re-emit at subcap depth for full fidelity; UI surfaces 'broadcast' disclosure via data_source='shallow_broadcast'",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:17/837 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 4",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'hq', 'legal_name', 'primary_regulator', 'website'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=DMA_Client_Research_Report_CISBH.docx count=8",
+      "used docx-extracted recommendations: 7 rec(s) from Assessment_Report.docx §9",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "peer_benchmarks_filled: 17 categories",
+      "tech_stack_from_report_prose: 4 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 4",
+      "INFO/pattern_gap: 01_evidence/ceiling_estimates.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/connector_validation.md — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_1_checkpoint.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_2a_checkpoint.json — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_2b_checkpoint.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_2c_checkpoint.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_2d_checkpoint.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_2e_checkpoint.json — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_2f_checkpoint.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_3a_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_3b_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_3c_checkpoint.json — no fingerprint matched (best confidence 0.00); 9 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_3d_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_3e_checkpoint.json — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_3f_checkpoint.json — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/batch_4_checkpoint.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 02_research_workbook/subvertical_classification.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/category_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/p1_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/p2_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/p3_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 03_scoring_workbook/p4_subcaps.json — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/report_audit.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: Untitled document.docx — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 24",
+      "shallow_alias_bridge:8367 subcap_scores rows broadcast from 4 category-level parents (P3C1, P3C2, P3C3, P3C4) -- bot pipeline should re-emit at subcap depth for full fidelity; UI surfaces 'broadcast' disclosure via data_source='shallow_broadcast'",
+      "catalogue_unresolved:17/837 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 4"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 182,
+      "peer_median": 2.6,
+      "pillar_id": "P1",
+      "score": 2.27,
+      "subcaps_scored": 182
+    },
+    {
+      "peer_benchmarked": 288,
+      "peer_median": 2.27,
+      "pillar_id": "P2",
+      "score": 2.23,
+      "subcaps_scored": 288
+    },
+    {
+      "peer_benchmarked": 202,
+      "peer_median": 2.74,
+      "pillar_id": "P3",
+      "score": 2.52,
+      "subcaps_scored": 202
+    },
+    {
+      "peer_benchmarked": 187,
+      "peer_median": 2.38,
+      "pillar_id": "P4",
+      "score": 1.57,
+      "subcaps_scored": 187
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-01",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:12:02.801638Z",
+    "created_at": "2026-07-02T23:12:02.801638Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "4195405f-f84c-480d-b555-2e6b16cf52ef",
+    "overall_score": null,
+    "request_id": "DMA-RES-CISBH-20260401-0001",
+    "started_at": "2026-07-02T23:12:02.801638Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 15,
+        "scale": 5,
+        "score": 4.3,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Integration Stall (P4C3, CRITICAL): Two full sprints have elapsed with zero integration stories completed. Broadridge (SBH-71) blocked and unassigned. APX API error handling (D005) overdue since March 27. All 5 integration workstreams (APX UNI Sync, APX API, DocuSign, Pardot, Broadridge) remain To Do or Blocked. This creates a growing risk to the late May/early June go-live. (INT-002:F6, INT-004:F2, INT-005:F11)",
+      "evidence": [
+        "INT-002",
+        "INT-004",
+        "INT-005",
+        "E-014"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Integration Stall",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Integration Stall in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Integration Stall",
+      "what": "Integration Stall (P4C3, CRITICAL). Two full sprints have elapsed with zero integration stories completed. Broadridge (SBH-71) blocked and unassigned. APX API error handling (D005) overdue since March 27. All 5 integration workstreams (APX UNI Sync, APX API, DocuSign, Pardot, Broadridge) remain To Do or Blocked.",
+      "why": "The linked evidence records: SBH HQ at 10 S Wacker Dr Suite 3100, Chicago IL 60606. Offices: Denver CO, Chesterfield MO, Ardmore PA, New York NY. Total regulatory AUM as of Dec 31 2024: $21,267,060,906 ($21.267B discretionary, $4,777 non-discretionary)."
+    },
+    {
+      "body": "Sprint Velocity Collapse (P3C1, HIGH): Sprint 2 velocity of 1 story completed is 93% below Sprint 1 (15 stories). Seven carry-forward stories have been in progress for 2+ sprints with no movement: SBH-7 (Person Account config), SBH-8 (Financial Account config — blocked on data migration review), SBH-9 (FAP config), SBH-30 (Account LRP), SBH-31 (PA LRP), SBH-34 (ARC), SBH-51 (Action Plan New Portfolio)",
+      "evidence": [
+        "INT-001",
+        "INT-002",
+        "E-014",
+        "E-016"
+      ],
+      "magnitude": "93%",
+      "name": "Sprint Velocity Collapse",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Sprint Velocity Collapse in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Sprint Velocity Collapse",
+      "what": "Sprint Velocity Collapse (P3C1, HIGH). Sprint 2 velocity of 1 story completed is 93% below Sprint 1 (15 stories).",
+      "why": "The linked evidence records: SBH HQ at 10 S Wacker Dr Suite 3100, Chicago IL 60606. Offices: Denver CO, Chesterfield MO, Ardmore PA, New York NY. Total regulatory AUM as of Dec 31 2024: $21,267,060,906 ($21.267B discretionary, $4,777 non-discretionary)."
+    },
+    {
+      "body": "Change Management Void (P1C4.4, HIGH): Change management is explicitly out of scope (INT-001:F9). Business readiness is ‘Not Started’ as of Sprint 3 (INT-005:F13). SBH has ~120 employees who will receive a fundamentally restructured Salesforce org (Person Accounts replacing Contacts, Financial Accounts replacing Portfolios, new PSG security model, new page layouts) with no training, no communication plan, and no adoption support.",
+      "evidence": [
+        "INT-001",
+        "INT-005",
+        "E-014",
+        "E-022"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "Change Management Void",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Change Management Void in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Change Management Void",
+      "what": "Change Management Void (P1C4.4, HIGH): Change management is explicitly out of scope (INT-001:F9). Business readiness is ‘Not Started’ as of Sprint 3 (INT-005:F13).",
+      "why": "The linked evidence records: SBH HQ at 10 S Wacker Dr Suite 3100, Chicago IL 60606. Offices: Denver CO, Chesterfield MO, Ardmore PA, New York NY. Total regulatory AUM as of Dec 31 2024: $21,267,060,906 ($21.267B discretionary, $4,777 non-discretionary)."
+    },
+    {
+      "body": "Budget Exhaustion Risk (MEDIUM): 905 total hours. 409 consumed (45%). Forecast (497 hrs) equals remaining (496 hrs) exactly — zero buffer. SBH-72 (Lead Conversion) and SBH-61 (OmniStudio Doc Gen) added to backlog without Change Orders. OmniStudio hours are being logged against the project without confirmed scope (D011). Any blocker resolution, integration build, or UAT extension will exceed the 905-hour envelope. (INT-005:F6, INT-005:F12)",
+      "evidence": [
+        "INT-005",
+        "E-014",
+        "E-016",
+        "E-017"
+      ],
+      "magnitude": "45%",
+      "name": "Budget Exhaustion Risk",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "Prioritize Budget Exhaustion Risk in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "Budget Exhaustion Risk",
+      "what": "Budget Exhaustion Risk (MEDIUM): 905 total hours. 409 consumed (45%). Forecast (497 hrs) equals remaining (496 hrs) exactly — zero buffer. SBH-72 (Lead Conversion) and SBH-61 (OmniStudio Doc Gen) added to backlog without Change Orders. OmniStudio hours are being logged against the project without confirmed scope (D011).",
+      "why": "The linked evidence records: SBH HQ at 10 S Wacker Dr Suite 3100, Chicago IL 60606. Offices: Denver CO, Chesterfield MO, Ardmore PA, New York NY. Total regulatory AUM as of Dec 31 2024: $21,267,060,906 ($21.267B discretionary, $4,777 non-discretionary)."
+    },
+    {
+      "body": "FA Config/Migration Sequencing (P4C1, MEDIUM): SBH-8 (Configure Financial Accounts) is blocked because Shawn Murray flagged on March 6 that the fields and Lightning Record Page cannot be finalized until the data migration approach is reviewed (INT-003:F8, DL-009). This creates a cross-workstream dependency between configuration and migration planning that must be resolved in Sprint 3.",
+      "evidence": [
+        "INT-003",
+        "INT-004",
+        "E-014",
+        "E-016"
+      ],
+      "magnitude": "1.1 pts below peer median",
+      "name": "FA Config/Migration Sequencing",
+      "peer_median": 2.5,
+      "platforms": [
+        "nCino",
+        "Tableau"
+      ],
+      "score": 1.36,
+      "so_what": "This creates a cross-workstream dependency between configuration and migration planning that must be resolved in Sprint 3.",
+      "subcap_id": "P1C1",
+      "theme": "Strategy & governance",
+      "title": "FA Config/Migration Sequencing",
+      "what": "FA Config/Migration Sequencing (P4C1, MEDIUM): SBH-8 (Configure Financial Accounts) is blocked.",
+      "why": "Shawn Murray flagged on March 6 that the fields and Lightning Record Page cannot be finalized until the data migration approach is reviewed (INT-003:F8, DL-009)."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.6,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "113 of 173 subcaps on thin evidence"
+      ],
+      "rationale": "Multi-Year Roadmap averages 1.4/5 over 173 scored subcaps; ceiling 2.0 reflects thin evidence density (60/173 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-034"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.5",
+        "182 of 222 subcaps on thin evidence"
+      ],
+      "rationale": "Compliance Governance averages 2.5/5 over 222 scored subcaps; ceiling 3.1 reflects thin evidence density (40/222 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.6,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.5",
+        "167 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Sandbox Environments averages 1.5/5 over 192 scored subcaps; ceiling 2.1 reflects thin evidence density (25/192 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.6,
+      "ceiling": 3.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 4.0",
+        "170 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Training Content Development & Delivery averages 3.3/5 over 205 scored subcaps; ceiling 3.9 reflects thin evidence density (35/205 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.5,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.5",
+        "35 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Strategy averages 2.9/5 over 70 scored subcaps; ceiling 3.7 reflects thin evidence density (35/70 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "253 of 313 subcaps on thin evidence"
+      ],
+      "rationale": "Affiliate Management averages 2.5/5 over 313 scored subcaps; ceiling 3.1 reflects thin evidence density (60/313 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 2.9,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "293 of 318 subcaps on thin evidence"
+      ],
+      "rationale": "Proactive Status Updates averages 2.4/5 over 318 scored subcaps; ceiling 2.9 reflects thin evidence density (25/318 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.5",
+        "287 of 317 subcaps on thin evidence"
+      ],
+      "rationale": "Collections & Delinquency Servicing Case Management averages 1.7/5 over 317 scored subcaps; ceiling 2.3 reflects thin evidence density (30/317 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "265 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Contextual Personalization averages 2.5/5 over 270 scored subcaps; ceiling 3.0 reflects thin evidence density (5/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-061"
+      ],
+      "modifiers": [
+        "169 of 169 subcaps on thin evidence"
+      ],
+      "rationale": "capability dimension 45 averages 3.0/5 over 169 scored subcaps; ceiling 3.5 reflects thin evidence density (0/169 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.5",
+        "153 of 153 subcaps on thin evidence"
+      ],
+      "rationale": "Loss Data Collection averages 2.0/5 over 153 scored subcaps; ceiling 2.5 reflects thin evidence density (0/153 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-067"
+      ],
+      "modifiers": [
+        "160 of 160 subcaps on thin evidence"
+      ],
+      "rationale": "Issue Management averages 3.0/5 over 160 scored subcaps; ceiling 3.5 reflects thin evidence density (0/160 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-065"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 3.0",
+        "164 of 164 subcaps on thin evidence"
+      ],
+      "rationale": "capability dimension 15 averages 2.0/5 over 164 scored subcaps; ceiling 2.5 reflects thin evidence density (0/164 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-073"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.0",
+        "201 of 206 subcaps on thin evidence"
+      ],
+      "rationale": "Data Architecture & Modeling averages 1.5/5 over 206 scored subcaps; ceiling 2.0 reflects thin evidence density (5/206 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-072"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.5",
+        "246 of 276 subcaps on thin evidence"
+      ],
+      "rationale": "BI Validation Evidence Pack Automation averages 1.6/5 over 276 scored subcaps; ceiling 2.2 reflects thin evidence density (30/276 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-077"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.5",
+        "217 of 242 subcaps on thin evidence"
+      ],
+      "rationale": "Data Incident Management averages 1.7/5 over 242 scored subcaps; ceiling 2.3 reflects thin evidence density (25/242 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 2.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-079"
+      ],
+      "modifiers": [
+        "cap applied: Evidence ceiling 2.5",
+        "125 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Security Assessment averages 1.5/5 over 150 scored subcaps; ceiling 2.1 reflects thin evidence density (25/150 full-evidence cells); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "CI Financial Corp acquired by Accelerate Holdings Corp (Mubadala Capital), closed Aug 12 2025 (Aug 2025).",
+      "evidence": [
+        "E-005"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "CI Financial Corp acquired",
+      "metric": null,
+      "peer_context": "Multi-Year Roadmap runs 1.36/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Business Alignment — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "CI Financial Corp acquired by Accelerate Holdings Corp (Mubadala Capital), closed Aug 12 2025 (Aug 2025). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2025-08-12",
+        "event": "CI Financial Corp acquired"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "leadership",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "SEC Form 497 confirms: 'The Trustees have appointed a Chief Compliance Officer who is an employee of the Adviser' — CCO is internal, not outsourced (Dec 2025).",
+      "evidence": [
+        "E-066"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "SEC Form 497 confirms",
+      "metric": null,
+      "peer_context": "Multi-Year Roadmap runs 1.36/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "SEC Form 497 confirms: 'The Trustees have appointed a Chief Compliance Officer who is an employee of the Adviser' — CCO is internal, not outsourced (Dec 2025). Window: closes ~Q4 2026.",
+      "timeline": {
+        "date": "2025-12-01",
+        "event": "SEC Form 497 confirms"
+      },
+      "window": "closes ~Q4 2026"
+    },
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Mark Brubaker CFA named 2025 Knowledge Broker by Chief Investment Officer magazine — investment CIO recognition, NOT technology CIO (Jul 2025).",
+      "evidence": [
+        "E-024"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Mark Brubaker CFA named 2025 Knowledge Broker by Chief…",
+      "metric": null,
+      "peer_context": "Multi-Year Roadmap runs 1.36/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Mark Brubaker CFA named 2025 Knowledge Broker by Chief Investment Officer magazine — investment CIO recognition, NOT technology CIO (Jul 2025).",
+      "timeline": {
+        "date": "2025-07-01",
+        "event": "Mark Brubaker CFA named 2025 Knowledge Broker by Chief…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Mubadala Capital (Abu Dhabi sovereign fund) completed take-private of CI Financial Aug 2025 at C$12.1B enterprise value. SBH is now part of a sovereign-fund-backed global wealth platform.",
+      "evidence": [
+        "E-078"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Mubadala Capital (Abu Dhabi sovereign fund) completed…",
+      "metric": "C $12.1B",
+      "peer_context": "Multi-Year Roadmap runs 1.36/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Business Alignment — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Mubadala Capital (Abu Dhabi sovereign fund) completed take-private of CI Financial Aug 2025 at C$12.1B enterprise value. SBH is now part of a sovereign-fund-backed global wealth platform.",
+      "timeline": {
+        "date": "2025-08-01",
+        "event": "Mubadala Capital (Abu Dhabi sovereign fund) completed…"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Multi-Year Roadmap scores 1.36/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-014",
+        "E-016",
+        "E-017",
+        "E-018"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Multi-Year Roadmap scores 1.36/5",
+      "metric": "Multi-Year Roadmap 1.36/5 vs peer 2.50",
+      "peer_context": "Multi-Year Roadmap runs 1.36/5 vs a 2.50 median at comparable institutions.",
+      "play": "Prioritize the Tableau conversation against Business Alignment — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C1",
+      "text": "Multi-Year Roadmap scores 1.36/5 vs a typical 2.50 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

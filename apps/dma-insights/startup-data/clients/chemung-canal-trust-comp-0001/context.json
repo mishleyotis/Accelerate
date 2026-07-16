@@ -1,0 +1,778 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Chemung Canal Trust Company",
+      "amount": null,
+      "announced_on": null,
+      "body": "Capital Bank acquired 2011 (Albany region); Canal Bank launched 2024 (Buffalo/WNY region)",
+      "closed_on": null,
+      "details": "Capital Bank acquired 2011 (Albany region); Canal Bank launched 2024 (Buffalo/WNY region)",
+      "e_id": "E-002",
+      "event_date": "2011-07-01",
+      "id": "abec2b9e-0bf4-41e3-9228-6936701d86ce",
+      "source_url": "https://www.chemungcanal.com/about/our-history",
+      "status": null,
+      "target": "Capital Bank",
+      "title": "Capital Bank acquired"
+    }
+  ],
+  "entity_display_id": "chemung-canal-trust-comp-0001",
+  "financials": {
+    "lines": [
+      "Five-year trajectory sourced from SEC 10-K filings and FFIEC Call Reports [E-001, E-004, E-005, E-006, E-032]. Trend: STABLE with ACCELERATING commercial lending. Asset CAGR 2020\u20132024: 7.9%. Loan CAGR 2020\u20132024: 6.2%.",
+      "Key Financial Observations (2024):",
+      "Total loans +5.0% YoY ($1.973B \u2192 $2.071B) \u2014 commercial loan growth the primary driver (Capital Bank C&I milestone $1.1B, Canal Bank launch) [E-001]",
+      "Net interest margin compressed 9bps (2.85% \u2192 2.76%) \u2014 reflects industry-wide rate environment pressure on liability-sensitive community banks [E-001, E-004]",
+      "Efficiency ratio deteriorated 269bps (66.20% \u2192 68.89%) \u2014 data processing cost +$253K (new contracts, cybersecurity), partially offset by outsourcing savings [E-001]",
+      "WMG AUA $2.212B (record) \u2014 WMG fee income $11.6M (+10.6% YoY) \u2014 fee income growth offsetting NIM compression [E-001, E-040]",
+      "5-Year Asset CAGR 2020\u20132024: 7.9% | 5-Year Loan CAGR: 6.2% | Trend: STABLE-GROWING [E-001, E-004, E-005, E-006]",
+      "5-year growth with CAGR calculated. Trend classification: STABLE-GROWING with ACCELERATING commercial lending trajectory. All data sourced from SEC 10-K filings and FFIEC Call Reports [E-001, E-004, E-005, E-006, E-032].",
+      "Key Trend Analysis:",
+      "ASSET GROWTH (7.9% CAGR): Driven by Fort Orange Financial integration (Capital Bank), consistent commercial loan expansion, and now Canal Bank de novo launch. Well above US community bank median CAGR (~4%) for $2-4B peers. [E-001]",
+      "LOAN GROWTH ACCELERATION (2022-2024): $1.518B \u2192 $2.071B = +36% in 3 years. Capital Bank C&I milestone $1.1B; Canal Bank Year 1 growth exceeded expectations. Commercial pipeline remains strong. [E-001, E-022]",
+      "NIM COMPRESSION SIGNAL: NIM declined from 3.12% (2020) to 2.76% (2024) = 36bps over 5 years. Liability-sensitive balance sheet exposed to rate environment. ALCO actively managing IRR. [E-001, E-103]",
+      "EFFICIENCY RATIO PRESSURE: Rose to 68.89% (2024) from 66.20% (2023) \u2014 269bps deterioration. Data processing expense +$253K YoY due to new contracts and cybersecurity spend. Fiserv renewal + outsourcing = management response. [E-001]",
+      "WMG ACCELERATION: $2.212B AUA (record) vs ~$1.8B in 2020 = +23% in 5 years. Fee income $11.6M (+10.6% YoY). Fee income growth is the strategic offset to NIM compression \u2014 Zennify FSC multiplier opportunity. [E-001, E-040]"
+    ],
+    "metrics": {
+      "asset_cagr_2020": "2024: 7.9%. Loan CAGR 2020\u20132024: 6.2%.",
+      "series_basis": "evidence_mined",
+      "series_metric": "total_assets",
+      "trajectory": {
+        "branches": 30,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 310,
+        "events": [
+          {
+            "fy": "FY2024",
+            "label": "Canal Bank division launched Western NY expansion"
+          },
+          {
+            "fy": "FY2023",
+            "label": "2023 10-K: '$0.1 million additional restitution regarding\u2026"
+          },
+          {
+            "fy": "FY2022",
+            "label": "Digital wallet/NFC payments confirmed"
+          },
+          {
+            "fy": "FY2021",
+            "label": "De novo Canal Bank expansion (Erie County / Western NY)"
+          }
+        ],
+        "fy": [
+          "FY2019",
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": null,
+        "headline": "$6.1B assets \u00b7 FY2024 \u00b7 +28.0% CAGR",
+        "regulator": "SEC",
+        "series": {
+          "net_income_m": [
+            776000.0,
+            null,
+            null,
+            518000.0,
+            null,
+            15.1,
+            7.7
+          ],
+          "total_assets": [
+            null,
+            2.28,
+            2.42,
+            2.65,
+            2.71,
+            6.12,
+            null
+          ]
+        },
+        "unit": "B"
+      }
+    },
+    "series": {
+      "value": [
+        2279451000.0,
+        2418475000.0,
+        2645553000.0,
+        2710529000.0,
+        6120000000.0
+      ]
+    },
+    "series_labeled": [
+      {
+        "fy": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "metric": "value",
+        "unit": "usd",
+        "values": [
+          2279451000.0,
+          2418475000.0,
+          2645553000.0,
+          2710529000.0,
+          6120000000.0
+        ]
+      }
+    ],
+    "years": [
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "United States (national)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Anders M. Tomson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President & Chief Executive Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "L. Dale Cole",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dale M. McKim III",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Chief Financial Officer & Treasurer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mary E. Meisner",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Thomas W. Wirth",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Wealth Management Group"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Vincent Cutrona",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President, Canal Bank"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Daniel Fariello",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "President, Capital Bank"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Christopher Conklin",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Information Security Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Darick Harriger",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Vice President, IT Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jebb Dennis",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Enterprise Project Management"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kimberly Hazelton",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP, Senior Banking Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jeffrey Kenefick",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Regional President"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "SEC-registered",
+    "narrative_md": "Comprehensive organizational context grounded in public filings, regulatory documents, and third-party analysis. All financial data sourced from SEC filings and FFIEC Call Reports. Evidence IDs cited per claim.",
+    "primary_regulator": "SEC",
+    "regulatory_standing": {
+      "as_of": "2023-09-01",
+      "e_id": "E-041",
+      "label": "Clean regulatory standing",
+      "note": "FAIR LENDING REVIEW: 'Chemung was in compliance with the substantive provisions of the anti-discrimination laws and regulations. No evidence of discriminatory or other illegal credit practices inconsistent with helping\u2026"
+    },
+    "size_tier": "community",
+    "thought_leadership": null,
+    "ticker": "NASDAQ: CHMG"
+  },
+  "issue_register": [
+    {
+      "id": "4e325c15-3245-4c75-be57-b7bd8944c721",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "1 rationales lack evidence ID citations",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "1 rationales lack evidence ID citations"
+    },
+    {
+      "id": "5f572144-e915-4968-a42d-802cbaf7cc1f",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "35 rationale text duplicates found",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "35 rationale text duplicates found"
+    },
+    {
+      "id": "896e3913-06cd-4868-be2c-1c6173432f88",
+      "issue_id": "GOV-003",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "20 evidence items in index but never cited",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "20 evidence items in index but never cited"
+    },
+    {
+      "id": "82920470-10ea-4063-99ba-133fbaec5202",
+      "issue_id": "GOV-004",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "1186 rationale pairs in P1 share >80% text",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "1186 rationale pairs in P1 share >80% text"
+    },
+    {
+      "id": "97b1d8e4-f685-4b4c-8e99-d19ba7b38c8e",
+      "issue_id": "GOV-005",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "1598 rationale pairs in P2 share >80% text",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "1598 rationale pairs in P2 share >80% text"
+    },
+    {
+      "id": "04fb2c19-93a1-486d-b525-818a9a371b69",
+      "issue_id": "GOV-006",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "675 rationale pairs in P3 share >80% text",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "675 rationale pairs in P3 share >80% text"
+    },
+    {
+      "id": "0c8276b6-5338-47d5-9a12-e62d3fce5661",
+      "issue_id": "GOV-007",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "958 rationale pairs in P4 share >80% text",
+      "resolved_on": null,
+      "severity": "high",
+      "status": "OPEN",
+      "title": "958 rationale pairs in P4 share >80% text"
+    },
+    {
+      "id": "582d91a1-4ae2-4142-887e-ddfee063b900",
+      "issue_id": "GOV-008",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "6 evidence items cited by >15% of all subcaps",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "6 evidence items cited by >15% of all subcaps"
+    },
+    {
+      "id": "df9b1681-95c8-47fe-875f-d63d36bdde6c",
+      "issue_id": "GOV-009",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "PV-01: Export CSV missing Rationale column. Workbook confirmed 698/698 subcaps have Evidence_IDs + Rationale. Export format gap only.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "PV-01: Export CSV missing Rationale column. Workbook confirmed 698/698 subcaps have Evidence_IDs + Rationale. Export format gap only."
+    },
+    {
+      "id": "4633b3d9-2350-4fde-9b5a-8b806c053854",
+      "issue_id": "GOV-010",
+      "linked_subcap_ids": [],
+      "opened_on": "2026-04-29",
+      "rationale": "RC-15: Automated paragraph scan found 0 peer refs in exec summary paragraphs. Full text scan (incl. table cells) confirms 16 peer references in exec area. False negative from paragraph-only scan.",
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "RC-15: Automated paragraph scan found 0 peer refs in exec summary paragraphs. Full text scan (incl. table cells) confirms 16 peer references in exec area. False negative from paragraph-only scan."
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "(Drawn from Zennify DMA Client Profile Research Report, DMA-RES-CCTRUST-20260429-0001, Section 5.1 \u2014 enriched with assessment scoring impacts.)",
+    "trend_md": "(Drawn from Zennify DMA Client Profile Research Report, DMA-RES-CCTRUST-20260429-0001, Section 3 \u2014 enriched with assessment-layer annotations.)"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.0,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.5,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 2.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.0,
+        "P4C2": 2.5,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.56,
+      "peer_name": "Financial Institutions Inc / Five Star Bank",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.5,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.5,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.5,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 1.5,
+        "P4C2": 2.0,
+        "P4C3": 2.5,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.26,
+      "peer_name": "Arrow Financial Corporation",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.18,
+      "peer_name": "Canandaigua National Bank & Trust",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.0,
+        "P1C2": 2.5,
+        "P1C3": 1.5,
+        "P1C4": 2.0,
+        "P1C5": 2.0,
+        "P2C1": 2.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 1.5,
+        "P3C1": 2.0,
+        "P3C2": 2.5,
+        "P3C3": 3.0,
+        "P3C4": 2.5,
+        "P4C1": 1.5,
+        "P4C2": 1.5,
+        "P4C3": 2.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.12,
+      "peer_name": "Evans Bancorp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-CCTRUST-20260429-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "Kraus (Northwest/KeyBank/M&T), Vincent Cutrona (M&T/Evans) Indeed overall rating: 3.9/5 (Culture 3.5, Job Security 3.6, Management 3.4, Work-Life Balance 3.9, Compensation 3.9) CEO approval rate: 70.22% \u2014 moderate executive leadership satis",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": 3.9
+      },
+      {
+        "drilldown": "controls, account alerts, bill pay, branch locator iOS App Store rating: 4.8 out of 5 (2,300 ratings) App last updated January 22, 2025 (Version 24.2.60) - active maintenance Investment Services team: Shelby M",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 2300,
+        "polarity": "neutral",
+        "source": "App Store",
+        "themes": [],
+        "value": 4.8
+      },
+      {
+        "drilldown": "Committee oversees privacy policy - annual review process Google Play rating: 4.5 out of 5 (1,090 reviews) as of late 2024 App features: mobile deposit, Zelle, card controls, account alerts, bill pay, branch locator iOS App Store rating: 4.",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": 1090,
+        "polarity": "neutral",
+        "source": "Google Play",
+        "themes": [],
+        "value": 4.5
+      },
+      {
+        "drilldown": "allet/NFC payments confirmed; Google/Apple No CCTC-specific CFPB complaints found in proxy search \u2014 consistent with clean 2023 CRA exam finding of 'no evidence of discriminatory or other illegal credit practices' CRA public files include 'C",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "CFPB complaints",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "Henry, Q2 \u2014 core vendors engage community banks on fintech Yelp: 2.5/5 (14 reviews, 2021 era) \u2014 customer frustration specifically with online banking quality ('poorly designed, confusing, least functional') \u2014 confirms GoBanking 2024 upgrade",
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": 14,
+        "polarity": "positive",
+        "source": "Yelp",
+        "themes": [],
+        "value": 2.5
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "6 branch consolidations completed including Ithaca Station (Nov 15, 2024); Canal Bank loans $180.7M at June 30, 2025",
+      "date_precision": "day",
+      "e_id": "E-022",
+      "event_date": "2024-11-15",
+      "evidence_e_ids": [
+        "E-022"
+      ],
+      "id": "63ce7751-a385-4837-a17d-d48ccbb2e56c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://s206.q4cdn.com/787238829/files/doc_presentations/2025/07/1/CFC-Deck-06-30-2025-V6.pdf",
+      "subcap_ids": [],
+      "title": "6 branch consolidations completed including Ithaca Station\u2026"
+    },
+    {
+      "body": "Canal Bank division launched 2024 in Erie County (Williamsville NY) - Western NY expansion",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "01c8d472-b62f-43bd-8f93-029abe35add3",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://s206.q4cdn.com/787238829/files/doc_events/2025/06/1/2024-Annual-Report-and-10K.pdf",
+      "subcap_ids": [],
+      "title": "Canal Bank division launched Western NY expansion"
+    },
+    {
+      "body": "Capital Bank acquired 2011 (Albany region); Canal Bank launched 2024 (Buffalo/WNY region)",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "dbc73e65-a723-48f2-8bb3-9ad0317137be",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://www.chemungcanal.com/about/our-history",
+      "subcap_ids": [],
+      "title": "Canal Bank launched 2024 (Buffalo/WNY region"
+    },
+    {
+      "body": "Named Executive Officers 2024: Anders M. Tomson (CEO), Dale M. McKim III (CFO), Loren D. Cole (EVP & CIO), Peter K. Cosgrove (EVP, CCO & CRO), Daniel D. Fariello (President, Capital Bank)",
+      "date_precision": "year",
+      "e_id": "E-021",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "c9bd8006-56f4-48bb-8ed3-f9026c609d5e",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/763563/000076356325000066/chmg-20250422.htm",
+      "subcap_ids": [],
+      "title": "Named Executive Officers 2024"
+    },
+    {
+      "body": "Dale M. McKim III appointed EVP/CFO/Treasurer July 1, 2023 - 25+ years finance/risk; formerly CRO Evans Bank; Partner KPMG Buffalo",
+      "date_precision": "day",
+      "e_id": "E-016",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-016"
+      ],
+      "id": "b42f69b2-4370-42e3-9186-b3caff7d83f2",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://quantisnow.com/insight/chemung-canal-trust-company-appoints-new-executive-vice-president-chief-financial-officer-treasurer-4594505",
+      "subcap_ids": [],
+      "title": "Dale M. McKim III appointed EVP/CFO/Treasurer"
+    },
+    {
+      "body": "2023 10-K: '$0.1 million additional restitution regarding previously disclosed consumer compliance matters' \u2014 consent order restitution completed, no new enforcement",
+      "date_precision": "year",
+      "e_id": "E-092",
+      "event_date": "2023-07-01",
+      "evidence_e_ids": [
+        "E-092"
+      ],
+      "id": "f4743cfc-d770-4422-86ce-7b11df4dab0e",
+      "kind": "regulatory",
+      "signal": "neutral",
+      "source_url": "https://www.consumerfinance.gov/data-research/consumer-complaints/",
+      "subcap_ids": [],
+      "title": "2023 10-K: '$0.1 million additional restitution regarding\u2026"
+    },
+    {
+      "body": "Tap-to-Pay debit cards (contactless) launched 2022 \u2014 digital wallet/NFC payments confirmed; Google/Apple Pay integration implied",
+      "date_precision": "year",
+      "e_id": "E-091",
+      "event_date": "2022-07-01",
+      "evidence_e_ids": [
+        "E-091"
+      ],
+      "id": "ff4e4c02-abbf-4183-87cf-93e9349df8a9",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://play.google.com/store/apps/details?id=com.chemungcanaltrustcompany.mobile&hl=en_GB",
+      "subcap_ids": [],
+      "title": "Digital wallet/NFC payments confirmed"
+    },
+    {
+      "body": "AI and RPA explicitly named as 2021 innovation initiatives (pre-dating widespread industry adoption) \u2014 innovation leadership in AI relative to peer group",
+      "date_precision": "year",
+      "e_id": "E-055",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-055"
+      ],
+      "id": "c0550e90-dd8f-4294-9bb4-9dd351ab7d18",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/763563/000117184321003149/exh_991.htm",
+      "subcap_ids": [],
+      "title": "AI and RPA named as 2021 innovation initiatives (pre-dating\u2026"
+    },
+    {
+      "body": "Issue appears RESOLVED (2021 consent, remediation completed) - no subsequent enforcement found",
+      "date_precision": "year",
+      "e_id": "E-010",
+      "event_date": "2021-07-01",
+      "evidence_e_ids": [
+        "E-010"
+      ],
+      "id": "d21d2225-2cf2-4e91-b6a5-238921076263",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/763563/000117184321004599/f8k_062921.htm",
+      "subcap_ids": [],
+      "title": "Issue appears Resolved (2021 consent, remediation completed)"
+    },
+    {
+      "body": "Canal Bank launched 2024 in Williamsville (Erie County). Regional President Vincent Cutrona (prev Evans Bancorp + M&T Bank) recruited. Year 1 C&I and deposit growth exceeded expectations. No existing legacy system \u2014 GREENFIELD TECHNOLOGY OPPORTUNITY. [E-001, E-022]",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-001",
+        "E-022"
+      ],
+      "id": "f0a6e661-25b2-4a4a-8be4-779dedb27ab5",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "De novo Canal Bank expansion (Erie County / Western NY)"
+    },
+    {
+      "body": "L. Dale Cole, age 52, EVP and CIO at Chemung Canal Trust \u2014 joined 2017 as SVP CIO; promoted to EVP CIO 2018; prev Senior VP Bank of Oklahoma, Executive VP SpiritBank Corp",
+      "date_precision": "year",
+      "e_id": "E-034",
+      "event_date": "2018-07-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "026e0db0-5838-4980-a29b-a2abec8f4b3c",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://fintool.com/app/research/companies/CHMG/people/loren-d-cole",
+      "subcap_ids": [],
+      "title": "Promoted to EVP CIO 2018"
+    },
+    {
+      "body": "L. Dale Cole, age 52, EVP and CIO at Chemung Canal Trust \u2014 joined 2017 as SVP CIO; promoted to EVP CIO 2018; prev Senior VP Bank of Oklahoma, Executive VP SpiritBank Corp",
+      "date_precision": "year",
+      "e_id": "E-034",
+      "event_date": "2017-07-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "57b85ddf-a1f8-4ce1-88d5-843dd6e7eb0d",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://fintool.com/app/research/companies/CHMG/people/loren-d-cole",
+      "subcap_ids": [],
+      "title": "Dale Cole, age 52, EVP and CIO at Chemung Canal Trust\u2026"
+    },
+    {
+      "body": "Board refreshment: 3 new directors elected 2020-2022; more than half of 13 directors joined since 2016 \u2014 active board renewal process",
+      "date_precision": "year",
+      "e_id": "E-067",
+      "event_date": "2016-07-01",
+      "evidence_e_ids": [
+        "E-067"
+      ],
+      "id": "6133cefd-6126-4985-ac27-9ea8acd10170",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/763563/000076356325000066/chmg-20250422.htm",
+      "subcap_ids": [],
+      "title": "More than half of 13 directors joined since 2016"
+    },
+    {
+      "body": "Capital Bank acquired 2011 (Albany region); Canal Bank launched 2024 (Buffalo/WNY region)",
+      "date_precision": "year",
+      "e_id": "E-002",
+      "event_date": "2011-07-01",
+      "evidence_e_ids": [
+        "E-002"
+      ],
+      "id": "abec2b9e-0bf4-41e3-9228-6936701d86ce",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://www.chemungcanal.com/about/our-history",
+      "subcap_ids": [],
+      "title": "Capital Bank acquired"
+    },
+    {
+      "body": "Capital Bank brand created. Albany market entry ($1.1B C&I milestone 2024). Multi-brand technology complexity introduced. Fiserv platform integration required. Goodwill still on balance sheet = acquisition invested and committed. [E-001, E-003]",
+      "date_precision": "year",
+      "e_id": "E-001",
+      "event_date": "2011-01-01",
+      "evidence_e_ids": [
+        "E-001",
+        "E-003"
+      ],
+      "id": "42d89ad8-31c2-493a-b84e-306cf7b728a7",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Fort Orange Financial Corp (Albany, NY) \u2014 Genesis of Capital Bank division"
+    },
+    {
+      "body": "Extended CCTC into Bradford County PA. Added PA regulatory layer. Technology systems migrated to Fiserv platform. Established cross-state operational model. [E-003]",
+      "date_precision": "year",
+      "e_id": "E-003",
+      "event_date": "2009-01-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "e3ee938f-5c22-41cc-ab45-58558dc8197a",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Canton Bancorp (Canton, PA)"
+    }
+  ]
+}

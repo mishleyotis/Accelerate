@@ -1,0 +1,452 @@
+{
+  "entity_display_id": "alma-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P3C3",
+        "P4C3.6.1",
+        "P2C4.1.2",
+        "P1C4.1.6",
+        "P1C1.4.IB1",
+        "P2C3.4.RIA1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-004",
+        "E-016",
+        "E-028"
+      ],
+      "ic_id": "INS-REC-02",
+      "id": "ec148941-e64f-4154-a006-2f031d418df8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-004",
+            "E-016",
+            "E-028"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P3C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no nCino platform detected in the stack",
+          "target_id": "ncino"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-006",
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-091",
+            "E-099"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-006",
+        "E-101",
+        "E-027",
+        "E-002",
+        "E-063",
+        "E-069",
+        "E-099",
+        "E-059"
+      ],
+      "linked_subcap_id": "P3C3",
+      "platforms": [
+        "databricks",
+        "ncino",
+        "salesforce",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Compliance Governance a near-term focus for Alma Bank: a scoped investment here would lift it from 2.0 toward the 3.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-006].",
+      "source_rec_id": "REC-02",
+      "theme": "Compliance & Surveillance",
+      "title": "Salesforce FSC Reactivation + Alma Wealth Management Advisor Platform",
+      "what_text": "Salesforce FSC LOS + Portfolio Management deployed 2017-2024, lapsed Oct 2024 at CIO Bessas departure. September 2025 Cetera AWM partnership launched without a CRM-linked advisor platform — Richard Koll (SVP AWM) cannot scale wealth management without household model, referral tracking, relationship plans, and financial account hierarchy. Commercial CRE book ($768.7M CRE + $233.6M multifamily = $1.002B, ) processed through legacy manual origination. 98.4% Loan-to-Deposit ratio vs 77.2% peer average demonstrates maximum lending velocity — CLO Hugh Donlon needs FSC LOS to manage this without Bessas. FSC Reactivation in 3 phases: (1) AWM Advisor Desktop — FSC Wealth Management for Richard Koll's team: household model, financial account hierarchy, advisor planning, referral tracking, Cetera integration. In Zennify's assessment Compliance Governance scores 2.0 out of 5, versus a typical 3.0 at comparable institutions [E-091].",
+      "why_text": "The assessment found: “NY State-chartered full-service commercial bank HQ Astoria Queens; operates 10 NY + 3 NJ banking offices; founded 2007” [E-002]. At 2.0 out of 5, Compliance Governance sits 1.0 points below the 3.0 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3",
+        "P4C3.6.1",
+        "P2C4.1.2",
+        "P3C3.1.2",
+        "P4C3.3.1",
+        "P4C3.8.CIB2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-008",
+        "E-013",
+        "E-035",
+        "E-099"
+      ],
+      "ic_id": "INS-REC-03",
+      "id": "9ebcf91b-ed03-478f-aa89-dbc957bcc623",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-008",
+            "E-013",
+            "E-035",
+            "E-099"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-002",
+            "E-006",
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        },
+        {
+          "e_ids": [
+            "E-103"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-091",
+        "E-072",
+        "E-077",
+        "E-002",
+        "E-103",
+        "E-012",
+        "E-006",
+        "E-007"
+      ],
+      "linked_subcap_id": "P4C3",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: MuleSoft Anypoint Platform — API Gateway + FedNow Integration + FIS CodeConnect Replacement — addressable via salesforce [E-072].",
+      "source_rec_id": "REC-03",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Anypoint Platform — API Gateway + FedNow Integration + FIS CodeConnect Replacement",
+      "what_text": "FIS CodeConnect is a point-to-point integration between FIS IBS and Salesforce — it is NOT an API gateway. It cannot support multi-system connectivity (FIS → Salesforce → AML → HubSpot → Data Cloud). No FedNow or RTP instant payments. 68% of community bank peers currently offer or plan FedNow in 2025 (CSBS survey, ). Alma Bank's 98.4% LDR means commercial CRE clients are the primary deposit base — losing treasury relationships to FedNow-enabled competitors is an existential deposit risk. MuleSoft Anypoint deployed as the central integration hub: (1) FIS IBS API connector (replacing CodeConnect for FSC data sync), (2) FedNow API integration for commercial clients (real-time treasury payments), (3) AML system → Salesforce Data Cloud connector, (4) HubSpot → Data Cloud migration connector. In Zennify's assessment Enterprise Architecture Strategy scores 1.0 out of 5, versus a typical 2.5 at comparable institutions [E-091].",
+      "why_text": "The assessment found: “NY State-chartered full-service commercial bank HQ Astoria Queens; operates 10 NY + 3 NJ banking offices; founded 2007” [E-002]. At 1.0 out of 5, Enterprise Architecture Strategy sits 1.5 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C4",
+        "P4C2.1.2",
+        "P4C3.6.1",
+        "P2C4.1.2",
+        "P3C1.1.2",
+        "P3C3.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "368c4ddc-62e5-4036-b518-11eba438ba64",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-091",
+            "E-099"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-091"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-004",
+        "E-016",
+        "E-028",
+        "E-080",
+        "E-085",
+        "E-029",
+        "E-105",
+        "E-091",
+        "E-099"
+      ],
+      "linked_subcap_id": "P4C4",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: Salesforce Shield + Agentforce — BSA Compliance Automation & NYCRR 500 Evidence Platform — addressable via salesforce [E-028].",
+      "source_rec_id": "REC-04",
+      "theme": "Cybersecurity & Privacy",
+      "title": "Salesforce Shield + Agentforce — BSA Compliance Automation & NYCRR 500 Evidence Platform",
+      "what_text": "Two BSA enforcement cycles (2015 DFS Consent Order; 2019 FDIC $1.25M CMP ) create a Board-level mandate to prevent a third. NYCRR 500 Second Amendment final phase (Nov 1, 2025) requires CEO + CISO dual-signature annual certification with documented evidence of controls. Salesforce Shield's field audit trail, event monitoring, and platform encryption directly produce NYCRR 500-compliant evidence for Salesforce data. BSA case management currently relies on manually built dashboards from the Bessas era — these are now lapsed. SAR triage and CTR filing are manual workflows. SHIELD: Field Audit Trail (records every Salesforce field change for compliance forensics), Event Monitoring (logs all user sessions, API calls for NYCRR 500 evidence), Platform Encryption (encrypts PII at rest in Salesforce — NYCRR 500 data protection requirement). In Zennify's assessment Security Strategy & Governance scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-004].",
+      "why_text": "The assessment found: “FDIC imposed $1.25 million civil money penalty on Alma Bank (April 4, 2019) for BSA violations from February 2013 through April 2017 — second major BSA enforcement action” [E-016]. At 2.5 out of 5, Security Strategy & Governance shows a developing capability still short of the peer standard. Because it feeds the data and technology foundation the rest of the business is built on, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1",
+        "P4C1.1.2",
+        "P4C2.1.2",
+        "P4C3.6.1",
+        "P2C4.1.2",
+        "P3C3.1.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "e63651ef-2daf-4a80-8bd8-39860afd1e24",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-059"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-034",
+            "E-066",
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-07"
+        }
+      ],
+      "linked_e_ids": [
+        "E-066",
+        "E-093",
+        "E-092",
+        "E-034",
+        "E-013",
+        "E-059",
+        "E-098"
+      ],
+      "linked_subcap_id": "P4C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Data Strategy & Vision a near-term focus for Alma Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-093].",
+      "source_rec_id": "REC-05",
+      "theme": "Data Management & Governance",
+      "title": "Salesforce Data Cloud — Customer 360 & Data Silo Unification",
+      "what_text": "Four confirmed data silos at Alma Bank: (1) FIS IBS core banking (transaction history, account balances), (2) HubSpot CRM (marketing, contacts), (3) AML system (risk profiles, SAR history), (4) lapsed Salesforce LOS (loan data). No unified customer object anywhere. Basil Ahmad's Python/Tableau stack is manually reconciling these silos for BSA purposes — an analyst-level solution for an enterprise-scale problem. AWM clients need wealth-level household views (assets, liabilities, referrals) that are impossible without Customer 360. CRE relationship managers cannot see a client's full banking relationship in one system. Data Cloud deployed as the Customer 360 layer unifying FIS IBS + HubSpot + AML system + Salesforce FSC. Ingestion connectors: (1) FIS IBS via MuleSoft (R3), (2) HubSpot native connector, (3) AML system via MuleSoft, (4) FSC natively. In Zennify's assessment Data Strategy & Vision scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-066].",
+      "why_text": "The assessment found: “Sr. BSA Data Analyst at Alma Bank (Jul 2025-present) — Stack: Python, Tableau, Copilot — confirms three active analytics/AI tools at Alma Bank as of mid-2025” [E-092]. At 1.0 out of 5, Data Strategy & Vision sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C4",
+        "P4C2.1.2",
+        "P4C4.3.2",
+        "P2C4.1.2",
+        "P3C3.1.2",
+        "P3C3.2.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-07",
+      "id": "e9e8b43f-c4c9-4902-ac7d-f15cf6a292e9",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-027",
+            "E-101"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-103"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-034",
+            "E-066",
+            "E-092"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-05"
+        }
+      ],
+      "linked_e_ids": [
+        "E-092",
+        "E-034",
+        "E-094",
+        "E-073",
+        "E-101",
+        "E-066",
+        "E-027",
+        "E-103"
+      ],
+      "linked_subcap_id": "P2C4",
+      "platforms": [
+        "tableau",
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Recommended move: CRM Analytics / Einstein — Enterprise BSA Analytics + Customer Intelligence Extension — addressable via salesforce [E-094].",
+      "source_rec_id": "REC-07",
+      "theme": "CX & Personalization",
+      "title": "CRM Analytics / Einstein — Enterprise BSA Analytics + Customer Intelligence Extension",
+      "what_text": "Basil Ahmad (Sr. BSA Data Analyst, Jul 2025) has Python + Tableau + Microsoft Copilot + ML coursework (Neural Networks cert, ). His stack operates at analyst scale, not enterprise scale — manually joining FIS exports, building Tableau dashboards for BSA risk officers, and using Copilot for ad-hoc analysis. No AI analytics platform exists for customer-facing use cases: no next-best-product engine, no deposit attrition prediction, no CRE portfolio risk scoring. DarkTrace AI is the only deployed AI — it is defensive (cybersecurity), not customer-facing. Einstein Analytics on Salesforce data via Data Cloud (R5): (1) BSA Analytics Dashboard — replace Ahmad's manual Tableau dashboards with Einstein-powered real-time BSA analytics on unified FIS + AML data. In Zennify's assessment Customer Intelligence Foundation scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-034].",
+      "why_text": "The assessment found: “Sr. BSA Data Analyst at Alma Bank (Jul 2025-present) — Stack: Python, Tableau, Copilot — confirms three active analytics/AI tools at Alma Bank as of mid-2025” [E-092]. At 1.0 out of 5, Customer Intelligence Foundation sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "",
+        "heading": "P1 Capability Scorecard",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "",
+        "heading": "P2 Capability Scorecard",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "",
+        "heading": "P3 Capability Scorecard",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "",
+        "heading": "P4 Capability Scorecard",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "All 7 recommendations confirmed absent from Alma Bank tech stack. Each maps to a named Zennify solution from the 12-solution catalog. No investment amounts per R6."
+  },
+  "run_request_id": "DMA-ASM-ALMA-20260519-0001"
+}

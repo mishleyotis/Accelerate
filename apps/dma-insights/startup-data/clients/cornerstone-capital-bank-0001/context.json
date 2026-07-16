@@ -1,0 +1,710 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "cornerstone-capital-bank-0001",
+  "financials": {
+    "lines": [
+      "Asset trajectory: ACCELERATING (26% CAGR since formation via organic growth + M&A). Four data points available 2022\u20132026.",
+      "Asset CAGR: ~26% (formation to Mar 2026 via M&A). Mortgage volume VARIABLE (market-cycle dependent). [E-007, E-074]"
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": 400,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 6500,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Peoples Bancorp / Peoples Bank (Lubbock, TX"
+          },
+          {
+            "fy": "FY2022",
+            "label": "The Roscoe State Bank (Roscoe, TX; est. 1906)"
+          }
+        ],
+        "fy": [
+          "FY2022",
+          "FY2025",
+          "FY2026"
+        ],
+        "geography": "Houston TX (HQ) + National (45 states + DC) + Texas community banking (17 branch",
+        "headline": "$1.5B net income \u00b7 FY2026",
+        "regulator": "Federal Reserve",
+        "series": {
+          "net_income_m": [
+            3400.0,
+            2200.0,
+            1500.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Houston TX (HQ) + National (45 states + DC) + Texas community banking (17 branch"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Scott Almy",
+        "recent_hire": false,
+        "tenure_months": 240,
+        "title": "President & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Tom Clark",
+        "recent_hire": false,
+        "tenure_months": 36,
+        "title": "EVP & Chief Information Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jason Bartels",
+        "recent_hire": false,
+        "tenure_months": 72,
+        "title": "SVP Information Technology"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Paul Woo",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Adam Laird",
+        "recent_hire": false,
+        "tenure_months": 432,
+        "title": "Vice Chairman / CEO Mortgage Bank"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Marc Laird",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chairman"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mary Clouthier",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP & Chief Risk Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kelly Zitlow",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Sales & Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Heather Woods",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director Marketing Operations"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Dan Cooper",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP Capital Markets & Servicing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Neil Merritt",
+        "recent_hire": false,
+        "tenure_months": 24,
+        "title": "SVP Product Strategy & Development"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Vanessa Bustos Sanchez",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Treasury Client Onboarding"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Toby Gallegos",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Servicing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jennifer Creger",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director FaRB"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rocky Flores",
+        "recent_hire": false,
+        "tenure_months": 288,
+        "title": "Director Business App Development"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Brennan Cropper",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tony Taveekanjana",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "VP Growth & Market Expansion"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lonnie Jenkins",
+        "recent_hire": false,
+        "tenure_months": 12,
+        "title": "VP Builder Division"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "State Savings Bank",
+    "narrative_md": "Comprehensive organizational context. Every claim cites evidence IDs. Financial data covers formation through March 2026.\n\nCornerstone Capital Bank, SSB (CCB) is the operating subsidiary of Cornerstone Capital Bancorp, Inc. \u2014 a privately held, family-owned Texas corporation. CCB was chartered as a Texas State Savings Bank (SSB) on October 3, 2022, upon regulatory approval by the Federal Reserve Board and the Texas Department of Savings and Mortgage Lending for the merger of Cornerstone Home Lending, Inc. (founded 1988 by Marc and Adam Laird) and The Roscoe State Bank (founded 1906). At formation, CCB was recognized as the highest-capitalized new bank in Texas history, with equity exceeding $200 million on day one \u2014 a testament to the combined financial strength of its predecessor organizations.\n\nIn March 2026, CCB completed the acquisition of Peoples Bank (Lubbock, TX, ~$1.5B assets), its second major bank acquisition since formation. This brought total assets to $3.80B, deposits to $2.57B, and equity to $431.5M \u2014 strengthening CCB's Texas banking franchise across the Houston-Lubbock corridor while adding commercial and agricultural banking capabilities to complement CCB's dominant mortgage origination engine. [E-004, E-008]",
+    "primary_regulator": "Federal Reserve",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-074",
+        "excerpt": "ASSET CORRECTION: CCB press release (March 2, 2026) states \"more than $3.4 billion in assets\" post-Peoples. Earlier sources cited $3.80B \u2014 likely reflects later FDIC data or system differences. Authoritative figure from ",
+        "title": "CCB press release (March 2, 2026) states more than $3.4 billion in\u2026",
+        "type": "article",
+        "url": "https://www.cornerstonecapital.com/cornerstone-capital-bank-completes-another-milestone-acquisition-combining-with-peoples-bank/"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-041",
+        "excerpt": "Cornerstone Home Lending LinkedIn: 29,470 followers \u2014 major professional presence; active daily posting (team welcome posts, industry thought leadership, holiday messaging) Cornerstone Capital Bank LinkedIn: active accou",
+        "title": "Cornerstone Home Lending LinkedIn: 29,470 followers",
+        "type": "podcast",
+        "url": "https://www.linkedin.com/company/cornerstone-home-lending"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "d7c7b5b0-5c39-4aa7-a3dd-511dd4897c5d",
+      "issue_id": "GAP-1-P1C5.1.2",
+      "linked_subcap_ids": [
+        "P1C5.1.2"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). EVIDENCE: [E-023,E-065] CRA Satisfactory rating (most recent FRB exam); Community Lending Division launched Feb 2024 for underserved communities (E-023); RiskExec platform managing CRA/HMDA analytics (E-065). MATURITY: Maps to M2 ('Basic awareness, inconsistent practice') for 'Materiality Assessment': category ceiling=3.0, subcap position 2 within capability. Gap to M3 ('Developing, some structure'): requires documented program, validated metrics, and deeper public evidence. FOR CCB: CRA Satisfactory + Community Lending Division demonstrate commitment; formal ESG reporting program and board-level ESG governance would lift score.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Materiality Assessment"
+    },
+    {
+      "id": "93029a02-1b61-4a42-853c-8d6abad1c724",
+      "issue_id": "GAP-2-P1C5.1.4",
+      "linked_subcap_ids": [
+        "P1C5.1.4"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). EVIDENCE: [E-023,E-065] CRA Satisfactory rating (most recent FRB exam); Community Lending Division launched Feb 2024 for underserved communities (E-023); RiskExec platform managing CRA/HMDA analytics (E-065). MATURITY: Maps to M2 ('Basic awareness, inconsistent practice') for 'ESG Roadmap': category ceiling=3.0, subcap position 4 within capability. Gap to M3 ('Developing, some structure'): requires documented program, validated metrics, and deeper public evidence. FOR CCB: CRA Satisfactory + Community Lending Division demonstrate commitment; formal ESG reporting program and board-level ESG governance would lift score.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: ESG Roadmap"
+    },
+    {
+      "id": "eb6cc650-6671-4c84-8606-75e5cf322a74",
+      "issue_id": "GAP-3-P1C5.2.2",
+      "linked_subcap_ids": [
+        "P1C5.2.2"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). EVIDENCE: [E-023,E-065] CRA Satisfactory rating (most recent FRB exam); Community Lending Division launched Feb 2024 for underserved communities (E-023); RiskExec platform managing CRA/HMDA analytics (E-065). MATURITY: Maps to M2 ('Basic awareness, inconsistent practice') for 'Board ESG Oversight': category ceiling=3.0, subcap position 2 within capability. Gap to M3 ('Developing, some structure'): requires documented program, validated metrics, and deeper public evidence. FOR CCB: CRA Satisfactory + Community Lending Division demonstrate commitment; formal ESG reporting program and board-level ESG governance would lift score.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Board ESG Oversight"
+    },
+    {
+      "id": "f80ddf7a-71b4-47ef-962b-85b92b6b44b7",
+      "issue_id": "GAP-4-P1C5.2.4",
+      "linked_subcap_ids": [
+        "P1C5.2.4"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). EVIDENCE: [E-023,E-065] CRA Satisfactory rating (most recent FRB exam); Community Lending Division launched Feb 2024 for underserved communities (E-023); RiskExec platform managing CRA/HMDA analytics (E-065). MATURITY: Maps to M2 ('Basic awareness, inconsistent practice') for 'ESG Policy Framework': category ceiling=3.0, subcap position 4 within capability. Gap to M3 ('Developing, some structure'): requires documented program, validated metrics, and deeper public evidence. FOR CCB: CRA Satisfactory + Community Lending Division demonstrate commitment; formal ESG reporting program and board-level ESG governance would lift score.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: ESG Policy Framework"
+    },
+    {
+      "id": "79e944cb-c170-4db8-b392-5c1749a42b69",
+      "issue_id": "GAP-5-P4C4.1.2",
+      "linked_subcap_ids": [
+        "P4C4.1.2"
+      ],
+      "opened_on": "2026-05-04",
+      "rationale": "Maturity 2.0/5 \u2014 1.0 pts below the RB peer median (3.0/5). EVIDENCE: [E-071,E-062,E-023] Nickesh P. IT Security Engineer (3+ years) confirmed; Snyk DevSecOps scanning + Azure Key Vault + Okta IAM (E-071); Azure Key Vault + MFA + ZTA foundation (E-062); FRB supervised - no OCC/FDIC/CFPB enforcement actions; 2023 breach third-party (resolved) (E-023). MATURITY: Maps to M2 ('Basic awareness, inconsistent practice') for 'Zero Trust Architecture Strategy': category ceiling=3.0, subcap position 2 within capability. Gap to M3 ('Developing, some structure'): requires documented program, validated metrics, and deeper public evidence. FOR CCB: Okta + Snyk + Azure Key Vault foundation solid; CISO status uncertainty caps ceiling; new CISO would likely prioritize Salesforce Shield as a platform-layer data protection initiative.",
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "Capability gap: Zero Trust Architecture Strategy"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "The Issue Register documents all issues identified during Layer 0 research that constrain scoring ceilings. Each active issue generates one or more capability caps (CAP-001 through CAP-008) that limit maximum scores in affected categories. One universal cap applies: CAP-007 (PUBLIC evidence mode) limits all categories to a maximum of 3.5/5.0.",
+    "trend_md": "Most recent reported financials: $1.5B net income as of FY2026, within a series tracked FY2022 to FY2026. Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.0,
+        "P2C4": 3.5,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.5,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.32,
+      "peer_name": "Texas Capital Bancshares",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.5,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.06,
+      "peer_name": "Atlantic Union Bankshares",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.5,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 3.0,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.91,
+      "peer_name": "Heartland Financial USA",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.85,
+      "peer_name": "CrossFirst Bankshares",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 2.5,
+        "P2C2": 2.5,
+        "P2C3": 2.5,
+        "P2C4": 2.5,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 2.5,
+        "P4C2": 2.5,
+        "P4C3": 3.0,
+        "P4C4": 2.5
+      },
+      "overall_score": 2.74,
+      "peer_name": "Glacier Bancorp",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-CCB-20260504-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "DIC-insured (granular deposit base, low concentration risk) Glassdoor 4.4/5 (666 reviews); 90% would recommend; 4.5 work-life; 4.5 culture; 4.3 career opp; 22% above Financial Services avg USA TODAY Top Workplaces 2025: #26 of 1,526 nationw",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": 5.0,
+        "n": 666,
+        "polarity": "neutral",
+        "source": "Glassdoor",
+        "themes": [],
+        "value": 4.4
+      },
+      {
+        "drilldown": "ry-certified compliance leadership for servicing Active CCB Indeed job posting: Director Mortgage Originations MODEL RISK MGMT alternative-surfacing: Black Knight RAP (Rapid Analytics Platform) deployed supports ML model training; Erin John",
+        "evidence_e_id": null,
+        "kind": "employee",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Indeed",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": "BBB accredited since 1997 / A+ rating \u2014 longest-standing professional accreditation in BBB system; formal commitment to BBB Standards for Trust BirdEye: 4.5 stars (905 reviews) \u2014 high-volume consumer aggregation; most re",
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": 5.0,
+        "n": 905,
+        "polarity": "neutral",
+        "source": "Better Business Bureau",
+        "themes": [],
+        "value": 4.5
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Peoples Bank acquisition completed ($1.5B assets); combined $3.4B+ [E-004, E-074]. Integration planning window: MuleSoft + Salesforce as unification layer NOW",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2026-03-01",
+      "evidence_e_ids": [
+        "E-004",
+        "E-074"
+      ],
+      "id": "162b3dd8-c1f3-4fe2-aa75-8dd4e5f2a27a",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Peoples Bank acquisition completed $1.5B assets"
+    },
+    {
+      "body": "Active LLM deployment in contact center; CEO commits to AI/ML/process automation investment [E-009, E-068]. AgentForce: 'You built the foundation; this is the platform'",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-12-01",
+      "evidence_e_ids": [
+        "E-009",
+        "E-068"
+      ],
+      "id": "7fb229c8-fbe9-4eac-a2ed-a109d8fe5df0",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "CEO commits to AI/ML/process automation investment"
+    },
+    {
+      "body": "Peoples Bank acquisition announced; Ironcrest Mortgage JV launched (Stone Martin Builders, Alabama) [E-004, E-015]. MuleSoft + Salesforce as integration/unification layer",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-004",
+        "E-015"
+      ],
+      "id": "e342a449-626d-49ba-a672-b5dfa02a116a",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Ironcrest Mortgage JV launched (Stone Martin Builders\u2026"
+    },
+    {
+      "body": "Peoples Bancorp / Peoples Bank (Lubbock, TX; 13 branches; small business + agricultural focus). Added ~$1.5B assets; combined $3.4B+; entered West Texas + DFW markets; Larry Allen joins CCB Board; Todd McKee (Area Vice Chairman) + Tim Farris (Area President) retained; deposit cost reduced ~68bps; CCB enters top-20 TX banks under $10B",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2025-10-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "d61f6d2a-a86f-40cf-9213-8561ba0fc27f",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Peoples Bancorp / Peoples Bank (Lubbock, TX"
+    },
+    {
+      "body": "Community Lending Division launched to strengthen CRA performance [E-023]. Salesforce FSC community lending module opportunity",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2024-02-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "9006d2a0-fa53-452b-9737-d72a493d6e92",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Community Lending Division launched"
+    },
+    {
+      "body": "Salesforce Data Cloud personalization engine in active build; 700K customer base [E-051]. CRITICAL: Immediate expansion opportunity; Data Cloud sanctioned",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "d4ccadc5-c2b0-4f48-a548-25d9b569dc51",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Salesforce Data Cloud personalization engine in active build"
+    },
+    {
+      "body": "Marketing Cloud \u2192 Surefire migration initiated; Heather Woods (Dir Mktg Ops) leads [E-038]. Data Cloud as bridge; protect Marketing Cloud license",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-038"
+      ],
+      "id": "bdd5eb01-74e5-41fc-8952-44df8c3919fd",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Heather Woods (Dir Mktg Ops) leads"
+    },
+    {
+      "body": "AI virtual assistant launched on Cornerstone Servicing customer portal [E-048]. AgentForce pre-validation; customer self-service AI active",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2023-04-01",
+      "evidence_e_ids": [
+        "E-048"
+      ],
+      "id": "fccf2122-e2bd-45d1-abc7-cd1175bf67f0",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "AI virtual assistant launched on Cornerstone Servicing\u2026"
+    },
+    {
+      "body": "$8B+ origination volume; record servicing levels expected; Fitch RPS3 affirmed [E-041, E-052]. Scale of mortgage operation = Data Cloud personalization opportunity",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-041",
+        "E-052"
+      ],
+      "id": "8c614b51-606a-4a98-b11c-e6496d7876bc",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Fitch RPS3 affirmed"
+    },
+    {
+      "body": "Service provider data breach \u2192 AG notifications + Experian monitoring (RESOLVED) [E-051]. Salesforce Shield / security posture opportunity",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-051"
+      ],
+      "id": "976cccb6-9367-4bd5-b443-cb6c1a5a9c21",
+      "kind": "milestone",
+      "signal": "negative",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Service provider data breach \u2192 AG notifications + Experian\u2026"
+    },
+    {
+      "body": "LOS upgrade initiative begins; Neil Merritt (SVP Product Strategy) hired to lead [E-041]. MuleSoft ICE-Salesforce bridge opportunity during LOS transition",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-041"
+      ],
+      "id": "f7e0dd0d-708e-4b26-9448-fd3241a41dd5",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Neil Merritt (SVP Product Strategy) hired"
+    },
+    {
+      "body": "Roscoe Bank acquisition \u2192 CCB charter; highest-capitalized new TX bank [E-001, E-031]. Core Salesforce relationship established",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2022-10-01",
+      "evidence_e_ids": [
+        "E-001",
+        "E-031"
+      ],
+      "id": "0db55f3b-46ad-4016-b76f-59ec4133ab7b",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Roscoe Bank acquisition \u2192 CCB charter"
+    },
+    {
+      "body": "Formation of Cornerstone Capital Bank SSB; highest-capitalized new TX bank history; bank charter enables deposit gathering and FRB regulation; triggered Salesforce multi-cloud deployment",
+      "date_precision": "month",
+      "e_id": null,
+      "event_date": "2022-10-01",
+      "evidence_e_ids": [
+        "E-001"
+      ],
+      "id": "36d54338-1796-4454-967f-9b02de93e2d1",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "The Roscoe State Bank (Roscoe, TX; est. 1906)"
+    },
+    {
+      "body": "Okta SSO/MFA deployed for 3,000 team members; Azure hybrid cloud migration begins [E-062]. Identity foundation for Salesforce integration",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2022-01-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "b010dd51-c05c-44d2-89d0-a0f7a361602c",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Azure hybrid cloud migration begins"
+    },
+    {
+      "body": "Cornerstone Servicing built from scratch by Stacy Speas; B2B subservicing launched [E-052]. Service Cloud + AgentForce for B2B servicing platform",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-052"
+      ],
+      "id": "0ce19c7e-09a0-400d-bfba-24bfd3abf396",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "B2B subservicing launched"
+    },
+    {
+      "body": "15+ JV Mortgage Companies (most recent: Ironcrest Mortgage with Stone Martin Builders, Nov 2025). Distributed brand architecture (15+ mortgage brands powered by CCB infrastructure); 100+ builder relationships; $2.2B builder forward commitments in 2024; each JV = incremental revenue + technology deployment",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2021-01-01",
+      "evidence_e_ids": [
+        "E-034"
+      ],
+      "id": "70218d9c-be43-4380-b643-d5a0266456be",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "15+ JV Mortgage Companies (most recent: Ironcrest Mortgage\u2026"
+    }
+  ]
+}

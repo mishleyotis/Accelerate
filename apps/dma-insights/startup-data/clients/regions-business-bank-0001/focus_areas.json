@@ -1,0 +1,268 @@
+{
+  "entity_display_id": "regions-business-bank-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-035",
+          "E-059",
+          "E-084"
+        ],
+        "representative_quote": "$400M\u2013$500M annual tech budget through 2027 \u2014 multi-year partner window",
+        "source_kind": "docx"
+      },
+      "id": "7f48f969-b6ba-4478-8afa-cf41a49bfd0e",
+      "involved_subcap_ids": [
+        "P4C2.8.2",
+        "P4C2.8.2",
+        "P4C2.8.4",
+        "P4C2.8.2",
+        "P4C3.5.7",
+        "P4C3.5.5",
+        "P4C3.5.7",
+        "P4C3.5.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "$400,000,000",
+          "delta": null,
+          "kpi_label": "F-007",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$500,000,000",
+          "delta": null,
+          "kpi_label": "F-007 M",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "$400M\u2013$500M annual tech budget through 2027",
+      "verbatim_quote": "F-007 | $400M\u2013$500M annual tech budget through 2027 \u2014 multi-year partner window | CEO: no M&A interest; all capital in technology. 9\u201311% tech spend. Three simultaneous platform programs. 200K hours saved. [E-035, E-059, E-084] | P1C1 Digital Strategy ceiling L4.0 \u00b10.3 \u2014 executive mandate confirmed. | Full Zennify engagement: nCino + Salesforce FSC + Data Cloud + Agentforce + MuleSoft. | \ud83d\udfe2 STRATEGIC"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-019",
+          "E-054",
+          "E-057"
+        ],
+        "representative_quote": "Ag lending: nCino deployed but headless AI absent",
+        "source_kind": "docx"
+      },
+      "id": "efb6d084-c4ab-44e5-97d3-71333629537d",
+      "involved_subcap_ids": [
+        "P4C2.7"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Ag lending: nCino deployed",
+      "verbatim_quote": "F-004 | Ag lending: nCino deployed but headless AI absent | No nCino Banking Advisor or IQ Agents evidence in ag lending. Standard nCino releases blocked. Stated engagement objective. [E-019, E-054, E-057] | P4C2.7 at L1.0 for ag lending; P3C2 ceiling L2.0 \u00b10.5. | nCino Banking Advisor + nCino IQ Agents for ag lending \u2014 exact match to stated engagement objective. | \ud83d\udd34 CRITICAL"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-084"
+        ],
+        "representative_quote": "CEO Turner July 18, 2025: 'planning to upgrade our commercial loan system to a new cloud platform in the coming months.'",
+        "source_kind": "docx"
+      },
+      "id": "adc3709d-7a10-489d-a8b7-84a842316538",
+      "involved_subcap_ids": [
+        "P4C3.4.1",
+        "P1C1.5.5",
+        "P4C3.4.2",
+        "P4C3.4.6",
+        "P4C3.4.7",
+        "P4C2.2.9"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P4": 83
+      },
+      "source_path": "(unknown)",
+      "title": "Commercial loan system cloud upgrade confirmed",
+      "verbatim_quote": "F-002 | Commercial loan system cloud upgrade confirmed \u2014 window OPEN NOW | CEO Turner July 18, 2025: 'planning to upgrade our commercial loan system to a new cloud platform in the coming months.' Also: new general ledger and Temenos deposit system 2027. [E-084] | P4C3 cloud migration ceiling L3.5 \u00b10.3 with upward trajectory. | nCino LOS cloud-native + Salesforce FSC + MuleSoft for Temenos integration. Window is live. | \ud83d\udd34 CRITICAL"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-048",
+          "E-081"
+        ],
+        "representative_quote": "Jeff Kennedy confirmed CIAM strategy and roadmap; no vendor named.",
+        "source_kind": "docx"
+      },
+      "id": "203e3643-b7d7-4ee7-aef0-96033142cbdc",
+      "involved_subcap_ids": [
+        "P4C4.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Customer CIAM roadmap exists",
+      "verbatim_quote": "F-006 | Customer CIAM roadmap exists \u2014 no platform confirmed | Jeff Kennedy confirmed CIAM strategy and roadmap; no vendor named. SailPoint/CyberArk workforce-only. New native mobile app launched July 2025. [E-048, E-081] | P4C4.4 CIAM at L2.0 \u00b10.5 \u2014 roadmap without platform. | Salesforce Customer Identity Cloud \u2014 open specification, no incumbent. | \ud83d\udfe1 HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-019",
+          "E-022",
+          "E-084"
+        ],
+        "representative_quote": "nCino since 2016 \u2014 customization debt blocks standard releases",
+        "source_kind": "docx"
+      },
+      "id": "a3356bb5-7e42-4fa2-9564-8b529b358518",
+      "involved_subcap_ids": [
+        "P4C2.4.12",
+        "P2C4.6.5",
+        "P1C1.1.5",
+        "P1C4.9.3",
+        "P2C3.3.3",
+        "P1C1.5.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 50,
+        "P2": 33,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "Customization debt blocks standard releases",
+      "verbatim_quote": "F-001 | nCino since 2016 \u2014 customization debt blocks standard releases | SAFe ART confirmed; CEO confirmed commercial loan system cloud upgrade Q2 2025. Deep custom features block standard releases. [E-019, E-022, E-084] | P4C2 ceiling L2.5 \u2014 standard nCino releases blocked; IQ Agents inaccessible. | nCino Standard Release Adoption + nCino Banking Advisor \u2014 PRIMARY engagement lever. Stated client objective. | \ud83d\udd34 CRITICAL"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-016",
+          "E-068",
+          "E-072"
+        ],
+        "representative_quote": "No Salesforce Data Cloud \u2014 consumer C360 gap at $157B scale",
+        "source_kind": "docx"
+      },
+      "id": "b79fd77d-b82a-4477-93e3-ed4dce6c8e4b",
+      "involved_subcap_ids": [
+        "P4C2.8.2",
+        "P4C2.8.2",
+        "P4C2.8.4",
+        "P4C2.8.2",
+        "P4C3.5.7",
+        "P4C3.5.5",
+        "P4C3.5.7",
+        "P4C3.5.7"
+      ],
+      "kpis": [
+        {
+          "current_value": "100%",
+          "delta": null,
+          "kpi_label": "Clients data elements",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "58.8%",
+          "delta": null,
+          "kpi_label": "Consumer Banking",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "$157,000,000,000",
+          "delta": null,
+          "kpi_label": "consumer C360 gap",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No Salesforce Data Cloud",
+      "verbatim_quote": "F-005 | No Salesforce Data Cloud \u2014 consumer C360 gap at $157B scale | RCLIQ covers commercial clients (350+ data elements, 100% adoption) but consumer C360 absent. Consumer Banking = 58.8% of revenue. [E-016, E-068, E-072] | P2C5 consumer analytics ceiling L2.5 \u00b10.5. | Salesforce Data Cloud for consumer segment \u2014 greenfield at largest revenue LOB. | \ud83d\udfe1 HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-050",
+          "E-075"
+        ],
+        "representative_quote": "ROSIE\u2013Salesforce NBA integration PLANNED but NOT deployed",
+        "source_kind": "docx"
+      },
+      "id": "9ba5711a-f938-48e0-be45-479c0afe1740",
+      "involved_subcap_ids": [
+        "P2C1.5.4",
+        "P2C1.6.8",
+        "P2C1.8.7",
+        "P2C1.6.3",
+        "P2C2.9.1",
+        "P2C2.7.1",
+        "P2C2.2.2",
+        "P2C2.9.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "Rosie = 22 ML models on IBM Interact across all channels",
+      "verbatim_quote": "F-003 | ROSIE\u2013Salesforce NBA integration PLANNED but NOT deployed | ROSIE = 22 ML models on IBM Interact across all channels. Roadmap confirmed: 'Regions will integrate ROSIE with Salesforce for commercial call center NBA.' 700+ bankers on IBM Banker Assist \u2014 NOT Salesforce. [E-050, E-075] | P2C4 ceiling L3.0 \u00b10.4 \u2014 backend strong; Salesforce delivery layer missing. | Einstein Next Best Action via Salesforce FSC \u2014 #1 highest-probability net-new Salesforce deployment. | \ud83d\udd34 CRITICAL"
+    }
+  ]
+}

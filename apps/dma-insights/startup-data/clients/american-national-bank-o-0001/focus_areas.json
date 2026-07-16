@@ -1,0 +1,45 @@
+{
+  "entity_display_id": "american-national-bank-o-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-058",
+          "E-082"
+        ],
+        "representative_quote": "ANBTX scores 1.5 (M1) on Digital Marketing Strategy Document.",
+        "source_kind": "heuristic"
+      },
+      "id": "fd796a05-698f-4ca3-8eb0-e339c724623a",
+      "involved_subcap_ids": [
+        "P2C1.1.1",
+        "P2C1.1.2",
+        "P2C1.1.3",
+        "P2C1.1.4",
+        "P2C1.1.5",
+        "P2C1.1.6"
+      ],
+      "kpis": [
+        {
+          "current_value": "24",
+          "delta": null,
+          "kpi_label": "Member",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Modernize customer experience",
+      "verbatim_quote": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track."
+    }
+  ]
+}

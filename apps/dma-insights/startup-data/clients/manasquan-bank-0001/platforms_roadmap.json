@@ -1,0 +1,142 @@
+{
+  "entity_display_id": "manasquan-bank-0001",
+  "phases": [
+    {
+      "customer_impact": {
+        "Outcome": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Foundational",
+      "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+      "name": "Foundational",
+      "phase": 2,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud",
+          "maturity_lift": "+2.82",
+          "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-01",
+          "title": "Deploy Financial Services Cloud as the Enterprise CRM Foundation"
+        },
+        {
+          "feature": "Data Cloud + CRM Analytics (Tableau)",
+          "maturity_lift": "+2.82",
+          "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-02",
+          "title": "Implement Data Cloud + Tableau as the Analytics & Data Unification Platform"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P2C2 score 1.96 \u2192 4.0 (peer median 2.00)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Strategic",
+      "metric": "P2C2 score 1.96 \u2192 4.0 (peer median 2.00)",
+      "name": "Strategic",
+      "phase": 3,
+      "platform": "Salesforce \u00b7 nCino",
+      "recommendations": [
+        {
+          "feature": "Financial Services Cloud + nCino (partner)",
+          "maturity_lift": "+2.04",
+          "metric": "P2C2 score 1.96 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C2 score 1.96 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "ncino",
+          "platform_name": "nCino",
+          "rec_id": "REC-03",
+          "title": "Deploy nCino for Loan Origination Automation"
+        },
+        {
+          "feature": "Marketing Cloud",
+          "maturity_lift": "+2.82",
+          "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P2C4 score 1.18 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-04",
+          "title": "Replace Marketo with Marketing Cloud for Full-Lifecycle Marketing"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P2C4, P2C2"
+    },
+    {
+      "customer_impact": {
+        "Outcome": "P4C1 score 1.21 \u2192 4.0 (peer median 1.50)"
+      },
+      "dependencies": [],
+      "duration_months": 4,
+      "label": "Aspirational",
+      "metric": "P4C1 score 1.21 \u2192 4.0 (peer median 1.50)",
+      "name": "Aspirational",
+      "phase": 4,
+      "platform": "Salesforce",
+      "recommendations": [
+        {
+          "feature": "MuleSoft Anypoint",
+          "maturity_lift": "+2.79",
+          "metric": "P4C1 score 1.21 \u2192 4.0 (peer median 1.50)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P4C1 score 1.21 \u2192 4.0 (peer median 1.50)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "salesforce",
+          "platform_name": "Salesforce",
+          "rec_id": "REC-05",
+          "title": "Implement MuleSoft for Non-Fiserv System Integration"
+        },
+        {
+          "feature": "Digital Strategy Workshop",
+          "maturity_lift": "+2.84",
+          "metric": "P3C4 score 1.16 \u2192 4.0 (peer median 2.00)",
+          "outcomes": {
+            "effort": "L",
+            "metric": "P3C4 score 1.16 \u2192 4.0 (peer median 2.00)",
+            "peer": null,
+            "time": "12\u201318 months"
+          },
+          "platform_id": "",
+          "platform_name": "",
+          "rec_id": "REC-06",
+          "title": "Digital Strategy Workshop to Formalize CTO's Data & Innovation Vision"
+        }
+      ],
+      "target": "M1 \u2192 M4 in P3C4, P4C1"
+    }
+  ],
+  "run_request_id": "DMA-ASM-MBNK-20260330-0001",
+  "total_duration_months": 12
+}

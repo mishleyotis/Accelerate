@@ -1,0 +1,21 @@
+{
+  "active_run_id": "bd65770d-9efb-4baf-9b07-521cbedc01c7",
+  "items": [
+    {
+      "assessment_date": "2026-04-28",
+      "assessment_date_source": "run_id",
+      "ccg_catalog_version": "v2.3",
+      "completed_at": "2026-07-02T23:10:20.456228Z",
+      "created_at": "2026-07-02T23:10:20.456228Z",
+      "data_source": "MANUAL_BACKFILL",
+      "evidence_mode": "public",
+      "id": "bd65770d-9efb-4baf-9b07-521cbedc01c7",
+      "overall_score": 2.3871650211565587,
+      "request_id": "DMA-RES-VESTGEN-20260428-0001",
+      "started_at": "2026-07-02T23:10:20.456228Z",
+      "status": "ACTIVE",
+      "subcap_count": 709,
+      "updated_at": "2026-07-03T01:50:54.185822Z"
+    }
+  ]
+}

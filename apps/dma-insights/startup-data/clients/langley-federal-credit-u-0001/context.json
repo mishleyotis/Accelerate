@@ -1,0 +1,451 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "langley-federal-credit-u-0001",
+  "financials": {
+    "lines": [
+      "Evidence: E-001, E-002, E-003, E-008",
+      "Trend Classification: ACCELERATING",
+      "Evidence: E-003, E-008, E-024"
+    ]
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Virginia",
+      "USA (Hampton Roads + Richmond)"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Gaurav Bhatia",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Will Sampson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Saji L.",
+        "note": "SVP Chief Digital Officer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Deb Vollmer",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CXO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Fred Hagerman",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "A. Jerome F.",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Chief Impact Officer"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mark Hutchinson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP Enterprise Risk & Audit"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Erling Amundson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Member Experience"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kelli Ragland",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lindsey Kelly",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "VP Legal/Compliance"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Mihaela Ciocanu",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Director BSA/Fraud"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Lauren Banks",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Digital Product Manager"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Adam G. Duncan",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "Board Chair"
+      },
+      {
+        "critical_role": true,
+        "gap_flag": true,
+        "name": null,
+        "note": "Not confirmed from public evidence.",
+        "tenure_months": null,
+        "title": "CISO"
+      }
+    ],
+    "license_type": "Federal Credit Union",
+    "narrative_md": "Langley Federal Credit Union is a credit union. It reports $5.6 billion in total assets and has operated since 1934. It is regulated by NCUA (National Credit Union Administration) and employs approximately 718 people across 20 branches. Its overall digital maturity is assessed at 2.3 out of 5 across the DMA capability framework.",
+    "primary_regulator": "NCUA (National Credit Union Administration)",
+    "size_tier": "community",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-018",
+        "excerpt": "Langley implemented CX Cloud from Genesys and Salesforce \u2014 unified contact center + CRM platform. Strategic move to 'single pane of glass' for representatives Amundson quoted: 'reduce complexity, enhance operational effi",
+        "title": "Langley implemented CX Cloud",
+        "type": "article",
+        "url": "https://www.genesys.com/customer-stories/langley-federal-cre"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "09b8e1fe-8749-4fa8-a7c4-226443c75424",
+      "issue_id": "ISS-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Data warehouse self-acknowledged as 'not positioned for analysis and data mining' per Annual Report [E-024]"
+    },
+    {
+      "id": "36228b80-b707-4bf2-8629-9e0d5bbecbb2",
+      "issue_id": "ISS-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Approaching $10B CFPB asset threshold \u2014 will trigger enhanced regulatory oversight including DFAST consideration and higher compliance burden"
+    },
+    {
+      "id": "6bc85471-1d3d-45bd-adbb-d56a55747f1f",
+      "issue_id": "ISS-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "No enterprise integration platform (iPaaS/MuleSoft) detected in 180-technology stack. Point-to-point integrations via vendor-specific connectors (Fortimize). [E-006]"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "This section documents regulatory actions, enforcement orders, material findings, and other issues that may impact capability scores through the assessment's scoring methodology.",
+    "trend_md": "Trajectory classified ACCELERATING in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 4.0,
+        "P1C2": 3.5,
+        "P1C3": 3.5,
+        "P1C4": 3.5,
+        "P1C5": 3.0,
+        "P2C1": 3.5,
+        "P2C2": 3.5,
+        "P2C3": 3.5,
+        "P2C4": 3.5,
+        "P3C1": 4.0,
+        "P3C2": 3.5,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 4.0,
+        "P4C2": 4.0,
+        "P4C3": 4.0,
+        "P4C4": 4.0
+      },
+      "overall_score": 3.65,
+      "peer_name": "First Tech Federal Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.0,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.0,
+        "P3C2": 3.0,
+        "P3C3": 3.5,
+        "P3C4": 3.5,
+        "P4C1": 3.5,
+        "P4C2": 3.5,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.09,
+      "peer_name": "Redstone Federal Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 3.5,
+        "P1C4": 3.0,
+        "P1C5": 3.0,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 3.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.0,
+        "P4C2": 3.0,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 3.03,
+      "peer_name": "Chartway Credit Union",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 3.0,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.5,
+        "P2C3": 2.5,
+        "P2C4": 3.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.0,
+        "P4C3": 3.0,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.91,
+      "peer_name": "Virginia Credit Union (VACU)",
+      "role": null
+    },
+    {
+      "category_scores": {
+        "P1C1": 3.0,
+        "P1C2": 2.5,
+        "P1C3": 2.5,
+        "P1C4": 2.5,
+        "P1C5": 2.5,
+        "P2C1": 3.0,
+        "P2C2": 3.0,
+        "P2C3": 3.0,
+        "P2C4": 3.0,
+        "P3C1": 2.5,
+        "P3C2": 3.0,
+        "P3C3": 3.0,
+        "P3C4": 3.0,
+        "P4C1": 3.5,
+        "P4C2": 3.0,
+        "P4C3": 2.5,
+        "P4C4": 3.0
+      },
+      "overall_score": 2.85,
+      "peer_name": "Apple Federal Credit Union",
+      "role": null
+    }
+  ],
+  "run_request_id": "DMA-ASM-LFCU-20260318-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 5.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "App",
+        "themes": [],
+        "value": 4.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": 100.0,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Member Engagement",
+        "themes": [],
+        "value": 1.9
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "customer",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "CFPB Complaints",
+        "themes": [],
+        "value": null
+      },
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "positive",
+        "source": "Media Sentiment",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Gaurav Bhatia selected as new CEO Nov 2025, succeeding Tom Ryan (13yr tenure). Bhatia: 20+ yrs exec experience at PenFed (CMDXO + Head Retail Deposits), AARP, Capital One, NewDay USA, Sabre, NIIT. Dartmouth Tuck.",
+      "date_precision": "month",
+      "e_id": "E-003",
+      "event_date": "2025-11-01",
+      "evidence_e_ids": [
+        "E-003"
+      ],
+      "id": "1e7df491-dcf4-42d9-bdbc-8e6d63a958e1",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.langleyfcu.org/press/release/langley-fcu-selects-new-ceo",
+      "subcap_ids": [],
+      "title": "Gaurav Bhatia selected as new CEO Nov 2025"
+    },
+    {
+      "body": "MyDesign checking launched Sept 2024 \u2014 member chooses from 3 options or all-in bundle to customize checking account",
+      "date_precision": "month",
+      "e_id": "E-021",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-021"
+      ],
+      "id": "40401ecd-9185-4515-951b-b03cf84f0329",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://creditunions.com/features/member-experience-gets-an-upgrade/",
+      "subcap_ids": [],
+      "title": "Member chooses bundle"
+    },
+    {
+      "body": "RC Miller appointed Director Sept 2024. First-ever Associate Director program (Oct 2023). Background: Legal, Product Counseling, Consumer Regulations, Technology, PE, M&A",
+      "date_precision": "month",
+      "e_id": "E-029",
+      "event_date": "2024-09-01",
+      "evidence_e_ids": [
+        "E-029"
+      ],
+      "id": "e391713f-179e-4f66-bb73-56e233728ff3",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://hrchamber.com/news/article/langley-welcomes-rc-miller-to-its-board-of-directors/",
+      "subcap_ids": [],
+      "title": "RC Miller appointed Director Sept 2024"
+    },
+    {
+      "body": "Blend unified origination platform launched March 2024 for consumer deposit + lending. 37% increase in new digital account openings. July 2024 highest month on record",
+      "date_precision": "month",
+      "e_id": "E-019",
+      "event_date": "2024-03-01",
+      "evidence_e_ids": [
+        "E-019"
+      ],
+      "id": "7d3098bb-d251-4192-b73b-b5502aedc0bf",
+      "kind": "product",
+      "signal": "positive",
+      "source_url": "https://blend.com/customers/langley-federal-credit-union/",
+      "subcap_ids": [],
+      "title": "Blend unified origination platform launched March 2024 for\u2026"
+    },
+    {
+      "body": "Will Sampson hired as SVP/CIO. 17+ yrs leading operations and technology, core system conversions experience. Former EVP/CIO First Light FCU. MBA IT concentration, ECPI grad, USMC veteran",
+      "date_precision": "publish_fallback",
+      "e_id": "E-023",
+      "event_date": "2023-01-01",
+      "evidence_e_ids": [
+        "E-023"
+      ],
+      "id": "aa6a50b8-8168-445e-bcf5-f4efa971ca6b",
+      "kind": "leadership",
+      "signal": "neutral",
+      "source_url": "https://www.langleyfcu.org/press/release/langley-fcu-announces-svp-chief-information-officer",
+      "subcap_ids": [],
+      "title": "Sampson Will hired as SVP/CIO"
+    },
+    {
+      "body": "Symitar Episys core conversion went live April 2018. 20,000+ manhours invested. Conversion declared success within one week. Member service not disrupted",
+      "date_precision": "month",
+      "e_id": "E-052",
+      "event_date": "2018-04-01",
+      "evidence_e_ids": [
+        "E-052"
+      ],
+      "id": "a5e190f3-6acd-4c32-8640-1d22ddae6ba8",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://www.finextra.com/pressarticle/74301/langley-federal-credit-union-moves-to-symitar-episys-core-processing-platform",
+      "subcap_ids": [],
+      "title": "Symitar Episys core conversion went"
+    }
+  ]
+}

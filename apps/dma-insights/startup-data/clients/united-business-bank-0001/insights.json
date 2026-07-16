@@ -1,0 +1,648 @@
+{
+  "entity_display_id": "united-business-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P1C3.2.1",
+        "P1C1.8.2",
+        "P2C4.5.IB1",
+        "P1C1.5.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-001",
+      "id": "5f3de9b0-6a4a-464e-96c6-119730f66d20",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        },
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-04"
+        }
+      ],
+      "linked_e_ids": [
+        "E-016",
+        "E-029",
+        "E-008",
+        "E-009",
+        "E-018",
+        "E-013"
+      ],
+      "linked_subcap_id": "P1C3.2.1",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "twilio",
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Make Idea Sourcing Channels a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the planning and oversight the rest of the business relies on, the gains reach well beyond this single capability [E-008].",
+      "source_rec_id": null,
+      "theme": "Innovation & Investment",
+      "title": "In the Q4 2025 earnings release (January 22, 2026), CEO George Guarini articulated five strategic priorities for 2026. A",
+      "what_text": "In the Q4 2025 earnings release (January 22, 2026), CEO George Guarini articulated five strategic priorities for 2026. Analysis of these objectives reveals a critical gap between stated strategy and the institution's technology posture:. In Zennify's assessment Idea Sourcing Channels scores 1.0 out of 5, versus a typical 1.8 at comparable institutions [E-029].",
+      "why_text": "The assessment found: “2024 Celent Model Bank Awards recognized 18 institutions — United Business Bank NOT among them United Community Bank (UCBI, a DIFFERENT bank) won 2023 Celent award for Autobooks integration — source” [E-016]. At 1.0 out of 5, Idea Sourcing Channels sits 0.8 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the planning and oversight the rest of the business relies on, so progress here compounds across the rest of the business.",
+      "pillar": "P1",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C3.3.1",
+        "P4C2.2.1",
+        "P2C4.1.1",
+        "P1C4.1.1",
+        "P1C1.4.7",
+        "P1C1.4.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "a8b31314-5e67-446d-9b82-c5c4b27689a8",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-017",
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027",
+            "E-040"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-017",
+        "E-039",
+        "E-040",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C3.3.1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-040].",
+      "source_rec_id": null,
+      "theme": "Architecture & Cloud",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"Zero technology/digital/IT job postings found on Indeed for United Business Bank as of April 2026 ABSENCE signals: no hiring for data analysts, software developers, digital product managers, Salesforce admins, or AI/ML roles\". In Zennify's assessment Enterprise Integration Strategy scores 1.0 out of 5, versus a typical 2.3 at comparable institutions [E-039].",
+      "why_text": "The client's own stated priority — \"In the Q4 2025 earnings release (January 22, 2026), CEO George Guarini articulated five strategic priorities for 2026. Analysis of these objectives reveals a critical gap between stated strategy and the institution's tec\" — needs the Databricks capability that is currently absent. scores 1.0/5 on the current assessment [E-017, E-039].",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C2.2.1",
+        "P2C4.1.1",
+        "P3C4.6.2",
+        "P1C5.2.3",
+        "P1C1.8.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "CP-S-002",
+      "id": "3a7329d7-a4c3-4539-a932-e16e0043f4e6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-038",
+        "E-017",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C2.2.1",
+      "platforms": [
+        "databricks",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Reporting Platform a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": null,
+      "theme": "Analytics & AI",
+      "title": "Critical finding: All five CEO strategic objectives are purely financial — zero mention of technology, digital transform",
+      "what_text": "Critical finding: All five CEO strategic objectives are purely financial — zero mention of technology, digital transformation, customer experience modernization, data/analytics, AI, or employee engagement. This is the strongest signal that digital maturity is not a leadership priority, creating both risk (competitive attrition visible in NIB deposit decline) and opportunity (Zennify can frame Salesforce as the execution engine for the CEO's existing financial objectives). In Zennify's assessment Enterprise Reporting Platform scores 1.0 out of 5, versus a typical 1.8 at comparable institutions [E-038].",
+      "why_text": "The assessment found: “Zero technology/digital/IT job postings found on Indeed for United Business Bank as of April 2026 ABSENCE signals: no hiring for data analysts, software developers, digital product managers” [E-017]. At 1.0 out of 5, Enterprise Reporting Platform sits 0.8 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P4C2",
+        "P1C1",
+        "P4C1.1.1",
+        "P4C2.2.1",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-01",
+      "id": "de662397-e829-407b-8d8a-49b7e9a1259e",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-024",
+        "E-009",
+        "E-010",
+        "E-021"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Marketing Strategy Document a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-009].",
+      "source_rec_id": "REC-01",
+      "theme": "Digital Channels",
+      "title": "Deploy Financial Services Cloud as enterprise CRM",
+      "what_text": "Zero CRM in 44+ tool stack (:F15). Customer relationships managed via banker memory and spreadsheets. 10 acquisitions created fragmented customer data. No single customer view, no cross-sell pipeline, no relationship tracking. connected unlock: CRM foundation enables Marketing Cloud, analytics, and digital strategy KPIs. In Zennify's assessment Digital Marketing Strategy Document scores 1.0 out of 5, versus a typical 1.8 at comparable institutions [E-024].",
+      "why_text": "At 1.0 out of 5, Digital Marketing Strategy Document sits 0.8 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-027, E-024].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P3C1",
+        "P4C1",
+        "P2C2",
+        "P4C1.1.1",
+        "P4C3.1.4",
+        "P2C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-02",
+      "id": "a8b887ab-570c-4d92-a60b-352a8256fd3f",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-03"
+        }
+      ],
+      "linked_e_ids": [
+        "E-040",
+        "E-027",
+        "E-033",
+        "E-036",
+        "E-031"
+      ],
+      "linked_subcap_id": "P3C1",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Automation Governance Framework a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the core processes that keep the institution running, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": "REC-02",
+      "theme": "Core Automation",
+      "title": "Implement MuleSoft as enterprise integration platform",
+      "what_text": "6+ vendors with zero middleware (:F1-F9). Point-to-point integrations between FIS, Jack Henry, Genesys, Zendesk, Abrigo. Windows Server 2003 in production (:F12). Each new system adds exponential tech debt. connected unlock: Integration layer enables process automation, data governance, and digital onboarding. In Zennify's assessment Automation Governance Framework scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-040].",
+      "why_text": "The assessment found: “FIS launched Bank Modernization Framework (Sep 2025) with 4 pillars: Digital, Open Banking/APIs, Platform Transformation, Data/AI FIS Horizon has API catalog via Code Connect marketplace — RESTful” [E-033]. At 1.0 out of 5, Automation Governance Framework sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the core processes that keep the institution running, so progress here compounds across the rest of the business.",
+      "pillar": "P3",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1",
+        "P2C4",
+        "P1C1",
+        "P2C4.1.1",
+        "P3C1.1.2",
+        "P2C1.5.2"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-03",
+      "id": "27d9dad9-bcf0-4efd-b543-ddc2b04c21b1",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-009"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-009",
+            "E-010",
+            "E-021",
+            "E-024"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-042",
+        "E-024",
+        "E-009",
+        "E-010",
+        "E-021",
+        "E-027"
+      ],
+      "linked_subcap_id": "P2C1",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Digital Marketing Strategy Document a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-009].",
+      "source_rec_id": "REC-03",
+      "theme": "Digital Channels",
+      "title": "Deploy Marketing Cloud for deposit retention",
+      "what_text": "NIB deposits declining 16% YoY — $111M lost (:F7). Zero marketing automation despite ad tools (:F1-F4). Marketing is 1% of workforce (~2-3 people). No segmentation, no lifecycle campaigns, no retention programs. connected unlock: Marketing automation enables customer acquisition, personalization, and competitive positioning. In Zennify's assessment Digital Marketing Strategy Document scores 1.0 out of 5, versus a typical 1.8 at comparable institutions [E-024].",
+      "why_text": "The assessment found: “CEO Guarini stated 5 strategic objectives for 2026: (1) disciplined loan growth, (2) prudent credit risk management, (3) expense control, (4) enhancing shareholder value through repurchases and” [E-042]. At 1.0 out of 5, Digital Marketing Strategy Document sits 0.8 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C2",
+        "P2C3",
+        "P4C2.2.1",
+        "P2C1.1.1",
+        "P2C1.3.3",
+        "P3C3.2.2"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-04",
+      "id": "fb05485e-8488-4bcb-b1c7-1ea88f2dea41",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-008"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-001"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-010",
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        }
+      ],
+      "linked_e_ids": [
+        "E-027",
+        "E-041",
+        "E-003",
+        "E-004",
+        "E-008",
+        "E-005",
+        "E-010",
+        "E-020"
+      ],
+      "linked_subcap_id": "P2C2",
+      "platforms": [
+        "databricks",
+        "tableau",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Eligibility Transparency a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-003].",
+      "source_rec_id": "REC-04",
+      "theme": "Customer Journeys & Servicing",
+      "title": "Activate purchased engagement tools (Eltropy, Genesys)",
+      "what_text": "4 tools purchased, 0 deployed customer-facing (:F20,:F6). Eltropy (text/video/chat/AI), Genesys PureCloud, Zendesk, Intercom all in tech stack but invisible to customers. Sunk cost without ROI. connected unlock: Omnichannel deployment enables digital onboarding and customer satisfaction. In Zennify's assessment Eligibility Transparency scores 1.0 out of 5, versus a typical 1.8 at comparable institutions [E-041].",
+      "why_text": "At 1.0 out of 5, Eligibility Transparency sits 0.8 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business [E-027, E-041].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2",
+        "P2C4",
+        "P2C1",
+        "P4C1.1.1",
+        "P4C2.2.1",
+        "P2C4.1.1"
+      ],
+      "confidence_band": "medium",
+      "counter_e_ids": [],
+      "ic_id": "INS-REC-05",
+      "id": "56b1ed12-58e1-491f-8008-c707e826bc25",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-017",
+            "E-027",
+            "E-038"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-S-002"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-01"
+        },
+        {
+          "e_ids": [
+            "E-027"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-REC-02"
+        }
+      ],
+      "linked_e_ids": [
+        "E-038",
+        "E-017",
+        "E-027"
+      ],
+      "linked_subcap_id": "P4C2",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make AI & ML Strategy & Governance a near-term focus for United Business Bank: a scoped investment here would lift it from 1.0 toward the 1.8 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-027].",
+      "source_rec_id": "REC-05",
+      "theme": "Analytics & AI",
+      "title": "Establish Data Cloud as unified data platform",
+      "what_text": "No CDO, no data governance, no MDM (:F1-F5). Customer data fragmented across FIS/Banno/Abrigo from 10 acquisitions. Cognos used for regulatory reporting only. 0% engineering workforce. connected unlock: Data foundation enables analytics, CRM effectiveness, marketing segmentation. In Zennify's assessment AI & ML Strategy & Governance scores 1.0 out of 5, versus a typical 1.8 at comparable institutions [E-038].",
+      "why_text": "The assessment found: “Zero technology/digital/IT job postings found on Indeed for United Business Bank as of April 2026 ABSENCE signals: no hiring for data analysts, software developers, digital product managers” [E-017]. At 1.0 out of 5, AI & ML Strategy & Governance sits 0.8 points below the 1.8 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "Weighting: 25% | Score: 1.22 | vs Median: -0.63 | Trend: → Stagnant",
+        "heading": "6.1. Pillar 1: Strategy, Governance & Culture",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "Weighting: 30% | Score: 1.19 | vs Median: -0.51 | Trend: ↓ Declining",
+        "heading": "6.2. Pillar 2: Customer Experience & Engagement",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P3": {
+        "findings_md": "Weighting: 20% | Score: 1.98 | vs Median: -0.30 | Trend: → Stable",
+        "heading": "6.3. Pillar 3: Operations, Risk & Compliance",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "Weighting: 25% | Score: 1.67 | vs Median: -0.21 | Trend: → Stable",
+        "heading": "6.4. Pillar 4: Data, Analytics & Technology",
+        "linked_e_ids": [],
+        "linked_subcap_ids": []
+      }
+    },
+    "recommendations_md": "The following recommendations are prioritized based on business impact, risk exposure, competitive positioning, and implementation feasibility. Each recommendation includes institution-specific root cause analysis and expected score outcomes. Deep search validation confirmed all recommendations against industry case studies and vendor capabilities."
+  },
+  "run_request_id": "DMA-ASM-UBB-20260401-0001"
+}

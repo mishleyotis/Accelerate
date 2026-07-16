@@ -1,0 +1,421 @@
+{
+  "acquisitions": [],
+  "entity_display_id": "capital-farm-credit-0001",
+  "financials": {
+    "lines": [
+      "trend data gap: Need CFC-specific 5-year asset/income/ROA trend. Will attempt extraction in Batch 2-3 or flag for internal validation."
+    ],
+    "metrics": {
+      "generated_at": "2026-03-05T09:13:30.849757",
+      "size_tier": "Large ($10B-$50B)"
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "Texas"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jeff Norte",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Jennifer Thompson",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "EVP CAO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Kenton Kimball",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "BOARD CHAIR"
+      }
+    ],
+    "license_type": "Farm Credit System institution (FCA-chartered)",
+    "narrative_md": "Capital Farm Credit is a farm-credit institution headquartered in Bryan, Texas. It reports $11.0 billion in total assets. It is regulated by Farm Credit Administration (FCA) and employs approximately 600 people across 67 branches. Its overall digital maturity is assessed at 1.9 out of 5 across the DMA capability framework.",
+    "primary_regulator": "Farm Credit Administration (FCA)",
+    "size_tier": "Large ($10B-$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-036",
+        "excerpt": "401(k) with up to 9% employer match; full medical/dental/vision; culture: collaboration, empathy, respect, diverse perspectives; Rock Star employee recognition",
+        "title": "401with up to 9% employer match",
+        "type": "article",
+        "url": "https://www.capitalfarmcredit.com/careers/benefits-culture/"
+      },
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-059",
+        "excerpt": "Content marketing: regular news posts, ag insights, market updates, patronage announcements, community stories. Blog cadence: 2-4 posts/month.",
+        "title": "Content marketing: regular news posts, ag insights, market updates\u2026",
+        "type": "blog",
+        "url": "https://www.capitalfarmcredit.com/news/"
+      }
+    ]
+  },
+  "issue_register": [
+    {
+      "id": "aa8dc61c-bfb1-4c15-9a29-8d8562c0e414",
+      "issue_id": "ISSUE-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "SENT-001 (app sentiment cap) and DATA-CAP-001 (governance foundation cap) magnitude rationale could be more explicit"
+    },
+    {
+      "id": "067d17b6-922d-42ae-9e88-6efd29dcc55e",
+      "issue_id": "ISSUE-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "P1C1 strategy score (2.0) based on CDO tenure <6 months; monitor for execution wins"
+    },
+    {
+      "id": "9a60a124-b2d7-4c56-9b7f-1e45e95a5fa2",
+      "issue_id": "ISSUE-003",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Layer 2 Governance Audit completed successfully; assessment approved for Layer 3 analysis"
+    },
+    {
+      "id": "ed9e77e7-c35c-4414-8e6e-c307739260c5",
+      "issue_id": "ISSUE-004",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "REC-001 (P4C1 Data Governance) high priority; implements Salesforce Data Cloud and Collibra metadata management"
+    },
+    {
+      "id": "0384f1fb-16b3-4dd8-a252-2e924195a013",
+      "issue_id": "ISSUE-005",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "REC-002 (P3C2 Risk Management) high priority; commodity/weather risk modeling and stress testing"
+    },
+    {
+      "id": "57c8be78-63d9-46de-ae48-23ba49a4f8ef",
+      "issue_id": "ISSUE-006",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "REC-003 (P3C1 Process Automation) high priority; intelligent document processing for loan origination"
+    },
+    {
+      "id": "2007f4b7-a4f1-408e-9783-1400eeb8a8c8",
+      "issue_id": "ISSUE-007",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "REC-004 (P2C1 Product Development) high priority; agricultural product portfolio modernization"
+    },
+    {
+      "id": "c8b69523-b8bd-442d-8705-d8970580adcc",
+      "issue_id": "ISSUE-008",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "REC-005 (P4C2 Analytics & AI) high priority; agricultural delinquency and commodity risk prediction ML models"
+    },
+    {
+      "id": "ff4d7efa-eb5a-4ac9-b97f-649c573bd24b",
+      "issue_id": "ISSUE-009",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "CFC P2C2 (Digital Channels) at peer parity (2.0) but mobile app adoption only ~15% of borrowers; recommend awareness"
+    },
+    {
+      "id": "f0b986e2-febb-4942-8c2a-2ce0b4ed02b8",
+      "issue_id": "ISSUE-010",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "XPIL-001 cap constrains P3 categories due to P1C2 governance weakness (1.5); governance improvement enables P3 advancement"
+    },
+    {
+      "id": "58d86e6d-e6f7-4b3f-8b4d-bb56506f727d",
+      "issue_id": "ISSUE-011",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "8 subcaps with T3-only evidence capped at 4.0 ceiling; no T1/T2 institutional documentation available"
+    },
+    {
+      "id": "58b84596-cac6-4518-9322-1413001f0400",
+      "issue_id": "ISSUE-012",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "3 categories with T5-only evidence (internal/website claims) capped at 2.0; external validation recommended"
+    },
+    {
+      "id": "586d5ba4-8234-49ad-b045-8d868efa50f6",
+      "issue_id": "ISSUE-013",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Technology audit shows modern CX stack (Azure"
+    },
+    {
+      "id": "ae736bed-c1d7-471b-ae64-2e564c93371b",
+      "issue_id": "ISSUE-014",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "82% marketing lift measured vs. infrastructure absent (no CRM/email marketing); resolved: infrastructure absence definitive"
+    },
+    {
+      "id": "694cfa09-bc62-4580-b0f2-9dddeee693f2",
+      "issue_id": "ISSUE-015",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Strategy roadmap vs. FCS regulatory constraints and agricultural market headwinds; resolved: constraints contextualize strategy maturity"
+    },
+    {
+      "id": "85c2cf7d-fc5c-4b0c-9728-0008352beef8",
+      "issue_id": "ISSUE-016",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Q2 app deployed vs. low adoption (15% of borrowers); resolved: platform \u2260 adoption"
+    },
+    {
+      "id": "79cd0ab1-44f3-472e-8943-ac4d6b505937",
+      "issue_id": "ISSUE-017",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "12-day origination vs. peer 3-5 days; partial automation evident but significant gaps remain"
+    },
+    {
+      "id": "948ca7dd-068f-40a9-ae67-25c069776649",
+      "issue_id": "ISSUE-018",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "DR plan documented vs. single-region cloud and branch system gaps; resolved: plan \u2260 implementation"
+    },
+    {
+      "id": "a5634bda-7cb3-49e7-87f7-94d3ee5c3b5a",
+      "issue_id": "ISSUE-019",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Basic analytics exist vs. advanced ML absent; acknowledged and targeted by REC-005"
+    },
+    {
+      "id": "bae8ee2f-d7c5-4c2d-a9e7-0ff5a355d013",
+      "issue_id": "ISSUE-020",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "70+ legacy products vs. no sustainability-focused or precision ag products; resolved: breadth \u2260 innovation"
+    },
+    {
+      "id": "fe535276-a258-4241-bc32-861e5a7c26cd",
+      "issue_id": "ISSUE-021",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Technology governance framework designed vs. execution gaps evident; resolved: design \u2260 execution"
+    },
+    {
+      "id": "cf9471e0-7689-432b-80a5-80fd1e2693d8",
+      "issue_id": "ISSUE-022",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Compliance stress testing vs. no commodity/weather risk modeling; resolved: compliance \u2260 advanced risk"
+    },
+    {
+      "id": "9d152c84-5acb-4cb8-9565-ca3c63e173b7",
+      "issue_id": "ISSUE-023",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "9 critic attacks across 10 categories; all adjudicated DEFEND with substantive reasoning"
+    },
+    {
+      "id": "af157f1f-2880-4cd8-873a-81142690be27",
+      "issue_id": "ISSUE-024",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "low",
+      "status": "OPEN",
+      "title": "Layer 2 Governance Audit completed with PASS verdict; assessment governance validated"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": ""
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.98,
+        "P1C2": 2.65,
+        "P1C3": 3.19,
+        "P1C4": 3.3,
+        "P1C5": 3.07,
+        "P2C1": 2.53,
+        "P2C2": 3.16,
+        "P2C3": 2.55,
+        "P2C4": 2.87,
+        "P3C1": 3.59,
+        "P3C2": 3.14,
+        "P3C3": 3.88,
+        "P3C4": 3.52,
+        "P4C1": 3.39,
+        "P4C2": 3.3,
+        "P4C3": 3.24,
+        "P4C4": 3.72
+      },
+      "overall_score": 3.18,
+      "peer_name": "Farm Credit Mid-America, ACA",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.33,
+        "P1C2": 2.93,
+        "P1C3": 2.33,
+        "P1C4": 3.21,
+        "P1C5": 2.0,
+        "P2C1": 1.74,
+        "P2C2": 2.69,
+        "P2C3": 1.98,
+        "P2C4": 2.39,
+        "P3C1": 2.61,
+        "P3C2": 2.48,
+        "P3C3": 3.24,
+        "P3C4": 3.23,
+        "P4C1": 1.93,
+        "P4C2": 1.63,
+        "P4C3": 2.26,
+        "P4C4": 2.9
+      },
+      "overall_score": 2.46,
+      "peer_name": "GreenStone Farm Credit Services ACA",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-ASM-CFC-20260305-0001",
+  "sentiment": {
+    "sources": [
+      {
+        "drilldown": null,
+        "evidence_e_id": null,
+        "kind": "other",
+        "max": null,
+        "n": null,
+        "polarity": "neutral",
+        "source": "Public Sources",
+        "themes": [],
+        "value": null
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Zennify completed a Digital Maturity Assessment of Capital Farm Credit. Overall digital maturity scored 1.77/5.0.",
+      "date_precision": "day",
+      "e_id": null,
+      "event_date": "2026-03-05",
+      "evidence_e_ids": [],
+      "id": "01ac9749-148a-4fd4-a1b6-b0cfaa26070d",
+      "kind": "milestone",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "DMA digital maturity assessment completed"
+    }
+  ]
+}

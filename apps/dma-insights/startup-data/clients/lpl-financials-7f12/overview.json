@@ -1,0 +1,970 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 142,
+        "subcaps": 142,
+        "thin": 142
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 187,
+        "subcaps": 187,
+        "thin": 187
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 108,
+        "subcaps": 108,
+        "thin": 108
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 160,
+        "subcaps": 160,
+        "thin": 160
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "lpl-financials-7f12",
+    "domain": null,
+    "hq": null,
+    "id": "01a49d9f-5358-426d-b299-25e0dc70c191",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "LPL Financials",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RIA",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:10:50.136514Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 88,
+    "current_count": 6,
+    "dated_count": 15,
+    "median_age_months": 19.9,
+    "oldest_published_date": "2021-03-01",
+    "stale_count": 3,
+    "stale_pct": 2.68,
+    "total": 112,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 112
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEUTRAL": 112
+    },
+    "tiers": {
+      "T1": 5,
+      "T2": 81,
+      "T3": 26
+    },
+    "total_facts": 112,
+    "total_items": 112
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 11.0,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 11000000000.0,
+    "cagr": "18%",
+    "cagr_basis": "report_prose",
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "total_assets": "$11.0B"
+    },
+    "founded": 1989,
+    "headcount": 6500,
+    "hq_address": null,
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Rich Steinmeier",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Renana Friedlich",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Vaughn Harvey",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Beth Hiatt",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": "No CTO / CIO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CTO / CIO"
+      }
+    ],
+    "legal_name": "LPL Financials",
+    "license_type": "SEC-registered",
+    "narrative_basis": "composed:firmographics",
+    "narrative_md": "LPL Financials is a wealth & advisory firm. It reports $11.0 billion in total assets and has operated since 1989. It is regulated by SEC and employs approximately 6,500 people. Its overall digital maturity is assessed at 3.4 out of 5 across the DMA capability framework.",
+    "primary_regulator": "SEC",
+    "regulator_basis": "inferred:subvertical",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 10100000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 100,
+          "score": 11.0,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "research_report_prose",
+      "employee": null,
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "signal": "ings, annual reports, press releases, analyst coverage, and app store ratings",
+          "source": "App Store"
+        },
+        {
+          "rating": "11",
+          "signal": ", NPS comparisons LPL Financials is a $11.0B in assets wealth & advisory firm regulated by SEC, operating since 1989 with 6,500 employees",
+          "source": "Net Promoter Score",
+          "trend": "Improving"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": null,
+    "thought_leadership": null,
+    "ticker": "LPLA",
+    "ticker_basis": "entity_profile",
+    "tl_synced_at": null,
+    "website": "lpl.com",
+    "website_basis": "entity_profile"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.490566+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# LPL Financials — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "LPL’s revised overall score of 3.18 places it below the peer median of 3.55 for large RIA/Broker-Dealers. The −0.37 gap is concentrated in Pillar 1 (Governance) and Pillar 4 (Technology), while Pillar 2 (Market-Facing) is competitive at 3.70.\nThe Schwab comparison is particularly instructive. Discovery notes reference a successful Schwab POV framework that “was rooted in building artifacts quickly that accelerate broader migration and adoption.” LPL is at a similar inflection point — post-major-reorg, new leadership mandate, platform modernization in progress. The Schwab playbook of prove-value-fast-then-scale is directly applicable.",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "LPL Financials is a $11.0B in assets wealth & advisory firm regulated by SEC, operating since 1989 with 6,500 employees. A 18.0% multi-year growth rate gives it the balance sheet to fund transformation [E-041, E-096]. Zennify's assessment places overall digital maturity at 3.3/5. The deepest capability gap is Digital Identity & Verifiable Credentials at 2.5/5 against a 2.9 peer median [E-038, E-050]. Next is Unified Data + AI Asset Governance Control Plane at 2.6/5 against a 2.7 peer median [E-019, E-067].\n\nThird is Sanctions Screening at 2.7/5 against a 3.1 peer median. The issue register adds Capability gap: Transaction Monitoring. The issue register adds Capability gap: Customer Due Diligence. Counter-signal: Cultural Integration Planning already runs at 4.1/5 against a 3.4 peer median — a strength to build on, not rebuild. The roster shows no CTO / CIO — a named ownership gap for the capabilities below.\n\nThe question for LPL Financials is whether to close Digital Identity & Verifiable Credentials first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. LPL Financials should lead with Databricks (59/100 fit) against Enterprise Data Catalog & Discovery, then sequence Tableau behind it. Closing Digital Identity & Verifiable Credentials to the peer median alone is worth 0.4 maturity points, and the capabilities that depend on it compound the gain. The analyst's own priority framing: \"Address the 4 P3 capability gaps as one operations + automation programme — payments, lending ops, and core.\"."
+  },
+  "overall_score": 3.32,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_Research/checkpoints/B2_evidence_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.047775+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_Research/checkpoints/B3_evidence_checkpoint.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.050360+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_Research/checkpoints/B3_evidence_checkpoint_final.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.053330+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_Research/handoff/A7_Coverage_Matrix.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.054547+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_Research/handoff/A9_Tech_Utilization.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.055256+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_Research/reports/LPL_Financial_Research_Report.docx",
+        "reason": "no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.106349+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/00_READ_ME_FIRST.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.106820+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/A1_Evidence_by_Source_Type.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.107228+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/A2_Pillar_Coverage.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.107664+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/A3_Evidence_to_Capabilities.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 32 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.108263+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/A6_Facts_Detail.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 158 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.112303+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/A7_Safeguard_Gates.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.112840+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/A8_Evidence_Quality_Report.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 11 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.113192+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/BATCH4_EXECUTION_SUMMARY.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.113449+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/CONSOLIDATION_REPORT.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.113638+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/master_evidence_registry.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.117709+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "02_Evidence/tier1_regulatory/B1_T1_enforcement_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.118456+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "03_Assessment/workbook/WORKBOOK_DOCUMENTATION.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 23 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.118910+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_Governance/check_results.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:10:50.119517+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 3,
+      "DEGRADED": 4,
+      "INFO": 30
+    },
+    "stage_ms": {
+      "manifest": 27,
+      "parse": 1793,
+      "persist": 299
+    },
+    "structured": [
+      {
+        "code": "docx_only_package_no_manifest",
+        "detail": "docx_only_package_no_manifest: no MANIFEST.json or canonical 01_..08_ layout; ingesting DOCX report(s) only",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "synthesized run_manifest from docx-only folder",
+        "detail": "synthesized run_manifest from docx-only folder: run_id=REQ-11C17F12, institution=LPL Financials",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'Independent RIA/Broker-Dealer'",
+        "severity": "INFO"
+      },
+      {
+        "code": "03_scoring_workbook missing — no subcap scores ingested",
+        "detail": "03_scoring_workbook missing — no subcap scores ingested",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx fallback extracted 605 subcaps from LPL_Financial_DMA_Scori",
+        "detail": "xlsx fallback extracted 605 subcaps from LPL_Financial_DMA_Scoring_Workbook.xlsx",
+        "severity": "INFO"
+      },
+      {
+        "code": "scoring loaded from xlsx fallback (605 subcaps, dir=03_Assessmen",
+        "detail": "scoring loaded from xlsx fallback (605 subcaps, dir=03_Assessment/workbook)",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "01_evidence missing — no evidence rows ingested",
+        "detail": "01_evidence missing — no evidence rows ingested",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "evidence loaded from non-canonical layout B2_evidence_checkpoint",
+        "detail": "evidence loaded from non-canonical layout B2_evidence_checkpoint.json (147 rows)",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_from",
+        "detail": "qa_verdict_from: 04_Governance/qa_verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=0 contradictions=4",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 105 cap event(s) parsed from 04_Governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 18 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "no_recommendations_source",
+        "detail": "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+        "severity": "DATA_LOSS"
+      },
+      {
+        "code": "category_scores_derived_from_subcaps",
+        "detail": "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_derived_from_category_gaps",
+        "detail": "insights_derived_from_category_gaps: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_Research/checkpoints/B2_evidence_checkpoint.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_Research/checkpoints/B3_evidence_checkpoint.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_Research/checkpoints/B3_evidence_checkpoint_final.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_Research/handoff/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_Research/handoff/A9_Tech_Utilization.csv — no fingerprint matched (best confidence 0.20); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_Research/reports/LPL_Financial_Research_Report.docx — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/00_READ_ME_FIRST.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/A1_Evidence_by_Source_Type.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/A2_Pillar_Coverage.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/A3_Evidence_to_Capabilities.csv — no fingerprint matched (best confidence 0.00); 32 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/A6_Facts_Detail.csv — no fingerprint matched (best confidence 0.00); 158 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/A7_Safeguard_Gates.csv — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/A8_Evidence_Quality_Report.csv — no fingerprint matched (best confidence 0.25); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/BATCH4_EXECUTION_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/CONSOLIDATION_REPORT.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/master_evidence_registry.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "02_Evidence/tier1_regulatory/B1_T1_enforcement_log.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "03_Assessment/workbook/WORKBOOK_DOCUMENTATION.md — no fingerprint matched (best confidence 0.00); 23 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_Governance/check_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:8/605 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "hollow_package",
+        "detail": "scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)",
+        "severity": "DATA_LOSS"
+      }
+    ],
+    "warnings": [
+      "docx_only_package_no_manifest: no MANIFEST.json or canonical 01_..08_ layout; ingesting DOCX report(s) only",
+      "synthesized run_manifest from docx-only folder: run_id=REQ-11C17F12, institution=LPL Financials",
+      "subvertical derived from report artifacts: 'Independent RIA/Broker-Dealer'",
+      "03_scoring_workbook missing — no subcap scores ingested",
+      "xlsx fallback extracted 605 subcaps from LPL_Financial_DMA_Scoring_Workbook.xlsx",
+      "scoring loaded from xlsx fallback (605 subcaps, dir=03_Assessment/workbook)",
+      "01_evidence missing — no evidence rows ingested",
+      "evidence loaded from non-canonical layout B2_evidence_checkpoint.json (147 rows)",
+      "qa_verdict_from: 04_Governance/qa_verdict.json",
+      "governance_audit_logs: reasoning_chain=0 contradictions=4",
+      "caps_applied_log: 105 cap event(s) parsed from 04_Governance/caps_applied_log.csv",
+      "tech_stack_from_variant_source: 18 entries",
+      "no_recommendations_source: package ships no recommendations_detail.json or recommendations_register.json AND the Assessment_Report.docx §9 had no extractable rec IDs (see docs/qa/qa_5folder_live_findings.md §F4)",
+      "category_scores_derived_from_subcaps: 17 categories (mean rollup)",
+      "insights_derived_from_category_gaps: 3",
+      "INFO/pattern_gap: 01_Research/checkpoints/B2_evidence_checkpoint.json — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 01_Research/checkpoints/B3_evidence_checkpoint.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 01_Research/checkpoints/B3_evidence_checkpoint_final.json — no fingerprint matched (best confidence 0.00); 10 generic sections mined",
+      "INFO/pattern_gap: 01_Research/handoff/A7_Coverage_Matrix.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 01_Research/handoff/A9_Tech_Utilization.csv — no fingerprint matched (best confidence 0.20); 15 generic sections mined",
+      "INFO/pattern_gap: 01_Research/reports/LPL_Financial_Research_Report.docx — no fingerprint matched (best confidence 0.00); 15 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/00_READ_ME_FIRST.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/A1_Evidence_by_Source_Type.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/A2_Pillar_Coverage.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/A3_Evidence_to_Capabilities.csv — no fingerprint matched (best confidence 0.00); 32 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/A6_Facts_Detail.csv — no fingerprint matched (best confidence 0.00); 158 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/A7_Safeguard_Gates.csv — no fingerprint matched (best confidence 0.00); 16 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/A8_Evidence_Quality_Report.csv — no fingerprint matched (best confidence 0.25); 11 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/BATCH4_EXECUTION_SUMMARY.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/CONSOLIDATION_REPORT.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/master_evidence_registry.json — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 02_Evidence/tier1_regulatory/B1_T1_enforcement_log.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 03_Assessment/workbook/WORKBOOK_DOCUMENTATION.md — no fingerprint matched (best confidence 0.00); 23 generic sections mined",
+      "INFO/pattern_gap: 04_Governance/check_results.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "catalogue_unresolved:8/605 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 3",
+      "DATA_LOSS/hollow_package: scored package parsed with zero_recommendations; kept ACTIVE (DMA_ALLOW_HOLLOW=1)"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 142,
+      "peer_median": 3.1,
+      "pillar_id": "P1",
+      "score": 3.72,
+      "subcaps_scored": 142
+    },
+    {
+      "peer_benchmarked": 187,
+      "peer_median": 3.13,
+      "pillar_id": "P2",
+      "score": 3.76,
+      "subcaps_scored": 187
+    },
+    {
+      "peer_benchmarked": 108,
+      "peer_median": 2.95,
+      "pillar_id": "P3",
+      "score": 2.97,
+      "subcaps_scored": 108
+    },
+    {
+      "peer_benchmarked": 160,
+      "peer_median": 3.01,
+      "pillar_id": "P4",
+      "score": 2.84,
+      "subcaps_scored": 160
+    }
+  ],
+  "run": {
+    "assessment_date": null,
+    "assessment_date_source": null,
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:10:50.136514Z",
+    "created_at": "2026-07-02T23:10:50.136514Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "b64eea1a-e326-4169-8cf8-2c4ac99a3571",
+    "overall_score": null,
+    "request_id": "REQ-11C17F12",
+    "started_at": "2026-07-02T23:10:50.136514Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 100,
+        "score": 11.0,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "research_report_prose",
+    "employee": [],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Address the 4 P3 capability gaps as one operations + automation programme — payments, lending ops, and core.",
+      "evidence": [
+        "E-053",
+        "E-132",
+        "E-123"
+      ],
+      "magnitude": "0.4 pts below peer median",
+      "name": "Operationalize process automation",
+      "peer_median": 3.07,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 2.68,
+      "so_what": "Prioritize Operationalize process automation in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C3",
+      "theme": "Operations",
+      "title": "Operationalize process automation",
+      "what": "Address the 4 P3 capability gaps as one operations + automation programme — payments, lending ops, and core.",
+      "why": "The shortfall is relative, not absolute: 2.68/5 sits below the 3.07 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Treat the 20 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "evidence": [
+        "E-025",
+        "E-132",
+        "E-067"
+      ],
+      "magnitude": "0.1 pts below peer median",
+      "name": "Build the data foundation",
+      "peer_median": 2.73,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.59,
+      "so_what": "Prioritize Build the data foundation in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C1",
+      "theme": "Data & technology",
+      "title": "Build the data foundation",
+      "what": "Treat the 20 P4 gaps as the prerequisite layer — data + AI cannot land without modern foundation, integration, and governance.",
+      "why": "The shortfall is relative, not absolute: 2.59/5 sits below the 2.73 peer median, so peers are compounding an advantage here each cycle."
+    },
+    {
+      "body": "Digital Identity & Verifiable Credentials is a priority capability gap in data and technology, scoring 2.45/5 against a peer median of 2.9. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-053",
+        "E-132",
+        "E-123"
+      ],
+      "magnitude": "0.4 pts below peer median",
+      "name": "Digital Identity & Verifiable Credentials",
+      "peer_median": 2.9,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 2.45,
+      "so_what": "Prioritize Digital Identity & Verifiable Credentials in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C4",
+      "theme": "Data & technology",
+      "title": "Digital Identity & Verifiable Credentials",
+      "what": "Digital Identity & Verifiable Credentials is a priority capability gap in data and technology, scoring 2.45/5 against a peer median of 2.9. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The shortfall is relative, not absolute: 2.45/5 sits below the 2.9 peer median, so peers are compounding an advantage here each cycle."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 4.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Cultural Integration Planning averages 4.1/5 over 146 scored subcaps; ceiling 4.6 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Model Monitoring averages 3.5/5 over 217 scored subcaps; ceiling 4.0 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "AI Governance for Innovation averages 3.5/5 over 130 scored subcaps; ceiling 4.0 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "135 of 135 subcaps on thin evidence"
+      ],
+      "rationale": "Customer-Centric Culture averages 3.8/5 over 135 scored subcaps; ceiling 4.3 reflects thin evidence density (0/135 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "70 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Climate Risk averages 3.8/5 over 70 scored subcaps; ceiling 4.3 reflects thin evidence density (0/70 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 4.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "254 of 254 subcaps on thin evidence"
+      ],
+      "rationale": "Educational Content averages 4.0/5 over 254 scored subcaps; ceiling 4.5 reflects thin evidence density (0/254 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "241 of 241 subcaps on thin evidence"
+      ],
+      "rationale": "Cross-Channel Application Continuity averages 3.5/5 over 241 scored subcaps; ceiling 4.0 reflects thin evidence density (0/241 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 4.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "239 of 239 subcaps on thin evidence"
+      ],
+      "rationale": "Case Management & Resolution averages 3.9/5 over 239 scored subcaps; ceiling 4.4 reflects thin evidence density (0/239 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "171 of 171 subcaps on thin evidence"
+      ],
+      "rationale": "Goal Setting & Tracking averages 3.5/5 over 171 scored subcaps; ceiling 4.0 reflects thin evidence density (0/171 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "126 of 126 subcaps on thin evidence"
+      ],
+      "rationale": "Workflow & Task Automation averages 3.0/5 over 126 scored subcaps; ceiling 3.5 reflects thin evidence density (0/126 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "115 of 115 subcaps on thin evidence"
+      ],
+      "rationale": "Law Enforcement Coordination averages 2.9/5 over 115 scored subcaps; ceiling 3.4 reflects thin evidence density (0/115 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "Sanctions Screening averages 2.7/5 over 142 scored subcaps; ceiling 3.2 reflects thin evidence density (0/142 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Exit & Contingency averages 3.3/5 over 145 scored subcaps; ceiling 3.8 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Unified Data + AI Asset Governance Control Plane averages 2.6/5 over 200 scored subcaps; ceiling 3.1 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "230 of 230 subcaps on thin evidence"
+      ],
+      "rationale": "RAG Cost/Performance Governance averages 3.1/5 over 230 scored subcaps; ceiling 3.6 reflects thin evidence density (0/230 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "220 of 220 subcaps on thin evidence"
+      ],
+      "rationale": "DevSecOps & Security in Pipeline averages 3.0/5 over 220 scored subcaps; ceiling 3.5 reflects thin evidence density (0/220 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Identity & Verifiable Credentials averages 2.5/5 over 150 scored subcaps; ceiling 3.0 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "HYPOTHESIS",
+      "confidence": "MEDIUM",
+      "derived_from": "timeline_events",
+      "detail": "Zennify completed a Digital Maturity Assessment of LPL Financials. Overall digital maturity scored 3.36/5.0 (Jul 2026).",
+      "evidence": [
+        "E-038",
+        "E-050"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Zennify completed a Digital Maturity Assessment of LPL…",
+      "metric": null,
+      "peer_context": "Digital Identity & Verifiable Credentials runs 2.45/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Zennify completed a Digital Maturity Assessment of LPL Financials. Overall digital maturity scored 3.36/5.0 (Jul 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-02",
+        "event": "DMA digital maturity assessment completed"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Digital Identity & Verifiable Credentials scores 2.45/5 vs a typical 2.90 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "evidence": [
+        "E-038",
+        "E-050"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Digital Identity & Verifiable Credentials scores 2.45/5",
+      "metric": "Digital Identity & Verifiable Credentials 2.45/5 vs peer 2.90",
+      "peer_context": "Digital Identity & Verifiable Credentials runs 2.45/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C4",
+      "text": "Digital Identity & Verifiable Credentials scores 2.45/5 vs a typical 2.90 at similar institutions — the deepest open gap in Data & Technology and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Unified Data + AI Asset Governance Control Plane at 2.59/5 is one of LPL Financials's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "evidence": [
+        "E-019",
+        "E-067"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "PRIORITY",
+      "label": "Unified Data + AI Asset Governance Control Plane at 2.59/5…",
+      "metric": null,
+      "peer_context": "Digital Identity & Verifiable Credentials runs 2.45/5 vs a 2.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Enterprise Data Catalog & Discovery — highest-fit surface at 59/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P4C1",
+      "text": "Unified Data + AI Asset Governance Control Plane at 2.59/5 is one of LPL Financials's lower-scoring capability areas and a priority focus for the next phase of the digital-maturity roadmap.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

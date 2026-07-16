@@ -1,0 +1,905 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 188,
+        "subcaps": 188,
+        "thin": 188
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 233,
+        "subcaps": 233,
+        "thin": 233
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 115,
+        "subcaps": 115,
+        "thin": 115
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "oneaz-credit-union-0001",
+    "domain": null,
+    "hq": null,
+    "id": "538f473c-2873-40f1-96df-b79f1466d9df",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "OneAZ Credit Union",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "CU",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:09.348389Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 94,
+    "current_count": 18,
+    "dated_count": 33,
+    "median_age_months": 22.1,
+    "oldest_published_date": "2021-12-01",
+    "stale_count": 7,
+    "stale_pct": 4.61,
+    "total": 152,
+    "undated_count": 0
+  },
+  "evidence_summary": {
+    "claims": {
+      "FACT": 151,
+      "INFERENCE": 1
+    },
+    "connectors": {
+      "Glassdoor": 1,
+      "LinkedIn": 7
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 9,
+      "NEUTRAL": 116,
+      "POSITIVE": 27
+    },
+    "tiers": {
+      "T1": 10,
+      "T2": 82,
+      "T3": 42,
+      "T4": 18
+    },
+    "total_facts": 152,
+    "total_items": 152
+  },
+  "financial_trajectory": {
+    "cagr": null,
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": null,
+    "highlights": [
+      {
+        "label": "Total assets",
+        "unit": "B",
+        "value": 4.3,
+        "year": null
+      }
+    ],
+    "series": {},
+    "trend": null,
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 4300000000.0,
+    "branches": 20,
+    "cagr": "7.5%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "fin_src": "report_prose",
+    "financial_highlights": {
+      "total_assets": "$4.3B"
+    },
+    "footprint": "Arizona (statewide)",
+    "footprint_basis": "derived:geography",
+    "founded": 1951,
+    "founded_basis": "nlp:narrative",
+    "geography": "Arizona (statewide)",
+    "headcount": 500,
+    "hq": "Phoenix, AZ",
+    "hq_address": "Phoenix, AZ",
+    "leadership": [
+      {
+        "background": "leads strategic vision including Backbase transformation [E-001",
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Brandon Michaels",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": "dedicated security governance, previously at Navigant CU [E-143",
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Monique M",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP CISO"
+      },
+      {
+        "background": "No CDO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CDO"
+      }
+    ],
+    "legal_name": "OneAZ Credit Union",
+    "license_type": "State-chartered",
+    "narrative_md": "OneAZ Credit Union is an Arizona state-chartered, NCUA-insured credit union headquartered in Phoenix, AZ. Founded in 1951 as Arizona Federal Credit Union, it rebranded to OneAZ in 2014 as part of a growth strategy. The credit union operates as a member-owned cooperative serving over 170,000 members across Arizona [E-001]. In 2023, OneAZ completed the absorption of Pinal County Federal Credit Union, expanding its branch network and member base [E-009].",
+    "primary_regulator": "NCUA",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "metric": "Overall",
+          "n": 458,
+          "scale": 5,
+          "score": 4.8,
+          "source": "Trustpilot"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.2,
+          "source": "CFPB complaints"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 104,
+          "scale": 5,
+          "score": 3.2,
+          "source": "Glassdoor"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.2/5",
+          "signal": "3.2/5 overall Glassdoor rating, 104 reviews, 57% recommend",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "4.8/5",
+          "signal": "Trustpilot 4.8/5 from 458+ reviews — strong member satisfaction signal",
+          "source": "Trustpilot"
+        },
+        {
+          "signal": "BBB complaints 2024-2025: member disputes include lending documentation issues, account freezing incidents, fraud handling concerns",
+          "source": "Better Business Bureau"
+        },
+        {
+          "rating": "3.2/5",
+          "signal": "No CFPB enforcement actions found against OneAZ Credit Union",
+          "source": "CFPB complaints"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "community",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-053",
+        "excerpt": "Financial Resources hub: articles, videos, calculators, coaching partnerships (GreenPath, Banzai).",
+        "title": "Financial Resources hub: articles, videos, calculators, coaching…",
+        "type": "article",
+        "url": "https://www.oneazcu.com/about/financial-resources/"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-055",
+        "excerpt": "Local First Arizona + State Forty Eight collaborations for financial literacy, podcasts, networking.",
+        "title": "Local First Arizona + State Forty Eight collaborations for financial…",
+        "type": "podcast",
+        "url": "https://www.oneazcu.com/community/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "oneazcu.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v5.5",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.397560+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# OneAZ Credit Union — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "OneAZ is benchmarked against five peer credit unions selected for sub-vertical match, asset size proximity ($1.3B-$5.3B), and Arizona/Western US geographic relevance: Connexus Credit Union (WI, $4.1B), Bellco Credit Union (CO, $5.3B), Patelco Credit Union (CA, $9.5B), Vantage West Credit Union (AZ, $2.3B), and TruWest Credit Union (AZ, $1.3B). Connexus leads the cohort (3.22 avg) with digital-first positioning, while TruWest (2.31) provides a baseline comparator. Notably, Patelco experienced a ransomware breach in 2024 (E-peer data), highlighting the cybersecurity risks facing the peer group.\nKey peer insights: OneAZ leads peers in Governance (+0.64 vs median) and Process Optimization (+0.46), reflecting strong institutional foundations. The largest gaps are in Analytics (-1.41), Personalization (-1.32), and Security (-0.98). The entire cohort scores weakly on ESG (median 2.55), indicating this is an industry-wide development area rather than an OneAZ-specific deficiency.",
+    "page_number": null,
+    "scqa_heading": "1. Executive Summary",
+    "scqa_md": "OneAZ Credit Union is a $4.3B in assets credit union regulated by NCUA, operating since 1951 with 500 employees. A 7.5% multi-year growth rate and a trajectory the analyst classifies as stable give it the balance sheet to fund transformation [E-079, E-021]. Zennify's assessment places overall digital maturity at 2.7/5. The deepest capability gap is Personalized Education at 1.7/5 against a 3.0 peer median [E-032, E-068].\n\nNext is Generative AI Strategy & Use Cases at 1.7/5 against a 3.1 peer median [E-010, E-017]. Third is Fine-Grained Entitlement Design at 1.8/5 against a 2.8 peer median [E-043, E-076]. The issue register adds Evidence IDs referenced but not in registry: ['', ''] (critical severity). The issue register adds 132 subcaps (18.7%) have missing/generic URLs (high severity).\n\nCounter-signal: Attended Automation already runs at 3.5/5 against a 3.1 peer median — a strength to build on, not rebuild. The roster shows no CDO — a named ownership gap for the capabilities below. The question for OneAZ Credit Union is whether to close Personalized Education first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. OneAZ Credit Union should lead with Databricks (64/100 fit) against Customer Intelligence Foundation, then sequence nCino behind it.\n\nClosing Personalized Education to the peer median alone is worth 1.3 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.74,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/all_peer_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.318160+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.318509+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.319279+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/OneAZ_DMA_Execution_Plan_v2.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 86 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.320211+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:09.320686+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 0,
+      "INFO": 18
+    },
+    "stage_ms": {
+      "manifest": 5,
+      "parse": 6704,
+      "persist": 401
+    },
+    "structured": [
+      {
+        "code": "used variant scoring CSV location",
+        "detail": "used variant scoring CSV location: 08_appendices/export_scoring_detail.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+152 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 07_governance/governance_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "qa_verdict_l1_l2_pair",
+        "detail": "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=20 contradictions=1",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 62 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=DMA_Client_Profile_OneAZ_20260312.docx leadership=0 focus_areas=1 facts_extracted=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "used docx-extracted recommendations",
+        "detail": "used docx-extracted recommendations: 5 rec(s) from Assessment_Report.docx §9",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 5 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 9",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/all_peer_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/OneAZ_DMA_Execution_Plan_v2.md — no fingerprint matched (best confidence 0.00); 86 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/critic_log.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 9",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant scoring CSV location: 08_appendices/export_scoring_detail.csv",
+      "INFO/evidence_facts_merged_from_json_twin: +152 rows gained facts[], +0 gained excerpts from the JSON evidence twin",
+      "used variant issue register: 07_governance/governance_issue_register.csv",
+      "qa_verdict_l1_l2_pair: L1='PASS_WITH_NOTES' L2='PASS_WITH_NOTES' (2-stage QA escalation captured)",
+      "governance_audit_logs: reasoning_chain=20 contradictions=1",
+      "caps_applied_log: 62 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "firmographics_from_client_profile_docx: source=DMA_Client_Profile_OneAZ_20260312.docx leadership=0 focus_areas=1 facts_extracted=2",
+      "used docx-extracted recommendations: 5 rec(s) from Assessment_Report.docx §9",
+      "tech_stack_from_report_prose: 5 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 9",
+      "INFO/pattern_gap: 06_peers/all_peer_scores.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 12 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/OneAZ_DMA_Execution_Plan_v2.md — no fingerprint matched (best confidence 0.00); 86 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/critic_log.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "timeline_events_persisted: 12",
+      "insight_cards_persisted: 9"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 188,
+      "peer_median": 2.91,
+      "pillar_id": "P1",
+      "score": 3.07,
+      "subcaps_scored": 188
+    },
+    {
+      "peer_benchmarked": 233,
+      "peer_median": 3.03,
+      "pillar_id": "P2",
+      "score": 2.7,
+      "subcaps_scored": 233
+    },
+    {
+      "peer_benchmarked": 115,
+      "peer_median": 2.81,
+      "pillar_id": "P3",
+      "score": 2.85,
+      "subcaps_scored": 115
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.09,
+      "pillar_id": "P4",
+      "score": 2.35,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-13",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v5.5",
+    "completed_at": "2026-07-02T23:11:09.348389Z",
+    "created_at": "2026-07-02T23:11:09.348389Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "1d79ceee-7136-400f-bab2-32f12f8cb0aa",
+    "overall_score": null,
+    "request_id": "DMA-ASM-ONEAZ-20260313-0001",
+    "started_at": "2026-07-02T23:11:09.348389Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "metric": "Overall",
+        "n": 458,
+        "scale": 5,
+        "score": 4.8,
+        "source": "Trustpilot"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.2,
+        "source": "CFPB complaints"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 104,
+        "scale": 5,
+        "score": 3.2,
+        "source": "Glassdoor"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "OneAZ Credit Union stands at a critical digital inflection point. The September 2024 Backbase partnership signals transformational ambition, but execution gaps in CRM depth, integration infrastructure, and automation maturity create a compelling Zennify engagement opportunity.",
+      "evidence": [
+        "E-067",
+        "E-009",
+        "E-126",
+        "E-014"
+      ],
+      "magnitude": "1.3 pts below peer median",
+      "name": "OneAZ Credit Union stands at a critical digital inflection",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.68,
+      "so_what": "Prioritize OneAZ Credit Union stands at a critical digital inflection in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "OneAZ Credit Union stands at a critical digital inflection",
+      "what": "OneAZ Credit Union stands at a critical digital inflection point. The September 2024 Backbase partnership signals transformational ambition, but execution gaps in CRM depth, integration infrastructure, and automation maturity create a compelling Zennify engagement opportunity.",
+      "why": "The linked evidence records: Multi-tier rewards: cash back, travel, donations. Flexible redemption model. $50-$500 referral escalation program with automatic enrollment."
+    },
+    {
+      "body": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-067",
+        "E-009",
+        "E-126",
+        "E-014"
+      ],
+      "magnitude": "1.3 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 3.0,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 1.68,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 24 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: Multi-tier rewards: cash back, travel, donations. Flexible redemption model. $50-$500 referral escalation program with automatic enrollment."
+    },
+    {
+      "body": "Generative AI Strategy & Use Cases is a priority capability gap in data and technology, scoring 1.74/5 against a peer median of 3.15. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "evidence": [
+        "E-025",
+        "E-112",
+        "E-113"
+      ],
+      "magnitude": "1.4 pts below peer median",
+      "name": "Generative AI Strategy & Use Cases",
+      "peer_median": 3.15,
+      "platforms": [
+        "Databricks",
+        "Tableau"
+      ],
+      "score": 1.74,
+      "so_what": "Prioritize Generative AI Strategy & Use Cases in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the data and technology capabilities that depend on it.",
+      "subcap_id": "P4C2",
+      "theme": "Data & technology",
+      "title": "Generative AI Strategy & Use Cases",
+      "what": "Generative AI Strategy & Use Cases is a priority capability gap in data and technology, scoring 1.74/5 against a peer median of 3.15. Strengthening it is among the highest-leverage moves to lift maturity in data and technology.",
+      "why": "The linked evidence records: Azure cloud + Hadoop data lake + Dynamics CRM = analytical data utility (ADU) for member management. Self-service analytics available to associates — reduces IT dependency for data queries."
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "167 of 167 subcaps on thin evidence"
+      ],
+      "rationale": "Cloud Strategy averages 3.5/5 over 167 scored subcaps; ceiling 4.0 reflects thin evidence density (0/167 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2 applied: Evidence absence cap 2.0 (no data governance framework)",
+        "221 of 221 subcaps on thin evidence"
+      ],
+      "rationale": "Steering Committee averages 3.4/5 over 221 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: Evidence absence cap 2.0 (no data governance framework)); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "192 of 192 subcaps on thin evidence"
+      ],
+      "rationale": "Design Thinking Capabilities averages 3.0/5 over 192 scored subcaps; ceiling 3.5 reflects thin evidence density (0/192 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Leadership Communication averages 3.1/5 over 205 scored subcaps; ceiling 3.6 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "126 of 126 subcaps on thin evidence"
+      ],
+      "rationale": "ESG Ratings Management averages 2.0/5 over 126 scored subcaps; ceiling 2.5 reflects thin evidence density (0/126 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "293 of 293 subcaps on thin evidence"
+      ],
+      "rationale": "Marketing Strategy & Segmentation averages 3.0/5 over 293 scored subcaps; ceiling 3.5 reflects thin evidence density (0/293 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "291 of 291 subcaps on thin evidence"
+      ],
+      "rationale": "Ancillary Services Setup averages 3.0/5 over 291 scored subcaps; ceiling 3.5 reflects thin evidence density (0/291 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "289 of 289 subcaps on thin evidence"
+      ],
+      "rationale": "Accessibility & Inclusion averages 3.0/5 over 289 scored subcaps; ceiling 3.5 reflects thin evidence density (0/289 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: CRITIC: LOW confidence cap 2.5",
+        "259 of 259 subcaps on thin evidence"
+      ],
+      "rationale": "Personalized Education averages 1.7/5 over 259 scored subcaps; ceiling 2.2 reflects the binding cap (cap M2.5 applied: CRITIC: LOW confidence cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 4.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "146 of 146 subcaps on thin evidence"
+      ],
+      "rationale": "Attended Automation averages 3.5/5 over 146 scored subcaps; ceiling 4.0 reflects thin evidence density (0/146 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: CRITIC: LOW confidence cap 2.5",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Loss Data Collection averages 2.8/5 over 130 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: CRITIC: LOW confidence cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: CRITIC: LOW confidence cap 2.5",
+        "142 of 142 subcaps on thin evidence"
+      ],
+      "rationale": "UDAAP Compliance averages 2.9/5 over 142 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: CRITIC: LOW confidence cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: CRITIC: LOW confidence cap 2.5",
+        "cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)",
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "DR Testing averages 2.1/5 over 145 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: CRITIC: LOW confidence cap 2.5); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap applied: P4C1_data_gov_cap=2.5",
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Data Quality Management averages 2.9/5 over 200 scored subcaps; ceiling 3.4 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)",
+        "cap applied: Evidence ceiling 1.5",
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Generative AI Strategy & Use Cases averages 1.7/5 over 270 scored subcaps; ceiling 2.2 reflects the binding cap (cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)",
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Enterprise Integration Strategy averages 3.0/5 over 235 scored subcaps; ceiling 2.5 reflects the binding cap (cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 2.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [],
+      "modifiers": [
+        "cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)",
+        "cap applied: Evidence ceiling 1.5",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Fine-Grained Entitlement Design averages 1.8/5 over 150 scored subcaps; ceiling 2.3 reflects the binding cap (cap M2.5 applied: Evidence absence cap 2.5 (no CDO/CTO)); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "leadership",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Mike Boden named President & CEO Jan 13 2026. Mike Boden named President & CEO Jan 13 2026 (Jan 2026).",
+      "evidence": [
+        "E-007"
+      ],
+      "impact": "Shapes which platforms the new leadership standardizes on.",
+      "kind": "LEADERSHIP",
+      "label": "Mike Boden named President & CEO Jan 13 2026",
+      "metric": null,
+      "peer_context": "Personalized Education runs 1.68/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize an intro meeting inside the new seat's first 90 days, anchored on the assessment's top gap.",
+      "risk": "New executives set platform direction in their first two quarters and defend it afterward — after the window, the criteria are someone else's.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Mike Boden named President & CEO Jan 13 2026. Mike Boden named President & CEO Jan 13 2026 (Jan 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-01-13",
+        "event": "Mike Boden named President & CEO Jan 13 2026"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "All-cash acquisition of 1st Bank Yuma closed. All-cash acquisition of 1st Bank Yuma closed Nov 21 2025 (Nov 2025).",
+      "evidence": [
+        "E-006"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "All-cash acquisition of 1st Bank Yuma closed",
+      "metric": null,
+      "peer_context": "Personalized Education runs 1.68/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Customer Intelligence Foundation — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "All-cash acquisition of 1st Bank Yuma closed. All-cash acquisition of 1st Bank Yuma closed Nov 21 2025 (Nov 2025). Window: closes ~Q2 2027.",
+      "timeline": {
+        "date": "2025-11-21",
+        "event": "All-cash acquisition of 1st Bank Yuma closed"
+      },
+      "window": "closes ~Q2 2027"
+    },
+    {
+      "category": "regulatory",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Absence of enforcement is informative for P3C3 compliance scoring — indicates regulatory standing within acceptable bounds (Mar 2026).",
+      "evidence": [
+        "E-012"
+      ],
+      "impact": "Dictates near-term compliance and data-governance investment.",
+      "kind": "REGULATORY",
+      "label": "Absence of enforcement is informative for P3C3 compliance…",
+      "metric": null,
+      "peer_context": "Personalized Education runs 1.68/5 vs a 3.00 median at comparable institutions.",
+      "play": "Lead with governed data and compliance reporting — remediation budgets should fund the data foundation once.",
+      "risk": "Remediation scope hardens as the clock runs; capabilities capped by the order stay capped until closure is evidenced.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Absence of enforcement is informative for P3C3 compliance scoring — indicates regulatory standing within acceptable bounds (Mar 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-03-01",
+        "event": "Clean regulatory standing"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "Tuition reimbursement and student loan repayment programs. Active hiring: IAM Specialist, Data Governance Lead, RPA Engineer — signals digital capability build-out.",
+      "evidence": [
+        "E-044"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "Tuition reimbursement and student loan repayment programs",
+      "metric": null,
+      "peer_context": "Personalized Education runs 1.68/5 vs a 3.00 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "Tuition reimbursement and student loan repayment programs. Active hiring: IAM Specialist, Data Governance Lead, RPA Engineer — signals digital capability build-out. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Total assets exceeded $4B after 1st Bank Yuma acquisition closed Nov 2025. 230K+ members, 25 branches.",
+      "evidence": [
+        "E-001"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Total assets exceeded $4B after 1st Bank Yuma acquisition",
+      "metric": "assets exceeded $4B",
+      "peer_context": "Personalized Education runs 1.68/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Customer Intelligence Foundation — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": null,
+      "text": "Total assets exceeded $4B after 1st Bank Yuma acquisition closed Nov 2025. 230K+ members, 25 branches.",
+      "timeline": {
+        "date": "2025-11-01",
+        "event": "Total assets exceeded $4B after 1st Bank Yuma acquisition"
+      },
+      "window": null
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Personalized Education scores 1.68/5 vs a typical 3.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "evidence": [
+        "E-068",
+        "E-108",
+        "E-067",
+        "E-009"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Personalized Education scores 1.68/5",
+      "metric": "Personalized Education 1.68/5 vs peer 3.00",
+      "peer_context": "Personalized Education runs 1.68/5 vs a 3.00 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Customer Intelligence Foundation — highest-fit surface at 64/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P2C4",
+      "text": "Personalized Education scores 1.68/5 vs a typical 3.00 at similar institutions — the deepest open gap in Customer and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+{
+  "entity_display_id": "greenstone-farm-credit-s-3001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Website inspection + tech stack scan",
+        "source_kind": "docx"
+      },
+      "id": "de5bd958-2cc8-4c47-8407-32b0181bb964",
+      "involved_subcap_ids": [
+        "P2C1.6.3",
+        "P1C3.3.4",
+        "P3C3.5.2",
+        "P3C4.3.4",
+        "P2C4.8.3",
+        "P4C4.4.1"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 17,
+        "P2": 33,
+        "P3": 33,
+        "P4": 17
+      },
+      "source_path": "(unknown)",
+      "title": "No A/B testing",
+      "verbatim_quote": "No A/B testing | P2C1 optimization capped | Website inspection + tech stack scan | MEDIUM"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Exhaustive search across all sources + job postings",
+        "source_kind": "docx"
+      },
+      "id": "cbb992e5-2aaf-4638-9ee9-a01e5064c6a9",
+      "involved_subcap_ids": [
+        "P4C2.7.5",
+        "P4C2.3.1",
+        "P4C2.2.4",
+        "P4C2.7.4",
+        "P4C1.1.3",
+        "P4C1.4.3",
+        "P4C1.1.3",
+        "P4C1.1.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No AI/ML in production",
+      "verbatim_quote": "No AI/ML in production | P4C2 cap at M1.5 | Exhaustive search across all sources + job postings | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-mid)",
+        "var(--z-teal)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Tech stack scan + job postings",
+        "source_kind": "docx"
+      },
+      "id": "a15d5182-2f69-4ed6-be89-4aa9e8dc5238",
+      "involved_subcap_ids": [
+        "P1C5.3.1",
+        "P1C5.3.1",
+        "P1C5.2.4",
+        "P1C5.3.1",
+        "P1C1.3.2",
+        "P1C1.1.4",
+        "P1C1.1.1",
+        "P1C1.3.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No API strategy/middleware",
+      "verbatim_quote": "No API strategy/middleware | P4C3 subcaps capped | Tech stack scan + job postings | MEDIUM"
+    },
+    {
+      "colors": [
+        "var(--z-blue)",
+        "var(--ph1)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Executive search + org chart review",
+        "source_kind": "docx"
+      },
+      "id": "07a4fad5-db6f-4bc5-afae-888eb7342a82",
+      "involved_subcap_ids": [
+        "P1C2.1.4",
+        "P1C4.5.1",
+        "P1C4.2.2",
+        "P4C1.1.5",
+        "P4C1.5.4",
+        "P1C2.1.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 67,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "No CDO role",
+      "verbatim_quote": "No CDO role | P4C1 governance subcaps | Executive search + org chart review | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-org)",
+        "var(--m-act)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Web search + SunStream services review",
+        "source_kind": "docx"
+      },
+      "id": "20dd69ef-b1e3-4a5e-901a-059b1aa11ffd",
+      "involved_subcap_ids": [
+        "P4C2.7.5",
+        "P4C2.3.1",
+        "P4C2.2.4",
+        "P4C2.7.4",
+        "P4C1.1.3",
+        "P4C1.4.3",
+        "P4C1.1.3",
+        "P4C1.1.3"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P4": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No GRC platform",
+      "verbatim_quote": "No GRC platform | P3C3 tech subcaps capped | Web search + SunStream services review | MEDIUM"
+    },
+    {
+      "colors": [
+        "var(--z-below)",
+        "var(--m-act-t)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "Web search + tech profile scan",
+        "source_kind": "docx"
+      },
+      "id": "f3f5be4c-d23c-46bd-be01-6cdc98eda77b",
+      "involved_subcap_ids": [
+        "P3C1.6.1",
+        "P4C1.4.2",
+        "P2C1.2.3",
+        "P2C1.2.2",
+        "P4C1.5.4"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 40,
+        "P3": 20,
+        "P4": 40
+      },
+      "source_path": "(unknown)",
+      "title": "No RPA deployment",
+      "verbatim_quote": "No RPA deployment | P3C1 subcaps capped | Web search + tech profile scan | MEDIUM"
+    },
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "No chatbot/virtual assistant",
+        "source_kind": "docx"
+      },
+      "id": "a5160b00-00de-46f3-aa38-e9b3e43953bc",
+      "involved_subcap_ids": [
+        "P2C3.2.1",
+        "P4C2.2.2",
+        "P3C1.5.4",
+        "P2C1.2.1",
+        "P4C1.5.4",
+        "P2C3.2.2"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 50,
+        "P3": 17,
+        "P4": 33
+      },
+      "source_path": "(unknown)",
+      "title": "No chatbot/virtual assistant",
+      "verbatim_quote": "No chatbot/virtual assistant | P2C3 AI self-service capped | Website + app inspection | HIGH"
+    },
+    {
+      "colors": [
+        "var(--z-dpur)",
+        "var(--ph0)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [],
+        "representative_quote": "7 sources: LeadIQ, ZoomInfo, Vibe Prospecting, Tavily, web_search, homepage, RocketReach",
+        "source_kind": "docx"
+      },
+      "id": "fed151f0-dd33-4f56-af45-7bf1e88a43ae",
+      "involved_subcap_ids": [
+        "P2C1.5.1",
+        "P2C1.6.5",
+        "P2C1.2.5",
+        "P2C1.8.1",
+        "P2C1.1.1",
+        "P2C1.7.5"
+      ],
+      "kpis": [],
+      "page_number": null,
+      "pillars_weight": {
+        "P2": 100
+      },
+      "source_path": "(unknown)",
+      "title": "No marketing automation",
+      "verbatim_quote": "No marketing automation | P2C1 cap at M2.0 | 7 sources: LeadIQ, ZoomInfo, Vibe Prospecting, Tavily, web_search, homepage, RocketReach | HIGH (7-source consensus)"
+    }
+  ]
+}

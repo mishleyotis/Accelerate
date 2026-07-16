@@ -1,0 +1,659 @@
+{
+  "acquisitions": [
+    {
+      "acquirer": "Synchrony Financial",
+      "amount": null,
+      "announced_on": null,
+      "body": "Acquired Versatile Credit Inc for POS financing digital origination \u2014 process automation expansion",
+      "closed_on": null,
+      "details": "Acquired Versatile Credit Inc for POS financing digital origination \u2014 process automation expansion",
+      "e_id": "E-101",
+      "event_date": "2026-02-01",
+      "id": "5129f286-f6b4-42ab-8f46-c863a59d4c54",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1601712/000160171226000006/syf-20251231.htm",
+      "status": null,
+      "target": "Versatile Credit Inc",
+      "title": "Acquired Versatile Credit Inc for POS financing digital\u2026"
+    },
+    {
+      "acquirer": "Synchrony Financial",
+      "amount": null,
+      "announced_on": null,
+      "body": "Acquired Lowes commercial co-brand credit card portfolio \u2014 deepening strategic partnership",
+      "closed_on": null,
+      "details": "Acquired Lowes commercial co-brand credit card portfolio \u2014 deepening strategic partnership",
+      "e_id": "E-101",
+      "event_date": "2026-02-01",
+      "id": "3f197193-a049-4775-a10f-627abeae0fe8",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1601712/000160171226000006/syf-20251231.htm",
+      "status": null,
+      "target": "Lowes",
+      "title": "Acquired Lowes commercial co-brand credit card portfolio"
+    },
+    {
+      "acquirer": "Synchrony Financial",
+      "amount": null,
+      "announced_on": null,
+      "body": "Completed acquisition of Ally Lending business (2,500 merchant locations, 450,000+ active borrowers in home improvement and health/wellness)",
+      "closed_on": "2025-02-01",
+      "details": "Completed acquisition of Ally Lending business (2,500 merchant locations, 450,000+ active borrowers in home improvement and health/wellness)",
+      "e_id": "E-006",
+      "event_date": "2025-02-01",
+      "id": "f8d751c2-eaf7-47b4-b794-7948b54b9e30",
+      "source_url": "https://synchronyannualreport.com/ceo-message.php",
+      "status": "closed",
+      "target": "Ally Lending",
+      "title": "Completed acquisition of Ally Lending business (2,500\u2026"
+    },
+    {
+      "acquirer": "Synchrony Financial",
+      "amount": null,
+      "announced_on": null,
+      "body": "POS financing digital origination \u2014 Enhanced embedded finance capabilities",
+      "closed_on": null,
+      "details": "POS financing digital origination \u2014 Enhanced embedded finance capabilities",
+      "e_id": "E-101",
+      "event_date": "2025-01-01",
+      "id": "543d58f0-1c5d-4e24-8a49-65b657ee4c4e",
+      "source_url": null,
+      "status": null,
+      "target": "Versatile Credit Inc",
+      "title": "Versatile Credit Inc"
+    },
+    {
+      "acquirer": "Synchrony Financial",
+      "amount": null,
+      "announced_on": null,
+      "body": "Mobile commerce/analytics platform \u2014 Integrated into Retail Card platform",
+      "closed_on": null,
+      "details": "Mobile commerce/analytics platform \u2014 Integrated into Retail Card platform",
+      "e_id": "E-113",
+      "event_date": "2017-01-01",
+      "id": "655e7c25-e431-4e62-aa72-570185f7949d",
+      "source_url": null,
+      "status": null,
+      "target": "GPShopper",
+      "title": "GPShopper"
+    }
+  ],
+  "entity_display_id": "synchrony-financial-0001",
+  "financials": {
+    "lines": [
+      "Employees: ~20,000 globally (US, India Hyderabad, Philippines)",
+      "Locations: Branchless bank \u2014 zero physical branches. Stamford HQ + Draper UT (bank charter) + Alpharetta GA + NYC Bryant Park (Innovation Station)",
+      "Growth Trajectory: STABLE \u2014 loan receivables grew from $78.8B (2019) to $104.7B (2024), CAGR ~5.8%. Net earnings variable due to pandemic + credit normalization."
+    ],
+    "metrics": {
+      "trajectory": {
+        "branches": null,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 20000,
+        "events": [],
+        "fy": [
+          "FY2014",
+          "FY2019"
+        ],
+        "geography": "US (nationwide, branchless) + India + Philippines",
+        "headline": "$80M net income \u00b7 FY2019",
+        "regulator": "Federal Reserve System (FRS)",
+        "series": {
+          "net_income_m": [
+            259.0,
+            80.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    }
+  },
+  "firmographics": {
+    "jurisdictions": [
+      "US (nationwide",
+      "branchless) + India + Philippines"
+    ],
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Brian Doubles",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Carol Juel",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "COO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Justin Heller",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Karl Schimmeck",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CISO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Tori Currier",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Cloud Technology",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "name": "Rachel Moore",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "name": "Justin Heller's",
+        "recent_hire": false,
+        "tenure_months": null,
+        "title": "CDO"
+      }
+    ],
+    "license_type": "Federal savings bank",
+    "narrative_md": "Legal Name: Synchrony Financial (holding company) / Synchrony Bank (FSB subsidiary)\n\nFormation: IPO July 31, 2014; GE Capital Retail Finance spinoff. Roots to 1932.\n\nCorporate Structure: Holding company (Synchrony Financial) \u2192 Synchrony Bank (federal savings bank, charter #715044). Bank is sole material operating subsidiary.\n\nOwnership: Public (NYSE: SYF). No controlling shareholder.\n\nHeadquarters: 777 Long Ridge Road, Stamford, CT 06902\n\nEvidence: E-001, E-002, E-003",
+    "primary_regulator": "Federal Reserve System (FRS)",
+    "size_tier": "Mega (>$50B)",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2020-10-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-135",
+        "excerpt": "Data lake architecture documented in public whitepaper \u2014 integrates structured + semi-structured + unstructured data in streams Hadoop/Hive/Pig/Spark/Sqoop/Storm + Cloudera + AWS Lake Formation \u2014 enterprise data lakehous",
+        "title": "Data lake architecture documented in public whitepaper",
+        "type": "article",
+        "url": "https://www.synchrony.com/harnessing-data-and-technology"
+      },
+      {
+        "author": "Justin Heller",
+        "date": "2024-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-139",
+        "excerpt": "CDO (SVP Justin Heller) + VP Enterprise Data Governance Leader (Shertina Mawuenyega) \u2014 two-tier data stewardship structure CDO Magazine Editorial Board membership \u2014 thought leadership validating stewardship maturity",
+        "title": "CDO (SVP Justin Heller) + VP Enterprise Data Governance Leader\u2026",
+        "type": "article",
+        "url": "https://www.cdomagazine.tech/leadership-moves/justin-heller-synchrony-chief-data-officer-joins-cdo-magazine-global-editorial-board"
+      },
+      {
+        "author": null,
+        "date": "2018-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-045",
+        "excerpt": "SVP Customer Systems presented monolith-to-microservices journey at SpringOne Platform conference Solution implemented with Spring framework and Pivotal Cloud Foundry",
+        "title": "SVP Customer Systems presented monolith-to-microservices journey at\u2026",
+        "type": "conference",
+        "url": "https://www.infoq.com/presentations/synchrony-financial-pfc/"
+      }
+    ],
+    "ticker": "SYF"
+  },
+  "issue_register": [
+    {
+      "id": "4fabbeb6-1e41-4e97-8e0c-a60798122e34",
+      "issue_id": "GOV-001",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "No single mode >40%"
+    },
+    {
+      "id": "3914b689-d354-4b21-a98e-6cb55a29a927",
+      "issue_id": "GOV-002",
+      "linked_subcap_ids": [],
+      "opened_on": null,
+      "rationale": null,
+      "resolved_on": null,
+      "severity": "medium",
+      "status": "OPEN",
+      "title": "No T4 internal evidence in PUBLIC mode"
+    }
+  ],
+  "narrative": {
+    "issue_register_md": "",
+    "trend_md": "Most recent reported financials: $80M net income as of FY2019, within a series tracked FY2014 to FY2019. Trajectory classified STABLE in the research corpus.",
+    "trend_md_source": "derived_financials"
+  },
+  "peers": [
+    {
+      "category_scores": {
+        "P1C1": 2.7,
+        "P1C2": 3.03,
+        "P1C3": 2.05,
+        "P1C4": 2.46,
+        "P1C5": 2.68,
+        "P2C1": 2.43,
+        "P2C2": 2.02,
+        "P2C3": 2.52,
+        "P2C4": 2.68,
+        "P3C1": 2.81,
+        "P3C2": 2.63,
+        "P3C3": 3.07,
+        "P3C4": 2.84,
+        "P4C1": 2.21,
+        "P4C2": 2.09,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.55,
+      "peer_name": "CalPrivate Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.73,
+        "P1C2": 3.41,
+        "P1C3": 1.96,
+        "P1C4": 2.45,
+        "P2C1": 2.53,
+        "P2C2": 2.34,
+        "P2C3": 2.78,
+        "P2C4": 1.7,
+        "P3C1": 1.87,
+        "P3C2": 2.71,
+        "P3C3": 2.57,
+        "P3C4": 2.41,
+        "P4C1": 1.81,
+        "P4C2": 1.64,
+        "P4C3": 2.39,
+        "P4C4": 2.93
+      },
+      "overall_score": 2.39,
+      "peer_name": "Exchange Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.45,
+        "P1C2": 2.31,
+        "P1C3": 2.26,
+        "P1C4": 2.09,
+        "P1C5": 2.71,
+        "P2C1": 2.13,
+        "P2C2": 2.19,
+        "P2C3": 2.22,
+        "P2C4": 2.3,
+        "P3C1": 2.26,
+        "P3C2": 2.58,
+        "P3C3": 2.34,
+        "P3C4": 2.19,
+        "P4C1": 2.88,
+        "P4C2": 2.28,
+        "P4C3": 2.72,
+        "P4C4": 2.75
+      },
+      "overall_score": 2.39,
+      "peer_name": "Regions Business Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.35,
+        "P1C2": 2.47,
+        "P1C3": 1.93,
+        "P1C4": 1.87,
+        "P1C5": 1.61,
+        "P2C1": 2.39,
+        "P2C2": 2.37,
+        "P2C3": 2.0,
+        "P2C4": 1.93,
+        "P3C1": 2.09,
+        "P3C2": 2.63,
+        "P3C3": 2.52,
+        "P3C4": 2.55,
+        "P4C1": 2.28,
+        "P4C2": 2.37,
+        "P4C3": 2.5,
+        "P4C4": 3.07
+      },
+      "overall_score": 2.29,
+      "peer_name": "Texas Capital Bancshares, Inc. / Texas Capital Bank",
+      "role": "Subvertical peer"
+    },
+    {
+      "category_scores": {
+        "P1C1": 2.86,
+        "P1C2": 3.86,
+        "P1C3": 2.03,
+        "P1C4": 2.66,
+        "P1C5": 1.71,
+        "P2C1": 1.6,
+        "P2C2": 2.15,
+        "P2C3": 2.07,
+        "P2C4": 1.61,
+        "P3C1": 1.98,
+        "P3C2": 2.37,
+        "P3C3": 3.0,
+        "P3C4": 2.28,
+        "P4C1": 1.58,
+        "P4C2": 1.56,
+        "P4C3": 2.54,
+        "P4C4": 2.67
+      },
+      "overall_score": 2.27,
+      "peer_name": "1st Security Bank of Washington",
+      "role": "Subvertical peer"
+    }
+  ],
+  "run_request_id": "DMA-RES-SYF-20260325-0001",
+  "sentiment": {
+    "derived_from": "evidence_excerpts",
+    "sources": [
+      {
+        "drilldown": "3.8 Synchrony Bank app: iOS 4.8/5 (70.4K ratings); Google Play 4.6/5 (61.8K reviews) MySynchrony (credit card app) separate; some users report difficulty adding multiple accounts 2014 consent order: $259M redress + $3.5M penalty for decepti",
+        "evidence_e_id": null,
+        "kind": "mobile",
+        "max": 5.0,
+        "n": null,
+        "polarity": "negative",
+        "source": "Google Play",
+        "themes": [],
+        "value": 4.8
+      }
+    ]
+  },
+  "timeline_events": [
+    {
+      "body": "Acquired Versatile Credit Inc for POS financing digital origination \u2014 process automation expansion",
+      "date_precision": "publish_fallback",
+      "e_id": "E-101",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "5129f286-f6b4-42ab-8f46-c863a59d4c54",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1601712/000160171226000006/syf-20251231.htm",
+      "subcap_ids": [],
+      "title": "Acquired Versatile Credit Inc for POS financing digital\u2026"
+    },
+    {
+      "body": "Acquired Lowes commercial co-brand credit card portfolio \u2014 deepening strategic partnership",
+      "date_precision": "publish_fallback",
+      "e_id": "E-101",
+      "event_date": "2026-02-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "3f197193-a049-4775-a10f-627abeae0fe8",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1601712/000160171226000006/syf-20251231.htm",
+      "subcap_ids": [],
+      "title": "Acquired Lowes commercial co-brand credit card portfolio"
+    },
+    {
+      "body": "Hyper-local digital ads and co-marketing tools rolled out to SMB partners in 2025 aligned with merchant promo calendars",
+      "date_precision": "year",
+      "e_id": "E-077",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-077"
+      ],
+      "id": "6334b4be-a70c-443c-9283-86ed8e6b8612",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://matrixbcg.com/products/synchronyfinancial-marketing-mix",
+      "subcap_ids": [],
+      "title": "Hyper-local digital ads and co-marketing tools rolled to\u2026"
+    },
+    {
+      "body": "Co-marketing with merchants aligns seasonal promotions; hyper-local ads for SMB partners rolled out 2025",
+      "date_precision": "year",
+      "e_id": "E-081",
+      "event_date": "2025-07-01",
+      "evidence_e_ids": [
+        "E-081"
+      ],
+      "id": "7935f521-4bfc-4247-93a0-5ce9cb7e3720",
+      "kind": "product",
+      "signal": "neutral",
+      "source_url": "https://pestel-analysis.com/blogs/marketing-strategy/synchrony",
+      "subcap_ids": [],
+      "title": "Hyper-local ads for SMB partners rolled 2025"
+    },
+    {
+      "body": "CFPB consent order (2014) fully remediated and terminated May 2025 \u2014 demonstrates regulatory change management capability",
+      "date_precision": "month",
+      "e_id": "E-062",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-062"
+      ],
+      "id": "84130e69-8cd5-4a2c-b82d-4d2cebbf7b52",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinance.gov/enforcement/actions/synchrony-bank-fka-ge-capital-retail-bank/",
+      "subcap_ids": [],
+      "title": "CFPB consent order (2014) fully remediated"
+    },
+    {
+      "body": "CFPB consent order (2014, $259M) terminated May 2025 after full remediation \u2014 demonstrates mature corrective action + closure verification",
+      "date_precision": "month",
+      "e_id": "E-117",
+      "event_date": "2025-05-01",
+      "evidence_e_ids": [
+        "E-117"
+      ],
+      "id": "36ea8d99-1f90-4739-9a3f-6fc2c536a268",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.consumerfinance.gov/enforcement/actions/synchrony-bank-fka-ge-capital-retail-bank/",
+      "subcap_ids": [],
+      "title": "CFPB consent order (2014, $259M) terminated after full\u2026"
+    },
+    {
+      "body": "CFPB consent order fully remediated + terminated \u2014 MRA/MRI equivalent successfully closed",
+      "date_precision": "publish_fallback",
+      "e_id": "E-121",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-121"
+      ],
+      "id": "4ff1dfa7-f5ba-4632-bca9-2284925ae43e",
+      "kind": "regulatory",
+      "signal": "negative",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/0001601712/000160171225000044/syf-20241231.htm",
+      "subcap_ids": [],
+      "title": "MRA/MRI equivalent closed"
+    },
+    {
+      "body": "More than doubled new Synchrony Bank accounts acquired through Synchrony.com at almost no associated cost",
+      "date_precision": "publish_fallback",
+      "e_id": "E-004",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-004"
+      ],
+      "id": "6ef9acc3-23b6-437d-9fb6-0a024ed68790",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://synchronyannualreport.com/ceo-message.php",
+      "subcap_ids": [],
+      "title": "More than doubled new Synchrony Bank accounts acquired\u2026"
+    },
+    {
+      "body": "Completed acquisition of Ally Lending business (2,500 merchant locations, 450,000+ active borrowers in home improvement and health/wellness)",
+      "date_precision": "publish_fallback",
+      "e_id": "E-006",
+      "event_date": "2025-02-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "f8d751c2-eaf7-47b4-b794-7948b54b9e30",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": "https://synchronyannualreport.com/ceo-message.php",
+      "subcap_ids": [],
+      "title": "Completed acquisition of Ally Lending business (2,500\u2026"
+    },
+    {
+      "body": "POS financing digital origination \u2014 Enhanced embedded finance capabilities",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-101"
+      ],
+      "id": "543d58f0-1c5d-4e24-8a49-65b657ee4c4e",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Versatile Credit Inc"
+    },
+    {
+      "body": "Deepen strategic Lowe's relationship \u2014 Added commercial credit to existing consumer program",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2025-01-01",
+      "evidence_e_ids": [
+        "E-050"
+      ],
+      "id": "0a31d510-f617-42ca-96bd-e5f0587c8d18",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Lowe's commercial co-brand portfolio"
+    },
+    {
+      "body": "Partner sales training tactic: 2024 pilot raised card-originated sales 7.2% and AOV 4.5%",
+      "date_precision": "year",
+      "e_id": "E-079",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-079"
+      ],
+      "id": "9e0cc19b-bda2-49a4-bb6e-0b12693a5149",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://matrixbcg.com/blogs/marketing-strategy/synchronyfinancial",
+      "subcap_ids": [],
+      "title": "Partner sales training tactic: 2024 pilot raised\u2026"
+    },
+    {
+      "body": "Almost 20M new accounts acquired in 2024",
+      "date_precision": "year",
+      "e_id": "E-011",
+      "event_date": "2024-07-01",
+      "evidence_e_ids": [
+        "E-011"
+      ],
+      "id": "dbcef34f-face-4ff3-8665-08109c5c7561",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": "https://synchronyannualreport.com/ceo-message.php",
+      "subcap_ids": [],
+      "title": "Almost 20M new accounts acquired in 2024"
+    },
+    {
+      "body": "$2.2B Ally Lending acquisition completed March 2024 \u2014 2,500 merchants, 450K borrowers in home improvement + healthcare",
+      "date_precision": "month",
+      "e_id": "E-049",
+      "event_date": "2024-03-01",
+      "evidence_e_ids": [
+        "E-049"
+      ],
+      "id": "1232cf58-1fae-4cc0-820b-543908ef2f17",
+      "kind": "milestone",
+      "signal": "positive",
+      "source_url": "https://newsletter.cobaltintelligence.com/p/synchrony-financial-2bn-ally-lending-acquisition",
+      "subcap_ids": [],
+      "title": "$2.2B Ally Lending acquisition completed"
+    },
+    {
+      "body": "2,500 merchants + 450K borrowers in home improvement/health \u2014 Expanded Health & Wellness + Home platforms",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2024-01-01",
+      "evidence_e_ids": [
+        "E-006"
+      ],
+      "id": "9a9818d5-1e34-4ac1-bf1d-a23d2b9ccbac",
+      "kind": "acquisition",
+      "signal": "positive",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "Ally Lending business"
+    },
+    {
+      "body": "CEO Doubles promoted Juel to CTO/COO specifically to 'further scale Synchrony's agile culture'",
+      "date_precision": "publish_fallback",
+      "e_id": "E-070",
+      "event_date": "2021-09-01",
+      "evidence_e_ids": [
+        "E-070"
+      ],
+      "id": "260a05e5-cfbb-43f2-8716-b4c788127803",
+      "kind": "leadership",
+      "signal": "positive",
+      "source_url": "https://www.americanbanker.com/news/synchrony-goes-all-in-on-agile-methodology",
+      "subcap_ids": [],
+      "title": "CEO Doubles promoted Juel"
+    },
+    {
+      "body": "$0 fraud liability + 2FA/Touch ID/Face ID \u2014 account takeover prevention measures deployed",
+      "date_precision": "publish_fallback",
+      "e_id": "E-112",
+      "event_date": "2021-09-01",
+      "evidence_e_ids": [
+        "E-112"
+      ],
+      "id": "87c8140d-5e9a-4eaf-8e58-04a73bff6855",
+      "kind": "acquisition",
+      "signal": "negative",
+      "source_url": "https://www.pymnts.com/fraud-prevention/2021/ai-ml-lifts-synchrony-fraud-detection-accuracy-to-90/",
+      "subcap_ids": [],
+      "title": "$0 fraud liability + 2FA/Touch ID/Face ID"
+    },
+    {
+      "body": "Mobile commerce/analytics platform \u2014 Integrated into Retail Card platform",
+      "date_precision": "year",
+      "e_id": null,
+      "event_date": "2017-01-01",
+      "evidence_e_ids": [
+        "E-113"
+      ],
+      "id": "655e7c25-e431-4e62-aa72-570185f7949d",
+      "kind": "acquisition",
+      "signal": "neutral",
+      "source_url": null,
+      "subcap_ids": [],
+      "title": "GPShopper"
+    }
+  ]
+}

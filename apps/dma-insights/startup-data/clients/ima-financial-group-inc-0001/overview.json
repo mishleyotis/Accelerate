@@ -1,0 +1,1175 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 80
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 228,
+        "subcaps": 228,
+        "thin": 169
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 116,
+        "subcaps": 116,
+        "thin": 104
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 174,
+        "subcaps": 174,
+        "thin": 161
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "ima-financial-group-inc-0001",
+    "domain": null,
+    "hq": null,
+    "id": "a22293bd-3dc2-4433-ab10-f1115138843e",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "IMA Financial Group, Inc.",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "IB",
+    "top_platform": null,
+    "updated_at": "2026-07-02T23:11:13.207585Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 41,
+    "current_count": 66,
+    "dated_count": 23,
+    "median_age_months": 18.4,
+    "oldest_published_date": "2020-11-01",
+    "stale_count": 11,
+    "stale_pct": 6.63,
+    "total": 166,
+    "undated_count": 25
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 20,
+      "MIXED": 6,
+      "NEGATIVE": 8,
+      "NEUTRAL": 18,
+      "POSITIVE": 114
+    },
+    "connectors": {},
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 7,
+      "NEUTRAL": 130,
+      "POSITIVE": 29
+    },
+    "tiers": {
+      "T1": 9,
+      "T2": 62,
+      "T3": 56,
+      "T4": 23,
+      "T5": 13,
+      "T8": 3
+    },
+    "total_facts": 1190,
+    "total_items": 166
+  },
+  "financial_trajectory": {
+    "cagr": "40%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "IMA's growth trajectory since 2020 is among the most aggressive in the independent broker category. The combination of $3.25B in PE capital and an employee-ownership culture has pr",
+    "highlights": [],
+    "series": {},
+    "trend": "ACCELERATING",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 308000000000.0,
+    "branches": 100,
+    "cagr": "40%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "financial_highlights": {
+      "accelerating": "3+ consecutive years of above-industry pr",
+      "lines": [
+        "IMA's growth trajectory since 2020 is among the most aggressive in the independent broker category. The combination of $3.25B in PE capital and an employee-ownership culture has produced a rare dual-engine growth model: acquisition pace of a PE-backed firm with the retention economics of an employee-owned firm. The 40%+ annual workforce CAGR directly drives the need for the FSC unification platform. [E-088, E-001, E-096]",
+        "IMA is a private company with no publicly available audited financials. All figures are derived from press releases, PE profiles, industry rankings, and analyst estimates. Trend: ACCELERATING — 3+ consecutive years of above-industry premium growth with no confirmed slowdown. [E-088, E-001, E-096]",
+        "5-Year CAGR (2020-2025): Revenue ~40%+ | Workforce ~40%+ | States 7 to 23+ (~27% CAGR). Data basis: press releases + PE profiles (private company — no audited financials). [E-088, E-001, IMA Feb 2025 press release]"
+      ],
+      "trajectory": {
+        "branches": 100,
+        "currency": "USD",
+        "derived_from": "report_prose",
+        "employees": 25,
+        "events": [
+          {
+            "fy": "FY2025",
+            "label": "Applied Epic Dashboards (Dec 2025): launched new…"
+          },
+          {
+            "fy": "FY2024",
+            "label": "(Denver HQ rates highest, acquired offices vary"
+          },
+          {
+            "fy": "FY2023",
+            "label": "Proxy P2C2.7.4 (Continuous Improvement): launched with…"
+          },
+          {
+            "fy": "FY2022",
+            "label": "IMA launched Advanced Industries Practice (April 2022)"
+          }
+        ],
+        "fy": [
+          "FY2020",
+          "FY2021",
+          "FY2022",
+          "FY2023",
+          "FY2024",
+          "FY2025"
+        ],
+        "geography": "US (23+ states; clients in all 50 states; HQ Denver CO)",
+        "headline": "$8.0B net income · FY2025",
+        "regulator": "FTC (GLBA Safeguards Rule) + State Insurance Depts (20+ states)",
+        "series": {
+          "net_income_m": [
+            2000.0,
+            4000.0,
+            5000.0,
+            6000.0,
+            8000.0,
+            8000.0
+          ],
+          "total_assets": null
+        },
+        "unit": "B"
+      }
+    },
+    "footprint": "US (23+ states; clients in all 50 states; HQ Denver CO)",
+    "footprint_basis": "derived:geography",
+    "founded": 1973,
+    "geography": "US (23+ states; clients in all 50 states; HQ Denver CO)",
+    "headcount": 25,
+    "hq": "Denver CO",
+    "hq_address": null,
+    "hq_basis": "nlp:narrative",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Robert Cohen",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chairman & CEO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Suzanne van Staveren",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CFO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Luke Proctor",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "John Hearn",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "COO & Atlantic Market President"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Greg Boothroyd",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "Chief People Officer"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Matt Watkins",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CIO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Garrett Droege",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP Innovation & Director, Digital Risk Practice"
+      },
+      {
+        "background": null,
+        "critical_role": true,
+        "gap_flag": false,
+        "name": "Michelle Vercellino",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Operations & Insights (de facto CDO)"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "James Leigh",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Director, Application Architecture & Engineering"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Justin Jacobs",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP Marketing"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Eric Pauly",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "General Counsel"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Paul Washington + Mark Ware",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "EVP + SVP IMA Labs"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "gap_flag": false,
+        "name": "Leeann McKinney",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "VP Retail Training"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "IMA Financial Group, Inc.",
+    "license_type": "Licensed consumer lender",
+    "narrative_md": "IMA Financial Group, Inc. operates as an integrated financial services holding company with a majority employee-owned structure — one of the defining characteristics that differentiates it from PE-only peers. The holding company architecture allows multiple specialised subsidiaries under a unified brand while preserving local identity in acquired firms. [E-001, E-002, E-003, E-INT-002]",
+    "primary_regulator": "FTC (GLBA Safeguards Rule) + State Insurance Depts (20+ states)",
+    "revenue_basis": "profile_prose",
+    "revenue_usd": 10000000000.0,
+    "sentiment": {
+      "b2b_b2c_gap": true,
+      "customer": [
+        {
+          "flag": "below_peer",
+          "metric": "Overall",
+          "scale": 100,
+          "score": 7.0,
+          "source": "Net Promoter Score"
+        }
+      ],
+      "derived_from": "evidence_excerpts",
+      "employee": [
+        {
+          "metric": "Overall",
+          "n": 201,
+          "scale": 5,
+          "score": 3.7,
+          "source": "Glassdoor"
+        },
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 4.0,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "Glassdoor overall 3.5-3.7/5 (201 reviews)",
+          "source": "Glassdoor"
+        },
+        {
+          "rating": "4.0/5",
+          "signal": "S usage Tech stack includes: Avaya, jQuery CDN, Salesforce, Indeed (job posting integration), Indio (client intake), WP Engine, Ensighten, Nginx; email format First.Last@imacorp.com Overall ~4.0/5 (role-specific) / 3.5-3.7 overall; 67% reco",
+          "source": "Indeed"
+        },
+        {
+          "rating": "7",
+          "signal": "6% client retention is outcome signal only, not evidence of NPS measurement or VoC program",
+          "source": "Net Promoter Score"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "mega",
+    "size_tier_basis": "derived:scale_bands",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": null,
+        "derived_from": "evidence_index",
+        "e_id": "E-029",
+        "excerpt": "IMA publishes Cyber Risk In Focus quarterly — systematic thought leadership on cyber governance indicating deep internal expertise Article details CVRM program components: vendor identification, attestations (NIST/AICPA/",
+        "title": "IMA publishes Cyber Risk",
+        "type": "article",
+        "url": "https://imacorp.com/insights/cyber-risk-in-focus-q2-2024"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-050",
+        "excerpt": "IMA careers: 'Repeatedly recognized for excellence of workplace culture.' 'IMA's mission to better the lives of employees and their communities has been recognized for years.' Women's Network+ program. Interview process ",
+        "title": "IMA careers: 'Repeatedly recognized for excellence of workplace…",
+        "type": "article",
+        "url": "https://imacorp.com/careers"
+      },
+      {
+        "author": null,
+        "date": "2025-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-054",
+        "excerpt": "IMA hosts annual Employee Benefits Summit (Coors Field, May 2025). Adam Moret leads 10-person Whole Health consultant team — multi-year wellness strategies, financial wellbeing, mental health initiatives. LinkedIn Learni",
+        "title": "IMA hosts annual Employee Benefits Summit (Coors Field, May 2025)",
+        "type": "conference",
+        "url": "https://imacorp.com/benefits/eb25"
+      },
+      {
+        "author": null,
+        "date": "2024-08-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-056",
+        "excerpt": "IMA sustainability program confirmed: (1) Green Teams — expanded from 3 to 13 active locations (2023), 9 offices with e-waste recycling drives + Bike to Work events; (2) Sustainability Real Estate Plan — 125,000+ sq ft L",
+        "title": "IMA sustainability program confirmed",
+        "type": "article",
+        "url": "https://imacorp.com/sustainability"
+      },
+      {
+        "author": null,
+        "date": "2026-04-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-064",
+        "excerpt": "IMA operates a comprehensive content hub with 6 series: Markets in Focus (quarterly industry reports), Risk in Focus, Workplace in Focus, HR Insights, Insurance Insights, Podcasts & Webinars. 2026 Pulse Report (gated — l",
+        "title": "IMA operates a comprehensive content hub Markets in Focus (quarterly…",
+        "type": "podcast",
+        "url": "https://imacorp.com/insights"
+      },
+      {
+        "author": null,
+        "date": "2025-11-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-124",
+        "excerpt": "6 structured insight series: Markets In Focus (industry-segmented quarterly reports), Risk In Focus (risk management),",
+        "title": "6 structured insight series: Markets In Focus (industry-segmented…",
+        "type": "article",
+        "url": "https://imacorp.com/series/markets-in-focus"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "trend": "ACCELERATING",
+    "trend_basis": "derived:financial_highlights",
+    "website": "imacorp.com",
+    "website_basis": "evidence_urls:own-domain"
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v7.0",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.376986+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# IMA Financial Group, Inc. — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Five peers were selected and locked during the Research Phase (Batch 1) and are immutable throughout the assessment. Peers are scored at category level using public evidence. Peer medians are calculated as the arithmetic median of the five peer category scores. IMA's gap to the peer median is reported for each category and pillar. The peer set was selected on the basis of: Insurance Broker subvertical match, size tier proximity (LARGE T2), geographic overlap (US multi-state), and competitive relevance (PitchBook, Tracxn, and CIAB membership).",
+    "gap_prioritization_md": "All 17 categories ranked using the six-factor prioritization formula. Rankings drive the recommendation sequence in Section 9. The top five categories (P1 — Immediate) are the primary focus for the current Zennify FSC engagement scope. P2 — Near-term categories are addressed in Phase 2 of the transformation roadmap.",
+    "page_number": null,
+    "scqa_heading": "Executive Summary",
+    "scqa_md": "IMA Financial Group, Inc. is a $308.0B in assets insurance broker regulated by FTC (GLBA Safeguards Rule) + State Insurance Depts (20+ states), operating since 1973 with 25 employees. A 40.0% multi-year growth rate and a trajectory the analyst classifies as accelerating give it the balance sheet to fund transformation [E-043, E-020]. Zennify's assessment places overall digital maturity at 2.7/5. The deepest capability gap is Climate Scenario Analysis at 1.6/5 against a 1.9 peer median [E-123, E-002]. Next is Risk Monitoring at 2.0/5 against a 2.6 peer median [E-157, E-149].\n\nThird is Self-Service BI & Analytics at 2.0/5 against a 2.5 peer median [E-151, E-009]. The issue register adds exports/ subdirectory has 3 CSVs; additional 6 CSVs in 03_appendices/ and 02_peers/. Total 9 CSVs across assessment directories.. The issue register adds Automated check used field name source_url; evidence_index.json uses field name url.. Counter-signal: Idea Management already runs at 3.5/5 against a 2.5 peer median — a strength to build on, not rebuild. The roster shows no CISO — a named ownership gap for the capabilities below.\n\nThe question for IMA Financial Group, Inc. is whether to close Climate Scenario Analysis first — the constraint the other investments inherit — or continue layering point solutions on top of it and accept the compounding operating cost. IMA Financial Group, Inc. should lead with Databricks (66/100 fit) against Self-Service BI & Analytics, then sequence nCino behind it. Closing Climate Scenario Analysis to the peer median alone is worth 0.3 maturity points, and the capabilities that depend on it compound the gain."
+  },
+  "overall_score": 2.71,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/A4_peer_set.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.520654+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_comparison_table.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.521461+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_set.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.522318+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.522527+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results_pass1.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.522784+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/check_results_pass2.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.523036+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.523383+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/patch_block.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.523698+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/gap_priority_register.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-02T23:11:11.534608+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 23
+    },
+    "stage_ms": {
+      "manifest": 15,
+      "parse": 13071,
+      "persist": 1615
+    },
+    "structured": [
+      {
+        "code": "used variant manifest file",
+        "detail": "used variant manifest file: 07_governance/qa_verdict.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +702 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:no_header_row:P1 Strategy & Governance",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:no_header_row:P2 Customer Experience",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:no_header_row:P3 Operations & Risk",
+        "severity": "INFO"
+      },
+      {
+        "code": "research_workbook",
+        "detail": "research_workbook:no_header_row:P4 Data & Technology",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+0 rows gained facts[], +64 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 08_appendices/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_client_profile_docx",
+        "detail": "firmographics_from_client_profile_docx: source=IMA_Client_Profile_Research_Report_FINAL.docx leadership=13 focus_areas=3 facts_extracted=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_report_prose",
+        "detail": "tech_stack_from_report_prose: 3 vendors mentioned",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 12",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/A4_peer_set.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results_pass1.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/check_results_pass2.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/gap_priority_register.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 27",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:13/702 subcaps unresolved against v7.0",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 14",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "used variant manifest file: 07_governance/qa_verdict.json",
+      "xlsx_name_enrichment: +0 subcap names +702 rationales merged from workbook into CSV-parsed rows",
+      "research_workbook:no_header_row:P1 Strategy & Governance",
+      "research_workbook:no_header_row:P2 Customer Experience",
+      "research_workbook:no_header_row:P3 Operations & Risk",
+      "research_workbook:no_header_row:P4 Data & Technology",
+      "INFO/evidence_facts_merged_from_json_twin: +0 rows gained facts[], +64 gained excerpts from the JSON evidence twin",
+      "used variant recommendations source: 08_appendices/recommendations.json",
+      "firmographics_from_client_profile_docx: source=IMA_Client_Profile_Research_Report_FINAL.docx leadership=13 focus_areas=3 facts_extracted=0",
+      "tech_stack_from_report_prose: 3 vendors mentioned",
+      "financial_highlights_from_client_report",
+      "insights_from_client_profile_findings: 12",
+      "INFO/pattern_gap: 06_peers/A4_peer_set.csv — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_comparison_table.json — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_set.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results_pass1.json — no fingerprint matched (best confidence 0.00); 4 generic sections mined",
+      "INFO/pattern_gap: 07_governance/check_results_pass2.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 07_governance/critic_log.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 07_governance/patch_block.md — no fingerprint matched (best confidence 0.00); 8 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/gap_priority_register.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "timeline_events_persisted: 27",
+      "catalogue_unresolved:13/702 subcaps unresolved against v7.0",
+      "insight_cards_persisted: 14"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 2.52,
+      "pillar_id": "P1",
+      "score": 2.97,
+      "subcaps_scored": 171
+    },
+    {
+      "peer_benchmarked": 228,
+      "peer_median": 2.48,
+      "pillar_id": "P2",
+      "score": 2.64,
+      "subcaps_scored": 228
+    },
+    {
+      "peer_benchmarked": 116,
+      "peer_median": 2.62,
+      "pillar_id": "P3",
+      "score": 2.73,
+      "subcaps_scored": 116
+    },
+    {
+      "peer_benchmarked": 174,
+      "peer_median": 2.46,
+      "pillar_id": "P4",
+      "score": 2.49,
+      "subcaps_scored": 174
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-04-16",
+    "assessment_date_source": "run_manifest",
+    "ccg_catalog_version": "v7.0",
+    "completed_at": "2026-07-02T23:11:13.207585Z",
+    "created_at": "2026-07-02T23:11:13.207585Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "cc4e62f8-1447-43bd-917a-e7155eaa66f2",
+    "overall_score": null,
+    "request_id": "DMA-ASM-IMA-20260416-0001",
+    "started_at": "2026-07-02T23:11:13.207585Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-03T01:50:54.185822Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": true,
+    "customer": [
+      {
+        "flag": "below_peer",
+        "metric": "Overall",
+        "scale": 100,
+        "score": 7.0,
+        "source": "Net Promoter Score"
+      }
+    ],
+    "derived_from": "evidence_excerpts",
+    "employee": [
+      {
+        "metric": "Overall",
+        "n": 201,
+        "scale": 5,
+        "score": 3.7,
+        "source": "Glassdoor"
+      },
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 4.0,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "body": "Reset enterprise priorities + governance cadence to close the 14 P1 capability gaps that surfaced in this assessment.",
+      "evidence": [
+        "E-027",
+        "E-057",
+        "E-058",
+        "E-122"
+      ],
+      "magnitude": "0.3 pts below peer median",
+      "name": "Sharpen strategic posture",
+      "peer_median": 1.9,
+      "platforms": [
+        "Databricks",
+        "nCino"
+      ],
+      "score": 1.57,
+      "so_what": "Prioritize Sharpen strategic posture in the next phase — Databricks is the platform surface that addresses it; sequencing it first lifts the strategy and governance capabilities that depend on it.",
+      "subcap_id": "P1C5",
+      "theme": "Strategy & governance",
+      "title": "Sharpen strategic posture",
+      "what": "Reset enterprise priorities + governance cadence to close the 14 P1 capability gaps that surfaced in this assessment.",
+      "why": "The linked evidence records: 2024 Purpose Report published annually — formal ESG/purpose reporting cycle 'I Make A Difference Day' — annual corporate day of service across all markets"
+    },
+    {
+      "body": "Unify the 9 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "evidence": [
+        "E-140",
+        "E-141",
+        "E-074",
+        "E-075"
+      ],
+      "magnitude": "0.3 pts below peer median",
+      "name": "Modernize customer experience",
+      "peer_median": 2.3,
+      "platforms": [
+        "Twilio",
+        "Salesforce"
+      ],
+      "score": 2.02,
+      "so_what": "Prioritize Modernize customer experience in the next phase — Twilio is the platform surface that addresses it; sequencing it first lifts the customer experience capabilities that depend on it.",
+      "subcap_id": "P2C4",
+      "theme": "Customer experience",
+      "title": "Modernize customer experience",
+      "what": "Unify the 9 member-facing capability gaps in P2 into a single channel + servicing modernization track.",
+      "why": "The linked evidence records: IMA People Analytics: dedicated analytics platform for employee benefits clients. Bundles multiple analytics techniques: descriptive (what happened), diagnostic (why), predictive (what will happen), prescriptive (what actions to take). All four levels confirmed."
+    },
+    {
+      "body": "Risk Monitoring is a priority capability gap in operations, scoring 2.02/5 against a peer median of 2.6. Strengthening it is among the highest-leverage moves to lift maturity in operations.",
+      "evidence": [
+        "E-157",
+        "E-149",
+        "E-162"
+      ],
+      "magnitude": "0.6 pts below peer median",
+      "name": "Risk Monitoring",
+      "peer_median": 2.6,
+      "platforms": [
+        "nCino",
+        "Databricks"
+      ],
+      "score": 2.02,
+      "so_what": "Prioritize Risk Monitoring in the next phase — nCino is the platform surface that addresses it; sequencing it first lifts the operations capabilities that depend on it.",
+      "subcap_id": "P3C4",
+      "theme": "Operations",
+      "title": "Risk Monitoring",
+      "what": "Risk Monitoring is a priority capability gap in operations, scoring 2.02/5 against a peer median of 2.6. Strengthening it is among the highest-leverage moves to lift maturity in operations.",
+      "why": "The linked evidence records: Policy governance (P3C3.7.x): GLBA Safeguards Rule requires written security program, policy documentation, and employee security awareness training — confirmed requirement for IMA. Applied Epic + Pardot +"
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.5,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-002"
+      ],
+      "modifiers": [
+        "65 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Customer Segment Definition averages 2.9/5 over 166 scored subcaps; ceiling 3.7 reflects thin evidence density (101/166 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.5,
+      "ceiling": 3.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-002"
+      ],
+      "modifiers": [
+        "95 of 216 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Governance Charter averages 3.0/5 over 216 scored subcaps; ceiling 3.8 reflects thin evidence density (121/216 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.5,
+      "ceiling": 4.3,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-002"
+      ],
+      "modifiers": [
+        "85 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Idea Management averages 3.5/5 over 190 scored subcaps; ceiling 4.3 reflects thin evidence density (105/190 full-evidence cells); band ±0.5 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.5,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-027"
+      ],
+      "modifiers": [
+        "cap M4 applied: ISS-002: training inconsistency / Glassdoor compensation declining → max M4",
+        "120 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Executive Sponsorship Model averages 3.0/5 over 205 scored subcaps; ceiling 3.7 reflects the binding cap (cap M4 applied: ISS-002: training inconsistency / Glassdoor compensation declining → max M4); band ±0.5 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.5,
+      "ceiling": 2.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-058"
+      ],
+      "modifiers": [
+        "cap M2 applied: ISS-007: ESG governance gap — all P1C5 subcaps max M2",
+        "35 of 70 subcaps on thin evidence"
+      ],
+      "rationale": "Climate Scenario Analysis averages 1.6/5 over 70 scored subcaps; ceiling 2.0 reflects the binding cap (cap M2 applied: ISS-007: ESG governance gap — all P1C5 subcaps max M2); band ±0.5 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.6,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-067"
+      ],
+      "modifiers": [
+        "191 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Channels & Presence averages 3.0/5 over 287 scored subcaps; ceiling 3.7 reflects thin evidence density (96/287 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.6,
+      "ceiling": 3.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-002"
+      ],
+      "modifiers": [
+        "231 of 287 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Application Availability averages 3.0/5 over 287 scored subcaps; ceiling 3.6 reflects thin evidence density (56/287 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.6,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-075"
+      ],
+      "modifiers": [
+        "195 of 286 subcaps on thin evidence"
+      ],
+      "rationale": "Anticipated Needs Service averages 2.5/5 over 286 scored subcaps; ceiling 3.2 reflects thin evidence density (91/286 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-075"
+      ],
+      "modifiers": [
+        "216 of 256 subcaps on thin evidence"
+      ],
+      "rationale": "Proactive Outreach & Alerts averages 2.0/5 over 256 scored subcaps; ceiling 2.6 reflects thin evidence density (40/256 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.6,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-002"
+      ],
+      "modifiers": [
+        "123 of 143 subcaps on thin evidence"
+      ],
+      "rationale": "Core Transaction Automation averages 3.0/5 over 143 scored subcaps; ceiling 3.5 reflects thin evidence density (20/143 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-020"
+      ],
+      "modifiers": [
+        "132 of 132 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Risk Framework averages 3.0/5 over 132 scored subcaps; ceiling 3.5 reflects thin evidence density (0/132 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-161"
+      ],
+      "modifiers": [
+        "130 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Fair Lending Compliance averages 3.0/5 over 140 scored subcaps; ceiling 3.5 reflects thin evidence density (10/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.6,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-149"
+      ],
+      "modifiers": [
+        "cap applied: No confirmed TPRM/BCP programme — conservative ceiling",
+        "115 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Risk Monitoring averages 2.0/5 over 145 scored subcaps; ceiling 2.6 reflects thin evidence density (30/145 full-evidence cells); band ±0.6 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-001"
+      ],
+      "modifiers": [
+        "191 of 201 subcaps on thin evidence"
+      ],
+      "rationale": "Data Strategy & Vision averages 2.5/5 over 201 scored subcaps; ceiling 3.0 reflects thin evidence density (10/201 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-004"
+      ],
+      "modifiers": [
+        "cap M3 applied: ISS-004: B2BMA + Analytics Cloud 100% saturation → max M3",
+        "260 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Self-Service BI & Analytics averages 2.0/5 over 270 scored subcaps; ceiling 2.5 reflects the binding cap (cap M3 applied: ISS-004: B2BMA + Analytics Cloud 100% saturation → max M3); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-INT-001"
+      ],
+      "modifiers": [
+        "212 of 237 subcaps on thin evidence"
+      ],
+      "rationale": "capability dimension 3 averages 3.0/5 over 237 scored subcaps; ceiling 3.5 reflects thin evidence density (25/237 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.6,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-161"
+      ],
+      "modifiers": [
+        "cap M3 applied: ISS-001 MATERIAL: Oct 2022 data breach → P4C4 capped M3",
+        "130 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Microsegmentation & SDP averages 2.5/5 over 150 scored subcaps; ceiling 3.0 reflects the binding cap (cap M3 applied: ISS-001 MATERIAL: Oct 2022 data breach → P4C4 capped M3); band ±0.6 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "BTV Accelerator: $50K SAFE investment per startup + access to 12 super-regional broker partners, 13 carriers/wholesalers — annual cohort (now 6+ years, 2026 cohort announced) (Jul 2026).",
+      "evidence": [
+        "E-110"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "BTV Accelerator: $50K SAFE investment per startup + access…",
+      "metric": "$50K",
+      "peer_context": "Climate Scenario Analysis runs 1.57/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service BI & Analytics — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "BTV Accelerator: $50K SAFE investment per startup + access to 12 super-regional broker partners, 13 carriers/wholesalers — annual cohort (now 6+ years, 2026 cohort announced) (Jul 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "BTV Accelerator: $50K SAFE investment per startup + access…"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "BTV 2026 new partners: Higginbotham and The Mahoney Group joined — IMA's BTV ecosystem expanding, now includes peer Higginbotham (Jul 2026).",
+      "evidence": [
+        "E-110"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "Higginbotham and The Mahoney Group joined",
+      "metric": null,
+      "peer_context": "Climate Scenario Analysis runs 1.57/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service BI & Analytics — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "BTV 2026 new partners: Higginbotham and The Mahoney Group joined — IMA's BTV ecosystem expanding, now includes peer Higginbotham (Jul 2026). Window: closes ~Q1 2027.",
+      "timeline": {
+        "date": "2026-07-01",
+        "event": "Higginbotham and The Mahoney Group joined"
+      },
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "5 IMA Financial Group Associates named to Risk & Insurance Magazine's 2026 Power Broker List (Feb 27, 2026) — professional talent recognition (Feb 2026).",
+      "evidence": [
+        "E-104"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "MILESTONE",
+      "label": "5 IMA Financial Group Associates named to Risk & Insurance…",
+      "metric": null,
+      "peer_context": "Climate Scenario Analysis runs 1.57/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service BI & Analytics — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "5 IMA Financial Group Associates named to Risk & Insurance Magazine's 2026 Power Broker List (Feb 27, 2026) — professional talent recognition (Feb 2026). Window: closes ~Q3 2026.",
+      "timeline": {
+        "date": "2026-02-27",
+        "event": "5 IMA Financial Group Associates named to Risk & Insurance…"
+      },
+      "window": "closes ~Q3 2026"
+    },
+    {
+      "category": "market",
+      "claim": "FACT",
+      "confidence": "LOW",
+      "derived_from": "timeline_events",
+      "detail": "Most recent deal (PitchBook): Burlington Insurance Agency Buyout/LBO Jan 1, 2026 — continuous M&A program confirmed (Jan 2026).",
+      "evidence": [
+        "E-104"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "M&A",
+      "label": "Most recent deal (PitchBook): Burlington Insurance Agency…",
+      "metric": null,
+      "peer_context": "Climate Scenario Analysis runs 1.57/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service BI & Analytics — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "STRONG",
+      "subcap_id": null,
+      "text": "Most recent deal (PitchBook): Burlington Insurance Agency Buyout/LBO Jan 1, 2026 — continuous M&A program confirmed (Jan 2026). Window: closes ~Q3 2027.",
+      "timeline": {
+        "date": "2026-01-01",
+        "event": "Most recent deal (PitchBook): Burlington Insurance Agency…"
+      },
+      "window": "closes ~Q3 2027"
+    },
+    {
+      "category": "hiring",
+      "claim": "INFERENCE",
+      "confidence": "LOW",
+      "derived_from": "evidence_index",
+      "detail": "IMA hiring Salesforce Manager to: manage Admin/Developer roles within Applications Team; act as primary business liaison; ensure Salesforce compliance and utilization improvement; define Salesforce strategy. Requires 7+ yrs Salesforce experience including Financial Services Cloud + Sales Cloud + Service Cloud.",
+      "evidence": [
+        "E-033"
+      ],
+      "impact": "Signals an imminent platform decision the team is being built for.",
+      "kind": "HIRING",
+      "label": "IMA hiring Salesforce Manager",
+      "metric": null,
+      "peer_context": "Climate Scenario Analysis runs 1.57/5 vs a 1.90 median at comparable institutions.",
+      "play": "Reach out while the team is forming — offer the platform evaluation criteria before the tooling decision hardens.",
+      "risk": "A hiring burst means budget is committed and a tooling decision is imminent; once the team lands, the stack is chosen.",
+      "strength": "LEADING",
+      "subcap_id": null,
+      "text": "IMA hiring Salesforce Manager to: manage Admin/Developer roles within Applications Team; act as primary business liaison; ensure Salesforce compliance and utilization improvement; define Salesforce strategy. Window: closes ~Q1 2027.",
+      "timeline": null,
+      "window": "closes ~Q1 2027"
+    },
+    {
+      "category": "market",
+      "claim": "INFERENCE",
+      "confidence": "MEDIUM",
+      "derived_from": "subcap_scores",
+      "detail": "Climate Scenario Analysis scores 1.57/5 vs a typical 1.90 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "evidence": [
+        "E-123",
+        "E-002",
+        "E-021",
+        "E-027"
+      ],
+      "impact": "Defines how fast the maturity gap to peers can close.",
+      "kind": "GAP",
+      "label": "Climate Scenario Analysis scores 1.57/5",
+      "metric": "Climate Scenario Analysis 1.57/5 vs peer 1.90",
+      "peer_context": "Climate Scenario Analysis runs 1.57/5 vs a 1.90 median at comparable institutions.",
+      "play": "Prioritize the Databricks conversation against Self-Service BI & Analytics — highest-fit surface at 66/100.",
+      "risk": "Peers keep compounding their advantage each cycle the gap stays open — the cost of waiting grows, not shrinks.",
+      "strength": "SUPPORTING",
+      "subcap_id": "P1C5",
+      "text": "Climate Scenario Analysis scores 1.57/5 vs a typical 1.90 at similar institutions — the deepest open gap in Strategy & Governance and the constraint the other investments inherit.",
+      "timeline": null,
+      "window": null
+    }
+  ]
+}

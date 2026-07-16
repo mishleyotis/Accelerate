@@ -1,0 +1,915 @@
+{
+  "alerts": [],
+  "audit_logs": null,
+  "caps_applied": [
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.1",
+      "trigger_condition": "S2 consent order cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.2",
+      "trigger_condition": "S2 consent order cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.3",
+      "trigger_condition": "S2 consent order cap 3.0 (binding)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.4",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.4",
+      "trigger_condition": "S2 consent order cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P1C2.1.5",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P1C2.1.5",
+      "trigger_condition": "S2 consent order cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P2C3.1.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P2C3.1.3",
+      "trigger_condition": "S3 mobile cap 3.0",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C2.1.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C2.1.3",
+      "trigger_condition": "Single T3 cap 2.5",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.1",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.1",
+      "trigger_condition": "S2 cap 2.5 (binding)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.2",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.2",
+      "trigger_condition": "S2 cap 2.5 (binding)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.3",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.3",
+      "trigger_condition": "S2 cap 2.5 (binding)",
+      "trigger_evidence": []
+    },
+    {
+      "affected_categories": [],
+      "cap_ceiling": null,
+      "cap_type": "INLINE_SUBCAP",
+      "date_applied": null,
+      "log_id": "INLINE-P3C3.1.4",
+      "recalc_verified": null,
+      "severity": null,
+      "subcap_id": "P3C3.1.4",
+      "trigger_condition": "S2 cap 2.5 (binding)",
+      "trigger_evidence": []
+    }
+  ],
+  "entity_display_id": "bank-of-utah-30v2",
+  "evidence_age": [
+    {
+      "e_id": "E-014",
+      "freshness_band": "stale",
+      "published_date": "2022-12-01",
+      "recency_months": 43,
+      "source_name": "Ogden-Weber Chamber - Leadership Succession",
+      "tier": 3
+    },
+    {
+      "e_id": "E-102",
+      "freshness_band": "undated",
+      "published_date": null,
+      "recency_months": null,
+      "source_name": "Clay Contacts: Carson Shreeve, Technology Services Manager",
+      "tier": 3
+    },
+    {
+      "e_id": "E-044",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 30,
+      "source_name": "Bank of Utah - Service Channels Blog",
+      "tier": 2
+    },
+    {
+      "e_id": "E-092",
+      "freshness_band": "dated",
+      "published_date": "2024-01-01",
+      "recency_months": 30,
+      "source_name": "Explorium Prospects + Clay Contacts: Jonathan Poon, VP Information Security Officer",
+      "tier": 3
+    },
+    {
+      "e_id": "E-015",
+      "freshness_band": "dated",
+      "published_date": "2024-02-01",
+      "recency_months": 29,
+      "source_name": "FDIC Consent Order FDIC-23-0038b",
+      "tier": 1
+    },
+    {
+      "e_id": "E-053",
+      "freshness_band": "dated",
+      "published_date": "2024-02-01",
+      "recency_months": 29,
+      "source_name": "PROXY: FDIC Consent Order Strategic Plan + Annual Report Cadence",
+      "tier": 1
+    },
+    {
+      "e_id": "E-055",
+      "freshness_band": "dated",
+      "published_date": "2024-02-01",
+      "recency_months": 29,
+      "source_name": "PROXY: Consent order + Verafin deployment",
+      "tier": 1
+    },
+    {
+      "e_id": "E-073",
+      "freshness_band": "dated",
+      "published_date": "2024-02-01",
+      "recency_months": 29,
+      "source_name": "PROXY: FDIC Consent Order \u2192 P3C3 Compliance subcaps",
+      "tier": 1
+    },
+    {
+      "e_id": "E-081",
+      "freshness_band": "dated",
+      "published_date": "2024-02-01",
+      "recency_months": 29,
+      "source_name": "PROXY: Verafin + consent order \u2192 compliance monitoring",
+      "tier": 1
+    },
+    {
+      "e_id": "E-016",
+      "freshness_band": "dated",
+      "published_date": "2024-04-01",
+      "recency_months": 27,
+      "source_name": "Consumer Finance Monitor - FDIC BaaS Consent Orders",
+      "tier": 3
+    },
+    {
+      "e_id": "E-023",
+      "freshness_band": "dated",
+      "published_date": "2024-04-01",
+      "recency_months": 27,
+      "source_name": "Bank of Utah Q1 2024 Quarterly Report",
+      "tier": 2
+    },
+    {
+      "e_id": "E-077",
+      "freshness_band": "dated",
+      "published_date": "2024-04-01",
+      "recency_months": 27,
+      "source_name": "PROXY: Regulatory context \u2192 BaaS TPRM industry enforcement trend",
+      "tier": 3
+    },
+    {
+      "e_id": "E-039",
+      "freshness_band": "aging",
+      "published_date": "2024-10-01",
+      "recency_months": 21,
+      "source_name": "Utah Business - Bank of Utah Zelle Launch",
+      "tier": 3
+    },
+    {
+      "e_id": "E-026",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 18,
+      "source_name": "Bank of Utah - Thumb Bar and Chat Features",
+      "tier": 2
+    },
+    {
+      "e_id": "E-028",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 18,
+      "source_name": "Bank of Utah Fintech Strategy Page",
+      "tier": 2
+    },
+    {
+      "e_id": "E-029",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 18,
+      "source_name": "Bank of Utah CRA Public File",
+      "tier": 2
+    },
+    {
+      "e_id": "E-074",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 18,
+      "source_name": "PROXY: Fintech strategy page \u2192 TPRM maturity evidence",
+      "tier": 2
+    },
+    {
+      "e_id": "E-082",
+      "freshness_band": "aging",
+      "published_date": "2025-01-01",
+      "recency_months": 18,
+      "source_name": "PROXY: Fintech strategy exclusions \u2192 regulatory awareness",
+      "tier": 2
+    },
+    {
+      "e_id": "E-018",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 16,
+      "source_name": "Bank of Utah - S&P Global Ranking Press Release",
+      "tier": 2
+    },
+    {
+      "e_id": "E-022",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 16,
+      "source_name": "Bank of Utah 2024 Annual Report",
+      "tier": 2
+    },
+    {
+      "e_id": "E-025",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 16,
+      "source_name": "Bank of Utah - Card Manager Launch",
+      "tier": 2
+    },
+    {
+      "e_id": "E-061",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 16,
+      "source_name": "PROXY: Annual Report + Quarterly Report investment commentary",
+      "tier": 2
+    },
+    {
+      "e_id": "E-100",
+      "freshness_band": "aging",
+      "published_date": "2025-03-01",
+      "recency_months": 16,
+      "source_name": "Clay Contacts: Felipe Henz, Strategy Manager",
+      "tier": 3
+    },
+    {
+      "e_id": "E-097",
+      "freshness_band": "aging",
+      "published_date": "2025-04-01",
+      "recency_months": 15,
+      "source_name": "Clay Contacts: Banking Technology Leadership",
+      "tier": 3
+    },
+    {
+      "e_id": "E-069",
+      "freshness_band": "aging",
+      "published_date": "2025-05-01",
+      "recency_months": 14,
+      "source_name": "Explorium - Website Changes (CardValet\u2192Card Manager)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-098",
+      "freshness_band": "aging",
+      "published_date": "2025-05-01",
+      "recency_months": 14,
+      "source_name": "Clay Contacts: CRM-titled Roles (Banking Context)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-034",
+      "freshness_band": "aging",
+      "published_date": "2025-06-01",
+      "recency_months": 13,
+      "source_name": "Bank of Utah Community Banking Blog",
+      "tier": 5
+    },
+    {
+      "e_id": "E-038",
+      "freshness_band": "aging",
+      "published_date": "2025-06-01",
+      "recency_months": 13,
+      "source_name": "Bank of Utah - Zelle Features Update",
+      "tier": 2
+    },
+    {
+      "e_id": "E-093",
+      "freshness_band": "current",
+      "published_date": "2025-07-01",
+      "recency_months": 12,
+      "source_name": "Clay Contacts: Siddharth Suresh Babu, Data Governance Analyst",
+      "tier": 3
+    },
+    {
+      "e_id": "E-024",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 11,
+      "source_name": "Bank of Utah - New Online Banking Dashboard",
+      "tier": 2
+    },
+    {
+      "e_id": "E-040",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 11,
+      "source_name": "GOBankingRates - Best Banks Utah 2025",
+      "tier": 3
+    },
+    {
+      "e_id": "E-065",
+      "freshness_band": "current",
+      "published_date": "2025-08-01",
+      "recency_months": 11,
+      "source_name": "PROXY: Dashboard redesign driven by customer survey \u2192 measurement loop",
+      "tier": 2
+    },
+    {
+      "e_id": "E-011",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "Bank of Utah Official - Stablecore Partnership",
+      "tier": 2
+    },
+    {
+      "e_id": "E-013",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "American Banker - Stablecore Investment",
+      "tier": 3
+    },
+    {
+      "e_id": "E-031",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "Park Record - Financial Literacy Partnership",
+      "tier": 3
+    },
+    {
+      "e_id": "E-054",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "PROXY: Investment decisions + FDIC requirements",
+      "tier": 2
+    },
+    {
+      "e_id": "E-056",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "PROXY: Innovation investment signals",
+      "tier": 2
+    },
+    {
+      "e_id": "E-095",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "Clay Contacts: Compliance & Risk Leadership",
+      "tier": 3
+    },
+    {
+      "e_id": "E-101",
+      "freshness_band": "current",
+      "published_date": "2025-09-01",
+      "recency_months": 10,
+      "source_name": "Clay Contacts: Vanina Fowles, CRA Officer",
+      "tier": 3
+    },
+    {
+      "e_id": "E-035",
+      "freshness_band": "current",
+      "published_date": "2025-10-01",
+      "recency_months": 9,
+      "source_name": "Google Play - Bank of Utah Mobile App",
+      "tier": 3
+    },
+    {
+      "e_id": "E-066",
+      "freshness_band": "current",
+      "published_date": "2025-10-01",
+      "recency_months": 9,
+      "source_name": "PROXY: Google Play reviews + app update cadence \u2192 feedback loop",
+      "tier": 3
+    },
+    {
+      "e_id": "E-019",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 8,
+      "source_name": "Visbanking - Bank of Utah Call Report Data",
+      "tier": 1
+    },
+    {
+      "e_id": "E-096",
+      "freshness_band": "current",
+      "published_date": "2025-11-01",
+      "recency_months": 8,
+      "source_name": "Clay Contacts: Digital & Marketing Leadership",
+      "tier": 3
+    },
+    {
+      "e_id": "E-021",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 6,
+      "source_name": "Fintechfutures - 2025 Fintech Trends",
+      "tier": 3
+    },
+    {
+      "e_id": "E-052",
+      "freshness_band": "current",
+      "published_date": "2026-01-01",
+      "recency_months": 6,
+      "source_name": "Explorium - LinkedIn Post (Aviation Trust)",
+      "tier": 5
+    },
+    {
+      "e_id": "E-048",
+      "freshness_band": "current",
+      "published_date": "2026-02-01",
+      "recency_months": 5,
+      "source_name": "Explorium - Company Award Event: 2026 Best Company for Community Impact",
+      "tier": 3
+    },
+    {
+      "e_id": "E-012",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Q2-Stablecore Partnership Announcement (BusinessWire)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-017",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Enrichment - Leadership & Tech Stack",
+      "tier": 3
+    },
+    {
+      "e_id": "E-020",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "BankBranchLocator - Regulatory History",
+      "tier": 3
+    },
+    {
+      "e_id": "E-027",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah - Digital Banking Services Page",
+      "tier": 5
+    },
+    {
+      "e_id": "E-030",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah Community Support Page",
+      "tier": 5
+    },
+    {
+      "e_id": "E-032",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Glassdoor - Bank of Utah Reviews",
+      "tier": 3
+    },
+    {
+      "e_id": "E-033",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay - Recent News Enrichment (March 2026)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-036",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah - Online/Mobile Banking Page",
+      "tier": 2
+    },
+    {
+      "e_id": "E-037",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah - Easy Checking Digital Account Opening",
+      "tier": 2
+    },
+    {
+      "e_id": "E-041",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "LunarCrush - Social Sentiment (Limited)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-042",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah Contact Us / Service Channels",
+      "tier": 2
+    },
+    {
+      "e_id": "E-043",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PissedConsumer - Bank of Utah Customer Service Info",
+      "tier": 3
+    },
+    {
+      "e_id": "E-045",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah - Zelle Page (Payment Features)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-046",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Bank of Utah - External Transfers Page",
+      "tier": 2
+    },
+    {
+      "e_id": "E-047",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium - Workforce Trends",
+      "tier": 3
+    },
+    {
+      "e_id": "E-049",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium - Partnership Event: Q2/Stablecore",
+      "tier": 3
+    },
+    {
+      "e_id": "E-050",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium - Company Ratings (Employer Reviews)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-051",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium - Full Technographics Stack",
+      "tier": 3
+    },
+    {
+      "e_id": "E-057",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: ESG governance absence documentation",
+      "tier": 5
+    },
+    {
+      "e_id": "E-058",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Marketing tech stack \u2192 analytics capability",
+      "tier": 3
+    },
+    {
+      "e_id": "E-059",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Digital opening process + security features",
+      "tier": 2
+    },
+    {
+      "e_id": "E-060",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Product analytics tools \u2192 UX measurement",
+      "tier": 3
+    },
+    {
+      "e_id": "E-062",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Verafin + consent order remediation",
+      "tier": 3
+    },
+    {
+      "e_id": "E-063",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: VP AI + BI Analyst + Lending Systems Analytics",
+      "tier": 3
+    },
+    {
+      "e_id": "E-064",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium: Website keyword scan \u2014 ESG terms absent",
+      "tier": 3
+    },
+    {
+      "e_id": "E-067",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium - Business Events (Legal/Security Extended Lookback)",
+      "tier": 3
+    },
+    {
+      "e_id": "E-068",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium - Webstack Analysis",
+      "tier": 3
+    },
+    {
+      "e_id": "E-070",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Sageworks/Abrigo in tech stack \u2192 lending automation",
+      "tier": 3
+    },
+    {
+      "e_id": "E-071",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Verafin fraud detection + Explorium security absence",
+      "tier": 3
+    },
+    {
+      "e_id": "E-072",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: ACI Speedpay + Ensenta \u2192 payments automation",
+      "tier": 3
+    },
+    {
+      "e_id": "E-075",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Security tech stack \u2192 BCP/DR infrastructure signals",
+      "tier": 3
+    },
+    {
+      "e_id": "E-076",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Explorium challenges enrichment \u2014 no SEC-filed risk data",
+      "tier": 3
+    },
+    {
+      "e_id": "E-078",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Payment automation stack + Q2 platform \u2192 STP inference",
+      "tier": 3
+    },
+    {
+      "e_id": "E-079",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Digital account opening \u2192 process automation signal",
+      "tier": 2
+    },
+    {
+      "e_id": "E-080",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Verafin consortium model + zero breaches \u2192 fraud management",
+      "tier": 3
+    },
+    {
+      "e_id": "E-083",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Sophos + Barracuda + Mimecast \u2192 operational risk event capture",
+      "tier": 3
+    },
+    {
+      "e_id": "E-084",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Open Jobs - VDI Engineer (reveals tech architecture)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-085",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Open Jobs - Client Support Manager (reveals contact center ops)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-086",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Open Jobs - Commercial Lending Assistant (confirms Sageworks utilization)",
+      "tier": 2
+    },
+    {
+      "e_id": "E-087",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Open Jobs - Mission Statement + HR Signals",
+      "tier": 2
+    },
+    {
+      "e_id": "E-088",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Full tech stack synthesis \u2192 P4 architecture assessment",
+      "tier": 3
+    },
+    {
+      "e_id": "E-089",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: No CDO + no data governance framework \u2192 documented absence",
+      "tier": 5
+    },
+    {
+      "e_id": "E-090",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Snowflake deployment without governance tooling",
+      "tier": 3
+    },
+    {
+      "e_id": "E-091",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "PROXY: Q2 + Stablecore integration \u2192 API/integration architecture",
+      "tier": 2
+    },
+    {
+      "e_id": "E-094",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Contacts: Complete Data & Analytics Team Discovery",
+      "tier": 3
+    },
+    {
+      "e_id": "E-099",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium Prospects: VP InfoSec Officer Deep Profile",
+      "tier": 3
+    },
+    {
+      "e_id": "E-103",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Recent News Enrichment: 5 news items 2025-2026",
+      "tier": 5
+    },
+    {
+      "e_id": "E-104",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Clay Headcount Growth Enrichment: 60-month detail",
+      "tier": 3
+    },
+    {
+      "e_id": "E-105",
+      "freshness_band": "current",
+      "published_date": "2026-03-01",
+      "recency_months": 4,
+      "source_name": "Explorium Website-Keywords: AI/chatbot/Agentforce scan",
+      "tier": 3
+    }
+  ],
+  "narrative": {
+    "data_gaps_md": "\u2022 Data governance policies - Analyst [E-093] exists but framework maturity unknown. Would clarify (+0.5).\n\u2022 Salesforce utilization (URF-01) - detected [E-098:F5], Chief of Staff has SF skills. Scope unknown.\n\u2022 AI/ML deployment - VP AI+Data Scientist+2 Engineers [E-094], website scan NULL [E-105:F1].\n\u2022 BCP/DR testing - Infrastructure [E-075], VP InfoSec has DR skills [E-099:F2]. Cadence unknown.\n\u2022 Consent order progress - Hires positive [E-095,E-101] but FDIC results confidential.\n\u2022 Board minutes, IT steering, strategy docs - would improve / accuracy.",
+    "evidence_registry_preface_md": null
+  },
+  "qa_verdict_l1": null,
+  "qa_verdict_l2": {
+    "governance_skill_version": null,
+    "recommendation": null,
+    "verdict": "PASS",
+    "verdict_basis": null
+  },
+  "run_request_id": "DMA-ASS-BKUT-20260330-V2",
+  "safeguard_gates": [],
+  "thin_evidence_subcap_ids": []
+}

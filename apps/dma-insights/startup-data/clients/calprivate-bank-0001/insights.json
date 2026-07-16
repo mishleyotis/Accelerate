@@ -1,0 +1,741 @@
+{
+  "entity_display_id": "calprivate-bank-0001",
+  "items": [
+    {
+      "affects": [
+        "P2C1.4.8",
+        "P2C4.3.2",
+        "P3C3.1.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "CP-F-001",
+      "id": "362119e8-8da8-41cd-97f1-edd7169f921d",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-002"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0043",
+        "E-0050",
+        "E-0108"
+      ],
+      "linked_subcap_id": "P2C1.4.8",
+      "platforms": [
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "critical",
+      "so_what_text": "Make Sales Process & Opportunity Configuration a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-0108].",
+      "source_rec_id": null,
+      "theme": "Digital Channels",
+      "title": "Seven primary findings are presented in order of sales-narrative priority",
+      "what_text": "Seven primary findings are presented in order of sales-narrative priority. 🔴 CRITICAL = highest-confidence opportunity with immediate evidence base. 🟠 HIGH = strong opportunity with multiple corroborating signals. ⚡ TIMING = window-sensitive — Zennify engagement required before the COO assessment concludes. In Zennify's assessment Sales Process & Opportunity Configuration scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-0050].",
+      "why_text": "At 2.5 out of 5, Sales Process & Opportunity Configuration shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business [E-0043, E-0050].",
+      "pillar": "P2",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P4C1.5.4",
+        "P4C2.7.1",
+        "P1C4.1.1",
+        "P2C3.3.CL1",
+        "P3C1.8.RIA2",
+        "P3C4.4.4"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [],
+      "ic_id": "XS-DATABRICKS",
+      "id": "ed04bfd7-f954-47ad-b1d5-d285aa0d87c6",
+      "interconnections": [
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0020",
+        "E-0099"
+      ],
+      "linked_subcap_id": "P4C1.5.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau",
+        "ncino",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "high",
+      "so_what_text": "Recommended play: open the Databricks conversation now — the talent build shows budget and intent before a platform has been chosen [E-0099].",
+      "source_rec_id": null,
+      "theme": "Data Management & Governance",
+      "title": "Hiring signals ahead of a Databricks foundation",
+      "what_text": "Hiring signals show investment intent while no Databricks platform is detected in the stack. The research recorded: \"Three active job postings observed May 2026: (1) Commercial Lending Regional Client Support Manager San Diego ($94K-$124K, posted May 1); (2) Relationship Manager San Diego ($127K-$154K, posted Feb 27); (3) SBA Business Development Officer La Jolla ($80K-$90K,\". In Zennify's assessment Unified Data + AI Asset Governance Control Plane scores 1.5 out of 5, versus a typical 2.0 at comparable institutions [E-0099].",
+      "why_text": "The assessment found: “Three active job postings observed May 2026: (1) Commercial Lending Regional Client Support Manager San Diego ($94K-$124K, posted May 1); (2) Relationship Manager San Diego” [E-0020]. The client's own stated priority — \"The following seven strategic objectives have been confirmed from official investor relations materials, press releases, and executive communications. These objectives form the analytical anchor for Zennify engagement po\" — needs the Databricks capability that is currently absent. scores 1.5/5 on the current assessment.",
+      "pillar": "P4",
+      "flag": "CRITICAL"
+    },
+    {
+      "affects": [
+        "P2C3.6",
+        "P2C4.1",
+        "P4C3.3.1",
+        "P2C4.1.1",
+        "P2C1.4.6",
+        "P1C2.1.7"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-0072"
+      ],
+      "ic_id": "INS-R-001",
+      "id": "b25f25ce-3c83-46fe-af9e-f0b0e2a2a8c8",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0072"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3.6"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-0105",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-002"
+        },
+        {
+          "e_ids": [
+            "E-0060",
+            "E-0073",
+            "E-0082",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-003"
+        },
+        {
+          "e_ids": [
+            "E-0105",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0120",
+        "E-0105",
+        "E-0012",
+        "E-0016",
+        "E-0122",
+        "E-0073",
+        "E-0060",
+        "E-0082"
+      ],
+      "linked_subcap_id": "P2C3.6",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino",
+        "tableau",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Unified Agent Desktop a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-0012].",
+      "source_rec_id": "R-001",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Salesforce Financial Services Cloud — Complete the CRM Architecture",
+      "what_text": "Microsoft Dynamics 365 CRM implemented November 2022 by AlphaBOLD for loan cycle management. nCino (Salesforce-native LOS) deployed Q1 2023 for commercial lending origination. Glassdoor reviewers report Excel still used for RM pipeline management — three competing CRM-adjacent platforms with no unified client record. Agent Enablement capped level 3 and Customer Intelligence capped level 3 per ISS-002 MATERIAL. CFO Cory Stewart is a former WaFd Bank executive — WaFd is a documented nCino and Salesforce Financial Services Cloud customer. Peer reference: Ponce Bank deployed FSC+nCino+MuleSoft+FIS and scaled from $800M to $2.8B in assets. In Zennify's assessment Unified Agent Desktop scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-0105].",
+      "why_text": "At 2.5 out of 5, Unified Agent Desktop shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business [E-0120, E-0105].",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C3.3",
+        "P4C3.3.1",
+        "P2C1.5.1",
+        "P2C2.2.7",
+        "P4C3.1.7",
+        "P4C3.1.6"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-0109"
+      ],
+      "ic_id": "INS-R-002",
+      "id": "ccf2acc9-9cf2-4ecb-8207-6fc57bca0a88",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0109"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C3.3"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-0108"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "CP-F-001"
+        },
+        {
+          "e_ids": [
+            "E-0105",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-001"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0085",
+        "E-0107",
+        "E-0120",
+        "E-0105",
+        "E-0112",
+        "E-0123",
+        "E-0108",
+        "E-0121"
+      ],
+      "linked_subcap_id": "P4C3.3",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Enterprise Integration Strategy a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 2.0 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-0120].",
+      "source_rec_id": "R-002",
+      "theme": "Architecture & Cloud",
+      "title": "MuleSoft Anypoint Platform — Enterprise Integration Backbone",
+      "what_text": "Seven-plus vendor platforms confirmed operating without iPaaS or API gateway — nCino, D365, IFS Banking, FIS RDC, Centrix, Treasury One, ServiceNow, Power Automate, SharePoint Online. Integration Architecture capped level 3 per ISS-005 MINOR. IR deck (Q2 2025) states explicit intent: 'create frictionless client experience through integrations of core, origination, servicing and online banking platforms' — architecture intent documented, platform absent. nCino acquired Sandbox Banking (nCino Integration Gateway) in FY2025, providing nCino-to-core pattern, but D365, IFS, Treasury One, and ServiceNow remain outside that scope. In Zennify's assessment Enterprise Integration Strategy scores 2.0 out of 5, versus a typical 2.5 at comparable institutions [E-0085].",
+      "why_text": "The assessment found: “Enterprise Architecture Strategy CONFIRMED in official IR deck: Technology Principles documented” [E-0107]. At 2.0 out of 5, Enterprise Integration Strategy sits 0.5 points below the 2.5 typically seen at comparable institutions — a developing capability still short of the peer standard. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C3.4",
+        "P2C3.5",
+        "P4C2.7.1",
+        "P2C4.1.1",
+        "P2C2.2.7",
+        "P3C1.1.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-0081"
+      ],
+      "ic_id": "INS-R-003",
+      "id": "9df7f8b9-b45b-4864-b63f-f0fdbd463dc2",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0081"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C3.4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-0060",
+            "E-0073",
+            "E-0082",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-001"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-002"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-005"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0119",
+        "E-0085",
+        "E-0120",
+        "E-0094",
+        "E-0067",
+        "E-0073",
+        "E-0060",
+        "E-0082"
+      ],
+      "linked_subcap_id": "P2C3.4",
+      "platforms": [
+        "salesforce",
+        "databricks",
+        "ncino"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Customer Context Visibility (360) a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 2.5 toward 4 out of 5 and beyond and move the institution toward best practice. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-0120].",
+      "source_rec_id": "R-003",
+      "theme": "Segment & Line-of-Business CX",
+      "title": "Salesforce Service Cloud — RM Enablement and Service Systematization",
+      "what_text": "COO Michael Pierron began his operational assessment on April 6, 2026 with an explicit mandate to 'champion AI-driven automation, digital transformation, and operational efficiency'. D365 (2022) handles loan cycle operations internally — it does not manage customer-facing service workflows. ServiceNow handles internal IT tickets — not client service cases. No customer-facing case management system confirmed. Case Management = 2.5; Context Visibility = 2.0. Service hours: Monday–Friday 9am–5pm only (ISS-007). NPS 81 is sustained through RM effort, not platform-supported service capability. In Zennify's assessment Customer Context Visibility (360) scores 2.5 out of 5, versus a typical 2.5 at comparable institutions [E-0085].",
+      "why_text": "The assessment found: “Q1 2026 net income $12.0M ($2.07 diluted EPS) — +20% QoQ vs $10.0M Q4'25. NIM widened to 5.21% (from 4.84% Q4'25; 4.61% Q1'25) — exceptional margin expansion. Core deposits $2.33B (+13.5% YoY)” [E-0119]. At 2.5 out of 5, Customer Context Visibility (360) shows a developing capability still short of the peer standard. Because it feeds the day-to-day experience customers have across every channel, lifting it toward best practice compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C1.4",
+        "P4C1.5.4",
+        "P4C2.7.1",
+        "P2C4.1.1",
+        "P4C1.2.3",
+        "P4C2.2.1"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-0099"
+      ],
+      "ic_id": "INS-R-005",
+      "id": "b6dd5784-d7c5-460f-ab46-765b84d91ab4",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0099"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C1.4"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [
+            "E-0105",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-001"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0105",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-002"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0120"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0081",
+        "E-0098",
+        "E-0120",
+        "E-0085",
+        "E-0002",
+        "E-0105",
+        "E-0097",
+        "E-0106"
+      ],
+      "linked_subcap_id": "P4C1.4",
+      "platforms": [
+        "databricks",
+        "salesforce",
+        "tableau"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make MDM Strategy & Golden Record a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 1.5 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-0120].",
+      "source_rec_id": "R-005",
+      "theme": "Data Management & Governance",
+      "title": "Salesforce Data Cloud — Unified Customer Intelligence Layer",
+      "what_text": "Five confirmed customer data platforms operate independently: D365, nCino, IFS Banking, FIS RDC, Treasury One. No CDP or Master Data Management platform confirmed. MDM score = 1.5 — the lowest evidence-supported score in the entire 698-capability assessment. SVP Credit Risk Analytics mandate: 'ensure quality, availability, and integrity of loan/credit risk data across platforms and business units; lead initiatives to build enterprise data warehousing capabilities'. Chairman Isakow Q4 2025 explicitly named AI and data capabilities as investment priorities. In Zennify's assessment MDM Strategy & Golden Record scores 1.5 out of 5, versus a typical 2.0 at comparable institutions [E-0098].",
+      "why_text": "At 1.5 out of 5, MDM Strategy & Golden Record sits 0.5 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business [E-0081, E-0098].",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P2C1.5",
+        "P2C4.1.1",
+        "P3C1.1.1",
+        "P2C1.5.4",
+        "P2C1.5.2",
+        "P2C1.2.5"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-0044",
+        "E-0051"
+      ],
+      "ic_id": "INS-R-006",
+      "id": "05ebef4d-55f3-42d9-9744-d9616ad917db",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0044",
+            "E-0051"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P2C1.5"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [
+            "E-0060"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-001"
+        },
+        {
+          "e_ids": [
+            "E-0107"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-002"
+        },
+        {
+          "e_ids": [
+            "E-0060",
+            "E-0119"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0060",
+        "E-0114",
+        "E-0107",
+        "E-0119",
+        "E-0040",
+        "E-0048",
+        "E-0062",
+        "E-0066"
+      ],
+      "linked_subcap_id": "P2C1.5",
+      "platforms": [
+        "databricks",
+        "salesforce"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Marketing Automation Platform a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 1.5 toward the 2.5 peer benchmark and move the institution to parity with peers. Because it underpins the day-to-day experience customers have across every channel, the gains reach well beyond this single capability [E-0114].",
+      "source_rec_id": "R-006",
+      "theme": "Digital Channels",
+      "title": "Salesforce Marketing Cloud — Digital Marketing Automation",
+      "what_text": "Storm Brain digital agency confirmed as primary marketing partner, having 'tripled email and social engagement'. No marketing automation platform (MAP) confirmed — Marketing Automation = 1.5. Montecito branch opened November 2025; Santa Barbara expansion publicly planned. COO Pierron: 7 years as EVP Head of Payments at a regional bank — treasury and payments cross-sell campaigns require data-triggered automation, not scheduled agency emails. SBA Preferred Lender status with documented commercial loan programs provides high-value content assets for automated campaign journeys. In Zennify's assessment Marketing Automation Platform scores 1.5 out of 5, versus a typical 2.5 at comparable institutions [E-0060].",
+      "why_text": "The assessment found: “Q1 2026 net income $12.0M ($2.07 diluted EPS) — +20% QoQ vs $10.0M Q4'25. NIM widened to 5.21% (from 4.84% Q4'25; 4.61% Q1'25) — exceptional margin expansion. Core deposits $2.33B (+13.5% YoY)” [E-0119]. At 1.5 out of 5, Marketing Automation Platform sits 1.0 points below the 2.5 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the day-to-day experience customers have across every channel, so progress here compounds across the rest of the business.",
+      "pillar": "P2",
+      "flag": "OPPORTUNITY"
+    },
+    {
+      "affects": [
+        "P4C2.7",
+        "P4C2.7.1",
+        "P3C1.1.1",
+        "P1C2.3.3",
+        "P2C4.8.5",
+        "P1C3.8.3"
+      ],
+      "confidence_band": "low",
+      "counter_e_ids": [
+        "E-0104"
+      ],
+      "ic_id": "INS-R-007",
+      "id": "076e21f0-7365-4928-b2d0-ec039bf054bb",
+      "interconnections": [
+        {
+          "e_ids": [
+            "E-0104"
+          ],
+          "kind": "counter_evidence",
+          "note": "same-subcap evidence with opposing polarity",
+          "target_id": "P4C2.7"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Databricks platform detected in the stack",
+          "target_id": "databricks"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Tableau platform detected in the stack",
+          "target_id": "tableau"
+        },
+        {
+          "e_ids": [],
+          "kind": "tech_absence",
+          "note": "no Twilio platform detected in the stack",
+          "target_id": "twilio"
+        },
+        {
+          "e_ids": [
+            "E-0105"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-001"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0105",
+            "E-0121"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-002"
+        },
+        {
+          "e_ids": [
+            "E-0085",
+            "E-0119"
+          ],
+          "kind": "sibling_card",
+          "note": "shares supporting evidence",
+          "target_id": "INS-R-003"
+        }
+      ],
+      "linked_e_ids": [
+        "E-0002",
+        "E-0085",
+        "E-0106",
+        "E-0105",
+        "E-0100",
+        "E-0119",
+        "E-0121",
+        "E-0102"
+      ],
+      "linked_subcap_id": "P4C2.7",
+      "platforms": [
+        "salesforce",
+        "ncino",
+        "tableau",
+        "databricks",
+        "twilio"
+      ],
+      "related_rec_ids": [],
+      "severity": "medium",
+      "so_what_text": "Make Assistive AI Agent a near-term focus for CalPrivate Bank: a scoped investment here would lift it from 1.0 toward the 2.0 peer benchmark and move the institution to parity with peers. Because it underpins the data and technology foundation the rest of the business is built on, the gains reach well beyond this single capability [E-0085].",
+      "source_rec_id": "R-007",
+      "theme": "Analytics & AI",
+      "title": "Einstein AI and Agentforce — AI-Driven Relationship Banking",
+      "what_text": "Chairman Isakow Q4 2025 explicitly named AI as a strategic investment priority. COO Pierron: explicit mandate to 'champion AI-driven automation'. CECL ML model in quarterly production with formal governance — demonstrating CalPrivate's capacity to operate regulated ML models. SVP Credit Risk Analytics role requires Python, R, ML expertise. AI Agents score = 1.0 — entirely absent. No Einstein AI, Agentforce, or AI agent deployment confirmed. Without Data Cloud (R-005) unified profile, AI models lack the clean, comprehensive data to operate on. In Zennify's assessment Assistive AI Agent scores 1.0 out of 5, versus a typical 2.0 at comparable institutions [E-0002].",
+      "why_text": "The assessment found: “Q1 2026 net income $12.0M ($2.07 diluted EPS) — +20% QoQ vs $10.0M Q4'25. NIM widened to 5.21% (from 4.84% Q4'25; 4.61% Q1'25) — exceptional margin expansion. Core deposits $2.33B (+13.5% YoY)” [E-0119]. At 1.0 out of 5, Assistive AI Agent sits 1.0 points below the 2.0 typically seen at comparable institutions — an early-stage capability with the widest distance to close. Closing that distance would strengthen the data and technology foundation the rest of the business is built on, so progress here compounds across the rest of the business.",
+      "pillar": "P4",
+      "flag": "OPPORTUNITY"
+    }
+  ],
+  "narrative": {
+    "per_pillar": {
+      "P1": {
+        "findings_md": "P1 is CalPrivate Bank's second-strongest pillar, where formal governance infrastructure and community standing deliver measurable advantages over peers. The IT Governance and ESG scores both reflect genuine, documented capability — not inference. The development opportunity in Innovation is the principal gap between CalPrivate's current position and a true level 4 Advanced P1 posture.\n: Digital Strategy & Vision Score 2.70 / 5.0 | Peer: 2.5 | Gap: +0.2 | level 3 Established\nWhat We See: CEO Sowers (ex-Accenture banking efficiency, since Feb 2018) articulated a $5B+ asset growth strategy [E-0001] supported by Q4 2025 Chairman Isakow's naming of AI, digital capabilities, and core systems as investment priorities [E-0002]. Investor relations materials document a formal Technology & Innovation roadmap process, with Product Strategy Roadmaps as explicit inputs to a broader Technology Roadmap [E-0107]. Technology principles — documented in the IR deck — include: investment in technology as a competitive necessity, improved client experience, scalability for organic growth and M&A [E-0107]. The newly hired SVP Director of Strategic Initiatives (Daniel Chang) [E-0123] indicates strategic execution capacity is being built. capability scores cluster at 2.5–3.0, reflecting a documented strategy but with limited quantified outcome evidence at the capability level.\nWhy It Matters: The strategic intent at CalPrivate is well-documented and board-aligned. The Chairman's AI mandate [E-0002] means that technology investment proposals do not need to create demand — they need only demonstrate alignment with a pre-authorized strategic direction. This is a meaningful procurement environment advantage for Zennify. The gap between strategy articulation (3.0) and innovation capability ( = 2.05) is the primary P1 development area: the 'what' is defined; the systematic mechanism for testing, piloting, and scaling new capabilities is not yet formal.\nPeer Context: score 2.70 vs peer median 2.50 (+0.20). HTBK (Heritage Commerce, Bay Area, Silicon Valley proximity) likely leads peers on strategy sophistication given tech-industry client base. CalPrivate matches on documented strategy; HTBK advantage may stem from more explicit digital transformation investment disclosures.\n: IT Governance & Risk Score 3.03 / 5.0 | Peer: 3 | Gap: +0.03 | level 3 Established\nWhat We See: The Technology & Innovation Board Committee is co-chaired by Leda Csanka — 36-year CIO/CTO career — and provides board-level oversight of the technology roadmap, governance, and budget [E-0093, E-0107]. The Information Technology Management Committee is a cross-functional internal body focused on cybersecurity, emerging security trends, and enterprise adoption [E-0107]. Board Director Kathy Lonowski (ex-FDIC San Francisco Regional Director, 350+ financial institutions, $1T AUM) provides dual regulatory and digital banking governance expertise [E-0095]. CTO Curtis Birkmann holds BCP/DR certifications and leads a portfolio of 100+ technology projects [E-0093]. subcaps score in the 3.0–3.5 range: Digital Governance Charter (3.5), Steering Committee (3.5), Decision Rights Framework (3.5).\nWhy It Matters: The dual-layer governance structure — T&I Board Committee plus IT Management Committee — provides both strategic authorization and operational oversight. This is the most institutionally mature aspect of CalPrivate's technology posture and directly enables the Zennify engagement: Leda Csanka and Kathy Lonowski provide the board-level credibility to evaluate and approve a Salesforce FSC transformation. Budget approval does not require creating a governance process — it requires presenting to an existing one. This is a significant sales cycle accelerant.\nPeer Context: score 3.03 vs peer median 3.00 (+0.03). CalPrivate matches or slightly exceeds peers on governance. The dedicated T&I Board Committee is a differentiator: most $1B–$5B community banks lack board-level technology committees with external CIO/CTO expertise.\n: Innovation & Fintech Score 2.05 / 5.0 | Peer: 2 | Gap: +0.05 | level 2 Developing\nWhat We See: CalPrivate participates in three structured FinTech ecosystems: BankTech Ventures, BankTech Consortium, and JAM FINTOP [E-0112] — providing access to emerging community banking technology research and early-stage fintech relationships. Kyle Bailey as SVP Product Management, Origination Technology [E-0123] represents the confirmed 'Product Strategy & Innovation team' hire referenced in the IR deck [E-0107]. nCino deployment (Q1 2023) and D365 deployment (2022) represent technology-forward decisions within the peers. subcaps score at 2.0–2.5, reflecting ecosystem access without a confirmed formal innovation lab, stage-gate process, or internal hackathon cadence.\nWhy It Matters: is the primary P1 development area. BankTech Ventures and JAM FINTOP provide an external FinTech radar, but a structured internal innovation process — pilot criteria, success metrics, scale gates — is not confirmed in public disclosures. The Product Strategy & Innovation team hire [E-0123] is the mechanism through which this gap is being addressed. Zennify's technology roadmap (FSC + MuleSoft + Einstein) introduces the structured, Salesforce-native framework within which future FinTech pilots can be evaluated and deployed.\nPeer Context: score 2.05 vs peer median 2.00 (+0.05). CalPrivate is at the peer median on innovation — this category is uniformly underdeveloped across SV1 $1B–$5B community banks, where innovation typically means vendor adoption rather than internal R&D.\n: Culture & Change Management Score 2.46 / 5.0 | Peer: 2.5 | Gap: -0.04 | level 2 Developing\nWhat We See: Glassdoor and Indeed employee data reflects a collaborative, client-relationship-focused culture: 78% salary satisfaction, 75% recommend to a friend, interview experience rated EXCELLENT [E-0012]. Six C-level and SVP hires in 12 months (COO, CCO, DCBO, SVP Credit Risk Analytics, Director Portfolio Management, SBA BDO) reflect aggressive organizational scaling [E-0019, E-0085] — an ISS-006 MINOR issue applying an level 4 ceiling. CEO Sowers' Q1 2026 statement emphasizes 'team strength' [E-0119] and the culture of Relationships, Solutions, and Trust is reinforced across public communications. subcaps score in the 2.0–2.5 range.\nWhy It Matters: The talent scaling risk (ISS-006) is not a culture failure — it is a growth management challenge. Six senior hires in 12 months doubles CalPrivate's C-suite density at exactly the point when the bank is formalizing its operational transformation agenda. COO Pierron's stated goal — 'build on the foundation, service our clients with excellence, and drive continued growth and innovation' [E-0085] — positions the new leadership cohort as additive rather than corrective. The Zennify deployment accelerates cultural alignment by systematizing workflows before new hires onboard into fragmented manual processes.\nPeer Context: score 2.46 vs peer median 2.50 (−0.04). At peer median. Culture and change management is uniformly developing across the SV1 cohort — most community banks lack formal change management frameworks; change occurs through leadership relationship rather than process.\n: ESG & Community Score 2.96 / 5.0 | Peer: 2 | Gap: +0.96 | level 3 Established\nWhat We See: FDIC CRA examination: High Satisfactory across all three tests (Lending, Investment, Services), rated under Large Institution CRA examination procedures — the highest applicable rating for CalPrivate's size class [E-0090]. CalPrivate holds SBA Preferred Lender status; Community Bank SBA 504 Lender of the Year (NADCO Community Impact Awards); Bank Director's #1 bank in its asset class for ROA and ROE [E-0124]. American Banker top 5% of US banks with $2B–$10B assets for both 2024 and 2025 [E-0124]. Board member George Leis served as YMCA Chairman of the Board; 8+ named community partnerships documented in research [E-0034]. Bauer Financial 5-star rated. New Montecito branch opens with dedicated nonprofit Impact Checking account [E-0114].\nWhy It Matters: ESG & Community is CalPrivate's strongest peer-differentiated category — +0.96 above the SV1 the peer benchmark, the single largest positive gap in the entire 17-category assessment. The CRA High Satisfactory under Large Institution procedures is significant: it means CalPrivate is evaluated under the same rigor applied to banks many times its size. This compliance depth is a market differentiator in HNW relationship banking: clients and referring RIAs prioritize institutional credibility. Every Salesforce recommendation in this report operates from the foundation of a bank with no enforcement actions [E-0024] and the highest applicable CRA rating.\nPeer Context: score 2.96 vs peer median 2.00 (+0.96). CalPrivate significantly outperforms all five peers on ESG. HAFC ($7.6B) has broader community investment capacity; CalPrivate leads on qualitative CRA outcomes and formal recognition. This is the most differentiated capability in the assessment.",
+        "heading": "Pillar 1: Strategy, Governance & Culture   Score: 2.61  |  Peer Median: 2.4  |  Gap: +0.21",
+        "linked_e_ids": [
+          "E-0001",
+          "E-0002",
+          "E-0012",
+          "E-0019",
+          "E-0024",
+          "E-0034",
+          "E-0085",
+          "E-0090",
+          "E-0093",
+          "E-0095",
+          "E-0107",
+          "E-0112",
+          "E-0114",
+          "E-0119",
+          "E-0123",
+          "E-0124"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P2": {
+        "findings_md": "P2 is the most strategically significant pillar in this assessment. The highest peer-relative strength ( Personalization, +0.68) and the most consequential development area ( Digital Onboarding, −0.48) both reside here. The tension is acute: CalPrivate delivers world-class client outcomes through relationship manager excellence while the digital infrastructure that would systematize and scale that excellence is underdeveloped. The Zennify engagement addresses this tension directly.\n: Digital Marketing & Acquisition Score 2.43 / 5.0 | Peer: 2.5 | Gap: -0.07 | level 2 Developing\nWhat We See: Storm Brain digital agency confirmed as CalPrivate's primary digital marketing partner, having 'tripled email and social engagement' [E-0060]. LinkedIn presence: 2,987 followers with regular commercial banking content. Google Tag Manager and LinkedIn Insight Tag deployed for web analytics [E-0121]. SBA content marketing active (rates, eligibility, program descriptions). 19 demo videos documented on website for product education. GTM Analytics tracking confirmed. Testimonial content from named clients supports referral-based acquisition model [E-0073]. subcaps score in the 1.5–3.0 range: digital channel strategy and compliance-in-marketing strong; marketing automation scores 1.5 (no MA platform confirmed).\nWhy It Matters: Marketing Cloud is the category-level gap: Storm Brain tripled engagement, but the absence of a marketing automation platform means campaigns are agency-dependent and cannot be triggered by Salesforce data events. The connection between CFR data (which commercial client just closed a loan) and marketing activation (send treasury cross-sell journey) requires Marketing Cloud. The COO's seven years of EVP Head of Payments expertise [E-0119] is directly relevant: payments and treasury cross-sell are the highest-value campaigns for a commercial bank, and they require real-time data triggers, not scheduled agency campaigns.\nPeer Context: score 2.43 vs peer median 2.50 (−0.07). Near parity. SoCal community banks at this tier all rely on agency-based digital marketing. CalPrivate's Storm Brain engagement results give it a slight quality advantage; the automation platform gap is shared across the cohort.\n: Digital Onboarding & Fulfillment Score 2.02 / 5.0 | Peer: 2.5 | Gap: -0.48 | level 2 Developing\nWhat We See: IFS Banking confirmed as CalPrivate's digital banking and mobile platform [E-0050]. App Store reviews rate the IFS app as 'outdated, lacks basic functions' (ISS-003 MINOR cap). Business clients require a separate FIS Deposit One application for remote deposit capture [E-0085]. Digital Account Platform (DAP) announced in the 2023 Annual Report but current activation status not confirmed [E-0113]. SBA loan eligibility transparency strong: minimum FICO 650 published, government-guaranteed programs documented [E-0058]. nCino (Salesforce-native, Q1 2023) handles commercial lending origination with known-fast decisioning (SBA approvals documented) [E-0105]. capability range: 1.5–3.0. Strongest capability: Eligibility Transparency (3.0); weakest cluster: digital account opening subcaps (1.5–2.0).\nWhy It Matters: = 2.02 — the weakest of all 17 assessed categories and the single largest negative gap versus peers (−0.48). This is the most actionable finding in the P2 pillar. The bank's IFS app fragmentation, absent native digital account opening, and dual-app friction directly contradict the 'Distinctly Different™' experience promise at the digital channel. NPS 81 survives this gap because RM-led relationships compensate — but at $5B scale, the compensation model fails. nCino Deposit Account Opening (R-004) directly addresses the digital account opening gap: as nCino is already live and the DCBO SME role is posted [E-0086], the expansion path requires internal resource rather than a net-new vendor procurement.\nPeer Context: score 2.02 vs peer median 2.50 (−0.48). This is the only material negative peer gap in the assessment. HAFC (Hanmi, $7.6B, NASDAQ-listed) leads the cohort on digital onboarding with a more mature mobile-first platform investment at its larger scale. RBB Bancorp, similar in size to CalPrivate, is estimated at 2.0-2.5 — the negative gap is therefore driven by IFS app age and the missing digital account opening capability.\n: Omnichannel Servicing Score 2.52 / 5.0 | Peer: 2.5 | Gap: +0.02 | level 3 Established\nWhat We See: CalPrivate operates three dedicated phone lines for retail, business, and Private Business Capital clients respectively, with M–F 9am–5pm banking hours (ISS-007 MINOR cap on ) [E-0067]. Secure Messaging is available through the IFS Banking platform for authenticated communication [E-0069]. Knowledge Center self-service resource library confirmed on the website [E-0068]. Can Truong: VP-Digital Banking & Operations Support Manager since 2015 confirms internal digital banking operations function [E-0123]. VoC and service performance subcaps score highest at 3.5 — driven by NPS 81 World Class ×15 consecutive quarters [E-0073]. Agent Enablement capped level 3 (ISS-002: D365+nCino+Excel fragmentation). Self-service subcaps capped level 4 (ISS-003: IFS app fragmentation).\nWhy It Matters: The NPS 81 outcome at is the strongest single capability signal in Pillar 2. It confirms that the RM-led servicing model delivers objectively superior client outcomes. The architectural challenge is that this excellence is not systematized: it resides in individual RM knowledge and relationship continuity. Service Cloud converts RM excellence from a human-dependent attribute into a platform-supported capability — case queues, SLAs, interaction history, and cross-branch visibility all contribute to making the NPS 81 model reproducible at scale and across 8+ branches.\nPeer Context: score 2.52 vs peer median 2.50 (+0.02). At peer median. CalPrivate's NPS 81 advantage does not fully translate into omnichannel scores because the metric captures human service, not platform capability. Peers with lower NPS (estimated 60–70 range) may have more sophisticated servicing platforms, reflecting a classic community bank trade-off: relationship quality versus digital infrastructure.\n: Personalization & Client Intelligence Score 2.68 / 5.0 | Peer: 2 | Gap: +0.68 | level 3 Established\nWhat We See: NPS 81 World Class for 15 consecutive quarters [E-0073] is the highest-confidence evidence item for: it demonstrates personalized client outcomes at sustained scale. CEO Sowers Q1 2026: 'the majority of our new business continues to come from referrals' [E-0119] — the referral-dominant acquisition model is the behavioral output of successful personalization. Revolving lines of credit CAGR 16% [E-0078] indicates RM-driven cross-sell effectiveness. CalPrivate serves HNW clients, legal industry professionals, and closely-held businesses [E-0078] with a 'RM-memory' personalization model: relationship managers carry client knowledge that substitutes for platform-based personalization. Customer Intelligence is capped at level 3 (ISS-002) due to CRM fragmentation.\nWhy It Matters: 's +0.68 peer gap is the bank's most pronounced above-peer advantage in Pillar 2 — but it is also the most fragile, because it is human-capital-dependent. When a long-tenured RM departs, their client knowledge departs with them unless systematized in a CRM. FSC converts RM memory into platform memory: household management, financial accounts 360, relationship history, and next-best-action all preserve relationship context across RM transitions. The advantage becomes durable only when it is encoded in the platform.\nPeer Context: score 2.68 vs peer median 2.00 (+0.68). Second-largest positive gap after. CalPrivate's personalization advantage is the most distinctive commercial signal in the assessment: a community bank delivering NPS 81 across 15 quarters through pure relationship management excellence. Peers (BMRC, RBB, BCAL) are estimated at 2.0, reflecting average community bank personalization capability.",
+        "heading": "Pillar 2: Customer Experience & Digital   Score: 2.42  |  Peer Median: 2.38  |  Gap: +0.04",
+        "linked_e_ids": [
+          "E-0050",
+          "E-0058",
+          "E-0060",
+          "E-0067",
+          "E-0068",
+          "E-0069",
+          "E-0073",
+          "E-0078",
+          "E-0085",
+          "E-0086",
+          "E-0105",
+          "E-0113",
+          "E-0119",
+          "E-0121",
+          "E-0123"
+        ],
+        "linked_subcap_ids": [
+          "P2C2.1.1"
+        ]
+      },
+      "P3": {
+        "findings_md": "P3 is CalPrivate Bank's highest-scoring pillar and its most durable competitive advantage. The combination of zero enforcement actions, CRA High Satisfactory under Large Institution procedures, Board-certified compliance expertise, and an active BCP/DR posture places CalPrivate in the top tier of SV1 peers on operational and compliance maturity. this area also sets the foundational conditions under which every Zennify technology recommendation can be deployed with confidence.\n: Process Automation Score 2.81 / 5.0 | Peer: 2.5 | Gap: +0.31 | level 3 Established\nWhat We See: Power Automate confirmed in production for workflow automation [E-0094] — a direct Microsoft 365 integration capability. nCino (Q1 2023) has automated key aspects of commercial lending origination: lead-to-close tracking, document generation, approval workflows [E-0105]. Centrix Positive Pay provides automated fraud prevention for commercial accounts [E-0085]. Treasury One handles treasury and payments automation [E-0085]. ServiceNow (ITSM) confirmed for internal IT ticket management and service workflows [E-0094]. COO Pierron — 25 years of banking operations and payments, 7 years EVP Head of Payments [E-0119] — leads an active operational efficiency mandate. subcaps score 2.5–3.5: workflow automation (3.0) and RPA/process automation (3.0) strong; cross-system automation limited by integration debt.\nWhy It Matters: Power Automate's presence is the most important signal: CalPrivate can build and deploy automated workflows within the Microsoft ecosystem. The constraint is that Power Automate cannot reach beyond M365 — nCino data, IFS Banking data, and FIS data are outside its scope without an API layer. MuleSoft (R-002) removes this constraint: once an integration layer is in place, Power Automate can trigger cross-system workflows (nCino loan event → FIS core booking → FSC case creation → Treasury One notification) that are currently manual. 's path to level 4 Advanced runs through MuleSoft.\nPeer Context: score 2.81 vs peer median 2.50 (+0.31). Above peers. Power Automate + nCino workflow automation + ServiceNow ITSM represents a more mature automation stack than most SV1 $1B–$5B community banks, where automation often means spreadsheet macros or basic rule-based systems.\n: Operational Risk & Fraud Score 2.63 / 5.0 | Peer: 2.5 | Gap: +0.13 | level 3 Established\nWhat We See: Centrix Positive Pay deployed for commercial fraud detection and check payment protection [E-0085]. BSA/AML department confirmed with dedicated VP-level AML officer [E-0085]. CCO Meitzen (ex-OCC examiner, BSA/AML expertise, Aug 2025 appointment) [E-0019] and Director Lonowski (ex-FDIC San Francisco Regional Director) [E-0095] provide dual regulatory expertise for risk oversight. CECL allowance for credit losses model in quarterly production [E-0106]. ISS-001 MATERIAL: NPA ratio deteriorated from 0.47% (Q4 2024) to 2.00% (Q4 2025), triggering an level 3 ceiling on. Q1 2026: CEO Sowers — 'laser focused on reducing criticized, classified and non-performing assets. We believe reserves are adequate' [E-0119]. Credit metrics described as 'improving over prior quarter' by Q1 2026.\nWhy It Matters: The ISS-001 credit quality cap is the only MATERIAL issue with an active Q1 2026 improvement trajectory. This is important context: the level 3 ceiling on is not a structural deficiency but a temporary constraint reflecting a credit cycle correction actively being remediated. The CECL model in production (quarterly update cycles, formal governance) [E-0106] and the nCino portfolio analytics opportunity (R-004) provide the mechanism for accelerating credit recovery — unified credit data feeds more accurate risk models, and better models support faster identification of deteriorating credits.\nPeer Context: score 2.63 vs peer median 2.50 (+0.13). Above peers despite ISS-001 cap. CalPrivate's Centrix Positive Pay + BSA/AML + ex-OCC CCO combination is stronger than the estimated peer baseline, even with the credit quality ceiling applied.\n: Compliance & CRA Score 3.07 / 5.0 | Peer: 3 | Gap: +0.07 | level 3 Established\nWhat We See: FDIC CRA examination (March 2024): High Satisfactory rating across all three performance tests (Lending, Investment, Services), rated under Large Institution CRA examination procedures [E-0090]. Zero enforcement actions confirmed across FDIC, OCC, CFPB, and California DFPI databases [E-0024]. BSA/AML department with dedicated VP-level officer [E-0085]. CCO Andrew Meitzen: ex-OCC examiner, enterprise risk, BSA/AML [E-0019]. Board Director Kathy Lonowski: ex-FDIC San Francisco Regional Director, supervised 350+ FIs with $1T AUM combined [E-0095]. CDARS and ICS (Certificate of Deposit Account Registry Service / Insured Cash Sweep) deployed for large deposit insurance optimization [E-0096]. SBA Preferred Lender; Community Bank SBA 504 Lender of the Year [E-0124]. October 2025 Privacy Notice updated for CCPA/CPRA compliance [E-0097]. subcaps score 3.0–3.5 — the second-highest category average in the entire assessment.\nWhy It Matters: = 3.07 is tied with as the highest category score in the assessment. It reflects genuine, documented compliance depth: not a claim, but a formal FDIC examination outcome under the most rigorous applicable testing regime. This posture has direct implications for every Zennify technology recommendation. Banks with active enforcement actions face technology adoption constraints; CalPrivate has none. The ex-OCC CCO and ex-FDIC board director represent a dual-layer compliance review framework that can evaluate and approve Salesforce FSC data architecture, MuleSoft API governance, and Einstein AI model risk management with institutional credibility. Compliance is the enabler, not the gatekeeper.\nPeer Context: score 3.07 vs peer median 3.00 (+0.07). CalPrivate is at or above peers on compliance — notable because HAFC (Hanmi Financial, $7.6B, NASDAQ-listed) has larger compliance investment capacity. CalPrivate's outperformance on a per-asset basis confirms that compliance maturity is an institutional value, not merely a scale outcome.\n: Business Resilience & TPRM Score 2.84 / 5.0 | Peer: 2.5 | Gap: +0.34 | level 3 Established\nWhat We See: CTO Birkmann holds BCP/DR certifications; FlexPod Cisco UCS + NetApp architecture designed for disaster recovery and high availability [E-0093]. BCP is 'tested annually' per bank communications. CalPrivate provided banking services to wildfire-affected clients (LA area wildfires) in early 2025 — demonstrating activated crisis response capability [E-0114]. CDARS/ICS deployment provides deposit insurance resilience for large depositors [E-0096]. 100+ technology project portfolio under CTO Birkmann [E-0093] provides vendor management discipline. Third-party risk management (TPRM) capability is demonstrated through 13 confirmed vendor platforms operating with formal governance relationships. subcaps score in the 3.0–3.5 range.\nWhy It Matters: Business Resilience is the second-strongest category in Pillar 3. The wildfire banking response [E-0114] is the most compelling evidence: it is one thing to test a BCP annually; it is another to activate it for a real-world crisis and maintain client service continuity. This resilience posture is directly relevant to the Salesforce recommendation set: FlexPod's existing high-availability architecture provides the on-premises foundation for a hybrid cloud deployment (Azure + FlexPod) that MuleSoft and Data Cloud require. The infrastructure resilience is already built; the application layer is what needs completion.\nPeer Context: score 2.84 vs peer median 2.50 (+0.34). Third-largest positive gap in the assessment. CalPrivate's BCP/DR certifications + wildfire response activation + FlexPod architecture represent above-peer operational resilience. Most SV1 $1B–$5B community banks do not have documented crisis activation events; CalPrivate's wildfire response is a differentiated proof point.",
+        "heading": "Pillar 3: Operations, Risk & Compliance   Score: 2.85  |  Peer Median: 2.62  |  Gap: +0.23",
+        "linked_e_ids": [
+          "E-0019",
+          "E-0024",
+          "E-0085",
+          "E-0090",
+          "E-0093",
+          "E-0094",
+          "E-0095",
+          "E-0096",
+          "E-0097",
+          "E-0105",
+          "E-0106",
+          "E-0114",
+          "E-0119",
+          "E-0124"
+        ],
+        "linked_subcap_ids": []
+      },
+      "P4": {
+        "findings_md": "P4 is CalPrivate Bank's lowest-scoring pillar and the primary opportunity horizon for the Zennify engagement. this area reflects a fundamental pattern: technology investment is present and documented, but architectural coherence is absent. Thirteen confirmed vendor platforms operate without a unified integration or data layer. The board AI mandate [E-0002] and COO AI automation mandate [E-0085] exist in the presence of a Analytics & AI score of 2.09 — the gap between aspiration and architecture is the opportunity.\n: Data Management & Governance Score 2.21 / 5.0 | Peer: 2 | Gap: +0.21 | level 2 Developing\nWhat We See: CECL allowance for credit losses model in quarterly production with formal governance — the most significant positive signal [E-0106]. SVP Credit Risk Analytics role (May 2026) requires Python, R, ML, CECL, Moody's Analytics, nCino, and PrecisionLender [E-0085] — confirming enterprise data warehouse construction is actively beginning. Privacy governance: CCPA/CPRA-compliant Privacy Notice updated October 2025 [E-0097]. Confirmed data platforms: D365, nCino, IFS Banking, FIS RDC, Treasury One — all independent data silos [E-0085, E-0120]. No CDP, no named MDM platform, no enterprise data warehouse confirmed. capability range: 1.5–3.0. Best capability: Privacy Governance (3.0). Weakest capability cluster: MDM subcaps (– = 1.5 — the lowest evidence-supported scores in the full 698-capability assessment).\nWhy It Matters: The MDM score of 1.5 is the most diagnostically precise finding in the P4 assessment. CalPrivate has a customer in D365 (loan cycle), a borrower in nCino, an account holder in IFS Banking, a depositor in FIS, and a treasury client in Treasury One — with no reconciliation layer between these five records. The SVP Credit Risk Analytics role requirement to 'ensure quality, availability, and integrity of loan/credit risk data across platforms and business units' [E-0085] confirms that management already recognizes this fragmentation as a priority. Data Cloud resolves the MDM gap by treating all five platform records as data sources feeding one unified profile — with identity resolution, calculated insights, and activation capabilities.\nPeer Context: score 2.21 vs peer median 2.00 (+0.21). CalPrivate is above peers, but both are in level 2 Developing territory. Data management is the developing frontier for the entire SV1 $1B–$5B cohort — no peer is confirmed to have a CDP or MDM platform at this tier.\n: Analytics & AI Enablement Score 2.09 / 5.0 | Peer: 2 | Gap: +0.09 | level 2 Developing\nWhat We See: CECL ML model in quarterly production: the bank runs a formal machine learning model with quarterly update cycles, formal governance, and regulated output disclosure [E-0106]. This is the highest-evidence AI signal in the entire P4 assessment ( = 3.0). Power BI inferred from M365 stack [E-0094]. Chairman Isakow Q4 2025: AI investment named explicitly [E-0002]. COO Pierron AI-driven automation mandate [E-0085]. SVP Credit Risk Analytics requires Python/R/ML [E-0085]. capability range: 1.0–3.0. Top: Data Science (3.0). Weakest: AI Agents (1.0 — not deployed). Analytics Data Platform (1.5) — no enterprise analytics platform confirmed.\nWhy It Matters: The gap between the dual AI mandate (board + COO) and the score of 2.09 is the most consequential finding for the Zennify sales conversation. CalPrivate wants to do AI; it has demonstrated it can govern ML (CECL); it does not yet have the data infrastructure to scale AI beyond CECL. Einstein AI and Agentforce (R-007) build on top of the Data Cloud unified profile — which builds on top of MuleSoft ingestion pipelines — which builds on top of FSC as the primary activation target. The AI capability CalPrivate's Chairman and COO have mandated is three infrastructure layers away from becoming real. Each Zennify recommendation in Phase 1 and Phase 2 is a prerequisite for Phase 3 AI outcomes.\nPeer Context: score 2.09 vs peer median 2.00 (+0.09). CalPrivate is marginally above the SV1 peer median on analytics and AI, driven by the CECL model. Both CalPrivate and peers are in early level 2 territory on this category — the entire $1B–$5B community bank cohort is at the threshold of AI adoption.\n: Technology Architecture Score 2.54 / 5.0 | Peer: 2.5 | Gap: +0.04 | level 3 Established\nWhat We See: FlexPod Cisco UCS + NetApp deployed as primary infrastructure platform with confirmed BCP/DR capability [E-0093]. ServiceNow ITSM confirmed for service management and IT operations [E-0094]. Microsoft 365 full suite (SharePoint Online, Teams, Power Apps, Power Automate, Outlook) [E-0094]. Active Directory for identity and access management. CIO Hurtik implemented SDLC/SCRUM methodology; LeSS (Large-Scale Scrum) and Change Control Board referenced [E-0094]. Architecture strategy documented in IR decks: 'create frictionless client experience through integrations of core, origination, servicing and online banking platforms' [E-0107]. Integration Architecture = 2.0 (capped level 4 per ISS-005: 7+ vendors without iPaaS).\nWhy It Matters: The technology architecture has all the components of a mature hybrid cloud infrastructure — FlexPod for compute, Azure (strongly inferred) for cloud services, M365 for productivity, ServiceNow for ITSM — but no integration layer connecting the application portfolio. The CTO's stated architecture principle [E-0107] of frictionless integration is aspirational without MuleSoft: each vendor integration is currently custom-built. This creates technical debt at exactly the point when CalPrivate is adding its most significant systems (nCino 2023, COO operational systems 2026). MuleSoft's API-led connectivity model converts custom integrations into reusable system, process, and experience layers — the architectural discipline the CTO's stated principle requires.\nPeer Context: score 2.54 vs peer median 2.50 (+0.04). At peer median. CalPrivate's FlexPod + M365 + ServiceNow stack is comparable to or slightly above SV1 peer infrastructure maturity. The integration deficit is a shared SV1 challenge — most community banks at this tier have custom point-to-point integrations rather than enterprise iPaaS.\n: Cybersecurity Score 2.67 / 5.0 | Peer: 2.5 | Gap: +0.17 | level 3 Established\nWhat We See: Annual Report cybersecurity investment: CIO Hurtik stated 'the board investment in cybersecurity allows me to sleep at night' [E-0094]. SANS cybersecurity training certifications held by CTO Birkmann [E-0093]. IT Management Committee focus on 'enhancing focus on cybersecurity and emerging security trends' [E-0107]. CIO Hurtik's background: Trace 3 (cybersecurity consulting) and Active Directory implementation [E-0094]. Microsoft 365 Defender and Azure AD (Entra ID) inferred from M365 deployment [E-0094]. FlexPod Cisco UCS includes integrated network security. GLBA/CCPA/CPRA compliance confirmed [E-0097]. No named SIEM or SOC platform confirmed — scores 2.0. FBI Cyber Division partnership referenced in annual report [E-0094]. subcaps score 2.0–3.0.\nWhy It Matters: cybersecurity is CalPrivate's most mature P4 category (2.67 vs peer median 2.50, +0.17). The 'board investment' language from CIO Hurtik [E-0094] and the IT Management Committee's cybersecurity mandate [E-0107] reflect investment priority. The primary gap is the absence of a named SIEM platform or dedicated SOC capability — meaningful for a bank processing HNW client financial data. Salesforce Shield (an optional FSC add-on for Zennify's R-001 engagement) provides platform-level event monitoring, encryption at rest, and field audit trail capabilities native to the Salesforce environment.\nPeer Context: score 2.67 vs peer median 2.50 (+0.17). Above peers on cybersecurity. Board investment language + IT Committee focus + SANS-certified CTO + FBI partnership give CalPrivate a documented cybersecurity posture stronger than most SV1 community banks. The SIEM gap is shared across the cohort.",
+        "heading": "Pillar 4: Data, AI & Technology   Score: 2.35  |  Peer Median: 2.25  |  Gap: +0.10",
+        "linked_e_ids": [
+          "E-0002",
+          "E-0085",
+          "E-0093",
+          "E-0094",
+          "E-0097",
+          "E-0106",
+          "E-0107",
+          "E-0120"
+        ],
+        "linked_subcap_ids": [
+          "P4C1.4.1",
+          "P4C1.4.3",
+          "P4C2.3.1"
+        ]
+      }
+    },
+    "recommendations_md": "Eight recommendations are presented, each grounded in evidence from the DMA assessment, validated as not currently deployed at CalPrivate Bank, and aligned to the bank's stated strategic objectives. Recommendations are ordered by priority score from the Gap Prioritization analysis (Section 8). Each recommendation identifies the root cause it addresses, the specific Zennify solution offered, and the capability improvements that follow from its implementation.\nTechnographic Validation Summary: All 8 Salesforce/Zennify solutions are confirmed absent at CalPrivate Bank as of the assessment date. Sources: LeadIQ tech stack scan (Feb 2026) [E-0121] — zero Salesforce products confirmed; Dice jobs scan (May 2026) — zero CalPrivate Salesforce/MuleSoft job postings; Exa/web_search — no vendor partnership announcements for any recommended technology.\nR-001: Salesforce Financial Services Cloud — Complete the CRM Architecture\nRoot Cause: Microsoft Dynamics 365 CRM implemented November 2022 by AlphaBOLD for loan cycle management [E-0120]. nCino (Salesforce-native LOS) deployed Q1 2023 for commercial lending origination [E-0105]. Glassdoor reviewers report Excel still used for RM pipeline management [E-0012] — three competing CRM-adjacent platforms with no unified client record. Agent Enablement capped level 3 and Customer Intelligence capped level 3 per ISS-002 MATERIAL. CFO Cory Stewart is a former WaFd Bank executive — WaFd is a documented nCino and Salesforce Financial Services Cloud customer [E-0016]. Peer reference: Ponce Bank deployed FSC+nCino+MuleSoft+FIS and scaled from $800M to $2.8B in assets [E-0122].\nStrategic Objective Alignment: SO-1 (scale to $5B+ — Excel RM management cannot scale to 15+ branches); SO-3 (nCino optimization — FSC is nCino's native CRM layer); SO-4 (IPO readiness — investor-grade CRM audit trail required for OTCQX uplisting and eventual public company disclosures)\nTechnology Validation: ABSENT — LeadIQ (Feb 2026): zero Salesforce products in CalPrivate tech stack [E-0121]. Dice (May 2026): zero CalPrivate Salesforce FSC job postings. AlphaBOLD case study confirms D365 scoped to loan cycle only, not full FSC functionality [E-0120].\nZennify Solution: Salesforce Financial Services Cloud (Banking Edition) — consolidates D365 (loan cycle) + nCino (lending origination) + Excel (pipeline) into one unified platform. nCino is Salesforce-native: CalPrivate already has the Salesforce technology through nCino. FSC adds the RM relationship layer above it — household management, financial account 360, referral management, and compliance-embedded interaction tracking. Zennify as qualified nCino + Salesforce FSC dual-certified implementation partner.\nExpected Outcomes:\nAll Relationship Managers access a unified client record spanning lending, deposits, treasury, and referrals — replacing the current three-system parallel workflow\nnCino loan origination data flows natively into FSC client record without manual rekeying or system switching\nReferral pipeline management and opportunity tracking systematized across all 8 branches with audit trail for IPO-readiness disclosures\nISS-002 MATERIAL cap lifted as CRM fragmentation is resolved — Agent Enablement and Customer Intelligence advance beyond level 3 ceiling\nPrerequisites: MuleSoft (R-002) should be deployed in parallel to handle D365 data migration to FSC and ongoing IFS/FIS connectivity. nCino Expansion (R-004) can proceed independently.\nconnected Unlock: Agent Enablement cap lifted from level 3; Customer Intelligence cap lifted; technology strategy execution validated; innovation narrative established as first SoCal community bank with FSC architecture.\nR-002: MuleSoft Anypoint Platform — Enterprise Integration Backbone\nRoot Cause: Seven-plus vendor platforms confirmed operating without iPaaS or API gateway — nCino, D365, IFS Banking, FIS RDC, Centrix, Treasury One, ServiceNow, Power Automate, SharePoint Online [E-0085, E-0107, E-0120]. Integration Architecture capped level 3 per ISS-005 MINOR. IR deck (Q2 2025) states explicit intent: 'create frictionless client experience through integrations of core, origination, servicing and online banking platforms' [E-0107] — architecture intent documented, platform absent. nCino acquired Sandbox Banking (nCino Integration Gateway) in FY2025, providing nCino-to-core pattern, but D365, IFS, Treasury One, and ServiceNow remain outside that scope [E-0105].\nStrategic Objective Alignment: SO-1 (M&A readiness — integration layer enables acquired bank onboarding without custom point-to-point builds); SO-4 (IPO readiness — auditable, governed API layer required for institutional investor due diligence); SO-2 (AI automation — data must flow through integration layer before AI can operate on it)\nTechnology Validation: ABSENT — Q2 2025 IR deck names BankTech Ventures/JAM FINTOP as tech ecosystem partners; no MuleSoft or iPaaS platform named [E-0107]. LeadIQ tech stack: no MuleSoft or Anypoint Platform confirmed [E-0121]. Exa search returned no CalPrivate MuleSoft signals.\nZennify Solution: MuleSoft Anypoint Platform with FINS Banking Accelerator — pre-built connectors for FIS, IFS, nCino, Jack Henry, and Fiserv core banking systems. Standard Book-to-Core pattern: nCino origination → MuleSoft → FIS core banking. Extends to D365 → FSC data migration and Treasury One → Data Cloud ingestion. The architectural decoupling principle (proven at Ponce Bank [E-0122]) insulates the FSC user experience from any future core banking migration — a critical capability for a bank with IPO ambitions and M&A growth strategy.\nExpected Outcomes:\nnCino loan booking to core banking automated in real-time, eliminating manual reconciliation between origination and core systems\nIntegration layer survives any future core banking migration — a future core banking change does not disrupt FSC or RM workflows\nM&A integration pattern established — any acquired bank's core system connects via MuleSoft reusable connector rather than custom point-to-point builds\nISS-005 MINOR cap lifted — Integration Architecture advances beyond level 3 ceiling\nPrerequisites: Can be deployed in parallel with FSC (R-001). Is a prerequisite for Data Cloud (R-005) ingestion pipelines and Marketing Cloud (R-006) data triggers.\nconnected Unlock: Integration Architecture cap lifted; Process Automation elevated — Power Automate gains cross-system reach; Data Management improved via unified ingestion architecture.\nR-003: Salesforce Service Cloud — RM Enablement and Service Systematization\nRoot Cause: COO Michael Pierron began his operational assessment on April 6, 2026 [E-0119] with an explicit mandate to 'champion AI-driven automation, digital transformation, and operational efficiency' [E-0085]. D365 (2022) handles loan cycle operations internally — it does not manage customer-facing service workflows [E-0120]. ServiceNow handles internal IT tickets — not client service cases [E-0094]. No customer-facing case management system confirmed. Case Management = 2.5; Context Visibility = 2.0. Service hours: Monday–Friday 9am–5pm only (ISS-007) [E-0067]. NPS 81 is sustained through RM effort, not platform-supported service capability.\nStrategic Objective Alignment: SO-1 (scale to $5B+ — the RM service model requires systematization to scale across more branches); SO-2 (AI-driven automation — COO explicit operational mandate); SO-5 (Montecito/Santa Barbara expansion — digital service delivery to new markets without proportional headcount)\nTechnology Validation: ABSENT — D365 scoped to loan cycle ops only [E-0120]. LeadIQ: zero Salesforce Service Cloud [E-0121]. ServiceNow confirmed for IT tickets — not client service. Dice: zero CalPrivate Service Cloud postings.\nZennify Solution: Salesforce Service Cloud for Financial Services — customer-facing case management for RM workflows: deposit inquiries, loan servicing escalations, complaints, payment issues, onboarding follow-ups, treasury management requests. Natively embedded in FSC (R-001) for unified client view during service interactions. COO Pierron can measure and optimize service operations via real-time dashboard — the operational assessment mandate has a concrete delivery mechanism.\nExpected Outcomes:\nRM service workflows systematized with shared case queues, SLAs, and escalation paths — making NPS 81 excellence auditable and reproducible across all branches\nCOO operational assessment gains a measurable technology outcome — service case metrics become quantifiable KPIs for the operational transformation agenda\nService hours limitation (ISS-007) partially addressed through automated case routing — clients can submit service requests outside M–F 9am–5pm window for next-business-day resolution\nNew market launches (Montecito, future Santa Barbara branches) supported by standardized service operations from day one\nPrerequisites: FSC (R-001) should be live first — Service Cloud is natively embedded in FSC architecture and the combined deployment is the standard community banking pattern.\nconnected Unlock: Case Management elevated from 2.5 toward level 4; Context Visibility elevated; ISS-007 Service Hours cap influence reduced; strategy execution validated through measurable operational transformation outcomes.\nR-004: nCino Platform Expansion — Commercial LOS to Full Commercial Banking Suite\nRoot Cause: nCino confirmed deployed since Q1 2023 for commercial lending origination [E-0105]. DCBO role posted at CalPrivate: 'nCino SME — REQUIRED (not preferred)' [E-0086] — an active organizational investment signal. SVP Credit Risk Analytics role requires 'CECL + Moody's Analytics + nCino + PrecisionLender' expertise [E-0085] — confirming nCino is central to credit analytics build-out. Portfolio Analytics, Deposit Account Opening, and consumer lending modules not confirmed active. DAP (Digital Account Platform) announced in 2023 Annual Report [E-0113] but current activation status unconfirmed.\nStrategic Objective Alignment: SO-3 (nCino optimization — CalPrivate's own stated strategic objective); SO-7 (credit quality recovery — portfolio analytics enables real-time monitoring of criticized/classified assets); SO-5 (Santa Barbara expansion — digital deposit account opening enables new market onboarding)\nTechnology Validation: EXPANSION of existing deployment — NOT a new vendor procurement. Current nCino scope: commercial lending origination only. Portfolio Analytics, Deposit Account Opening, Banking Advisor AI modules not confirmed active. DCBO role requirement [E-0086] confirms optimization mandate is active.\nZennify Solution: nCino Platform Expansion — three module activations: (1) Portfolio Analytics: real-time covenant monitoring, credit risk dashboards, criticized/classified asset tracking — feeds CECL model with granular portfolio data; (2) Deposit Account Opening: replaces or complements IFS-based DAP for digital new account origination; (3) nCino Banking Advisor: AI-assisted credit decisioning embedded in the LOS. Zennify as qualified nCino + Salesforce dual-certified implementation partner, uniquely positioned to optimize nCino within the FSC ecosystem simultaneously.\nExpected Outcomes:\nCECL model receives real-time portfolio data from nCino Portfolio Analytics — improving ACL forecasting accuracy and credit risk granularity for the SVP Credit Risk Analytics team\nDigital deposit account opening available via nCino — directly addressing the Digital Onboarding gap vs peer median (−0.48)\nDCBO 'nCino SME required' hire has an expanded, optimized platform to drive commercial deposit and lending growth\nPortfolio Analytics enables proactive identification of credit deterioration signals — accelerating the ISS-001 credit quality recovery trajectory\nPrerequisites: No prerequisites — nCino is already licensed and live. Independent of FSC (R-001) deployment sequence, though combining with FSC deployment maximizes architectural coherence.\nconnected Unlock: Digital Onboarding elevated toward level 3.5; credit risk analytics improved; data quality improved via unified nCino data model; ISS-001 recovery trajectory accelerated.\nR-005: Salesforce Data Cloud — Unified Customer Intelligence Layer\nRoot Cause: Five confirmed customer data platforms operate independently: D365, nCino, IFS Banking, FIS RDC, Treasury One [E-0081, E-0098, E-0120]. No CDP or Master Data Management platform confirmed. MDM score = 1.5 — the lowest evidence-supported score in the entire 698-capability assessment. SVP Credit Risk Analytics mandate: 'ensure quality, availability, and integrity of loan/credit risk data across platforms and business units; lead initiatives to build enterprise data warehousing capabilities' [E-0085]. Chairman Isakow Q4 2025 explicitly named AI and data capabilities as investment priorities [E-0002].\nStrategic Objective Alignment: SO-2 (AI-driven automation — AI cannot function without clean, unified data; Data Cloud is the prerequisite layer for Einstein AI in R-007); SO-7 (credit quality recovery — CECL model accuracy depends on unified credit data inputs from all five platforms)\nTechnology Validation: ABSENT — LeadIQ: zero Salesforce Data Cloud/CDP confirmed [E-0121]. Exa/web search: no Data Cloud or CDP signals at CalPrivate. SVP Credit Risk Analytics role references 'building enterprise data warehousing capabilities from scratch' — confirming Data Cloud opportunity [E-0085].\nZennify Solution: Salesforce Data Cloud for Banking — ingests D365 + nCino + IFS Banking + FIS RDC + Treasury One via MuleSoft streaming APIs (R-002) into unified customer profile. Identity resolution creates one customer record across all five platforms. Calculates SVP Credit Risk Analytics–relevant credit segments, payment behavior patterns, and household-level financial profiles. Activates insights to FSC (R-001) and Service Cloud (R-003) in real time for RM next-best-action and case context.\nExpected Outcomes:\nSVP Credit Risk Analytics team works from a unified, governed credit data layer across all platforms — CECL model inputs elevated from manually aggregated to continuously synchronized\nFSC Relationship Managers access household-level financial view spanning deposits, loans, treasury, and investment products without switching systems\nRegulatory reporting (FDIC Call Report, CRA data, BSA/AML) sourced from unified Data Cloud rather than manual extraction and reconciliation across five platforms\n MDM advances from 1.5 — the lowest assessment score — toward level 3 as CalPrivate achieves a unified customer record for the first time\nPrerequisites: MuleSoft (R-002) ingestion pipelines and FSC (R-001) as primary activation target should be live or in deployment. Data Cloud is a Phase 2 initiative building on Phase 1 architecture.\nconnected Unlock: MDM elevated from 1.5; Data Management overall elevated from 2.21; Personalization ceiling lifted above level 3; Einstein AI (R-007) becomes viable as data foundation is established.\nR-006: Salesforce Marketing Cloud — Digital Marketing Automation\nRoot Cause: Storm Brain digital agency confirmed as primary marketing partner, having 'tripled email and social engagement' [E-0060]. No marketing automation platform (MAP) confirmed — Marketing Automation = 1.5. Montecito branch opened November 2025 [E-0114]; Santa Barbara expansion publicly planned [E-0107]. COO Pierron: 7 years as EVP Head of Payments at a regional bank [E-0119] — treasury and payments cross-sell campaigns require data-triggered automation, not scheduled agency emails. SBA Preferred Lender status with documented commercial loan programs provides high-value content assets for automated campaign journeys.\nStrategic Objective Alignment: SO-5 (Santa Barbara/Montecito expansion — new market digital outreach requires coordinated, bank-controlled campaign execution); SO-6 (commercial banking build-out — treasury cross-sell campaigns to commercial onboarded clients are COO's core domain)\nTechnology Validation: ABSENT — Storm Brain = external creative/digital agency, not a marketing automation platform. LeadIQ: zero Salesforce Marketing Cloud [E-0121]. Exa/web search: no MAP signals (HubSpot, Pardot, Marketo, Marketing Cloud) at CalPrivate.\nZennify Solution: Salesforce Marketing Cloud Engagement — automated email and SMS journeys for commercial onboarding, treasury cross-sell, SBA referral, and new market campaigns. Natively connected to FSC (R-001) client data for segment-based targeting — loan closing triggers treasury cross-sell journey; deposit milestones trigger relationship deepening campaigns. Retains Storm Brain for creative production while giving CalPrivate bank-controlled automation, data, and attribution.\nExpected Outcomes:\nSystematic treasury cross-sell journey triggered automatically upon commercial loan closing — converting COO's payments expertise and network into measurable campaign outcomes\nSanta Barbara and Montecito expansion launches supported by data-driven digital campaigns orchestrated from one bank-controlled platform rather than relying on agency scheduling\nSBA referral partner communications automated with tracked pipeline attribution — measuring which partner relationships drive the highest-value loan volume\n Marketing Automation advances from 1.5 to level 3+ as CalPrivate replaces agency dependency with bank-controlled automation capability\nPrerequisites: FSC (R-001) and Data Cloud (R-005) should be live — Marketing Cloud connects to FSC client segments for targeting. Can be accelerated if FSC is live before Data Cloud.\nconnected Unlock: Digital Marketing elevated from 2.43 toward 3.0; Innovation elevated via data-driven growth strategy; Personalization elevated via Marketing Cloud personalization journeys.\nR-007: Einstein AI and Agentforce — AI-Driven Relationship Banking\nRoot Cause: Chairman Isakow Q4 2025 explicitly named AI as a strategic investment priority [E-0002]. COO Pierron: explicit mandate to 'champion AI-driven automation' [E-0085]. CECL ML model in quarterly production with formal governance [E-0106] — demonstrating CalPrivate's capacity to operate regulated ML models. SVP Credit Risk Analytics role requires Python, R, ML expertise [E-0085]. AI Agents score = 1.0 — entirely absent. No Einstein AI, Agentforce, or AI agent deployment confirmed. Without Data Cloud (R-005) unified profile, AI models lack the clean, comprehensive data to operate on.\nStrategic Objective Alignment: SO-2 (AI-driven automation — dual mandate from Chairman board level [E-0002] and COO operational level [E-0085] — the highest SO alignment score in the full recommendation set); SO-7 (credit analytics — Einstein models applied to portfolio risk improve CECL precision and early-warning capabilities)\nTechnology Validation: ABSENT — CECL is an internal quantitative model, not a Salesforce AI deployment. LeadIQ: zero Salesforce Einstein/Agentforce [E-0121]. Dice: zero CalPrivate Agentforce/Einstein job postings (May 2026). LeadIQ: zero AI-agent technology in CalPrivate tech stack.\nZennify Solution: Einstein AI for Financial Services embedded in FSC — next-best-action recommendations surfaced at RM portfolio review; Einstein Lead Scoring applied to SBA pipeline prioritization; Agentforce for automated routing of tier-1 banking service inquiries. All Einstein models feed from Data Cloud (R-005) unified customer profile — the data quality that CECL demonstrates is achievable at the model level becomes systematically available at the platform level.\nExpected Outcomes:\nRelationship Managers receive AI-generated next-best-action prompts at portfolio review — delivering the Chairman's 'AI-driven relationship banking' vision with specific, evidence-grounded recommendations rather than RM intuition alone\nSBA loan pipeline scored and prioritized automatically by Einstein Lead Scoring — DCBO and SBA BDOs allocate attention to highest-value opportunities based on data\nAgentforce handles tier-1 payment and deposit inquiry routing — freeing RM attention for complex relationship management and directly addressing COO operational efficiency mandate\n AI Agents advances from 1.0 to level 3+ — the most dramatic single-capability maturity improvement in the entire transformation roadmap\nPrerequisites: Data Cloud (R-005) must be live with unified customer profile before Einstein AI reaches full effectiveness. FSC (R-001) and Service Cloud (R-003) must be deployed as the activation surfaces. This is a Phase 3 initiative.\nconnected Unlock: AI Agents from 1.0 to level 3+; overall elevated toward 2.8; servicing automation elevated; strategy execution fully validated — the Chairman's AI mandate has a confirmed deployment.\nR-008: Salesforce Experience Cloud — HNW Digital Portal and RIA Partner Network\nRoot Cause: CalPrivate serves high-net-worth individuals, legal and professional services clients, and wealth management RIA referral partners [E-0078]. DAP (Digital Account Platform) announced in the 2023 Annual Report [E-0113] but current status unconfirmed. IFS Banking provides transactional access only — no documented HNW concierge digital portal, RIA partner self-service, or secure document submission workflow. Montecito branch opened with new nonprofit Impact Checking account [E-0114] — expanding the product set that requires digital self-service access. CEO Q1 2026: 'the majority of our new business continues to come from referrals' [E-0119] — the referral network driving majority of growth has no systematized digital interface.\nStrategic Objective Alignment: SO-5 (market expansion — digital-first HNW client experience in new markets without proportional branch staff); SO-6 (commercial build-out — RIA and legal industry deepening via partner portal that tracks and incentivizes referrals)\nTechnology Validation: ABSENT — IFS Banking = transactional banking platform only. LeadIQ: zero Salesforce Experience Cloud [E-0121]. Dice: zero CalPrivate Experience Cloud postings. DAP status unconfirmed [E-0113].\nZennify Solution: Salesforce Experience Cloud — two-portal deployment: (1) HNW Client Portal: account visibility, document submission, secure messaging, and concierge request management natively connected to FSC (R-001) for real-time data; (2) RIA Partner Portal: referral pipeline tracking, relationship visibility, and commission tracking — systematizing the referral network that CEO Sowers confirms drives the majority of new business.\nExpected Outcomes:\nHNW clients access a consolidated portfolio view and submit documentation without requiring a branch visit or RM phone call — extending 'Distinctly Different™' service to a digital channel\nRIA and legal industry referral partners manage their pipeline, track referral history, and view relationship credit through a self-service portal — removing friction from the dominant acquisition channel\nNew market launches (current Montecito, future branches) supported by digital-first HNW client experience from day one — service expansion without proportional headcount\n Self-Service cap from ISS-003 partially addressed as Experience Cloud provides a purpose-built HNW digital channel distinct from the IFS Banking consumer app\nPrerequisites: FSC (R-001) and Data Cloud (R-005) should be live — Experience Cloud connects to FSC for real-time account data and Data Cloud for personalized portal content. This is a Phase 3 initiative.\nconnected Unlock: Self-Service elevated; Channel Integration elevated; Innovation narrative strengthened — first SoCal HNW community bank with Salesforce-native concierge portal."
+  },
+  "run_request_id": "DMA-RES-CPB-20260527-0001"
+}

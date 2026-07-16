@@ -1,0 +1,60 @@
+{
+  "entity_display_id": "wsfs-financial-corporati-0001",
+  "items": [
+    {
+      "colors": [
+        "var(--z-teal)",
+        "var(--m-bld)"
+      ],
+      "financial_ref": null,
+      "grounding": {
+        "evidence_e_ids": [
+          "E-045",
+          "E-021",
+          "E-019"
+        ],
+        "representative_quote": "[Direct evidence] CRE portfolio includes hotels (12%), retail (25%), office (14%) \u2014.",
+        "source_kind": "heuristic"
+      },
+      "id": "7bc200b8-1774-4fff-8603-0822686311e9",
+      "involved_subcap_ids": [
+        "P1C5.3.2",
+        "P1C5.7.4",
+        "P1C1.2.3",
+        "P1C1.7.2",
+        "P1C1.7.4",
+        "P1C1.8.2"
+      ],
+      "kpis": [
+        {
+          "current_value": "14%",
+          "delta": null,
+          "kpi_label": "Hotels retail office",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "25%",
+          "delta": null,
+          "kpi_label": "Includes hotels retail",
+          "source_mode": "public",
+          "target_value": null
+        },
+        {
+          "current_value": "12%",
+          "delta": null,
+          "kpi_label": "Portfolio includes hotels",
+          "source_mode": "public",
+          "target_value": null
+        }
+      ],
+      "page_number": null,
+      "pillars_weight": {
+        "P1": 100
+      },
+      "source_path": "synthesized:heuristic",
+      "title": "Sharpen strategic posture",
+      "verbatim_quote": "Reset enterprise priorities + governance cadence to close the 22 P1 capability gaps that surfaced in this assessment."
+    }
+  ]
+}

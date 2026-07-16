@@ -1,0 +1,1034 @@
+{
+  "assumptions_register": [],
+  "coverage_stats": {
+    "by_pillar": [
+      {
+        "pct": 100,
+        "pillar": "P1",
+        "scored": 185,
+        "subcaps": 185,
+        "thin": 185
+      },
+      {
+        "pct": 100,
+        "pillar": "P2",
+        "scored": 222,
+        "subcaps": 222,
+        "thin": 222
+      },
+      {
+        "pct": 100,
+        "pillar": "P3",
+        "scored": 111,
+        "subcaps": 111,
+        "thin": 111
+      },
+      {
+        "pct": 100,
+        "pillar": "P4",
+        "scored": 171,
+        "subcaps": 171,
+        "thin": 171
+      }
+    ],
+    "derived_from": "subcap_scores",
+    "gate_pct": 80,
+    "overall_pct": 100
+  },
+  "entity": {
+    "assessment_date": null,
+    "current_batch": null,
+    "data_source": null,
+    "display_id": "pentegra-retirement-serv-0001",
+    "domain": null,
+    "hq": null,
+    "id": "4af7a6e3-8085-4872-b3c7-5b58ecb60146",
+    "in_progress": false,
+    "last_run_at": null,
+    "last_run_request_id": null,
+    "last_run_status": null,
+    "lobs": [],
+    "name": "Pentegra Retirement Services",
+    "open_alerts": 0,
+    "overall_score": null,
+    "owner_email": null,
+    "owner_name": null,
+    "pillar_scores": null,
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "subvertical": "RIA",
+    "top_platform": null,
+    "updated_at": "2026-07-04T15:07:44.543885Z"
+  },
+  "evidence_freshness": {
+    "aging_count": 9,
+    "current_count": 31,
+    "dated_count": 0,
+    "median_age_months": 20.3,
+    "oldest_published_date": "2008-08-01",
+    "stale_count": 6,
+    "stale_pct": 12.77,
+    "total": 47,
+    "undated_count": 1
+  },
+  "evidence_summary": {
+    "claims": {
+      "EVIDENCE": 1,
+      "NEGATIVE": 2,
+      "NEUTRAL": 17,
+      "POSITIVE": 27
+    },
+    "connectors": {
+      "Clay": 6,
+      "Explorium": 6,
+      "Indeed": 1,
+      "LinkedIn": 1
+    },
+    "derived_from": "evidence_index",
+    "signals": {
+      "NEGATIVE": 2,
+      "NEUTRAL": 41,
+      "POSITIVE": 4
+    },
+    "tiers": {
+      "T1": 3,
+      "T2": 9,
+      "T3": 22,
+      "T5": 13
+    },
+    "total_facts": 159,
+    "total_items": 47
+  },
+  "financial_trajectory": {
+    "cagr": "0.68%",
+    "currency": "USD",
+    "events": [],
+    "fy": [],
+    "headline": "AUA growth: $13B → $16B (~23% increase), driven by Zennify-enabled digital modernization and NPCG acquisition (2022) [E-008, E-026]. Trend classification: STABLE-GROWING. Headcount",
+    "highlights": [],
+    "series": {},
+    "trend": "STABLE",
+    "unit": "B"
+  },
+  "firmographics": {
+    "aum_basis": "total_assets",
+    "aum_usd": 13000000000.0,
+    "cagr": "0.68%",
+    "cagr_basis": "trajectory_prose",
+    "clay_synced_at": null,
+    "employees_approx": "293",
+    "entity_type": "Privately Held",
+    "financial_highlights": {
+      "aua_growth": "13B → $16B (~23% increase), driven by Zenni",
+      "headcount": "239 → 293 (22.5% over 5 years, +14.8% 3yr)",
+      "lines": [
+        "AUA growth: $13B → $16B (~23% increase), driven by Zennify-enabled digital modernization and NPCG acquisition (2022) [E-008, E-026]. Trend classification: STABLE-GROWING. Headcount: 239 → 293 (22.5% over 5 years, +14.8% 3yr) but slight Q1 2026 contraction (295→293, -0.68%) [E-021]. CAGR not calculable — only 2 AUA datapoints. Revenue: private company, unverifiable."
+      ]
+    },
+    "founded": 1943,
+    "geography": "US National",
+    "headcount": 201,
+    "hq": "701 Westchester Avenue, Suite 320E, White Plains, NY 10604",
+    "hq_address": "701 Westchester Avenue, Suite 320E, White Plains, NY 10604",
+    "leadership": [
+      {
+        "background": null,
+        "critical_role": true,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Peter Sprague",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CTO"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Client Services",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "General Counsel",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "SVP"
+      },
+      {
+        "background": null,
+        "critical_role": false,
+        "derived_from": "ner:document_sections",
+        "gap_flag": false,
+        "name": "Eric Wietsma",
+        "recent_hire": false,
+        "tenure": null,
+        "title": "CEO"
+      },
+      {
+        "background": "No CISO identified in the public roster or evidence trail — a named ownership gap.",
+        "critical_role": true,
+        "derived_from": "roster_gap_scan",
+        "gap_flag": true,
+        "name": null,
+        "recent_hire": false,
+        "title": "CISO"
+      }
+    ],
+    "legal_name": "Pentegra Retirement Services",
+    "narrative_md": "Pentegra Services, Inc. was founded in 1943 by Founded by the Federal Home Loan Bank system. Headquartered at 701 Westchester Avenue, Suite 320E, White Plains, NY 10604. Non-profit, client-owned. Board = client Presidents/CEOs. Three wholly-owned subsidiaries: Pentegra Distributors, Inc. (SEC/FINRA broker-dealer, CRD #26249), Pentegra Trust Company (ERISA-regulated), Pentegra Investors, Inc. [E-007, E-009, E-014].",
+    "primary_regulator": "SEC",
+    "revenue_usd": null,
+    "sentiment": {
+      "b2b_b2c_gap": false,
+      "customer": null,
+      "derived_from": "research_report_prose",
+      "employee": [
+        {
+          "metric": "Overall",
+          "scale": 5,
+          "score": 3.7,
+          "source": "Indeed"
+        }
+      ],
+      "industry_avg": 3.5,
+      "normalized": true,
+      "sources": [
+        {
+          "rating": "3.7/5",
+          "signal": "Indeed employer ratings, T3): Overall 3.7/5, Culture & Values 3.2, Job Security 2.9, Management 3.2, CEO Approval 61.1%",
+          "source": "Indeed"
+        }
+      ]
+    },
+    "sentiment_synced_at": null,
+    "size_tier": "Medium",
+    "thought_leadership": [
+      {
+        "author": null,
+        "date": "2026-03-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-017",
+        "excerpt": "80%+ advisors view 3(16) outsourcing as best practice, but fewer than 50% of plans currently outsource 3(16). Active thought leadership: annual advisor studies (2025, 2026), plan sponsor studies, 3(16) Day annual event.",
+        "title": "80%+ advisors view",
+        "type": "article",
+        "url": "https://pentegra.com/current-thinking/fiduciary-governance-and-outsourcing/316-in-action-how-you-can-stand-out-in-a-crowded-market/"
+      },
+      {
+        "author": null,
+        "date": "2026-02-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-021",
+        "excerpt": "Recent LinkedIn post (3 likes, 21 days old): focuses on outsourcing retirement plan admin to reduce compliance burden. B2B content marketing active.",
+        "title": "Recent LinkedIn post (3 likes, 21 days old): focuses on outsourcing…",
+        "type": "linkedin-post",
+        "url": "https://www.linkedin.com/feed/update/urn:li:activity:7432166605238841346"
+      },
+      {
+        "author": null,
+        "date": "2025-01-01",
+        "derived_from": "evidence_index",
+        "e_id": "E-038",
+        "excerpt": "Thought leadership hub includes: Current Thinking blog, Videos/Webcasts, White Papers, Regulatory/Technical Updates, SECURE Act explainers, SECURE 2.0 guidance. Content organized by topic: fiduciary governance, retiremen",
+        "title": "Thought leadership hub includes Current Thinking blog…",
+        "type": "blog",
+        "url": "https://pentegra.com/expertise/"
+      }
+    ],
+    "tl_synced_at": "2026-07-02T23:17:04.702227Z",
+    "total_assets": "$13 billion (as of 2023)",
+    "trend": "STABLE",
+    "trend_basis": "derived:financial_highlights",
+    "website": "https://www.pentegra.com",
+    "website_basis": "entity_profile",
+    "footprint": [
+      "US National"
+    ]
+  },
+  "intelligence_profile": {
+    "catalogue_version": "v5.5",
+    "closed_gap_subcap_ids": [],
+    "computed_at": "2026-07-04T11:11:35.371465+00:00",
+    "emerging_themes": [],
+    "intelligence_summary_md": "# Pentegra Retirement Services — Digital Maturity Trajectory\n\n**1 assessment on file** (first 2026-07-02, latest 2026-07-02).\n\n\n_This summary was auto-generated from the deterministic rollup because the LLM call did not pass validation. An analyst will regenerate it on the next nightly recompute._",
+    "maturity_velocity": null,
+    "persistent_gap_subcap_ids": [],
+    "recurring_themes": [],
+    "total_runs": 1
+  },
+  "narrative": {
+    "benchmark_md": "Pentegra was benchmarked against four locked peers in the retirement plan administration space. Peers were selected for sub-vertical match, size proximity, and competitive relevance. Peer scoring used public evidence with Explorium technographic enrichment.",
+    "gap_prioritization_md": "Categories are ranked using the 6-factor priority framework: Business Impact (25%), Risk Exposure (20%), Competitive Gap (20%), Effort Inverse (15%), Quick Win Potential (10%), and Trend Alignment (10%). Each factor is scored 1-5, producing a composite priority score.",
+    "page_number": null,
+    "scqa_heading": "Report Synthesis — Pentegra Retirement Services DMA",
+    "scqa_md": "This file is the SOLE input for STEP 3 (report writing) Pentegra Retirement Services scores 2.31/5.0 (level 2 — Developing maturity) across 709 capability, supported by 47 evidence items (25.5% T1/T2 coverage). The assessment reveals a bifurcated digital profile: a modern Salesforce 5-cloud CRM platform (P4C3=3.24, implemented by Zennify per E-026/E-027) coexists with critical gaps in analytics (=1.28), data governance (=2.0), and digital marketing (=2.14). Three defining patterns emerge: 1. Bifurcated Digital Profile: The Salesforce 5-cloud implementation (FSC, SFMC, Experience Cloud, Service Cloud, Sales Cloud — E-026/E-027) modernized Pentegra's front-office. Experience Cloud delivers <24hr digital onboarding with DocuSign e-signature (E-026). Yet the back-office remains on an on-prem data warehouse (E-011) with zero BI/analytics tools (E-019), no integration platform (E-011), and legacy systems (Datair, ftwilliam.com — E-027). 2. Settlement Overhang: The $48.5M ERISA fiduciary breach settlement (E-005, E-023) — final approval December 2025 — caps Governance (2.73), Op Risk (2.6), and Compliance (2.86) at level 3.0 via S2 severity classification. CEFEX certification renewed January 2026 (E-005) and two cybersecurity-experienced board members added July 2024 (E-035: Yonesy Núñez, Gregory Wilson NACD.DC) demonstrate remediation intent. 3. Outsourced Capability Dependency: The Empower partnership (E-040) provides participant portal, mobile app, and Lifetime Income Score — but Pentegra owns none of this infrastructure. This creates single-vendor TPRM risk and means / scores partially reflect 3rd-party capability, not Pentegra-owned maturity. Pentegra trails the 4-peer median across 16 of 17 categories. The only near-parity or lead is in Onboarding (2.6 vs median 3.5, gap -0.90). Largest Gaps (vs peer median):\n- Analytics & AI: 1.28 vs 3.0 (gap = -1.72). WHY: Pentegra has on-prem DW only (E-011), zero BI/analytics platforms (E-019). Peers: BPAS uses Snowflake+Power BI+Hadoop; FuturePlan uses Oracle DW+Snowflake+Power BI; TRA uses Adobe Analytics. - Data Governance: 2.0 vs 3.0 (gap = -1.00). WHY: No CDO (validated via E-061, Explorium — CTO Sprague oversees IT/InfoSec, not data), no data catalog, no data lineage. Salesforce is system of record but no enterprise data governance framework. - ESG: 1.16 vs 2.25 (gap = -1.09). WHY: No ESG reporting, sustainability metrics, or green finance products. Non-profit mission provides social alignment but no formal ESG framework. - Digital Marketing: 2.14 vs 3.0 (gap = -0.86). WHY: 1,139 monthly website visitors (E-019) is critically low for a national provider. Marketing stack fragmented: SharpSpring + SendGrid + Brevo coexist alongside deployed SFMC (E-011, E-019, E-026). - Personalization: 1.99 vs 2.75 (gap = -0.76). WHY: FSC client 360 deployed (E-026) but no AI personalization, no recommendation engine. Empower Lifetime Income Score (E-040) is 3rd-party, not Pentegra-owned. - Resilience & TPRM: 2.03 vs 3.0 (gap = -0.97). WHY: Empower dependency (E-040) is single-vendor risk. No BCP/DR evidence. AWS+Azure multi-cloud (E-011) but no orchestration. Where Pentegra Leads or Matches:\n- Tech Architecture: 3.24 vs 3.25 (gap = -0.01). Salesforce 5-cloud + Copado DevOps (E-026/E-027) + CTO Sprague (E-061, Morgan Stanley pedigree) positions Pentegra competitively. - Onboarding: 2.6 vs 3.25 (gap = -0.65).\n\nExperience Cloud <24hr onboarding (E-026) + DocuSign + Empower participant portal (E-040). - Compliance: 2.86 vs 3.0 (gap = -0.14). 80+ year fiduciary legacy + CEFEX (E-005). Capped at level 3.0 by settlement. Zennify has 10 recommendations mapped to 10 of 12 solution portfolio items. Priority sequencing: Wave 1 — Quick Wins (activate deployed assets):\n-: Marketing Cloud consolidation (E-019: 1,139 visitors, E-011: SharpSpring/SendGrid/Brevo fragmentation). SFMC already deployed — this is activation, not net-new. -: Shield activation (E-005: $48.5M settlement, E-011: no SOC2/ISO27001). Zero infrastructure change. Post-settlement compliance hardening. -: Digital Strategy Workshop (E-026/E-027: tactical SF investment without published strategy, E-061: CTO ready for strategic alignment). -: Slack (E-010: Indeed 3.2 culture rating, E-019: 14 locations distributed workforce). Wave 2 — Data & Integration Foundation:\n-: Data Cloud (E-011: on-prem DW only, E-019: zero BI tools). Replaces on-prem DW, enables ++. Foundation for everything else. -: MuleSoft (E-011: zero integration layer, E-026/E-027: Acumatica/Empower/Datair point-to-point). Greenfield opportunity. -: Agentforce (E-011: zero AI, E-026: Service Cloud deployed). 4-category lift. Depends on. -: CRM Analytics (E-011: zero BI). Embedded analytics in SF. Depends on. -: Experience Cloud expansion (E-026: <24hr onboarding exists, extend to advisor/sponsor self-service). Wave 3 — Governance:\n-: GRC (E-005: settlement, E-023: prohibited transactions). ERISA compliance automation. Severity cap limits near-term lift. D. connected Unlocks 1. Data Cloud (/) → Personalization: XP-004 triggered because =2.0 < 2.5. Fixing data governance unlocks personalization ceiling. Data Cloud is the keystone. 2. Analytics → Automation → Servicing: Agentforce requires data to power AI servicing. Without analytics infrastructure, AI-powered case deflection and personalization cannot function. 3.\n\nSettlement Cap Expiration → Governance/Compliance: // capped at level 3.0 regardless of investment. Cap expires when settlement ages beyond 24 months (post-December 2027). GRC builds toward post-cap maturity. 4. CTO as Executive Sponsor: Peter Sprague (E-061) — SVP IT & CTO, ex-Morgan Stanley ED — is the natural executive sponsor for Data Cloud, MuleSoft, and Agentforce. His technology leadership team (4 named members) provides governance capacity. E. Key Data Points for Report Sections Cover Page\n- Entity: Pentegra Retirement Services\n- Overall: 2.31/5.0 (level 2 — Developing)\n- Evidence: 47 items | 709 subcaps | 25.5% T1/T2\n- Assessment ID: DMA-ASM-PENT-20260317-0001\n- Evidence Mode: RESEARCH_HANDOFF (PUBLIC)\n- Date: 2026-03-17 SCQA Elements\n- SITUATION: Pentegra, founded 1943 by FHLB system, is a $16B AUA non-profit retirement plan administrator (E-019) serving 50K+ plans and 1M+ participants (E-019) across 14 US locations. Client-owned governance (board of client CEOs). CEO Eric Wietsma (FSA, ex-MassMutual) since April 2023 (E-010). CTO Peter Sprague (SVP IT, ex-Morgan Stanley) leads 4-person tech team (E-061). - COMPLICATION: Despite a modern Salesforce 5-cloud platform (P4C3=3.24, E-026/E-027), Pentegra faces a $48.5M ERISA settlement (E-005/E-023), an analytics void (=1.28, -1.72 vs peers), and marketing dysfunction (P2C1=2.14, 1,139 monthly visitors — E-019). Overall score of 2.31 places Pentegra in level 2 (Developing), approximately 0.5 points below the peer median. - QUESTION: How can Pentegra leverage its existing Salesforce investment and fiduciary expertise to close the analytics, marketing, and compliance gaps while maintaining its onboarding advantage? - ANSWER: A three-wave transformation — activating deployed SFMC/Shield assets, then building a Data Cloud+MuleSoft+Agentforce foundation, then automating ERISA compliance via GRC — can advance Pentegra from level 2 (Developing, 2.31) to approximately level 3 (Established, 3.0-3.2), directly addressing the 3 critical and 7 high-priority gaps. Pillar Data for Deep Dives\n- P1 (2.3): CTO Sprague validates tech leadership (E-061). $48.5M settlement caps at 3.0 (E-005). No published digital strategy (E-026/E-027 show tactical, not strategic SF investment). ESG void (=1.16). Indeed 3.7 overall / 2.9 job security (E-010). - P2 (2.31): Onboarding strength via Experience Cloud <24hr (E-026). 1,139 visitors critically low (E-019). SFMC underutilized alongside SharpSpring/SendGrid/Brevo (E-011). Empower provides participant portal but Pentegra-owned personalization absent (E-040). Service Cloud deployed with CTI (E-026) but no chatbot/AI. - P3 (2.45): CEFEX renewed (E-005) but settlement caps / at 3.0. No RPA — peers use UiPath (TRA), WinAutomation (BPAS). Copado CI/CD covers DevOps (E-027) but not business process automation. Empower dependency = TPRM risk (E-040). Legacy Datair/ftwilliam (E-027). - P4 (2.2): Tech architecture is competitive strength (P4C3=3.24, SF 5-cloud + Copado — E-026/E-027). Analytics is largest gap (P4C2=1.28, on-prem DW only — E-011). No CDO, no data catalog (E-061 confirms CTO scope is IT/InfoSec). Okta+Azure AD+DMARC/HSTS security stack (E-011). 2 cybersec board members (E-035)."
+  },
+  "overall_score": 2.31,
+  "parser_warnings": {
+    "needs_review": false,
+    "pattern_gaps": [
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/cap_matrix.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.505942+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/cap_triggers.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.506253+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/cdo_cto_proxy_validation.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.506600+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/coverage_report.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.506941+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/critic_log.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.508920+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/distributional_checks.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.509367+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/parameters.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.509768+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "01_evidence/tech_inventory.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.510358+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/analysis_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.510957+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/implementation_roadmap.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.511304+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/priority_ranked.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.511859+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/priority_scores.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.512441+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/recommendation_summary.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.512860+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/report_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 22 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.513737+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/solution_map.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.514227+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "04_reports/Analysis/swot_analysis.json",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.514660+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "06_peers/peer_synthesis.md",
+        "reason": "no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.515555+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "07_governance/qa_findings_register.csv",
+        "reason": "no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.516063+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A3_tech_inventory.csv",
+        "reason": "no fingerprint matched (best confidence 0.25); 26 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.516806+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A5_coverage_map.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.517143+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/A7_coverage_map_detailed.csv",
+        "reason": "no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.517543+00:00"
+      },
+      {
+        "code": "PATTERN_GAP",
+        "path": "08_appendices/parameter_lock.txt",
+        "reason": "no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "recorded_at": "2026-07-04T15:07:44.517972+00:00"
+      }
+    ],
+    "severity_counts": {
+      "DATA_LOSS": 0,
+      "DEGRADED": 1,
+      "INFO": 39
+    },
+    "stage_ms": {
+      "manifest": 27,
+      "parse": 3937,
+      "persist": 1603
+    },
+    "structured": [
+      {
+        "code": "subvertical derived from report artifacts",
+        "detail": "subvertical derived from report artifacts: 'RIAs & Broker-Dealers (Retirement Plan Administration)'",
+        "severity": "INFO"
+      },
+      {
+        "code": "xlsx_name_enrichment",
+        "detail": "xlsx_name_enrichment: +0 subcap names +709 rationales merged from workbook into CSV-parsed rows",
+        "severity": "INFO"
+      },
+      {
+        "code": "evidence_facts_merged_from_json_twin",
+        "detail": "+0 rows gained facts[], +1 gained excerpts from the JSON evidence twin",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant issue register",
+        "detail": "used variant issue register: 03_scoring_workbook/export_issue_register.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "governance_audit_logs",
+        "detail": "governance_audit_logs: reasoning_chain=20 contradictions=2",
+        "severity": "INFO"
+      },
+      {
+        "code": "caps_applied_log",
+        "detail": "caps_applied_log: 198 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+        "severity": "INFO"
+      },
+      {
+        "code": "used variant recommendations source",
+        "detail": "used variant recommendations source: 04_reports/Analysis/recommendations.json",
+        "severity": "INFO"
+      },
+      {
+        "code": "tech_stack_from_variant_source",
+        "detail": "tech_stack_from_variant_source: 26 entries",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_from_entity_profile_json",
+        "detail": "firmographics_from_entity_profile_json: fields=['employees_approx', 'entity_type', 'hq', 'legal_name', 'total_assets', 'website'] leadership=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_leadership_merged_from_docx",
+        "detail": "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_Pentegra_20260317.docx count=0",
+        "severity": "INFO"
+      },
+      {
+        "code": "scqa_from_report_synthesis_md",
+        "detail": "scqa_from_report_synthesis_md: report_synthesis.md e_ids=10 subcaps=13 replaced_docx_scqa=True",
+        "severity": "INFO"
+      },
+      {
+        "code": "financial_highlights_from_client_report",
+        "detail": "financial_highlights_from_client_report",
+        "severity": "INFO"
+      },
+      {
+        "code": "firmographics_mined_from_report_prose",
+        "detail": "firmographics_mined_from_report_prose:primary_regulator",
+        "severity": "INFO"
+      },
+      {
+        "code": "insights_from_client_profile_findings",
+        "detail": "insights_from_client_profile_findings: 3",
+        "severity": "INFO"
+      },
+      {
+        "code": "acquisitions_from_client_profile_docx",
+        "detail": "acquisitions_from_client_profile_docx: 3 events",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/cap_matrix.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/cap_triggers.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/cdo_cto_proxy_validation.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/coverage_report.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/distributional_checks.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/parameters.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "01_evidence/tech_inventory.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/analysis_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/implementation_roadmap.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/priority_ranked.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/priority_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/recommendation_summary.csv — no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/report_analysis.json — no fingerprint matched (best confidence 0.00); 22 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/solution_map.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "04_reports/Analysis/swot_analysis.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A3_tech_inventory.csv — no fingerprint matched (best confidence 0.25); 26 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A5_coverage_map.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/A7_coverage_map_detailed.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "pattern_gap",
+        "detail": "08_appendices/parameter_lock.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+        "severity": "INFO"
+      },
+      {
+        "code": "timeline_events_persisted",
+        "detail": "timeline_events_persisted: 5",
+        "severity": "INFO"
+      },
+      {
+        "code": "catalogue_unresolved",
+        "detail": "catalogue_unresolved:20/709 subcaps unresolved against v5.5",
+        "severity": "DEGRADED"
+      },
+      {
+        "code": "insight_cards_persisted",
+        "detail": "insight_cards_persisted: 3",
+        "severity": "INFO"
+      }
+    ],
+    "warnings": [
+      "subvertical derived from report artifacts: 'RIAs & Broker-Dealers (Retirement Plan Administration)'",
+      "xlsx_name_enrichment: +0 subcap names +709 rationales merged from workbook into CSV-parsed rows",
+      "INFO/evidence_facts_merged_from_json_twin: +0 rows gained facts[], +1 gained excerpts from the JSON evidence twin",
+      "used variant issue register: 03_scoring_workbook/export_issue_register.csv",
+      "governance_audit_logs: reasoning_chain=20 contradictions=2",
+      "caps_applied_log: 198 cap event(s) parsed from 07_governance/caps_applied_log.csv",
+      "used variant recommendations source: 04_reports/Analysis/recommendations.json",
+      "tech_stack_from_variant_source: 26 entries",
+      "firmographics_from_entity_profile_json: fields=['employees_approx', 'entity_type', 'hq', 'legal_name', 'total_assets', 'website'] leadership=0",
+      "firmographics_leadership_merged_from_docx: source=DMA_Client_Profile_Pentegra_20260317.docx count=0",
+      "scqa_from_report_synthesis_md: report_synthesis.md e_ids=10 subcaps=13 replaced_docx_scqa=True",
+      "financial_highlights_from_client_report",
+      "firmographics_mined_from_report_prose:primary_regulator",
+      "insights_from_client_profile_findings: 3",
+      "acquisitions_from_client_profile_docx: 3 events",
+      "INFO/pattern_gap: 01_evidence/cap_matrix.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/cap_triggers.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/cdo_cto_proxy_validation.json — no fingerprint matched (best confidence 0.00); 11 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/coverage_report.json — no fingerprint matched (best confidence 0.00); 3 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/critic_log.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/distributional_checks.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/parameters.json — no fingerprint matched (best confidence 0.00); 13 generic sections mined",
+      "INFO/pattern_gap: 01_evidence/tech_inventory.json — no fingerprint matched (best confidence 0.00); 7 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/analysis_synthesis.md — no fingerprint matched (best confidence 0.00); 6 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/implementation_roadmap.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/priority_ranked.csv — no fingerprint matched (best confidence 0.00); 17 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/priority_scores.json — no fingerprint matched (best confidence 0.00); 2 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/recommendation_summary.csv — no fingerprint matched (best confidence 0.20); 10 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/report_analysis.json — no fingerprint matched (best confidence 0.00); 22 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/solution_map.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 04_reports/Analysis/swot_analysis.json — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 06_peers/peer_synthesis.md — no fingerprint matched (best confidence 0.00); 5 generic sections mined",
+      "INFO/pattern_gap: 07_governance/qa_findings_register.csv — no fingerprint matched (best confidence 0.00); 14 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A3_tech_inventory.csv — no fingerprint matched (best confidence 0.25); 26 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A5_coverage_map.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/A7_coverage_map_detailed.csv — no fingerprint matched (best confidence 0.20); 17 generic sections mined",
+      "INFO/pattern_gap: 08_appendices/parameter_lock.txt — no fingerprint matched (best confidence 0.00); 1 generic sections mined",
+      "timeline_events_persisted: 5",
+      "catalogue_unresolved:20/709 subcaps unresolved against v5.5",
+      "insight_cards_persisted: 3"
+    ]
+  },
+  "pillar_scores": [
+    {
+      "peer_benchmarked": 185,
+      "peer_median": 2.97,
+      "pillar_id": "P1",
+      "score": 2.31,
+      "subcaps_scored": 185
+    },
+    {
+      "peer_benchmarked": 222,
+      "peer_median": 3.31,
+      "pillar_id": "P2",
+      "score": 2.32,
+      "subcaps_scored": 222
+    },
+    {
+      "peer_benchmarked": 111,
+      "peer_median": 3.15,
+      "pillar_id": "P3",
+      "score": 2.45,
+      "subcaps_scored": 111
+    },
+    {
+      "peer_benchmarked": 171,
+      "peer_median": 3.36,
+      "pillar_id": "P4",
+      "score": 2.2,
+      "subcaps_scored": 171
+    }
+  ],
+  "run": {
+    "assessment_date": "2026-03-17",
+    "assessment_date_source": "run_id",
+    "ccg_catalog_version": "v5.5",
+    "completed_at": "2026-07-04T15:07:44.543885Z",
+    "created_at": "2026-07-02T23:11:13.208124Z",
+    "data_source": "MANUAL_BACKFILL",
+    "evidence_mode": "public",
+    "id": "2dac4d47-38eb-48a3-abd9-02c7f9608f99",
+    "overall_score": 2.31,
+    "request_id": "DMA-ASM-PENT-20260317-0001",
+    "started_at": "2026-07-02T23:11:13.208124Z",
+    "status": "ACTIVE",
+    "subcap_count": null,
+    "updated_at": "2026-07-04T15:07:44.543885Z"
+  },
+  "scqa": null,
+  "sentiment": {
+    "b2b_b2c_gap": false,
+    "customer": [],
+    "derived_from": "research_report_prose",
+    "employee": [
+      {
+        "metric": "Overall",
+        "scale": 5,
+        "score": 3.7,
+        "source": "Indeed"
+      }
+    ],
+    "industry_avg": 3.5
+  },
+  "top_findings": [
+    {
+      "name": "Innovation Management & Funding",
+      "peer_median": 3.0,
+      "score": 2.01,
+      "subcap_id": "P1C3",
+      "body": "",
+      "platforms": [
+        "ncino",
+        "databricks"
+      ]
+    },
+    {
+      "name": "Culture & Change Enablement",
+      "peer_median": 3.0,
+      "score": 2.5,
+      "subcap_id": "P1C4",
+      "body": "",
+      "platforms": [
+        "ncino",
+        "databricks"
+      ]
+    },
+    {
+      "name": "ESG & Sustainable Finance",
+      "peer_median": 2.2,
+      "score": 1.16,
+      "subcap_id": "P1C5",
+      "body": "",
+      "platforms": [
+        "ncino",
+        "databricks"
+      ]
+    },
+    {
+      "name": "Digital Marketing & Acquisition",
+      "peer_median": 3.2,
+      "score": 2.14,
+      "subcap_id": "P2C1",
+      "body": "",
+      "evidence": [
+        "E-020",
+        "E-019",
+        "E-021",
+        "E-022"
+      ],
+      "platforms": [
+        "salesforce",
+        "twilio"
+      ]
+    },
+    {
+      "name": "Onboarding & Fulfillment",
+      "peer_median": 3.5,
+      "score": 2.6,
+      "subcap_id": "P2C2",
+      "body": "",
+      "platforms": [
+        "salesforce",
+        "twilio"
+      ]
+    }
+  ],
+  "uncertainty_bands": {
+    "P1C1": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-015"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "166 of 166 subcaps on thin evidence"
+      ],
+      "rationale": "Digital Due Diligence averages 2.7/5 over 166 scored subcaps; ceiling 3.2 reflects thin evidence density (0/166 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C2": {
+      "band": 0.7,
+      "ceiling": 3.2,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: SEV-001: $48.5M ERISA settlement (S2)",
+        "217 of 217 subcaps on thin evidence"
+      ],
+      "rationale": "Concentration Risk Management averages 2.7/5 over 217 scored subcaps; ceiling 3.2 reflects thin evidence density (0/217 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C3": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-030"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "190 of 190 subcaps on thin evidence"
+      ],
+      "rationale": "Employee Ideation averages 2.0/5 over 190 scored subcaps; ceiling 2.5 reflects thin evidence density (0/190 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-030"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "cap applied: None; CRITIC_CHALLENGE: SINGLE-SOURCE: E-026 and E-027 are from same Zennify engagem",
+        "205 of 205 subcaps on thin evidence"
+      ],
+      "rationale": "Adoption Metrics Framework averages 2.5/5 over 205 scored subcaps; ceiling 3.0 reflects thin evidence density (0/205 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P1C5": {
+      "band": 0.7,
+      "ceiling": 1.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-033"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "122 of 122 subcaps on thin evidence"
+      ],
+      "rationale": "Operational Sustainability averages 1.2/5 over 122 scored subcaps; ceiling 1.7 reflects thin evidence density (0/122 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C1": {
+      "band": 0.7,
+      "ceiling": 2.6,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-024"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Attribution Modeling averages 2.1/5 over 285 scored subcaps; ceiling 2.6 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-030"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "cap applied: None; CRITIC_CHALLENGE: SINGLE-SOURCE: E-026 and E-027 are from same Zennify engagem",
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "1033/Open Banking API Compliance averages 2.6/5 over 285 scored subcaps; ceiling 3.1 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C3": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-040"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "cap applied: None; CRITIC_CHALLENGE: SINGLE-SOURCE: E-026 and E-027 are from same Zennify engagem",
+        "285 of 285 subcaps on thin evidence"
+      ],
+      "rationale": "Conversational AI Self-Service averages 2.5/5 over 285 scored subcaps; ceiling 3.0 reflects thin evidence density (0/285 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P2C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-017"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "255 of 255 subcaps on thin evidence"
+      ],
+      "rationale": "Retention & At-Risk Intervention averages 2.0/5 over 255 scored subcaps; ceiling 2.5 reflects thin evidence density (0/255 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C1": {
+      "band": 0.7,
+      "ceiling": 2.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-045"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Attended Automation averages 2.3/5 over 140 scored subcaps; ceiling 2.8 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C2": {
+      "band": 0.7,
+      "ceiling": 3.1,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-005"
+      ],
+      "modifiers": [
+        "cap applied: SEV-001: $48.5M ERISA settlement (S2)",
+        "130 of 130 subcaps on thin evidence"
+      ],
+      "rationale": "Behavioral Analytics averages 2.6/5 over 130 scored subcaps; ceiling 3.1 reflects thin evidence density (0/130 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C3": {
+      "band": 0.7,
+      "ceiling": 3.4,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-014"
+      ],
+      "modifiers": [
+        "cap applied: SEV-001: $48.5M ERISA settlement (S2)",
+        "140 of 140 subcaps on thin evidence"
+      ],
+      "rationale": "Complaint Management averages 2.9/5 over 140 scored subcaps; ceiling 3.4 reflects thin evidence density (0/140 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P3C4": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-046"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "145 of 145 subcaps on thin evidence"
+      ],
+      "rationale": "Vendor Tiering averages 2.0/5 over 145 scored subcaps; ceiling 2.5 reflects thin evidence density (0/145 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C1": {
+      "band": 0.7,
+      "ceiling": 2.5,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-061"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "200 of 200 subcaps on thin evidence"
+      ],
+      "rationale": "Metadata Management & Data Catalog averages 2.0/5 over 200 scored subcaps; ceiling 2.5 reflects thin evidence density (0/200 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C2": {
+      "band": 0.7,
+      "ceiling": 1.8,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-022"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "270 of 270 subcaps on thin evidence"
+      ],
+      "rationale": "Speech-to-Text & Conversation Intelligence averages 1.3/5 over 270 scored subcaps; ceiling 1.8 reflects thin evidence density (0/270 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C3": {
+      "band": 0.7,
+      "ceiling": 3.7,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-030"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "235 of 235 subcaps on thin evidence"
+      ],
+      "rationale": "Container & Kubernetes Orchestration averages 3.2/5 over 235 scored subcaps; ceiling 3.7 reflects thin evidence density (0/235 full-evidence cells); band ±0.7 tracks evidence coverage."
+    },
+    "P4C4": {
+      "band": 0.7,
+      "ceiling": 3.0,
+      "derived_from": "synthesized:scores+caps",
+      "evidence": [
+        "E-061"
+      ],
+      "modifiers": [
+        "cap applied: None",
+        "150 of 150 subcaps on thin evidence"
+      ],
+      "rationale": "Zero Trust Architecture Strategy averages 2.5/5 over 150 scored subcaps; ceiling 3.0 reflects thin evidence density (0/150 full-evidence cells); band ±0.7 tracks evidence coverage."
+    }
+  },
+  "why_now_signals": [
+    {
+      "date": "2022-01-01",
+      "derived_from": "timeline_events",
+      "evidence": [
+        "E-008"
+      ],
+      "kind": "M&A",
+      "text": "New Pinnacle Consulting Group (NPCG)"
+    },
+    {
+      "date": "2013-01-01",
+      "derived_from": "timeline_events",
+      "evidence": [
+        "E-008"
+      ],
+      "kind": "M&A",
+      "text": "Advanced Pension Solutions (APS)"
+    }
+  ]
+}
