@@ -102,6 +102,8 @@ def run_row():
     # pre-clean: an earlier crashed run may have left the entity behind
     cur.execute("SELECT id FROM entities WHERE display_id = 'synthetic-submit-bank'")
     for (old,) in cur.fetchall():
+        cur.execute("""DELETE FROM gate_results WHERE run_id IN
+                         (SELECT id FROM runs WHERE entity_id = %s)""", (old,))
         cur.execute("""DELETE FROM submission_verdicts WHERE submission_id IN
                          (SELECT id FROM submissions WHERE run_id IN
                             (SELECT id FROM runs WHERE entity_id = %s))""", (old,))
@@ -120,6 +122,7 @@ def run_row():
     admin.commit()
     yield mcp, str(rid)
     mcp.rollback()
+    cur.execute("DELETE FROM gate_results WHERE run_id = %s", (rid,))
     cur.execute("""DELETE FROM submission_verdicts WHERE submission_id IN
                      (SELECT id FROM submissions WHERE run_id = %s)""", (rid,))
     cur.execute("DELETE FROM submissions WHERE run_id = %s", (rid,))
