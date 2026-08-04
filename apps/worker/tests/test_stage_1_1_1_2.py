@@ -103,3 +103,9 @@ def test_dedup_is_reproducible_and_retains_losers():
     assert first.winner.stable_key == second.winner.stable_key == "k"   # stable tiebreak
     assert {c.stable_key for c, _ in first.losers} == {"m", "z"}        # retained, marked
     assert all(rule == "stable_tiebreak" for _, rule in first.losers)
+
+
+def test_request_identifier_accepts_short_sequence():
+    # Real manifest observed in the intake tree: DMA-ASM-WLI-20260803-01
+    r = resolve(None, "DMA-ASM-WLI-20260803-01", None, None)
+    assert r.signal == "request_id" and r.entity_token == "WLI" and r.status == "ACTIVE"

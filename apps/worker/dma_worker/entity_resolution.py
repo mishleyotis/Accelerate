@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass
 
 REQ_ID = re.compile(r"^REQ-[0-9A-F]{8}$")
-DMA_ASM = re.compile(r"^DMA-ASM-(?P<entity>[A-Z0-9]+)-(?P<date>\d{8})-(?P<seq>\d{4})$")
+DMA_ASM = re.compile(r"^DMA-ASM-(?P<entity>[A-Z0-9]+)-(?P<date>\d{8})-(?P<seq>\d{2,4})$")
 
 # Legal-form suffixes stripped before name comparison.
 _SUFFIXES = re.compile(
