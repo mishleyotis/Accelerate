@@ -91,11 +91,16 @@ def parse_capability_map(ws, version, pillar_id):
         if not sid or not SUBCAP_RE.match(sid):
             continue
         pillar, category, capability = _grain(sid)
+        raw_weight = _get(row, headers, "Pillar_Weight", "Weight")
+        try:
+            weight = float(raw_weight) if raw_weight is not None and str(raw_weight).strip() else None
+        except (TypeError, ValueError):
+            weight = None
         out.append({
             "subcap_id": sid, "version": version, "capability_id": capability,
             "category_id": category, "pillar_id": pillar,
             "name": _s(row, headers, "Sub_Cap_Name"),
-            "weight": None,   # v7.0 ships no weight column (v5.0 did)
+            "weight": weight,   # v5.0 ships Pillar_Weight; v7.0 has none
             "l3_platform_areas": _split(_get(row, headers, "L3_Platforms_Addressing")),
             "l4_features": _split(_get(row, headers, "L4_Features_Available")),
         })
@@ -104,15 +109,27 @@ def parse_capability_map(ws, version, pillar_id):
 
 def parse_maturity(ws, version, pillar_id):
     headers, first = _headers(ws, ("Sub_Cap_ID",))
-    # Wide form: per band, first M{n}_ column = narrative, second = features.
+    out, warns = [], []
+    # Long form (v5.0-era): one row per (subcap, band) with a Band column.
+    if "Band" in headers or "Maturity Band" in headers:
+        for row in _rows(ws, headers, first):
+            sid = _s(row, headers, "Sub_Cap_ID")
+            band = _s(row, headers, "Band", "Maturity Band")
+            if not sid or not SUBCAP_RE.match(sid) or band not in ("M1", "M2", "M3", "M4", "M5"):
+                continue
+            out.append({"version": version, "subcap_id": sid, "band": band,
+                        "narrative": _s(row, headers, "Narrative", "Description"),
+                        "features": _s(row, headers, "Features", "Capabilities")})
+        return out, warns
+    # Wide form (v7.0 shipped): per band, first M{n}_ column = narrative,
+    # second = features.
     band_cols = {}
     for band in ("M1", "M2", "M3", "M4", "M5"):
         cols = sorted((i, h) for h, i in headers.items() if h.startswith(f"{band}_"))
         if cols:
             band_cols[band] = (cols[0][0], cols[1][0] if len(cols) > 1 else None)
-    out, warns = [], []
     if not band_cols:
-        warns.append("no wide band columns found")
+        warns.append("no band columns found in either shape")
         return out, warns
     for row in _rows(ws, headers, first):
         sid = _s(row, headers, "Sub_Cap_ID")

@@ -105,6 +105,24 @@ TABS = {
     "Z1_QA_Gates": (parse_qa_gates, "ccg_qa_gates",
         ["version", "pillar_id", "gate_id", "category", "title", "status", "detail"]),
 }
+# Earlier catalogue generations name the same logical tabs differently
+# (v5.0 uses the schema-HTML canonical names; v7.0 shipped with drift).
+# First present name wins.
+TAB_ALIASES: dict[str, tuple[str, ...]] = {
+    "6_Maturity_Descriptors": ("3_Maturity_Scoring_Bands",),
+    "4_L3_Detailed": ("4_L3_Platforms_Reference",),
+    "5_L4_Detailed_Features": ("5_L4_Features",),
+    "3_User_Stories_Catalogue": ("6_User_Stories",),
+    "7_Product_Catalogue": ("7_Product_Catalog",),
+    "8_Agentforce_Agents_List": ("8_Agentforce_Agents",),
+    "9_Platform_Constructs_Library": ("9_Platform_Constructs",),
+    "14_CrossPillar_Stories": ("14_Cross_Pillar_Stories",),
+    "18_SubCap_Completeness_Profile": ("17_SubCap_Completeness",),
+    "19_Toggle_Cascade_Simulation": ("18_Toggle_Cascade", "17_Toggle_Control_Panel"),
+    "Z1_QA_Gates": ("20_QA_Gates",),
+    "21_VC_Mapping_PerSubcap": ("21_Value_Chain_Mapping",),
+}
+
 # Tabs with no target table in the 21 (informational or superseded):
 SKIPPED = ["1_Overview", "16_SubCap_CrossPillar_Coverage", "17_Toggle_Control_Panel",
            "20_Final_QA_Report", "Z2_Plan_Revisions", "_R2_Dropped_Stories",
@@ -137,6 +155,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True)
     ap.add_argument("--dir", required=True, help="directory holding the four pillar xlsx files")
+    ap.add_argument("--make-current", action="store_true",
+                    help="mark this version current (new runs pin to it). "
+                         "Loading a HISTORICAL version (e.g. v5.0 behind v7.0) "
+                         "must NOT pass this — existing runs keep their pinned "
+                         "version and new runs stay on the newest catalogue.")
     args = ap.parse_args()
 
     files = sorted(Path(args.dir).glob("*.xlsx"))
@@ -151,10 +174,11 @@ def main() -> int:
         pillar_id = f"P{m.group(1)}" if m else "?"
         wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
         for tab, (parser, table, _) in TABS.items():
-            if tab not in wb.sheetnames:
+            actual = next((c for c in (tab, *TAB_ALIASES.get(tab, ())) if c in wb.sheetnames), None)
+            if actual is None:
                 warnings.append(f"{path.name}: missing tab {tab}")
                 continue
-            rows, warns = parser(wb[tab], args.version, pillar_id)
+            rows, warns = parser(wb[actual], args.version, pillar_id)
             collected[table].extend(rows)
             warnings.extend(f"{path.name}/{tab}: {w}" for w in warns)
         wb.close()
@@ -216,13 +240,19 @@ def main() -> int:
         # flag moved atomically (exactly one TRUE, by partial unique).
         cells = [r for r in collected["ccg_subcaps"]]
         categories = {r["category_id"] for r in cells}
-        cur.execute("UPDATE ccg_versions SET is_current = NULL WHERE is_current")
+        cur.execute("SELECT version FROM ccg_versions WHERE is_current")
+        row = cur.fetchone()
+        current_before = row[0] if row else None
+        make_current = args.make_current or current_before in (None, args.version)
+        if make_current:
+            cur.execute("UPDATE ccg_versions SET is_current = NULL WHERE is_current")
         cur.execute("DELETE FROM ccg_versions WHERE version = %s", (args.version,))
         cur.execute(
-            "INSERT INTO ccg_versions (version, loaded_at, cell_count, category_count, is_current) VALUES (%s, now(), %s, %s, TRUE)",
-            (args.version, len(cells), len(categories)))
+            "INSERT INTO ccg_versions (version, loaded_at, cell_count, category_count, is_current) VALUES (%s, now(), %s, %s, %s)",
+            (args.version, len(cells), len(categories), True if make_current else None))
         conn.commit()
-        print(f"ccg_versions: {args.version} current, {len(cells)} cells, {len(categories)} categories")
+        state = "current" if make_current else f"historical (current stays {current_before})"
+        print(f"ccg_versions: {args.version} {state}, {len(cells)} cells, {len(categories)} categories")
     except Exception:
         conn.rollback()
         raise
