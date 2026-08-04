@@ -58,6 +58,13 @@ jobs:
       - name: QA checklist as tests
         run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' python -m pytest tests/schema/ -q
 
+  worker-tests:
+    name: Worker unit tests (stage 1 QA bullets)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q pytest && python -m pytest apps/worker/tests/ -q
+
   # Per-service lint/type/test/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
   # the first commit so no code was ever merged without them.
