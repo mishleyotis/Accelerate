@@ -73,7 +73,9 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     source_folder_id: str, evidence: list | None = None,
                     peers: list | None = None,
                     recommendations: list | None = None,
-                    artefact_id: str | None = None) -> PersistResult:
+                    artefact_id: str | None = None,
+                    sections: list | None = None,
+                    report_artefact_id: str | None = None) -> PersistResult:
     cur = conn.cursor()
     inst = manifest.get("institution", {})
     resolution = resolve(
@@ -298,6 +300,16 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             """INSERT INTO recommendations_raw (run_id, rec_id, payload, artefact_id)
                VALUES (%s,%s,%s,%s)""",
             (run_id, rec["rec_id"], json.dumps(rec["payload"]), artefact_id))
+
+    # The twelve structured report sections, at subsection grain. `page`
+    # comes through as-parsed (None from a .docx — computed or null).
+    for sec in (sections or []):
+        cur.execute(
+            """INSERT INTO document_sections
+                 (run_id, section_kind, pillar_id, heading, body, page, artefact_id)
+               VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+            (run_id, sec.section_kind, sec.pillar_id, sec.heading, sec.body,
+             sec.page, report_artefact_id))
 
     # Manifest-vs-workbook figure check: the workbook (priority 1) wins;
     # a material disagreement is an observation, never silently reconciled.
