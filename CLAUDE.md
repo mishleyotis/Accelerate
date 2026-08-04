@@ -88,6 +88,15 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
 - Deploy continuously: every stage ends with `infra/deploy.sh` against production and DoD verified at the production URL.
 - Small diffs; expand–migrate–contract; `CREATE INDEX CONCURRENTLY`; grants in the same revision as the table.
 
+## Adjudications made during the build (user-confirmed)
+
+- **v7.0 has 16 categories (C1–C4 × four pillars), not the docs' 17** —
+  the 17 was v5.0's count; user confirmed 2026-08-04. Cell counts are
+  unchanged (851 = 205+292+164+190, including 165 sub-vertical variant
+  cells like `P1C1.3.CU1`). v5.0 workbooks (17 categories, for lineage
+  work): Drive folder `1rF9zdx1qF7BJ9t21eFdvZQW11Y5dUjy3`.
+- v7.0 catalogue source of record: `gs://digital-maturity-assessor-catalogue-staging/v7.0/`.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

@@ -119,10 +119,33 @@ stage_0_2() {
 }
 
 stage_0_5() {
-  say "0.5 buckets, Redis, Jobs, Scheduler — implemented at stage 0.5"
-  echo "artefact/export/corpus-pack buckets; corpus-gate-scanner + pack-exporter Jobs;"
-  echo "package-scan trigger every 30 min; Redis (decision pending: new vs reuse dma-insights-redis)"
-  exit 1
+  say "0.5 buckets (uniform bucket-level access; worker is the only artefact writer)"
+  for suffix in dmai-artefacts dmai-exports dmai-corpus-packs; do
+    b="gs://${PROJECT_ID}-${suffix}"
+    if gcloud storage buckets describe "$b" --project="$PROJECT_ID" >/dev/null 2>&1; then
+      echo "exists: $b"
+    else
+      gcloud storage buckets create "$b" --project="$PROJECT_ID" \
+        --location="$REGION" --uniform-bucket-level-access
+      echo "created: $b"
+    fi
+  done
+  bind_bucket() { # bucket member role
+    gcloud storage buckets add-iam-policy-binding "gs://${PROJECT_ID}-${1}" \
+      --member="serviceAccount:${2}@${SA_DOMAIN}" --role="$3" --quiet >/dev/null \
+      && echo "bucket ${1}: ${2} -> ${3}"
+  }
+  # Artefact bytes: retained at parse, read by the connector for excerpt
+  # verification (TRD §07). The worker holds the ONLY writer role.
+  bind_bucket dmai-artefacts dmai-worker roles/storage.objectAdmin
+  bind_bucket dmai-artefacts dmai-mcp    roles/storage.objectViewer
+  bind_bucket dmai-exports      dmai-worker roles/storage.objectAdmin
+  bind_bucket dmai-corpus-packs dmai-worker roles/storage.objectAdmin
+
+  say "0.5 Redis + Scheduler — blocked on grants (see grants-for-admin.sh)"
+  echo "Memorystore (or approved reuse of dma-insights-redis) needs roles/redis.admin;"
+  echo "the three Scheduler triggers need roles/cloudscheduler.admin."
+  echo "corpus-gate-scanner and pack-exporter Jobs register via deploy.sh when their images exist."
 }
 
 have || { echo "gcloud not found"; exit 1; }
