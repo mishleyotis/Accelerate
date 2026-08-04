@@ -82,6 +82,7 @@ class ParsedScore:
     confidence: str | None = None      # HIGH · MEDIUM · LOW where the workbook carries it
     facets: list = field(default_factory=list)
     evidence_refs: list = field(default_factory=list)
+    rationale: str | None = None       # scorer's grounding text; embedded, never stored
 
 
 @dataclass
@@ -186,6 +187,7 @@ def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
                 tier=None, score=score, source_cell=cell,
                 evidence_quality=None, confidence=conf,
                 facets=[], evidence_refs=sorted({m.split(":")[0] for m in EID_RE.findall(refs_raw)}),
+                rationale=rationale,
             ))
     result.scored_cells = len(result.scores)
     return result
