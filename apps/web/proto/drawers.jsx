@@ -205,7 +205,7 @@ function InsightModal() {
               {ic.annotation ? (
                 <div style={{ background: "var(--z-lav)", borderRadius: 8, padding: 14, marginBottom: 14 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, fontSize: 12 }}>
-                    <div className="sb-avatar" style={{ width: 22, height: 22, fontSize: 9 }}>MO</div>
+                    <div className="sb-avatar" style={{ width: 22, height: 22, fontSize: 9 }}>{sessionUser().initials}</div>
                     <strong>{ic.annotation.author}</strong>
                     <span className="b b-teal">{ic.annotation.role}</span>
                     <span className="b b-above">{ic.annotation.status}</span>

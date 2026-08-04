@@ -62,9 +62,9 @@ function Sidebar() {
         </nav>
 
         <div className="sb-foot">
-          <div className="sb-avatar">MO</div>
+          <div className="sb-avatar">{sessionUser().initials}</div>
           <div className="sb-foot-meta">
-            <div className="sb-foot-name">Mishley O.</div>
+            <div className="sb-foot-name">{sessionUser().short}</div>
             <div className="sb-foot-role">{role}</div>
           </div>
           <button className="icon-btn" style={{ color: "rgba(255,255,255,.6)" }} title="Sign out" onClick={() => { setAuthed(false); navigate("/login"); }}>
@@ -250,17 +250,17 @@ function NotificationsPopover({ onClose }) {
 function SettingsPopover({ onClose }) {
   const { role, setRole, audience, setAudience, setAuthed } = useApp();
   const items = [
-    { label: "Profile",          icon: "user",     route: "/admin",       sub: "Mishley Otiende" },
+    { label: "Profile",          icon: "user",     route: "/admin",       sub: sessionUser().name },
     { label: "Tweaks panel",     icon: "settings", action: () => { try { window.parent.postMessage({ type: "__activate_edit_mode" }, "*"); } catch(e){}; window.dispatchEvent(new MessageEvent("message", { data: { type: "__activate_edit_mode" } })); onClose(); }, sub: "Toggle in-page tweaks" },
     { label: "Sign out",          icon: "logout",   action: () => { setAuthed(false); navigate("/login"); onClose(); },     sub: "End session" },
   ];
   return (
     <div className="popover" style={{ width: 280 }}>
       <div className="popover-head">
-        <div className="sb-avatar" style={{ width: 32, height: 32, fontSize: 11 }}>MO</div>
+        <div className="sb-avatar" style={{ width: 32, height: 32, fontSize: 11 }}>{sessionUser().initials}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>Mishley Otiende</div>
-          <div style={{ fontSize: 11, color: "var(--z-mid)" }}>mishley@zennify.com</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>{sessionUser().name}</div>
+          <div style={{ fontSize: 11, color: "var(--z-mid)" }}>{sessionUser().email}</div>
         </div>
       </div>
       <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--z-sep)" }}>

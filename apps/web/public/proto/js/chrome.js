@@ -126,11 +126,11 @@ function Sidebar() {
     className: "sb-foot"
   }, /*#__PURE__*/React.createElement("div", {
     className: "sb-avatar"
-  }, "MO"), /*#__PURE__*/React.createElement("div", {
+  }, sessionUser().initials), /*#__PURE__*/React.createElement("div", {
     className: "sb-foot-meta"
   }, /*#__PURE__*/React.createElement("div", {
     className: "sb-foot-name"
-  }, "Mishley O."), /*#__PURE__*/React.createElement("div", {
+  }, sessionUser().short), /*#__PURE__*/React.createElement("div", {
     className: "sb-foot-role"
   }, role)), /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
@@ -588,7 +588,7 @@ function SettingsPopover({
     label: "Profile",
     icon: "user",
     route: "/admin",
-    sub: "Mishley Otiende"
+    sub: sessionUser().name
   }, {
     label: "Tweaks panel",
     icon: "settings",
@@ -631,7 +631,7 @@ function SettingsPopover({
       height: 32,
       fontSize: 11
     }
-  }, "MO"), /*#__PURE__*/React.createElement("div", {
+  }, sessionUser().initials), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
@@ -642,12 +642,12 @@ function SettingsPopover({
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, "Mishley Otiende"), /*#__PURE__*/React.createElement("div", {
+  }, sessionUser().name), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-mid)"
     }
-  }, "mishley@zennify.com"))), /*#__PURE__*/React.createElement("div", {
+  }, sessionUser().email))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "10px 14px",
       borderBottom: "1px solid var(--z-sep)"

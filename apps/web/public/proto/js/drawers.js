@@ -451,7 +451,7 @@ function InsightModal() {
       height: 22,
       fontSize: 9
     }
-  }, "MO"), /*#__PURE__*/React.createElement("strong", null, ic.annotation.author), /*#__PURE__*/React.createElement("span", {
+  }, sessionUser().initials), /*#__PURE__*/React.createElement("strong", null, ic.annotation.author), /*#__PURE__*/React.createElement("span", {
     className: "b b-teal"
   }, ic.annotation.role), /*#__PURE__*/React.createElement("span", {
     className: "b b-above"

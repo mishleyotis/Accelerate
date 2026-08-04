@@ -158,7 +158,7 @@ function DashboardHome() {
       <div className="page-head">
         <div>
           <div className="eyebrow">Command centre</div>
-          <h1>Good morning{role === "ANALYST" ? ", Mishley" : ""}</h1>
+          <h1>{(h => h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening")(new Date().getHours())}, {sessionUser().first}</h1>
           <div className="sub">{ent.length} entities · {totalAlerts} open alerts · {active.length} run{active.length === 1 ? "" : "s"} in progress</div>
         </div>
         <div className="actions">

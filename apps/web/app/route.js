@@ -1,12 +1,14 @@
 import { cookies } from "next/headers";
-import { verify, COOKIE } from "../lib/session";
+import { COOKIE, verify } from "../lib/session";
 
 export const dynamic = "force-dynamic";
 
 // The app IS the prototype: its modules run verbatim (compiled at build
-// time), booted from live data instead of the mock. This host page
-// verifies the session server-side, fetches the bootstrap from svc_api,
-// and hands both to the SPA via window.DMA_LIVE before any module runs.
+// time) inside a plain HTML document — a route handler, not a React
+// page, so no framework hydration ever reconciles SPA-owned DOM. The
+// session is verified server-side and the live bootstrap (catalogue,
+// promoted directory) is inlined as window.DMA_LIVE before any module
+// runs — mirroring prototype/template.html's own structure.
 
 async function apiFetch(path) {
   const base = process.env.API_URL;
@@ -46,10 +48,12 @@ const SCRIPTS = [
   "proto/js/app-root.js",
 ];
 
-export default async function Home() {
+export async function GET() {
   const session = verify(cookies().get(COOKIE)?.value);
-  const catalogue = await apiFetch("/v1/catalogue");
-  const directory = await apiFetch("/v1/directory");
+  const [catalogue, directory] = await Promise.all([
+    apiFetch("/v1/catalogue"),
+    apiFetch("/v1/directory"),
+  ]);
   const live = {
     authed: !!session,
     role: session?.role || null,
@@ -60,14 +64,24 @@ export default async function Home() {
     active_runs: directory?.active_runs || [],
     pending_review: directory?.pending_review || [],
   };
-  const boot = `window.DMA_LIVE=${JSON.stringify(live).replace(/</g, "\\u003c")};`;
-  return (
-    <>
-      <div id="app" />
-      <script dangerouslySetInnerHTML={{ __html: boot }} />
-      {SCRIPTS.map((s) => (
-        <script key={s} src={`/${s}`} defer />
-      ))}
-    </>
-  );
+  const boot = JSON.stringify(live).replace(/</g, "\\u003c");
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMA Insights</title>
+<link rel="stylesheet" href="/proto/app.css">
+<link rel="icon" href="/brand/icon_teal.png">
+</head>
+<body>
+<div id="app"></div>
+<script>window.DMA_LIVE=${boot};</script>
+${SCRIPTS.map((s) => `<script src="/${s}" defer></script>`).join("\n")}
+</body>
+</html>`;
+  return new Response(html, {
+    headers: { "content-type": "text/html; charset=utf-8",
+               "cache-control": "no-store" },
+  });
 }

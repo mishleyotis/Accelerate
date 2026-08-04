@@ -564,6 +564,34 @@ function assetUrl(id, fallback) {
   return typeof window !== "undefined" && window.__resources && window.__resources[id] || fallback;
 }
 
+/* ── Session identity (production divergence, data-flow only) ────────
+   The signed-in user comes from the server-verified session in
+   DMA_LIVE; the prototype's fixed persona remains only as the
+   local-preview fallback. Every rendered name/avatar derives from
+   here — nothing hardcodes a person. */
+function sessionUser() {
+  const live = typeof window !== "undefined" && window.DMA_LIVE || null;
+  const email = live && live.email;
+  if (!email) {
+    return {
+      name: "Mishley Otiende",
+      short: "Mishley O.",
+      first: "Mishley",
+      initials: "MO",
+      email: "mishley@zennify.com"
+    };
+  }
+  const parts = email.split("@")[0].split(/[._-]+/).filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1));
+  const first = parts[0] || email;
+  return {
+    name: parts.join(" ") || email,
+    short: parts.length > 1 ? `${parts[0]} ${parts[1][0]}.` : first,
+    first,
+    initials: (parts.length > 1 ? parts[0][0] + parts[1][0] : (parts[0] || email).slice(0, 2)).toUpperCase(),
+    email
+  };
+}
+
 /* ── Brand mark ──────────────────────────────────────────────────── */
 function BrandMark({
   size = 28
@@ -942,5 +970,6 @@ Object.assign(window, {
   fmtPct,
   relTime,
   FreshnessDot,
-  assetUrl
+  assetUrl,
+  sessionUser
 });

@@ -327,7 +327,7 @@ function DashboardHome() {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Command centre"), /*#__PURE__*/React.createElement("h1", null, "Good morning", role === "ANALYST" ? ", Mishley" : ""), /*#__PURE__*/React.createElement("div", {
+  }, "Command centre"), /*#__PURE__*/React.createElement("h1", null, (h => h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening")(new Date().getHours()), ", ", sessionUser().first), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, ent.length, " entities \xB7 ", totalAlerts, " open alerts \xB7 ", active.length, " run", active.length === 1 ? "" : "s", " in progress")), /*#__PURE__*/React.createElement("div", {
     className: "actions"

@@ -851,7 +851,17 @@ function AdminUsersCard() {
   const {
     pushToast
   } = useApp();
-  const [users, setUsers] = useState([{
+  // Production divergence: real deployments list the signed-in session
+  // only (the users table arrives with the auth stage); the mock staff
+  // roster renders solely in local preview.
+  const [users, setUsers] = useState(window.DMA_LIVE ? [{
+    id: 1,
+    name: sessionUser().name,
+    email: sessionUser().email,
+    role: window.DMA_LIVE.role || "ANALYST",
+    active: true,
+    last: "now"
+  }] : [{
     id: 1,
     name: "Mishley Andrade",
     email: "mishley@zennify.com",

@@ -17,8 +17,14 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 function AppProvider({
   children
 }) {
-  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
-  const [role, setRole] = useState(TWEAK_DEFAULTS.role);
+  // Production divergence: the session's role seeds the tweaks too —
+  // the tweaks-sync effect below would otherwise clobber it on mount.
+  const _sessionRole = typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.role || TWEAK_DEFAULTS.role;
+  const [tweaks, setTweaks] = useState({
+    ...TWEAK_DEFAULTS,
+    role: _sessionRole
+  });
+  const [role, setRole] = useState(_sessionRole);
   // Production divergence: the host page verifies the session cookie
   // server-side and passes the verdict in DMA_LIVE.
   const [authed, setAuthed] = useState(!!(typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.authed));
@@ -354,5 +360,15 @@ function App() {
   });
   return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(Router, null), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
 }
-const root = ReactDOM.createRoot(document.getElementById("app"));
+
+// Production divergence: mount OUTSIDE the host framework's hydration
+// tree (the host page renders no #app), so server hydration never
+// reconciles SPA-owned DOM.
+const _mount = document.getElementById("app") || (() => {
+  const d = document.createElement("div");
+  d.id = "app";
+  document.body.appendChild(d);
+  return d;
+})();
+const root = ReactDOM.createRoot(_mount);
 root.render(/*#__PURE__*/React.createElement(App, null));
