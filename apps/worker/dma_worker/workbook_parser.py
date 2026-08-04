@@ -79,6 +79,7 @@ class ParsedScore:
     score: Decimal
     source_cell: str
     evidence_quality: Decimal | None
+    confidence: str | None = None      # HIGH · MEDIUM · LOW where the workbook carries it
     facets: list = field(default_factory=list)
     evidence_refs: list = field(default_factory=list)
 
@@ -119,12 +120,75 @@ def _header_map(ws, anchor: str, marker: str | None = None, max_scan: int = 30):
 
 
 def parse_scoring_workbook(path: str) -> WorkbookParse:
+    """Two shipped generations, detected by tab set:
+    - claude_dma:  2_Scorecard (Effective_Score) + 3_Assessment facets
+    - general_dma: P{n}_Subcap_Scoring tabs (one row per subcap) +
+                   Evidence_Master / Peer_Benchmarks (parsed separately)
+    """
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        facets = _parse_assessment(wb["3_Assessment"]) if "3_Assessment" in wb.sheetnames else {}
-        return _parse_scorecard(wb["2_Scorecard"], facets)
+        if "2_Scorecard" in wb.sheetnames:
+            facets = _parse_assessment(wb["3_Assessment"]) if "3_Assessment" in wb.sheetnames else {}
+            return _parse_scorecard(wb["2_Scorecard"], facets)
+        pillar_tabs = [t for t in wb.sheetnames if re.match(r"P\d+_Subcap_Scoring$", t)]
+        if pillar_tabs:
+            return _parse_pillar_scoring(wb, pillar_tabs)
+        raise ValueError(f"unrecognised scoring workbook generation: tabs={wb.sheetnames}")
     finally:
         wb.close()
+
+
+CONFIDENCE_WORDS = {"HIGH", "MEDIUM", "LOW"}
+
+
+def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
+    result = WorkbookParse(scores=[], observations=[], toggled_out=[])
+    for tab in sorted(pillar_tabs):
+        ws = wb[tab]
+        headers, first = _header_map(ws, "SubCap_ID")
+        sid_col = headers["subcap_id"]
+        score_col = headers["score"]
+        score_letter = openpyxl.utils.get_column_letter(score_col + 1)
+        conf_col = headers.get("confidence")
+        name_col = headers.get("subcap_name")
+        eids_col = headers.get("evidence_ids")
+        rationale_col = headers.get("rationale")
+        for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
+            sid = row[sid_col] if sid_col < len(row) else None
+            sid = str(sid).strip() if sid else None
+            if not sid or not SUBCAP_RE.match(sid):
+                continue
+            pillar, category, capability = _grain(sid)
+            score = _decimal(row[score_col] if score_col < len(row) else None)
+            cell = f"{tab}!{score_letter}{r}"
+            if score == "UNPARSEABLE":
+                result.observations.append(Observation(
+                    "unparseable_cell", sid, {"source_cell": cell,
+                                              "raw": str(row[score_col])[:80]}))
+                continue
+            refs_raw = str(row[eids_col]) if eids_col is not None and row[eids_col] else ""
+            rationale = str(row[rationale_col]).strip() if rationale_col is not None and row[rationale_col] else None
+            if score is None:
+                if refs_raw.strip() or rationale:
+                    result.observations.append(Observation(
+                        "missing_score", sid, {"source_cell": cell}))
+                else:
+                    result.toggled_out.append(sid)
+                continue
+            conf = None
+            if conf_col is not None and row[conf_col] is not None:
+                c = str(row[conf_col]).strip().upper()
+                conf = c if c in CONFIDENCE_WORDS else None
+            result.scores.append(ParsedScore(
+                subcap_id=sid, pillar_id=pillar, category_id=category,
+                capability_id=capability,
+                name=(str(row[name_col]).strip() if name_col is not None and row[name_col] else None),
+                tier=None, score=score, source_cell=cell,
+                evidence_quality=None, confidence=conf,
+                facets=[], evidence_refs=sorted({m.split(":")[0] for m in EID_RE.findall(refs_raw)}),
+            ))
+    result.scored_cells = len(result.scores)
+    return result
 
 
 def _parse_assessment(ws) -> dict:
@@ -229,3 +293,62 @@ def _parse_scorecard(ws, facets: dict) -> WorkbookParse:
 
     result.scored_cells = len(result.scores)
     return result
+
+
+# ── General-DMA companion tabs ─────────────────────────────────────────
+
+DATE_FUZZY = re.compile(r"^(\d{4})(?:-(?:Q([1-4])|(\d{2})))?")
+
+
+def parse_fuzzy_date(value):
+    """'2025-07' → 2025-07-01; '2025-Q4' → quarter END (H7 rule); '2025' →
+    None is NOT returned for a bare year — the year is a date at year grain,
+    resolved to Jan 1 conservatively. Unparseable → None (UNVERIFIED)."""
+    if value is None:
+        return None
+    from datetime import date
+    m = DATE_FUZZY.match(str(value).strip())
+    if not m:
+        return None
+    year = int(m.group(1))
+    if m.group(2):
+        q = int(m.group(2))
+        month, day = 3 * q, (31, 30, 30, 31)[q - 1]
+        return date(year, month, day)
+    if m.group(3):
+        return date(year, int(m.group(3)), 1)
+    return date(year, 1, 1)
+
+
+def parse_evidence_master(path: str) -> list:
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        if "Evidence_Master" not in wb.sheetnames:
+            return []
+        ws = wb["Evidence_Master"]
+        headers, first = _header_map(ws, "Evidence_ID")
+        out = []
+        for row in ws.iter_rows(min_row=first, values_only=True):
+            def v(key):
+                i = headers.get(key)
+                return row[i] if i is not None and i < len(row) else None
+            e_id = str(v("evidence_id") or "").strip()
+            if not e_id.startswith("E-"):
+                continue
+            tier = str(v("tier") or "").strip().upper()
+            ers = _decimal(v("ers_score"))
+            out.append({
+                "e_id": e_id,
+                "source_name": (str(v("source_name")).strip() if v("source_name") else None),
+                "source_url": (str(v("url")).strip() if v("url") else None),
+                "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
+                "ers": None if ers in (None, "UNPARSEABLE") else ers,
+                "published_date": parse_fuzzy_date(v("publish_date")),
+                "excerpt": (str(v("fact_summary")).strip() if v("fact_summary") else None),
+                "subcaps": [s for s in
+                            (x.strip() for x in str(v("subcaps_supported") or "").split(","))
+                            if SUBCAP_RE.match(s)],
+            })
+        return out
+    finally:
+        wb.close()
