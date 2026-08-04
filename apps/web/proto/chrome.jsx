@@ -265,8 +265,12 @@ function SettingsPopover({ onClose }) {
       </div>
       <div style={{ padding: "10px 14px", borderBottom: "1px solid var(--z-sep)" }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>Acting as</div>
+        {/* Production divergence: previewing a lesser view is fine; acting
+            ABOVE the server-granted role is not. */}
         <div className="toggle-row" style={{ width: "100%" }}>
-          {[["AE","AE"],["ANALYST","Analyst"],["ADMIN","Admin"]].map(([k, l]) => (
+          {[["AE","AE"],["ANALYST","Analyst"],["ADMIN","Admin"]]
+            .filter(([k]) => k !== "ADMIN" || grantedRole() === "ADMIN")
+            .map(([k, l]) => (
             <button key={k} className={role === k ? "on" : ""} style={{ flex: 1 }} onClick={() => { setRole(k); onClose(); }}>{l}</button>
           ))}
         </div>

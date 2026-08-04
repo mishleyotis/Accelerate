@@ -58,10 +58,14 @@ if [ -f apps/web/Dockerfile ]; then
     --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
   API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
     --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
+  # Role grants (interim allowlist until the auth stage's users table):
+  # override per deploy with ADMIN_EMAILS/AE_EMAILS in the environment.
+  ADMIN_EMAILS="${ADMIN_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com}"
+  AE_EMAILS="${AE_EMAILS:-}"
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
-    ${API_URL:+--set-env-vars="API_URL=${API_URL}"} \
+    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};AE_EMAILS=${AE_EMAILS}" \
     --set-secrets="SESSION_SECRET=dmai-session-secret:latest" \
     --allow-unauthenticated --quiet
 fi

@@ -334,9 +334,23 @@ function Router() {
   if (path === "/clients") return /*#__PURE__*/React.createElement(EntityDirectoryPage, null);
   if (path === "/alerts") return /*#__PURE__*/React.createElement(AlertsPage, null);
   if (path === "/prospecting") return /*#__PURE__*/React.createElement(ProspectingPage, null);
-  if (path === "/admin") return /*#__PURE__*/React.createElement(AdminPage, null);
-  if (path === "/admin/import") return /*#__PURE__*/React.createElement(ImportPage, null);
-  if (path === "/admin/import/audit") return /*#__PURE__*/React.createElement(ImportAuditPage, null);
+  // Production divergence: admin surfaces require the server-granted
+  // ADMIN role — direct hash navigation included, not just the nav.
+  if (path.startsWith("/admin")) {
+    if (grantedRole() !== "ADMIN") {
+      return /*#__PURE__*/React.createElement(PageShell, {
+        title: "Not authorised"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "empty"
+      }, /*#__PURE__*/React.createElement("h3", null, "Not authorised"), /*#__PURE__*/React.createElement("p", null, "The admin console requires an ADMIN grant on your account."), /*#__PURE__*/React.createElement("button", {
+        className: "btn btn-primary",
+        onClick: () => navigate("/")
+      }, "Back to Dashboard")));
+    }
+    if (path === "/admin") return /*#__PURE__*/React.createElement(AdminPage, null);
+    if (path === "/admin/import") return /*#__PURE__*/React.createElement(ImportPage, null);
+    if (path === "/admin/import/audit") return /*#__PURE__*/React.createElement(ImportAuditPage, null);
+  }
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Not found"
   }, /*#__PURE__*/React.createElement("div", {

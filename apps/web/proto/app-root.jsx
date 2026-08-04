@@ -183,9 +183,16 @@ function Router() {
   if (path === "/clients")                    return <EntityDirectoryPage />;
   if (path === "/alerts")                     return <AlertsPage />;
   if (path === "/prospecting")                return <ProspectingPage />;
-  if (path === "/admin")                      return <AdminPage />;
-  if (path === "/admin/import")               return <ImportPage />;
-  if (path === "/admin/import/audit")         return <ImportAuditPage />;
+  // Production divergence: admin surfaces require the server-granted
+  // ADMIN role — direct hash navigation included, not just the nav.
+  if (path.startsWith("/admin")) {
+    if (grantedRole() !== "ADMIN") {
+      return <PageShell title="Not authorised"><div className="empty"><h3>Not authorised</h3><p>The admin console requires an ADMIN grant on your account.</p><button className="btn btn-primary" onClick={() => navigate("/")}>Back to Dashboard</button></div></PageShell>;
+    }
+    if (path === "/admin")                    return <AdminPage />;
+    if (path === "/admin/import")             return <ImportPage />;
+    if (path === "/admin/import/audit")       return <ImportAuditPage />;
+  }
 
   return <PageShell title="Not found"><div className="empty"><h3>Page not found</h3><p>{path}</p><button className="btn btn-primary" onClick={() => navigate("/")}>Back to Dashboard</button></div></PageShell>;
 }

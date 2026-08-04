@@ -14,13 +14,17 @@ function LoginPage() {
   const [phase, setPhase] = useState("idle"); // idle | verifying | granting
   const [email, setEmail] = useState("");
   const signIn = async forcedEmail => {
+    // Production divergence: the interim gate has no Google account
+    // detection, so the email is REQUIRED — never silently defaulted
+    // (a default renders someone else's name over a real session).
+    const e = (forcedEmail || email).trim().toLowerCase();
+    if (!e) {
+      setErr("Enter your @zennify.com email to sign in.");
+      return;
+    }
     setLoading(true);
     setErr(null);
     setPhase("verifying");
-    // Production divergence from the prototype (data-flow only): the
-    // domain check and session issue happen server-side (/api/signin sets
-    // an httpOnly session cookie). Visuals and flow are the prototype's.
-    const e = (forcedEmail || email).trim().toLowerCase() || "mishley@zennify.com";
     try {
       const r = await fetch("/api/signin", {
         method: "POST",
@@ -105,7 +109,32 @@ function LoginPage() {
       marginBottom: 28,
       maxWidth: 440
     }
-  }, "Sign in to explore every assessment, drill into the evidence, and lead with the platform conversation your client needs to hear."), /*#__PURE__*/React.createElement("button", {
+  }, "Sign in to explore every assessment, drill into the evidence, and lead with the platform conversation your client needs to hear."), /*#__PURE__*/React.createElement("label", {
+    className: "inp-label",
+    htmlFor: "signin-email",
+    style: {
+      display: "block",
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      marginBottom: 6
+    }
+  }, "Work email"), /*#__PURE__*/React.createElement("input", {
+    id: "signin-email",
+    className: "inp",
+    type: "email",
+    placeholder: "you@zennify.com",
+    value: email,
+    onChange: e => setEmail(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter") signIn();
+    },
+    style: {
+      width: "100%",
+      marginBottom: 10
+    },
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary",
     disabled: loading,
     onClick: () => signIn(),
@@ -116,29 +145,12 @@ function LoginPage() {
       justifyContent: "center",
       marginBottom: 10
     }
-  }, loading ? "Verifying…" : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("svg", {
-    width: "16",
-    height: "16",
-    viewBox: "0 0 48 48",
-    "aria-hidden": "true"
-  }, /*#__PURE__*/React.createElement("path", {
-    fill: "#FFC107",
-    d: "M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6 8-11.3 8a12 12 0 1 1 0-24c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44a20 20 0 0 0 20-20c0-1.3-.1-2.7-.4-3.9z"
-  }), /*#__PURE__*/React.createElement("path", {
-    fill: "#FF3D00",
-    d: "M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"
-  }), /*#__PURE__*/React.createElement("path", {
-    fill: "#4CAF50",
-    d: "M24 44c5.1 0 9.8-2 13.3-5.2l-6.2-5.2A12 12 0 0 1 12.7 28l-6.6 5.1A20 20 0 0 0 24 44z"
-  }), /*#__PURE__*/React.createElement("path", {
-    fill: "#1976D2",
-    d: "M43.6 20.1H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2c-.4.4 6.6-4.8 6.6-14.8 0-1.3-.1-2.7-.4-3.9z"
-  })), "Continue with Google")), /*#__PURE__*/React.createElement("div", {
+  }, loading ? "Verifying…" : "Sign in"), /*#__PURE__*/React.createElement("div", {
     className: "inp-help",
     style: {
       marginBottom: 12
     }
-  }, "Domain-restricted \xB7 Google OAuth \xB7 session expires after 8 hours"), err ? /*#__PURE__*/React.createElement("div", {
+  }, "Domain-restricted \xB7 interim access gate (Google OAuth arrives with the auth stage) \xB7 session expires after 8 hours"), err ? /*#__PURE__*/React.createElement("div", {
     className: "co co-auth",
     style: {
       marginBottom: 12

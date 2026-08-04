@@ -666,7 +666,7 @@ function SettingsPopover({
     style: {
       width: "100%"
     }
-  }, [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
+  }, [["AE", "AE"], ["ANALYST", "Analyst"], ["ADMIN", "Admin"]].filter(([k]) => k !== "ADMIN" || grantedRole() === "ADMIN").map(([k, l]) => /*#__PURE__*/React.createElement("button", {
     key: k,
     className: role === k ? "on" : "",
     style: {

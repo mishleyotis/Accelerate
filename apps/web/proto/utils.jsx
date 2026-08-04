@@ -140,6 +140,14 @@ function sessionUser() {
   };
 }
 
+/* The role the SERVER granted this session (allowlist). "Acting as" may
+   preview a lesser view but never exceed the grant. Local preview
+   (no DMA_LIVE) keeps the prototype's free switching. */
+function grantedRole() {
+  const live = (typeof window !== "undefined" && window.DMA_LIVE) || null;
+  return live ? (live.role || "ANALYST") : "ADMIN";
+}
+
 /* ── Brand mark ──────────────────────────────────────────────────── */
 function BrandMark({ size = 28 }) {
   return (
@@ -357,5 +365,5 @@ Object.assign(window, {
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
   fmtDate, fmtAssets, fmtPct, relTime, FreshnessDot,
-  assetUrl, sessionUser,
+  assetUrl, sessionUser, grantedRole,
 });
