@@ -352,3 +352,69 @@ def parse_evidence_master(path: str) -> list:
         return out
     finally:
         wb.close()
+
+
+_CATEGORY_RE = re.compile(r"^P\d+C\d+$")
+
+
+def parse_peer_benchmarks(path: str) -> list:
+    """Peer_Benchmarks is CATEGORY grain with named-peer columns after the
+    stat block. Only the per-peer scores are data — Entity_Score and the
+    stat columns (median/quartiles/min/max/delta) are derivable, so they
+    are read solely to verify, never to store (counts are computed, never
+    stored, where a source of truth exists). Stops at the footer notes."""
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        if "Peer_Benchmarks" not in wb.sheetnames:
+            return []
+        ws = wb["Peer_Benchmarks"]
+        rows = ws.iter_rows(values_only=True)
+        header = next(rows)
+        stats = {"category", "category_name", "entity_score", "peer_median",
+                 "peer_p25", "peer_p75", "peer_min", "peer_max", "delta_vs_median"}
+        peer_cols = [(i, str(h).strip()) for i, h in enumerate(header)
+                     if h is not None and _norm(str(h)) not in stats]
+        out = []
+        for row in rows:
+            cat = str(row[0] or "").strip()
+            if not _CATEGORY_RE.match(cat):
+                continue
+            def col(key):
+                for i, h in enumerate(header):
+                    if h is not None and _norm(str(h)) == key:
+                        return row[i] if i < len(row) else None
+                return None
+            out.append({
+                "category_id": cat,
+                "category_name": (str(row[1]).strip() if row[1] else None),
+                "entity_score": _decimal(col("entity_score")),
+                "stated_median": _decimal(col("peer_median")),
+                "peers": [(name, _decimal(row[i]) if i < len(row) else None)
+                          for i, name in peer_cols],
+            })
+        return out
+    finally:
+        wb.close()
+
+
+def parse_recommendations(path: str) -> list:
+    """The Recommendations tab lands raw: rec_id as it arrived (the raw
+    tier preserves package identifiers) plus the full row as payload."""
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        if "Recommendations" not in wb.sheetnames:
+            return []
+        ws = wb["Recommendations"]
+        rows = ws.iter_rows(values_only=True)
+        header = [(_norm(str(h)) if h is not None else None) for h in next(rows)]
+        out = []
+        for row in rows:
+            rec_id = str(row[0] or "").strip()
+            if not rec_id.upper().startswith("REC-"):
+                continue
+            payload = {header[i]: (str(row[i]).strip() if row[i] is not None else None)
+                       for i in range(len(header)) if header[i]}
+            out.append({"rec_id": rec_id, "payload": payload})
+        return out
+    finally:
+        wb.close()

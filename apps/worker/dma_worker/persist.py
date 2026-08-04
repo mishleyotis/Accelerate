@@ -70,7 +70,10 @@ def _round_once(value: Decimal | None) -> Decimal | None:
 
 
 def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
-                    source_folder_id: str, evidence: list | None = None) -> PersistResult:
+                    source_folder_id: str, evidence: list | None = None,
+                    peers: list | None = None,
+                    recommendations: list | None = None,
+                    artefact_id: str | None = None) -> PersistResult:
     cur = conn.cursor()
     inst = manifest.get("institution", {})
     resolution = resolve(
@@ -268,6 +271,33 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             (run_id, o.kind, json.dumps({"subcap_id": o.subcap_id, **o.detail})),
         )
         n_obs += 1
+
+    # Peer cohort: only the named-peer scores are data. The tab's stated
+    # median is read to VERIFY (recomputed from the very scores beside it);
+    # a material disagreement is an observation, and nothing derivable is
+    # stored (counts are computed, never stored).
+    for p in (peers or []):
+        scores = sorted(s for _, s in p["peers"] if s is not None)
+        for peer_name, score in p["peers"]:
+            cur.execute(
+                """INSERT INTO peer_scores (run_id, peer_name, category_id, score)
+                   VALUES (%s,%s,%s,%s)""",
+                (run_id, peer_name, p["category_id"], score))
+        if scores and p.get("stated_median") is not None:
+            n = len(scores)
+            mid = (scores[n // 2] if n % 2 else
+                   (scores[n // 2 - 1] + scores[n // 2]) / 2)
+            if abs(mid - p["stated_median"]) > Decimal("0.005"):
+                _observe("artefact_disagreement", {
+                    "figure": f"peer_median[{p['category_id']}]",
+                    "stated": str(p["stated_median"]), "recomputed": str(mid),
+                    "resolution": "recomputed from named-peer scores; stated value not stored"})
+
+    for rec in (recommendations or []):
+        cur.execute(
+            """INSERT INTO recommendations_raw (run_id, rec_id, payload, artefact_id)
+               VALUES (%s,%s,%s,%s)""",
+            (run_id, rec["rec_id"], json.dumps(rec["payload"]), artefact_id))
 
     # Manifest-vs-workbook figure check: the workbook (priority 1) wins;
     # a material disagreement is an observation, never silently reconciled.

@@ -57,6 +57,10 @@ def conns():
                              (SELECT id FROM runs WHERE entity_id = %s)""", (eid,))
             cur.execute("""DELETE FROM subcap_scores WHERE run_id IN
                              (SELECT id FROM runs WHERE entity_id = %s)""", (eid,))
+            cur.execute("""DELETE FROM peer_scores WHERE run_id IN
+                             (SELECT id FROM runs WHERE entity_id = %s)""", (eid,))
+            cur.execute("""DELETE FROM recommendations_raw WHERE run_id IN
+                             (SELECT id FROM runs WHERE entity_id = %s)""", (eid,))
             cur.execute("""DELETE FROM run_manifest WHERE run_id IN
                              (SELECT id FROM runs WHERE entity_id = %s)""", (eid,))
             cur.execute("DELETE FROM runs WHERE entity_id = %s", (eid,))
@@ -176,6 +180,52 @@ def test_rescan_of_same_ids_is_idempotent_and_unaudited(conns):
     assert acur.fetchone()[0] == 2   # one per persist call — E-002 deduped each time
     # second run is a new run row (run-level idempotency lives in scan_diff)
     assert res2.run_seq == 2
+
+
+def test_peer_scores_store_only_named_scores_and_verify_the_median(conns):
+    """Only per-peer scores land; the tab's stated median is verified
+    against a recompute of the scores beside it, and a lie becomes an
+    observation — derivable figures are never stored."""
+    worker, _ = conns
+    peers = [
+        {"category_id": "P1C1", "category_name": "Digital Strategy",
+         "entity_score": Decimal("1.77"), "stated_median": Decimal("3.0"),
+         "peers": [("Peer A", Decimal("3.0")), ("Peer B", Decimal("3.5")),
+                   ("Peer C", Decimal("2.5"))]},
+        # stated median 9.9 disagrees with the recomputed 2.0
+        {"category_id": "P1C2", "category_name": "Governance",
+         "entity_score": Decimal("1.71"), "stated_median": Decimal("9.9"),
+         "peers": [("Peer A", Decimal("2.0")), ("Peer B", Decimal("2.0")),
+                   ("Peer C", None)]},
+    ]
+    res = persist_package(worker, manifest=MANIFEST, workbook=_workbook(),
+                          source_folder_id="synthetic", evidence=EVIDENCE,
+                          peers=peers)
+    cur = worker.cursor()
+    cur.execute("""SELECT category_id, peer_name, score FROM peer_scores
+                    WHERE run_id = %s ORDER BY category_id, peer_name""", (res.run_id,))
+    rows = [list(r) for r in cur.fetchall()]
+    assert len(rows) == 6                      # every named peer, both categories
+    assert ["P1C2", "Peer C", None] in rows    # NULL retained, never imputed
+    cur.execute("""SELECT detail FROM parser_observations
+                    WHERE run_id = %s AND kind = 'artefact_disagreement'
+                      AND detail->>'figure' LIKE 'peer_median%%'""", (res.run_id,))
+    details = [r[0] for r in cur.fetchall()]
+    assert len(details) == 1 and details[0]["figure"] == "peer_median[P1C2]"
+    assert details[0]["recomputed"] == "2.0"
+
+
+def test_recommendations_land_raw_with_package_ids(conns):
+    worker, _ = conns
+    recs = [{"rec_id": "REC-01", "payload": {"sequencing_phase": "1 — Foundation",
+                                             "zennify_solution_s": "Workshop"}}]
+    res = persist_package(worker, manifest=MANIFEST, workbook=_workbook(),
+                          source_folder_id="synthetic", evidence=EVIDENCE,
+                          recommendations=recs, artefact_id="wb.xlsx")
+    cur = worker.cursor()
+    cur.execute("""SELECT rec_id, payload->>'sequencing_phase', artefact_id
+                    FROM recommendations_raw WHERE run_id = %s""", (res.run_id,))
+    assert [list(r) for r in cur.fetchall()] == [["REC-01", "1 — Foundation", "wb.xlsx"]]
 
 
 def test_reused_local_id_with_changed_content_never_aliases(conns):
