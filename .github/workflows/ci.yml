@@ -32,6 +32,32 @@ jobs:
           python3 scripts/extract_docs.py docs /tmp/docs-text-check
           diff -r /tmp/docs-text-check docs/text --exclude='*docx upload*' && echo "docs/text matches sources"
 
+  schema-qa:
+    name: Schema QA checklist (stage 0.3 DoD)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: dma_insights
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parity users (mirror Cloud SQL IAM users)
+        run: PGPASSWORD=local psql -h localhost -U postgres -d dma_insights -f infra/local/pg-init/01-iam-parity-users.sql
+      - name: Install
+        run: pip install -q -r migrations/requirements.txt pytest
+      - name: Migrate
+        working-directory: migrations
+        run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' alembic upgrade head
+      - name: QA checklist as tests
+        run: LOCAL_DATABASE_URL='postgresql+pg8000://postgres:local@localhost:5432/dma_insights' python -m pytest tests/schema/ -q
+
   # Per-service lint/type/test/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
   # the first commit so no code was ever merged without them.
