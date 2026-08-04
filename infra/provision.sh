@@ -87,12 +87,22 @@ stage_0_2() {
       --database-version=POSTGRES_16 --edition=enterprise-plus \
       --tier="$SQL_TIER" \
       --network=default --no-assign-ip \
-      --enable-point-in-time-recovery --retained-transaction-log-days=7 \
-      --backup-start-time=08:00 --retained-backups-count=35 \
+      --enable-point-in-time-recovery --retained-transaction-log-days=35 \
+      --backup-start-time=08:00 --retained-backups-count=36 \
       --enable-connection-pooling \
       --database-flags=cloudsql.iam_authentication=on \
       --storage-auto-increase
   fi
+
+  # Managed pooling flags are instance-wide (pool_mode included), so the
+  # TRD's per-service table maps as: api + worker through the pooler in
+  # transaction mode (default_pool_size 20 ≙ svc_api's 200→20; worker's →8
+  # server cap is enforced by role CONNECTION LIMIT in migrations), and
+  # svc_mcp connects DIRECT via the Cloud SQL connector — session semantics
+  # for the promote's advisory locks without forcing session mode on api.
+  say "0.2 pooling flags (TRD connection pooling table)"
+  gcloud sql instances patch "$SQL_INSTANCE" --project="$PROJECT_ID" \
+    --connection-pool-flags=max_client_connections=220,max_pool_size=20 --quiet
 
   say "0.2 database + IAM users"
   gcloud sql databases describe "$DB_NAME" --instance="$SQL_INSTANCE" --project="$PROJECT_ID" >/dev/null 2>&1 \
