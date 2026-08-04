@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  gates:
+    name: Architecture gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret scan
+        run: python3 scripts/scan_secrets.py
+      - name: Gate A — no inference import
+        run: python3 scripts/gate_a_no_inference_imports.py
+      - name: Gate B — corpus ceiling ratchet
+        run: |
+          if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          elif git rev-parse HEAD~1 >/dev/null 2>&1; then
+            BASE="HEAD~1"
+          else
+            BASE=""
+          fi
+          if [ -n "$BASE" ]; then python3 scripts/gate_b_ceiling_ratchet.py "$BASE"; else echo "No base commit; skipping ratchet"; fi
+      - name: Docs extraction is reproducible
+        run: |
+          python3 scripts/extract_docs.py docs /tmp/docs-text-check
+          diff -r /tmp/docs-text-check docs/text --exclude='*docx upload*' && echo "docs/text matches sources"
+
+  # Per-service lint/type/test/build jobs are added when each service's
+  # first code lands (Implementation Plan S.3); the gates above run from
+  # the first commit so no code was ever merged without them.
