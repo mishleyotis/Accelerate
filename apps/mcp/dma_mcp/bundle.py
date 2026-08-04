@@ -107,9 +107,9 @@ def get_report_bundle(conn, run_id) -> dict:
     firmographics = _rows(cur, "SELECT field, payload FROM firmographics_raw WHERE run_id = %s", (run_id,))
 
     value_chains = _rows(cur, """
-        SELECT chain_id, sub_vertical, stage_no, stage_name, subcap_ids
+        SELECT chain_id, sub_vertical, name, stage_order
           FROM ccg_value_chains WHERE version = %s
-         ORDER BY chain_id, stage_no""", (version,))
+         ORDER BY sub_vertical, stage_order""", (version,))
 
     return _jsonable({
         "run_id": rid, "entity_id": entity_id, "display_id": display_id,
