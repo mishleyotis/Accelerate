@@ -157,22 +157,26 @@ def get_capability_catalogue(conn, run_id) -> dict:
           FROM ccg_aliases WHERE to_version = %s
          ORDER BY from_subcap_id""", (version,))
 
-    # Pillar/category display names are per-run assessment prose; the
-    # catalogue's own grain rows carry ids (names land with the
-    # ccg_categories loader). The run's stated grains carry the names the
-    # assessment itself used.
+    # Category names: the catalogue's own row where the version ships one
+    # (v5.0 does), the run's stated grain otherwise (v7.0 ships ids only).
+    # Pillar display names are assessment prose — per-run stated grains.
     cur.execute("SELECT payload FROM run_manifest WHERE run_id = %s", (run_id,))
     payload = (cur.fetchone() or [None])[0] or {}
     grains = payload.get("workbook_grains") or {}
+    stated_names = {c["category_id"]: c.get("name")
+                    for c in (grains.get("categories") or [])}
+    cur.execute("""SELECT category_id, pillar_id, name FROM ccg_categories
+                    WHERE version = %s ORDER BY category_id""", (version,))
+    categories = [{"category_id": cid, "pillar_id": pid,
+                   "name": name or stated_names.get(cid)}
+                  for cid, pid, name in cur.fetchall()]
 
     return _jsonable({
         "ccg_catalog_version": version,
         "pillars": [{"pillar_id": p["pillar_id"], "name": p.get("name"),
                      "weight": p.get("weight")}
                     for p in (grains.get("pillars") or [])],
-        "categories": [{"category_id": c["category_id"],
-                        "pillar_id": c.get("pillar_id"), "name": c.get("name")}
-                       for c in (grains.get("categories") or [])],
+        "categories": categories,
         "subcaps": subcaps,
         "aliases": aliases,
     })

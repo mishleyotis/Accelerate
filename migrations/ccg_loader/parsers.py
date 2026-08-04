@@ -116,6 +116,9 @@ def parse_capability_map(ws, version, pillar_id):
             "weight": weight,   # v5.0 ships Pillar_Weight; v7.0 has none
             "l3_platform_areas": _split(_get(row, headers, "L3_Platforms_Addressing")),
             "l4_features": _split(_get(row, headers, "L4_Features_Available")),
+            # the capability map's Category column carries the category's
+            # DISPLAY NAME; the loader lifts it to ccg_categories
+            "category_name": _s(row, headers, "Category", "Category_Name"),
         })
     return out, warns
 

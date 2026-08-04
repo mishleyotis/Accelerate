@@ -219,7 +219,7 @@ def main() -> int:
     try:
         cur = conn.cursor()
         # Replace this version's rows, all tables, one transaction.
-        for table in list(collected) + ["ccg_value_chains"]:
+        for table in list(collected) + ["ccg_value_chains", "ccg_categories"]:
             col = "to_version" if table == "ccg_aliases" else "version"
             cur.execute(f"DELETE FROM {table} WHERE {col} = %s", (args.version,))
         for tab, (parser, table, cols) in TABS.items():
@@ -237,6 +237,23 @@ def main() -> int:
                 (c["chain_id"], c["version"], c["sub_vertical"], c["name"], c["stage_order"]))
         print(f"ccg_value_chains: {len(chains)} stage rows")
 
+        # Category display names, one per category, from the capability
+        # map's Category column (first spelling wins across workbooks).
+        # v7.0's column carries the ID itself — an id echoed as a name is
+        # NULL here (computed or null), and the per-run stated grains stay
+        # the display-name source for such versions.
+        cat_names: dict[str, dict] = {}
+        for r in collected["ccg_subcaps"]:
+            raw = r.get("category_name")
+            cat_names.setdefault(r["category_id"], {
+                "category_id": r["category_id"], "pillar_id": r["pillar_id"],
+                "name": raw if raw and raw != r["category_id"] else None})
+        for c in sorted(cat_names.values(), key=lambda x: x["category_id"]):
+            cur.execute(
+                "INSERT INTO ccg_categories (version, category_id, pillar_id, name) VALUES (%s,%s,%s,%s)",
+                (args.version, c["category_id"], c["pillar_id"], c["name"]))
+        print(f"ccg_categories: {len(cat_names)} rows")
+
         # The version row: counts computed from what was loaded, current
         # flag moved atomically (exactly one TRUE, by partial unique).
         cells = [r for r in collected["ccg_subcaps"]]
@@ -247,9 +264,15 @@ def main() -> int:
         make_current = args.make_current or current_before in (None, args.version)
         if make_current:
             cur.execute("UPDATE ccg_versions SET is_current = NULL WHERE is_current")
-        cur.execute("DELETE FROM ccg_versions WHERE version = %s", (args.version,))
+        # UPSERT, never delete: runs pin this version by FK, and a reload
+        # of a pinned version must keep the row identity.
         cur.execute(
-            "INSERT INTO ccg_versions (version, loaded_at, cell_count, category_count, is_current) VALUES (%s, now(), %s, %s, %s)",
+            """INSERT INTO ccg_versions (version, loaded_at, cell_count, category_count, is_current)
+               VALUES (%s, now(), %s, %s, %s)
+               ON CONFLICT (version) DO UPDATE
+                 SET loaded_at = now(), cell_count = EXCLUDED.cell_count,
+                     category_count = EXCLUDED.category_count,
+                     is_current = EXCLUDED.is_current""",
             (args.version, len(cells), len(categories), True if make_current else None))
         conn.commit()
         state = "current" if make_current else f"historical (current stays {current_before})"

@@ -78,13 +78,12 @@ def catalogue():
         cur.execute("SELECT version FROM ccg_versions WHERE is_current")
         version = cur.fetchone()[0]
         cur.execute(
-            """SELECT DISTINCT category_id, pillar_id
-                 FROM ccg_subcaps WHERE version = %s ORDER BY category_id""",
-            (version,))
-        # Category display names load with the ccg_categories migration;
-        # until then the id is the label (never a guessed name).
-        categories = [{"id": c, "pillar": p, "name": c, "weight": None}
-                      for c, p in cur.fetchall()]
+            """SELECT category_id, pillar_id, name FROM ccg_categories
+                WHERE version = %s ORDER BY category_id""", (version,))
+        # name falls back to the id where the version ships none (v7.0) —
+        # promoted surfaces carry the run's own stated names instead.
+        categories = [{"id": c, "pillar": p, "name": n or c, "weight": None}
+                      for c, p, n in cur.fetchall()]
         pillars = [{"id": pid, "name": n, "short": s}
                    for pid, (n, s) in _PILLAR_NAMES.items()]
         return {"version": version, "pillars": pillars, "categories": categories}
