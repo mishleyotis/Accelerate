@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .gates import ensure_gate_registry
 from .validation import validate_pass1
+from .validation2 import validate_pass2
 
 _CONTRACT_VERSION = None
 
@@ -38,7 +39,8 @@ def _counts(payload: dict) -> dict:
 def submit_page_payload(conn, run_id, page: str, payload: dict,
                         provenance: str = "producer",
                         producer_version: str | None = None,
-                        submitted_by: str = "svc_mcp") -> dict:
+                        submitted_by: str = "svc_mcp",
+                        encoder=None) -> dict:
     ensure_gate_registry(conn)
     cur = conn.cursor()
     cur.execute("SELECT 1 FROM runs WHERE id = %s", (run_id,))
@@ -62,8 +64,14 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
                             "warnings": [], "counts": {}}}
 
     reasons = validate_pass1(page, payload)
-    # Pass 2 (evidence resolution, grain locks, band words, V4 grounding)
-    # attaches here as it lands; its reasons join the same list.
+    # Pass 2 always runs too — more named conflicts per verdict means
+    # fewer repair round trips. Its SG results DISCLOSE (warnings), never
+    # block; everything else joins the blocking reasons.
+    warnings = []
+    if isinstance(payload, dict):
+        p2, sg = validate_pass2(conn, run_id, page, payload, encoder=encoder)
+        reasons.extend(p2)
+        warnings.extend(sg)
     status = "FAIL" if any(r["severity"] == "block" for r in reasons) else "PASS"
     counts = _counts(payload)
 
@@ -89,12 +97,12 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
         """INSERT INTO submission_verdicts
              (submission_id, status, reasons, warnings, counts, evaluated_at)
            VALUES (%s,%s,%s,%s,%s, now())""",
-        (submission_id, status, json.dumps(reasons), json.dumps([]),
+        (submission_id, status, json.dumps(reasons), json.dumps(warnings),
          json.dumps(counts)))
     conn.commit()
     return {"submission_id": str(submission_id),
             "verdict": {"status": status.lower(), "reasons": reasons,
-                        "warnings": [], "counts": counts}}
+                        "warnings": warnings, "counts": counts}}
 
 
 def get_validation_verdict(conn, submission_id) -> dict:
