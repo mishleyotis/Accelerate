@@ -29,7 +29,14 @@ if [ -f apps/api/Dockerfile ]; then
   gcloud run deploy dmai-api --source=apps/api \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-api@${SA_DOMAIN}" \
-    --concurrency=80 --min-instances=1 --no-allow-unauthenticated
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights" \
+    --concurrency=80 --min-instances=1 --no-allow-unauthenticated --quiet
+  # web calls api service-to-service with an ID token
+  gcloud run services add-iam-policy-binding dmai-api \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+    --role="roles/run.invoker" --quiet >/dev/null
 fi
 if [ -f apps/mcp/Dockerfile ]; then
   say "svc_mcp"
@@ -40,10 +47,13 @@ if [ -f apps/mcp/Dockerfile ]; then
 fi
 if [ -f apps/web/Dockerfile ]; then
   say "web"
+  API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
+    --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
-    --allow-unauthenticated
+    ${API_URL:+--set-env-vars="API_URL=${API_URL}"} \
+    --allow-unauthenticated --quiet
 fi
 
 # --- 3 · worker Job + Scheduler sync (stage 1 / 0.5) ----------------------
