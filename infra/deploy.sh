@@ -40,10 +40,25 @@ if [ -f apps/api/Dockerfile ]; then
 fi
 if [ -f apps/mcp/Dockerfile ]; then
   say "svc_mcp"
+  # Capability-URL token: the streamable-HTTP path embeds it, so the
+  # Cowork connector needs only the URL. Rotating the secret rotates the
+  # URL. Created once, never echoed.
+  if ! gcloud secrets describe dmai-mcp-path-token --project="$PROJECT_ID" >/dev/null 2>&1; then
+    head -c 24 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=' | gcloud secrets create dmai-mcp-path-token \
+      --project="$PROJECT_ID" --data-file=- --quiet
+  fi
+  gcloud secrets add-iam-policy-binding dmai-mcp-path-token \
+    --project="$PROJECT_ID" \
+    --member="serviceAccount:dmai-mcp@${SA_DOMAIN}" \
+    --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
   gcloud run deploy dmai-mcp --source=apps/mcp \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-mcp@${SA_DOMAIN}" \
-    --concurrency=4 --timeout=900 --min-instances=1 --no-allow-unauthenticated
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-mcp@${PROJECT_ID}.iam;DB_NAME=dma_insights" \
+    --set-secrets="MCP_PATH_TOKEN=dmai-mcp-path-token:latest" \
+    --memory=2Gi --cpu=2 \
+    --concurrency=4 --timeout=900 --min-instances=1 --allow-unauthenticated --quiet
 fi
 if [ -f apps/web/Dockerfile ]; then
   say "web"
