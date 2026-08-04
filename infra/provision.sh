@@ -142,10 +142,16 @@ stage_0_5() {
   bind_bucket dmai-exports      dmai-worker roles/storage.objectAdmin
   bind_bucket dmai-corpus-packs dmai-worker roles/storage.objectAdmin
 
-  say "0.5 Redis + Scheduler — blocked on grants (see grants-for-admin.sh)"
-  echo "Memorystore (or approved reuse of dma-insights-redis) needs roles/redis.admin;"
-  echo "the three Scheduler triggers need roles/cloudscheduler.admin."
-  echo "corpus-gate-scanner and pack-exporter Jobs register via deploy.sh when their images exist."
+  say "0.5 Redis (claim leases, cache — reached over Direct VPC egress)"
+  if gcloud redis instances describe dmai-redis --region="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1; then
+    echo "exists: dmai-redis ($(gcloud redis instances describe dmai-redis --region="$REGION" --format='value(host)'))"
+  else
+    gcloud redis instances create dmai-redis --size=1 --region="$REGION" \
+      --redis-version=redis_7_0 \
+      --network="projects/${PROJECT_ID}/global/networks/default" \
+      --connect-mode=PRIVATE_SERVICE_ACCESS --quiet
+  fi
+  say "0.5 Scheduler — the three triggers register via deploy.sh once their target Jobs exist"
 }
 
 have || { echo "gcloud not found"; exit 1; }
