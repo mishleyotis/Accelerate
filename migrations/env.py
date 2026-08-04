@@ -51,6 +51,12 @@ def run_migrations_online() -> None:
             text("SELECT 1 FROM pg_roles WHERE rolname = 'svc_migrate'")
         ).scalar()
         if has_role:
+            # alembic_version is created by whoever ran the very first
+            # upgrade (before svc_migrate existed); hand it to the group
+            # role so later runs under SET ROLE can stamp it.
+            connection.execute(
+                text("ALTER TABLE IF EXISTS alembic_version OWNER TO svc_migrate")
+            )
             connection.execute(text("SET ROLE svc_migrate"))
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
