@@ -6,4 +6,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 ENV PYTHONUNBUFFERED=1
-CMD ["alembic", "upgrade", "head"]
+CMD ["python", "prod_apply.py"]

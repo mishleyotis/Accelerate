@@ -101,6 +101,17 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   all 31 are P1C5 (ESG), the killed 17th category. Runs pinned to v5.0
   serve against it; cross-version diffs render P1C5 as NOT_COMPARABLE.
 - v7.0 catalogue source of record: `gs://digital-maturity-assessor-catalogue-staging/v7.0/`.
+- **Synthesis sessions are scheduled by the app, not by a human** (user,
+  2026-08-04): when runs are pending, the system sets up a Cowork session
+  running the `/dma-surface-production` skill against the client folders
+  under the intake tree (General DMAs, folder
+  `1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo`). The connector (stage 2) is that
+  skill's counterpart; the scheduling automation lands with stages 2–3.
+- Prod DB bootstrap (one-time, done 2026-08-04): extensions + database
+  ownership to `dmai-migrate` + service-role authority were bootstrapped
+  via an ephemeral postgres password, immediately rotated to a discarded
+  value. `migrations/prod_apply.py` is the migrate Job entrypoint; its
+  VERIFY log lines are the production proof (private-IP DB).
 
 ## Open decisions — leave open, do not resolve silently
 

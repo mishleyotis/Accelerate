@@ -13,10 +13,13 @@ say() { printf '\n== %s ==\n' "$*"; }
 
 # --- 1 · migrate (Cloud Run Job, pre-deploy; deploy proceeds only on success)
 if [ -f migrations/Dockerfile ]; then
-  say "migrate job"
+  say "migrate job (runs prod_apply.py: alembic + catalogue loads + VERIFY log lines)"
   gcloud run jobs deploy dmai-migrate --source=migrations \
     --project="$PROJECT_ID" --region="$REGION" \
-    --service-account="dmai-migrate@${SA_DOMAIN}" --max-retries=0
+    --service-account="dmai-migrate@${SA_DOMAIN}" \
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-migrate@${PROJECT_ID}.iam;DB_NAME=dma_insights;LOAD_CATALOGUES=v7.0:current,v5.0" \
+    --max-retries=0 --task-timeout=1800 --memory=1Gi --quiet
   gcloud run jobs execute dmai-migrate --project="$PROJECT_ID" --region="$REGION" --wait
 fi
 
