@@ -1,0 +1,1096 @@
+DMA Insights — Implementation Plan
+
+Zennify
+DMA Insights · Implementation Plan
+August 2026
+
+Plan
+00 Build sequence
+
+Foundations
+S Scaffolding
+0 Infrastructure & schema
+
+The write path
+1 Ingest worker
+2 MCP connector
+3 Walking skeleton
+
+The read path
+4 Read API
+5 Frontend & global surfaces
+6 Seven dashboards
+7 Drilldown atlas
+
+Assurance
+8 Gates & corpus scanning
+9 Hardening & deployment
+© 2026 Zennify · Confidential
+
+00 — Build sequence
+DMA Insights · Implementation Plan · Claude Code edition
+Plan10 stages62 surfaces scheduled
+
+Implementation plan
+
+# DMA Insights — build sequence Claude Code edition
+
+Ten stages, ordered by dependency rather than by layer. Nothing can be rendered until something has been promoted, and nothing can be promoted until the contract exists — so the MCP connector is infrastructure, not an integration step at the end.
+
+## Stage map
+
+Stage | Delivers | Blocks
+
+S |
+Scaffolding
+Repository, project instructions, environment, continuous integration. | everything
+
+0 |
+Infrastructure and schema
+Cloud project, database, all 89 tables, catalogue load. | everything
+
+1 |
+Ingest worker
+Drive to ingested tier, with source cells and retained artefact bytes. | stage 2 — no bundle without it
+
+2 |
+MCP connector
+12 tools, 34 contracts, validation, staging, atomic promotion. | stages 3–8
+
+3 |
+Walking skeleton
+One section synthesised in Cowork, promoted and on screen. | all breadth work
+
+4 |
+Read API
+One endpoint per page, redaction, envelope, corpus rollups. | stages 5–7
+
+5 |
+Frontend foundation
+Shell, tokens, auth, routing, and the 9 global surfaces. | stage 6
+
+6 |
+Seven dashboards
+All 38 client surfaces. | stage 7
+
+7 |
+Drilldown atlas
+Three shells, 15 panels, stacking. | —
+
+8 |
+Gates and corpus scanning
+Four families, ceilings, the ratchet. | —
+
+9 |
+Hardening and deploy
+Invariant tests, observability, production. | —
+
+The walking skeleton is stage 3 and it is not optional
+One entity, one run, one section — synthesised by a Cowork agent, validated, promoted and rendered on screen — before any breadth is built. Every architectural assumption in this plan is falsified or confirmed by that one path, and every one of them is expensive to discover later.
+
+One sequencing trap worth naming. It is tempting to build the frontend early against hand-written fixtures, because it is visible progress and parallelises well. Resist it until stage 3 has landed. A frontend built against fixtures encodes the fixture author's assumptions about the payload shape, and those assumptions are exactly what the contract exists to replace. Build the shell early; build the surfaces against promoted data.
+
+## Surface coverage — every surface has a stage
+
+38 client surfaces, 9 global surfaces and 15 drilldowns. Nothing is left to “and then the rest of the UI”.
+
+Stage | Count | Surfaces
+
+5 | 9 | G1 · G2 · G3 · G4 · G5 · G6 · G7 · G8 · G9
+
+6.1 | 13 | O1 · O2 · O3 · O4 · O5 · O6 · O7 · O8 · O9 · O10 · O11 · O1b · O12
+
+6.2 | 2 | I1 · T2
+
+6.3 | 5 | H4 · H1 · H2 · H6 · H9
+
+6.4 | 5 | P1 · P2 · P2b · P3 · P4
+
+6.5 | 6 | C1 · C2 · C3 · C4 · C5 · C6
+
+6.6 | 2 | T1 · T3
+
+6.7 | 5 | H3 · V1 · H5 · H7 · H8
+
+7 | 15 | DD-1 · DD-2 · DD-3 · DD-4 · DD-5 · DD-6 · DD-7 · DD-8 · DD-9 · DD-10 · DD-11 · DD-12 · DD-13 · DD-14 · DD-15
+
+Total  | 62 |
+
+Stage S
+
+# Scaffolding
+
+S.1Repository and project instructionsScaffold
+
+Initialise the monorepo and write the instructions Claude Code reads at the start of every session. This file is the highest-leverage artefact in the repository: it is what stops a session re-deriving a decision that was already taken.
+
+- Monorepo: backend/, frontend/, infra/, etl/, docs/
+- The four design documents copied to docs/ and referenced from the instructions
+- Branch protection; conventional commits
+
+#### Verification
+
+- The instructions file exists at the root and states the invariants verbatim
+- All four design documents are in docs/
+
+### Project instructions — the content that matters
+
+```
+# DMA Insights — Claude Code project instructions
+
+## The twelve invariants — breaking any of these is a breaking change
+1  The app never calls a model at request time.
+2  All content writes go through the MCP connector.
+3  The API reads serving tables only.
+4  Promotion is atomic across all 6 pages.
+5  The synthesis agent creates 5 id classes and no others.
+6  Evidence ids are recognised by ONE pattern, in ONE module.
+7  The rank score is server-computed and bounded 1.0–5.0.
+8  A quoted figure and its named cell are the same cell, within 0.05.
+9  Every figure passes the identity gate before it renders.
+10 A derived value is computed or null — never a sentinel.
+11 Internal rungs are marked in the payload, not filtered in the frontend.
+12 A corpus ceiling only ever moves down.
+
+## Where content comes from
+A synthesis agent in Claude Cowork reads the ingested tier through the
+DMA Insights MCP connector, reasons, enriches, cites, writes every surface,
+submits page by page, and promotes. The deployed app does no reasoning.
+If you are adding an inference client to backend/, you have misread this.
+
+## Stack
+Backend    Python 3.12 · FastAPI · SQLAlchemy 2.0 async · Alembic
+Frontend   Next.js 15 App Router · TypeScript
+Database   Cloud SQL PostgreSQL 16 · pgvector (BUILD TIME ONLY)
+Cache      Redis — ingest queue and claim leases ONLY
+Storage    Object storage — artefact bytes retained for excerpt verification
+Hosting    Cloud Run — 4 services (web · api · mcp · worker) + 2 jobs
+Auth       Google OIDC · RS256 JWT · httpOnly cookie · domain restricted
+
+## The counts, and what they mean
+6    submission pages     promotion needs a PASS on every one
+34   payload sections     one per serving table
+38   client surfaces      across 7 dashboards
+9    global surfaces
+15   drilldowns           3 shells
+89   tables
+851  catalogue cells      NOT the per-run scored count
+12   MCP tools
+
+## Two counts that are NOT the same
+catalogue_cells  851, fixed per catalogue version
+scored_cells     per run, smaller, varies — sub-vertical toggles exclude
+                 cells an institution cannot legally operate
+
+## Dashboards
+D1 Overview · D2 Insights · D3 Heatmap · D4 Platform · D5 Context · D6 Tech stack · D7 Health
+D5 Context is INTERNAL ONLY. D7 Health is ANALYST ONLY.
+
+## Conventions
+API prefix        /api/v1/
+Python            snake_case modules · React components PascalCase
+Maturity palette  M1 #FFCB99 · M2 #B0EDD3 · M3 #27BBAF · M4 #139F94
+                  M5 #185F60 · no score #E5E7EB
+                  resolved through ONE module. No page computes a colour.
+Zennify brand     teal #27BBAF · dark #1C4A4D · purple #735BA1 · DM Sans
+```
+
+S.2Environment configurationScaffold
+
+Every variable the four services need, with no secret in the repository. Note what is absent: there are no model names, no inference endpoints, no temperature, no cache time-to-live.
+
+- An example environment file per service, committed; real values in a secret manager
+- Typed settings for the backend; typed environment access on the frontend
+- Database, cache, storage, OAuth, token and connector-credential configuration
+
+#### Verification
+
+- No secret is committed; a pre-commit hook scans for them
+- A service fails fast with a clear message on a missing required variable
+- No configuration key references an inference provider
+
+S.3Continuous integrationScaffold
+
+Lint, type-check, test, build and deploy per service — plus two gates that exist specifically because of this architecture and would not appear in a conventional pipeline.
+
+- Migrations run as a deploy step under the migration role
+- Gate A — no inference import. The build fails if any backend module imports an inference client.
+- Gate B — the ceiling ratchet. The build fails if any corpus gate threshold in the committed configuration is higher than in the previous commit.
+
+#### Verification
+
+- A branch adding an inference import fails CI
+- A branch raising a corpus ceiling fails CI and names the gate
+
+Why Gate B belongs in CI: the pressure to raise a ceiling arrives exactly when everyone is busy shipping. A check at the moment of the commit is the only one that reliably resists it.
+
+Stage 0
+
+# Infrastructure and schema
+
+0.1Cloud project and identityInfra
+
+One project, four service identities, least privilege throughout. The identity boundary carries real architectural weight: it is where the write-boundary invariant is enforced.
+
+- Service identities for web, api, mcp, worker
+- The worker identity holds read-only delegation on the assessment tree
+- The connector identity holds the only credential that can write serving tables
+- Artefact registry, secret manager, monitoring and tracing
+
+#### Verification
+
+- The API identity cannot write beyond the two workflow tables
+- The worker identity has no access to serving or staging tables
+
+0.2Database instance and rolesInfra
+
+Private networking, automated backups, point-in-time recovery. Four database roles matching the four services, created before any table exists so no table is ever created without its grants.
+
+- PostgreSQL 16 with the vector and case-insensitive-text extensions
+- Roles for the API, connector, worker and migrations
+- Default-deny grants: a new table grants nothing until a migration says so
+
+#### Verification
+
+- The API role returns a permission error on any staging select
+- Point-in-time recovery is verified by an actual restore, not by a console setting
+
+0.3Deploy all 89 tablesSchema
+
+Migrations in tier order, so a foreign key never points at a table that does not yet exist. The enumerated types are created before the tables that use them.
+
+- Enumerated types (22) → Auth (2) → Catalogue (21) → Ingested (13) → Ingest ops (3)
+- → Staging (3) → Serving (33) → Control and audit (7) → Workflow (5)
+- All ten stored generated columns; all check constraints; both partial unique indexes
+- Per-role grants applied in the same migration that creates each table
+
+#### Verification
+
+- The table count in the application schema equals 89
+- Every generated column is stored, not virtual
+- An out-of-range rank score is rejected at insert
+- A null published date yields a null age, an unverified band and an undated status
+- Both partial unique indexes hold under concurrent insert
+
+0.4Catalogue loadData
+
+Load the capability catalogue — 851 cells across four pillars and 17 categories, plus the supporting tables, the alias bridge and the value chains. Every row is keyed on its version, so a bump adds rows rather than mutating them.
+
+- Ingest into the 21 catalogue tables, keyed on identifier and version
+- A version row marked current; existing runs keep their pinned version
+- The alias bridge, populated for any known rename
+- The toggle cascade — what makes scored cells differ from catalogue cells
+- Value chains and their cell mappings, which the value-chain view reads
+
+#### Verification
+
+- Cell count equals 851; per pillar P1 205 · P2 292 · P3 164 · P4 190
+- Every cell resolves to a canonical name — none returns a raw code as its label
+- A renamed cell resolves through the alias bridge across a simulated bump
+- Every value-chain stage maps to at least one cell
+
+0.5Cache, storage and jobsInfra
+
+Scoped deliberately narrowly.
+
+- Cache: the ingest job queue, and claim leases with a time-to-live
+- Buckets: artefacts (retained, for excerpt verification), exports, corpus packs
+- Cloud Run Jobs registered: corpus-gate-scanner · pack-exporter
+- Cloud SQL is Enterprise Plus with Managed Connection Pooling; svc_mcp pools in session mode, everything else transaction mode
+- Database auth is automatic IAM via the Cloud SQL Python Connector, with pool_recycle=1800 and pool_pre_ping — tokens live one hour and pooled connections must not outlive them
+- Response compression is FastAPI middleware; Cloud Run does not compress dynamic responses
+- Memorystore for Redis is reached over Direct VPC egress
+
+#### Verification
+
+- A claim lease expires and the run returns to unclaimed
+- Artefact bytes survive parse and are fetchable by the connector for excerpt verification
+
+Stage 1
+
+# Ingest worker
+
+Built before the connector, because the connector's primary read tool returns the parsed package. No ingested run means no bundle, and nothing for a Cowork agent to synthesise against.
+
+1.1Traversal and classificationWorker
+
+Scheduled traversal of the assessment tree, diffed against previous scans so re-running the scanner does not reprocess the corpus.
+
+- Read-only Drive client with delegated access
+- Folder discovery, diffed against prior scans
+- Artefact classification against the registry, ranked by source priority
+- Every file recorded — including ones that were skipped
+
+#### Verification
+
+- A skipped folder appears in the audit with the rule that skipped it — a silently skipped folder is indistinguishable from a traversal bug
+- Re-running the scanner processes nothing new
+
+1.2Entity resolution and deduplicationWorker
+
+The four-signal cascade, then test-case exclusion, then the four ordered dedup rules. Exclusion runs before resolution so a rehearsal folder never becomes an entity.
+
+- Cascade: run manifest → request identifier → document header → folder name
+- Low confidence produces a pending-review entity, never an active one
+- Test-case detection, recorded with the rule that fired
+- Dedup: priority → completion date → parsed section count → stable tiebreak
+- The losing artefact is retained and marked, never deleted
+
+#### Verification
+
+- A test folder never produces an entity
+- Dedup is reproducible — the same inputs select the same winner twice
+- A low-confidence inference lands in pending review and does not appear in the directory
+
+1.3Artefact parsing — and the two fields that cannot be backfilledParser
+
+Workbook, report, client profile and package files into the ingested tier.
+
+- Workbook → score rows, with the source cell on every row, and all four grain ids
+- Report and client profile → document sections, with page numbers
+- Package files → evidence, issues, peers, recommendations, tech stack, fits, firmographics
+- Artefact bytes retained in object storage, so an excerpt can be verified later
+- Every package excerpt verified against those bytes at parse time
+- Scored cells computed and stamped on the run
+- Parse observations for every disagreement, exclusion, skipped row and unparseable value
+
+#### Verification
+
+- Every score row carries a source cell and all four grain ids
+- A missing score is skipped, never defaulted to zero — a zero renders as the lowest maturity band and is indistinguishable from a real assessment of it
+- An excerpt absent from its artefact leaves the row unverified rather than linked
+- Scored cells is stamped and differs from catalogue cells where toggles applied
+
+Neither field can be backfilled. The originating workbook cell and the artefact bytes are only available at parse time.
+
+1.4Embedding tier and centroidsVector
+
+Built at ingest, because V4 needs the bundle embedded before the first submission arrives. Entirely inside the worker, off any request path.
+
+- Local 384-dimension sentence-embedding model in the worker and connector images — CPU, deterministic, no network call
+- Sentence-window chunking at 60–120 tokens with 20% overlap; evidence excerpts are already the right size and pass through whole
+- L2 normalisation at write, so cosine becomes a dot product
+- bundle_embeddings populated with scope, source reference and retained content — the content is what lets a flagged field be told what it matched
+- bundle_centroids per scope: cell, category, pillar, run
+- HNSW index created once at migration (m=16, ef_construction=64); the graph grows incrementally as each run's vectors insert at ingest
+- embedding_model pinned on every row
+
+#### Verification
+
+- A run produces 3,000–6,000 vectors and four scope levels of centroid
+- A centroid with fewer than five members is marked so the check abstains
+- An insert with the wrong dimension fails at INSERT with a readable message
+- Mixed embedding models in one run is rejected, not silently averaged
+- The attribution query returns three nearest chunks in single-digit milliseconds
+
+Scoped centroids, not one global centroid. An assessment corpus spans regulatory filings, technology detail and executive commentary; their mean points at nothing. Each claim is checked against the narrowest centroid that applies.
+
+Stage 2
+
+# MCP connector
+
+The contract, and the only writable boundary into served content. Everything downstream depends on it, which is why it is stage 2 rather than stage 8.
+
+2.1Contract registry — all 34 sectionsMCP
+
+Field tuples with per-field spec text. This registry is the single source of truth that the contract tool serves, the validator reads and the writers target — one definition, four consumers.
+
+- Field tuple: required, type, item type, doc; nested specs under a sections key
+- All 34 sections across 6 pages, 32 of them required
+- Every list-of-object field carries its item schema in its doc text
+- The universal envelope on every section: produced-at, producer version, citations, internal-only paths, empty state
+
+#### Verification
+
+- Every section has a contract, and the count reconciles with the serving-table list
+- No list-of-object field lacks doc text
+- The contract tool returns doc text verbatim
+
+The doc field is part of the contract, not documentation. Required-type-items tells the agent nothing about item keys, so the shape would live only in the writers and the agent would guess — and a guess that type-checks promotes silently wrong content.
+
+2.2Identifier authorityMCP
+
+One module, one compiled recogniser, imported everywhere and pinned by test at every call site.
+
+- The recogniser plus find-ids and find-fabricated helpers
+- Four namespaces recognised: package, enrichment mint, connector, internal
+- Case-sensitive, no partial matches, order preserved
+- Agent-creatable id validation: exactly 5 classes, rejected otherwise
+- The connector boundary's copy pinned to the same compiled object
+
+#### Verification
+
+- A test asserts object identity of the compiled pattern at every call site, not equality
+- The mint namespace is matched
+- A payload attempting to mint an evidence id is rejected
+
+2.3Read and discover toolsMCP
+
+Six tools, all idempotent and side-effect free.
+
+- get_report_bundle — the parsed package, with a source cell on every score and all four grain ids
+- get_page_contract — shapes plus verbatim doc text
+- get_capability_catalogue — the pinned catalogue, with the alias bridge and value chains
+- get_evidence — a three-way split: found, not found, foreign
+- get_run_progress — per-page status and what is blocking
+- get_client_state and list_pending_runs — served state, prior runs, and the claim
+
+#### Verification
+
+- Every score in the bundle carries a source cell
+- A foreign id is returned in its own bucket, not merged into not-found
+- Prior runs are returned so a rerun is not synthesised as though it were a first run
+
+The three-way split is the point. Not-found means fabricated or unregistered. Foreign — a real row belonging to another institution — must stop synthesis rather than be filtered out quietly, because its presence means the reasoning has drifted onto the wrong entity.
+
+2.3bEnrichment intakeMCP
+
+The synthesis agent reaches the enrichment service directly; the application never calls it. What the application must do is accept the output as evidence and tier it correctly.
+
+- register_evidence accepts origin=connector and stamps it
+- Tier comes from the underlying source, never from the tool — a technographic scan registers at T1, and filing it at T4 caps the capability at L2.5
+- The source domain is identity-checked at registration, because enrichment resolves by domain and a holding company, a subsidiary and a same-named institution in another market all have one
+- A registered item with no traceable source URL is accepted as INFERENCE, never FACT
+
+#### Verification
+
+- A technographic scan registers at T1 and does not cap its cells
+- An enrichment row whose domain fails the identity check is quarantined, not stored
+- A value with no source URL cannot be registered as FACT
+
+2.4Validation — two passes and four gate familiesMCP
+
+Structural and editorial first; evidence second and separately, because checking an extraction against artefact bytes is database work of a different shape from format sweeps.
+
+- Pass 1: required fields, types, word budgets, forbidden registers, terminal punctuation, id resolution by pattern
+- Pass 2: every id resolves and belongs to this entity and run; every excerpt verbatim against fetched bytes; every source domain identity-checked
+- Grain resolution: resolve each quoted label to a served cell, require agreement, round once
+- The identity gate: legal name, regulator, footprint, source domain, order of magnitude
+- All seven cross-surface reconciliation pairs
+- r_layer present on every ranked or causal claim, with a verdict
+- empty_state.sources_searched on every declared absence — an absence with no ladder is rejected
+- narrative_thread present on each page lead section
+- Band words validated against the four-value domain, resolved from the RAW score
+- The citation stack V1–V4, with V4 abstaining when no embedding tier is available
+- Structured verdicts: gate id, JSON path, and a message naming the arithmetic
+- The gate registry populated across all four families
+
+#### Verification
+
+- A grain mismatch fails and the verdict names both figures and the path
+- A foreign source domain quarantines the field and emits a reason — no value is substituted
+- V4 abstains rather than failing closed when the embedding tier is unavailable
+- A verdict message is specific enough to repair from without re-reading the payload
+- All seven reconciliation pairs are asserted independently
+
+Any evidence reason at all fails the submission. An excerpt is either a copy of something a document says or it is not evidence. The check lives at submit so the agent can still repair the span.
+
+2.5Write tools and the promote transactionMCP
+
+Three write tools. The promotion is one transaction spanning 6 pages and 34 writers.
+
+- register_evidence — server allocates the id, computes the bounded rank score, dedups by content hash scoped to the entity, verifies the excerpt, identity-checks the domain
+- submit_page_payload — validate, supersede the live row, stage, return the verdict
+- promote_run — assert a pass on every page, then all 34 writers in one transaction
+- Claim leases with expiry, so a dead session does not block a run permanently
+- Idempotent re-promotion; supersession on resubmission
+
+#### Verification
+
+- A promote with one page missing writes nothing and returns the missing page
+- An injected writer failure rolls back all 34 writes
+- Re-promoting a promoted run is not an error
+- Registering the same source six times returns one id six times
+- Every promoted row carries a non-null producer version
+
+2.6Inspect tools and the error taxonomyMCP
+
+Three tools plus the structured error set. An error an agent cannot act on produces another failed attempt, so the taxonomy is part of the deliverable.
+
+- get_validation_verdict, get_run_progress, explain_gate
+- Gate explanations carry threshold history, with a reason per change
+- All 10 structured error codes, each with a documented agent action
+
+#### Verification
+
+- Every error code the connector can emit appears in the documented table
+- Gate history shows direction of movement — a ceiling that only moved down is visible as such
+
+Stage 3
+
+# Walking skeleton
+
+One entity, one run, one section — synthesised in Cowork, validated, promoted and rendered. Nothing else is built until this path works.
+
+1
+Ingest one package
+A real assessment folder, parsed, with source cells and retained bytes.
+
+2
+Connect Cowork
+The connector registered, the agent claiming the run and reading the bundle.
+
+3
+Synthesise one section
+overview.scores — the hero. Chosen deliberately.
+
+4
+Fail, then repair
+Submit with a known grain error and repair from the verdict alone.
+
+5
+Promote and render
+A minimal page reading the serving table and showing the hero.
+
+Why overview.scores is the right first section
+It exercises grain resolution, the peer-figure ladder, the composite rounding rule, the generated band column and the cross-section reconciliation gate — five of the mechanisms most likely to be subtly wrong — in one small payload.
+
+## What this stage proves
+
+Assumption | Confirmed by
+
+The connector is reachable from a Cowork session with its own credential | A claim acquired and a bundle read end to end
+
+The contract is legible enough to synthesise against without reading the source | An agent producing from the contract tool alone
+
+A failing verdict is actionable | Repairing a grain error from the verdict without re-reading the payload
+
+Grain resolution actually resolves | A deliberate mismatch failing, and the correct pairing passing
+
+The promote transaction is atomic | An injected writer failure leaving nothing behind
+
+The serving table is readable in the shape the API needs | The hero rendering from a single indexed select
+
+Rounding happens once and the band is generated | A tie value rendering identically on the hero and the run row
+
+## Verification
+
+- One run reaches promoted with one section and five explicitly empty pages.
+- The hero renders the composite, four pillar scores, peer deltas, posture and the framing sentence.
+- A deliberate grain error fails, and the verdict is sufficient to repair from.
+- The rendered composite equals the served value, and equals the run row.
+- No inference client appears anywhere in the request path.
+
+Do not skip the deliberate failure. A validator tested only on valid payloads is a validator whose error paths are untested — and the error path is where the synthesis agent lives. The verdict has to be good enough to repair from on the first read, and the only way to know is to try.
+
+Stage 4
+
+# Read API
+
+4.1Scaffold and authAPI
+
+Application factory, async database session, structured logging. Google OIDC with domain restriction, token verification and a two-layer role gate.
+
+- Health and readiness probes; middleware; structured JSON logging
+- OIDC callback, token issue and verification, httpOnly cookie
+- Role re-verified at the API on every request, never trusted from the frontend
+
+#### Verification
+
+- An AE token is refused on Context and Health by the API, not only by the router
+- A token from outside the Workspace domain is refused at the OAuth client
+
+4.2Page endpointsAPI
+
+One endpoint per page plus the platform-detail sub-route and Health. Sections are selected concurrently, so a section that failed to promote returns no row rather than nulling columns the serialiser must then interpret.
+
+- 6 page endpoints, the tech-stack detail sub-route, and Health
+- The response envelope: entity, run, audience, and per-section data with source and provenance
+- Data-source attribution per section: producer, parsed or empty
+- Evidence resolution, run history and version diff
+- Corpus endpoints: directory, dashboard, alerts, patterns, search
+- Admin endpoints: imports, import audit, users
+- Two write exceptions: annotations and alert actions, in workflow tables only
+
+#### Verification
+
+- A section with no promoted row returns an explicit empty state, not a null-filled object
+- The run history score column equals the Overview hero
+- Neither write exception touches a serving table
+- Health assembles from the four heatmap sections plus the runs table
+
+One query for a count and its rows. A header and its KPI counts drawn from different queries will eventually disagree.
+
+4.4Run resolution, pinning and version diffAPI
+
+Every page endpoint resolves a run before it reads a section. Getting this wrong is how numbers change under an open page.
+
+- Slug → entity → active run, or the run pinned in the request
+- The envelope carries run id, sequence, active flag, promotion time, catalogue version and both cell counts
+- The diff resolver: direct comparison within a catalogue lineage; alias-bridged with the rename disclosed; degraded to category grain on a split or merge; not-comparable on a retirement
+- A composite compared across a catalogue bump is returned as approximate, with that stated
+- user_workspace read to default the pin, written on navigation
+
+#### Verification
+
+- A pinned run is honoured and reported as not-active
+- A diff across a catalogue bump marks unbridgeable cells not-comparable rather than null
+- A cell that was retired renders as retired, never as a drop to zero
+- An entity with runs but none promoted returns a 404 naming both counts
+
+Refuse rather than annotate. A renamed cell compared naively reads as a capability that vanished; a split cell reads as a score that halved. The resolver declines the comparison and says why.
+
+4.3Redaction layerAPI
+
+Walk the internal-only paths and delete them before serialisation. The frontend receives an object that never contained the field.
+
+- Path-walking redaction driven entirely by the payload's own marking
+- Customer audience: Context and Health return a locked state, not a partial page
+- Customer audience withholds the three internal Overview cards
+- Cohort-pattern entity ids stripped for every audience
+- Thin-evidence and quarantine markers retained for both audiences
+
+#### Verification
+
+- No path listed in any internal-only array appears in a customer response
+- Entity ids never appear in any response, at any audience
+- The assertion runs against serialised output, not against the code that hides fields
+
+Honesty is not internal. An assessment that states its own weaknesses is more credible than one that appears complete.
+
+Stage 5
+
+# Frontend foundation and the global surfaces
+
+5.1Scaffold, tokens and the colour resolverFrontend
+
+App Router, TypeScript, server-rendered. The token layer includes the one module that resolves score to band to colour — and no page computes a colour.
+
+- Typed section shapes generated from the contract registry, so a contract change breaks the build
+- Zennify tokens: teal #27BBAF, dark #1C4A4D, purple #735BA1, DM Sans
+- The maturity resolver, matching the database's generated band column exactly
+- Typography, spacing, elevation and shape scales
+
+#### Verification
+
+- No component computes a colour from a score
+- The frontend resolver and the database band column agree for every score in a fixture run
+
+5.2Shell, navigation and URL stateFrontend
+
+Sidebar, top bar, search, notifications, settings, and the seven-dashboard client shell.
+
+- The full route structure — global, client, admin
+- URL-captured state: audience, heatmap view mode and grain, open panel and anchor, Health tab, insight grouping, filters
+- Keyboard navigation and focus management
+- Role-aware navigation: Context and Health hidden for an AE
+
+#### Verification
+
+- Every route is reachable and URL-addressable
+- A drilled-in heatmap state and an open panel both survive a refresh and are shareable
+- Context and Health are absent from an AE's navigation and refused by the API
+
+5.3All 9 global surfacesGlobal
+
+Built here rather than deferred, because several are how an analyst diagnoses a bad ingest and an admin recovers from one.
+
+- G1 Login — Google OIDC, Workspace domain restricted. Always the entry point until signed in.
+- G2 Dashboard — Command centre: active assessments, open alerts, insight cards, average maturity, in-progress runs. Header and KPI counts come from one query.
+- G3 Client directory — Card and table views with maturity, pillar strip, sub-vertical, source badge, open alerts and top platform fit.
+- G4 Global alert dashboard — The corpus-wide thin-evidence queue plus the cross-entity pattern finder and the waived-alert register. Virtualised.
+- G5 Prospecting — Search-first surface producing the customer-safe scorecard export. Empty until a query is entered.
+- G6 Run history — Per-entity run list. The score column must equal the Overview hero ring.
+- G7 Admin — Users and roles, settings and operations. Admin role required.
+- G8 Import & jobs — Ingest job status with a live stream, and the pending-review queue for low-confidence entity inferences.
+- G9 Import audit — Every file seen, classified, excluded or deduplicated, with the rule that fired.
+
+#### Verification
+
+- A headline score in the directory uses its maturity band colour, not a fixed brand colour
+- An untiered entity renders as untiered, not a broken chip
+- Dashboard header and KPI counts come from one query and cannot disagree
+- The alert queue is interactive at corpus scale, with virtualisation active
+- Prospecting renders its search-to-begin state rather than an empty grid
+- The import audit shows every excluded file with the rule that fired
+- Run history's score column equals the Overview hero
+
+Stage 6
+
+# The seven dashboards
+
+All 38 client surfaces, built against promoted data rather than fixtures. Each carries a data-source attribute, because a blank surface is otherwise indistinguishable from a broken one.
+
+Build each surface against its own contract
+Every surface below has a full contract in the Surface Specification: what must be presented, why it is shaped that way, its information-sources table naming the source of truth per field, its synthesis prompt, and the gates asserted against it. Build from that document, not from this table — this one is the schedule.
+
+Five surfaces are confidence instrumentation — O1b, O10 and O11 on the Overview, and Q3 and Q4 on Health. They tell the reader how much to trust everything else on the screen. If they flatter, every other number in the document becomes unfalsifiable. Three rules bind all five: a derived status must follow from a computed input; a percentage must render its denominator; and a threshold is either enforced or it is not a threshold.
+
+6.1D1 · OverviewD1
+
+13 surfaces, reading 12 sections from overview.
+
+ID | Surface | Reads | Component
+
+O1 | Scores & peer benchmarks | overview.scores | ScoreRing
+
+O2 | Firmographics strip | overview.firmographics | ScoreRing inline strip
+
+O3 | Why-now signals | overview.why_now | WhyNowStrip
+
+O4 | Executive summary | overview.exec_summary | SCQACard
+
+O5 | Opportunity surface tiles | overview.opportunity | OpportunitySurfaceStrip
+
+O6 | Top findings | overview.findings | TopFindingsCard
+
+O7 | Leadership panel | overview.leadership | LeadershipPanel
+
+O8 | Financial trajectory | overview.financial_series | FinancialTrajectoryCard
+
+O9 | Sentiment | overview.sentiment | SentimentCard
+
+O10 | Evidence coverage | overview.evidence_coverage | CoverageByPillarCard
+
+O11 | Evidence tier distribution | overview.evidence_coverage | EvidenceTierCard
+
+O1b | Capability ceiling & uncertainty | overview.ceilings | CeilingEstimateCard
+
+O12 | Thought leadership signal | overview.thought_leadership | ThoughtLeadershipPanel
+
+6.2D2 · InsightsD2
+
+2 surfaces, reading 2 sections from insights.
+
+ID | Surface | Reads | Component
+
+I1 | Insight cards | insights.insights | ClientInsights
+
+T2 | Technology landscape strip | insights.landscape | ClientInsights landscape card
+
+6.3D3 · HeatmapD3
+
+5 surfaces, reading 9 sections from heatmap.
+
+ID | Surface | Reads | Component
+
+H4 | Workbook grain scores | heatmap.workbook_scores | PillarHeatmap / CategoryHeatmap / SubcapHeatmap
+
+H1 | Focus areas | heatmap.focus_areas | FocusAreaView + CustomizableKpiStrip
+
+H2 | Cell evidence | heatmap.cell_evidence | SynthesisDrawer source
+
+H6 | Evidence store | heatmap.evidence | EvidenceDrawer source
+
+H9 | Value-chain view | heatmap.value_chain | ValueChainView
+
+6.4D4 · PlatformD4
+
+5 surfaces, reading 5 sections from platform.
+
+ID | Surface | Reads | Component
+
+P1 | Platform fit & story | platform.platform_story | ClientPlatform
+
+P2 | Recommendations | platform.recommendations | ClientPlatform + RecommendationModal
+
+P2b | Conversation starters | platform.starters | ClientPlatform starters card
+
+P3 | Transformation roadmap | platform.roadmap | TransformationRoadmap
+
+P4 | Stair-step curve | platform.stairstep | StairstepCurve
+
+6.5D5 · Context INTERNAL ONLYD5
+
+6 surfaces, reading 5 sections from context.
+
+ID | Surface | Reads | Component
+
+C1 | Digital evolution timeline | context.timeline | InteractiveTimeline + EventDetail
+
+C2 | Issue register & Gantt | context.issue_register | InteractiveGantt + IssueDetail
+
+C3 | Regulatory standing | context.regulatory_standing | ClientContext
+
+C4 | Sentiment overview | context.context_sentiment | SentimentGridInteractive
+
+C5 | Acquisition history | context.acquisitions | ClientContext
+
+C6 | Financial trajectory | overview.financial_series | FinChartInteractive
+
+6.6D6 · Tech stackD6
+
+2 surfaces, reading 1 sections from techstack.
+
+ID | Surface | Reads | Component
+
+T1 | Technology stack register | techstack.techstack | ClientTechStack + TechRow
+
+T3 | Platform detail | techstack.techstack | ClientTechStackDetail
+
+6.7D7 · Health ANALYST ONLYD7
+
+5 surfaces. Four read heatmap-page sections; version diff is derived from the runs table.
+
+ID | Surface | Reads | Component
+
+H3 | Thin-evidence alerts | heatmap.alerts | ClientHealth alerts tab
+
+V1 | Version diff | — | VersionDiff
+
+H5 | Safeguard gates | heatmap.safeguard_gates | ClientHealth gates tab
+
+H7 | Evidence age tracker | heatmap.evidence_age | ClientHealth age tab
+
+H8 | Cross-entity patterns | heatmap.cohort_patterns | ClientHealth patterns tab
+
+## Cross-dashboard verification
+
+- The hero ring, the workbook rollup and the run-history score all render the same number.
+- O8 and C6 render identical financial figures, asserted by test.
+- The landscape strip's four counts sum to the tech-stack register and are recomputed from it.
+- Coverage is computed over the same cell set the heatmap serves.
+- Every alerted cell is one the same payload declared under-evidenced.
+- Every roadmap phase and stair-step step cites a recommendation the same payload describes.
+- No raw taxonomy code appears in any client-visible prose on any dashboard.
+- Every surface declares its data source; no surface renders blank without an empty state.
+- Customer view withholds Context and Health entirely, and the three internal Overview cards.
+
+Stage 7
+
+# Drilldown atlas
+
+15 panels across three shells. One shell is not an overlay at all, which is why an audit that probes the DOM for dialogs reports zero drilldowns on a page full of them.
+
+Shell | Geometry | Panels
+
+Drawer | Right slide-in, z-index 95, 420–480px  | DD-1 Synthesis, DD-2 Evidence
+
+Modal | Centred, z-index 80, 640–820px  | DD-3 Insight, DD-4 Recommendation, DD-5 New run, DD-6 Intelligence panel
+
+Inline expansion | Expands in the document flow, no overlay  | DD-7 Event detail, DD-8 Issue detail, DD-9 Finding expansion, DD-10 Focus area expansion, DD-11 Platform tile expansion, DD-12 Sentiment tile expansion, DD-13 Readiness gate expansion, DD-14 Acquisition expansion, DD-15 Ceiling rationale
+
+## The complete atlas
+
+ID | Shell | Panel | Opens from
+
+DD-1 | drawer | Synthesis | a sub-capability row on the heatmap
+
+DD-2 | drawer | Evidence | any evidence chip, anywhere in the app
+
+DD-3 | modal | Insight | an insight card
+
+DD-4 | modal | Recommendation | a recommendation row
+
+DD-5 | modal | New run | the request-rerun control
+
+DD-6 | modal | Intelligence panel | the Open Intelligence control
+
+DD-7 | inline | Event detail | a timeline event
+
+DD-8 | inline | Issue detail | an issue register row
+
+DD-9 | inline | Finding expansion | a top-findings row
+
+DD-10 | inline | Focus area expansion | a focus area card
+
+DD-11 | inline | Platform tile expansion | a platform fit tile
+
+DD-12 | inline | Sentiment tile expansion | a sentiment context tile
+
+DD-13 | inline | Readiness gate expansion | a prerequisite gate row
+
+DD-14 | inline | Acquisition expansion | an acquisition row
+
+DD-15 | inline | Ceiling rationale | a capability ceiling row
+
+## Deliverables
+
+- All three shells, with focus trapping, escape handling and focus return to the trigger
+- Stacking: the evidence drawer opens above an open modal or synthesis drawer, and closing it returns to the panel beneath rather than orphaning it
+- Every panel renders from data already in the page response — a drilldown never fetches
+- Panel state in the URL, so a drilldown is linkable and survives refresh
+- The four-tab insight modal: argument, evidence, capabilities, action
+- The recommendation modal, with provenance and its dependency map
+- The intelligence panel, context-loaded from the surface that opened it
+
+The synthesis drawer contract
+The cell id, its name, its score and its confidence — all four from the same row, because grain lock is the whole point of this panel. The peer ladder with entity, median and signed delta, all belonging to that cell. Every linked evidence item with tier, claim class, recency, publisher and a verbatim excerpt. And the synthesis, with the count of items it reasoned over printed beside it, computed from the citation array.
+
+## Verification
+
+- All 15 panels open, verified by clicking the trigger the component defines — never by DOM probe.
+- A drawer over a modal stacks correctly, and closing it returns to the modal.
+- No panel issues a network request on open.
+- The synthesis count equals the length of its citation array.
+- An evidence chip on a card with no linked evidence does not render at all, rather than rendering and opening nothing.
+- Every inline expansion is reachable and linkable, and none matches an overlay selector.
+
+Stage 8
+
+# Gates and corpus scanning
+
+AG-nn Analytical
+Inside synthesis, per claim, before anything is emitted On failureThe claim changes or is dropped — the agent's own discipline
+
+SG-nn Safeguard
+At submit — and the results render to the client On failureRecorded and disclosed. Does not block promotion.
+
+ET-nn Enrichment trigger
+During synthesis, to send the agent looking On failureNot a failure — a prompt to enrich
+
+CG-nn Corpus
+At build time, over the exported pack, corpus-wide On failureFails the build
+
+## Deliverables
+
+- The gate registry populated across all four families, with plain-language labels on every client-visible gate
+- Gate results per run, including not-run with a required reason
+- The corpus gate scanner, running in continuous integration and nightly against the exported pack
+- Threshold history with a required reason per change
+- The ratchet: any upward movement in a committed corpus ceiling fails the build
+- Q3 Safeguard gates rendering the results in plain language on Health
+
+Ceilings must be rates, not counts
+A fixed count passes at one corpus size and fails at the next on arithmetic alone, with no defect introduced. And a ceiling set from an acceptance target rather than a measurement fails every build on day one, for defects the build did not introduce — which is how a gate ends up disabled wholesale.
+
+## Initial ceilings — set by measurement, not aspiration
+
+Gate | Asserts
+
+Workbook fidelity | Every served score and peer equals the cell it names; the hero and the run row agree
+
+Metric grain | No category average quoted under a sub-capability's name
+
+Firmographic integrity | No contradictory or contaminated firmographic
+
+Why-now provenance | Every signal is a dated, cited event
+
+Executive synthesis | Client facts outnumber score references
+
+Financial series | Three dated points, or an explicit sparse marker
+
+Insight integrity | No score-predicate openers; no dead cell links
+
+Focus grounding | Quotes are client prose, not machine text
+
+Evidence reach | Evidence reaches the scored cells
+
+Platform distinctiveness | Story, opportunity and narrative are client-specific
+
+Recommendation detail | Panel and roadmap agree; provenance present
+
+Timeline provenance | Every event cited
+
+Issue register | One row per matter; identity fields present
+
+Tech stack register | No service or category shipped as a product
+
+Surface completeness | Every contracted surface exported and rendering — target zero failures
+
+## Verification
+
+- Every client-visible gate has a plain-language label; none renders as a bare code.
+- A gate that could not run reports not-run with a reason, never a default pass.
+- A failing safeguard gate is disclosed and does not block promotion.
+- A branch raising any corpus ceiling fails continuous integration and names the gate.
+- No bare G-number appears in any payload, log or rendered surface.
+
+Stage 9
+
+# Hardening and deployment
+
+9.1Invariant testsTest
+
+One test per invariant, named after the invariant so a failure is self-describing. These carry more weight than unit coverage here, because the failures this system is designed against are cases where the code does exactly what it says and what it says is wrong.
+
+- No backend module imports an inference client
+- The API database role holds no SELECT grant on any staging table
+- Promotion writes all 6 pages or none, verified by an injected writer failure
+- A payload minting an evidence id is rejected
+- A customer response contains no path listed in any internal-only array
+- Every promoted row carries a non-null producer version
+- Committed corpus ceilings are no higher than in the previous commit
+- The section registry, writer registry, serving-table list and surface register reconcile
+- The evidence recogniser is the same compiled object at every call site
+- No serving table contains a vector column — embeddings are never promoted
+- The writer registry is an ordered list and its order is stable across imports, because an unordered promote deadlocks under concurrency
+- V4 abstains and records NOT_RUN when no centroid exists, rather than failing closed
+- A re-promotion after a one-page fix rewrites every serving table and preserves the other pages
+- A read issued during a promotion sees the entire previous run, never a mixture
+- A catalogue load fails if any cell from the prior version is neither bridged nor explicitly retired
+
+The reconciliation test is what prevents a specified surface being unauthorable. Four registries that can drift; one test that asserts they have not.
+
+9.2Rendering testsTest
+
+Assertions against rendered output rather than against the code that produces it — because the defect class here is a field nobody marked, and reading the marking code cannot find a field absent from it.
+
+- All 38 client surfaces and 9 global surfaces render for a fixture run, each with a data-source attribute
+- All 15 drilldowns open by clicking the component's own trigger
+- A drawer stacks above a modal; closing it returns rather than orphaning
+- Customer view withholds Context and Health entirely, asserted on markup
+- The alert queue is interactive at corpus scale
+- Every empty state is a sentence naming what was searched, never an error string
+- Every heatmap view mode and grain transition is reachable and linkable
+
+9.3ObservabilityOps
+
+Seven signals, one of which should page someone.
+
+- Page: a serving row with a null producer version — content reached a serving table without a promotion, which breaks the invariant everything rests on
+- Alert: any foreign-id rejection; any upward ceiling movement
+- Alert: identity quarantines above the corpus rate — a spike usually means one contaminated profile rather than many bad figures
+- Alert: repeated promotion failure on the same blocking page; ingest lag beyond a day; leases repeatedly expiring mid-synthesis
+- Structured logging and distributed tracing across the four services
+
+9.4ProductionDeploy
+
+Three environments, staged rollout, and one operational decision left open.
+
+- Local (seeded fixture run) → staging (anonymised subset, production ceilings) → production
+- Migrations under the migration role as a deploy step
+- Scheduled traversal and the nightly corpus scan
+- Backup verification by actual restore
+- Open: retention for superseded runs and verdicts. The contract requires only that a superseded run stays queryable long enough for the longitudinal surfaces to read across it.
+
+#### Verification
+
+- A restore from backup produces a working instance
+- A staged deploy can be rolled back without a schema rollback
+- Corpus gates run nightly and their results are visible on Health
+
+## Cross-page consistency, before promotion
+
+Each page passes its submission independently, so a contradiction between pages survives every per-page gate. One check runs across all six payloads and is the only thing that catches it.
+
+Reconciles | Assertion
+
+Composite ↔ pillar means | The composite is the mean of the four pillar means, not a flat mean over cells
+
+Hero ↔ grid | Every pillar figure matches to two decimals
+
+Gap rows ↔ served scores | Within 0.05, per cell
+
+Roadmap ↔ recommendations | Every cited id resolves within the payload
+
+Landscape ↔ register | Four counts recomputed, never stored
+
+O8 ↔ C6 | Identical — C6 renders O8's section
+
+Alerts ↔ cell evidence | Every alerted cell is one the payload declared thin
+
+Confidence ↔ evidence count | HIGH confidence is earned by three or more items
+
+Framing ↔ top finding | They name the same constraint
+
+Band words ↔ raw scores | Resolved before display rounding; no unreachable band
+
+## Definition of done
+
+- All 89 tables deployed; the count reconciles with the enumeration.
+- All 12 connector tools implemented, with the documented error taxonomy.
+- All 34 sections have a contract, a writer, a serving table and a renderer.
+- All 38 client surfaces and 9 global surfaces render, each declaring its data source.
+- All 15 drilldowns open, with correct stacking.
+- One real client synthesised end to end in Cowork: every page passing, promoted, rendered, and the customer view verified on rendered output.
+- All twelve invariant tests pass.
+- Corpus gates run in continuous integration with measured ceilings and a working downward ratchet.
+- No inference client anywhere in the deployed application.
+- All four version axes carried and asserted: run, catalogue, producer and contract.
+- A one-page fix re-promotes without re-synthesising the other pages.
+- A promotion mid-session does not change numbers under an open page.
+- Every surface built against its contract in the Surface Specification, not from the schedule table.
+
+The last two checks, and the ones most likely to be skipped
+Verify the customer view on rendered output rather than by reading the code, and verify the drilldowns by clicking the triggers the components define rather than by probing the DOM for overlays. Both shortcuts produce a clean result on a broken app — the first because an unmarked field is invisible to the code that hides fields, the second because the inline expansions match no overlay selector.

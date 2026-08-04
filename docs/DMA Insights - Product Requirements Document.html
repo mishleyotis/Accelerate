@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DMA Insights — Product Requirements Document</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap">
+<style>
+
+/* ─── ZENNIFY TOKEN MAP ──────────────────────────────────────── */
+:root {
+  --z-teal:      #27BBAF;   /* brand teal — headlines, accents     */
+  --z-teal-dark: #185F60;   /* dark teal  — sidebar, dark cards    */
+  --z-teal-mid:  #139F94;   /* accent green — icons, sub-labels    */
+  --z-mint:      #79E2BF;   /* mint — curve, highlight             */
+  --z-ice:       #E8F7F6;   /* ice — card tint, soft bg            */
+  --z-green:     #1C4A4D;   /* dark green — primary body text      */
+  --z-green2:    #1A4D4D;   /* dark teal variant 2                 */
+  --z-lavender:  #F2F4F9;   /* card fill — most common card color  */
+  --z-purple:    #8094C0;   /* eyebrow / caption                   */
+  --z-orange:    #FE9732;   /* accent orange — warnings            */
+  --z-orange-lt: #FFCB99;   /* light orange — Activating level     */
+  --z-gray-bg:   #F5F5F5;   /* light slide background              */
+  --z-gray-sep:  #E5E7EB;   /* separator                           */
+  --z-gray-body: #4A5568;   /* alt body text                       */
+  --z-gray-muted:#6B7280;   /* footnotes, muted                    */
+  --z-white:     #FFFFFF;
+  --z-navy:      #001E48;   /* featured offerings dark             */
+  /* Maturity */
+  --m1: #FFCB99; --m1t: #7C3C00;   /* Activating */
+  --m2: #62D7B8; --m2t: #0D4F3C;   /* Building   */
+  --m3: #27BBAF; --m3t: #FFFFFF;   /* Competing  */
+  --m4: #139F94; --m4t: #FFFFFF;   /* Differentiating */
+  /* Phase colours */
+  --ph0: #735BA1; --ph0-lt: #EDE9FE; --ph0-bd: #C4B5FD;
+  --ph1: #3D81F6; --ph1-lt: #EFF6FF; --ph1-bd: #BFDBFE;
+  --radius: 8px; --radius-lg: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;font-weight:400;font-size:14px;line-height:1.65;background:var(--z-gray-bg);color:var(--z-green);}
+
+/* ─── LAYOUT ─────────────────────────────────────────────────── */
+.shell{display:flex;min-height:100vh;}
+
+/* Sidebar */
+.sb{width:240px;flex-shrink:0;background:var(--z-teal-dark);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sb-head{padding:20px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo{font-size:13px;font-weight:600;color:var(--z-teal);letter-spacing:.1em;text-transform:uppercase;}
+.sb-doc{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;}
+.sb-ver{font-size:10px;color:rgba(255,255,255,.2);margin-top:2px;font-family:'DM Mono',monospace;}
+.sb-grp{padding:14px 10px 2px;}
+.sb-grp-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.22);letter-spacing:.14em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.48);font-size:12px;font-weight:400;transition:all .13s;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.82);}
+.sb-item.on{background:rgba(39,187,175,.16);color:var(--z-teal);}
+.sb-item.ph0{color:rgba(196,181,253,.65);}
+.sb-item.ph0:hover{background:rgba(115,91,161,.12);color:#c4b5fd;}
+.sb-item.ph0.on{background:rgba(115,91,161,.2);color:#c4b5fd;}
+.sb-item.ph1{color:rgba(147,197,253,.65);}
+.sb-item.ph1:hover{background:rgba(61,129,246,.12);color:#93c5fd;}
+.sb-item.ph1.on{background:rgba(61,129,246,.2);color:#93c5fd;}
+.sb-tag{font-size:9px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 5px;min-width:22px;text-align:center;}
+.sb-item.on .sb-tag{background:rgba(39,187,175,.25);color:var(--z-teal);}
+.sb-item.ph0.on .sb-tag{background:rgba(115,91,161,.25);color:#c4b5fd;}
+.sb-item.ph1.on .sb-tag{background:rgba(61,129,246,.25);color:#93c5fd;}
+.sb-foot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.2);}
+
+/* Main */
+.main{flex:1;min-width:0;}
+.topbar{background:var(--z-white);border-bottom:1px solid var(--z-gray-sep);padding:14px 36px;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
+.tb-title{font-size:15px;font-weight:600;color:var(--z-green);}
+.tb-meta{font-size:11px;color:var(--z-gray-muted);}
+.content{padding:36px;max-width:980px;}
+.section{display:none;}
+.section.on{display:block;}
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────── */
+h1{font-size:26px;font-weight:600;color:var(--z-green);letter-spacing:-.018em;line-height:1.2;margin-bottom:6px;}
+.eyebrow{font-size:11px;font-weight:400;color:var(--z-purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+h2{font-size:17px;font-weight:600;color:var(--z-green);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--z-ice);}
+h3{font-size:14px;font-weight:600;color:var(--z-green);margin:20px 0 8px;}
+h4{font-size:13px;font-weight:500;color:var(--z-green2);margin:14px 0 6px;}
+p{color:var(--z-gray-body);line-height:1.75;margin-bottom:10px;}
+.lead{font-size:15px;font-weight:300;color:var(--z-gray-body);line-height:1.85;margin-bottom:22px;max-width:820px;}
+code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--z-lavender);padding:2px 5px;border-radius:4px;color:var(--z-teal-dark);}
+strong{font-weight:600;color:var(--z-green);}
+hr{border:none;border-top:1px solid var(--z-gray-sep);margin:24px 0;}
+
+/* ─── BADGES ─────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap;}
+.b-teal{background:var(--z-ice);color:var(--z-teal-dark);}
+.b-green{background:#D1FAE5;color:#065F46;}
+.b-amber{background:#FEF3C7;color:#92400E;}
+.b-red{background:#FEE2E2;color:#991B1B;}
+.b-gray{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-navy{background:#E0E7FF;color:var(--z-navy);}
+.b-ph0{background:var(--ph0-lt);color:#5B21B6;}
+.b-ph1{background:var(--ph1-lt);color:#1D4ED8;}
+.b-p0{background:#FEE2E2;color:#991B1B;}
+.b-p1{background:#FFEDD5;color:#C2410C;}
+.b-p2{background:var(--z-lavender);color:var(--z-gray-body);}
+.b-new{background:var(--z-teal);color:var(--z-white);font-size:9px;}
+
+/* ─── CALL-OUT BOXES ─────────────────────────────────────────── */
+.callout{border-radius:var(--radius);padding:13px 16px;margin:12px 0;}
+.callout p{margin:0;font-size:13px;line-height:1.7;}
+.co-teal{background:var(--z-ice);border-left:3px solid var(--z-teal);}
+.co-teal p{color:var(--z-teal-dark);}
+.co-orange{background:#FFF7ED;border-left:3px solid var(--z-orange);}
+.co-orange p{color:#7C2D12;}
+.co-dark{background:var(--z-teal-dark);border-left:3px solid var(--z-mint);}
+.co-dark .co-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--z-mint);margin-bottom:5px;}
+.co-dark p{color:rgba(255,255,255,.78);}
+.co-ph0{background:var(--ph0-lt);border-left:3px solid var(--ph0);}
+.co-ph0 p{color:#4C1D95;}
+.co-ph1{background:var(--ph1-lt);border-left:3px solid var(--ph1);}
+.co-ph1 p{color:#1E3A8A;}
+
+/* ─── CARDS ─────────────────────────────────────────────────── */
+.card{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;}
+.card-lav{background:var(--z-lavender);border:none;}
+.card-ice{background:var(--z-ice);border:none;}
+.card-dark{background:var(--z-teal-dark);border:none;color:var(--z-white);}
+.card-title{font-size:14px;font-weight:600;color:var(--z-green);}
+.card-dark .card-title{color:var(--z-white);}
+.card-sub{font-size:12px;color:var(--z-gray-muted);margin-top:2px;}
+.card-dark .card-sub{color:rgba(255,255,255,.45);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+
+/* ─── GRIDS ─────────────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;}
+
+/* ─── PHASE BANNER ───────────────────────────────────────────── */
+.phase-banner{display:flex;gap:0;border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:18px 0;}
+.pb-col{flex:1;padding:18px 16px;}
+.pb-0{background:linear-gradient(135deg,rgba(115,91,161,.07),rgba(115,91,161,.03));}
+.pb-1{background:linear-gradient(135deg,rgba(61,129,246,.07),rgba(61,129,246,.03));}
+.pb-div{width:1px;background:var(--z-gray-sep);}
+.pb-eye{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.pb-0 .pb-eye{color:var(--ph0);}
+.pb-1 .pb-eye{color:var(--ph1);}
+.pb-h{font-size:14px;font-weight:600;color:var(--z-green);margin-bottom:5px;}
+.pb-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;margin-bottom:10px;}
+.pb-li{font-size:12px;color:var(--z-gray-body);line-height:1.8;list-style:none;}
+.pb-li li{display:flex;gap:6px;align-items:flex-start;}
+.pb-0 .pb-li li::before{content:'→';color:var(--ph0);font-weight:600;flex-shrink:0;}
+.pb-1 .pb-li li::before{content:'→';color:var(--ph1);font-weight:600;flex-shrink:0;}
+
+/* ─── FEATURE TABLE ──────────────────────────────────────────── */
+.ft{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.ft th{background:var(--z-teal-dark);color:rgba(255,255,255,.82);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.ft th:first-child{border-radius:6px 0 0 6px;}
+.ft th:last-child{border-radius:0 6px 6px 0;}
+.ft td{padding:9px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.ft tr:last-child td{border-bottom:none;}
+.ft tr:hover td{background:#FAFBFD;}
+.ft .fn{font-weight:600;color:var(--z-green);margin-bottom:2px;}
+.ft .fd{font-size:11px;color:var(--z-gray-muted);}
+
+/* ─── FLOW ───────────────────────────────────────────────────── */
+.flow{display:flex;flex-direction:column;}
+.f-row{display:flex;gap:13px;}
+.f-spine{display:flex;flex-direction:column;align-items:center;}
+.f-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.f-dot-teal{background:var(--z-teal);color:var(--z-white);}
+.f-dot-0{background:var(--ph0);color:var(--z-white);}
+.f-dot-1{background:var(--ph1);color:var(--z-white);}
+.f-line{flex:1;width:2px;min-height:12px;}
+.f-line-teal{background:var(--z-ice);}
+.f-line-0{background:var(--ph0-lt);}
+.f-line-1{background:var(--ph1-lt);}
+.f-body{flex:1;padding-bottom:16px;}
+.f-title{font-size:13px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.f-desc{font-size:12px;color:var(--z-gray-muted);line-height:1.7;}
+.f-sub{background:var(--z-lavender);border-radius:var(--radius);padding:9px 12px;margin-top:7px;}
+.f-sub p{font-size:11px;color:var(--z-gray-body);margin:0;line-height:1.65;}
+
+/* ─── PERSONA CARDS ──────────────────────────────────────────── */
+.personas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0;}
+.persona{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);padding:16px;}
+.p-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin-bottom:10px;}
+.p-name{font-size:13px;font-weight:600;color:var(--z-green);}
+.p-role{font-size:11px;color:var(--z-gray-muted);margin-bottom:8px;}
+.p-desc{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.p-missions{margin-top:10px;padding-top:10px;border-top:1px solid var(--z-lavender);}
+.p-m{font-size:11px;color:var(--z-gray-muted);padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.p-m::before{content:'→';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* ─── DASHBOARD BLOCKS ───────────────────────────────────────── */
+.db{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:16px 0;}
+.db-head{background:var(--z-teal-dark);padding:14px 18px;display:flex;align-items:center;gap:12px;}
+.db-num{width:28px;height:28px;border-radius:8px;background:rgba(39,187,175,.25);color:var(--z-teal);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.db-info{flex:1;}
+.db-title{font-size:14px;font-weight:600;color:var(--z-white);}
+.db-sub{font-size:11px;color:rgba(255,255,255,.38);margin-top:1px;}
+.db-body{padding:18px;}
+.db-desc{font-size:13px;color:var(--z-gray-body);margin-bottom:14px;line-height:1.75;}
+.db-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.db-feat{background:var(--z-lavender);border-radius:var(--radius);padding:10px 12px;}
+.db-ft{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.db-fd{font-size:11px;color:var(--z-gray-muted);line-height:1.6;}
+
+/* ─── TABLES ─────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.tbl th{background:var(--z-teal-dark);color:rgba(255,255,255,.8);padding:8px 11px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.tbl th:first-child{border-radius:6px 0 0 6px;}
+.tbl th:last-child{border-radius:0 6px 6px 0;}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--z-lavender);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafbfd;}
+.tk{color:var(--z-teal-mid);font-weight:600;font-family:'DM Mono',monospace;}
+.tv{color:var(--z-gray-body);}
+
+/* ─── CODE BLOCK ─────────────────────────────────────────────── */
+.code{background:var(--z-teal-dark);border-radius:var(--radius);padding:14px 16px;font-family:'DM Mono',monospace;font-size:11.5px;color:#e2e8f0;overflow-x:auto;margin:10px 0;line-height:1.75;}
+.code .kw{color:#60a5fa;}
+.code .str{color:#6ee7b7;}
+.code .cmt{color:#475569;}
+.code .key{color:#f0abfc;}
+.code .num{color:#fbbf24;}
+
+/* ─── HEATMAP DEMO ───────────────────────────────────────────── */
+.hm-wrap{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.hm-bar{background:var(--z-lavender);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--z-gray-muted);border-bottom:1px solid var(--z-gray-sep);}
+.hm-grid{padding:12px;display:grid;grid-template-columns:88px repeat(8,1fr);gap:3px;}
+.hm-c{height:22px;border-radius:3px;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
+.hm-c:hover{transform:scale(1.1);z-index:1;}
+.hm-label{font-size:10px;color:var(--z-gray-muted);text-align:right;padding-right:8px;display:flex;align-items:center;justify-content:flex-end;}
+.hm-ch{font-size:9px;color:var(--z-gray-muted);text-align:center;display:flex;align-items:flex-end;justify-content:center;height:22px;}
+.m1s{background:#FFCB99;color:#7C3C00;}
+.m2s{background:#B0EDD3;color:#0D4F3C;}
+.m3s{background:#27BBAF;color:#fff;}
+.m4s{background:#139F94;color:#fff;}
+.m5s{background:#185F60;color:#fff;}
+.thin{outline:2px dashed #C25008;outline-offset:1px;}
+
+/* ─── MATURITY PILLS ─────────────────────────────────────────── */
+.m-legend{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.m-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+
+/* ─── ARTIFACT CARDS ─────────────────────────────────────────── */
+.art-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+.art{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.art-head{padding:9px 13px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
+.art-body{padding:10px 13px;}
+.art-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--z-lavender);font-size:11px;}
+.art-row:last-child{border-bottom:none;}
+.art-k{color:var(--z-gray-muted);}
+.art-v{color:var(--z-gray-body);}
+.ah-doc{background:var(--z-ice);color:var(--z-teal-dark);}
+.ah-xlsx{background:#D1FAE5;color:#065F46;}
+.ah-json{background:#FEF3C7;color:#92400E;}
+.ah-zip{background:var(--ph0-lt);color:#5B21B6;}
+
+/* ─── DEDUP ──────────────────────────────────────────────────── */
+.dd-group{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:10px 0;overflow:hidden;}
+.dd-head{background:var(--z-lavender);padding:8px 13px;font-size:12px;font-weight:600;color:var(--z-green);display:flex;align-items:center;gap:8px;}
+.dd-file{display:flex;align-items:center;gap:10px;padding:8px 13px;border-top:1px solid var(--z-lavender);font-size:12px;}
+.dd-name{flex:1;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--z-gray-body);}
+.dd-date{font-size:10px;color:var(--z-gray-muted);}
+.win{background:#F0FDF4;}
+.win .dd-name{color:var(--z-green);font-weight:500;}
+.lose .dd-name{text-decoration:line-through;color:var(--z-gray-muted);}
+
+/* ─── API ENDPOINTS ──────────────────────────────────────────── */
+.ep{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;}
+.method{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 6px;border-radius:3px;font-family:'DM Mono',monospace;flex-shrink:0;}
+.mget{background:#DBEAFE;color:#1E40AF;}
+.mpost{background:#D1FAE5;color:#065F46;}
+.mput{background:#FFEDD5;color:#C2410C;}
+.ep-path{font-family:'DM Mono',monospace;font-size:12px;color:var(--z-green);font-weight:500;}
+.ep-desc{font-size:11px;color:var(--z-gray-muted);margin-top:1px;}
+
+/* ─── CHECKLIST ──────────────────────────────────────────────── */
+.chk{list-style:none;font-size:13px;}
+.chk li{padding:4px 0;display:flex;gap:8px;align-items:flex-start;}
+.chk li::before{content:'✓';color:var(--z-teal);font-weight:700;flex-shrink:0;margin-top:1px;}
+.chk-x li::before{content:'✗';color:#DC2626;}
+
+/* ─── PLATFORM CHIPS ─────────────────────────────────────────── */
+.plat{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;border:1px solid;}
+.pl-sf{background:#E0F4FC;color:#005C82;border-color:#B8E4F5;}
+.pl-db{background:#FFF0EE;color:#9B1A08;border-color:#FFD0C9;}
+.pl-tbl{background:#FFF3E8;color:#7A3C00;border-color:#FFD9B0;}
+.pl-tw{background:#FFEEF0;color:#8B0012;border-color:#FFCCD1;}
+.pl-nc{background:#E8EEF8;color:#1B5298;border-color:#C5D4EE;}
+
+/* ─── STAT CARDS ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+.stat{background:var(--z-lavender);border-radius:var(--radius-lg);padding:16px 14px;}
+.stat-num{font-size:28px;font-weight:600;color:var(--z-teal);line-height:1;}
+.stat-label{font-size:12px;font-weight:500;color:var(--z-green);margin-top:4px;}
+.stat-desc{font-size:11px;color:var(--z-gray-muted);margin-top:4px;line-height:1.5;}
+
+/* ─── INSIGHT CARD DEMO ──────────────────────────────────────── */
+.ic{background:var(--z-white);border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;margin:10px 0;}
+.ic-head{background:var(--z-teal-dark);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ic-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--z-teal);}
+.ic-body{padding:0;}
+.ic-row{display:grid;grid-template-columns:72px 1fr;gap:10px;padding:9px 14px;border-bottom:1px solid var(--z-lavender);}
+.ic-row:last-child{border-bottom:none;}
+.ic-label{font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--z-gray-muted);padding-top:2px;}
+.ic-text{font-size:12px;color:var(--z-gray-body);line-height:1.65;}
+
+/* SCOPE TABLE */
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media(max-width:768px){.sb{display:none;}.personas,.stats,.g3{grid-template-columns:1fr;}.g2,.db-grid,.art-grid,.scope-grid{grid-template-columns:1fr;}.phase-banner{flex-direction:column;}}
+
+
+/* ─── v4.0 ADDITIONS ─────────────────────────────────────────── */
+.b-mcp{background:#EDE9FE;color:#5B21B6;}
+.b-gate{background:#E0F2FE;color:#075985;}
+.b-serv{background:#D1FAE5;color:#065F46;}
+.b-stage{background:#FEF3C7;color:#92400E;}
+.b-ing{background:#E0E7FF;color:#3730A3;}
+.b-none{background:var(--z-lavender);color:var(--z-gray-muted);font-style:italic;}
+.b-mono{font-family:'DM Mono',monospace;font-weight:500;letter-spacing:0;}
+
+
+/* Decision register */
+.dec{border:1px solid var(--z-gray-sep);border-left:3px solid var(--z-purple);
+  border-radius:var(--radius);padding:13px 16px;margin:10px 0;background:var(--z-white);}
+.dec-h{display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap;}
+.dec-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-purple);}
+.dec-t{font-size:13px;font-weight:600;color:var(--z-green);}
+.dec-b{font-size:12px;color:var(--z-gray-body);line-height:1.7;}
+.dec-b p{font-size:12px;margin:0 0 6px;}
+.dec-b p:last-child{margin-bottom:0;}
+.dec-why{background:var(--z-lavender);border-radius:6px;padding:8px 11px;margin-top:8px;
+  font-size:11px;color:var(--z-gray-body);line-height:1.65;}
+.dec-why b{color:var(--z-green);}
+
+/* Boundary / invariant rules — the hard statements */
+.rule{background:var(--z-teal-dark);border-radius:var(--radius);padding:12px 16px;margin:12px 0;}
+.rule p{color:#fff;font-size:12.5px;font-weight:500;margin:0;line-height:1.7;}
+.rule .rule-lbl{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--z-mint);margin-bottom:5px;}
+
+/* Tier ladder */
+.tier-row{display:grid;grid-template-columns:44px 1fr 62px 60px;gap:10px;align-items:center;
+  padding:7px 11px;border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.tier-row:last-child{border-bottom:none;}
+.tier-n{font-family:'DM Mono',monospace;font-weight:600;font-size:11px;padding:3px 0;
+  text-align:center;border-radius:4px;}
+.t1{background:#065F46;color:#fff;} .t2{background:#059669;color:#fff;}
+.t3{background:#27BBAF;color:#fff;} .t4{background:#FE9732;color:#7C3C00;}
+.t5{background:#FEE2E2;color:#991B1B;}
+.tier-w{font-family:'DM Mono',monospace;color:var(--z-gray-muted);text-align:right;}
+.tier-c{font-family:'DM Mono',monospace;color:var(--z-teal-mid);font-weight:600;text-align:right;}
+
+/* Gate family cards */
+.gfam{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
+.gf{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);overflow:hidden;}
+.gf-h{padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.gf-p{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
+.gf-b{padding:11px 13px;font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+.gf-b .gf-k{color:var(--z-gray-muted);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;display:block;margin-top:7px;margin-bottom:2px;}
+.gf-ag .gf-h{background:var(--z-ice);color:var(--z-teal-dark);}
+.gf-sg .gf-h{background:#FFF7ED;color:#7C2D12;}
+.gf-et .gf-h{background:var(--ph0-lt);color:#5B21B6;}
+.gf-cg .gf-h{background:var(--ph1-lt);color:#1D4ED8;}
+
+/* MCP tool cards */
+.tool{display:grid;grid-template-columns:190px 1fr;gap:12px;padding:9px 12px;
+  border:1px solid var(--z-gray-sep);border-radius:var(--radius);margin-bottom:6px;
+  background:var(--z-white);}
+.tool-n{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;color:var(--z-teal-dark);}
+.tool-g{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--z-gray-muted);
+  margin-top:2px;}
+.tool-d{font-size:11.5px;color:var(--z-gray-body);line-height:1.65;}
+
+/* Pipeline / lifecycle strip */
+.pipe{display:flex;align-items:stretch;gap:0;margin:14px 0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;}
+.pipe-s{flex:1;padding:12px 13px;border-right:1px solid var(--z-gray-sep);}
+.pipe-s:last-child{border-right:none;}
+.pipe-n{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--z-purple);margin-bottom:4px;}
+.pipe-t{font-size:12px;font-weight:600;color:var(--z-green);margin-bottom:3px;}
+.pipe-d{font-size:10.5px;color:var(--z-gray-muted);line-height:1.6;}
+.pipe-s.hot{background:var(--z-ice);}
+.pipe-s.cold{background:var(--z-lavender);}
+
+/* Schema column rows (backend schema doc) */
+.schema{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);
+  overflow:hidden;margin:12px 0;}
+.sch-h{background:var(--z-teal-dark);padding:9px 14px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.sch-n{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--z-teal);}
+.sch-s{font-size:10.5px;color:rgba(255,255,255,.45);}
+.sch-b{padding:2px 0;}
+.col{display:grid;grid-template-columns:210px 128px 58px 1fr;gap:9px;padding:6px 14px;
+  border-bottom:1px solid var(--z-lavender);font-size:11px;align-items:baseline;}
+.col:last-child{border-bottom:none;}
+.col-name{font-family:'DM Mono',monospace;font-weight:500;color:var(--z-green);}
+.col-type{font-family:'DM Mono',monospace;font-size:10px;color:var(--z-teal-mid);}
+.col-pk{font-size:8.5px;font-weight:700;letter-spacing:.05em;color:var(--z-purple);}
+.col-desc{color:var(--z-gray-muted);line-height:1.6;font-size:10.5px;}
+
+/* Count reconciliation */
+.count{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:6px 12px;
+  border-bottom:1px solid var(--z-lavender);font-size:11.5px;}
+.count:last-of-type{border-bottom:2px solid var(--z-teal);}
+.count-v{font-family:'DM Mono',monospace;font-weight:600;color:var(--z-green);text-align:right;}
+.count-tot{display:grid;grid-template-columns:1fr 66px;gap:8px;padding:8px 12px;
+  font-size:12px;font-weight:600;color:var(--z-green);}
+.count-tot .count-v{color:var(--z-teal-mid);}
+
+/* Step cards (implementation plan) */
+.step{border:1px solid var(--z-gray-sep);border-radius:var(--radius-lg);margin:12px 0;
+  overflow:hidden;}
+.step-h{background:var(--z-lavender);padding:10px 14px;display:flex;align-items:center;
+  gap:10px;flex-wrap:wrap;}
+.step-id{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--z-teal-dark);
+  background:var(--z-white);border-radius:4px;padding:2px 7px;}
+.step-t{font-size:13px;font-weight:600;color:var(--z-green);flex:1;}
+.step-b{padding:13px 15px;}
+.step-b p{font-size:12px;}
+.deliv{list-style:none;font-size:11.5px;margin:8px 0;}
+.deliv li{padding:3px 0;display:flex;gap:7px;align-items:flex-start;color:var(--z-gray-body);
+  line-height:1.6;}
+.deliv li::before{content:'▸';color:var(--z-teal);font-weight:700;flex-shrink:0;}
+
+/* Dependency / ordering note */
+.dep{font-size:10.5px;color:var(--z-gray-muted);background:var(--z-lavender);
+  border-radius:5px;padding:6px 10px;margin-top:8px;display:inline-block;}
+.dep b{color:var(--z-teal-dark);}
+
+/* Two-column compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--z-gray-sep);
+  border-radius:var(--radius-lg);overflow:hidden;margin:12px 0;}
+.cmp-c{padding:14px 16px;}
+.cmp-c:first-child{background:#FFF7ED;border-right:1px solid var(--z-gray-sep);}
+.cmp-c:last-child{background:#F0FDF4;}
+.cmp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:7px;}
+.cmp-c:first-child .cmp-l{color:#C2410C;}
+.cmp-c:last-child .cmp-l{color:#065F46;}
+.cmp-c ul{list-style:none;font-size:11.5px;line-height:1.75;color:var(--z-gray-body);}
+.cmp-c li{padding:2px 0;display:flex;gap:6px;align-items:flex-start;}
+.cmp-c:first-child li::before{content:'✗';color:#DC2626;font-weight:700;flex-shrink:0;}
+.cmp-c:last-child li::before{content:'✓';color:#059669;font-weight:700;flex-shrink:0;}
+
+.tbl td code, .ft td code{font-size:10.5px;padding:1px 4px;}
+.tbl .num, .ft .num{font-family:'DM Mono',monospace;text-align:right;color:var(--z-green);}
+.nowrap{white-space:nowrap;}
+.muted{color:var(--z-gray-muted);}
+.small{font-size:11px;}
+h2 .delta, h3 .delta{vertical-align:middle;margin-left:8px;}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">Zennify</div>
+    <div class="sb-doc">DMA Insights · PRD</div>
+    <div class="sb-ver">August 2026</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Product</div>
+    <div class="sb-item on" onclick="go('s01')"><span class="sb-tag">01</span> Product overview</div>
+    <div class="sb-item" onclick="go('s02')"><span class="sb-tag">02</span> Problem statement</div>
+    <div class="sb-item" onclick="go('s03')"><span class="sb-tag">03</span> Personas &amp; roles</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(196,181,253,.3)">Synthesis</div>
+    <div class="sb-item ph0" onclick="go('s04')"><span class="sb-tag">04</span> The synthesis model</div>
+    <div class="sb-item ph0" onclick="go('s13')"><span class="sb-tag">13</span> Ingest &amp; entity resolution</div>
+    <div class="sb-item ph0" onclick="go('s14')"><span class="sb-tag">14</span> Lifecycle &amp; persistence</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Surfaces</div>
+    <div class="sb-item" onclick="go('s05')"><span class="sb-tag">05</span> Dashboard architecture</div>
+    <div class="sb-item" onclick="go('s06')"><span class="sb-tag">06</span> Surface register</div>
+    <div class="sb-item" onclick="go('s07')"><span class="sb-tag">07</span> Drilldown atlas</div>
+    <div class="sb-item" onclick="go('s08')"><span class="sb-tag">08</span> Insight cards</div>
+    <div class="sb-item" onclick="go('s09')"><span class="sb-tag">09</span> Heatmap &amp; platform</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label" style="color:rgba(147,197,253,.3)">Integrity</div>
+    <div class="sb-item ph1" onclick="go('s10')"><span class="sb-tag">10</span> Evidence &amp; citation</div>
+    <div class="sb-item ph1" onclick="go('s11')"><span class="sb-tag">11</span> Gates &amp; disclosure</div>
+    <div class="sb-item ph1" onclick="go('s12')"><span class="sb-tag">12</span> Audience model</div>
+  </div>
+  <div class="sb-grp">
+    <div class="sb-grp-label">Operations</div>
+    <div class="sb-item" onclick="go('s15')"><span class="sb-tag">15</span> Rerun intelligence</div>
+    <div class="sb-item" onclick="go('s16')"><span class="sb-tag">16</span> Success metrics</div>
+    <div class="sb-item" onclick="go('s18')"><span class="sb-tag">18</span> Versioning</div>
+    <div class="sb-item" onclick="go('s19')"><span class="sb-tag">19</span> Persistence &amp; sessions</div>
+    <div class="sb-item" onclick="go('s17')"><span class="sb-tag">20</span> Scope</div>
+  </div>
+  <div class="sb-foot">© 2026 Zennify · Confidential</div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="tb-title">01 — Product overview</div>
+      <div class="tb-meta">DMA Insights · Product Requirements Document</div>
+    </div>
+    <div style="display:flex;gap:7px;align-items:center"><span class="badge b-teal">PRD</span><span class="badge b-mcp">MCP connector</span><span class="badge b-serv">47 surfaces</span></div>
+  </div>
+  <div class="content">
+
+<div id="s01" class="section on">
+
+<div class="eyebrow">Product Requirements Document</div>
+<h1>DMA Insights</h1>
+<p class="lead">An intelligence workspace that turns a completed Digital Maturity Assessment into
+47 interrogable surfaces an account executive can walk into a client meeting
+with. Every sentence it displays was written, cited, validated and persisted before the page was opened.
+The application performs no reasoning at request time.</p>
+
+<div class="callout co-dark">
+  <div class="co-label">Core thesis</div>
+  <p>A DMA produces hundreds of scored cells, hundreds of evidence items, insight cards, issue registers,
+  peer benchmarks, financial trajectories and platform opportunity maps. Under a fifth of it reaches an AE.
+  The rest sits in a forty-to-eighty page report and a scoring workbook. This product surfaces the
+  remainder — selectively, with every number traceable to the cell it came from, and with an honest empty
+  state wherever the evidence genuinely is not there.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">38</div><div class="stat-label">client surfaces</div>
+    <div class="stat-desc">Across seven dashboards, plus 9 global surfaces.</div></div>
+  <div class="stat"><div class="stat-num">34</div><div class="stat-label">payload sections</div>
+    <div class="stat-desc">Each synthesised, validated and promoted into one serving table.</div></div>
+  <div class="stat"><div class="stat-num">15</div><div class="stat-label">drilldowns</div>
+    <div class="stat-desc">Three shells. Every one renders from data the page already carries.</div></div>
+</div>
+
+<h2>How the product works</h2>
+<div class="pipe">
+  <div class="pipe-s cold"><div class="pipe-n">Upstream</div><div class="pipe-t">The assessment</div>
+    <div class="pipe-d">A DMA run produces a report, a scoring workbook, an evidence index and a package
+    of structured files. Unchanged by this product.</div></div>
+  <div class="pipe-s cold"><div class="pipe-n">Ingest</div><div class="pipe-t">Package parser</div>
+    <div class="pipe-d">Discovers the folder, classifies artefacts, resolves the entity, parses into a
+    read-only tier the synthesis agent can read.</div></div>
+  <div class="pipe-s hot"><div class="pipe-n">Synthesis</div><div class="pipe-t">Claude Cowork</div>
+    <div class="pipe-d">An agent reads the bundle through the MCP connector, reasons, enriches, cites,
+    writes every surface, submits page by page, repairs against verdicts.</div></div>
+  <div class="pipe-s hot"><div class="pipe-n">Promotion</div><div class="pipe-t">MCP connector</div>
+    <div class="pipe-d">One atomic write across all 6 pages. Nothing renders before it; nothing
+    is half-new after it.</div></div>
+  <div class="pipe-s"><div class="pipe-n">Serving</div><div class="pipe-t">The web app</div>
+    <div class="pipe-d">Pure reads. No reasoning, no model, no synthesis at request time.</div></div>
+</div>
+
+<p>The separation is the central product decision. Everything expensive, slow and fallible happens once,
+ahead of time, in an environment where a failure is catchable and repairable against a structured verdict.
+Everything an AE does at twenty to nine before a nine o'clock meeting is a database read.</p>
+
+<div class="rule">
+  <div class="rule-lbl">The sentence the whole architecture follows from</div>
+  <p>The app never calls a model. Content arrives as a validated payload over the MCP connector and is
+  written to the serving tables by promotion. This is what makes the product fast, cheap and reproducible —
+  and what turns a hallucination into a build-time failure a verdict can name, rather than a runtime
+  surprise a client discovers.</p>
+</div>
+
+<h2>Who it serves</h2>
+<p>Internal, and it stays internal. Zennify account executives preparing for and sitting in client
+conversations; delivery analysts who ran the assessment and own its quality; and practice leads who read
+across the corpus. A client sees output from it — a redacted view, an exported scorecard — but never the
+tool itself.</p>
+
+<h2>What it is not</h2>
+<ul class="chk chk-x">
+  <li>Not a replacement for the assessment engine. It consumes assessments; it does not perform them.</li>
+  <li>Not a scoring tool. Nothing here assigns a maturity level. Scores are read from the workbook and
+  never re-derived.</li>
+  <li>Not a research tool. No live scraping, no request-time search. Enrichment happens during
+  synthesis.</li>
+  <li>Not a chat interface. There is no prompt box, because the reasoning already happened.</li>
+</ul>
+
+</div>
+<div id="s02" class="section">
+
+<div class="eyebrow">Section 02</div>
+<h1>Problem statement</h1>
+<p class="lead">Two problems sit on top of each other. The first is that rich assessment output does not
+reach its audience. The second is that when it does, it has to survive being challenged — and six specific
+defect classes determine whether it does.</p>
+
+<h2>The assessment does not reach its audience</h2>
+
+<h3>The static artefact problem</h3>
+<p>Every completed DMA writes documents and workbooks to Drive. Reaching one finding means opening a
+forty-to-eighty page report and interpreting tables without context. The report alone carries twelve
+structured sections: an SCQA executive summary, trend analysis, an issue register with a timeline, four
+pillar deep-dives, benchmark comparison, gap prioritisation, recommendations with root-cause analysis, a
+transformation roadmap, data gaps and a full evidence registry. None of it is searchable, filterable or
+cross-referenceable.</p>
+
+<h3>The evidence depth problem</h3>
+<p>Each score is backed by evidence carrying a quality tier, a rank score, a claim class, a source URL and
+a verbatim excerpt. The insight cards — each structured as what, why and so what — are the most
+commercially useful analysis in the engagement, and they are rows in a table on page twenty.</p>
+
+<h3>The platform recommendation problem</h3>
+<p>Recommendations name platforms: Agentforce, Data Cloud, Mosaic AI, Tableau Next, Twilio Engage, nCino.
+Each gap maps to platform areas and features in the capability catalogue. Today that is prose, with no way
+to filter by platform or see every gap a platform addresses.</p>
+
+<h3>The rerun quality problem</h3>
+<p>A rerun has no memory of where the prior run was thin. Cells with fewer than three evidence items get no
+special attention, and proxy searches that were never attempted are not recorded. Reruns reproduce the same
+gaps.</p>
+
+<h3>The version coherence problem</h3>
+<p>Runs accumulate with no comparison mechanism. Asking whether a pillar improved means opening two
+workbooks and comparing rows by hand.</p>
+
+<h2>Six defect classes that determine whether it survives a client</h2>
+<p>Each is closed by a specific mechanism rather than by review discipline. The pattern worth naming: every
+one is a contract that existed in someone's head rather than in a file. None would have been caught by more
+careful reading, because the fifth reader reads the same undocumented assumption as the first.</p>
+
+<table class="tbl">
+<tr><th style="width:140px">Defect class</th><th>What it looks like</th><th>Closed by</th></tr>
+<tr><td><strong>Grain</strong></td>
+    <td>A quoted score names a different cell than the one it came from — a sub-capability's name beside a
+    category's mean.</td>
+    <td>Grain lock at submit: resolve the label to a served cell, require agreement within 0.05.
+    <span class="badge b-gate">blocking</span></td></tr>
+<tr><td><strong>Identity</strong></td>
+    <td>One entity's overview carrying another institution's assets, regulator and footprint — one root
+    cause visible on five surfaces at once.</td>
+    <td>An identity gate on every figure, quote, document and source domain.
+    <span class="badge b-gate">blocking</span></td></tr>
+<tr><td><strong>Citation</strong></td>
+    <td>Enrichment-minted ids served having passed no citation check, because no module's pattern could see
+    the mint namespace.</td>
+    <td>One recogniser in one module, with a test asserting identity of the compiled object at every call
+    site.</td></tr>
+<tr><td><strong>Bounds</strong></td>
+    <td>An evidence rank score rendering below the floor of its own scale.</td>
+    <td>Server-computed, bounded, and quarantined outside the range.</td></tr>
+<tr><td><strong>Derived values</strong></td>
+    <td>An age column reading as uncomputable while the status beside it reads fresh.</td>
+    <td>Computed or null, never a sentinel. Status follows band, band follows age, age follows a real
+    date.</td></tr>
+<tr><td><strong>Coverage</strong></td>
+    <td>Rendered surfaces with no payload route, so nothing can author them even though they are
+    specified.</td>
+    <td>A complete section set, reconciled by test against the rendered surface register.</td></tr>
+</table>
+
+<div class="callout co-orange">
+  <p><strong>Why these matter more than they look.</strong> An AE is challenged on exactly one thing in a
+  client meeting: where a number came from. A product that answers that instantly and correctly is worth
+  more than one that presents more analysis. Every mechanism above exists to protect that single moment.</p>
+</div>
+
+</div>
+<div id="s03" class="section">
+
+<div class="eyebrow">Section 03</div>
+<h1>Personas and roles</h1>
+
+<div class="personas">
+  <div class="persona">
+    <div class="p-av" style="background:var(--z-ice);color:var(--z-teal-dark)">AE</div>
+    <div class="p-name">The account executive</div>
+    <div class="p-role">Primary user · reads before a meeting</div>
+    <p class="p-desc">Has twenty minutes and a nine o'clock call. Needs the one number that frames the
+    conversation, the named capability behind it, and something true and specific to open with. Will be
+    challenged on where a figure came from and must survive that.</p>
+    <div class="p-missions">
+      <div class="p-m">What is true about this client, and what do I lead with?</div>
+      <div class="p-m">Where does that number come from — shown, not asserted.</div>
+      <div class="p-m">What do I say out loud, in words I would actually use.</div>
+    </div>
+  </div>
+  <div class="persona">
+    <div class="p-av" style="background:var(--ph0-lt);color:#5B21B6">AN</div>
+    <div class="p-name">The delivery analyst</div>
+    <div class="p-role">Owns assessment quality</div>
+    <p class="p-desc">Ran the assessment and is accountable for it. Needs to see where evidence is thin,
+    which gates failed and why, which cells are capped by tier misclassification, and what the next run
+    should go and find.</p>
+    <div class="p-missions">
+      <div class="p-m">Which cells are under-evidenced, and what would close them?</div>
+      <div class="p-m">Did anything fail a gate, and is it disclosed rather than hidden?</div>
+      <div class="p-m">What changed since the last run, and did a recommendation land?</div>
+    </div>
+  </div>
+  <div class="persona">
+    <div class="p-av" style="background:var(--ph1-lt);color:#1D4ED8">PL</div>
+    <div class="p-name">The practice lead</div>
+    <div class="p-role">Reads across the corpus</div>
+    <p class="p-desc">Not interested in one client. Wants the pattern: which categories are structurally
+    weak across a sub-vertical, where platform opportunity concentrates, and whether assessment quality is
+    improving run over run.</p>
+    <div class="p-missions">
+      <div class="p-m">What is systematically true across this sub-vertical?</div>
+      <div class="p-m">Where does opportunity concentrate, and how confident are we?</div>
+      <div class="p-m">Is the corpus improving, or has the gate simply loosened?</div>
+    </div>
+  </div>
+</div>
+
+<h2>Roles and what they gate</h2>
+<table class="tbl">
+<tr><th style="width:110px">Role</th><th>Reaches</th><th>Cannot</th></tr>
+<tr><td><span class="badge b-teal">AE</span></td>
+    <td>Overview, Insights, Heatmap, Platform and Tech stack in either audience. All drilldowns, evidence
+    drawers and exports.</td>
+    <td>Reach Context or Health. Resolve alerts. Trigger a synthesis run.</td></tr>
+<tr><td><span class="badge b-ph0">ANALYST</span></td>
+    <td>Everything the AE reaches, plus Context and Health — the thin-evidence queue, gate results with
+    reasons, the evidence age tracker, cross-entity patterns and version diff.</td>
+    <td>Manage users, reload the catalogue or administer imports.</td></tr>
+<tr><td><span class="badge b-navy">ADMIN</span></td>
+    <td>Everything, plus user management, import administration, the import audit and catalogue version
+    control.</td>
+    <td>Write content. Nothing writes a serving table except a promotion.</td></tr>
+</table>
+
+<div class="callout co-teal">
+  <p>There is a fourth reader who never signs in: <strong>the client</strong>. The customer view is a
+  redaction contract driven by payload marking, not a layout preference. Two whole dashboards — Context and
+  Health — are withheld from it entirely.</p>
+</div>
+
+</div>
+<div id="s04" class="section">
+
+<div class="eyebrow">Section 04</div>
+<h1>The synthesis model</h1>
+<p class="lead">Content is produced by an agent running in Claude Cowork, connected to the application
+through the DMA Insights MCP connector. The connector is the only writable boundary into anything the
+product serves.</p>
+
+<div class="code"><span class="cmt">┌─ CLAUDE COWORK ───────────────────────────────────────────────────────┐</span>
+<span class="cmt">│</span>  A synthesis agent running the DMA surface-production skill.          <span class="cmt">│</span>
+<span class="cmt">│</span>  Reads the assessment. Reasons over it. Searches for what would       <span class="cmt">│</span>
+<span class="cmt">│</span>  refute it. Enriches where evidence is thin. Writes every sentence    <span class="cmt">│</span>
+<span class="cmt">│</span>  the product will display, and cites all of it.                       <span class="cmt">│</span>
+<span class="cmt">└───────────────────────────────┬───────────────────────────────────────┘</span>
+                                <span class="cmt">│</span>  DMA Insights MCP connector · 12 tools
+                                <span class="cmt">│</span>  read:  bundle · contract · catalogue · evidence · state
+                                <span class="cmt">│</span>  write: register_evidence · submit_page_payload · promote_run
+                                <span class="kw">▼</span>
+<span class="cmt">┌───────────────────────────────────────────────────────────────────────┐</span>
+<span class="cmt">│</span>  THE APPLICATION       validates → stages → promotes → serves         <span class="cmt">│</span>
+<span class="cmt">└───────────────────────────────────────────────────────────────────────┘</span></div>
+
+<div class="rule">
+  <div class="rule-lbl">Claude Cowork and Claude Code are different things in this system</div>
+  <p><strong>Claude Cowork</strong> is where synthesis runs: an agent reads the assessment through the MCP
+  connector and writes the content the product serves. <strong>Claude Code</strong> is where the application
+  itself is built, and it never touches client content. They are separate trust boundaries and the documents
+  keep them apart.</p>
+</div>
+
+<h2>Why synthesis happens in Cowork</h2>
+<table class="tbl">
+<tr><th style="width:230px">Property</th><th>What it buys</th></tr>
+<tr><td><strong>It is agentic and multi-step</strong></td>
+    <td>Producing one client means reading a bundle, resolving a catalogue, reasoning across
+    34 sections, running enrichment searches, registering sources, submitting, reading verdicts
+    and repairing. That is a long-running task with many tool calls, not a single completion.</td></tr>
+<tr><td><strong>It can search</strong></td>
+    <td>Enrichment is the highest-value work on any surface. A cell with two evidence items and a successful
+    search becomes a cited cell; the same cell without one becomes a thin-evidence alert.</td></tr>
+<tr><td><strong>It is separable from the app</strong></td>
+    <td>The deployed application carries no inference dependency, no model credential, no token cost and no
+    latency budget for reasoning. Its compliance surface shrinks to reads.</td></tr>
+<tr><td><strong>It fails where failure is cheap</strong></td>
+    <td>A grain violation caught at submit is repaired in the same session. The same violation discovered
+    in a client meeting is not repairable at all.</td></tr>
+</table>
+
+<h2>Enrichment: Clay</h2>
+<p>Clay closes the evidence gaps public search cannot. It runs during synthesis, immediately
+after the package is read and before the pages that consume it, because enrichment is
+asynchronous and the surfaces that need it come last.</p>
+
+<table class="ft">
+<tr><th style="width:56px">Surface</th><th style="width:170px">Provides</th><th>Data point</th><th style="width:80px">Tier</th></tr>
+<tr><td class="tk">O7</td><td><strong>Leadership</strong></td><td class="small">find-and-enrich-contacts-at-company — <code>filtered contact rows</code></td><td class="small">—</td></tr><tr><td class="tk">O12</td><td><strong>Thought leadership</strong></td><td class="small">add-contact-data-points — <code>Find Thought Leadership</code></td><td class="small">T2–T3</td></tr><tr><td class="tk">O2</td><td><strong>Firmographics</strong></td><td class="small">add-company-data-points — <code>Annual Revenue · Headcount Growth</code></td><td class="small">T1–T2</td></tr><tr><td class="tk">T1</td><td><strong>Technology stack</strong></td><td class="small">add-company-data-points — <code>Tech Stack</code></td><td class="small">T1</td></tr><tr><td class="tk">O3</td><td><strong>Why-now signals</strong></td><td class="small">add-company-data-points — <code>Recent News · Latest Funding · Open Jobs</code></td><td class="small">T2–T3</td></tr><tr><td class="tk">C5</td><td><strong>Acquisitions</strong></td><td class="small">add-company-data-points — <code>Recent News + Custom</code></td><td class="small">T3</td></tr><tr><td class="tk">P1</td><td><strong>Platform readiness</strong></td><td class="small">add-company-data-points — <code>Open Jobs — the demand signal</code></td><td class="small">T2–T3</td></tr><tr><td class="tk">O7</td><td><strong>Tenure and trajectory</strong></td><td class="small">add-contact-data-points — <code>Summarize Work History</code></td><td class="small">T3</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">Three rules that matter more than the call sequence</div>
+  <p><strong>Cite the source, not the tool.</strong> A value Clay surfaced is evidence because
+  of the filing behind it, not because it arrived through an API — a value with no traceable
+  source is an inference and is labelled one. <strong>Never record an absence from a Clay call
+  without polling first</strong>; the search response carries base fields only, so an empty
+  leadership panel written before the poll resolved is an unfinished call rendered as a
+  finding. And <strong>enrichment is a budget, not a blank cheque</strong> — a technographic
+  scan is worth its credits, enriching the whole org chart is not.</p>
+</div>
+
+<table class="tbl">
+<tr><th style="width:70px">Per run</th><th style="width:230px">Call</th><th>Scope</th></tr>
+<tr><td class="num">1</td><td>company enrichment call</td><td class="small">Tech Stack · Annual Revenue · Headcount Growth · Recent News · Open Jobs · Latest Funding</td></tr><tr><td class="num">1</td><td>leadership contact search</td><td class="small">C-suite and technology leadership, title-filtered</td></tr><tr><td class="num">1</td><td>contact enrichment call</td><td class="small">Find Thought Leadership · Summarize Work History</td></tr><tr><td class="num">0–2</td><td>targeted custom data points</td><td class="small">Only against a named gap already attempted by search</td></tr>
+</table>
+
+<div class="callout co-orange">
+  <p><strong>A technographic scan is a T1 machine scan, never T4.</strong> Filing it at T4 caps
+  the capability at L2.5 and silently suppresses the score — the commonest tier
+  misclassification in the corpus, and Clay is now the largest single producer of these
+  scans.</p>
+</div>
+
+<h2>The agent's responsibilities</h2>
+<ul class="chk">
+  <li>Reading the parsed package, the page contract and the catalogue pinned to the run.</li>
+  <li>Reasoning over evidence and writing the prose every surface renders.</li>
+  <li>Enriching beyond the package when a cell is thin — and registering every source found before citing
+  it.</li>
+  <li>Challenging its own conclusions: state the claim, search for what would refute it, probe for grain
+  mismatch and identity contamination, then accept, reject or mark uncertain.</li>
+  <li>Emitting honest empty states, with what was searched, rather than filling space.</li>
+  <li>Marking every internal rung in the payload so the serve layer can strip it.</li>
+</ul>
+
+<h2>What the agent is forbidden from doing</h2>
+<ul class="chk chk-x">
+  <li>Assigning a score. Scores are read from the workbook and never re-derived.</li>
+  <li>Inventing an identifier. It creates 5 classes — insight card, finding, focus area,
+  tech-stack row and why-now signal — and everything else is read or requested.</li>
+  <li>Choosing an evidence id. Enrichment sources are registered and the server allocates the id.</li>
+  <li>Computing an evidence rank score. The server computes it, bounded.</li>
+  <li>Writing a serving table. Every write goes through the connector; there is no side door.</li>
+</ul>
+
+<div class="rule">
+  <div class="rule-lbl">The rule that prevents most errors</div>
+  <p>An invented evidence id is fabrication by construction, even when a matching source genuinely exists.
+  Register first, cite second, and use the id you were given.</p>
+</div>
+
+<h2>The analyst stance</h2>
+<div class="callout co-teal">
+  <p>The agent extracts and explains. It is not a copywriter and not a scorer. Every claim about the client
+  carries an evidence id; if it cannot be cited, it is not written. Where a source is absent, the surface
+  renders an honest empty state — <strong>absent beats wrong</strong>, because a guessed field survives into
+  a meeting and costs credibility, while a dash with a provenance note costs nothing.</p>
+</div>
+
+<h2>The reasoning layer</h2>
+<p>Every gate in this product checks a claim after it has been written. The reasoning layer is
+what happens before, and it is the only mechanism that catches a claim that is well-formed,
+correctly cited, grain-locked and wrong.</p>
+
+<table class="ft">
+<tr><th style="width:44px"></th><th style="width:180px">Step</th><th>What it requires</th></tr>
+<tr><td class="tk">A</td><td><strong>Hypothesis</strong></td><td>State the claim and its confidence, before defending it.</td></tr><tr><td class="tk">B</td><td><strong>Counter-evidence</strong></td><td>Argue the strongest case against it. Inside a thin margin, present both and say the call is close.</td></tr><tr><td class="tk">C</td><td><strong>Domain test</strong></td><td>Is this plausible for THIS sub-vertical, size tier and regulator?</td></tr><tr><td class="tk">D</td><td><strong>Failure probes</strong></td><td>Run the probe set for the surface. Each probe fires a search.</td></tr><tr><td class="tk">E</td><td><strong>Verdict</strong></td><td>ACCEPT · REJECT · UNCERTAIN. Reject means re-rank or drop, not soften.</td></tr>
+</table>
+
+<p>Any surface making a ranked, causal or comparative claim carries its verdict in the payload.
+A verdict that is not recorded is a step the agent can convince itself it took.</p>
+
+<div class="callout co-teal">
+  <p><strong>Step B is the one that gets skipped.</strong> Arguing against your own conclusion
+  feels like undermining the work; it is the opposite. A claim that survives its strongest
+  counter-argument is one an AE can defend in the room, and a claim that does not survive was
+  going to fail there instead. The strongest form sources the falsifier from the client's own
+  words rather than from the assessment's judgement.</p>
+</div>
+
+<h3>Nine contradiction classes</h3>
+<p>Each has been observed, and each renders plausibly.</p>
+<table class="tbl">
+<tr><th style="width:170px">Class</th><th style="width:330px">Looks like</th><th>Caught by</th></tr>
+<tr><td><strong>Grain</strong></td><td class="small">A figure quoted under a name from a different row</td><td class="small">Grain lock, per quoted figure</td></tr><tr><td><strong>Magnitude</strong></td><td class="small">Two figures for one metric differing by more than a quarter</td><td class="small">Identity gate, assertion 5</td></tr><tr><td><strong>Cross-surface</strong></td><td class="small">The hero names one constraint and the findings another</td><td class="small">The seven reconciliation pairs</td></tr><tr><td><strong>Source rank</strong></td><td class="small">The workbook and the report disagree and the report won</td><td class="small">Source priority — the workbook wins on scores</td></tr><tr><td><strong>Self-description</strong></td><td class="small">The entity's claim contradicts a registry</td><td class="small">Registry wins; the contradiction is itself a finding</td></tr><tr><td><strong>Arithmetic vs analyst</strong></td><td class="small">The engine ranks a platform the report never discusses</td><td class="small">State it, say which won, lower confidence</td></tr><tr><td><strong>Temporal</strong></td><td class="small">The timeline shows a platform live; the register shows it stalled</td><td class="small">One is wrong, or the relationship is the finding</td></tr><tr><td><strong>Confidence</strong></td><td class="small">A cell scored HIGH on two evidence items</td><td class="small">Confidence is earned by the evidence count</td></tr><tr><td><strong>Vocabulary</strong></td><td class="small">One word carrying two meanings on one screen</td><td class="small">Resolve the band word from the served score</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">Never average two disagreeing figures</div>
+  <p>The result is in no source, which is fabrication with extra steps. Agreement from
+  independent origins is corroboration. Disagreement where one source outranks resolves by
+  priority and is recorded. Disagreement between peers is quarantined and stated — the
+  resolution is the finding.</p>
+</div>
+
+<h2>Register discipline</h2>
+<table class="tbl">
+<tr><th style="width:300px">Banned in anything a client reads</th><th>Why</th></tr>
+<tr><td>Consultant register — leverage, journey, best-in-class</td><td>Says nothing, and signals a template.</td></tr>
+<tr><td>Deficit framing — lacks, fails to</td><td>The client is in the room. State what is true, not what is missing about them.</td></tr>
+<tr><td>Raw taxonomy codes in prose</td><td>Internal grammar. Capability names are humanised; codes appear only in drilldown provenance.</td></tr>
+<tr><td>Score-predicate openers</td><td>A card opening with a score has told the AE nothing they cannot read off the grid.</td></tr>
+<tr><td>Markdown in a field that renders as text</td><td>Only explicitly typed markdown fields go through a stripper; everything else renders literally.</td></tr>
+</table>
+
+<h2>Every gap is stated as available value</h2>
+<p>Everything on a client dashboard is read by, or in front of, the client. A gap stated as a
+deficiency invites defensiveness; the same gap stated as available value invites a
+conversation. The finding is identical and the evidence is unchanged — what differs is whether
+the sentence is about what the institution failed to do or about what is now available to it.</p>
+
+<table class="tbl">
+<tr><th style="width:300px">Instead of</th><th>Write</th></tr>
+<tr><td>The bank <strong>lacks</strong> covenant monitoring</td><td>Covenant monitoring is <strong>purchased and not yet activated</strong></td></tr>
+<tr><td><strong>Failure to</strong> govern agent creation</td><td>Governance <strong>is in place at the sanctioned tool</strong>; the unsanctioned path is still open</td></tr>
+<tr><td>Data quality is <strong>poor</strong></td><td>Data quality rules are <strong>embedded in the delivery lifecycle</strong>; coverage extends to 7 of 12 sources</td></tr>
+<tr><td>They are <strong>behind</strong> their peers</td><td>The peer set has moved on this; <strong>the pattern is available and the substrate is already built</strong></td></tr>
+<tr><td><strong>Nobody owns</strong> the agent estate</td><td>An owner per agent <strong>is the output of one governance session</strong></td></tr>
+</table>
+
+<p><strong>The pattern behind every rewrite: name what exists before naming what does not.</strong>
+Almost every gap sits beside something the institution has already built, bought or decided.
+Lead with that, and the gap becomes the next step rather than an indictment.</p>
+
+<div class="callout co-orange">
+  <p><strong>This is register, not softening.</strong> Thin-evidence markers, quarantine notes
+  and failing safeguard gates all still render, unhedged. Never soften a risk into vagueness —
+  state it plainly, attach it to evidence, and frame the response as available rather than
+  overdue. Capability sits with institutions, not individuals: "the team lacks" is both
+  accusatory and unfalsifiable.</p>
+</div>
+
+<h2>The verb is governed by the evidence level</h2>
+<table class="tbl">
+<tr><th style="width:60px">Level</th><th>Basis</th><th>Permitted language</th></tr>
+<tr><td><span class="badge b-green">L1</span></td><td>Vendor named in a T1 or T2 source with deployment confirmed</td><td>implemented · deployed · uses · powers</td></tr><tr><td><span class="badge b-teal">L2</span></td><td>Official partnership announcement or case study</td><td>partnered with · selected · announced</td></tr><tr><td><span class="badge b-amber">L3</span></td><td>Two or more independent signals</td><td>likely uses · signals suggest · inferred from hiring</td></tr><tr><td><span class="badge b-red">L4</span></td><td>A single weak source</td><td>may use · potential · unconfirmed</td></tr>
+</table>
+<p class="small muted">Writing “uses” on level-three evidence is a fabrication, not a style choice.</p>
+
+</div>
+<div id="s05" class="section">
+
+<div class="eyebrow">Section 05</div>
+<h1>Dashboard architecture</h1>
+<p class="lead">Seven client dashboards, 38 client surfaces, 9 global surfaces and
+34 payload sections across 6 submission pages. These are four different quantities
+and this document keeps them apart.</p>
+
+<h2>The four quantities</h2>
+<table class="tbl">
+<tr><th style="width:130px">Quantity</th><th class="nowrap">Count</th><th>What it is</th></tr>
+<tr><td><strong>Dashboard</strong></td><td class="num">7</td><td>A client screen with a route and a tab.</td></tr>
+<tr><td><strong>Surface</strong></td><td class="num">38</td>
+    <td>One card or panel a human sees on a client dashboard. Several live on one page, and one section can
+    produce more than one.</td></tr>
+<tr><td><strong>Section</strong></td><td class="num">34</td>
+    <td>One named block inside a page payload — the unit the agent synthesises into and the unit that
+    promotes into a serving table.</td></tr>
+<tr><td><strong>Page</strong></td><td class="num">6</td>
+    <td>A submission boundary, not necessarily a screen. Promotion requires a pass on every one.</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">Why the page count is load-bearing, and why sections do not follow screens</div>
+  <p>Adding a seventh page raises the bar for every client in the corpus, because promotion requires a
+  passing submission on every page before serving tables can be touched again. Adding a section to an
+  existing page does not. That is why four sections synthesised into the <code>heatmap</code> page render on
+  the Health dashboard, and why the Context financial trajectory renders the Overview's section rather than
+  owning one of its own.</p>
+</div>
+
+<h2>The seven dashboards</h2>
+<table class="ft">
+<tr><th style="width:44px"></th><th style="width:120px">Dashboard</th><th>Route</th>
+    <th style="width:76px">Surfaces</th><th style="width:140px">Audience</th></tr>
+<tr><td class="tk">D1</td><td><strong>Overview</strong></td><td><code>/clients/:id/overview</code></td>
+<td class="num">13</td>
+<td><span class="small muted">internal + customer</span></td></tr><tr><td class="tk">D2</td><td><strong>Insights</strong></td><td><code>/clients/:id/insights</code></td>
+<td class="num">2</td>
+<td><span class="small muted">internal + customer</span></td></tr><tr><td class="tk">D3</td><td><strong>Heatmap</strong></td><td><code>/clients/:id/heatmap</code></td>
+<td class="num">5</td>
+<td><span class="small muted">internal + customer</span></td></tr><tr><td class="tk">D4</td><td><strong>Platform</strong></td><td><code>/clients/:id/platform</code></td>
+<td class="num">5</td>
+<td><span class="small muted">internal + customer</span></td></tr><tr><td class="tk">D5</td><td><strong>Context</strong></td><td><code>/clients/:id/context</code></td>
+<td class="num">6</td>
+<td><span class="badge b-red">INTERNAL ONLY</span></td></tr><tr><td class="tk">D6</td><td><strong>Tech stack</strong></td><td><code>/clients/:id/techstack</code></td>
+<td class="num">2</td>
+<td><span class="small muted">internal + customer</span></td></tr><tr><td class="tk">D7</td><td><strong>Health</strong></td><td><code>/clients/:id/health</code></td>
+<td class="num">5</td>
+<td><span class="badge b-red">ANALYST ONLY</span></td></tr>
+<tr style="border-top:2px solid var(--z-teal)"><td></td><td><strong>Total</strong></td><td></td>
+    <td class="num"><strong>38</strong></td><td></td></tr>
+</table>
+
+<div class="db"><div class="db-head"><div class="db-num">D1</div><div class="db-info">
+  <div class="db-title">Overview</div>
+  <div class="db-sub">13 surfaces · 12 sections · the page an AE is guaranteed to read</div></div></div>
+  <div class="db-body"><p class="db-desc">Answers one question: what is true about this client, and what do
+  I lead with. The hero carries the whole argument in one screen — composite, four pillar scores with peer
+  deltas, posture, and a framing sentence that states the gap, quantifies it and localises it. Five of its
+  cards are confidence instrumentation: they tell the reader how much to trust everything else on the
+  screen.</p></div></div>
+
+<div class="db"><div class="db-head"><div class="db-num">D2</div><div class="db-info">
+  <div class="db-title">Insights</div>
+  <div class="db-sub">2 surfaces · 2 sections · triage, not a grid</div></div></div>
+  <div class="db-body"><p class="db-desc">Insight cards grouped by priority, pillar or theme, each opening
+  a four-tab modal carrying the full argument. The technology landscape strip sits here rather than on the
+  Tech stack page, because the gap it names is what makes an insight actionable.</p></div></div>
+
+<div class="db"><div class="db-head"><div class="db-num">D3</div><div class="db-info">
+  <div class="db-title">Heatmap</div>
+  <div class="db-sub">5 surfaces · 9 sections · three view modes, four grain levels</div></div></div>
+  <div class="db-body"><p class="db-desc">The scoring grid and everything that qualifies it. Three view
+  modes — focus areas, the standard grid and the value chain — and within the standard grid four grain
+  levels: pillar, category, capability and sub-capability. This page carries nine sections because an agent
+  filling cell evidence is already reading the workbook cell by cell; four of those sections render on the
+  Health dashboard.</p></div></div>
+
+<div class="db"><div class="db-head"><div class="db-num">D4</div><div class="db-info">
+  <div class="db-title">Platform</div>
+  <div class="db-sub">5 surfaces · 5 sections · fit is not readiness</div></div></div>
+  <div class="db-body"><p class="db-desc">Fit score, client-specific story, gap-to-platform mapping with
+  backing sub-capabilities, readiness prerequisites, recommendations, roadmap phases, the stair-step curve
+  and the conversation starters. All five sections sit together because all five reference the same
+  recommendation ids.</p></div></div>
+
+<div class="db"><div class="db-head"><div class="db-num">D5</div><div class="db-info">
+  <div class="db-title">Context <span class="badge b-red">INTERNAL ONLY</span></div>
+  <div class="db-sub">6 surfaces · 5 sections · withheld from the customer view entirely</div></div></div>
+  <div class="db-body"><p class="db-desc">Timeline, issue register, regulatory standing, sentiment,
+  acquisition history and the financial trajectory. This is internal team-preparation material: the customer
+  view renders a locked state, not a redacted page.</p></div></div>
+
+<div class="db"><div class="db-head"><div class="db-num">D6</div><div class="db-info">
+  <div class="db-title">Tech stack</div>
+  <div class="db-sub">2 surfaces · 1 section · layered, not flat</div></div></div>
+  <div class="db-body"><p class="db-desc">Four layer cards — operations and core, customer engagement, data
+  and analytics, infrastructure and cloud — each with a pillar tag and a detection count. The layering
+  carries analysis a flat list cannot: two of four detected at the data layer with a data-pillar tag says
+  where the gap is and which pillar absorbs it.</p></div></div>
+
+<div class="db"><div class="db-head"><div class="db-num">D7</div><div class="db-info">
+  <div class="db-title">Health <span class="badge b-red">ANALYST ONLY</span></div>
+  <div class="db-sub">5 surfaces · 4 sections from the heatmap page, plus one derived</div></div></div>
+  <div class="db-body"><p class="db-desc">Five tabs: thin-evidence alerts, version diff, safeguard gates,
+  the evidence age tracker and cross-entity patterns. This is where the assessment states its own
+  weaknesses. Four surfaces are synthesised into the heatmap page; version diff is derived from the runs
+  table.</p></div></div>
+
+</div>
+<div id="s06" class="section">
+
+<div class="eyebrow">Section 06</div>
+<h1>Surface register</h1>
+<p class="lead">Every client surface, what it must present, and the payload section that produces it. A
+surface with no stated section is not buildable; a section with no surface is not authorable. This register
+is reconciled by test against the section registry, the writer registry and the serving tables.</p>
+
+<div class="callout co-teal">
+  <p>The payload-section column names where a surface is <em>synthesised</em>, which is not always the
+  dashboard it <em>renders</em> on. Four heatmap sections render on Health; the Context financial trajectory
+  renders the Overview's section so the two cards cannot disagree; and evidence coverage produces two
+  surfaces from one section.</p>
+</div>
+
+<h2>D1 · Overview <span class="small muted" style="font-weight:400">· 13 surfaces</span> <span class="badge b-gray">internal + customer</span></h2><p class="small muted"><code>/clients/:id/overview</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">O1</td><td><div class="fn">Scores &amp; peer benchmarks</div><div class="fd">Composite to 1dp with its band word, four pillar scores with peer deltas, posture chip, evidence basis, and an 18–32 word framing sentence that states the gap, quantifies it and localises it.</div></td><td class="small"><code>overview.scores</code></td></tr><tr><td class="tk">O2</td><td><div class="fn">Firmographics strip</div><div class="fd">Assets, employees and branches rendered inside the hero rather than as a separate panel. Every figure identity-checked against the entity.</div></td><td class="small"><code>overview.firmographics</code></td></tr><tr><td class="tk">O3</td><td><div class="fn">Why-now signals</div><div class="fd">Dated, cited events. Each carries trigger, window, consequence of waiting, cost of acting now and why this sequence.</div></td><td class="small"><code>overview.why_now</code></td></tr><tr><td class="tk">O4</td><td><div class="fn">Executive summary</div><div class="fd">Situation, complication, question, answer. At most one raw score, and client facts must outnumber score references.</div></td><td class="small"><code>overview.exec_summary</code></td></tr><tr><td class="tk">O5</td><td><div class="fn">Opportunity surface tiles</div><div class="fd">Where engagement value concentrates per platform, tied to the cells below M3 that the platform addresses.</div></td><td class="small"><code>overview.opportunity</code></td></tr><tr><td class="tk">O6</td><td><div class="fn">Top findings</div><div class="fd">Ranked findings, each with what, why and so what, a named consequence, a rejected alternative, and an inline expansion.</div></td><td class="small"><code>overview.findings</code></td></tr><tr><td class="tk">O7</td><td><div class="fn">Leadership panel</div><div class="fd">Roster with role and tenure, or an explicit verified-absent state naming every source searched.</div></td><td class="small"><code>overview.leadership</code></td></tr><tr><td class="tk">O8</td><td><div class="fn">Financial trajectory</div><div class="fd">A dated series. Below three points it renders as a labelled snapshot with no trend line.</div></td><td class="small"><code>overview.financial_series</code></td></tr><tr><td class="tk">O9</td><td><div class="fn">Sentiment</div><div class="fd">Bars plus context tiles, each tile expanding inline to the items behind it.</div></td><td class="small"><code>overview.sentiment</code></td></tr><tr><td class="tk">O10</td><td><div class="fn">Evidence coverage</div><div class="fd">Overall and per-pillar against the 80% hard gate, with the denominator definition rendered. Never rounded up across the gate.</div></td><td class="small"><code>overview.evidence_coverage</code></td></tr><tr><td class="tk">O11</td><td><div class="fn">Evidence tier distribution</div><div class="fd">Tier and claim-class histograms, plus what vocabulary this mix licenses across the whole document.</div></td><td class="small"><code>overview.evidence_coverage</code></td></tr><tr><td class="tk">O1b</td><td><div class="fn">Capability ceiling &amp; uncertainty</div><div class="fd">Per category, the highest level the evidence would support under perfect execution, its uncertainty band, and the named absence that set it.</div></td><td class="small"><code>overview.ceilings</code></td></tr><tr><td class="tk">O12</td><td><div class="fn">Thought leadership signal</div><div class="fd">Dated executive publications with verbatim quotes. A contradicting entry is the most valuable row on the card and is never filtered out.</div></td><td class="small"><code>overview.thought_leadership</code></td></tr></table><h2>D2 · Insights <span class="small muted" style="font-weight:400">· 2 surfaces</span> <span class="badge b-gray">internal + customer</span></h2><p class="small muted"><code>/clients/:id/insights</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">I1</td><td><div class="fn">Insight cards</div><div class="fd">Triage layout grouped by priority, pillar or theme. Each card carries a claim as its title and opens a four-tab modal.</div></td><td class="small"><code>insights.insights</code></td></tr><tr><td class="tk">T2</td><td><div class="fn">Technology landscape strip</div><div class="fd">Confirmed, inferred, claimed and gaps. Four counts recomputed from the register, each tile printing its evidence basis.</div></td><td class="small"><code>insights.landscape</code></td></tr></table><h2>D3 · Heatmap <span class="small muted" style="font-weight:400">· 5 surfaces</span> <span class="badge b-gray">internal + customer</span></h2><p class="small muted"><code>/clients/:id/heatmap</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">H4</td><td><div class="fn">Workbook grain scores</div><div class="fd">The maturity grid at four grain levels — pillar, category, capability, sub-capability. A cell drills in; it does not open a panel.</div></td><td class="small"><code>heatmap.workbook_scores</code></td></tr><tr><td class="tk">H1</td><td><div class="fn">Focus areas</div><div class="fd">Three to five client priorities, each with a verbatim quote from the client's own report and its page number, plus a configurable KPI strip.</div></td><td class="small"><code>heatmap.focus_areas</code></td></tr><tr><td class="tk">H2</td><td><div class="fn">Cell evidence</div><div class="fd">Per-cell evidence linkage and synthesis prose, with the count of items reasoned over computed from the citation array.</div></td><td class="small"><code>heatmap.cell_evidence</code></td></tr><tr><td class="tk">H6</td><td><div class="fn">Evidence store</div><div class="fd">The run's full evidence index: tier, claim class, recency, publisher, verbatim excerpt, and the cells each item supports.</div></td><td class="small"><code>heatmap.evidence</code></td></tr><tr><td class="tk">H9</td><td><div class="fn">Value-chain view</div><div class="fd">The same scores arranged along the institution's value chain rather than the catalogue's taxonomy. Prototype-only; no prompt in the design specification.</div></td><td class="small"><code>heatmap.value_chain</code></td></tr></table><h2>D4 · Platform <span class="small muted" style="font-weight:400">· 5 surfaces</span> <span class="badge b-gray">internal + customer</span></h2><p class="small muted"><code>/clients/:id/platform</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">P1</td><td><div class="fn">Platform fit &amp; story</div><div class="fd">Fit score per platform, the client-specific story, gap-to-platform mapping with backing sub-capabilities, and the readiness prerequisite gates.</div></td><td class="small"><code>platform.platform_story</code></td></tr><tr><td class="tk">P2</td><td><div class="fn">Recommendations</div><div class="fd">Detail, impact, effort, sequencing and provenance. A derived recommendation must never present as analyst judgement.</div></td><td class="small"><code>platform.recommendations</code></td></tr><tr><td class="tk">P2b</td><td><div class="fn">Conversation starters</div><div class="fd">45–90 word say-it-aloud openers with distinct opening shapes. No codes, no bracketed ids mid-sentence, no score-first opening.</div></td><td class="small"><code>platform.starters</code></td></tr><tr><td class="tk">P3</td><td><div class="fn">Transformation roadmap</div><div class="fd">Sequenced phases referencing the same recommendation ids the page already carries. Order is meaning.</div></td><td class="small"><code>platform.roadmap</code></td></tr><tr><td class="tk">P4</td><td><div class="fn">Stair-step curve</div><div class="fd">The maturity ladder and its clusters, or an explicit reason it is not derivable — never a blank card.</div></td><td class="small"><code>platform.stairstep</code></td></tr></table><h2>D5 · Context <span class="small muted" style="font-weight:400">· 6 surfaces</span> <span class="badge b-red">INTERNAL ONLY</span></h2><p class="small muted"><code>/clients/:id/context</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">C1</td><td><div class="fn">Digital evolution timeline</div><div class="fd">Chronological, year-range and signal filtered. Every event dated and cited; each expands inline to its detail.</div></td><td class="small"><code>context.timeline</code></td></tr><tr><td class="tk">C2</td><td><div class="fn">Issue register &amp; Gantt</div><div class="fd">One row per matter with identity fields, rendered as a Gantt. Each issue expands inline and names the cells it caps.</div></td><td class="small"><code>context.issue_register</code></td></tr><tr><td class="tk">C3</td><td><div class="fn">Regulatory standing</div><div class="fd">Primary regulator from the regulator's own registry, licence type, jurisdictions, and enforcement actions with the cells they cap.</div></td><td class="small"><code>context.regulatory_standing</code></td></tr><tr><td class="tk">C4</td><td><div class="fn">Sentiment overview</div><div class="fd">The sentiment grid at Context depth, each tile expanding inline to the items behind it. Prototype-only; produced under the O9 sentiment prompt at Context depth.</div></td><td class="small"><code>context.context_sentiment</code></td></tr><tr><td class="tk">C5</td><td><div class="fn">Acquisition history</div><div class="fd">Closed and announced transactions with integration status and maturity effect. A temporarily-constraining integration is not smoothed to neutral.</div></td><td class="small"><code>context.acquisitions</code></td></tr><tr><td class="tk">C6</td><td><div class="fn">Financial trajectory</div><div class="fd">Renders the Overview's financial series section. One section, so the two cards cannot disagree.</div></td><td class="small"><code>overview.financial_series</code></td></tr></table><h2>D6 · Tech stack <span class="small muted" style="font-weight:400">· 2 surfaces</span> <span class="badge b-gray">internal + customer</span></h2><p class="small muted"><code>/clients/:id/techstack</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">T1</td><td><div class="fn">Technology stack register</div><div class="fd">Four layer cards — operations, customer engagement, data, infrastructure — each with a pillar tag and a detection count.</div></td><td class="small"><code>techstack.techstack</code></td></tr><tr><td class="tk">T3</td><td><div class="fn">Platform detail</div><div class="fd">A sub-page per stack item: detection basis, evidence, the cells it touches and the gap it leaves.</div></td><td class="small"><code>techstack.techstack</code></td></tr></table><h2>D7 · Health <span class="small muted" style="font-weight:400">· 5 surfaces</span> <span class="badge b-red">ANALYST ONLY</span></h2><p class="small muted"><code>/clients/:id/health</code></p><table class="ft"><tr><th style="width:48px">ID</th><th>Surface and its contract</th><th style="width:180px">Payload section</th></tr><tr><td class="tk">H3</td><td><div class="fn">Thin-evidence alerts</div><div class="fd">The run's under-evidenced cells with severity, current count, proxy attempted and closure condition.</div></td><td class="small"><code>heatmap.alerts</code></td></tr><tr><td class="tk">V1</td><td><div class="fn">Version diff</div><div class="fd">Run-to-run comparison, derived from the runs table. Comparison is direct within a catalogue lineage and resolves through the alias bridge across a bump.</div></td><td class="small">—</td></tr><tr><td class="tk">H5</td><td><div class="fn">Safeguard gates</div><div class="fd">Client-visible gate results in plain language, including an explicit not-run state with its reason.</div></td><td class="small"><code>heatmap.safeguard_gates</code></td></tr><tr><td class="tk">H7</td><td><div class="fn">Evidence age tracker</div><div class="fd">Age against a pinned reference date. Status follows band, band follows age, age follows a real date — or all three are null.</div></td><td class="small"><code>heatmap.evidence_age</code></td></tr><tr><td class="tk">H8</td><td><div class="fn">Cross-entity patterns</div><div class="fd">Sub-vertical concentration at or above the declared threshold. Counts and shares only; entity ids never leave the audit trail.</div></td><td class="small"><code>heatmap.cohort_patterns</code></td></tr></table>
+
+<h2>Global surfaces</h2>
+<p>These render from serving rollups, the runs table and the ingest audit rather than from a payload
+section. They carry no synthesis prompt, and each breaks in its own characteristic way.</p>
+<table class="ft">
+<tr><th style="width:44px">ID</th><th style="width:160px">Surface</th><th style="width:170px">Route</th><th>Contract</th></tr>
+<tr><td class="tk">G1</td><td><strong>Login</strong></td><td><code>/login</code></td><td class="small">Google OIDC, Workspace domain restricted. Always the entry point until signed in.</td></tr><tr><td class="tk">G2</td><td><strong>Dashboard</strong></td><td><code>/</code></td><td class="small">Command centre: active assessments, open alerts, insight cards, average maturity, in-progress runs. Header and KPI counts come from one query.</td></tr><tr><td class="tk">G3</td><td><strong>Client directory</strong></td><td><code>/clients</code></td><td class="small">Card and table views with maturity, pillar strip, sub-vertical, source badge, open alerts and top platform fit.</td></tr><tr><td class="tk">G4</td><td><strong>Global alert dashboard</strong></td><td><code>/alerts</code></td><td class="small">The corpus-wide thin-evidence queue plus the cross-entity pattern finder and the waived-alert register. Virtualised.</td></tr><tr><td class="tk">G5</td><td><strong>Prospecting</strong></td><td><code>/prospecting</code></td><td class="small">Search-first surface producing the customer-safe scorecard export. Empty until a query is entered.</td></tr><tr><td class="tk">G6</td><td><strong>Run history</strong></td><td><code>/clients/:id/runs</code></td><td class="small">Per-entity run list. The score column must equal the Overview hero ring.</td></tr><tr><td class="tk">G7</td><td><strong>Admin</strong></td><td><code>/admin</code></td><td class="small">Users and roles, settings and operations. Admin role required.</td></tr><tr><td class="tk">G8</td><td><strong>Import &amp; jobs</strong></td><td><code>/admin/import</code></td><td class="small">Ingest job status with a live stream, and the pending-review queue for low-confidence entity inferences.</td></tr><tr><td class="tk">G9</td><td><strong>Import audit</strong></td><td><code>/admin/import/audit</code></td><td class="small">Every file seen, classified, excluded or deduplicated, with the rule that fired.</td></tr>
+</table>
+
+<h2>Reconciliation</h2>
+<div class="g2">
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="background:var(--z-teal-dark);padding:9px 14px;color:var(--z-teal);font-size:11px;
+    font-weight:600;letter-spacing:.08em;text-transform:uppercase">Surfaces</div>
+  <div class="count"><span>D1 Overview</span><span class="count-v">13</span></div><div class="count"><span>D2 Insights</span><span class="count-v">2</span></div><div class="count"><span>D3 Heatmap</span><span class="count-v">5</span></div><div class="count"><span>D4 Platform</span><span class="count-v">5</span></div><div class="count"><span>D5 Context</span><span class="count-v">6</span></div><div class="count"><span>D6 Tech stack</span><span class="count-v">2</span></div><div class="count"><span>D7 Health</span><span class="count-v">5</span></div>
+  <div class="count"><span>Global</span><span class="count-v">9</span></div>
+  <div class="count-tot"><span>Total</span><span class="count-v">47</span></div>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="background:var(--z-teal-dark);padding:9px 14px;color:var(--z-teal);font-size:11px;
+    font-weight:600;letter-spacing:.08em;text-transform:uppercase">Sections per page</div>
+  <div class="count"><span>overview</span><span class="count-v">12</span></div><div class="count"><span>insights</span><span class="count-v">2</span></div><div class="count"><span>heatmap</span><span class="count-v">9</span></div><div class="count"><span>platform</span><span class="count-v">5</span></div><div class="count"><span>context</span><span class="count-v">5</span></div><div class="count"><span>techstack</span><span class="count-v">1</span></div>
+  <div class="count-tot"><span>Total</span><span class="count-v">34</span></div>
+</div>
+</div>
+
+</div>
+<div id="s07" class="section">
+
+<div class="eyebrow">Section 07</div>
+<h1>Drilldown atlas</h1>
+<p class="lead">15 panels across three shells. One shell is not an overlay at all, which is
+why an audit that probes the DOM for dialogs reports zero drilldowns on a page full of them.</p>
+
+<table class="ft">
+<tr><th style="width:160px">Shell</th><th style="width:250px">Geometry</th><th>Panels</th></tr>
+<tr><td><div class="fn">Drawer</div></td><td class="small">Right slide-in, z-index 95, 420–480px</td>
+<td class="small">DD-1 Synthesis, DD-2 Evidence</td></tr><tr><td><div class="fn">Modal</div></td><td class="small">Centred, z-index 80, 640–820px</td>
+<td class="small">DD-3 Insight, DD-4 Recommendation, DD-5 New run, DD-6 Intelligence panel</td></tr><tr><td><div class="fn">Inline expansion</div></td><td class="small">Expands in the document flow, no overlay</td>
+<td class="small">DD-7 Event detail, DD-8 Issue detail, DD-9 Finding expansion, DD-10 Focus area expansion, DD-11 Platform tile expansion, DD-12 Sentiment tile expansion, DD-13 Readiness gate expansion, DD-14 Acquisition expansion, DD-15 Ceiling rationale</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">A drilldown never fetches</div>
+  <p>Every panel renders from data the page response already carried. The panel must open instantly and must
+  never fail after the card has rendered — a spinner on the panel an AE opens when a client challenges a
+  number is the worst possible moment for a network round trip.</p>
+</div>
+
+<h2>The complete atlas</h2>
+<table class="ft">
+<tr><th style="width:62px">ID</th><th style="width:88px">Shell</th><th style="width:180px">Panel</th><th>Opens from</th></tr>
+<tr><td class="tk">DD-1</td><td><span class="badge b-gray">drawer</span></td><td><strong>Synthesis</strong></td><td class="small">a sub-capability row on the heatmap</td></tr><tr><td class="tk">DD-2</td><td><span class="badge b-gray">drawer</span></td><td><strong>Evidence</strong></td><td class="small">any evidence chip, anywhere in the app</td></tr><tr><td class="tk">DD-3</td><td><span class="badge b-gray">modal</span></td><td><strong>Insight</strong></td><td class="small">an insight card</td></tr><tr><td class="tk">DD-4</td><td><span class="badge b-gray">modal</span></td><td><strong>Recommendation</strong></td><td class="small">a recommendation row</td></tr><tr><td class="tk">DD-5</td><td><span class="badge b-gray">modal</span></td><td><strong>New run</strong></td><td class="small">the request-rerun control</td></tr><tr><td class="tk">DD-6</td><td><span class="badge b-gray">modal</span></td><td><strong>Intelligence panel</strong></td><td class="small">the Open Intelligence control</td></tr><tr><td class="tk">DD-7</td><td><span class="badge b-gray">inline</span></td><td><strong>Event detail</strong></td><td class="small">a timeline event</td></tr><tr><td class="tk">DD-8</td><td><span class="badge b-gray">inline</span></td><td><strong>Issue detail</strong></td><td class="small">an issue register row</td></tr><tr><td class="tk">DD-9</td><td><span class="badge b-gray">inline</span></td><td><strong>Finding expansion</strong></td><td class="small">a top-findings row</td></tr><tr><td class="tk">DD-10</td><td><span class="badge b-gray">inline</span></td><td><strong>Focus area expansion</strong></td><td class="small">a focus area card</td></tr><tr><td class="tk">DD-11</td><td><span class="badge b-gray">inline</span></td><td><strong>Platform tile expansion</strong></td><td class="small">a platform fit tile</td></tr><tr><td class="tk">DD-12</td><td><span class="badge b-gray">inline</span></td><td><strong>Sentiment tile expansion</strong></td><td class="small">a sentiment context tile</td></tr><tr><td class="tk">DD-13</td><td><span class="badge b-gray">inline</span></td><td><strong>Readiness gate expansion</strong></td><td class="small">a prerequisite gate row</td></tr><tr><td class="tk">DD-14</td><td><span class="badge b-gray">inline</span></td><td><strong>Acquisition expansion</strong></td><td class="small">an acquisition row</td></tr><tr><td class="tk">DD-15</td><td><span class="badge b-gray">inline</span></td><td><strong>Ceiling rationale</strong></td><td class="small">a capability ceiling row</td></tr>
+</table>
+
+<div class="callout co-orange">
+  <p><strong>Stacking.</strong> The evidence drawer opens above an already-open insight modal or synthesis
+  drawer. Whatever manages panel order must handle a drawer over a modal, and closing the drawer must return
+  to the panel beneath rather than orphaning it. An audit harness that reads “the open panel” must prefer
+  the drawer, or it captures the modal behind it and records the wrong contract.</p>
+</div>
+
+<h2>The synthesis path — four levels deep</h2>
+<p>This is the most important drilldown in the product, and the reason a single cell click looks like a dead
+control if the levels are not understood.</p>
+<div class="flow">
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">1</div><div class="f-line f-line-teal"></div></div>
+    <div class="f-body"><div class="f-title">Pillar and category grid</div>
+      <div class="f-desc">Each cell is a drill target, not a panel trigger.</div></div></div>
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">2</div><div class="f-line f-line-teal"></div></div>
+    <div class="f-body"><div class="f-title">Capability, then sub-capability rows</div>
+      <div class="f-desc">The grid is replaced, not overlaid. A breadcrumb states the category, its
+      sub-capability count, its capability count and its weight, with a reset control.</div></div></div>
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">3</div><div class="f-line f-line-teal"></div></div>
+    <div class="f-body"><div class="f-title">Synthesis drawer</div>
+      <div class="f-desc">One cell: its id, name, score and confidence; the peer ladder with entity, median
+      and signed delta; every linked evidence item with a verbatim excerpt; and the synthesis with the count
+      of items it reasoned over printed beside it.</div></div></div>
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">4</div></div>
+    <div class="f-body"><div class="f-title">Evidence drawer, stacked above</div>
+      <div class="f-desc">Any evidence chip opens the source itself. This is the panel that decides whether
+      an AE survives being challenged.</div></div></div>
+</div>
+
+<div class="callout co-teal">
+  <p><strong>Why the count beside the synthesis is not decoration.</strong> “On the three items above” is
+  computed from the length of the citation array, so prose that reasons past its evidence is visible to the
+  reader without them opening anything. It is the anti-hallucination affordance and it is not optional.</p>
+</div>
+
+</div>
+<div id="s08" class="section">
+
+<div class="eyebrow">Section 08</div>
+<h1>Insight cards</h1>
+
+<div class="ic">
+  <div class="ic-head"><span class="ic-id">IC-nnn</span><span class="badge b-p0">ACT NOW</span></div>
+  <div class="ic-body">
+    <div class="ic-row"><div class="ic-label">Title</div><div>A claim, not a topic. “Data fragmentation is the root constraint, not under-investment” — never “Data management”.</div></div>
+    <div class="ic-row"><div class="ic-label">Theme</div><div>The area it belongs to, for grouping.</div></div>
+    <div class="ic-row"><div class="ic-label">What</div><div>What is observably true, cited.</div></div>
+    <div class="ic-row"><div class="ic-label">Why</div><div>The mechanism, not a restatement of the what.</div></div>
+    <div class="ic-row"><div class="ic-label">So what</div><div>What follows commercially. One clause of consequence.</div></div>
+    <div class="ic-row"><div class="ic-label">Rejected</div><div>The alternative explanation considered, and why the evidence points elsewhere. This field separates analysis from assertion.</div></div>
+    <div class="ic-row"><div class="ic-label">Magnitude</div><div>The named consequence — cells blocked, cycle time, peer gap.</div></div>
+    <div class="ic-row"><div class="ic-label">Links</div><div>Cell ids, evidence ids, platforms, claim label, confidence.</div></div>
+  </div>
+</div>
+
+<h2>Grouping</h2>
+<p>The page groups by priority, pillar or theme. Priority is a commercial judgement the card carries, not a
+filter the reader applies.</p>
+<table class="tbl">
+<tr><th style="width:120px">Priority</th><th style="width:250px">Means</th><th>Test</th></tr>
+<tr><td><span class="badge b-p0">Act now</span></td><td>Raise it in the next conversation</td><td>There is a dated trigger and a cost to waiting.</td></tr>
+<tr><td><span class="badge b-p1">Plan next</span></td><td>Sequence it behind something else</td><td>Real, but blocked by a prerequisite that is itself a card.</td></tr>
+<tr><td><span class="badge b-p2">Watch</span></td><td>True but not yet actionable</td><td>Evidence is thin, or the trigger has not fired.</td></tr>
+</table>
+
+<h2>The four-tab modal</h2>
+<table class="tbl">
+<tr><th style="width:140px">Tab</th><th>Carries</th></tr>
+<tr><td>Argument</td><td>The full what, why and so what, unabbreviated, with the rejected alternative.</td></tr>
+<tr><td>Evidence</td><td>Every linked item with tier, claim class, recency, publisher and a verbatim excerpt. Each id opens the evidence drawer above the modal.</td></tr>
+<tr><td>Capabilities</td><td>The cells the card touches, with scores and peer deltas. Each opens the synthesis drawer.</td></tr>
+<tr><td>Action</td><td>The recommendation it maps to, and the conversation starter derived from it.</td></tr>
+</table>
+
+<h2>Lifecycle states</h2>
+<table class="tbl">
+<tr><th style="width:140px">State</th><th>Renders as</th></tr>
+<tr><td>Cited</td><td>A normal card with evidence chips.</td></tr>
+<tr><td>Thin</td><td>A provisional marker, the count of items it rests on, and the closure condition.</td></tr>
+<tr><td>Quarantined</td><td>A dash and a provenance note. Never a substituted value.</td></tr>
+<tr><td>Annotated</td><td>Carries a team member's note, attributed and dated. Notes are workflow, never content.</td></tr>
+<tr><td>Superseded</td><td>Visible in run history, not on the active page.</td></tr>
+</table>
+
+<div class="callout co-orange">
+  <p><strong>No score-predicate openers.</strong> A card that opens by restating a score has told the AE
+  nothing they cannot read off the grid, and it puts a raw taxonomy code in front of a client. The gate
+  rejects it.</p>
+</div>
+
+</div>
+<div id="s09" class="section">
+
+<div class="eyebrow">Section 09</div>
+<h1>Heatmap and platform layers</h1>
+
+<h2>Maturity palette</h2>
+<div class="m-legend">
+  <div class="m-pill" style="background:#FFCB99;color:#7C3C00">M1 · Activating</div>
+  <div class="m-pill" style="background:#B0EDD3;color:#0D4F3C">M2 · Building</div>
+  <div class="m-pill" style="background:#27BBAF;color:#fff">M3 · Competing</div>
+  <div class="m-pill" style="background:#139F94;color:#fff">M4 · Differentiating</div>
+  <div class="m-pill" style="background:#185F60;color:#fff">M5 · Transformational</div>
+  <div class="m-pill" style="background:#E5E7EB;color:#6B7280">No score</div>
+</div>
+
+<div class="rule">
+  <div class="rule-lbl">One resolver</div>
+  <p>Score to band to colour resolves through a single module. No page computes a colour. Thin evidence adds
+  a dashed outline; it does not change the fill, because the fill means maturity and nothing else.</p>
+</div>
+
+<h2>Three view modes, four grain levels</h2>
+<table class="tbl">
+<tr><th style="width:170px">View mode</th><th>Presents</th></tr>
+<tr><td><strong>Focus areas</strong></td><td>Focus-area cards with a configurable KPI strip and the insight cards sitting in each area.</td></tr>
+<tr><td><strong>Standard grid</strong></td><td>The catalogue taxonomy at four grain levels: pillar, category, capability, sub-capability.</td></tr>
+<tr><td><strong>Value chain</strong></td><td>The same scores arranged along the institution's value chain rather than the catalogue's taxonomy.</td></tr>
+</table>
+
+<h2>Drill behaviour</h2>
+<table class="tbl">
+<tr><th style="width:280px">Action</th><th>Effect</th><th style="width:170px">Shell</th></tr>
+<tr><td>Click a pillar or category cell</td><td>Replaces the grid with the next grain down, with a breadcrumb and reset</td><td>None — in-page state</td></tr>
+<tr><td>Click a capability row</td><td>Replaces with its sub-capability rows</td><td>None</td></tr>
+<tr><td>Click a sub-capability row</td><td>Opens the synthesis panel</td><td>Drawer</td></tr>
+<tr><td>Click an evidence chip in the drawer</td><td>Opens the source</td><td>Drawer, stacked above</td></tr>
+</table>
+
+<h2>Thin evidence</h2>
+<p>Below three linked items a cell is thin. The drawer says so rather than reading as complete, and the
+alert that results carries what was searched and what would close it. Searched-and-not-found is a finding;
+silence is not.</p>
+
+<h2>Platform taxonomy</h2>
+<div class="g-auto">
+  <div class="card card-lav"><span class="plat pl-sf">Salesforce</span>
+    <div class="card-sub" style="margin-top:6px">Agentforce, Data Cloud, Service Cloud, Financial Services Cloud</div></div>
+  <div class="card card-lav"><span class="plat pl-db">Databricks</span>
+    <div class="card-sub" style="margin-top:6px">Mosaic AI, Delta, Unity Catalog</div></div>
+  <div class="card card-lav"><span class="plat pl-tbl">Tableau</span>
+    <div class="card-sub" style="margin-top:6px">Tableau Next, Pulse</div></div>
+  <div class="card card-lav"><span class="plat pl-tw">Twilio</span>
+    <div class="card-sub" style="margin-top:6px">Engage, Segment</div></div>
+  <div class="card card-lav"><span class="plat pl-nc">nCino</span>
+    <div class="card-sub" style="margin-top:6px">Workflow engine, origination</div></div>
+</div>
+
+<h2>Fit and readiness are different questions</h2>
+<div class="cmp">
+  <div class="cmp-c" style="background:var(--z-ice)"><div class="cmp-l" style="color:var(--z-teal-dark)">Platform fit</div>
+    <p class="small" style="color:var(--z-gray-body)">How much of this client's gap surface a platform
+    addresses — derived from which cells sit below M3 and which of those the platform's areas cover. A high
+    fit says the opportunity is real.</p></div>
+  <div class="cmp-c" style="background:#FFF7ED"><div class="cmp-l" style="color:#C2410C">Readiness index</div>
+    <p class="small" style="color:var(--z-gray-body)">Whether the prerequisites exist. A platform can fit
+    perfectly and be unsellable this year because the substrate underneath is not there. Rendered as
+    prerequisite gates, each expandable.</p></div>
+</div>
+
+<div class="callout co-orange">
+  <p>Selling into a high-fit, low-readiness platform is the failure this surface exists to prevent. Every
+  channel or experience investment made before the data substrate is fixed compounds the problem — which is
+  a finding, and belongs in the why-now's cost of acting now.</p>
+</div>
+
+<h2>Roadmap, stair-step and starters</h2>
+<table class="tbl">
+<tr><th style="width:190px">Surface</th><th>Rule</th></tr>
+<tr><td>Recommendations</td><td>Provenance is not cosmetic. A deterministically composed recommendation must not present as analyst judgement.</td></tr>
+<tr><td>Transformation roadmap</td><td>Order is meaning. Phases render in the order sent and cite recommendations the same payload describes.</td></tr>
+<tr><td>Stair-step curve</td><td>The ladder and its clusters, or an explicit reason it is not derivable — never a blank card.</td></tr>
+<tr><td>Conversation starters</td><td>Opening shapes enforced distinct across the set. An obviously templated opener is worse than none, because an AE reads it out loud.</td></tr>
+</table>
+
+</div>
+<div id="s10" class="section">
+
+<div class="eyebrow">Section 10</div>
+<h1>Evidence and citation</h1>
+<p class="lead">A citation is the only thing standing between analysis and assertion. This section defines
+what a citation has to survive.</p>
+
+<h2>Two legal origins, and only two</h2>
+<div class="cmp">
+  <div class="cmp-c" style="background:var(--z-ice)"><div class="cmp-l" style="color:var(--z-teal-dark)">Package evidence</div>
+    <p class="small" style="color:var(--z-gray-body)">Already in the store with an entity, a run, a tier and
+    a URL. Cite it; never create it.</p></div>
+  <div class="cmp-c" style="background:var(--ph0-lt)"><div class="cmp-l" style="color:#5B21B6">Enrichment mints</div>
+    <p class="small" style="color:var(--z-gray-body)">Anything found outside the package is registered first
+    and cited second. The server allocates the id and computes the rank score. Registration is idempotent by
+    content, so one annual report cited by six cards produces one row.</p></div>
+</div>
+
+<h2>The quality ladder</h2>
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="tier-row" style="background:var(--z-lavender);font-weight:600;font-size:10px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--z-gray-muted)">
+    <div>Tier</div><div>Type</div><div class="tier-w">Weight</div><div class="tier-c">Ceiling</div></div>
+  <div class="tier-row"><div class="tier-n t1">T1</div><div>Regulatory and audited sources — and machine technographic scans</div><div class="tier-w">1.0</div><div class="tier-c">L5</div></div><div class="tier-row"><div class="tier-n t2">T2</div><div>Official disclosures; structured internal notes</div><div class="tier-w">0.85</div><div class="tier-c">L5</div></div><div class="tier-row"><div class="tier-n t3">T3</div><div>Third-party analysis — analyst, app ratings, trade press</div><div class="tier-w">0.7</div><div class="tier-c">L4</div></div><div class="tier-row"><div class="tier-n t4">T4</div><div>Internal unvalidated narrative</div><div class="tier-w">0.55</div><div class="tier-c">L2.5</div></div><div class="tier-row"><div class="tier-n t5">T5</div><div>Marketing and claims — requires corroboration</div><div class="tier-w">0.3</div><div class="tier-c">L2</div></div>
+</div>
+
+<div class="callout co-orange">
+  <p><strong>Two rules that cost real score accuracy.</strong> A machine technographic scan is T1, never T4
+  — filing it as T4 caps the capability and silently suppresses the score. And the ladder has five rungs,
+  not eight: a separate source-type display table renders the weakest tier as something that reads stronger
+  than it is, inverting the reader's trust exactly where the evidence is weakest.</p>
+</div>
+
+<h2>Recency — one vocabulary</h2>
+<table class="tbl">
+<tr><th style="width:180px">Age</th><th style="width:190px">Band</th><th>Recency score</th></tr>
+<tr><td>≤ 12 months</td><td><span class="badge b-green">CURRENT</span></td><td class="num">5.0</td></tr><tr><td>12–24 months</td><td><span class="badge b-teal">RECENT</span></td><td class="num">4.0</td></tr><tr><td>24–36 months</td><td><span class="badge b-gray">DATED</span></td><td class="num">3.0</td></tr><tr><td>36–48 months</td><td><span class="badge b-amber">STALE</span></td><td class="num">2.0</td></tr><tr><td>48 months+</td><td><span class="badge b-red">ARCHIVAL</span></td><td class="num">1.0</td></tr><tr><td>no date</td><td><span class="badge b-gray">UNVERIFIED</span></td><td class="num">1.0</td></tr>
+</table>
+<p class="small muted">An undated item is never rendered as current. One set of names, used in the payload,
+the database column and the interface label.</p>
+
+<h2>The evidence rank score</h2>
+<div class="code">ERS = (0.35 × Tier) + (0.25 × Recency) + (0.20 × Specificity) + (0.20 × Corroboration)
+
+<span class="cmt">Every factor is itself scored 1.0–5.0, so the result is bounded 1.0–5.0.</span>
+<span class="cmt">High ≥ 3.5      Medium 2.5–3.5      Low &lt; 2.5</span>
+
+<span class="key">Specificity</span>    quantified with method / quantified / specific-qualitative /
+               general / vague
+<span class="key">Corroboration</span>  3+ independent / 2 independent / single T1–T2 / single T3 /
+               single T4–T5
+               <span class="cmt">"Independent" means different ORIGINS. An annual report and an</span>
+               <span class="cmt">investor deck from the same institution are ONE source.</span></div>
+
+<div class="rule">
+  <div class="rule-lbl">Server-computed, and bounded</div>
+  <p>Computed at registration, never sent by the agent, and asserted within range on ingest. Anything
+  outside is quarantined rather than rendered.</p>
+</div>
+
+<h2>Four failure modes, ordered by damage</h2>
+<table class="tbl">
+<tr><th style="width:210px">Failure</th><th>What the client sees</th><th>Caught by</th></tr>
+<tr><td><strong>Fabricated</strong> — no such row</td><td>A chip that opens nothing</td><td>Pattern and database existence checks, fail-closed</td></tr>
+<tr><td><strong>Foreign</strong> — a real row, another entity</td><td>A competitor's data on their page</td><td>Cohort filter plus the identity gate. Stops synthesis; it is not filtered out quietly.</td></tr>
+<tr><td><strong>Misattributed</strong> — real row, wrong cell</td><td>Evidence that does not support the claim</td><td>Linker thresholds. The quietest failure: everything renders and nothing breaks.</td></tr>
+<tr><td><strong>Unverifiable excerpt</strong></td><td>A quote that is not in the source</td><td>Verified against the fetched artefact at registration</td></tr>
+</table>
+
+<div class="callout co-teal">
+  <p><strong>Link on substance, not proximity.</strong> An item supports a cell when it speaks to that
+  capability, not when it was found while researching the category. The commonest cause of over-linking is
+  one category-level search mapped identically onto five sub-capabilities. And a cell whose every drawer is
+  empty is a linking failure, not an evidence gap — enriching a linker bug adds evidence that also will not
+  render.</p>
+</div>
+
+<h2>When an id cannot be established</h2>
+<p>In order, stopping at the first that applies:</p>
+<ul class="chk">
+  <li><strong>Enrich.</strong> Find a real source, register it, cite the returned id. This is the answer
+  most of the time and the highest-value work on any surface.</li>
+  <li><strong>Drop the claim, keep the surface.</strong> A shorter honest card beats a complete unfounded
+  one.</li>
+  <li><strong>Emit the empty state with what was searched.</strong> Absence with a recorded search is a
+  finding. Absence with no record is a research failure wearing a finding's clothes.</li>
+</ul>
+<ul class="chk chk-x">
+  <li>Never keep the claim and remove the citation. An uncited claim is excluded by the serve layer anyway,
+  so it is wasted work as well as wrong.</li>
+</ul>
+
+</div>
+<div id="s11" class="section">
+
+<div class="eyebrow">Section 11</div>
+<h1>Quality gates and disclosure</h1>
+<p class="lead">Four families with four different jobs and four different failure behaviours. The prefix is
+part of the id, so a gate reference is unambiguous in isolation.</p>
+
+<div class="gfam">
+<div class="gf gf-ag"><div class="gf-h"><span class="gf-p">AG-nn</span>
+<span class="badge b-teal">Analytical</span></div><div class="gf-b">Inside synthesis, per claim, before anything is emitted
+<span class="gf-k">On failure</span>The claim changes or is dropped — the agent's own discipline<span class="gf-k">Examples</span>AG-01 Identity &amp; boundary · AG-04 Traceability</div></div><div class="gf gf-sg"><div class="gf-h"><span class="gf-p">SG-nn</span>
+<span class="badge b-amber">Safeguard</span></div><div class="gf-b">At submit — and the results render to the client
+<span class="gf-k">On failure</span>Recorded and disclosed. Does not block promotion.<span class="gf-k">Examples</span>SG-01 Source diversity · SG-04 Evidence per cell</div></div><div class="gf gf-et"><div class="gf-h"><span class="gf-p">ET-nn</span>
+<span class="badge b-ph0">Enrichment trigger</span></div><div class="gf-b">During synthesis, to send the agent looking
+<span class="gf-k">On failure</span>Not a failure — a prompt to enrich<span class="gf-k">Examples</span>ET-01 Empty field · ET-04 Contradiction</div></div><div class="gf gf-cg"><div class="gf-h"><span class="gf-p">CG-nn</span>
+<span class="badge b-ph1">Corpus</span></div><div class="gf-b">At build time, over the exported pack, corpus-wide
+<span class="gf-k">On failure</span>Fails the build<span class="gf-k">Examples</span>CG-01 Grain resolution · CG-02 Citation set</div></div>
+</div>
+
+<p>Two more run at submit and are not G-numbered because they are structural rather than analytical: the
+<strong>contract</strong> pass — required fields, types, word budgets, forbidden registers, terminal
+punctuation, id resolution — and the <strong>evidence</strong> pass, in which every id resolves and belongs
+to this entity and this run, every excerpt is verbatim, and every source domain is identity-checked.</p>
+
+<div class="rule">
+  <div class="rule-lbl">Any evidence reason fails the submission</div>
+  <p>An excerpt is either a copy of something a document says or it is not evidence. The check lives at
+  submit rather than at promotion, so the agent can still repair the span.</p>
+</div>
+
+<h2>Safeguard gates render to the client — three consequences</h2>
+<table class="tbl">
+<tr><th style="width:250px">Requirement</th><th>Because</th></tr>
+<tr><td><strong>Plain language.</strong> A human sentence beside every gate, never a bare code.</td>
+    <td>A client reading a code and a fail learns nothing and distrusts everything.</td></tr>
+<tr><td><strong>A third state.</strong> Not-run, with a reason.</td>
+    <td>A gate that reports pass because it did not run is worse than one that reports fail.</td></tr>
+<tr><td><strong>A failing gate is not a blocked run.</strong></td>
+    <td>Disclosure is the point. The assessment ships with its weakness stated.</td></tr>
+</table>
+
+<h2>Corpus ceilings only ever move down</h2>
+<div class="callout co-orange">
+  <p>Every ceiling is a measurement of the corpus as it is, so any regression past today's state fails the
+  build. The only sanctioned movement is downward, after a defect class is fixed and re-measured. A ceiling
+  raised to make a build pass is a gate that has stopped measuring anything — and the change history is
+  what makes that visible.</p>
+</div>
+<p>Two corollaries. Ceilings must be per-client <strong>rates</strong>, not fixed counts: a fixed count
+passes at one corpus size and fails at the next on arithmetic alone, with no defect introduced. And a
+ceiling set from an acceptance target rather than a measurement fails every build on day one, for defects
+the build did not introduce — which is how a gate ends up disabled wholesale.</p>
+
+<h2>Four presentation guarantees the payload must satisfy</h2>
+<table class="tbl">
+<tr><th style="width:290px">Guarantee</th><th>Because</th></tr>
+<tr><td><strong>Order is meaning.</strong> A list renders in the order sent.</td>
+    <td>Findings are ranked, phases sequenced, events chronological. Never rely on the client to sort.</td></tr>
+<tr><td><strong>Counts are computed.</strong> Where a surface declares its grounding, the number is the
+    length of the citation array.</td>
+    <td>An asserted count drifts from the thing it counts. A computed one cannot.</td></tr>
+<tr><td><strong>Denominators are rendered.</strong></td>
+    <td>A percentage without its base is not information. Share of cells with at least one item and share
+    meeting the three-item threshold differ by tens of points.</td></tr>
+<tr><td><strong>Thresholds are enforced or they are not thresholds.</strong></td>
+    <td>A row below a declared threshold displayed under a header stating it teaches the reader to distrust
+    every other number on the page.</td></tr>
+</table>
+
+<h2>Before stating no: the proxy ladder</h2>
+<p>An absence is a finding only if the search that established it can be shown. An absence with
+no record is a research failure wearing a finding's clothes — and it is the difference between
+"no enforcement actions were found" and "no enforcement actions exist".</p>
+
+<div class="rule">
+  <div class="rule-lbl">The rule</div>
+  <p>No empty state is emitted until a documented proxy ladder has failed. Every rung attempted
+  is recorded, whether it hit or missed, and the record ships with the payload and renders in
+  the empty state.</p>
+</div>
+
+<table class="ft">
+<tr><th style="width:210px">Result</th><th style="width:290px">Means</th><th>Renders as</th></tr>
+<tr><td><span class="badge b-green">HIT</span></td><td class="small">A rung returned something</td><td class="small">The finding, cited</td></tr><tr><td><span class="badge b-teal">NEGATIVE</span></td><td class="small">Every rung ran and returned nothing</td><td class="small">A verified absence, with the routes shown</td></tr><tr><td><span class="badge b-amber">NEGATIVE AND APPROPRIATE</span></td><td class="small">The absence is the correct posture, not a gap</td><td class="small">The absence, stated as correct — with why</td></tr><tr><td><span class="badge b-red">NOT ATTEMPTED</span></td><td class="small">The ladder did not run</td><td class="small"><strong>Not an absence.</strong> Emit nothing and record the omission</td></tr>
+</table>
+
+<p>The third is the one most often missed. Some absences are the correct posture rather than a
+gap — an institution with no browser-automation estate has declined a capability its model does
+not need, and saying so is more useful than rendering it as a shortfall. The fourth is the one
+that causes damage: an unrun ladder rendered as "none found" is a claim nobody earned.</p>
+
+<h2>Representing absence</h2>
+<p>An empty surface is a value, not an omission. A missing required field fails the contract; an explicit
+empty state passes and renders correctly.</p>
+<table class="tbl">
+<tr><th style="width:270px">Situation</th><th>The payload emits</th><th>The app renders</th></tr>
+<tr><td>No leadership found after a full search</td><td>An empty roster, verified-absent, and the sources searched</td><td>The honest empty state, with what was searched</td></tr>
+<tr><td>Fewer than three dated financial points</td><td>The points, verified-sparse, no trend</td><td>The points, labelled a snapshot</td></tr>
+<tr><td>No stair-step derivable</td><td>A null ladder and a stated reason</td><td>The reason, not a blank card</td></tr>
+<tr><td>A figure failed the identity gate</td><td>A null value, quarantined, with its reason</td><td>A dash with a provenance note</td></tr>
+<tr><td>A cell's evidence is genuinely thin</td><td>Thin, the sources searched, the closure condition</td><td>The provisional-score state</td></tr>
+</table>
+
+<h2>A page tells one story</h2>
+<p>A page is not a container for surfaces. An AE reads it top to bottom in about ninety seconds
+and takes one argument away. Surfaces that are individually correct and collectively incoherent
+are a page that has failed, even though every gate passed.</p>
+
+<p>Each page payload carries a narrative thread of 45–75 words tracing the line through its
+surfaces in render order. It is written last, from what was actually produced — a thread written
+in advance describes the page the agent meant to make. Three arguments run across pages and must
+not fracture: <strong>the primary constraint</strong> (hero framing → top finding → act-now
+insight → platform readiness → roadmap phase one), <strong>the clock</strong> (why-now → triage
+→ horizon → cost of waiting), and <strong>the confidence</strong> (coverage → tier distribution
+→ ceilings → thin alerts → gate results).</p>
+
+<div class="callout co-teal">
+  <p>A page that does not cohere is more expensive than a page with a thin card on it. The thin
+  card costs one surface; the incoherent page costs the AE the argument.</p>
+</div>
+
+<h2>Colour conventions</h2>
+<p>Score resolves to band resolves to colour in one module. No payload field carries a hex
+value, a class name or an outline instruction — the payload carries the raw score, the band
+word where a surface renders one, and semantic flags. Thin evidence adds a dashed outline and
+does not change the fill, because the fill means maturity and nothing else.</p>
+
+<table class="tbl">
+<tr><th style="width:60px">Band</th><th style="width:170px">Word</th><th style="width:190px">Boundary</th><th>Fill</th></tr>
+<tr><td class="tk">M1</td><td><strong>Activating</strong></td><td class="small">score < 2.0</td><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#FFCB99;vertical-align:middle;margin-right:7px;border:1px solid rgba(0,0,0,.12)"></span><code>#FFCB99</code></td></tr><tr><td class="tk">M2</td><td><strong>Building</strong></td><td class="small">2.0 ≤ score < 3.0</td><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#62D7B8;vertical-align:middle;margin-right:7px;border:1px solid rgba(0,0,0,.12)"></span><code>#62D7B8</code></td></tr><tr><td class="tk">M3</td><td><strong>Competing</strong></td><td class="small">3.0 ≤ score < 4.0</td><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#27BBAF;vertical-align:middle;margin-right:7px;border:1px solid rgba(0,0,0,.12)"></span><code>#27BBAF</code></td></tr><tr><td class="tk">M4</td><td><strong>Differentiating</strong></td><td class="small">score ≥ 4.0</td><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#139F94;vertical-align:middle;margin-right:7px;border:1px solid rgba(0,0,0,.12)"></span><code>#139F94</code></td></tr><tr><td class="tk">—</td><td><strong>No score</strong></td><td class="small">score is null</td><td><span style="display:inline-block;width:15px;height:15px;border-radius:3px;background:#E5E7EB;vertical-align:middle;margin-right:7px;border:1px solid rgba(0,0,0,.12)"></span><code>#E5E7EB</code></td></tr>
+</table>
+<p class="small muted">Boundaries are strict less-than on the <strong>raw</strong> score, before
+display rounding. A score of 2.97 displays as 3.0 and bands as Building — prose must resolve the
+band from the raw value.</p>
+
+<div class="rule">
+  <div class="rule-lbl">Absent beats wrong</div>
+  <p>A dash with a provenance note costs nothing. A plausible-looking wrong figure costs the document its
+  credibility with the client, and the AE has no way to recover it in the room.</p>
+</div>
+
+</div>
+<div id="s12" class="section">
+
+<div class="eyebrow">Section 12</div>
+<h1>Audience model</h1>
+<p class="lead">Two audiences, one payload, one enforcement point. Internal rungs are marked in the payload
+so the serve layer can strip them; the frontend does not decide what is internal, because it never receives
+the internal fields.</p>
+
+<h2>What each audience reaches</h2>
+<table class="tbl">
+<tr><th>Rendered</th><th style="width:160px">Internal</th><th style="width:170px">Customer</th></tr>
+<tr><td>D1 Overview · D2 Insights · D3 Heatmap · D4 Platform · D6 Tech stack</td>
+    <td><span class="badge b-green">full</span></td><td><span class="badge b-teal">redacted</span></td></tr>
+<tr><td>D5 Context</td><td><span class="badge b-green">full</span></td><td><span class="badge b-red">locked state</span></td></tr>
+<tr><td>D7 Health</td><td><span class="badge b-green">analyst only</span></td><td><span class="badge b-red">no route</span></td></tr>
+<tr><td>Evidence rank scores and tier weights</td><td>shown</td><td><span class="badge b-red">stripped</span></td></tr>
+<tr><td>Scoring rationale</td><td>shown</td><td><span class="badge b-red">stripped</span></td></tr>
+<tr><td>Synthetic provenance — derived versus analyst</td><td>shown</td><td><span class="badge b-red">stripped</span></td></tr>
+<tr><td>Internal codes — cell ids, gate ids, evidence ids</td><td>shown as chips</td><td>capability <strong>names</strong> only</td></tr>
+<tr><td>Capability ceilings, sentiment, thought leadership</td><td>shown</td><td><span class="badge b-red">withheld</span></td></tr>
+<tr><td>Cross-entity pattern entity ids</td><td><span class="badge b-red">audit only</span></td><td><span class="badge b-red">never</span></td></tr>
+<tr><td>Thin-evidence and quarantine markers</td><td>shown</td><td><span class="badge b-green">shown</span></td></tr>
+</table>
+
+<div class="callout co-teal">
+  <p><strong>Honesty is not internal.</strong> Thin evidence and quarantine markers render to the client. An
+  assessment that states its own weaknesses is more credible than one that appears complete, and hiding them
+  is how a document gets caught out in the room.</p>
+</div>
+
+<div class="rule">
+  <div class="rule-lbl">Any new surface declares its side before it ships</div>
+  <p>There is no default. A surface added without an audience declaration has undefined redaction behaviour,
+  and the failure direction is the expensive one.</p>
+</div>
+
+<h2>Verification</h2>
+<p>The customer view is verified on rendered output, not by reading the code. The entire defect class here
+is a field nobody marked — and reading the marking logic cannot find a field absent from it. The scorecard
+export renders the same customer-view markup through a headless browser rather than a parallel template,
+because a second implementation is a second place for a redaction rule to be missing.</p>
+
+</div>
+<div id="s13" class="section">
+
+<div class="eyebrow">Section 13</div>
+<h1>Package ingest and entity resolution</h1>
+<p class="lead">How an assessment becomes something a synthesis agent can read. This runs before any agent
+claims the run.</p>
+
+<div class="pipe">
+  <div class="pipe-s"><div class="pipe-n">1</div><div class="pipe-t">Discover</div>
+    <div class="pipe-d">Scheduled traversal of the assessment tree, diffed against previous scans.</div></div>
+  <div class="pipe-s"><div class="pipe-n">2</div><div class="pipe-t">Classify</div>
+    <div class="pipe-d">Each artefact typed against the registry and ranked by source priority.</div></div>
+  <div class="pipe-s"><div class="pipe-n">3</div><div class="pipe-t">Resolve</div>
+    <div class="pipe-d">Entity inferred, test cases excluded, duplicates collapsed to a winner.</div></div>
+  <div class="pipe-s"><div class="pipe-n">4</div><div class="pipe-t">Parse</div>
+    <div class="pipe-d">Report, workbook and package files parsed. Read-only thereafter.</div></div>
+  <div class="pipe-s"><div class="pipe-n">5</div><div class="pipe-t">Queue</div>
+    <div class="pipe-d">The run appears as unclaimed and awaiting synthesis.</div></div>
+</div>
+
+<h2>What an assessment folder contains</h2>
+<p>Every client folder carries the same structure — eight top-level folders and seven nested, fifteen in
+all. The parser reads eight of them; the rest are retained for lineage.</p>
+
+<div class="code">&lt;Client Name&gt; - DMA/
+├── 01_evidence/                     <span class="cmt">the evidence corpus</span>
+│   └── entity_profile/              <span class="cmt">firmographics and identity</span>
+├── 02_research_workbook/            <span class="cmt">raw research, per cell</span>
+├── 03_scoring_workbook/             <span class="str">THE scoring authority</span>
+│   └── exports/                     <span class="cmt">flattened score projections</span>
+├── 04_reports/                      <span class="cmt">Assessment Report + Client Profile</span>
+├── 05_narrative_deck/               <span class="cmt">client-facing deck — not parsed</span>
+├── 06_peers/                        <span class="cmt">the peer cohort table</span>
+├── 07_governance/
+│   ├── layer1_qa/                   <span class="cmt">first-line QA on the assessment</span>
+│   └── layer2_audit/                <span class="cmt">independent audit and calibration</span>
+└── 08_appendices/
+    ├── recommendations/             <span class="cmt">recommendation detail</span>
+    ├── gap_priority/                <span class="cmt">ranked gap register</span>
+    └── research_appendix_csv/       <span class="cmt">issue register and flat exports</span></div>
+
+<div class="rule">
+  <div class="rule-lbl">Two folders the parser treats differently from the rest</div>
+  <p><code>03_scoring_workbook</code> is the only authority for a score, and the parser records the workbook
+  cell address alongside every figure. <code>05_narrative_deck</code> is deliberately not parsed: it is a
+  rendering of the report, so treating it as a source would create a second path to the same claim.</p>
+</div>
+
+<div class="callout co-teal">
+  <p><strong>Governance is an ingest source, not an archive.</strong> The two governance folders carry the
+  assessment's own quality findings — the thin-evidence register, calibration analysis and drift checks.
+  Those seed the thin-evidence alerts and the safeguard gate results rather than being re-derived. An
+  assessment that already knows where it is weak should not have to be re-diagnosed by the product.</p>
+</div>
+
+<h2>Source priority</h2>
+<p>Where two artefacts disagree, the higher row wins and the disagreement is recorded as a parser
+observation rather than silently resolved.</p>
+<table class="tbl">
+<tr><th style="width:34px">#</th><th style="width:270px">Artefact</th><th>Authoritative for</th></tr>
+<tr><td class="tk">1</td><td>Scoring workbook</td><td>Every score, every peer figure, and the cell each was read from</td></tr>
+<tr><td class="tk">2</td><td>Assessment report</td><td>The twelve structured report sections, gap prioritisation, roadmap</td></tr>
+<tr><td class="tk">3</td><td>Client profile research report</td><td>Focus areas with verbatim quotes and page numbers, leadership, firmographics narrative</td></tr>
+<tr><td class="tk">4</td><td>Package structured files</td><td>Evidence index, issue register, peer cohort, recommendation detail, run identity</td></tr>
+<tr><td class="tk">5</td><td>Ops sheet and enrichment connectors</td><td>AE ownership, firmographic enrichment</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">Two things the parser must capture, and cannot capture later</div>
+  <p>The workbook cell each score was read from — without it the grain assertion has nothing to resolve
+  against. And the artefact bytes themselves — without them an excerpt cannot be verified. Neither can be
+  reconstructed after the parse.</p>
+</div>
+
+<h2>Test case exclusion and deduplication</h2>
+<p>Detection runs before entity resolution, so a rehearsal folder never becomes an entity. Exclusion is
+recorded with the rule that fired, because a silently skipped folder is indistinguishable from a traversal
+bug. Deduplication applies four rules in strict order — artefact priority, completion date, parsed section
+count, then a stable tiebreak so the outcome is reproducible — and the loser is retained and marked rather
+than deleted.</p>
+
+<h2>The four-signal entity cascade</h2>
+<div class="flow">
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">1</div><div class="f-line f-line-teal"></div></div>
+    <div class="f-body"><div class="f-title">Run manifest</div>
+      <div class="f-desc">An explicit identity in the package. Highest confidence; stop here.</div></div></div>
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">2</div><div class="f-line f-line-teal"></div></div>
+    <div class="f-body"><div class="f-title">Request identifier</div>
+      <div class="f-desc">Carries the entity token in its own structure.</div></div></div>
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">3</div><div class="f-line f-line-teal"></div></div>
+    <div class="f-body"><div class="f-title">Document header extraction</div>
+      <div class="f-desc">Legal name from the report cover, resolved against known suffixes and trading
+      names.</div></div></div>
+  <div class="f-row"><div class="f-spine"><div class="f-dot f-dot-teal">4</div></div>
+    <div class="f-body"><div class="f-title">Folder name inference</div>
+      <div class="f-desc">Lowest confidence. Produces a pending-review entity, never an active one.</div></div></div>
+</div>
+
+<h2>The identity gate</h2>
+<p>Resolution establishes which entity a run belongs to. The identity gate is stricter and runs per figure,
+per quote, per document and per source domain, every time.</p>
+<table class="tbl">
+<tr><th style="width:34px">#</th><th style="width:350px">Assert</th><th>Catches</th></tr>
+<tr><td class="tk">1</td><td>Legal name matches, with suffixes and trading names resolved</td><td>A same-named institution in another market</td></tr>
+<tr><td class="tk">2</td><td>Regulator matches this entity's own</td><td>A regulator from another charter type — an instant contradiction</td></tr>
+<tr><td class="tk">3</td><td>Footprint and jurisdictions are consistent</td><td>The fastest contamination check available</td></tr>
+<tr><td class="tk">4</td><td>Source domain belongs to this entity or a known neutral registry</td><td>The cheapest check, and the one that catches the most</td></tr>
+<tr><td class="tk">5</td><td>Order of magnitude agrees with any other figure for the same metric</td><td>Two figures for one metric differing materially — a contradiction to resolve, not two data points to render</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">On failure</div>
+  <p>Quarantine the field, emit the reason, escalate. Never render a partial identity and never substitute a
+  plausible value.</p>
+</div>
+
+</div>
+<div id="s14" class="section">
+
+<div class="eyebrow">Section 14</div>
+<h1>Lifecycle and persistence</h1>
+
+<div class="code">claim ──▶ synthesise ──▶ [register_evidence]* ──▶ submit ──▶ verdict
+                                                       │           │
+                                               fail ◀──┘           │ pass
+                                                 │                 ▼
+                                                 └── repair ──▶ <span class="str">STAGED</span>
+                                                                   │
+                            all 6 pages STAGED + pass ───┤
+                                                                   ▼
+                                                             promote_run
+                                                                   │
+                                                                   ▼
+                                                             <span class="str">SERVING</span> (renders)</div>
+
+<div class="rule">
+  <div class="rule-lbl">The distinction that causes the most confusion</div>
+  <p>Accepted means staged. Rendered means promoted. A submission that passes validation appears nowhere a
+  human can see it. The two states exist so a run can be assembled surface by surface without a client ever
+  seeing a half-built page.</p>
+</div>
+
+<h2>The six states</h2>
+<table class="tbl">
+<tr><th style="width:130px">State</th><th>What is true</th></tr>
+<tr><td><strong>Claimed</strong></td><td>One Cowork session holds a lease so two cannot synthesise the same run concurrently. The lease expires, so a dead session cannot block a run permanently.</td></tr>
+<tr><td><strong>Synthesising</strong></td><td>Reading the bundle, the contract and the catalogue; reasoning; enriching; citing; writing.</td></tr>
+<tr><td><strong>Submitted</strong></td><td>One page's payload handed over and a structured verdict returned naming the gate, the path and the arithmetic.</td></tr>
+<tr><td><strong>Staged</strong></td><td>Passed validation. Persisted. Survives the session ending. Renders nowhere.</td></tr>
+<tr><td><strong>Promoted</strong></td><td>Every page passed and all 34 sections wrote into serving tables inside one transaction.</td></tr>
+<tr><td><strong>Superseded</strong></td><td>A newer run is active. This one stays queryable for the longitudinal surfaces.</td></tr>
+</table>
+
+<h2>Three rules that make iteration safe</h2>
+<table class="tbl">
+<tr><th style="width:320px">Rule</th><th>Consequence</th></tr>
+<tr><td><strong>Resubmission supersedes.</strong> A new submission for the same run and page replaces the previous row.</td>
+    <td>No merge, no accumulation, no cleanup. Submit, read the verdict, repair, resubmit.</td></tr>
+<tr><td><strong>Promotion is all-or-nothing.</strong> A pass is required for every page.</td>
+    <td>A client is never looking at a page from the new run beside a page from the old one.</td></tr>
+<tr><td><strong>Re-promotion is idempotent.</strong></td><td>Not an error. Retries are safe.</td></tr>
+</table>
+
+<h2>Three tiers, one direction</h2>
+<table class="tbl">
+<tr><th>Tier</th><th>Written by</th><th>Read by</th><th>Mutability</th></tr>
+<tr><td><span class="badge b-ing">Ingested</span></td><td>The package parser, at ingest</td><td>The synthesis agent, through the bundle</td><td>Read-only after parse</td></tr>
+<tr><td><span class="badge b-stage">Staging</span></td><td>The connector, at submit</td><td>The connector, at promote</td><td>Superseded, never merged</td></tr>
+<tr><td><span class="badge b-serv">Serving</span></td><td>The connector, at promote, only</td><td>The API, for every request</td><td>Replaced atomically per run</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">The boundary that matters most</div>
+  <p>The API reads serving tables only. If a surface can render from a staging table, the boundary has been
+  broken and unvalidated content can reach a client.</p>
+</div>
+
+<h2>Every serving row carries its provenance</h2>
+<p>Which run produced it, which client it belongs to, when it began rendering, which synthesis version
+produced it, whether it is analyst, derived or producer content, and every citation behind it.</p>
+
+<div class="callout co-orange">
+  <p><strong>Provenance is not cosmetic.</strong> A deterministically composed recommendation must not
+  present as an analyst recommendation, because an AE who quotes a synthetic recommendation as analyst
+  judgement is exposed in the room.</p>
+</div>
+
+<h2>Reruns</h2>
+<p>A new run does not delete the old one. Promotion swaps which run is active; the previous stays queryable
+because the longitudinal surfaces — velocity, recurring themes, the seen-in-N-runs chip, version diff — read
+across runs. A rerun must not be synthesised as though it were a first run. A catalogue version bump
+invalidates by version tag, and renamed cells resolve through the alias bridge rather than silently
+vanishing.</p>
+
+</div>
+<div id="s15" class="section">
+
+<div class="eyebrow">Section 15</div>
+<h1>Rerun intelligence</h1>
+<p class="lead">The product's obligation back to the assessment engine. Without it, every rerun rediscovers
+the same gaps.</p>
+
+<table class="ft">
+<tr><th style="width:210px">Signal</th><th>Carries</th><th style="width:180px">Consumed by</th></tr>
+<tr><td><div class="fn">Thin evidence</div><div class="fd">Every cell below three linked items.</div></td>
+    <td>Cell id, current count, sources searched, closure condition</td><td>Next run's pre-flight</td></tr>
+<tr><td><div class="fn">Evidence freshness</div><div class="fd">Cells whose support has aged past the dated boundary.</div></td>
+    <td>Cell id, oldest item age, reference date</td><td>Next run's enrichment queue</td></tr>
+<tr><td><div class="fn">Calibration flags</div><div class="fd">Scores materially out of line with the cohort.</div></td>
+    <td>Cell id, delta, peer basis and cohort size</td><td>Analyst review — re-verification, not adjustment</td></tr>
+<tr><td><div class="fn">Limiting absences</div><div class="fd">The artefact whose absence set each ceiling.</div></td>
+    <td>Category, named artefact, searchable description</td><td>Next run's research backlog</td></tr>
+<tr><td><div class="fn">Tier misclassification</div><div class="fd">Machine scans filed at a tier that caps the cell artificially.</div></td>
+    <td>Evidence id, filed tier, correct tier</td><td>Immediate correction</td></tr>
+</table>
+
+<div class="callout co-teal">
+  <p><strong>The limiting absence is the highest-value signal.</strong> A ceiling set by absence obliges the
+  analyst to have looked, and naming the artefact that would raise it turns a dead end into next run's
+  backlog. “No dedicated transformation office is evidenced” is searchable. “Insufficient evidence” is
+  not.</p>
+</div>
+
+<h2>The corpus as a calibration baseline</h2>
+<p>Across the corpus the product holds every score, every peer figure and every evidence count that produced
+them. That makes it the natural baseline for two questions the assessment engine cannot answer alone:
+whether a given score is an outlier for its sub-vertical and size tier, and whether coverage is improving
+run over run or the gate has simply loosened.</p>
+
+<h2>Longitudinal surfaces depend on prior runs</h2>
+<p>Velocity, recurring themes, the seen-in-N-runs chip and version diff all read across runs. This is why
+prior-run state is part of the synthesis input rather than an optional lookup.</p>
+
+</div>
+<div id="s16" class="section">
+
+<div class="eyebrow">Section 16</div>
+<h1>Success metrics</h1>
+<p class="lead">Two sets. Integrity tells us whether the product deserves to be used; adoption tells us
+whether it is.</p>
+
+<h2>Integrity — primary</h2>
+<div class="g2">
+  <div class="card card-lav"><div class="card-title">Grain violations per client</div>
+    <div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Quoted figures that do not resolve
+    to the cell they name. Enforced at submit, measured corpus-wide, and the ratchet only moves down.</div></div>
+  <div class="card card-lav"><div class="card-title">Identity quarantines per client</div>
+    <div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Counted, not minimised — a
+    quarantine is the gate working. The failure signal is one that should have fired and did not, caught by
+    cross-surface reconciliation.</div></div>
+  <div class="card card-lav"><div class="card-title">Unresolvable citation rate</div>
+    <div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Chips that open nothing. Target
+    zero, enforced at submit rather than measured after.</div></div>
+  <div class="card card-lav"><div class="card-title">Evidence coverage per pillar</div>
+    <div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Against the hard gate, per pillar
+    rather than overall. An overall figure can hide a failing pillar.</div></div>
+  <div class="card card-lav"><div class="card-title">Surface completeness</div>
+    <div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">All 38 client surfaces
+    exported and rendering, each declaring its data source. Target 100%.</div></div>
+  <div class="card card-lav"><div class="card-title">Honest empty states</div>
+    <div class="card-sub" style="margin-top:5px;color:var(--z-gray-body)">Share of absences carrying what
+    was searched. An absence with no record is a research failure wearing a finding's clothes.</div></div>
+</div>
+
+<h2>Adoption — secondary</h2>
+<table class="tbl">
+<tr><th>Metric</th><th style="width:190px">Target</th><th>What it tells us</th></tr>
+<tr><td>Runs opened before a client meeting</td><td>80% of active opportunities</td><td>Whether it reaches the moment it was built for</td></tr>
+<tr><td>Evidence drawer opens per session</td><td>five or more</td><td>Whether AEs trust it enough to check it — the drawer is where a challenge is survived</td></tr>
+<tr><td>Thin-evidence alerts resolved within 14 days of a rerun</td><td>80%</td><td>Whether the feedback loop is closing</td></tr>
+<tr><td>Conversation starters used verbatim</td><td>tracked, not targeted</td><td>Whether the prose is say-it-aloud or merely correct</td></tr>
+<tr><td>Customer view exports per engagement</td><td>at least one</td><td>Whether the redaction contract is trusted in front of a client</td></tr>
+<tr><td>Synthesis runs reaching promotion on first pass</td><td>rising</td><td>Whether the contract and verdicts are legible enough to work against</td></tr>
+</table>
+
+<div class="callout co-orange">
+  <p><strong>One class of metric deliberately absent.</strong> There is no target for time-to-first-token,
+  synthesis latency or model cost per session. The app performs no reasoning at request time, so the
+  interesting question is not how fast it thinks.</p>
+</div>
+
+</div>
+<div id="s18" class="section">
+
+<div class="eyebrow">Section 18</div>
+<h1>Versioning across assessments</h1>
+<p class="lead">Four independent version axes. Conflating any two produces a comparison that looks valid and
+is not.</p>
+
+<table class="ft">
+<tr><th style="width:110px">Axis</th><th style="width:180px">Carried by</th><th>What it means</th></tr>
+<tr><td><strong>Run</strong></td><td><code>run_id · run_seq</code></td><td>One complete assessment of one entity at one point in time. Promotion swaps which run is active; prior runs stay queryable forever.</td></tr>
+<tr><td><strong>Catalogue</strong></td><td><code>ccg_catalog_version</code></td><td>Which capability catalogue the run was scored against. Pinned at ingest and never changed for that run.</td></tr>
+<tr><td><strong>Producer</strong></td><td><code>producer_version</code></td><td>Which synthesis produced each section. Stamped per serving row, so one page can be re-synthesised without a rerun.</td></tr>
+<tr><td><strong>Contract</strong></td><td><code>contract_version</code></td><td>The payload shape a submission validated against. A contract bump invalidates staged-but-unpromoted work for the changed sections only.</td></tr>
+</table>
+
+<h2>What a comparison may assert</h2>
+<table class="tbl">
+<tr><th style="width:320px">Comparison</th><th>Permitted</th></tr>
+<tr><td>Two runs, same catalogue version</td><td><span class="badge b-green">Cell by cell.</span> Score, coverage and evidence deltas; recommendation carry-over.</td></tr>
+<tr><td>Catalogue bump, cell bridged by an alias</td><td><span class="badge b-teal">Cell by cell, with the rename disclosed.</span></td></tr>
+<tr><td>Catalogue bump, cell split or merged</td><td><span class="badge b-amber">Category level only.</span> The row says not comparable, and why.</td></tr>
+<tr><td>Catalogue bump, cell retired</td><td><span class="badge b-red">Not comparable.</span> Rendered as retired, never as a drop to zero.</td></tr>
+<tr><td>Composite across a catalogue bump</td><td><span class="badge b-amber">Disclosed as approximate.</span> The denominator changed.</td></tr>
+<tr><td>Anything across entities</td><td><span class="badge b-red">Never on a client surface.</span></td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">The failure this prevents</div>
+  <p>A renamed cell compared naively across a catalogue bump reads as a capability that vanished — which
+  looks like a regression, gets investigated as one, and is a rename. A split cell reads as a score that
+  halved. Both are the diff asserting more than the data supports, and both are prevented by refusing the
+  comparison rather than annotating it afterwards.</p>
+</div>
+
+<h2>Fixing one card without rerunning the assessment</h2>
+<p>A section can be wrong without the assessment being wrong. Because promoted staging rows are retained, a
+Cowork session can re-claim a promoted run, resubmit one page, and re-promote — five pages come from the
+retained rows, one from the new submission, and all sections rewrite in a single transaction. The atomic
+guarantee is unaffected; what changes is that five pages needed no re-synthesis.</p>
+
+<div class="callout co-orange">
+  <p><strong>This is why promotion retains its inputs.</strong> If promotion cleared them, fixing one card
+  would mean re-synthesising every page — which in practice means nobody fixes one card.</p>
+</div>
+
+</div>
+<div id="s19" class="section">
+
+<div class="eyebrow">Section 19</div>
+<h1>Persistence across users and sessions</h1>
+<p class="lead">Five classes of state with five owners and five lifetimes. The common design error is treating
+content as user state, or view state as server state.</p>
+
+<table class="ft">
+<tr><th style="width:150px">Class</th><th style="width:220px">Owner</th><th>Lives in</th></tr>
+<tr><td><strong>Content</strong></td><td>Global — identical for every user</td><td>Serving tables, keyed by run</td></tr>
+<tr><td><strong>Synthesis session</strong></td><td>One Cowork session at a time</td><td>Staging tables, plus a lease</td></tr>
+<tr><td><strong>User workspace</strong></td><td>Per user, per entity</td><td>Workflow tables</td></tr>
+<tr><td><strong>View state</strong></td><td>Per user, per tab</td><td>The URL — nothing server-side</td></tr>
+<tr><td><strong>Pinned run</strong></td><td>Per user, per entity</td><td>URL parameter, defaulted from the workspace row</td></tr>
+</table>
+
+<h2>Two AEs, one client</h2>
+<p>Both resolve to the active run and read the same serving rows. Both see identical numbers, prose and
+citations. What can differ: the audience (a URL parameter, not a user attribute), the pinned run, view state,
+and which tabs their role reaches. <strong>Content is never per-user.</strong> There is no per-user copy of a
+payload, no per-user cache, and nothing to reconcile between two readers.</p>
+
+<h2>A promotion lands while a page is open</h2>
+<div class="code">t0   AE opens the Overview            → resolves run 2, pins it in the URL
+t1   Cowork promotes run 3           → run 2 becomes superseded
+t2   AE clicks the Heatmap tab       → still run 2
+t3   A banner offers the newer assessment
+t4   AE clicks through               → the whole shell reloads on run 3
+
+<span class="num">The numbers never change under an open page.</span></div>
+
+<div class="rule">
+  <div class="rule-lbl">Why pinning is not optional</div>
+  <p>An AE reads the hero, walks into a meeting, and refers back to the tab twenty minutes later. If the run
+  swapped in between, the figure they quoted is no longer on screen and they cannot tell whether they misread
+  it or the data moved. Pinning costs one URL parameter and removes the entire class of failure.</p>
+</div>
+
+<h2>A Cowork session dies mid-synthesis</h2>
+<p>Staged work persists, including the failing verdicts. The lease expires and the run returns to unclaimed.
+A new session claims it, reads run progress, and continues from where the first left off — repairing the
+pages that failed and never re-synthesising the ones that passed.</p>
+
+<h2>Concurrency</h2>
+<table class="tbl">
+<tr><th style="width:330px">Situation</th><th>Behaviour</th></tr>
+<tr><td>Two Cowork sessions, same run</td><td>The second is refused. The lease is exclusive.</td></tr>
+<tr><td>Two Cowork sessions, different runs of one entity</td><td>Allowed. Whichever promotes last becomes active.</td></tr>
+<tr><td>An AE annotates a run that is then superseded</td><td>The annotation stays attached to the run it was made against.</td></tr>
+<tr><td>An alert is resolved, then a rerun reopens the cell</td><td>A new alert row. The reopening is itself a signal — the closure condition did not hold.</td></tr>
+</table>
+
+<h2>What survives what</h2>
+<table class="tbl">
+<tr><th style="width:250px">Event</th><th>Survives</th><th>Does not</th></tr>
+<tr><td>A user signs out</td><td>Annotations, alert dispositions, last-viewed run, saved searches</td><td>View state, unless the URL was saved</td></tr>
+<tr><td>A Cowork session ends</td><td>Staged submissions, verdicts, registered evidence</td><td>The claim lease, once expired</td></tr>
+<tr><td>A run is superseded</td><td>Everything — scores, evidence, sections, verdicts, annotations</td><td>Its active status only</td></tr>
+<tr><td>A catalogue bump</td><td>Every existing run, against its pinned version</td><td>Naive cross-version cell comparison</td></tr>
+<tr><td>A contract change</td><td>Promoted content, until re-synthesised</td><td>Staged-but-unpromoted work for changed sections</td></tr>
+</table>
+
+</div>
+<div id="s17" class="section">
+
+<div class="eyebrow">Section 20</div>
+<h1>Scope</h1>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+<div>
+<h4>In scope — v1</h4>
+<ul class="chk">
+  <li>Internal tool for Zennify AEs, analysts and practice leads</li>
+  <li>Package ingest from Drive with classification, entity resolution and deduplication</li>
+  <li>The DMA Insights MCP connector — all 12 tools — as the sole writable boundary</li>
+  <li>Synthesis by a Claude Cowork agent, page by page, against structured verdicts</li>
+  <li>Seven client dashboards and all 38 client surfaces</li>
+  <li>9 global surfaces including admin, import and the import audit</li>
+  <li>The full drilldown atlas — three shells, 15 panels, with stacking</li>
+  <li>Identity, grain and cross-surface reconciliation gates, blocking</li>
+  <li>Client-visible safeguard gate disclosure including a not-run state</li>
+  <li>Internal and customer audiences driven by payload marking</li>
+  <li>Thin-evidence queue and the feedback signals back to the assessment engine</li>
+  <li>Run history, superseded-run querying, version diff and longitudinal surfaces</li>
+  <li>Scorecard export with redaction applied at render</li>
+  <li>Corpus gate scanning at build time, with a downward-only ratchet</li>
+</ul>
+</div>
+<div>
+<h4>Out of scope — v1</h4>
+<ul class="chk chk-x">
+  <li>Any model call on the request path</li>
+  <li>A customer-facing portal — clients receive exports, not logins</li>
+  <li>Live research or scraping at request time</li>
+  <li>Assigning or adjusting maturity scores</li>
+  <li>Replacing the assessment execution engine</li>
+  <li>CRM write-back</li>
+  <li>A natural-language query interface</li>
+  <li>Cost, ROI or investment projections</li>
+  <li>Multi-tenant or white-label deployment</li>
+  <li>Cross-entity patterns on any client-visible surface</li>
+  <li>Unattended synthesis scheduling</li>
+</ul>
+</div>
+</div>
+
+<h2>Deferred, with a reason</h2>
+<table class="tbl">
+<tr><th style="width:230px">Deferred</th><th>Why not now</th><th style="width:240px">Revisit when</th></tr>
+<tr><td>Semantic evidence search</td><td>The embedding tier serves build-time grounding validation. Exposing it as a query surface reintroduces a request-time model dependency.</td><td>Grounding validation is stable and the cost is understood.</td></tr>
+<tr><td>A seventh payload page</td><td>Promotion requires a pass on every page, so a seventh raises the bar for every client in the corpus.</td><td>Only if a surface genuinely cannot be synthesised from an existing page's context.</td></tr>
+<tr><td>Cross-entity patterns for AEs</td><td>It is the one surface where one client's data can leak into another's view.</td><td>Counts-and-shares-only rendering is verified on rendered output.</td></tr>
+<tr><td>Unattended synthesis</td><td>Verdicts need a human in the loop while gate thresholds settle.</td><td>Corpus ceilings have moved down twice without a manual override.</td></tr>
+</table>
+
+<div class="rule">
+  <div class="rule-lbl">The invariants — breaking any of these is a breaking change, not a refactor</div>
+  <p>The app never calls a model at request time. All content writes go through the MCP connector. The API
+  reads serving tables only. Promotion is atomic across all 6 pages. The agent creates
+  5 id classes and no others. Evidence ids are recognised by one pattern in one module. Rank
+  scores are server-computed and bounded. A quoted figure and its named cell are the same cell. Every figure
+  passes the identity gate. A derived value is computed or null. Internal rungs are marked in the payload. A
+  corpus ceiling only ever moves down.</p>
+</div>
+
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const titles = {
+  s01:"01 — Product overview",
+  s02:"02 — Problem statement",
+  s03:"03 — Personas & roles",
+  s04:"04 — The synthesis model",
+  s13:"13 — Ingest & entity resolution",
+  s14:"14 — Lifecycle & persistence",
+  s05:"05 — Dashboard architecture",
+  s06:"06 — Surface register",
+  s07:"07 — Drilldown atlas",
+  s08:"08 — Insight cards",
+  s09:"09 — Heatmap & platform",
+  s10:"10 — Evidence & citation",
+  s11:"11 — Gates & disclosure",
+  s12:"12 — Audience model",
+  s15:"15 — Rerun intelligence",
+  s16:"16 — Success metrics",
+  s18:"18 — Versioning",
+  s19:"19 — Persistence & sessions",
+  s17:"20 — Scope"
+};
+function go(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(l => l.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(l => {
+    if ((l.getAttribute('onclick')||'').includes("'"+id+"'")) l.classList.add('on');
+  });
+  document.getElementById('tb-title').textContent = titles[id]||id;
+  window.scrollTo(0,0);
+}
+</script>
+</body></html>
