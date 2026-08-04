@@ -47,8 +47,16 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     engine = _engine()
     with engine.connect() as connection:
+        # Roles are cluster-level but schema grants are per-database: after
+        # a database rebuild the role can exist while this database's
+        # bootstrap (revision 0001) hasn't granted it CREATE yet. Switch
+        # roles only when the grant is in place; otherwise run as the login
+        # user — 0001 re-grants idempotently and SET ROLEs at its end.
         has_role = connection.execute(
-            text("SELECT 1 FROM pg_roles WHERE rolname = 'svc_migrate'")
+            text(
+                "SELECT EXISTS (SELECT FROM pg_roles WHERE rolname = 'svc_migrate')"
+                " AND has_schema_privilege('svc_migrate', 'public', 'CREATE')"
+            )
         ).scalar()
         if has_role:
             # alembic_version is created by whoever ran the very first

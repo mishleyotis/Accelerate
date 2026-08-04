@@ -80,6 +80,17 @@ def upgrade() -> None:
     # Alembic's own version table must not be writable by the services.
     # (It is created by the connected migration user; nothing to grant.)
 
+    # Hand the version table to the group role BEFORE switching to it —
+    # only the login user owns it at this point, and Alembic stamps the
+    # version row after this migration, under the new role.
+    op.execute("ALTER TABLE IF EXISTS alembic_version OWNER TO svc_migrate")
+    # Everything from here on — including later revisions in this SAME
+    # alembic invocation — runs as svc_migrate, so object ownership is
+    # deterministic from the very first `upgrade head` (env.py re-asserts
+    # the role on later invocations). A login user that cannot SET ROLE
+    # svc_migrate fails loudly here, which is correct.
+    op.execute("SET ROLE svc_migrate")
+
 
 def downgrade() -> None:
     for role, member in IAM_MEMBERS.items():
