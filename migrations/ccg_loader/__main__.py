@@ -109,11 +109,12 @@ TABS = {
 # (v5.0 uses the schema-HTML canonical names; v7.0 shipped with drift).
 # First present name wins.
 TAB_ALIASES: dict[str, tuple[str, ...]] = {
-    "6_Maturity_Descriptors": ("3_Maturity_Scoring_Bands",),
+    "2_Capability_Map": ("Capability Map",),
+    "6_Maturity_Descriptors": ("3_Maturity_Scoring_Bands", "Maturity Descriptors"),
     "4_L3_Detailed": ("4_L3_Platforms_Reference",),
     "5_L4_Detailed_Features": ("5_L4_Features",),
     "3_User_Stories_Catalogue": ("6_User_Stories",),
-    "7_Product_Catalogue": ("7_Product_Catalog",),
+    "7_Product_Catalogue": ("7_Product_Catalog", "Product Catalog"),
     "8_Agentforce_Agents_List": ("8_Agentforce_Agents",),
     "9_Platform_Constructs_Library": ("9_Platform_Constructs",),
     "14_CrossPillar_Stories": ("14_Cross_Pillar_Stories",),

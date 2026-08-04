@@ -94,7 +94,12 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   the 17 was v5.0's count; user confirmed 2026-08-04. Cell counts are
   unchanged (851 = 205+292+164+190, including 165 sub-vertical variant
   cells like `P1C1.3.CU1`). v5.0 workbooks (17 categories, for lineage
-  work): Drive folder `1rF9zdx1qF7BJ9t21eFdvZQW11Y5dUjy3`.
+  work): Drive folder `1rF9zdx1qF7BJ9t21eFdvZQW11Y5dUjy3`, staged at
+  `gs://digital-maturity-assessor-catalogue-staging/v5.0/`. v5.0 loads as
+  HISTORICAL (never `--make-current`): 836 cells, 17 categories.
+  v5→v7 resolution: 795 direct · 10 bridged renames · 31 NOT_COMPARABLE —
+  all 31 are P1C5 (ESG), the killed 17th category. Runs pinned to v5.0
+  serve against it; cross-version diffs render P1C5 as NOT_COMPARABLE.
 - v7.0 catalogue source of record: `gs://digital-maturity-assessor-catalogue-staging/v7.0/`.
 
 ## Open decisions — leave open, do not resolve silently

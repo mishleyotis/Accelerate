@@ -21,11 +21,22 @@ SUBVERTICAL_CODES = {
 }
 
 
+def _norm(name: str) -> str:
+    """Header normalisation so generations match: 'Sub_Cap_ID', 'Sub-Cap ID'
+    and 'SubCap ID' are one header; 'M1 - Foundational' matches the M1_
+    prefix. Non-alphanumerics collapse to single underscores, lowercased."""
+    return re.sub(r"_+", "_", re.sub(r"[^A-Za-z0-9]+", "_", name.strip())).strip("_").lower()
+
+
 def _headers(ws, anchor=None, max_scan=8):
-    """Map header name -> column index; find the header row by anchor."""
+    """Map normalised header name -> column index; header row by anchor."""
+    anchors = tuple(_norm(a) for a in (anchor if isinstance(anchor, tuple) else (anchor,))) if anchor else ()
     for r, row in enumerate(ws.iter_rows(min_row=1, max_row=max_scan, values_only=True), 1):
-        names = {str(v).strip(): i for i, v in enumerate(row) if v is not None}
-        if anchor is None or any(a in names for a in (anchor if isinstance(anchor, tuple) else (anchor,))):
+        names = {}
+        for i, v in enumerate(row):
+            if v is not None and str(v).strip():
+                names.setdefault(_norm(str(v)), i)
+        if not anchors or any(a in names for a in anchors):
             if len(names) >= 3:
                 return names, r + 1
     return {}, 2
@@ -33,13 +44,15 @@ def _headers(ws, anchor=None, max_scan=8):
 
 def _get(row, headers, *names, prefix_ok=True):
     for n in names:
-        if n in headers:
-            i = headers[n]
+        k = _norm(n)
+        if k in headers:
+            i = headers[k]
             return row[i] if i < len(row) else None
     if prefix_ok:
         for n in names:
+            k = _norm(n)
             for h, i in headers.items():
-                if h.startswith(n):
+                if h.startswith(k):
                     return row[i] if i < len(row) else None
     return None
 
@@ -99,7 +112,7 @@ def parse_capability_map(ws, version, pillar_id):
         out.append({
             "subcap_id": sid, "version": version, "capability_id": capability,
             "category_id": category, "pillar_id": pillar,
-            "name": _s(row, headers, "Sub_Cap_Name"),
+            "name": _s(row, headers, "Sub_Cap_Name", "Sub_Capability"),
             "weight": weight,   # v5.0 ships Pillar_Weight; v7.0 has none
             "l3_platform_areas": _split(_get(row, headers, "L3_Platforms_Addressing")),
             "l4_features": _split(_get(row, headers, "L4_Features_Available")),
@@ -111,7 +124,7 @@ def parse_maturity(ws, version, pillar_id):
     headers, first = _headers(ws, ("Sub_Cap_ID",))
     out, warns = [], []
     # Long form (v5.0-era): one row per (subcap, band) with a Band column.
-    if "Band" in headers or "Maturity Band" in headers:
+    if "band" in headers or "maturity_band" in headers:
         for row in _rows(ws, headers, first):
             sid = _s(row, headers, "Sub_Cap_ID")
             band = _s(row, headers, "Band", "Maturity Band")
@@ -125,7 +138,7 @@ def parse_maturity(ws, version, pillar_id):
     # second = features.
     band_cols = {}
     for band in ("M1", "M2", "M3", "M4", "M5"):
-        cols = sorted((i, h) for h, i in headers.items() if h.startswith(f"{band}_"))
+        cols = sorted((i, h) for h, i in headers.items() if h.startswith(f"{band.lower()}_"))
         if cols:
             band_cols[band] = (cols[0][0], cols[1][0] if len(cols) > 1 else None)
     if not band_cols:
@@ -214,11 +227,11 @@ def parse_products(ws, version, pillar_id):
     out = []
     for row in _rows(ws, headers, first):
         vendor = _s(row, headers, "Vendor")
-        name = _s(row, headers, "Component_Name", "Product_Name")
+        name = _s(row, headers, "Component_Name", "Product_Name")   # v7 · v5
         if not vendor or not name:
             continue
         out.append({"version": version, "vendor": vendor, "product_name": name,
-                    "component_type": _s(row, headers, "Component_Type"),
+                    "component_type": _s(row, headers, "Component_Type", "Product_Category"),
                     "l3_platform_area": _s(row, headers, "L3_Platform_Area"),
                     "description": _s(row, headers, "Description"),
                     "source_type": _s(row, headers, "Source_Type"),
@@ -440,8 +453,9 @@ def parse_vc_mapping(ws, version, pillar_id):
     # match full-name subvertical columns by prefix (headers may truncate)
     sv_cols = []
     for full, code in SUBVERTICAL_CODES.items():
+        key = _norm(full)
         for h, i in headers.items():
-            if h.startswith(full[:14]):
+            if h.startswith(key[:14]):
                 sv_cols.append((code, i))
                 break
     out, warns = [], []
@@ -467,24 +481,25 @@ def parse_vc_mapping(ws, version, pillar_id):
     return out, warns
 
 
-_R1_PRIOR = re.compile(r"^Sub_?Cap[ _]?ID \((v?[\d.]+) origina", re.IGNORECASE)
+_R1_PRIOR = re.compile(r"^sub_cap_id_(v?[\d_]+)_original")
 
 
 def parse_alias_bridge(ws, current_version, pillar_id):
-    headers, first = _headers(ws, ("Sub_Cap_ID (post-rename)",))
+    headers, first = _headers(ws, ("Sub_Cap_ID post rename",))
     prior_col = prior_version = None
     for name, idx in headers.items():
         m = _R1_PRIOR.match(name)
         if m:
             prior_col = idx
             v = m.group(1)
+            v = v.replace("_", ".")
             prior_version = v if v.startswith("v") else f"v{v}"
             break
     out, warns = [], []
-    if prior_col is None or "Sub_Cap_ID (post-rename)" not in headers:
+    if prior_col is None or "sub_cap_id_post_rename" not in headers:
         warns.append("alias bridge columns not recognised")
         return out, warns
-    cur_col = headers["Sub_Cap_ID (post-rename)"]
+    cur_col = headers["sub_cap_id_post_rename"]
     migrated = 0
     for row in _rows(ws, headers, first):
         prior = str(row[prior_col] or "").strip() if prior_col < len(row) else ""
