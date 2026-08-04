@@ -47,12 +47,22 @@ if [ -f apps/mcp/Dockerfile ]; then
 fi
 if [ -f apps/web/Dockerfile ]; then
   say "web"
+  # Session-cookie signing secret: created once, never echoed (Secret Manager).
+  if ! gcloud secrets describe dmai-session-secret --project="$PROJECT_ID" >/dev/null 2>&1; then
+    head -c 48 /dev/urandom | base64 | gcloud secrets create dmai-session-secret \
+      --project="$PROJECT_ID" --data-file=- --quiet
+  fi
+  gcloud secrets add-iam-policy-binding dmai-session-secret \
+    --project="$PROJECT_ID" \
+    --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+    --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
   API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
     --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
     ${API_URL:+--set-env-vars="API_URL=${API_URL}"} \
+    --set-secrets="SESSION_SECRET=dmai-session-secret:latest" \
     --allow-unauthenticated --quiet
 fi
 

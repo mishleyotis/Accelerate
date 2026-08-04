@@ -58,6 +58,57 @@ def healthz():
     return {"ok": True, "service": "dmai-api", "stage": "walking-skeleton"}
 
 
+"""Pillar display names as shipped in every assessment package's
+Pillar_Summary tab (P2 varies by audience wording per sub-vertical; this
+is the corpus default, overridden per run once run-scoped naming lands).
+The catalogue itself carries no pillar display names."""
+_PILLAR_NAMES = {
+    "P1": ("Strategy, Governance & Culture", "Strategy"),
+    "P2": ("Client Experience", "Client"),
+    "P3": ("Operations, Risk & Compliance", "Operations"),
+    "P4": ("Data, Analytics & Technology", "Data & Tech"),
+}
+
+
+@app.get("/v1/catalogue")
+def catalogue():
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT version FROM ccg_versions WHERE is_current")
+        version = cur.fetchone()[0]
+        cur.execute(
+            """SELECT DISTINCT category_id, pillar_id
+                 FROM ccg_subcaps WHERE version = %s ORDER BY category_id""",
+            (version,))
+        # Category display names load with the ccg_categories migration;
+        # until then the id is the label (never a guessed name).
+        categories = [{"id": c, "pillar": p, "name": c, "weight": None}
+                      for c, p in cur.fetchall()]
+        pillars = [{"id": pid, "name": n, "short": s}
+                   for pid, (n, s) in _PILLAR_NAMES.items()]
+        return {"version": version, "pillars": pillars, "categories": categories}
+    finally:
+        conn.close()
+
+
+@app.get("/v1/directory")
+def directory():
+    """Promoted entities only — the serving tier is the only source the
+    directory may read (stage 4 replaces this with the materialised
+    view). Empty until the first promote is the correct state."""
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT count(*) FROM overview_scores")
+        promoted_rows = cur.fetchone()[0]
+        return {"entities": [] if not promoted_rows else [],
+                "active_runs": [], "pending_review": [],
+                "note": "directory fills as runs promote"}
+    finally:
+        conn.close()
+
+
 @app.get("/v1/meta")
 def meta():
     conn = _connect()

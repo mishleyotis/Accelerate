@@ -3,12 +3,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build:proto": "babel proto --presets @babel/preset-react --out-dir public/proto/js && node scripts/copy-vendor.js",
+    "build": "npm run build:proto && next build",
     "start": "next start -p ${PORT:-3000}"
   },
   "dependencies": {
     "next": "14.2.32",
     "react": "18.3.1",
     "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.24.8",
+    "@babel/core": "7.25.2",
+    "@babel/preset-react": "7.24.7"
   }
 }
