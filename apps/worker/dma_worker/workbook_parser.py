@@ -357,6 +357,67 @@ def parse_evidence_master(path: str) -> list:
 
 
 _CATEGORY_RE = re.compile(r"^P\d+C\d+$")
+_PILLAR_RE = re.compile(r"^P\d+$")
+
+
+def parse_grain_summaries(path: str) -> dict:
+    """The workbook's own STATED pillar and category grains
+    (Pillar_Summary / Category_Detail tabs, cached formula values). H4's
+    grain lock forbids recomputing these by averaging subcaps — cap
+    logic, weighting and analyst override are applied when they are
+    struck. The rubric Level column (M1-M5) is deliberately not read:
+    display banding is the app's four-band rule over raw scores."""
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    out = {"pillars": [], "categories": []}
+    try:
+        if "Pillar_Summary" in wb.sheetnames:
+            ws = wb["Pillar_Summary"]
+            headers, first = _header_map(ws, "Pillar")
+            for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
+                def v(key, _row=row):
+                    i = headers.get(key)
+                    return _row[i] if i is not None and i < len(_row) else None
+                pid = str(v("pillar") or "").strip()
+                if not _PILLAR_RE.match(pid):
+                    continue
+                score_col = openpyxl.utils.get_column_letter(headers["score"] + 1)
+                out["pillars"].append({
+                    "pillar_id": pid,
+                    "name": (str(v("pillar_name")).strip() if v("pillar_name") else None),
+                    "score": _num(v("score")),
+                    "weight": _num(v("weight_ib")),
+                    "peer_median": _num(v("peer_median")),
+                    "source_cell": f"Pillar_Summary!{score_col}{r}",
+                })
+        if "Category_Detail" in wb.sheetnames:
+            ws = wb["Category_Detail"]
+            headers, first = _header_map(ws, "Category_ID")
+            for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
+                def v(key, _row=row):
+                    i = headers.get(key)
+                    return _row[i] if i is not None and i < len(_row) else None
+                cid = str(v("category_id") or "").strip()
+                if not _CATEGORY_RE.match(cid):
+                    continue
+                score_col = openpyxl.utils.get_column_letter(headers["score"] + 1)
+                out["categories"].append({
+                    "category_id": cid,
+                    "name": (str(v("category_name")).strip() if v("category_name") else None),
+                    "pillar_id": (str(v("pillar")).strip() if v("pillar") else cid.split("C")[0]),
+                    "score": _num(v("score")),
+                    "peer_median": _num(v("peer_median")),
+                    "priority_score": _num(v("priority_score")),
+                    "priority_tier": (str(v("priority_tier")).strip() if v("priority_tier") else None),
+                    "source_cell": f"Category_Detail!{score_col}{r}",
+                })
+        return out
+    finally:
+        wb.close()
+
+
+def _num(value):
+    d = _decimal(value)
+    return None if d in (None, "UNPARSEABLE") else float(d)
 
 
 def parse_peer_benchmarks(path: str) -> list:

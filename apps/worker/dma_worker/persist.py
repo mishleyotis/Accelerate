@@ -75,7 +75,8 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     recommendations: list | None = None,
                     artefact_id: str | None = None,
                     sections: list | None = None,
-                    report_artefact_id: str | None = None) -> PersistResult:
+                    report_artefact_id: str | None = None,
+                    grains: dict | None = None) -> PersistResult:
     cur = conn.cursor()
     inst = manifest.get("institution", {})
     resolution = resolve(
@@ -134,8 +135,14 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     )
     run_id = cur.fetchone()[0]
 
+    # The payload wraps the manifest artefact with the workbook's STATED
+    # pillar/category grains (Pillar_Summary / Category_Detail): the
+    # ingested tier has no stated-grain table, H4's grain lock needs the
+    # stated rows server-side, and run_manifest is the run's one-to-one
+    # JSONB home. Readers take payload["manifest"].
     cur.execute("INSERT INTO run_manifest (run_id, payload) VALUES (%s, %s)",
-                (run_id, json.dumps(manifest)))
+                (run_id, json.dumps({"manifest": manifest,
+                                     "workbook_grains": grains or None})))
     n_obs = 0
     if composite_from_manifest:
         cur.execute(
