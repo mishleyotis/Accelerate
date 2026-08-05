@@ -16,12 +16,39 @@ from __future__ import annotations
 import json
 import re
 
+from .contracts import sections
 from .evidence_tools import get_evidence
 from .identifiers import MINT_RE
 
 GRAIN_TOLERANCE = 0.05
 V4_MIN_MEMBERS = 5
 V4_MIN_PROSE = 40
+
+# Every key under which a payload cites an evidence id. `e_ids` is the
+# envelope's own key; the rest are item-level keys the section contracts
+# declare. All of them are citations, so all of them resolve (invariant 4
+# is fail-closed) and all of them satisfy AG-03 — before this list existed
+# an id under `supporting_e_ids` was never checked against the store.
+_EV_KEYS = ("e_ids", "supporting_e_ids", "evidence_ids", "new_evidence_ids",
+            "source_e_id", "e_id")
+# The item schema appears in the doc under several lead-ins ("Per item:",
+# "Per card:", "Per recommendation:", or the inline "bars[] {…}" form).
+# The negative lookbehind keeps a NESTED array's schema — "gaps[] per row:
+# {…}" inside platform_story.platforms — from being read as the outer
+# item's, which would demand a citation the outer item never carries.
+_PER_ITEM_RE = re.compile(
+    r"(?<!\[\] )\bPer [a-z ]*?(?:item|card|recommendation|starter|event|row|"
+    r"point|signal|entry|person|gate|cap|tile|alert|pattern|phase|step)"
+    r"[^:{]*:\s*\{([^}]*)\}", re.I)
+
+# An item that asserts nothing needs no citation, and there are exactly
+# two honest shapes for that: a null-valued row (the derived-or-null rule)
+# and a recorded absence carrying the ladder that established it (the
+# absence protocol). A state that asserts a FIND with no id is neither —
+# it is a contradiction, and AG-03 blocks it.
+_ABSENT_STATES = {"UNWORKED", "WORKED_ABSENT", "NOT_RUN", "verified_absent",
+                  "verified_sparse", "cannot_estimate", "insufficient_cohort",
+                  "empty_state", "quarantined"}
 
 _BANDS = ("Activating", "Building", "Competing", "Differentiating")
 _FORBIDDEN_BANDS = ("Transformational", "M5")
@@ -46,6 +73,72 @@ _PILLAR_RE = re.compile(r"^P\d+$")
 def _reason(gate, section, path, message):
     return {"gate_id": gate, "section": section, "path": path,
             "message": message, "severity": "block"}
+
+
+def _declared_ev_keys(spec, field: str = None) -> tuple:
+    """The evidence keys a field's own item schema declares. The doc text
+    is the only place item keys are stated, so the requirement is read
+    from the contract rather than hand-listed here: a field that gains an
+    evidence key gains its enforcement in the same edit."""
+    doc = spec.get("doc") or ""
+    m = _PER_ITEM_RE.search(doc)
+    if not m and field:
+        # inline form, keyed by the field's own name: "bars[] {…, e_id}"
+        m = re.search(re.escape(field) + r"\[\]\s*\{([^}]*)\}", doc)
+    if not m:
+        return ()
+    keys = {k.strip().rstrip("[]") for k in m.group(1).split(",")}
+    return tuple(k for k in _EV_KEYS if k in keys)
+
+
+def _asserts_nothing(item: dict) -> bool:
+    """True when the item makes no claim, so no citation is owed."""
+    if item.get("quarantined"):
+        return True
+    for key in ("state", "status", "basis", "peer_basis"):
+        state = item.get(key)
+        if isinstance(state, str) and state in _ABSENT_STATES:
+            # an absence is a finding only with the search that established it
+            return bool(item.get("sources_searched") or item.get("queries_run"))
+    return "value" in item and item.get("value") in (None, "")
+
+
+def _check_item_evidence(page: str, payload: dict) -> list:
+    """AG-03 — every claim carries an evidence id, inferences included.
+
+    A card, signal, finding, ceiling or register row that asserts
+    something about the institution and cites nothing is unfalsifiable:
+    it renders to a client with no way back to a source. The section
+    envelope's e_ids are not enough — a reader drills into the ITEM."""
+    out = []
+    for name, sec in sections(page).items():
+        body = payload.get(name)
+        if not isinstance(body, dict):
+            continue
+        for fname, spec in sec["fields"].items():
+            ev_keys = _declared_ev_keys(spec, fname)
+            if not ev_keys:
+                continue
+            items = body.get(fname)
+            if not isinstance(items, list):
+                continue
+            for i, item in enumerate(items):
+                if not isinstance(item, dict) or _asserts_nothing(item):
+                    continue
+                if any(item.get(k) for k in ev_keys):
+                    continue
+                shown = " or ".join(repr(k) for k in ev_keys)
+                out.append(_reason(
+                    "AG-03", name, f"{name}.{fname}[{i}].{ev_keys[0]}",
+                    f"this item asserts a claim and cites no evidence — the "
+                    f"{page}.{name}.{fname} item schema declares {shown}, and "
+                    "every claim resolves to at least one registered evidence "
+                    "id, inferences included. Register the source with "
+                    "register_evidence and cite the id it returns, or state "
+                    "the absence explicitly with its sources_searched ladder. "
+                    "A state that asserts a find with an empty id list is a "
+                    "contradiction, not an empty state"))
+    return out
 
 
 def band_for(raw) -> str | None:
@@ -158,9 +251,13 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     for name, body in payload.items():
         if isinstance(body, dict):
             for _path, obj in _walk(body, name):
-                for e in obj.get("e_ids") or []:
-                    if isinstance(e, str):
-                        cited.setdefault(e, name)
+                for key in _EV_KEYS:
+                    val = obj.get(key)
+                    # every citation key, not just the envelope's e_ids:
+                    # a fabricated id under supporting_e_ids is still one
+                    for e in ([val] if isinstance(val, str) else (val or [])):
+                        if isinstance(e, str):
+                            cited.setdefault(e, name)
     if cited:
         split = get_evidence(conn, run_id, sorted(cited))
         for e in split.get("not_found", []):
@@ -263,6 +360,9 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 "r_layer verdict — a verdict you did not "
                                 "write down is a step you can convince "
                                 "yourself you took"))
+
+    # ── AG-03: every claim-bearing item cites evidence ─────────────────
+    reasons.extend(_check_item_evidence(page, payload))
 
     sg = _run_v4(conn, run_id, page, payload, encoder)
     return reasons, sg
