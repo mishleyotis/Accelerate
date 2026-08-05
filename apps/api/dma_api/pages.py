@@ -39,23 +39,23 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
     if run:
         cur.execute("""SELECT id, request_id, completed_at, promoted_at,
                               ccg_catalog_version, scored_cells, catalogue_cells,
-                              status, composite
+                              status, composite, is_active
                          FROM runs WHERE id = %s AND entity_id = %s""",
                     (run, entity_id))
         row = cur.fetchone()
         if row is None:
             raise ApiError(404, "entity_not_found",
                            f"run {run} does not belong to {display_id}")
-        if row[7] != "ACTIVE" and not allow_history:
+        if not row[9] and not allow_history:
             raise ApiError(409, "run_superseded",
                            "the pinned run is no longer active; pass "
                            "history=true to read it deliberately")
     else:
         cur.execute("""SELECT id, request_id, completed_at, promoted_at,
                               ccg_catalog_version, scored_cells, catalogue_cells,
-                              status, composite
+                              status, composite, is_active
                          FROM runs
-                        WHERE entity_id = %s AND status = 'ACTIVE'
+                        WHERE entity_id = %s AND is_active
                           AND promoted_at IS NOT NULL
                         ORDER BY promoted_at DESC LIMIT 1""", (entity_id,))
         row = cur.fetchone()
@@ -69,7 +69,8 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                 "completed_at": row[2].isoformat() if row[2] else None,
                 "promoted_at": row[3].isoformat() if row[3] else None,
                 "ccg_catalog_version": row[4], "scored_cells": row[5],
-                "catalogue_cells": row[6], "is_active": row[7] == "ACTIVE",
+                "catalogue_cells": row[6], "status": row[7],
+              "is_active": bool(row[9]),
                 "composite": float(row[8]) if row[8] is not None else None}
     return entity_id, entity, run_meta, row[3]
 

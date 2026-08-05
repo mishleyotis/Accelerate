@@ -218,3 +218,15 @@ def test_etag_carries_run_promotion_and_audience():
     assert internal.startswith('W/"abc.') and internal.endswith('.internal"')
     assert internal != customer, "one run serves two documents"
     assert etag_for({"run_id": "abc", "promoted_at": None}, "internal") == 'W/"abc.0.internal"'
+
+
+def test_active_run_predicate_matches_the_real_enum():
+    """runs.status is run_status_t (INGESTED · CLAIMED · SYNTHESISING ·
+    STAGED · PROMOTED · SUPERSEDED) — there is no 'ACTIVE' value, and
+    comparing against one aborts the query with 22P02. The active run is
+    the one promote flagged: is_active AND promoted_at IS NOT NULL."""
+    src = (ROOT / "apps" / "api" / "dma_api" / "pages.py").read_text()
+    assert "status = 'ACTIVE'" not in src
+    assert "AND is_active" in src and "promoted_at IS NOT NULL" in src
+    # and the run envelope reports both, so a caller can tell them apart
+    assert '"status": row[7]' in src and '"is_active": bool(row[9])' in src
