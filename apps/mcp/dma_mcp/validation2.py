@@ -320,7 +320,7 @@ def _run_v4(conn, run_id, page, payload, encoder) -> list:
                           1 - (embedding <=> %s::vector)
                      FROM bundle_embeddings
                     WHERE run_id = %s AND scope_kind = %s
-                      AND (scope_id = %s OR %s IS NULL)
+                      AND (scope_id = %s OR %s::text IS NULL)
                     ORDER BY embedding <=> %s::vector LIMIT 3""",
                 (lit, run_id, kind, scope_id or None, scope_id or None, lit))
             nearest = [{"source_kind": a, "source_ref": b, "snippet": c2,
