@@ -361,7 +361,22 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     f"""SELECT e_id FROM evidence_index
                         WHERE entity_id = %s AND content_hash = {_HASH_SQL}""",
                     (entity_id, ev.get("source_url"), ev.get("excerpt")))
-                kept = cur.fetchone()[0]
+                hit = cur.fetchone()
+                if hit is None:
+                    # Neither lookup resolved: the insert conflicted on a
+                    # constraint this branch cannot attribute. Record it and
+                    # drop THIS item — one unattributable row must not sink a
+                    # whole package, and a silent alias to the wrong row would
+                    # be worse than an absent citation.
+                    _observe("evidence_conflict_unresolved", {
+                        "package_local_id": ev["e_id"],
+                        "candidate": candidate,
+                        "has_url": bool(ev.get("source_url")),
+                        "has_excerpt": bool(ev.get("excerpt")),
+                        "reason": "ON CONFLICT fired but neither the e_id nor "
+                                  "the (entity_id, content_hash) lookup matched"})
+                    return None
+                kept = hit[0]
                 branch = ("duplicate_within_run" if kept in landed
                           else "dedup_same_entity")
                 cur.execute(
