@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 
 from .entity_resolution import DMA_ASM, resolve
-from .workbook_parser import WorkbookParse
+from .workbook_parser import WorkbookParse, mine_evidence_from_rationales
 
 # Mirrors CONTENT_HASH_EXPR in migrations/versions/0005_ingested_tier.py with
 # claim_type NULL (the package path never asserts a claim type). Used to find
@@ -290,12 +290,12 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             cur.execute(
                 """INSERT INTO evidence_index
                      (e_id, entity_id, origin, source_name, source_url, excerpt,
-                      tier, ers, published_date, reference_date)
-                   VALUES (%s,%s,'package',%s,%s,%s,%s,%s,%s,%s)
+                      tier, claim_type, ers, published_date, reference_date)
+                   VALUES (%s,%s,'package',%s,%s,%s,%s,%s,%s,%s,%s)
                    ON CONFLICT DO NOTHING RETURNING e_id""",
                 (candidate, entity_id, ev.get("source_name"), ev.get("source_url"),
-                 ev.get("excerpt"), ev.get("tier"), ev.get("ers"),
-                 ev.get("published_date"), reference_date))
+                 ev.get("excerpt"), ev.get("tier"), ev.get("claim_type"),
+                 ev.get("ers"), ev.get("published_date"), reference_date))
             if cur.fetchone():
                 landed.add(candidate)
                 return candidate
@@ -342,7 +342,28 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                                             "qualified": qualified})
         return None
 
+    # The general_dma Evidence_Master ships a Fact_Count but no fact TEXT; the
+    # verbatim excerpts live in the scoring tabs' Rationale, tagged per
+    # evidence id. Mine them and fill in what the ledger left blank — an
+    # evidence row with no excerpt reaches the evidence drawer empty, and a
+    # citation the reader cannot read is not a citation (invariant 4). The
+    # ledger still wins where it carries its own text.
+    mined = mine_evidence_from_rationales(workbook.scores)
+    if mined:
+        _observe("evidence_excerpts_mined", {
+            "source": "P*_Subcap_Scoring.Rationale tagged fragments",
+            "ids_with_excerpt": sum(1 for v in mined.values() if v.get("excerpt")),
+            "ids_seen": len(mined)})
+
     for ev in (evidence or []):
+        m = mined.get(ev["e_id"]) or {}
+        if not ev.get("excerpt") and m.get("excerpt"):
+            ev = {**ev, "excerpt": m["excerpt"]}
+        if not ev.get("subcaps") and m.get("subcaps"):
+            # The ledger's SubCaps column carries corpus tokens like
+            # ENTITY_PROFILE rather than cell ids; the cells that actually
+            # cite this item are the ones the drawer should link to.
+            ev = {**ev, "subcaps": m["subcaps"]}
         resolved = _land_evidence(ev)
         alias[ev["e_id"]] = resolved
         if resolved is None:

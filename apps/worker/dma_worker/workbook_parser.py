@@ -375,6 +375,58 @@ def parse_fuzzy_date(value):
         return None
 
 
+# The shipped corpus spells the evidence ledger's columns several ways. The
+# canonical general_dma tab reads
+#   Evidence_ID · Source · URL · Tier · Recency · Claim_Type · Fact_Count · SubCaps
+# while earlier generations used source_name / publish_date / fact_summary /
+# subcaps_supported. First alias present wins.
+_EV_ALIASES = {
+    "source_name": ("source_name", "source", "source_title", "publisher"),
+    "source_url": ("url", "source_url", "link"),
+    "tier": ("tier", "evidence_tier"),
+    "ers": ("ers_score", "ers"),
+    "published": ("publish_date", "published_date", "published", "date"),
+    # A separate column, and a different KIND of value: "Recency" states a
+    # band word (CURRENT / RECENT / …), never a date. Kept apart so a band is
+    # never parsed as a date nor a date mistaken for a band.
+    "recency": ("recency", "recency_band"),
+    "claim_type": ("claim_type", "claim"),
+    "fact_count": ("fact_count", "facts"),
+    "subcaps": ("subcaps_supported", "subcaps", "subcap_ids"),
+    # Only some generations carry the verbatim text here; where they do not,
+    # it is mined out of the scoring tabs' Rationale column (see below).
+    "excerpt": ("fact_summary", "excerpt", "verbatim", "quote", "summary"),
+}
+
+# The excerpt tag the scoring rationales use: "[E-012:F1] Board committees: …"
+# — one fact of one evidence item, verbatim, and the only place in the
+# general_dma workbook the excerpt text exists at all.
+_FACT_TAG = re.compile(r"\[(E-\d+)(?::(F\d+))?\]\s*")
+
+
+def _stated_band(recency, published) -> str | None:
+    """The band word the workbook asserted, carried for the record only.
+
+    The database generates recency_band from a date, and undated evidence is
+    UNVERIFIED, never current (charter invariant 9) — so a package that says
+    "CURRENT" without a publication date does not get to say it. The claim is
+    kept so the disagreement is visible rather than lost."""
+    for cand in (recency, published):
+        if cand is None or str(cand).strip() == "":
+            continue
+        if parse_fuzzy_date(cand) is not None:
+            continue                    # a real date, not a band word
+        return str(cand).strip().upper()
+    return None
+
+
+def _pick(headers: dict, names) -> int | None:
+    for n in names:
+        if n in headers:
+            return headers[n]
+    return None
+
+
 def parse_evidence_master(path: str) -> list:
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
@@ -392,31 +444,105 @@ def parse_evidence_master(path: str) -> list:
                 # evidence tab (links absent, counts computed zero) rather
                 # than failing wholesale.
                 return []
+        cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
+        cols["e_id"] = _pick(headers, ("evidence_id", "e_id"))
         out = []
         for row in ws.iter_rows(min_row=first, values_only=True):
             def v(key):
-                i = headers.get(key)
+                i = cols.get(key)
                 return row[i] if i is not None and i < len(row) else None
-            e_id = str(v("evidence_id") or "").strip()
+            e_id = str(v("e_id") or "").strip()
             if not e_id.startswith("E-"):
                 continue
             tier = str(v("tier") or "").strip().upper()
-            ers = _decimal(v("ers_score"))
+            ers = _decimal(v("ers"))
+            claim = str(v("claim_type") or "").strip().upper() or None
+            facts = _decimal(v("fact_count"))
             out.append({
                 "e_id": e_id,
-                "source_name": (str(v("source_name")).strip() if v("source_name") else None),
-                "source_url": (str(v("url")).strip() if v("url") else None),
+                "source_name": (str(v("source_name")).strip()
+                                if v("source_name") else None),
+                "source_url": (str(v("source_url")).strip()
+                               if v("source_url") else None),
                 "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
                 "ers": None if ers in (None, "UNPARSEABLE") else ers,
-                "published_date": parse_fuzzy_date(v("publish_date")),
-                "excerpt": (str(v("fact_summary")).strip() if v("fact_summary") else None),
+                # "Recency" ships a BAND word ("CURRENT"), not a date. A band
+                # asserted without a date cannot be honoured: undated evidence
+                # is UNVERIFIED, never current (charter invariant 9), so the
+                # stated word is carried for the record and the date stays null.
+                "published_date": parse_fuzzy_date(v("published")),
+                "stated_recency": _stated_band(v("recency"), v("published")),
+                "claim_type": claim if claim in
+                              ("FACT", "INFERENCE", "HYPOTHESIS",
+                               "CEILING_ESTIMATE") else None,
+                "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
+                "excerpt": (str(v("excerpt")).strip() if v("excerpt")
+                            and not str(v("excerpt")).strip().isdigit() else None),
                 "subcaps": [s for s in
-                            (x.strip() for x in str(v("subcaps_supported") or "").split(","))
+                            (x.strip() for x in str(v("subcaps") or "").split(","))
                             if SUBCAP_RE.match(s)],
             })
         return out
     finally:
         wb.close()
+
+
+def mine_evidence_from_rationales(scores: list) -> dict:
+    """Verbatim excerpts and subcap links, mined out of the scoring rationales.
+
+    The general_dma Evidence_Master carries a Fact_Count but no fact TEXT, so
+    without this every ingested evidence row reaches the evidence drawer with
+    an empty excerpt — and an evidence drawer with no excerpt is the one thing
+    the product cannot ship (invariant 4 requires a verbatim excerpt of
+    50–500 chars behind every citation).
+
+    The text does exist: each subcap's Rationale opens with tagged fragments,
+    `[E-012:F1] Board committees: Technology Committee (…)`, one per cited
+    fact. Returns `{e_id: {"excerpt": longest fragment, "fragments": [...],
+    "subcaps": [ids that cite it]}}`.
+
+    Nothing is composed or paraphrased here — a fragment is stored exactly as
+    the assessor wrote it, and the longest is chosen only because the excerpt
+    column holds one.
+    """
+    out: dict = {}
+    for s in scores or []:
+        text = str(getattr(s, "rationale", "") or "")
+        for e_id in getattr(s, "evidence_refs", None) or []:
+            rec = out.setdefault(str(e_id), {"fragments": [], "subcaps": []})
+            if s.subcap_id not in rec["subcaps"]:
+                rec["subcaps"].append(s.subcap_id)
+        if not text:
+            continue
+        # Split on the tags, keeping each tag with the text that follows it.
+        marks = list(_FACT_TAG.finditer(text))
+        for i, m in enumerate(marks):
+            e_id = m.group(1)
+            end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
+            frag = text[m.end():end]
+            # A fragment ends at the next evidence tag OR at the next section
+            # label ([MATURITY]: / [GAP]: / [CEILING]: / [SO WHAT]: …), whichever
+            # comes first. Without the second cut, one fact's excerpt swallows
+            # the assessor's maturity reasoning and stops being verbatim.
+            cut = re.search(r"\[[A-Z][A-Z ]{2,}\]\s*:?", frag)
+            if cut:
+                frag = frag[:cut.start()]
+            frag = frag.strip().strip(" .;·")
+            if len(frag) < 20:
+                continue
+            rec = out.setdefault(e_id, {"fragments": [], "subcaps": []})
+            if frag not in rec["fragments"]:
+                rec["fragments"].append(frag)
+            if s.subcap_id not in rec["subcaps"]:
+                rec["subcaps"].append(s.subcap_id)
+    for e_id, rec in out.items():
+        best = max(rec["fragments"], key=len) if rec["fragments"] else None
+        # The column is bounded at 500 chars by the registration gate; a
+        # longer fragment is truncated on a word boundary rather than dropped.
+        if best and len(best) > 500:
+            best = best[:500].rsplit(" ", 1)[0]
+        rec["excerpt"] = best
+    return out
 
 
 # Pillar-grain scoring tabs, across every shipped naming convention seen in

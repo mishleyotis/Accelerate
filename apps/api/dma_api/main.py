@@ -15,7 +15,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
-from .pages import ApiError, build_page, etag_for
+from .evidence import fetch as ev_fetch, redact_items as ev_redact
+from .pages import ApiError, build_page, etag_for, resolve_run
 
 _pool = {}
 
@@ -175,6 +176,43 @@ def directory():
         return {"entities": list(by_entity.values()),
                 "subvertical_labels": labels,
                 "active_runs": [], "pending_review": []}
+    finally:
+        conn.close()
+
+
+# Declared BEFORE the generic {page} route: FastAPI matches in declaration
+# order, and "evidence" would otherwise be read as a page name.
+@app.get("/v1/entities/{display_id}/evidence")
+def entity_evidence(display_id: str, request: Request, response: Response,
+                    audience: str = "internal", run: str | None = None,
+                    e_ids: str | None = None, role: str | None = None,
+                    history: bool = False):
+    """The evidence drawer's read path.
+
+    Entity-scoped and fail-closed (invariant 4): an id that belongs to another
+    entity comes back under `foreign`, never as a row. `e_ids` is a
+    comma-separated filter — the drawer asks for exactly the ids a card cites,
+    so the response is the resolution verdict for those ids and nothing else.
+    """
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            entity_id, entity, run_meta, _ = resolve_run(
+                cur, display_id, run, history)
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        wanted = [x.strip() for x in (e_ids or "").split(",") if x.strip()]
+        res = ev_fetch(cur, entity_id, wanted or None)
+        res["items"] = ev_redact(res["items"], audience)
+        tag = etag_for(run_meta, f"{audience}.evidence")
+        if request.headers.get("if-none-match") == tag:
+            return Response(status_code=304, headers={"ETag": tag,
+                                                      "Cache-Control": "private, max-age=0"})
+        response.headers["ETag"] = tag
+        response.headers["Cache-Control"] = "private, max-age=0"
+        return {"entity": entity, "run": run_meta, "audience": audience, **res}
     finally:
         conn.close()
 

@@ -213,9 +213,57 @@ def backfill_sections(conn, token, groups) -> int:
     return 1 if failed else 0
 
 
+def dump_headers(token, groups, needle: str) -> int:
+    """Print every tab's first non-empty rows for one package's workbook.
+
+    A diagnostic, not a pipeline step: the corpus does not standardise column
+    names any more than it standardises file names, and a parser cannot be
+    made tolerant of spellings nobody has read. Prints the first three rows of
+    each tab so a header row that sits under a title row is still visible.
+    """
+    import openpyxl
+    matches = [k for k in groups if needle.lower() in k.lower()
+               and "workbook" in groups[k]]
+    if not matches:
+        print(f"dump: no package folder matching {needle!r}")
+        return 1
+    folder = sorted(matches)[0]
+    print(f"dump: {folder}")
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "wb.xlsx")
+        with open(p, "wb") as fh:
+            fh.write(drive.download(token, groups[folder]["workbook"].file_id))
+        wb = openpyxl.load_workbook(p, read_only=True, data_only=True)
+        try:
+            print(f"dump: tabs = {wb.sheetnames}")
+            for name in wb.sheetnames:
+                ws = wb[name]
+                print(f"--- {name}")
+                for i, row in enumerate(
+                        ws.iter_rows(min_row=1, max_row=3, values_only=True), 1):
+                    cells = [str(v).strip() for v in row if v is not None
+                             and str(v).strip()]
+                    if cells:
+                        print(f"    r{i}: {cells[:22]}")
+        finally:
+            wb.close()
+    return 0
+
+
 def main() -> int:
     intake = os.environ["INTAKE_FOLDER_ID"]
     limit = int(os.environ.get("MAX_PACKAGES", "3"))
+
+    # The header dump touches Drive and nothing else, so it runs before the
+    # connection and before the scan lock. Taking the lock for a read-only
+    # diagnostic just means it loses a race with the Scheduler and reports
+    # nothing.
+    if os.environ.get("DUMP_HEADERS"):
+        print(f"scan: walking intake tree {intake}")
+        tree = drive.walk_tree(intake)
+        return dump_headers(drive.metadata_token(), _package_groups(tree),
+                            os.environ["DUMP_HEADERS"])
+
     conn = _connect()
 
     # One scan at a time: the Scheduler fires every 30 minutes and manual
@@ -259,6 +307,7 @@ def main() -> int:
         rc = backfill_sections(conn, drive.metadata_token(), groups)
         conn.close()
         return rc
+
 
     summary = run_scan(conn, tree, datetime.now(timezone.utc))
     print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")

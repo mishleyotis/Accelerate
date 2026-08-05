@@ -254,3 +254,67 @@ def test_a_pillar_shaped_tab_without_subcap_rows_is_observed_not_fatal(tmp_path)
     out = parse_scoring_workbook(str(p))
     assert [s.subcap_id for s in out.scores] == ["P2C1.1.1"]
     assert any(o.kind == "unrecognised_pillar_tab" for o in out.observations)
+
+
+def test_evidence_master_reads_the_corpus_real_column_names():
+    """The shipped general_dma ledger reads
+    Evidence_ID · Source · URL · Tier · Recency · Claim_Type · Fact_Count · SubCaps.
+    The parser was looking for source_name / publish_date / fact_summary /
+    subcaps_supported, so 75 of Baxter's 84 evidence rows landed with a tier and
+    nothing else — and an evidence drawer with no source and no excerpt is not a
+    drawer."""
+    import openpyxl, tempfile, os
+    from dma_worker.workbook_parser import parse_evidence_master
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Evidence_Master"
+    ws.append(["Evidence_ID", "Source", "URL", "Tier", "Recency", "Claim_Type",
+               "Fact_Count", "SubCaps"])
+    ws.append(["E-001", "NCUSO.org NCUA Data", "https://ncuso.org/x", "T1",
+               "CURRENT", "FACT", 2, "ENTITY_PROFILE"])
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "wb.xlsx")
+        wb.save(p)
+        rows = parse_evidence_master(p)
+    assert len(rows) == 1
+    r = rows[0]
+    assert r["source_name"] == "NCUSO.org NCUA Data"
+    assert r["source_url"] == "https://ncuso.org/x"
+    assert r["tier"] == "T1" and r["claim_type"] == "FACT"
+    assert r["fact_count"] == 2
+    # "Recency" ships a BAND word, not a date. Undated evidence is UNVERIFIED,
+    # never current — so the date stays null and the stated word is recorded.
+    assert r["published_date"] is None
+    assert r["stated_recency"] == "CURRENT"
+    # Fact_Count is a number: it must never be mistaken for the excerpt text.
+    assert r["excerpt"] is None
+    # ENTITY_PROFILE is not a cell id.
+    assert r["subcaps"] == []
+
+
+def test_excerpts_are_mined_verbatim_and_stop_at_the_next_label():
+    """The excerpt text exists only inside the scoring Rationale, tagged per
+    evidence id. A fragment must end at the next evidence tag OR the next
+    section label — otherwise one fact's excerpt swallows the assessor's
+    maturity reasoning and stops being verbatim."""
+    from dma_worker.workbook_parser import mine_evidence_from_rationales
+
+    class S:
+        def __init__(self, sid, rationale, refs):
+            self.subcap_id, self.rationale, self.evidence_refs = sid, rationale, refs
+
+    text = ("[EVIDENCE]: [E-012:F1] Board committees: Technology Committee "
+            "(Paul Martin chair, 7 members), Supervisory Committee. "
+            "[SECOND]: [E-014:F1] Jim Block: responsible for product lines since 1995. "
+            "[MATURITY]: Maps to M3 because a documented strategy exists. "
+            "[GAP]: Needs industry recognition.")
+    out = mine_evidence_from_rationales([S("P1C1.1.1", text, ["E-012", "E-014", "E-016"])])
+
+    assert out["E-012"]["excerpt"].startswith("Board committees: Technology Committee")
+    assert "MATURITY" not in out["E-012"]["excerpt"]
+    assert out["E-014"]["excerpt"] == ("Jim Block: responsible for product lines "
+                                       "since 1995")
+    assert "Maps to M3" not in out["E-014"]["excerpt"], "the reasoning is not an excerpt"
+    # cited but untagged: linked to the cell, with no excerpt invented for it
+    assert out["E-016"]["excerpt"] is None
+    assert out["E-016"]["subcaps"] == ["P1C1.1.1"]
