@@ -33,8 +33,22 @@ function ClientHeatmap({ entity, run }) {
     return out;
   }, [entity?.id]);
 
-  // Synth helper: derive what subcap belongs to focus area
-  const subcapsForFocusArea = (fa) => fa ? entity.subcaps.filter(s => fa.subcaps.some(prefix => s.id.startsWith(prefix.slice(0, 4)))) : [];
+  // The cells a focus area names — the ones it actually names. Matching on a
+  // 4-char prefix returned every cell in the CATEGORY (so a 7-cell focus area
+  // showed dozens), and returned nothing at all when an id did not start with
+  // a PxCy prefix, which collapsed the grid to `repeat(0, 1fr)` and rendered a
+  // blank card. Exact first, prefix only as a documented fallback.
+  const subcapsForFocusArea = (fa) => {
+    if (!fa || !Array.isArray(entity.subcaps)) return [];
+    const named = new Set(fa.subcaps || []);
+    if (!named.size) return [];
+    const exact = entity.subcaps.filter(s => named.has(s.id));
+    if (exact.length) return exact;
+    // Some packages name a capability (P4C1.2) where the grid holds its
+    // sub-capabilities (P4C1.2.1…): widen to descendants of a named id.
+    return entity.subcaps.filter(s =>
+      [...named].some(n => typeof n === "string" && s.id.startsWith(`${n}.`)));
+  };
 
   return (
     <div>
@@ -235,7 +249,11 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 14, marginBottom: 14 }}>
         <div className="card">
           <div style={{ fontSize: 11, color: "var(--z-muted)", marginBottom: 8 }}>Pillar contribution</div>
-          {Object.entries(fa.pillars_weight).map(([p, w]) => (
+          {!fa.pillars_weight || !Object.keys(fa.pillars_weight).length ? (
+            <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+              No cells linked to this focus area.
+            </div>
+          ) : Object.entries(fa.pillars_weight).map(([p, w]) => (
             <div key={p} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, marginBottom: 6 }}>
               <span className="chip purple" style={{ minWidth: 26, textAlign: "center" }}>{p}</span>
               <div className="prog" style={{ flex: 1, height: 6 }}><div className="prog-fill" style={{ width: `${w}%`, background: DMA.helpers.maturityHex(entity.pillar_scores[p]) }} /></div>
@@ -633,6 +651,23 @@ function SubcapHeatmap({ entity, catFocus, pillarFocus, showPeers, showIssues, o
 }
 
 /* ─────────────────────── VALUE CHAIN VIEW ─────────────────────── */
+// The cells a value-chain stage actually covers. Each stage declares its own
+// membership list; the view used to pick `subcaps.slice(hash(stage.id) % n, +8)`
+// instead, which is why the cells under "Loan Origination" had nothing to do
+// with loan origination. A stage that declares nothing renders empty and says
+// so — the arrangement is a claim about the client's operating model, and an
+// arbitrary slice of it is not one.
+function subcapsForStage(entity, vc) {
+  const named = new Set((vc && (vc.subcaps || vc.subcap_ids)) || []);
+  const all = Array.isArray(entity.subcaps) ? entity.subcaps : [];
+  if (!named.size || !all.length) return [];
+  const exact = all.filter((s) => named.has(s.id));
+  if (exact.length) return exact;
+  return all.filter((s) =>
+    [...named].some((n) => typeof n === "string" && s.id.startsWith(`${n}.`)));
+}
+
+
 function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }) {
   const [selected, setSelected] = useState(null);
   return (
@@ -647,10 +682,16 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
       <div className="g3" style={{ marginBottom: 14 }}>
         {DMA.VALUE_CHAINS.map(vc => {
           // Pick subcaps representative of value chain - sample from subcaps
-          const idx = Math.abs(hashCode(vc.id)) % entity.subcaps.length;
-          const subs = entity.subcaps.slice(idx, idx + 8);
-          const avg = subs.reduce((a, s) => a + s.score, 0) / Math.max(1, subs.length);
-          const peer = subs.reduce((a, s) => a + s.peerMedian, 0) / Math.max(1, subs.length);
+          const subs = subcapsForStage(entity, vc);
+          const scored = subs.filter(s => s.score != null);
+          const avg = scored.length
+            ? scored.reduce((a, s) => a + s.score, 0) / scored.length : null;
+          // Peer medians are absent at cell grain in every shipped package, so
+          // this is null far more often than not — and averaging nulls produced
+          // NaN on the tile. Computed-or-null, never a placeholder.
+          const withPeer = subs.filter(s => s.peerMedian != null);
+          const peer = withPeer.length
+            ? withPeer.reduce((a, s) => a + s.peerMedian, 0) / withPeer.length : null;
           return (
             <div key={vc.id} className="card-tile clickable" style={{ padding: 14, border: selected === vc.id ? "1px solid var(--z-teal)" : "1px solid var(--z-sep)", background: selected === vc.id ? "var(--z-ice)" : "#fff" }}
               onClick={() => setSelected(vc.id === selected ? null : vc.id)}>
@@ -659,18 +700,28 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
                 <span style={{ fontSize: 13, fontWeight: 600 }}>{vc.name}</span>
               </div>
               <div className="row" style={{ marginBottom: 8 }}>
-                <MaturityChip score={avg} />
-                <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>
+                {avg == null ? <span className="b b-muted">No score</span>
+                             : <MaturityChip score={avg} />}
+                {peer == null ? null
+                  : <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Peer {fx(peer, 1)}</span>}
                 <span className="spacer" />
-                <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{subs.length} subcaps</span>
+                <span style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                  {subs.length} subcap{subs.length === 1 ? "" : "s"}
+                </span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: `repeat(${subs.length}, 1fr)`, gap: 2 }}>
-                {subs.map(s => (
-                  <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}>
-                    {fx(s.score, 1)}
-                  </div>
-                ))}
-              </div>
+              {!subs.length ? (
+                <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
+                  No cells mapped to this stage for this run.
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(subs.length, 12)}, 1fr)`, gap: 2 }}>
+                  {subs.slice(0, 12).map(s => (
+                    <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}>
+                      {fx(s.score, 1)}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
@@ -678,8 +729,8 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
 
       {selected ? (() => {
         const vc = DMA.VALUE_CHAINS.find(x => x.id === selected);
-        const idx = Math.abs(hashCode(vc.id)) % entity.subcaps.length;
-        const subs = entity.subcaps.slice(idx, idx + 8);
+        if (!vc) return null;
+        const subs = subcapsForStage(entity, vc);
         const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => subs.some(s => s.id === sid)));
         return (
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14 }}>

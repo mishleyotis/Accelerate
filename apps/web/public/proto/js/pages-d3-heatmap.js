@@ -49,8 +49,21 @@ function ClientHeatmap({
     return out;
   }, [entity?.id]);
 
-  // Synth helper: derive what subcap belongs to focus area
-  const subcapsForFocusArea = fa => fa ? entity.subcaps.filter(s => fa.subcaps.some(prefix => s.id.startsWith(prefix.slice(0, 4)))) : [];
+  // The cells a focus area names — the ones it actually names. Matching on a
+  // 4-char prefix returned every cell in the CATEGORY (so a 7-cell focus area
+  // showed dozens), and returned nothing at all when an id did not start with
+  // a PxCy prefix, which collapsed the grid to `repeat(0, 1fr)` and rendered a
+  // blank card. Exact first, prefix only as a documented fallback.
+  const subcapsForFocusArea = fa => {
+    if (!fa || !Array.isArray(entity.subcaps)) return [];
+    const named = new Set(fa.subcaps || []);
+    if (!named.size) return [];
+    const exact = entity.subcaps.filter(s => named.has(s.id));
+    if (exact.length) return exact;
+    // Some packages name a capability (P4C1.2) where the grid holds its
+    // sub-capabilities (P4C1.2.1…): widen to descendants of a named id.
+    return entity.subcaps.filter(s => [...named].some(n => typeof n === "string" && s.id.startsWith(`${n}.`)));
+  };
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -532,7 +545,12 @@ function FocusAreaView({
       color: "var(--z-muted)",
       marginBottom: 8
     }
-  }, "Pillar contribution"), Object.entries(fa.pillars_weight).map(([p, w]) => /*#__PURE__*/React.createElement("div", {
+  }, "Pillar contribution"), !fa.pillars_weight || !Object.keys(fa.pillars_weight).length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "No cells linked to this focus area.") : Object.entries(fa.pillars_weight).map(([p, w]) => /*#__PURE__*/React.createElement("div", {
     key: p,
     style: {
       display: "flex",
@@ -1493,6 +1511,20 @@ function SubcapHeatmap({
 }
 
 /* ─────────────────────── VALUE CHAIN VIEW ─────────────────────── */
+// The cells a value-chain stage actually covers. Each stage declares its own
+// membership list; the view used to pick `subcaps.slice(hash(stage.id) % n, +8)`
+// instead, which is why the cells under "Loan Origination" had nothing to do
+// with loan origination. A stage that declares nothing renders empty and says
+// so — the arrangement is a claim about the client's operating model, and an
+// arbitrary slice of it is not one.
+function subcapsForStage(entity, vc) {
+  const named = new Set(vc && (vc.subcaps || vc.subcap_ids) || []);
+  const all = Array.isArray(entity.subcaps) ? entity.subcaps : [];
+  if (!named.size || !all.length) return [];
+  const exact = all.filter(s => named.has(s.id));
+  if (exact.length) return exact;
+  return all.filter(s => [...named].some(n => typeof n === "string" && s.id.startsWith(`${n}.`)));
+}
 function ValueChainView({
   entity,
   subcapsForFocusArea,
@@ -1529,10 +1561,14 @@ function ValueChainView({
     }
   }, DMA.VALUE_CHAINS.map(vc => {
     // Pick subcaps representative of value chain - sample from subcaps
-    const idx = Math.abs(hashCode(vc.id)) % entity.subcaps.length;
-    const subs = entity.subcaps.slice(idx, idx + 8);
-    const avg = subs.reduce((a, s) => a + s.score, 0) / Math.max(1, subs.length);
-    const peer = subs.reduce((a, s) => a + s.peerMedian, 0) / Math.max(1, subs.length);
+    const subs = subcapsForStage(entity, vc);
+    const scored = subs.filter(s => s.score != null);
+    const avg = scored.length ? scored.reduce((a, s) => a + s.score, 0) / scored.length : null;
+    // Peer medians are absent at cell grain in every shipped package, so
+    // this is null far more often than not — and averaging nulls produced
+    // NaN on the tile. Computed-or-null, never a placeholder.
+    const withPeer = subs.filter(s => s.peerMedian != null);
+    const peer = withPeer.length ? withPeer.reduce((a, s) => a + s.peerMedian, 0) / withPeer.length : null;
     return /*#__PURE__*/React.createElement("div", {
       key: vc.id,
       className: "card-tile clickable",
@@ -1559,9 +1595,11 @@ function ValueChainView({
       style: {
         marginBottom: 8
       }
-    }, /*#__PURE__*/React.createElement(MaturityChip, {
+    }, avg == null ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted"
+    }, "No score") : /*#__PURE__*/React.createElement(MaturityChip, {
       score: avg
-    }), /*#__PURE__*/React.createElement("span", {
+    }), peer == null ? null : /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
         color: "var(--z-muted)"
@@ -1573,13 +1611,18 @@ function ValueChainView({
         fontSize: 11,
         color: "var(--z-muted)"
       }
-    }, subs.length, " subcaps")), /*#__PURE__*/React.createElement("div", {
+    }, subs.length, " subcap", subs.length === 1 ? "" : "s")), !subs.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, "No cells mapped to this stage for this run.") : /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
-        gridTemplateColumns: `repeat(${subs.length}, 1fr)`,
+        gridTemplateColumns: `repeat(${Math.min(subs.length, 12)}, 1fr)`,
         gap: 2
       }
-    }, subs.map(s => /*#__PURE__*/React.createElement("div", {
+    }, subs.slice(0, 12).map(s => /*#__PURE__*/React.createElement("div", {
       key: s.id,
       className: `hm-cell b ${DMA.helpers.maturityClass(s.score)}`,
       style: {
@@ -1591,8 +1634,8 @@ function ValueChainView({
     }, fx(s.score, 1)))));
   })), selected ? (() => {
     const vc = DMA.VALUE_CHAINS.find(x => x.id === selected);
-    const idx = Math.abs(hashCode(vc.id)) % entity.subcaps.length;
-    const subs = entity.subcaps.slice(idx, idx + 8);
+    if (!vc) return null;
+    const subs = subcapsForStage(entity, vc);
     const insights = DMA.INSIGHT_CARDS.filter(ic => ic.affects.some(sid => subs.some(s => s.id === sid)));
     return /*#__PURE__*/React.createElement("div", {
       style: {

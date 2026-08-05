@@ -506,6 +506,24 @@ function faIndex(id, mod) {
   for (let i = 0; i < t.length; i++) h = (h << 5) - h + t.charCodeAt(i);
   return Math.abs(h) % mod;
 }
+function pillarShareOf(subcapIds) {
+  // {P1: 40, P4: 60} — the percentage of this focus area's cells sitting in
+  // each pillar. Computed, so it cannot disagree with the cell list beside it.
+  const ids = (subcapIds || []).filter(s => typeof s === "string");
+  if (!ids.length) return null;
+  const counts = {};
+  for (const id of ids) {
+    const m = /^(P\d+)/.exec(id);
+    if (m) counts[m[1]] = (counts[m[1]] || 0) + 1;
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (!total) return null;
+  const out = {};
+  for (const p of Object.keys(counts).sort()) {
+    out[p] = Math.round(counts[p] / total * 100);
+  }
+  return out;
+}
 function adaptFocusAreas(focus) {
   return (focus && focus.focus_areas || []).map(f => ({
     id: f.fa_id,
@@ -525,7 +543,11 @@ function adaptFocusAreas(focus) {
     // KPI targets are not in the H1 contract: an empty list, never invented
     // "current vs target" figures for a real client.
     kpis: [],
-    pillars_weight: null,
+    // Which pillars this focus area actually reaches, as a share of the cells
+    // it names — computed from involved_subcap_ids, not invented. Null when it
+    // names none, and the card tolerates null (it used to be hardcoded null,
+    // and Object.entries(null) blanked the whole page on the first click).
+    pillars_weight: pillarShareOf(f.involved_subcap_ids),
     icon: FA_ICONS[faIndex(f.fa_id, FA_ICONS.length)],
     colors: FA_GRADIENTS[faIndex(f.fa_id, FA_GRADIENTS.length)],
     illustration: null
@@ -640,8 +662,14 @@ function buildLiveEntity(entityId, pages, extras) {
     id: entityId,
     scores,
     pillar_scores: pillarScoresOf(scores),
+    // The workbook's STATED peer median per pillar, so the bar's peer tick and
+    // its delta come from the run rather than from a constant offset. Baxter's
+    // P1 sits at 3.11 against a stated 2.9 — ABOVE its peer set — which the
+    // old `score + 0.3` rendered as 0.3 BELOW.
+    pillar_peer_medians: pillarPeerMediansOf(scores),
     overall: num(scores && scores.composite),
     posture: scores && scores.posture || null,
+    posture_basis: scores && scores.posture_basis || null,
     framing: scores && scores.framing || null,
     claim: scores && scores.claim_label || null,
     confidence: scores && scores.confidence || null,
@@ -693,6 +721,16 @@ function pillarScoresOf(scores) {
   const out = {};
   for (const p of scores && scores.pillars || []) {
     if (p.pillar_id) out[p.pillar_id] = num(p.score);
+  }
+  return out;
+}
+function pillarPeerMediansOf(scores) {
+  // Only where the run states one — an absent median stays absent so the bar
+  // renders no tick rather than a fabricated benchmark.
+  const out = {};
+  for (const p of scores && scores.pillars || []) {
+    const v = num(p.peer_median);
+    if (p.pillar_id && v != null) out[p.pillar_id] = v;
   }
   return out;
 }

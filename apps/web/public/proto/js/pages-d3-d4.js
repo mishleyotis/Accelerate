@@ -149,10 +149,15 @@ function ClientPlatform({
     nCino: [`${entity.name} is mid-migration to nCino core - Workflow Engine is a low-risk extension during go-live.`, `Loan origination cycle is currently 12 days median. First Citizens went from 11 to 4 days post-Workflow Engine deployment.`, `STP rate at 1.8 - Workflow Engine can move this to 3.5 in 6 months on the existing core migration roadmap.`]
   };
 
-  // Live wins; the fixture answers only when there is no promoted data (the
-  // standalone prototype). Never undefined.
-  const prereqRows = livePrereqs.length ? livePrereqs : prerequisites[platform] || [];
-  const starterRows = liveStarters.length ? liveStarters : conversationStarters[platform] || [];
+  // Live wins, and in LIVE mode the fixture must not answer AT ALL: both maps
+  // are FCE-specific prose (naming nCino, Synovus, BMO, Truist, "1,800 users",
+  // "12 days median"), and the prerequisite rows invent their `current` figure
+  // by subtracting a constant from a pillar score. Falling back to them under a
+  // real client's name is the fabrication the LIVE rule exists to prevent, so
+  // here an absent promoted list stays absent.
+  const isLive = typeof window !== "undefined" && !!window.DMA_LIVE;
+  const prereqRows = livePrereqs.length ? livePrereqs : isLive ? [] : prerequisites[platform] || [];
+  const starterRows = liveStarters.length ? liveStarters : isLive ? [] : conversationStarters[platform] || [];
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -647,8 +652,32 @@ function ClientPlatform({
 function StairstepCurve({
   entity
 }) {
-  const [cluster, setCluster] = useState("P4-data");
-  const C = DMA.STAIRSTEP_CLUSTERS[cluster];
+  // The default cluster key was hardcoded "P4-data", so any run whose ladder
+  // does not carry that theme threw on C.label and blanked the whole lower
+  // half of the platform page — the missing maturity curve and roadmap.
+  const clusters = DMA.STAIRSTEP_CLUSTERS || {};
+  const keys = Object.keys(clusters);
+  const [cluster, setCluster] = useState(null);
+  const active = cluster && clusters[cluster] ? cluster : keys[0];
+  const C = active ? clusters[active] : null;
+  if (!C) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "card-head"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "row"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "stairs",
+      size: 14
+    }), /*#__PURE__*/React.createElement("h3", null, "Maturity stair-step"))), /*#__PURE__*/React.createElement("div", {
+      className: "card-body",
+      style: {
+        fontSize: 12,
+        color: "var(--z-muted)"
+      }
+    }, "No stair-step ladder promoted for this run."));
+  }
   const {
     openEvidence
   } = useApp();
@@ -701,9 +730,9 @@ function StairstepCurve({
     }
   }, "Where ", entity.name, " is today \u2192 M3 \u2192 M4 \u2192 M5 \xB7 with the platform that enables each step-up")), /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
-  }, Object.entries(DMA.STAIRSTEP_CLUSTERS).map(([k, v]) => /*#__PURE__*/React.createElement("button", {
+  }, Object.entries(clusters).map(([k, v]) => /*#__PURE__*/React.createElement("button", {
     key: k,
-    className: cluster === k ? "on" : "",
+    className: active === k ? "on" : "",
     onClick: () => setCluster(k)
   }, v.label)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -996,7 +1025,7 @@ function TransformationRoadmap({
     className: "co-title"
   }, "Sequencing rationale"), /*#__PURE__*/React.createElement("div", {
     className: "co-body"
-  }, "Foundation (P4C1) must reach M3 before Phase 2 can deliver on Marketing + Engage. Mosaic AI in Phase 3 requires the Lakehouse from Phase 1 to be operational. Phases overlap - staffing is concurrent, not sequential."))));
+  }, (roadmap || []).some(p => p.rationale) ? (roadmap || []).filter(p => p.rationale).map(p => `${p.phase ? `Phase ${p.phase}: ` : ""}${p.rationale}`).join(" ") : "No sequencing rationale promoted for this run."))));
 }
 function ChevronView({
   roadmap,

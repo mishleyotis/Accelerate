@@ -1092,7 +1092,12 @@
     WHY_NOW,
     FINANCIALS, SENTIMENT, COVERAGE_STATS, UNCERTAINTY_BANDS, EVIDENCE_SUMMARY,
     SOURCE_MAP, ENTITY_ALIASES,
-    PILLARS, PLATFORMS, CATEGORIES, VALUE_CHAINS,
+    PILLARS, PLATFORMS, CATEGORIES,
+    /* A value-chain stage's cell membership is a claim about THIS client's
+       operating model, so the fixture's arrangement must not stand in for it.
+       Empty in LIVE until heatmap.value_chain promotes (the section is
+       optional and Baxter's run submitted eight of nine sections without it). */
+    get VALUE_CHAINS() { return LIVE ? (liveField(null, "valueChains") || []) : VALUE_CHAINS; },
     ENTITIES,
     /* Getters, not values: a client route replaces DMA_ENTITY when the
        entity, run or audience changes, and a captured array would keep
@@ -1114,9 +1119,18 @@
     get ROADMAP() { return LIVE ? (liveField(null, "roadmap") || []) : ROADMAP; },
     QA_GATES,
     IMPORT_AUDIT, PENDING_REVIEW, ACTIVE_RUNS, PATTERNS,
-    PEER_SETS, SUBVERTICAL_LABEL,
-    STAIRSTEP_CLUSTERS,
-    EVIDENCE_TIERS, ROADMAP_IMPACTS, ISSUE_CAPS, NOTIFICATIONS,
+    SUBVERTICAL_LABEL,
+    /* These carry client-shaped CONTENT — named peer institutions, per-stage
+       cell membership, roadmap uplift figures, issue→cap maps, ladder steps —
+       so in LIVE they must be empty rather than the flagship fixture's. The
+       accessor rule ("null, never fce-001") was applied to the functions and
+       missed these plain objects, which is how a real client's value chain and
+       peer set were the fixture's. */
+    get PEER_SETS() { return LIVE ? (liveField(null, "peerSets") || {}) : PEER_SETS; },
+    get STAIRSTEP_CLUSTERS() { return LIVE ? (liveField(null, "stairstepClusters") || {}) : STAIRSTEP_CLUSTERS; },
+    get ROADMAP_IMPACTS() { return LIVE ? (liveField(null, "roadmapImpacts") || {}) : ROADMAP_IMPACTS; },
+    get ISSUE_CAPS() { return LIVE ? (liveField(null, "issueCaps") || {}) : ISSUE_CAPS; },
+    EVIDENCE_TIERS, NOTIFICATIONS,
     ALERTS: buildAlerts(),
     helpers: { maturityClass, maturityHex, maturityLabel, freshnessOf, clamp, round1 },
     getEntity: id => ENTITIES.find(e => e.id === id || e.slug === id),
@@ -1149,6 +1163,22 @@
     evidenceSummaryFor: id => LIVE ? liveField(id, "evidenceSummary") : (EVIDENCE_SUMMARY[id] || EVIDENCE_SUMMARY["fce-001"]),
     sourceFor: cardId => SOURCE_MAP[cardId] || null,
     whyNowFor: id => LIVE ? liveField(id, "whyNow") : (WHY_NOW[id] || synthWhyNow(id)),
+    /* The promoted SCQA and top findings. Both were adapted onto DMA_ENTITY and
+       read by nothing, so the cards rendered the prototype's fixture prose —
+       a fictional bank's narrative under a real client's name. No fixture
+       fallback: absent means the card says so. */
+    /* Acquisition rows: the D5 card used an inline FCE fixture, so every
+       client saw another institution's M&A history. Empty in fixture mode
+       too — the prototype's own list lived in the component, not here. */
+    get ACQUISITIONS() { return LIVE ? (liveField(null, "acquisitions") || []) : []; },
+    execSummaryFor: id => (LIVE ? liveField(id, "exec_summary") : null),
+    /* The registry holds the SECTION (its item array plus the envelope), so
+       these unwrap to the array the cards iterate. */
+    findingsFor: id => {
+      const sec = LIVE ? liveField(id, "findings") : null;
+      return (sec && Array.isArray(sec.findings)) ? sec.findings : [];
+    },
+    opportunityFor: id => (LIVE ? liveField(id, "opportunity") : null),
     /* Per-section provenance for the live run: what promoted, when, by which
        producer version. The prototype states provenance per card, so a card
        asks for its own section rather than the page's. */
@@ -1157,9 +1187,14 @@
     startersFor: id => LIVE ? (liveField(id, "starters") || []) : [],
     insightPriority,
     issueCapsFor: subcapId => {
+      // Read the LIVE-gated maps, not the module-level fixtures: this used to
+      // return the flagship's issue caps for a real client's cell.
+      const caps = LIVE ? (liveField(null, "issueCaps") || {}) : ISSUE_CAPS;
+      const issues = LIVE ? (liveField(null, "issues") || []) : ISSUES;
       const out = [];
-      Object.entries(ISSUE_CAPS).forEach(([iid, info]) => {
-        if (info.caps[subcapId] != null) out.push({ id: iid, cap: info.caps[subcapId], issue: ISSUES.find(x => x.id === iid) });
+      Object.entries(caps).forEach(([iid, info]) => {
+        const v = info && info.caps ? info.caps[subcapId] : null;
+        if (v != null) out.push({ id: iid, cap: v, issue: issues.find(x => x.id === iid) });
       });
       return out;
     },

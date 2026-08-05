@@ -17,48 +17,23 @@ function ClientOverview({ entity, run }) {
     return <InProgressBanner run={run} entity={entity} />;
   }
 
-  const findings = [
-    {
-      id: "F-01", title: "Data fragmentation is the root constraint, not under-investment",
-      theme: "Data foundation", platforms: ["SF", "DB"], evidence: ["E-047", "E-141"],
-      what: "Three production cores run in parallel with no canonical customer profile — a customer with a mortgage, a deposit account, and a card appears as three unrelated records.",
-      why: "Each core was retained through prior acquisitions rather than consolidated. The organization has invested heavily in analytics on top, but every downstream initiative inherits the fragmentation underneath.",
-      so_what: "Every channel or CX investment made before the substrate is fixed compounds the problem. The data foundation is the highest-leverage conversation on the board right now.",
-      magnitude: "Blocks 34 downstream subcaps",
-    },
-    {
-      id: "F-02", title: "Loan origination is where automation lands first",
-      theme: "Workflow", platforms: ["nCino"], evidence: ["E-236"],
-      what: "Loan origination is still substantially manual — hand-offs between underwriting, credit, and closing are tracked in email and spreadsheets.",
-      why: "The nCino migration already underway includes a Workflow Engine that isn't yet switched on for origination. The capability is bought but unused.",
-      so_what: "This is the fastest credible win: a 5–7 month cycle compression using a tool they already own, with no new procurement. It builds the proof point for the larger data conversation.",
-      magnitude: "5–7 month cycle compression",
-    },
-    {
-      id: "F-03", title: "The team generates insight faster than it acts on it",
-      theme: "Decisioning", platforms: ["DB", "TBL"], evidence: ["E-250", "E-283"],
-      what: "Tableau adoption is strong and broad, but insight rarely converts into an automated action or a next-best-action in the channel.",
-      why: "The reporting layer matured ahead of the activation layer. Analysts produce dashboards; there's no decisioning fabric to operationalize what they surface.",
-      so_what: "The appetite for data is already proven — so lead with activation (Data Cloud + Agentforce), not more BI. The muscle exists; it needs a destination.",
-      magnitude: "Readiness signal, not a gap",
-    },
-    {
-      id: "F-04", title: "Mobile is the weakest customer-facing channel",
-      theme: "Channels", platforms: ["TW", "SF"], evidence: ["E-271"],
-      what: "App-store sentiment sits meaningfully below regional-bank peers; customers cite friction in onboarding and servicing, not missing features.",
-      why: "The mobile experience is built on the fragmented data layer — personalization and straight-through servicing can't work when the customer isn't a single record.",
-      so_what: "Mobile is a symptom of F-01, not an independent project. Twilio Engage + Service Cloud close most of the experience gap once the profile is unified — sequence it after the substrate.",
-      magnitude: "Trails peer sentiment by ~0.8★",
-    },
-    {
-      id: "F-05", title: "Two C-suite hires open a 6–9 month decision window",
-      theme: "Timing", platforms: [], evidence: ["E-203"],
-      what: "A new CTO (ex-Wells Fargo, Apr 2026) and CDO (ex-JPM, May 2026) are both in their first two quarters.",
-      why: "New executives set platform direction early and lock commitments after. Combined with five open Data Cloud Architect roles, the organization is visibly preparing for a CDP decision it hasn't made yet.",
-      so_what: "This is the relationship window of the cycle. Engage now to shape the criteria before a point-solution is chosen — the technical case (F-01) and the political timing align exactly once.",
-      magnitude: "Window closes at nCino go-live",
-    },
-  ];
+  // The promoted findings, mapped onto the card's shape. This was a hardcoded
+  // five-item array of fictional prose — "three production cores", a CTO
+  // "ex-Wells Fargo", a CDO "ex-JPM" — rendered identically for every client,
+  // whose evidence ids resolved against nothing, which is why the card's
+  // "Evidence · click to view" list was always empty.
+  const findings = (DMA.findingsFor(entity.id) || []).map(f => ({
+    id: f.f_id,
+    title: asText(f.title),
+    theme: asText(f.theme),
+    platforms: f.platform_chips || [],
+    evidence: f.e_ids || [],
+    what: asText(f.body),
+    why: asText(f.rejected_alternative),
+    so_what: asText(f.consequence),
+    magnitude: asText(f.strategic_alignment),
+    subcaps: f.linked_subcap_ids || [],
+  }));
 
   return (
     <div>
@@ -98,8 +73,13 @@ function ClientOverview({ entity, run }) {
                     <FreshnessDot date={entity.assessment_date} withLabel />
                     {entity.data_source === "DRIVE_PARSE" ? <span className="b b-ph0">DRIVE PARSE</span> : null}
                   </div>
+                  {/* The run's own framing sentence. This was arithmetic on the
+                      fabricated 0.3 offset plus a hardcoded "Gap concentrated in
+                      P4 Data foundation" — true of the fixture, asserted of
+                      everyone. */}
                   <div style={{ fontSize: 13, color: "var(--z-body)", lineHeight: 1.5 }}>
-                    Trails {DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} peer median by {fx(((entity.pillar_scores.P1 + entity.pillar_scores.P2 + entity.pillar_scores.P3 + entity.pillar_scores.P4) / 4 - entity.overall - 0.3), 1)} points. Gap concentrated in P4 Data foundation.
+                    {asText(entity.framing) || asText(entity.posture_basis) ||
+                     `Composite ${fx(entity.overall, 1)} / 5 across ${DMA.PILLARS.length} pillars.`}
                   </div>
                 </div>
               </div>
@@ -107,19 +87,28 @@ function ClientOverview({ entity, run }) {
             <div>
               {DMA.PILLARS.map(p => {
                 const s = entity.pillar_scores[p.id];
-                const peer = s + 0.3;
+                // The workbook's own stated peer median for this pillar. This
+                // was `s + 0.3` — a constant offset presented as a benchmark,
+                // so every bar showed a peer tick 0.3 above the score and a
+                // delta of exactly ▼0.3. No figure is better than a made-up one:
+                // where the run states no median, no tick and no delta render.
+                const peer = (entity.pillar_peer_medians || {})[p.id];
                 const w = (s / 5) * 100;
-                const peerL = (peer / 5) * 100;
-                const delta = s - peer;
+                const peerL = peer == null ? null : (peer / 5) * 100;
+                const delta = peer == null ? null : s - peer;
                 return (
                   <div className="pbar" key={p.id} onClick={() => navigate(`/clients/${entity.id}/heatmap`, { pillar: p.id, run: run.id })} style={{ cursor: "pointer" }}>
                     <div className="pbar-name">{p.id} · {p.short}</div>
                     <div className="pbar-track">
                       <div className="pbar-fill" style={{ width: `${w}%`, background: DMA.helpers.maturityHex(s) }} />
-                      <div className="pbar-peer" style={{ left: `calc(${peerL}% - 1px)` }} title={`Peer ${fx(peer, 1)}`} />
+                      {peerL == null ? null : (
+                        <div className="pbar-peer" style={{ left: `calc(${peerL}% - 1px)` }} title={`Peer ${fx(peer, 1)}`} />
+                      )}
                     </div>
                     <div className="pbar-score">{fx(s, 1)}</div>
-                    <div className="pbar-delta" style={{ color: delta < 0 ? "var(--z-below)" : "var(--z-mid)" }}>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</div>
+                    <div className="pbar-delta" style={{ color: delta == null ? "var(--z-muted)" : (delta < 0 ? "var(--z-below)" : "var(--z-mid)") }}>
+                      {delta == null ? "—" : <>{delta >= 0 ? "▲" : "▼"} {fx(Math.abs(delta), 1)}</>}
+                    </div>
                   </div>
                 );
               })}
@@ -322,12 +311,62 @@ function SCQACard({ entity, expanded, onToggle, openEvidence }) {
         </div>
         <button className="btn btn-tertiary btn-sm" onClick={onToggle}>{expanded ? "Collapse ↑" : "Read full ↓"}</button>
       </div>
-      <div style={{ fontSize: 14, color: "var(--z-dark)", lineHeight: 1.7, maxWidth: 880 }}>
-        <span style={{ fontWeight: 600 }}>{entity.name}</span> is a mid-tier {DMA.SUBVERTICAL_LABEL[entity.subvertical].toLowerCase()} mid-way through a multi-year digital transformation. Current overall maturity ({fx(entity.overall, 1)} / 5) trails the peer median by 0.4, with the gap concentrated in P4 Data Foundation. Two recent C-suite hires open a 6-9 month integration window.{" "}
-        {expanded ? (
-          <>The institution has invested visibly in front-end channels (Tableau Cloud, Marketing Cloud roles, mobile redesign) but lacks the data substrate to operate any of these as a coherent customer-experience system. Without intervention, fragmentation deepens as nCino lands on top of FIS Profile core, and a future re-platform becomes harder. The strategic question is whether to invest now in a unified customer-data layer ahead of the nCino go-live, or continue to layer point solutions and accept the operating cost. Recommendation: lead the next 9 months with Salesforce Data Cloud + Databricks as the substrate <button className="chip" onClick={() => openEvidence("E-047")}>E-047</button> <button className="chip" onClick={() => openEvidence("E-089")}>E-089</button>.</>
-        ) : null}
+      <SCQABody entity={entity} expanded={expanded} openEvidence={openEvidence} />
+    </div>
+  );
+}
+
+/* The promoted SCQA, and nothing else. This card used to interpolate three
+   fields into a paragraph of prose about a fictional bank — "a mid-tier …
+   trails the peer median by 0.4 … Two recent C-suite hires open a 6-9 month
+   integration window", then an expanded body naming nCino, FIS Profile and
+   Databricks with two hardcoded evidence chips. All of it rendered under a
+   real client's name while the run's own six-field SCQA sat adapted and
+   unread. The contract's fields are the card. */
+const SCQA_PARTS = [
+  ["situation", "Situation"],
+  ["complication", "Complication"],
+  ["question", "Question"],
+  ["answer", "Answer"],
+  ["sequencing_rationale", "Why this order"],
+  ["cost_of_delay", "Cost of delay"],
+];
+
+function SCQABody({ entity, expanded, openEvidence }) {
+  const s = DMA.execSummaryFor(entity.id);
+  const parts = SCQA_PARTS.filter(([k]) => s && asText(s[k]));
+  if (!parts.length) {
+    return (
+      <div style={{ fontSize: 12.5, color: "var(--z-muted)" }}>
+        No executive narrative promoted for this run.
       </div>
+    );
+  }
+  // Collapsed shows the situation and the complication — the constraint is the
+  // point of the card; expanded shows all six with their headings.
+  const shown = expanded ? parts : parts.slice(0, 2);
+  const eIds = Array.isArray(s.e_ids) ? s.e_ids : [];
+  return (
+    <div style={{ fontSize: 14, color: "var(--z-dark)", lineHeight: 1.7, maxWidth: 880 }}>
+      {shown.map(([key, heading]) => (
+        <div key={key} style={{ marginBottom: 10 }}>
+          {expanded ? (
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".06em",
+                          color: "var(--z-mid)", textTransform: "uppercase",
+                          marginBottom: 3 }}>{heading}</div>
+          ) : null}
+          <div>{asText(s[key])}</div>
+        </div>
+      ))}
+      {expanded && eIds.length ? (
+        <div className="row" style={{ gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+          <span style={{ fontSize: 10.5, color: "var(--z-muted)" }}>EVIDENCE</span>
+          {eIds.map(eid => (
+            <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+              onClick={() => openEvidence(eid)}>{eid}</button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -544,7 +583,21 @@ function LeadershipPanel({ audience }) {
       </div>
       <div style={{ padding: "10px 16px", background: "var(--z-lav)", fontSize: 11, color: "var(--z-muted)", display: "flex", alignItems: "center", gap: 6 }}>
         <Icon name="info" size={11} />
-        <span>Critical roles flagged: <strong style={{ color: "var(--z-below)" }}>CISO absent</strong> from evidence</span>
+        {/* Derived from the roster's own gap rows. This read "CISO absent" as a
+            literal, so every client was told their CISO was missing. */}
+        {(() => {
+          const gaps = (DMA.LEADERSHIP || []).filter(x => x.gap_flag);
+          if (!gaps.length) {
+            return <span>No critical role gaps in the promoted roster.</span>;
+          }
+          const named = gaps.map(g => g.title || g.domain).filter(Boolean);
+          return (
+            <span>Critical roles flagged:{" "}
+              <strong style={{ color: "var(--z-below)" }}>
+                {named.length ? `${named.join(" · ")} absent` : `${gaps.length} absent`}
+              </strong>{" "}from evidence</span>
+          );
+        })()}
         <span className="spacer" />
         {anyEnriched ? <span style={{ color: "var(--z-mid)", fontWeight: 600 }}>✓ {Object.values(enriched).filter(v => v === "done").length} of {DMA.LEADERSHIP.filter(x => !x.gap_flag).length} enriched</span> : null}
       </div>
@@ -773,8 +826,14 @@ function ClientInsights({ entity, run }) {
             {[
               { label: "Confirmed",   count: DMA.TECH_STACK.filter(t => t.status === "CONFIRMED").length, tone: "b-teal",   sub: "T1–T3 evidence",   desc: "Active deployments validated via Explorium and primary sources." },
               { label: "Inferred",    count: DMA.TECH_STACK.filter(t => t.status === "INFERRED").length,  tone: "b-purple", sub: "Job + press signals", desc: "Strong circumstantial signal - not yet confirmed." },
-              { label: "Claimed",     count: 7,                                                            tone: "b-org",    sub: "T4–T5 marketing",  desc: "Marketing pages reference platforms not yet confirmed." },
-              { label: "Gaps",        count: DMA.TECH_STACK.filter(t => t.status === "ABSENT").length,    tone: "b-below",  sub: "ABSENT confirmed", desc: "Data Cloud · Databricks · Mosaic AI · Twilio Engage." },
+              /* Counts are computed from the register, never asserted — the
+                 Claimed tile carried a hardcoded 7 — and the Gaps tile names
+                 the products THIS client is actually missing rather than the
+                 fixture's four. */
+              { label: "Claimed",     count: DMA.TECH_STACK.filter(t => t.status === "CLAIMED").length,   tone: "b-org",    sub: "T4–T5 marketing",  desc: "Marketing pages reference platforms not yet confirmed." },
+              { label: "Gaps",        count: DMA.TECH_STACK.filter(t => t.status === "ABSENT").length,    tone: "b-below",  sub: "ABSENT confirmed",
+                desc: (DMA.TECH_STACK.filter(t => t.status === "ABSENT").map(t => t.name).filter(Boolean).slice(0, 4).join(" · ")
+                       || "No confirmed absences in the register.") },
             ].map((q, i) => (
               <div key={i} className="card-tile">
                 <div className="row" style={{ marginBottom: 8 }}>

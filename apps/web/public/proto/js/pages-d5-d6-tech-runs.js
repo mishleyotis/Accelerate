@@ -290,30 +290,19 @@ function ClientContext({
       fontWeight: 600,
       fontSize: 13
     }
-  }, "Acquisition history")), [{
-    id: "ACQ-01",
-    date: "2024-08",
-    target: "Hudson Valley CU branches",
-    status: "Integrating",
-    impl: "P2C1 channel fragmentation",
-    details: "32 branches · ~$420M in deposits · integration tracking to Q3 2026 · expected to reduce P2C1 score temporarily during cutover.",
-    evidence: []
-  }, {
-    id: "ACQ-02",
-    date: "2022-03",
-    target: "Cazenovia Credit",
-    status: "Complete",
-    impl: "-",
-    details: "Single-branch agricultural lender · fully integrated into FCE technology stack by Q4 2023.",
-    evidence: []
-  }].map((a, i) => /*#__PURE__*/React.createElement("div", {
-    key: a.id,
+  }, "Acquisition history")), !(DMA.ACQUISITIONS || []).length ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)"
+    }
+  }, "No acquisitions or mergers promoted for this run.") : (DMA.ACQUISITIONS || []).map((a, i, arr) => /*#__PURE__*/React.createElement("div", {
+    key: a.id || i,
     style: {
       padding: "10px 0",
-      borderBottom: i === 0 ? "1px solid var(--z-sep)" : "none",
+      borderBottom: i < arr.length - 1 ? "1px solid var(--z-sep)" : "none",
       cursor: "pointer"
     },
-    onClick: () => setAcqOpen(acqOpen === a.id ? null : a.id)
+    onClick: () => setAcqOpen(acqOpen === (a.id || i) ? null : a.id || i)
   }, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
@@ -322,27 +311,29 @@ function ClientContext({
       fontSize: 10,
       color: "var(--z-muted)"
     }
-  }, a.date), /*#__PURE__*/React.createElement("div", {
+  }, a.date || "undated"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       fontWeight: 500,
       fontSize: 12.5
     }
-  }, a.target), /*#__PURE__*/React.createElement("span", {
+  }, a.target), a.kind ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, a.kind) : null, /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
   }, a.status), /*#__PURE__*/React.createElement(Icon, {
-    name: acqOpen === a.id ? "chevron-u" : "chevron-d",
+    name: acqOpen === (a.id || i) ? "chevron-u" : "chevron-d",
     size: 12,
     style: {
       color: "var(--z-muted)"
     }
-  })), a.impl !== "-" ? /*#__PURE__*/React.createElement("div", {
+  })), a.impl && a.impl !== "-" ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)",
       marginTop: 4
     }
-  }, a.impl) : null, acqOpen === a.id ? /*#__PURE__*/React.createElement("div", {
+  }, a.impl) : null, acqOpen === (a.id || i) ? /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 8,
       padding: "8px 10px",
@@ -352,7 +343,45 @@ function ClientContext({
       color: "var(--z-body)",
       lineHeight: 1.55
     }
-  }, a.details) : null)))));
+  }, /*#__PURE__*/React.createElement("div", null, a.details), (a.subcaps || []).length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 5,
+      flexWrap: "wrap",
+      marginTop: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, "AFFECTS"), a.subcaps.map(sid => /*#__PURE__*/React.createElement("span", {
+    key: sid,
+    className: "chip purple"
+  }, sid))) : null, (a.evidence || []).length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 5,
+      flexWrap: "wrap",
+      marginTop: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      color: "var(--z-muted)"
+    }
+  }, "EVIDENCE"), a.evidence.map(eid => /*#__PURE__*/React.createElement("button", {
+    key: eid,
+    className: "chip",
+    style: {
+      cursor: "pointer",
+      border: 0
+    },
+    onClick: ev => {
+      ev.stopPropagation();
+      openEvidence(eid);
+    }
+  }, eid))) : null) : null)))));
 }
 
 /* ── Range slider ───────────────────────────────────────────────── */

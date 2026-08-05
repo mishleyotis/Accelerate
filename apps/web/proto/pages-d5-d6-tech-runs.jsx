@@ -142,19 +142,45 @@ function ClientContext({ entity, run }) {
             <Icon name="stack" size={16} />
             <div style={{ fontWeight: 600, fontSize: 13 }}>Acquisition history</div>
           </div>
-          {[
-            { id: "ACQ-01", date: "2024-08", target: "Hudson Valley CU branches",  status: "Integrating", impl: "P2C1 channel fragmentation", details: "32 branches · ~$420M in deposits · integration tracking to Q3 2026 · expected to reduce P2C1 score temporarily during cutover.", evidence: [] },
-            { id: "ACQ-02", date: "2022-03", target: "Cazenovia Credit",             status: "Complete",    impl: "-",                                       details: "Single-branch agricultural lender · fully integrated into FCE technology stack by Q4 2023.", evidence: [] },
-          ].map((a, i) => (
-            <div key={a.id} style={{ padding: "10px 0", borderBottom: i === 0 ? "1px solid var(--z-sep)" : "none", cursor: "pointer" }} onClick={() => setAcqOpen(acqOpen === a.id ? null : a.id)}>
+          {/* The promoted acquisition rows. This was an inline two-item FCE
+              fixture (Hudson Valley CU branches, Cazenovia Credit) whose
+              declared `evidence: []` was never rendered anyway — so every
+              client was shown another institution's M&A history with no
+              citations. */}
+          {!(DMA.ACQUISITIONS || []).length ? (
+            <div style={{ fontSize: 12, color: "var(--z-muted)" }}>
+              No acquisitions or mergers promoted for this run.
+            </div>
+          ) : (DMA.ACQUISITIONS || []).map((a, i, arr) => (
+            <div key={a.id || i} style={{ padding: "10px 0", borderBottom: i < arr.length - 1 ? "1px solid var(--z-sep)" : "none", cursor: "pointer" }} onClick={() => setAcqOpen(acqOpen === (a.id || i) ? null : (a.id || i))}>
               <div className="row">
-                <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.date}</span>
+                <span className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{a.date || "undated"}</span>
                 <div style={{ flex: 1, fontWeight: 500, fontSize: 12.5 }}>{a.target}</div>
+                {a.kind ? <span className="b b-muted">{a.kind}</span> : null}
                 <span className="b b-muted">{a.status}</span>
-                <Icon name={acqOpen === a.id ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
+                <Icon name={acqOpen === (a.id || i) ? "chevron-u" : "chevron-d"} size={12} style={{ color: "var(--z-muted)" }} />
               </div>
-              {a.impl !== "-" ? <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>{a.impl}</div> : null}
-              {acqOpen === a.id ? <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-lav)", borderRadius: 6, fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>{a.details}</div> : null}
+              {a.impl && a.impl !== "-" ? <div style={{ fontSize: 11, color: "var(--z-muted)", marginTop: 4 }}>{a.impl}</div> : null}
+              {acqOpen === (a.id || i) ? (
+                <div style={{ marginTop: 8, padding: "8px 10px", background: "var(--z-lav)", borderRadius: 6, fontSize: 12, color: "var(--z-body)", lineHeight: 1.55 }}>
+                  <div>{a.details}</div>
+                  {(a.subcaps || []).length ? (
+                    <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 7 }}>
+                      <span style={{ fontSize: 10, color: "var(--z-muted)" }}>AFFECTS</span>
+                      {a.subcaps.map(sid => <span key={sid} className="chip purple">{sid}</span>)}
+                    </div>
+                  ) : null}
+                  {(a.evidence || []).length ? (
+                    <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 7 }}>
+                      <span style={{ fontSize: 10, color: "var(--z-muted)" }}>EVIDENCE</span>
+                      {a.evidence.map(eid => (
+                        <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                          onClick={ev => { ev.stopPropagation(); openEvidence(eid); }}>{eid}</button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           ))}
         </div>

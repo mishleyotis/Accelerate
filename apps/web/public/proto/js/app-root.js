@@ -333,6 +333,13 @@ function ClientRoute({
     subcaps: live.entity.subcaps,
     oss: live.entity.oss,
     pillar_scores: Object.keys(live.entity.pillar_scores || {}).length ? live.entity.pillar_scores : entity.pillar_scores,
+    // Whatever this merge omits reaches no card, which is how the run's own
+    // peer medians and framing sentence stayed unread while the hero
+    // rendered a constant offset and a hardcoded gap.
+    pillar_peer_medians: live.entity.pillar_peer_medians || {},
+    framing: live.entity.framing || null,
+    posture: live.entity.posture || null,
+    posture_basis: live.entity.posture_basis || null,
     overall: live.entity.overall != null ? live.entity.overall : entity.overall,
     assessment_date: live.entity.run && live.entity.run.completed_at || entity.assessment_date || null
   } : entity;
