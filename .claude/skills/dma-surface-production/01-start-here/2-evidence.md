@@ -9,6 +9,55 @@ it; never create it.
 server allocates the id and computes the rank score. Registration is idempotent by content,
 so one annual report cited by six cards produces one row.
 
+## Registering an excerpt: re-extract, never retype
+
+The excerpt is verified against the **fetched artefact**, fail-closed, at registration. What
+the checker actually does, so you neither over- nor under-correct:
+
+- Whitespace runs — including newlines and paragraph breaks — collapse to one space on BOTH
+  sides, and the comparison is case-insensitive. **So re-flowing whitespace is safe.** You do
+  not need to reproduce the source's line breaks.
+- After that normalisation, your span must appear **contiguously** in the artefact. That is
+  the whole test, and it is where hand-repair fails.
+- The span must be **50–500 characters**.
+- No reachable URL → `url_unreachable`, and nothing is registered.
+- A `FACT` with no `source_url` is **automatically downgraded to `INFERENCE`** and told to you
+  in `adjustments`. That is not an error; it is the system refusing to let an untraceable
+  claim keep a fact's label.
+
+Measured against production, registering one real source: four attempts refused before one
+was accepted.
+
+| Attempt | Verdict |
+|---|---|
+| Two passages joined together | `excerpt_not_verbatim` — the artefact has words between them, so the joined span is contiguous nowhere |
+| A hand-written summary of the source | `excerpt_not_verbatim` — the words are not there |
+| A Glassdoor URL | `url_unreachable` — the site returns 403 to automated fetch |
+| A 123-character literal substring of the fetched page | **accepted**; ERS computed server-side |
+
+The rule that follows: **take the span exactly as the fetched artefact holds it, in one
+piece.** Reformatting is fine; joining, trimming a clause, or supplying a missing subject is
+not. If the passage you want spans an intervening caption or heading, take the half that
+carries the claim rather than stitching.
+
+## A source that blocks retrieval cannot be cited at all
+
+Glassdoor, Indeed, ZipRecruiter and the Glassdoor mirrors all return 403 to automated
+fetches. A figure whose only source is one of those is **unciteable** — there is no id to
+carry it.
+
+That leaves exactly three honest moves, and inventing an id is not among them:
+
+1. Find the same figure somewhere retrievable (an aggregator that republishes it with
+   attribution, a filing, a press release) and cite THAT.
+2. Carry it as an explicit inference with its route named — what you saw, where, and that the
+   source could not be fetched.
+3. Omit the figure, and record the attempt in `sources_searched` as a rung that did not
+   resolve.
+
+A blocked source belongs in the ladder, never in an `e_ids` list, and never behind a number
+presented as cited. `01-start-here/4-absence-protocol.md` owns the ladder's shape.
+
 ## The quality ladder
 
 | Tier | Type | Weight | Ceiling |
@@ -42,6 +91,28 @@ Two rules that cost real score accuracy:
 An undated item is never rendered as current. Age is computed against the run's pinned
 reference date, or it is null. Never a sentinel.
 
+### The whole ladder hangs from `reference_date`
+
+`runs.completed_at` becomes every evidence row's `reference_date`. Without it the generated
+`age_months` is null and **every** item bands `UNVERIFIED` — regardless of how many of them
+carry a publication date.
+
+Measured on a real run: **120 served items, 45 of them carrying a published date, and all 120
+banded UNVERIFIED.** A `FACT` chip then rendered beside an "unverified" label, which a reader
+correctly reads as a contradiction.
+
+The date is usually there twice. Check both before concluding a run has none:
+
+- the manifest — `assessment.completed_at`, `assessment_date`, `completed_at`,
+  `generated_at`, `execution_timestamp`, `last_updated`
+- **the run's own request id.** The corpus names every run
+  `DMA-ASM-<ENTITY>-<YYYYMMDD>-<seq>`, so `DMA-ASM-BCU-20260330-0001` states 2026-03-30 as
+  plainly as a manifest field would. The worker reads it as a last resort — it is read, not
+  guessed.
+
+If a run genuinely has no date, say so on the surface. Never present an item as current when
+its band is `UNVERIFIED`.
+
 ## The rank score
 
 ```
@@ -58,6 +129,16 @@ Corroboration  3+ independent / 2 independent / single T1–T2 / single T3 / sin
 The server computes this at registration. Never send it; it is ignored.
 
 ## The peer fallback ladder
+
+**First, the grain.** The scoring workbook's `Peer_Benchmarks` tab states per-CATEGORY scores
+for named peers plus Median / P25 / P75. Measured: **0 of 765 cell rows carry a peer median**,
+and that is faithful — the workbook does not state one at cell grain.
+
+So at pillar and category grain you serve the workbook's figure. **At cell grain the app
+inherits the category median and labels it a proxy** — you do not restate a per-cell peer
+figure, because no source holds one. Read the cohort from the workbook rather than assuming
+it; the peers differ by sub-vertical (one credit-union run's tab named CEFCU, Alliant,
+Consumers, GreenState and Lake Michigan).
 
 Where the peer table lacks a figure, apply in strict order and stop at the first rung that
 yields one.

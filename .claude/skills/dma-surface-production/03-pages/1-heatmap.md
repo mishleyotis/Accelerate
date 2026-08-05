@@ -33,11 +33,49 @@ The pillar and category zooms serve the workbook's OWN stated figure, with the s
 
 Every aggregate cell ships both candidates and its source_cell, so a disagreement is measurable rather than invisible.
 
+### Peer figures exist at two grains and nowhere else
+
+The scoring workbook's `Peer_Benchmarks` tab gives per-CATEGORY scores for named
+peers plus Median / P25 / P75. Measured: **0 of 765 cell rows carry a peer median.**
+
+So `peer_median` belongs on `pillars` and `categories` — the grains the workbook
+states — and **not on a cell.** At cell grain the app inherits the category median
+and labels it a proxy, which is honest; a per-cell peer figure you supply is a number
+no source states.
+
+Two things this replaces, both worth knowing so you recognise them:
+
+- The renderer used to draw peer ticks as `score + 0.3` — arithmetic in no source,
+  on every card. It is deleted, so a missing peer figure is now **visibly** missing
+  rather than plausibly present.
+- Where no peer figure is available at all, `peer_basis = cannot_estimate` and the
+  median stays null. Never estimate one to fill the axis.
+
+Read the cohort from the workbook rather than assuming one; the peers differ by
+sub-vertical. `01-start-here/2-evidence.md` owns the peer fallback ladder and its
+proxy-disclosure rung.
+
+### Cell NAMES come from the catalogue, never from prose
+
+`get_capability_catalogue(run_id)` is the source. Measured on a real run: **0 of 765
+served cells had a name**, because the run was not pinned to the catalogue version it
+was scored against — a 17-category assessment joined against the current 16-category
+catalogue matches nothing. If cells are coming back nameless, that is a catalogue pin
+to fix in the run, not a name to copy out of report prose. Copying a name out of prose
+is how raw taxonomy codes end up rendering as labels.
+
+Check `is_thin_evidence` too: it was false on all 765 cells of a run that also carried
+11 thin alerts. H3 and H2 must agree — every alerted cell is one the payload declared
+under-evidenced.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
 | pillars / categories | Scoring workbook + assessment report | the stated figure, with source_cell |
+| pillars/categories `peer_median` | `Peer_Benchmarks` tab | stated at these two grains only |
+| a CELL's peer figure | **inherited at read** | the category median, labelled a proxy — never sent per cell |
+| cell names | `get_capability_catalogue(run_id)` | never from report prose |
 | rollup_score | subcap_scores | the arithmetic mean, carried alongside |
 | score_source | workbook_scores.resolve_cell | 'payload' or 'rollup' — the flag that makes 'both took the same source' checkable |
 
@@ -91,12 +129,32 @@ Evidence must reach the cells — 67 clients rendered 100% thin-evidence while h
 
 Attribution must be right: a Forbes ranking under an Open-Banking subcapability is a misattribution, not a citation.
 
+### The per-cell `synthesis` is what the drawer renders
+
+Clicking a cell opens a drawer, and `synthesis` is its body — the sentence or two
+saying what this cell's evidence, taken together, establishes about this capability.
+It was promoted and displayed by nothing until recently, so a drawer that had a
+synthesis showed the ids instead.
+
+Measured on a real run: `cell_evidence` rows existed for **69 of 765 served
+cells** — 9%. A cell with no synthesis opens a drawer that says nothing, and that
+drawer is the whole reason the grid is clickable. Coverage is worth raising honestly
+and worth reporting where it stops: `linking_stats` is how a low-reach run declares
+itself rather than looking complete.
+
+The drawer resolves the ids **you cited for this cell**, not a reverse-derived list,
+so a cited id that no longer resolves renders as UNRESOLVED rather than quietly
+vanishing. `grounded_on` is the LENGTH of the citation list — computed, never
+asserted (invariant 8, checked by AG-02).
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
 | cells[].e_ids | research workbook P1C1..P4C4 sheets | one row per E-ID, mapped to the subcap the sheet is about |
 | cells[].excerpt | research workbook | the quoted span, verbatim |
+| cells[].synthesis | producer | the drawer's body: what this cell's evidence establishes |
+| cells[].grounded_on | **computed** | the length of `e_ids`; never asserted |
 | freshness_band | evidence_staleness.py | current / aging / dated / stale / undated, keyed to the run date |
 | linking_stats | producer | reach counters so a zero-reach client is visible |
 
@@ -208,9 +266,49 @@ identity-checked · rank score bounded
 - **Section** `heatmap.value_chain` — **renders on** D3 (Heatmap)
 - **Contract** The same scores arranged along the institution's value chain rather than the catalogue's taxonomy. Prototype-only; no prompt in the design specification.
 
+### You author the envelope and nothing else
+
+`fields: {}` on this section is the **answer**, not a gap waiting to be filled. The
+Surface Specification declines a payload contract deliberately:
+
+> No prompt block exists for this surface in the design specification. It renders
+> from server-derived data and its contract is the one stated above.
+
+The Backend Schema says the same from the other side: joining `ccg_value_chains` to
+`ccg_vc_mapping` "is what lets the heatmap arrange the same scores along the
+institution's value chain rather than the catalogue's taxonomy." The arrangement is
+a property of the CATALOGUE for this sub-vertical and version, not of this run.
+
+So:
+
+- **You do not author stages.** Not their names, not their order, not their cell
+  membership.
+- **You do not author cell membership.** The mapping table already states which
+  cells sit in which stage.
+- You emit the section envelope — `produced_at`, `producer_version`, `e_ids[]`,
+  `internal_only[]` — and, where the section cannot stand up for this run, its
+  `empty_state` with the reason.
+- **CG-04 refuses fields outside the section contract.** An invented stage list is
+  not a helpful addition; it is a contract fork, and the section contract here has
+  no fields for it to fork into.
+
+If the surface renders empty for a run, that is a server-side derivation to fix — not
+a payload to write. Say so in the empty state rather than filling the hole by hand.
+
+### A known flaw, so you can recognise it
+
+`ccg_value_chains.chain_id` is minted **per stage** by the loader (`VC-RB-01`,
+`VC-RB-02`, …), so one `chain_id` names one STAGE, not an arrangement. Only
+`sub_vertical` + `version` together identify a value chain. If you see a `chain_id`
+treated as the name of a whole chain anywhere, that is the flaw, not your mapping.
+
 ### Prompt
 
-No prompt exists in the design specification for this surface. Produce it from the contract above, the standing clauses and the seven-step form in `04-craft/5-prompt-standard.md`.
+**There is no prompt, and that is not an omission.** The surface is server-derived:
+there is nothing to synthesise, so there is nothing to prompt for. Emit the
+envelope. Do not produce this section from `04-craft/5-prompt-standard.md` — that
+form is for surfaces whose contract has fields and no prompt, and this one has
+neither.
 
 ---
 

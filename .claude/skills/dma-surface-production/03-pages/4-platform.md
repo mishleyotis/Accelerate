@@ -35,6 +35,35 @@ Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's lis
 
 story_md must be whole sentences — 501 cards shipped head-clipped mid-sentence.
 
+### `discarded[]` is the field a reader actually looks for
+
+A platform list with no recorded alternatives reads as the only option anyone
+considered, and the first question in the room is "why not X". `discarded[]`
+answers it before it is asked: `{platform, reason, relevance}`.
+
+Two rules on the reason. It is about **fit for THIS institution**, never a
+criticism of the product — "addresses two of this client's cells" is a fit
+statement; "weak analytics" is a product review, and it is both unnecessary and
+unsupportable. And it is specific enough to be checkable: the four legitimate
+grounds are sub-vertical relevance below 0.5, anchor cells belonging to a
+different entity type, the client already running it at that layer, and fewer
+than three cells addressed.
+
+**A ranking that cannot discard is a sort.** Six clients ranked an out-of-vertical
+platform first, one of them with a relevance of 0.35 that was simply ignored.
+
+### Coverage prose names what is available, never what is missing
+
+This page's characteristic language failure is the templated line — "what *vendor*
+does not cover" — generated per row and grounded in nothing. It is unusable twice
+over: it is not data-backed, and it reads as accusatory about a product the client
+may have chosen deliberately.
+
+Write the other side instead. Name what exists, what it reaches, and where the
+next capability sits. The finding does not change; only whether the sentence is
+about a failure or about available value. `01-start-here/3-language.md` owns the
+rule and it is not optional on this page.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
@@ -64,6 +93,43 @@ The analyst's recommendations with their detail: what, why, prerequisites, effor
 Analyst recommendations and synthesised ones must be distinguishable — 32 clients shipped synthetic recs laundered as analyst output.
 
 The drilldown must carry the detail the panel promises.
+
+### Six fields that render, and were displayed by nothing
+
+Every one of these was promoted, served, and shown to no one — which is the whole
+of this page being read as shallow. The reasoning was written; it never reached the
+screen. They render now, so write them as if the AE is reading them in front of the
+client, because that is where they land.
+
+| Field | What a good one contains | What an empty one costs |
+|---|---|---|
+| `root_cause` | 30–60 words, cited: why the gap EXISTS. A root cause of "the score is low" is not one | The recommendation is a wish. Nobody can tell whether it addresses the cause or the symptom |
+| `cost_of_inaction` | 30–60 words, GROUNDED in one of: a dated regulator milestone, a peer trajectory, a contract or licence expiry, a migration date in evidence, a stated board commitment. If nothing grounds it, write "no dated trigger established" | The recommendation competes with everything else on the client's list and loses, because nothing says what waiting costs |
+| `sequencing_reason` | 20–40 words: the dependency or gate that fixes this phase. Must agree with the roadmap AND the stair-step — 17 clients shipped a sequence contradicting their own roadmap | The order looks arbitrary, and an arbitrary order invites re-ordering by whoever is loudest |
+| `kpi_triple` | `{metric, baseline, target}` where the **baseline is a figure that exists in the pack with an `as_of`** — never an aspiration | Nobody can tell later whether it worked |
+| `validation_gate` | The readiness condition as a cell and a threshold (`P4C1 >= 2.0`), its verdict `MET │ NOT MET`, and the BACKING CELLS producing that verdict — the drilldown renders them, so the verdict must be traceable | A readiness claim with nothing behind it, and a drilldown that opens onto an assertion |
+| `r_layer` | The recorded hypothesis, counter, domain test, probes and verdict | AG-01 blocks the submission |
+
+`provenance` is `ANALYST │ DERIVED`, required, never blank. DERIVED means composed
+from the pack by rule. **32 clients shipped derived rows presented as analyst
+recommendations** — a derived recommendation must never present as analyst
+judgement, and the distinction is the reader's basis for trusting the rest.
+
+`dma_impact[]` is one row per affected cell, and each row's `current` **must equal
+what the heatmap serves** — assert it, within 0.05, before emitting.
+
+### The gates this page dies on
+
+- **AG-01** blocks a ranked or causal claim with no `r_layer`. **Sequencing is a
+  causal claim**: putting phase 2 after phase 1 asserts a dependency, so the roadmap
+  needs its reasoning recorded as much as the ranking does.
+- **AG-03** fires per ITEM. Every recommendation, phase and starter that asserts
+  something carries its own non-empty evidence list, read from the keys its field's
+  contract `doc` declares. An inference cites the source it was drawn FROM.
+- **Cross-page reconciliation.** `scripts/check_consistency.py` reconciles roadmap
+  phase ids against the recommendation set and gap rows against served scores. Run
+  it before submitting — no per-page gate can make that check, because each page
+  passes its own submission independently.
 
 ### Information sources
 
@@ -106,11 +172,31 @@ Phased sequencing with each phase's capabilities, dependencies and horizon.
 
 Phase order must not contradict the recommendation prerequisites (17 clients did).
 
+**Each phase's `rationale` renders**, and it was displayed by nothing until
+recently — so the roadmap showed an order with no argument for it. A phase whose
+rationale restates its own title tells the reader nothing they could not see; the
+rationale's job is the DEPENDENCY: what must be true before this phase, and what
+this phase makes possible.
+
+`narrative_thread` was null on all 34 promoted sections of a real run. This page
+carries one like every other: write it last, from what you actually produced. See
+`04-craft/3-page-narrative.md`.
+
+Two earlier defects worth one clause each, because they explain why thin fields are
+now visibly thin: the roadmap rationale and the conversation starters rendered a
+PROTOTYPE FIXTURE under a real client's name — prose naming Synovus, BMO, Truist
+and "1,800 users" — because the promoted fields were never read. They are read now.
+A thin field is no longer invisibly replaced by fiction; it is simply thin, which is
+the honest failure and the one you can fix.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
-| phases[] | recommendations_detail.json + assessment report | {phase, horizon, capabilities[], depends_on[]} |
+| phases[] | recommendations_detail.json + assessment report | {phase, horizon, capabilities[], depends_on[], rationale} |
+| phases[].rationale | producer | the dependency that fixes this phase's position; renders on the card |
+| phases[] rec ids | the recommendation set | every phase cites ids P2 describes; reconciled by `check_consistency.py` |
+| sequencing_basis | producer | why this ordering rather than another |
 | metrics | workbook | any metric quoted must be current, not carried from a prior run |
 
 ### Prompt

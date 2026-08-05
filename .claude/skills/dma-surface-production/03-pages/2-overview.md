@@ -72,6 +72,22 @@ Figures must be about THIS legal entity. A parent, subsidiary or same-name insti
 
 Magnitude sanity: an AUM or asset figure implying a market-scale absurdity is rejected (a $2.70T AUM on a mid-market manager was a real defect).
 
+**The must-present set is a set, not a suggestion, and two of its members are the ones that go missing.**
+
+- **CAGR belongs here.** The financial-series section's `cagr` column is unbound and
+  computed at read; a producer-stated, cited CAGR is a firmographics field with its
+  own `as_of` and `source_e_id`. If you want a sourced growth rate on the page, this
+  is where it goes. If you want the computed one, send O8 ≥2 dated points.
+- **Footprint is NOT a firmographics field.** The strip's footprint renders from
+  `context.regulatory_standing.jurisdictions`, which is also the fastest
+  contamination check in the product. An empty footprint on the overview is an
+  empty `jurisdictions` on the context page — fix it there, and make the two agree,
+  because a disagreement is a contradiction rather than variation.
+
+`branches` is an integer count. Never a serialised list, never a dict repr — an
+unknown field renders an em dash, and a dict printed into a strip is the one failure
+mode a reader instantly distrusts.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
@@ -105,13 +121,36 @@ A signal is an EVENT, not a score read-out. 'P2 scores 2.4' is not a why-now.
 
 No signal may be the assessment itself ('Zennify completed a Digital Maturity Assessment' shipped on 11 clients and is circular).
 
+**`synthesis` is a REQUIRED field, not a closing flourish.** 60–110 words, one
+paragraph across the signals: what the signals TOGETHER say about timing that no
+single one says. The signals are the raw material; the synthesis is the product,
+and it is why the card exists rather than being a list of recent news. It must be
+consistent with `exec_summary.complication` and with the platform page's roadmap
+phase 1 — three surfaces stating one timing argument.
+
+Required **even on a thin card**: two signals still make a timing argument, and no
+source states a thin exemption. A card that genuinely cannot carry one declares
+`empty_state`.
+
+**`cost_of_acting_now` is required per signal** and it is the field that gets
+dropped. It is the honest other side — the concurrent commitment this collides
+with, from the timeline, the issue register and the tech stack. A signal with only
+upside is a pitch, and it is rejected. If the cost is genuinely low, state WHY it
+is low; that is an argument, and "no cost" is not.
+
+`linked_subcap_ids` renders: it is what ties the timing claim to the assessment
+beneath it. A signal linked to no cell is news.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
+| synthesis | producer | REQUIRED, 60–110 words; consistent with O4's Complication and P3's phase 1 |
 | signals[].body | Research workbook + enrichment | dated timeline events within a 24-month lookback, most recent first |
 | signals[].kind | producer classification | LEADERSHIP │ EARNINGS │ REGULATORY │ TECHNOLOGY │ M&A │ MARKET |
 | signals[].event_date | the source | required; an undated signal is dropped |
+| signals[].cost_of_acting_now | timeline, issue register, tech stack | REQUIRED, 30–55 words; a signal with only upside is rejected |
+| signals[].linked_subcap_ids | catalogue | the tie to the assessment; renders on the card |
 | signals[].e_ids | evidence store | at least one; uncited signals are dropped |
 
 ### Prompt
@@ -225,12 +264,44 @@ The executives who matter to this conversation: name, title, tenure signal, and 
 
 An empty roster must be an explicit verified_absent, not a silent blank.
 
+Measured on a real run: **25 words per person**. A roster entry whose
+`relevance_note` restates the title is an org chart row.
+
+### The contact route is established HERE, or it does not exist
+
+`roster[*].email`, `.linkedin_url`, `.phone`, `.enriched_at`, `.enrichment_basis`
+are real columns and the panel renders them beside the name.
+
+**The app makes no third-party call while serving** (invariant 1). There is no
+"fetch it when the AE clicks" — the click reads a stored row in milliseconds
+because you established it during synthesis. A contact route you do not establish
+now is a route that does not exist for the AE, and the panel says so honestly
+rather than offering a button that cannot work.
+
+**`enrichment_basis` is not decoration.** "Clay reports it" is not a source; the
+filing or profile Clay surfaced is. Without a basis, the contact route is the one
+field on this panel asserting something with no provenance. Where a tool returns
+a value whose origin it does not name, the value is an inference — label it as one
+or leave it out.
+
+**A name-similar match is an identity FAILURE, not a near-miss.** Measured: a
+search for six named executives returned five correct matches and, for a named SVP
+Chief Data Officer, an INTERN with the same surname at the same employer.
+Attaching it would have put an intern's email on a Chief Data Officer's row. The
+check is that the returned TITLE matches the person you searched for — surname and
+employer are not identity. On failure, quarantine the field with its reason.
+
+Full playbook, call budget and tier map: `02-inputs/2-clay-enrichment.md`.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
 | roster[] | Client Profile DOCX | paragraph form OR a 5-column table — both shapes occur in real packages |
-| roster[].relevance | producer | which pillar/capability this person owns |
+| roster[].relevance_note | producer | 10–25 words: which capability this person owns and what they have said about it |
+| roster[].email / .linkedin_url / .phone | enrichment, at synthesis time | stored; the app makes no call at serve time |
+| roster[].enrichment_basis | the filing or profile the tool surfaced | never the tool itself |
+| roster[].enriched_at | producer | when the route was established |
 | verified_absent | producer | true only after the profile was read and held none |
 
 ### Prompt
@@ -254,12 +325,45 @@ A trend word (improving, stable, declining) only when the series supports it.
 
 Two points is not a trajectory — thin series must declare themselves.
 
+**`reading` is a REQUIRED field.** 35–60 words: what the trajectory means for THE
+ASSESSMENT — whether the growth outpaces the digital capability that has to support
+it. That question is the card's reason to exist. It is not a restatement of the
+series and not a restatement of the trend word; both are already on the card.
+
+Measured on a real run: **22 words for the whole card.** A financial series with no
+reading is a chart, and the AE has to supply the argument in the room.
+
+**This section serves BOTH O8 and C6.** The Context page's financial card renders
+this same section — the same row, the same `reading`. So it is written once and
+cannot disagree with itself, and there is nothing to produce on the context page.
+
+### Three columns exist and you must NOT send them
+
+The instinct to fill a column that exists is the failure mode here. Each of these
+is unbound deliberately:
+
+| Do not send | Why |
+|---|---|
+| `basis` at section level | Basis is stated PER POINT, because mixing metric definitions across periods produces a fake trend. A section-level copy is a second place the definition can disagree with itself |
+| `cagr` | **Computed at read** from the series' first and last dated points over the real number of years between them (invariants 8 and 9). Send ≥2 dated points and it appears; send one and it correctly does not. A producer-stated, cited CAGR belongs on `firmographics.fields[]`, whose must-present set names CAGR |
+| a rounded or pre-formatted value | The card formats; you send the figure and its unit |
+
+So: **CAGR is a firmographics field, not a series field.** If you want a cited CAGR
+on the page, put it there with its `as_of` and `source_e_id`. If you want the
+computed one, send the dated points and the app does the arithmetic.
+
+Where the identity gate quarantines the series, declare `empty_state` and emit
+`quarantine_reason` instead — a quarantined series never renders, so it has no
+reading.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
-| series[] | Client Profile financial highlights; assessment report | {year, metric, value, unit, e_id} per point |
-| trajectory | computed from the series | never asserted without >=3 dated points |
+| series[] | Client Profile financial highlights; assessment report | {period, value, unit, as_of, source_e_id, basis} per point — basis per point, never section-level |
+| reading | producer | REQUIRED, 35–60 words; serves O8 AND C6, so written once |
+| trend | computed from the series | `GROWING │ STABLE │ DECLINING │ VOLATILE`; null below 3 dated points |
+| CAGR | **computed at read**, or cited on firmographics | never sent on this section |
 | verified_sparse | producer | set when the sources hold fewer than 3 points |
 
 ### Prompt
@@ -277,7 +381,10 @@ Produce the financial trajectory: a dated series, a trend label, and the validat
 
 ### Prompt
 
-No prompt exists in the design specification for this surface. Produce it from the contract above, the standing clauses and the seven-step form in `04-craft/5-prompt-standard.md`.
+**There is nothing to produce.** C6 is the same section rendered on a second page —
+the same row, the same `series`, the same `reading`. Produce O8 above and C6
+follows. Writing a second version is how the two cards come to disagree, and there
+is no second row for it to land in.
 
 ---
 
@@ -296,18 +403,63 @@ A single displayed line is not a sentiment picture — thin sources declare them
 
 The invented card style that shipped on D1 is not in the design package and must not return.
 
+### `themes` and `gap_analysis` are the analysis, and they are now writable
+
+Until recently the contract had no fields for them, so whatever was submitted was
+discarded at promotion and the card rendered with nine words on it. That was not
+producer laziness — the column existed and nothing bound it. Both are bound now, so
+STEP 3 and STEP 4 of the prompt below finally land somewhere.
+
+`themes[]` — two to four per audience, extracted from the review and complaint
+**TEXT**, not from the star rating. Per item `{audience, theme, mapped_subcap_ids,
+cap_statement}`. `cap_statement` is PROSE and it names which cell this sentiment
+caps and at what rubric level, with the cause distinguished. The measured exemplar
+distinguishes process from service, and that distinction is what makes it usable:
+
+> Below industry median (43). Most complaints relate to ACH processing delays, not
+> service quality. Caps P2C2.1.1 at M3.
+
+Sentiment that connects to no assessed capability is decoration. Sentiment that
+caps a cell is evidence.
+
+`gap_analysis` — `{b2b_b2c, internal_external, e_ids}`, conditional by
+construction: omit it when only one audience was established. The Overview's
+"B2B/B2C gap" chip is computed at render from `b2b_b2c` being non-empty; it is
+never a stored boolean.
+
+### SG-S8 discloses. Thinness is stated, not hidden.
+
+A single rated line trips **SG-S8**, which **discloses and still promotes** — the
+client reads *"Sentiment rests on a single source, so treat it as indicative
+only"*. The gate computes the count from `bars[]` at submit and **never reads
+`displayed_lines`**; that field exists for the renderer. A self-published NPS
+standing alone is thin whatever the count.
+
+Two consequences: a row with no `rating` is not a line of sentiment — it belongs in
+`sources_searched` — and a source that blocks automated retrieval cannot be cited
+at all. Glassdoor, Indeed and ZipRecruiter all 403, so they are rungs in the ladder
+rather than evidence ids. See `01-start-here/2-evidence.md`.
+
+**This dataset is also C4.** The Context page re-projects these same ratings as
+three expandable tiles, reconciled by `e_id` and `rating`. Produce this section
+first; C4 projects it and can never disagree with it.
+
 ### Information sources
 
 | Field / element | Source of truth | Where it comes from |
 | --- | --- | --- |
-| overview.bars[] | Research workbook sentiment rows; enrichment | {source, rating, n, audience, e_id} — customer, employee, industry |
-| context_tiles[] | same | three tiles: customer, employee, market, each with drilldown rows and evidence chips |
-| displayed_lines | producer | gate S8 flags a single-line render as thin |
+| bars[] | Research workbook sentiment rows; enrichment | {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} — customer, employee, industry |
+| themes[] | the review and complaint TEXT | {audience, theme, mapped_subcap_ids, cap_statement}; 2–4 per audience |
+| themes[].cap_statement | producer analysis | prose naming the cell and the rubric level, cause distinguished |
+| gap_analysis | producer | {b2b_b2c, internal_external, e_ids}; omitted when only one audience exists |
+| displayed_lines | producer | for the renderer only — SG-S8 recomputes and does not read it |
+| `metric` | **no such key** | a prototype leftover named by no source; must not be emitted |
+| context_tiles[] | **not this section** | C4 owns them — `03-pages/5-context.md` |
 
 ### Prompt
 
 ```
-Produce the sentiment surface: per-audience ratings that each terminate in an assessed capability. STEP 1 - COLLECT ACROSS ALL SEVEN SOURCE FAMILIES (do not stop at one)   1 Apple App Store   rating, n, scale, latest release date   2 Google Play       rating, n, scale, latest release date   3 Glassdoor         overall + the sub-ratings that bear on execution   4 Indeed            where Glassdoor is thin   5 CFPB complaint narratives  by product, with counts - the complaint TEXT is                       the analysable part, not just the count   6 BBB               complaint themes and resolution behaviour   7 Trustpilot / Google reviews  where the entity has presence Plus: J.D. Power and Forrester rankings where the entity appears (T3), and any NPS the entity publishes itself (T4/T5, needs corroboration). STEP 2 - EVERY RATING CARRIES ITS INTERPRETABILITY FIELDS {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} No n -> not a signal, do not render a number. No scale -> the rating is meaningless (4.1 out of what?). No as_of -> UNVERIFIED recency, never rendered as current. n below 30 -> render with a low-sample warning, not as a finding. STEP 3 - THEMES, MAPPED TO CAPABILITIES (this is the analysis) Extract 2-4 recurring themes per audience from the review and complaint TEXT, not from the star rating. Map each theme to the pillar and cell it bears on:   onboarding / account opening friction        -> P2C3, P2C1   transfer, payment and processing delays      -> P3C2, P2C2   manual and spreadsheet-heavy internal work   -> P3C1, P3C3   data and personalisation complaints          -> P4C1, P4C2   app stability and release cadence            -> P2C1   advice and service quality                   -> P2C2 Then state the CAP: which cell this sentiment caps and at what level. Measured exemplar: "Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3." Note that the exemplar also DISTINGUISHES the cause - process, not service - which is what makes it useful. Negative-dominant employee themes cap P1C4 and P4C3 at L3.0. Mixed themes add +0.2 uncertainty. Record which. STEP 4 - THE B2B/B2C AND INTERNAL/EXTERNAL GAPS Where both sides exist, state the GAP and what it implies. An employee rating well above the customer rating says the constraint is not capability but process; the reverse says delivery is outrunning the operating model. One measured exemplar reads "Engineering scores 4.2 - front-line ops scores 3.1", which localises the constraint inside the organisation. STEP 5 - RECENCY An app not updated in over 6 months is a flag in itself. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY and must not be presented as the current picture. STEP 6 - HONESTY If only one source exists after searching all seven, emit it and let the thin-source state show. Do NOT synthesise a second audience to fill the grid. One source should be rare. CHALLENGE (R-Layer)  D Probes: CX Disconnect (internal metrics good, customer sentiment bad - that    contradiction is a finding, surface it as one); a rating from the wrong app    (check the publisher); reviews for a same-named different entity; a sample    too small to mean anything; a rating average that hides a bimodal split.  E UNCERTAIN -> ship with n and scale visible and confidence LOW. GATES: S8_sentiment_thin; every rating carries n + scale + as_of; every theme maps to a served cell.
+Produce the sentiment surface: per-audience ratings that each terminate in an assessed capability. STEP 1 - COLLECT ACROSS ALL SEVEN SOURCE FAMILIES (do not stop at one)   1 Apple App Store   rating, n, scale, latest release date   2 Google Play       rating, n, scale, latest release date   3 Glassdoor         overall + the sub-ratings that bear on execution   4 Indeed            where Glassdoor is thin   5 CFPB complaint narratives  by product, with counts - the complaint TEXT is                       the analysable part, not just the count   6 BBB               complaint themes and resolution behaviour   7 Trustpilot / Google reviews  where the entity has presence Plus: J.D. Power and Forrester rankings where the entity appears (T3), and any NPS the entity publishes itself (T4/T5, needs corroboration). STEP 2 - EVERY RATING CARRIES ITS INTERPRETABILITY FIELDS {audience, source, rating, scale, n, as_of, url, e_id, trend_vs_prior} No n -> not a signal, do not render a number. No scale -> the rating is meaningless (4.1 out of what?). No as_of -> UNVERIFIED recency, never rendered as current. n below 30 -> render with a low-sample warning, not as a finding. STEP 3 - THEMES, MAPPED TO CAPABILITIES (this is the analysis) Extract 2-4 recurring themes per audience from the review and complaint TEXT, not from the star rating. Map each theme to the pillar and cell it bears on:   onboarding / account opening friction        -> P2C3, P2C1   transfer, payment and processing delays      -> P3C2, P2C2   manual and spreadsheet-heavy internal work   -> P3C1, P3C3   data and personalisation complaints          -> P4C1, P4C2   app stability and release cadence            -> P2C1   advice and service quality                   -> P2C2 Then state the CAP: which cell this sentiment caps and at what level. Measured exemplar: "Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3." Note that the exemplar also DISTINGUISHES the cause - process, not service - which is what makes it useful. Negative-dominant employee themes cap P1C4 and P4C3 at L3.0. Mixed themes add +0.2 uncertainty. Record which. STEP 4 - THE B2B/B2C AND INTERNAL/EXTERNAL GAPS Where both sides exist, state the GAP and what it implies. An employee rating well above the customer rating says the constraint is not capability but process; the reverse says delivery is outrunning the operating model. One measured exemplar reads "Engineering scores 4.2 - front-line ops scores 3.1", which localises the constraint inside the organisation. STEP 5 - RECENCY An app not updated in over 6 months is a flag in itself. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY and must not be presented as the current picture. STEP 6 - HONESTY If only one source exists after searching all seven, emit it and let the thin-source state show. Do NOT synthesise a second audience to fill the grid. One source should be rare. CHALLENGE (R-Layer)  D Probes: CX Disconnect (internal metrics good, customer sentiment bad - that    contradiction is a finding, surface it as one); a rating from the wrong app    (check the publisher); reviews for a same-named different entity; a sample    too small to mean anything; a rating average that hides a bimodal split.  E UNCERTAIN -> ship with n and scale visible and confidence LOW. GATES: SG-S8 (discloses, does not block: computed from the rating rows at submit, never from a declared displayed_lines; self-published-NPS-only is thin whatever the count); AG-03 per bar and per theme; every rating carries n + scale + as_of; every theme maps to a served cell; reconciles with context.context_sentiment.context_tiles by e_id and rating.
 ```
 
 ---

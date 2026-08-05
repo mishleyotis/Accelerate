@@ -121,6 +121,81 @@ labelled one — it does not become a fact by arriving through an API.
 company, a subsidiary and a same-named institution in another market all have domains. Check
 the legal name, the regulator and the order of magnitude before you use a figure.
 
+A source that blocks automated retrieval cannot be registered at all, whatever Clay returned
+from it — Glassdoor, Indeed and ZipRecruiter all 403, so `register_evidence` gets
+`url_unreachable`. Such a value is an inference with its route named, or it is omitted. See
+`01-start-here/2-evidence.md`.
+
+## The contact route lands in real columns, and it lands NOW
+
+Contact output is persisted per person on the leadership roster:
+`roster[*].email`, `.linkedin_url`, `.phone`, `.enriched_at`, `.enrichment_basis`.
+
+**The app makes no third-party call while serving** (invariant 1). The AE's click reads a
+stored row in milliseconds because you established the route during synthesis. There is no
+lazy fetch and no queue that fills in later: a route you do not establish now does not exist
+for the AE, and the panel says so rather than offering a control that cannot work.
+
+`enrichment_basis` is the field that makes the rest of the row trustworthy. It names the
+filing or profile the tool SURFACED — never the tool. Without it, the contact route is the one
+field on that panel asserting something with no provenance, and an AE cannot tell a verified
+address from a pattern guess. Where Clay returns a value whose origin it does not name, that
+value is an inference: label it, or leave it out.
+
+### A name-similar match is an identity FAILURE, not a near-miss
+
+Measured, and it nearly shipped: a contact search for six named executives returned five
+correct matches and, for a named **SVP Chief Data Officer**, an **intern with the same
+surname at the same employer**. Attaching it would have put an intern's email on a Chief Data
+Officer's row — in front of a client, in a panel whose whole job is "who owns this decision".
+
+The check is one line and it is not optional:
+
+> **The returned TITLE must match the person you searched for.** Surname plus employer is not
+> identity.
+
+On failure, quarantine the field with its reason. Do not attach the nearest match, and do not
+attach the row with the title silently corrected to the one you were looking for.
+
+## A peer technographic claim is now gated
+
+**AG-04 blocks.** A Clay technographic scan across a named peer set feeds the tech register,
+and the moment you state a `peer_coverage` share, three things are required:
+
+- a `peer_deployments[]` breakdown with **one row per peer**, including the peers you could
+  NOT establish — those carry `deployed: null`
+- `source_url` and `as_of` on every `deployed: true` row
+- agreement between the stated share and its own breakdown to within **one peer**
+  (`1 / len(rows)`)
+
+So a scan that establishes 2 of 5 peers with 3 unknown is **not 40% coverage**. It is two
+established, three unknown — state that, or state no share. Rows with `deployed: null` count
+in the denominator, so scope the share to what the breakdown supports.
+
+This replaced a card that decided "✓ deployed" beside a NAMED credit union from
+`hashCode(row_id + peerName) % 100`. The claim cannot be manufactured, and a share with
+unknowns behind it is not that share.
+
+## When the scan and the register disagree
+
+Measured on a real run: the machine scan reported **Alkami** on the client's domain while the
+promoted tech register stated **Lumin Digital** as the digital banking platform. Both cannot
+be the live member-facing platform without an explanation.
+
+This is a contradiction, and the resolution is the finding. Work it in this order:
+
+1. **Compare `as_of` dates.** A scan is current; a register row may be a migration that has
+   since completed, or one still in flight.
+2. **Ask what the scan actually observed.** A technographic scan reads the surfaces it can
+   reach — a marketing site, a login subdomain, an app bundle. A vendor detected on
+   `www` is not necessarily the member-facing platform behind authentication.
+3. **Check for a subsidiary, a predecessor or a partial estate.** Two platforms genuinely
+   coexist during a conversion, and "both, in this window" is a legitimate answer with a date.
+4. **If it still does not resolve: quarantine and STATE it.** Never average two disagreeing
+   figures, never silently prefer the newer one, and never drop one so the card looks clean.
+
+`04-craft/1-reasoning.md` owns the nine contradiction classes and the cross-check procedure.
+
 ## What Clay cannot do, and what to do instead
 
 | Gap | Clay | Instead |
