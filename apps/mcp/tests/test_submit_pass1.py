@@ -171,3 +171,23 @@ def test_gate_registry_seeds_and_explains(run_row):
     cg = explain_gate(mcp, "CG-07")
     assert cg["family"] == "corpus" and "0.05" in cg["what_it_checks"]
     assert explain_gate(mcp, "XX-99")["error"] == "unknown_gate"
+
+
+def test_bad_provenance_is_a_structured_refusal_not_a_db_error(run_row):
+    """provenance is the envelope's class (Schema §06 provenance_t). The
+    first production submission passed a description of the inputs and got
+    a raw 22P02 back; the refusal now names the three legal values."""
+    conn, run_id = run_row
+    r = submit_page_payload(conn, run_id, "heatmap", {},
+                            provenance="package: evidence_index.json",
+                            producer_version="test@1")
+    assert r["submission_id"] is None
+    reasons = r["verdict"]["reasons"]
+    assert [x["path"] for x in reasons] == ["provenance"]
+    msg = reasons[0]["message"]
+    assert "analyst" in msg and "derived" in msg and "producer" in msg
+    # and a legal value still reaches validation (which fails on the empty payload)
+    r2 = submit_page_payload(conn, run_id, "heatmap", {},
+                             provenance="derived", producer_version="test@1")
+    assert r2["verdict"]["status"] == "fail"
+    assert all(x["path"] != "provenance" for x in r2["verdict"]["reasons"])

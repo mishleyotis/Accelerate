@@ -16,6 +16,9 @@ from .validation2 import validate_pass2
 
 _CONTRACT_VERSION = None
 
+# migrations/versions/0002_enumerated_types.py provenance_t
+PROVENANCE_T = frozenset(("analyst", "derived", "producer"))
+
 
 def contract_version() -> str:
     """Identity of the payload shapes this connector validates against."""
@@ -60,6 +63,22 @@ def submit_page_payload(conn, run_id, page: str, payload: dict,
                                          "message": "producer_version is "
                                          "required — every promoted row "
                                          "carries it non-null",
+                                         "severity": "block"}],
+                            "warnings": [], "counts": {}}}
+    # provenance is the envelope's provenance CLASS (Schema §06 provenance_t),
+    # not free text. A structured refusal naming the three values beats the
+    # raw 22P02 the INSERT would raise — the first production submission of
+    # this connector lost a round trip to exactly that.
+    if provenance not in PROVENANCE_T:
+        return {"submission_id": None,
+                "verdict": {"status": "fail",
+                            "reasons": [{"gate_id": "CG-05", "section": None,
+                                         "path": "provenance",
+                                         "message": (
+                                             f"provenance {provenance!r} is not one of "
+                                             f"{' · '.join(sorted(PROVENANCE_T))} — it is the "
+                                             "envelope's provenance class, not a description "
+                                             "of the inputs"),
                                          "severity": "block"}],
                             "warnings": [], "counts": {}}}
 
