@@ -158,3 +158,30 @@ def test_workbook_alone_is_ingestable_and_best_candidate_wins():
                and any(a in v for a in ("manifest", "workbook", "report"))}
     assert set(ingestable) == {"Two Candidates - DMA", "No Manifest - DMA"}
     assert set(partial) == {"Manifest Only - DMA"}
+
+
+def test_packages_assemble_from_the_whole_tree_not_only_changed_files():
+    """The diff decides WHICH folders to process; the package still needs
+    all of its artefacts. Assembling from the changed set alone meant a
+    folder whose workbook changed but whose report did not lost its report
+    — which is why no run had ever landed its report sections."""
+    tree = [
+        _f("Client A - DMA", "run_manifest.json", checksum="m1"),
+        _f("Client A - DMA", "DMA_Scoring_Workbook_A.xlsx", checksum="w2"),   # changed
+        _f("Client A - DMA", "DMA_Assessment_Report_A.docx", checksum="r1"),
+        _f("Client B - DMA", "run_manifest.json", checksum="m1"),
+        _f("Client B - DMA", "DMA_Scoring_Workbook_B.xlsx", checksum="w1"),   # unchanged
+    ]
+    prior = {t.file_id: ("w1" if "Workbook_A" in t.name else t.checksum) for t in tree}
+    d = diff_tree(tree, prior)
+    assert [f.name for f in d.changed] == ["DMA_Scoring_Workbook_A.xlsx"]
+
+    groups = _package_groups(tree)
+    touched = {f.path_segments[0] for f in d.changed}
+    packages = {k: v for k, v in groups.items() if "workbook" in v and k in touched}
+
+    assert set(packages) == {"Client A - DMA"}, "only the touched folder processes"
+    parts = packages["Client A - DMA"]
+    # and it carries the artefacts that did NOT change
+    assert "manifest" in parts and "report" in parts
+    assert parts["report"].name == "DMA_Assessment_Report_A.docx"

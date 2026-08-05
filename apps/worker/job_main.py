@@ -195,13 +195,21 @@ def main() -> int:
     summary = run_scan(conn, tree, datetime.now(timezone.utc))
     print(f"scan: new={summary['files_new']} changed={summary['files_changed']}")
 
-    groups = _package_groups(summary["to_process"])
+    # Assemble packages from the WHOLE tree, and let the diff decide which
+    # folders to process. Assembling from the changed set only meant a
+    # folder whose workbook changed but whose report did not lost its
+    # report — no run has ever landed its twelve report sections — and a
+    # folder with a changed report but an unchanged workbook looked
+    # incomplete on every firing.
+    groups = _package_groups(tree)
+    touched = {f.path_segments[0] if f.path_segments else "?"
+               for f in summary["to_process"]}
     # The scoring workbook is what makes a package ingestable; the manifest
-    # and report are enriching, not gating (76 of 105 client folders were
-    # skipped when both were required).
-    packages = {k: v for k, v in groups.items() if "workbook" in v}
-    partial = {k: v for k, v in groups.items() if k not in packages
-               and any(a in v for a in ("manifest", "workbook", "report"))}
+    # and report are enriching, not gating.
+    packages = {k: v for k, v in groups.items() if "workbook" in v and k in touched}
+    partial = {k: v for k, v in groups.items()
+               if k in touched and "workbook" not in v
+               and any(a in v for a in ("manifest", "report"))}
     if not packages and not partial:
         print("scan: nothing to ingest (unchanged tree creates nothing)")
         conn.close()
@@ -245,7 +253,11 @@ def main() -> int:
                 print(f"embed FAILED (run kept, V4 will abstain): {folder}: {exc!r}")
 
     for folder, parts in sorted(partial.items()):
-        _requeue(conn, parts, folder, "incomplete package (waiting for the rest)")
+        # NOT requeued: the folder holds no scoring workbook at all, and
+        # blanking its checksums would re-detect the same folder on every
+        # firing forever. A real change in Drive puts it back in the diff.
+        print(f"no workbook: {folder} — {sorted(k for k in parts if k != 'folder')} "
+              "present, nothing to score")
 
     conn.close()
     print(f"done: {done} ingested, {failed} failed (requeued), "
