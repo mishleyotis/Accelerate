@@ -66,10 +66,18 @@ def _conn():
 
 
 def _fetch(url: str):
-    """Excerpt-verification fetcher: plain GET, text out, None on failure."""
+    """Excerpt-verification fetcher: GET with a browser-shaped UA (bare
+    python-urllib is WAF-blocked by most entity sites — bcu.org rejected
+    the first prod registration), text out, None on failure."""
     import urllib.request
     try:
-        with urllib.request.urlopen(url, timeout=20) as r:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                           "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        })
+        with urllib.request.urlopen(req, timeout=20) as r:
             return r.read(2_000_000).decode("utf-8", "replace")
     except Exception:
         return None
