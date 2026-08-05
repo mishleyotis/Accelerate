@@ -87,13 +87,29 @@ fi
 
 # --- 3 · worker Job + Scheduler sync (stage 1 / 0.5) ----------------------
 if [ -f apps/worker/Dockerfile ]; then
-  say "worker job"
+  say "worker job (package scan; requires the intake folder shared with dmai-worker@)"
   gcloud run jobs deploy dmai-worker --source=apps/worker \
     --project="$PROJECT_ID" --region="$REGION" \
-    --service-account="dmai-worker@${SA_DOMAIN}"
+    --service-account="dmai-worker@${SA_DOMAIN}" \
+    --network=default --subnet=default --vpc-egress=private-ranges-only \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};MAX_PACKAGES=3" \
+    --max-retries=0 --task-timeout=3600 --memory=2Gi --cpu=2 --quiet
+  gcloud run jobs add-iam-policy-binding dmai-worker \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:dmai-worker@${SA_DOMAIN}" \
+    --role="roles/run.invoker" --quiet >/dev/null
+  # package scan every 30 minutes (charter: mandatory trigger #1)
+  if ! gcloud scheduler jobs describe dmai-package-scan --project="$PROJECT_ID" --location="$REGION" >/dev/null 2>&1; then
+    gcloud scheduler jobs create http dmai-package-scan \
+      --project="$PROJECT_ID" --location="$REGION" \
+      --schedule="*/30 * * * *" \
+      --uri="https://run.googleapis.com/v2/projects/${PROJECT_ID}/locations/${REGION}/jobs/dmai-worker:run" \
+      --http-method=POST \
+      --oauth-service-account-email="dmai-worker@${SA_DOMAIN}" --quiet
+  fi
 fi
-# Scheduler triggers (package scan 30min; corpus-gate-scanner nightly;
-# pack-exporter nightly) sync here once stage 0.5 lands.
+# Remaining Scheduler triggers (corpus-gate-scanner nightly; pack-exporter
+# nightly) sync here with stage 8.
 
 say "deployed. Service URLs:"
 gcloud run services list --project="$PROJECT_ID" --region="$REGION" \
