@@ -94,17 +94,35 @@ def _walk(node, path):
             yield from _walk(item, f"{path}[{i}]")
 
 
+# Producer metadata: fields ABOUT the production (method notes, search
+# records, gate labels, provenance), not claims about the entity. Checking
+# them against bundle centroids fails forever and drowns the client-visible
+# gate card in noise — the first prod submission flagged filenames and
+# R-layer notes as ungrounded claims.
+_V4_SKIP_KEYS = frozenset((
+    "produced_at", "producer_version", "source_cell", "r_layer",
+    "grain_note", "currency_note", "reach_note", "provenance",
+    "source_filename", "source_document", "closure_condition",
+    "quarantine_reason", "not_run_reason", "queries_run",
+    "sources_searched", "plain_label", "justification", "empty_state",
+    "note", "rationale",
+))
+
+
 def _iter_prose(node, path):
-    """Yield (path, text) for prose-bearing string fields."""
+    """Yield (path, text) for prose-bearing string fields — entity claims,
+    not producer metadata, and never URLs."""
     if isinstance(node, dict):
         for k, v in node.items():
-            if k in ("produced_at", "producer_version", "source_cell"):
+            if k in _V4_SKIP_KEYS:
                 continue
             yield from _iter_prose(v, f"{path}.{k}")
     elif isinstance(node, list):
         for i, item in enumerate(node):
             yield from _iter_prose(item, f"{path}[{i}]")
     elif isinstance(node, str):
+        if node.startswith(("http://", "https://")):
+            return
         text = re.sub(r"\s+", " ", re.sub(r"[#*_`\[\]]", "", node)).strip()
         if len(text) >= V4_MIN_PROSE:
             yield path, text
